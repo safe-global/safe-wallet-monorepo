@@ -2,6 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useNestedThreatAnalysis } from '../useNestedThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
@@ -38,10 +39,18 @@ jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
   },
 }))
 
-const mockUseIsHypernativeGuard = jest.fn(() => ({ isHypernativeGuard: false, loading: false }))
+const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): HypernativeEligibility => ({
+  isHypernativeEligible: false,
+  isHypernativeGuard: false,
+  isAllowlistedSafe: false,
+  loading: false,
+  ...overrides,
+})
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
-  useIsHypernativeGuard: () => mockUseIsHypernativeGuard(),
+const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
+
+jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+  useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
 }))
 
 const mockUseThreatAnalysisUtils = jest.requireMock('@safe-global/utils/features/safe-shield/hooks').useThreatAnalysis
@@ -96,7 +105,7 @@ const buildThreatResult = (severity: Severity) => [
 describe('useNestedThreatAnalysis', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+    mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
   })
 
@@ -151,7 +160,7 @@ describe('useNestedThreatAnalysis', () => {
     it('should return loading state when Hypernative guard check is loading', async () => {
       const nestedTx = buildSafeTransaction('0x1234')
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ loading: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -170,7 +179,7 @@ describe('useNestedThreatAnalysis', () => {
     it('should skip Blockaid analysis when Hypernative guard check is loading', async () => {
       const nestedTx = buildSafeTransaction('0x1234')
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: true })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ loading: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -212,7 +221,7 @@ describe('useNestedThreatAnalysis', () => {
       const nestedTx = buildSafeTransaction('0x1234')
       const authToken = 'test-auth-token'
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -264,7 +273,7 @@ describe('useNestedThreatAnalysis', () => {
       const nestedTx = buildSafeTransaction('0x1234')
       const authToken = 'test-auth-token'
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -286,7 +295,7 @@ describe('useNestedThreatAnalysis', () => {
     it('should not skip Blockaid analysis when guard is disabled and loading is false', async () => {
       const nestedTx = buildSafeTransaction('0x1234')
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -312,7 +321,7 @@ describe('useNestedThreatAnalysis', () => {
       const nestedTx = buildSafeTransaction('0x1234')
       const authToken = 'test-auth-token'
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -339,7 +348,7 @@ describe('useNestedThreatAnalysis', () => {
     it('should return undefined when guard is enabled but no auth token provided', async () => {
       const nestedTx = buildSafeTransaction('0x1234')
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -375,7 +384,7 @@ describe('useNestedThreatAnalysis', () => {
       const nestedTx = buildSafeTransaction('0x1234')
       const authToken = 'test-auth-token'
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,
@@ -448,7 +457,7 @@ describe('useNestedThreatAnalysis', () => {
       const authToken = 'test-auth-token'
       const nestedSafeInfo = buildNestedSafeInfo()
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo,
         nestedSafeTx: nestedTx,
@@ -496,7 +505,7 @@ describe('useNestedThreatAnalysis', () => {
       const authToken = 'test-auth-token'
       const error = new Error('Hypernative API error')
 
-      mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: true, loading: false })
+      mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: true }))
       mockUseNestedTransaction.mockReturnValue({
         nestedSafeInfo: buildNestedSafeInfo(),
         nestedSafeTx: nestedTx,

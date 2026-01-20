@@ -10,7 +10,7 @@ import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
 import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
@@ -18,9 +18,9 @@ import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
-  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
+  const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
 
-  const showHnLoginCard = !HNGuardCheckLoading && isHypernativeGuard
+  const showHnLoginCard = !eligibilityLoading && isHypernativeEligible
 
   return (
     <>
