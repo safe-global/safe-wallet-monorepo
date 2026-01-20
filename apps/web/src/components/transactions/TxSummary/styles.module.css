@@ -1,12 +1,12 @@
 .gridContainer {
   --grid-nonce: minmax(45px, 0.25fr);
-  --grid-type: minmax(150px, 3fr);
-  --grid-info: minmax(190px, 3fr);
-  --grid-date: minmax(200px, 3fr);
-  --grid-confirmations: minmax(120px, 1fr);
-  --grid-assessment: minmax(140px, 1.5fr);
+  --grid-type: minmax(130px, 3fr);
+  --grid-info: minmax(170px, 3fr);
+  --grid-date: minmax(170px, 3fr);
+  --grid-confirmations: minmax(100px, 1fr);
+  --grid-assessment: minmax(80px, 1.5fr);
 
-  --grid-status: minmax(120px, 1fr);
+  --grid-status: minmax(100px, 1fr);
   --grid-actions: minmax(100px, 1fr);
 
   width: 100%;
@@ -14,9 +14,9 @@
   gap: var(--space-2);
   align-items: center;
   white-space: nowrap;
-  grid-template-columns:
-    var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
-    var(--grid-assessment) var(--grid-status) var(--grid-actions);
+  grid-template-columns: var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(
+      --grid-confirmations
+    ) var(--grid-assessment) var(--grid-status) var(--grid-actions);
   grid-template-areas: 'nonce type info date confirmations assessment status actions';
 }
 
@@ -34,9 +34,9 @@
 }
 
 .gridContainer.conflictGroup {
-  grid-template-columns:
-    var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(--grid-assessment)
-    var(--grid-status) var(--grid-actions);
+  grid-template-columns: var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(
+      --grid-assessment
+    ) var(--grid-status) var(--grid-actions);
   grid-template-areas: 'type info date confirmations assessment status actions';
 }
 
