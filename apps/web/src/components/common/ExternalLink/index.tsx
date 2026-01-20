@@ -26,7 +26,7 @@ const ExternalLink = ({
       }}
     >
       {children ?? href}
-      {!noIcon && <OpenInNewRounded fontSize="small" />}
+      {!noIcon && <OpenInNewRounded className="external-link-icon" fontSize="small" />}
     </Box>
   )
   return mode === 'link' ? (

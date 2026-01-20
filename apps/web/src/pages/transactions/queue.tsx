@@ -14,6 +14,9 @@ import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHype
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
+import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
+import { useState, useCallback, useMemo } from 'react'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
@@ -21,6 +24,22 @@ const Queue: NextPage = () => {
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
 
   const showHnLoginCard = !eligibilityLoading && isHypernativeEligible
+
+  // Collect pages from main queue for assessment provider
+  const [mainQueuePages, setMainQueuePages] = useState<(QueuedItemPage | undefined)[]>([])
+  const handleMainQueuePagesChange = useCallback((pages: (QueuedItemPage | undefined)[]) => {
+    setMainQueuePages(pages)
+  }, [])
+
+  const [pendingQueuePages, setPendingQueuePages] = useState<(QueuedItemPage | undefined)[]>([])
+  const handlePendingQueuePagesChange = useCallback((pages: (QueuedItemPage | undefined)[]) => {
+    setPendingQueuePages(pages)
+  }, [])
+
+  // Combine pages (for now just main queue, pending queue can be added later if needed)
+  const allPages = useMemo(() => {
+    return [...mainQueuePages, ...pendingQueuePages]
+  }, [mainQueuePages, pendingQueuePages])
 
   return (
     <>
@@ -49,11 +68,15 @@ const Queue: NextPage = () => {
 
             <RecoveryList />
 
-            {/* Pending unsigned transactions */}
-            {showPending && <PaginatedTxns useTxns={usePendingTxsQueue} />}
+            <QueueAssessmentProvider pages={allPages}>
+              {/* Pending unsigned transactions */}
+              {showPending && (
+                <PaginatedTxns useTxns={usePendingTxsQueue} onPagesChange={handlePendingQueuePagesChange} />
+              )}
 
-            {/* The main queue of signed transactions */}
-            <PaginatedTxns useTxns={useTxQueue} />
+              {/* The main queue of signed transactions */}
+              <PaginatedTxns useTxns={useTxQueue} onPagesChange={handleMainQueuePagesChange} />
+            </QueueAssessmentProvider>
           </Box>
         </main>
       </BatchExecuteHoverProvider>
