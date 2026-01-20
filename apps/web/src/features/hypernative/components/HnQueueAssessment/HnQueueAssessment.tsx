@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { Skeleton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SeverityIcon as SeverityIconSafeShield } from '@/features/safe-shield/components/SeverityIcon'
-import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'
 import LockIcon from '@/public/images/common/lock-small.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
+import { useHnAssessmentSeverity } from '@/features/hypernative/hooks/useHnAssessmentSeverity'
 
 interface HnQueueAssessmentProps {
   safeTxHash: string
@@ -44,28 +44,8 @@ export const HnQueueAssessment = ({
   isAuthenticated,
 }: HnQueueAssessmentProps): ReactElement | null => {
   const [assessmentData, error, isLoading] = assessment || [undefined, undefined, false]
-
-  // Extract primary result and severity
-  const primaryResult = useMemo(() => {
-    if (!assessmentData) {
-      return undefined
-    }
-    const groupedAssessmentData = {
-      ['0x']: {
-        THREAT: assessmentData.THREAT,
-        CUSTOM_CHECKS: assessmentData.CUSTOM_CHECKS,
-      },
-    }
-    return getPrimaryAnalysisResult(groupedAssessmentData)
-  }, [assessmentData])
-
-  const [severity, setSeverity] = useState<Severity | undefined>(primaryResult?.severity)
-
+  const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
-
-  useEffect(() => {
-    setSeverity(error ? Severity.ERROR : primaryResult?.severity)
-  }, [error, primaryResult?.severity])
 
   // Scan unavailable state (not logged in)
   if (!isAuthenticated) {

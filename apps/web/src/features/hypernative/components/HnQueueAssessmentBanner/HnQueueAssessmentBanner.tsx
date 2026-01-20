@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import type { AlertProps } from '@mui/material'
 import { Alert, Stack, Typography } from '@mui/material'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
+import { useHnAssessmentSeverity } from '@/features/hypernative/hooks/useHnAssessmentSeverity'
 import LockIcon from '@/public/images/common/lock-small.svg'
 
 interface HnQueueAssessmentBannerProps {
@@ -37,29 +37,9 @@ export const HnQueueAssessmentBanner = ({
   assessment,
   isAuthenticated,
 }: HnQueueAssessmentBannerProps): ReactElement | null => {
-  const [assessmentData, error] = assessment || [undefined, undefined]
   const { initiateLogin } = useHypernativeOAuth()
-
-  const primaryResult = useMemo(() => {
-    if (!assessmentData) {
-      return undefined
-    }
-    const groupedAssessmentData = {
-      ['0x']: {
-        THREAT: assessmentData.THREAT,
-        CUSTOM_CHECKS: assessmentData.CUSTOM_CHECKS,
-      },
-    }
-    return getPrimaryAnalysisResult(groupedAssessmentData)
-  }, [assessmentData])
-
-  const [severity, setSeverity] = useState<Severity | undefined>(primaryResult?.severity)
-
+  const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
-
-  useEffect(() => {
-    setSeverity(error ? Severity.ERROR : primaryResult?.severity)
-  }, [error, primaryResult?.severity])
 
   if (!isAuthenticated) {
     const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
