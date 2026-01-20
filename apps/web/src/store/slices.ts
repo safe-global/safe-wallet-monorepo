@@ -24,7 +24,7 @@ export {
   selectUndeployedSafe,
   selectUndeployedSafesByAddress,
   selectIsUndeployedSafe,
-} from '@/features/counterfactual'
+} from '@/features/counterfactual/store'
 export * from '@/features/swap/store/swapParamsSlice'
 export * from './swapOrderSlice'
 export * from './api/gateway'

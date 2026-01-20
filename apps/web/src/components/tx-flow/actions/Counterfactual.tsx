@@ -1,7 +1,7 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import { CounterfactualForm } from '@/features/counterfactual'
+import { CounterfactualForm } from '@/features/counterfactual/components'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 

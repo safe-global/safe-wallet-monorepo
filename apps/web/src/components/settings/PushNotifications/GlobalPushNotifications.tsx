@@ -1,5 +1,5 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
-import { selectUndeployedSafes } from '@/features/counterfactual'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import {
   Box,
   Grid,

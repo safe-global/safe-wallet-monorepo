@@ -1,4 +1,4 @@
-import { ActivateAccountButton } from '@/features/counterfactual'
+import { ActivateAccountButton } from '@/features/counterfactual/components'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type ReactElement, useContext } from 'react'
 import Button from '@mui/material/Button'
