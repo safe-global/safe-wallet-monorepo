@@ -55,4 +55,21 @@ describe('HypernativeInfo', () => {
     expect(screen.getByText('Hypernative Guardian is active')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Log in' })).not.toBeInTheDocument()
   })
+
+  it('hides active guardian message when showActiveStatus is false', () => {
+    const authStatus = makeAuthStatus()
+
+    render(<HypernativeInfo hypernativeAuth={authStatus} showActiveStatus={false} />)
+
+    expect(screen.queryByText('Hypernative Guardian is active')).not.toBeInTheDocument()
+    expect(screen.getByText('Log in to Hypernative to view the full analysis.')).toBeInTheDocument()
+  })
+
+  it('returns null when no login card is needed and showActiveStatus is false', () => {
+    const authStatus = makeAuthStatus({ isAuthenticated: true, isTokenExpired: false })
+
+    const { container } = render(<HypernativeInfo hypernativeAuth={authStatus} showActiveStatus={false} />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
 })

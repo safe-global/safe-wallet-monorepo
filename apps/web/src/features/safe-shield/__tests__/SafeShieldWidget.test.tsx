@@ -10,6 +10,7 @@ import { useSafeShield } from '../SafeShieldContext'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
+import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 
 jest.mock('../SafeShieldContext')
 jest.mock('@/features/hypernative/hooks/useHypernativeOAuth')
@@ -24,6 +25,14 @@ const mockUseCheckSimulation = useCheckSimulation as jest.MockedFunction<typeof 
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
 const emptyContract: AsyncResult<ContractAnalysisResults> = [{}, undefined, false]
 const emptyThreat: AsyncResult<ThreatAnalysisResults> = [undefined, undefined, false]
+
+const makeEligibility = (overrides: Partial<HypernativeEligibility> = {}): HypernativeEligibility => ({
+  isHypernativeEligible: false,
+  isHypernativeGuard: false,
+  isAllowlistedSafe: false,
+  loading: false,
+  ...overrides,
+})
 
 describe('SafeShieldWidget', () => {
   beforeEach(() => {
@@ -44,10 +53,7 @@ describe('SafeShieldWidget', () => {
       initiateLogin: jest.fn(),
       logout: jest.fn(),
     })
-    mockUseIsHypernativeEligible.mockReturnValue({
-      isHypernativeEligible: false,
-      loading: false,
-    })
+    mockUseIsHypernativeEligible.mockReturnValue(makeEligibility())
     mockUseCheckSimulation.mockReturnValue({ hasSimulationError: false })
   })
 
@@ -58,8 +64,10 @@ describe('SafeShieldWidget', () => {
     expect(screen.queryByText('Log in to Hypernative to view the full analysis.')).not.toBeInTheDocument()
   })
 
-  it('shows Hypernative login CTA when eligible and not authenticated', () => {
-    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: false })
+  it('shows Hypernative login CTA with guardian status when Safe has the guard installed', () => {
+    mockUseIsHypernativeEligible.mockReturnValue(
+      makeEligibility({ isHypernativeEligible: true, isHypernativeGuard: true }),
+    )
 
     render(<SafeShieldWidget />)
 
@@ -67,8 +75,19 @@ describe('SafeShieldWidget', () => {
     expect(screen.getByText('Log in to Hypernative to view the full analysis.')).toBeInTheDocument()
   })
 
+  it('shows Hypernative login CTA without guardian status when Safe is eligible via outreach only', () => {
+    mockUseIsHypernativeEligible.mockReturnValue(
+      makeEligibility({ isHypernativeEligible: true, isAllowlistedSafe: true }),
+    )
+
+    render(<SafeShieldWidget />)
+
+    expect(screen.queryByText('Hypernative Guardian is active')).not.toBeInTheDocument()
+    expect(screen.getByText('Log in to Hypernative to view the full analysis.')).toBeInTheDocument()
+  })
+
   it('does not show Hypernative info while eligibility is loading', () => {
-    mockUseIsHypernativeEligible.mockReturnValue({ isHypernativeEligible: true, loading: true })
+    mockUseIsHypernativeEligible.mockReturnValue(makeEligibility({ isHypernativeEligible: true, loading: true }))
 
     render(<SafeShieldWidget />)
 

@@ -8,7 +8,9 @@ import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHype
 const SafeShieldWidget = (): ReactElement => {
   const { recipient, contract, threat, safeTx } = useSafeShield()
   const hypernativeAuth = useHypernativeOAuth()
-  const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
+  const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
+  const showHnInfo = !eligibilityLoading && isHypernativeEligible
+  const showHnActiveStatus = !eligibilityLoading && isHypernativeGuard
 
   // Track when a transaction flow is started
   useEffect(() => {
@@ -23,6 +25,8 @@ const SafeShieldWidget = (): ReactElement => {
       threat={threat}
       safeTx={safeTx}
       hypernativeAuth={!eligibilityLoading && isHypernativeEligible ? hypernativeAuth : undefined}
+      showHypernativeInfo={showHnInfo}
+      showHypernativeActiveStatus={showHnActiveStatus}
     />
   )
 }

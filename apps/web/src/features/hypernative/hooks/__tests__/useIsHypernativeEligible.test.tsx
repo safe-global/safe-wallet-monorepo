@@ -22,6 +22,8 @@ describe('useIsHypernativeEligible', () => {
     const { result } = renderHook(() => useIsHypernativeEligible())
 
     expect(result.current.isHypernativeEligible).toBe(true)
+    expect(result.current.isHypernativeGuard).toBe(true)
+    expect(result.current.isAllowlistedSafe).toBe(false)
   })
 
   it('returns eligible when Safe is targeted and prerequisites are met', () => {
@@ -30,12 +32,16 @@ describe('useIsHypernativeEligible', () => {
     const { result } = renderHook(() => useIsHypernativeEligible())
 
     expect(result.current.isHypernativeEligible).toBe(true)
+    expect(result.current.isHypernativeGuard).toBe(false)
+    expect(result.current.isAllowlistedSafe).toBe(true)
   })
 
   it('returns ineligible when neither guard nor targeting applies', () => {
     const { result } = renderHook(() => useIsHypernativeEligible())
 
     expect(result.current.isHypernativeEligible).toBe(false)
+    expect(result.current.isHypernativeGuard).toBe(false)
+    expect(result.current.isAllowlistedSafe).toBe(false)
   })
 
   it('passes the login outreach ID to targeted messaging', () => {

@@ -4,6 +4,8 @@ import { HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '@/features/hypernative/consta
 
 export type HypernativeEligibility = {
   isHypernativeEligible: boolean
+  isHypernativeGuard: boolean
+  isAllowlistedSafe: boolean
   loading: boolean
 }
 
@@ -13,10 +15,14 @@ export type HypernativeEligibility = {
  */
 export const useIsHypernativeEligible = (): HypernativeEligibility => {
   const { isHypernativeGuard, loading: guardLoading } = useIsHypernativeGuard()
-  const { isTargeted: isTargetedSafe, loading: outreachLoading } = useIsOutreachSafe(HYPERNATIVE_ALLOWLIST_OUTREACH_ID)
+  const { isTargeted: isAllowlistedSafe, loading: outreachLoading } = useIsOutreachSafe(
+    HYPERNATIVE_ALLOWLIST_OUTREACH_ID,
+  )
 
   return {
-    isHypernativeEligible: isHypernativeGuard || isTargetedSafe,
+    isHypernativeEligible: isHypernativeGuard || isAllowlistedSafe,
+    isHypernativeGuard,
+    isAllowlistedSafe,
     loading: guardLoading || outreachLoading,
   }
 }
