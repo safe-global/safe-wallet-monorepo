@@ -44,7 +44,6 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import HnSecurityReportBtnForTxDetails from '@/features/hypernative/components/HnSecurityReportBtn'
 import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
 import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
 import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
@@ -215,8 +214,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               isAuthenticated={isAuthenticated}
             />
           )}
-
-          {isQueue && <HnSecurityReportBtnForTxDetails txDetails={txDetails} />}
 
           {txDetails.txHash && <TxExplorerLink txHash={txDetails.txHash} />}
 
