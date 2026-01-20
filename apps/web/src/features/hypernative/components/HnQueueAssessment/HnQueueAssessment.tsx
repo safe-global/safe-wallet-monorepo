@@ -75,12 +75,22 @@ export const HnQueueAssessment = ({
   // Scan unavailable state (not logged in)
   if (!isAuthenticated) {
     return (
-      <Stack direction="row" alignItems="center" gap={0.5}>
-        <SvgIcon inheritViewBox component={LockIcon} sx={{ width: '16px', height: '16px', color: 'text.disabled' }} />
-        <Typography variant="caption" color="text.disabled">
-          {getSeverityMessage(Severity.ERROR)}
-        </Typography>
-      </Stack>
+      <Tooltip
+        title={
+          <Typography variant="caption" letterSpacing={0} align="center">
+            Log in to Hypernative to view security scan results
+          </Typography>
+        }
+        arrow
+        placement="top"
+      >
+        <Stack direction="row" alignItems="center" gap={0.5}>
+          <SvgIcon inheritViewBox component={LockIcon} sx={{ width: '16px', height: '16px', color: 'text.disabled' }} />
+          <Typography variant="caption" color="text.disabled">
+            {getSeverityMessage(Severity.ERROR)}
+          </Typography>
+        </Stack>
+      </Tooltip>
     )
   }
 
