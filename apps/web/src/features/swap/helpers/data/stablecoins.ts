@@ -541,6 +541,11 @@ export const stableCoinAddresses: {
     symbol: 'USDS',
     chains: ['ethereum'],
   },
+  '0x5f7827fdeb7c20b443265fc2f40845b715385ff2': {
+    name: 'EURCV',
+    symbol: 'EURCV',
+    chains: ['ethereum'],
+  },
   // Base
   '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': {
     name: 'USDC',

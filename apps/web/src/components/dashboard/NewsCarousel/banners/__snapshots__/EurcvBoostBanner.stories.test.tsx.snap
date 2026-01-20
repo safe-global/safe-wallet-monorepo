@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./EurcvBoostBanner.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner eurcvBanner css-1869usn-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root eurcvStack css-1jxunfs-MuiStack-root"
+    >
+      <div
+        class="eurcvIconContainer MuiBox-root css-0"
+      >
+        <img
+          alt="EURCV"
+          class="eurcvIconImage"
+          src="/images/eurcv-boost/eurcv.svg"
+        />
+      </div>
+      <div
+        class="eurcvContent MuiBox-root css-0"
+      >
+        <div
+          class="eurcvTextContainer MuiBox-root css-0"
+        >
+          <span
+            class="eurcvTitle"
+          >
+            EURCV is now available
+          </span>
+          <span
+            class="eurcvDescription"
+          >
+            A new vault is added. Stake EURCV and earn 
+            9.5
+            % APY on deposits.
+             
+            <a
+              class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1spsnlm-MuiTypography-root-MuiLink-root"
+              href="https://help.safe.global/en/articles/322149-defi-lending-in-safe-wallet"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Learn more
+            </a>
+          </span>
+        </div>
+        <span
+          data-track="overview: Open EURCV boost from banner"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary eurcvButton css-1p6otmy-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
+          >
+            Start earning
+            <span
+              class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                data-testid="ChevronRightIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+                />
+              </svg>
+            </span>
+          </button>
+        </span>
+      </div>
+    </div>
+    <span
+      data-track="overview: Hide EURCV boost banner"
+    >
+      <button
+        aria-label="close"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-a3ejuf-MuiButtonBase-root-MuiIconButton-root"
+        tabindex="0"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+          data-testid="CloseIcon"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+</div>
+`;

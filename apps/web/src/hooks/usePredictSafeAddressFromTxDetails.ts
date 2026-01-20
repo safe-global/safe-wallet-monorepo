@@ -1,6 +1,6 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-import { predictSafeAddress } from '@/features/multichain/utils/utils'
+import { predictSafeAddress } from '@/features/multichain'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from './wallets/web3'
 

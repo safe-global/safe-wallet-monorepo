@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
 import { useAppSelector } from '@/store'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { trackEvent } from '@/services/analytics'
@@ -11,7 +11,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 jest.mock('@/store')
 jest.mock('@/features/spaces/hooks/useSpaceMembers')
 jest.mock('@/services/analytics')
-jest.mock('@/features/multichain/utils/utils')
+jest.mock('@/features/multichain')
 
 jest.mock('../RemoveSafeDialog', () => {
   return jest.fn(() => <div data-testid="remove-safe-dialog">Remove Safe Dialog</div>)

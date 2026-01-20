@@ -4,6 +4,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
+import type { SafeSetup } from '../types'
 
 import {
   type UndeployedSafesState,
@@ -18,12 +19,7 @@ import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-
-type SafeSetup = {
-  owners: string[]
-  threshold: number
-  chainId: string
-}
+import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
 export const isChangingSignerSetup = (decodedData: DataDecoded | undefined) => {
   return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
@@ -139,8 +135,10 @@ export const predictAddressBasedOnReplayData = async (safeCreationData: Replayed
 }
 
 const canMultichain = (chain: Chain) => {
-  const MIN_SAFE_VERSION = '1.4.1'
-  return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
+  return (
+    hasFeature(chain, FEATURES.COUNTERFACTUAL) &&
+    semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION_FOR_MULTICHAIN}`)
+  )
 }
 
 export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
