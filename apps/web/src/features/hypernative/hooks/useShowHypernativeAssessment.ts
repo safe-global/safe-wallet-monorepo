@@ -1,6 +1,6 @@
-import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useIsHypernativeEligible } from './useIsHypernativeEligible'
 
 interface UseShowHypernativeAssessmentParams {
   isQueue: boolean
@@ -17,10 +17,10 @@ interface UseShowHypernativeAssessmentParams {
 export const useShowHypernativeAssessment = ({ isQueue, safeTxHash }: UseShowHypernativeAssessmentParams): boolean => {
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
-  const { isHypernativeGuard, loading: hnGuardLoading } = useIsHypernativeGuard()
+  const { isHypernativeEligible, loading: hnEligibilityLoading } = useIsHypernativeEligible()
   const isSafeOwner = useIsSafeOwner()
 
-  if (!isQueue || !isHypernativeGuard || !safeTxHash || !chainId || !isSafeOwner || hnGuardLoading) {
+  if (!isQueue || !isHypernativeEligible || hnEligibilityLoading || !safeTxHash || !chainId || !isSafeOwner) {
     return false
   }
 
