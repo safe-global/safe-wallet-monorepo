@@ -6,6 +6,7 @@ import {
 } from '../../contexts/QueueAssessmentContext'
 import { useQueueBatchAssessments } from '../../hooks/useQueueBatchAssessments'
 import { useIsHypernativeEligible } from '../../hooks/useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from '../../hooks/useIsHypernativeQueueScanFeature'
 
 interface QueueAssessmentProviderProps {
   children: ReactNode
@@ -18,11 +19,12 @@ interface QueueAssessmentProviderProps {
  */
 export const QueueAssessmentProvider = ({ children, pages }: QueueAssessmentProviderProps): ReactElement => {
   const { isHypernativeEligible, loading: hnEligibilityLoading } = useIsHypernativeEligible()
+  const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
 
   // Fetch batch assessments for all pages
   const assessments = useQueueBatchAssessments({
     pages,
-    skip: !isHypernativeEligible || hnEligibilityLoading,
+    skip: !isHypernativeQueueScanEnabled || !isHypernativeEligible || hnEligibilityLoading,
   })
 
   // Determine if any assessment is currently loading
