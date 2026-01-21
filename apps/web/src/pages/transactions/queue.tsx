@@ -11,6 +11,7 @@ import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
 import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
 import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/useIsHypernativeQueueScanFeature'
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
@@ -22,8 +23,9 @@ const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
+  const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
 
-  const showHnLoginCard = !eligibilityLoading && isHypernativeEligible
+  const showHnLoginCard = !eligibilityLoading && isHypernativeEligible && isHypernativeQueueScanEnabled
 
   // Collect pages from main queue for assessment provider
   const [mainQueuePages, setMainQueuePages] = useState<(QueuedItemPage | undefined)[]>([])

@@ -2,6 +2,7 @@ import { renderHook } from '@/tests/test-utils'
 import { useShowHypernativeAssessment } from '../useShowHypernativeAssessment'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useIsHypernativeEligibleHook from '../useIsHypernativeEligible'
+import * as useIsHypernativeQueueScanFeatureHook from '../useIsHypernativeQueueScanFeature'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
@@ -26,6 +27,7 @@ describe('useShowHypernativeAssessment', () => {
       isAllowlistedSafe: false,
       loading: false,
     },
+    useIsHypernativeQueueScanFeature: true,
     useIsSafeOwner: true,
   }
 
@@ -35,6 +37,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -54,11 +59,34 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
         useShowHypernativeAssessment({
           isQueue: false,
+          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+        }),
+      )
+
+      expect(result.current).toBe(false)
+    })
+  })
+
+  describe('when isHypernativeQueueScanEnabled is false', () => {
+    it('should return false', () => {
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue(defaultMocks.useSafeInfo)
+      jest
+        .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
+        .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest.spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature').mockReturnValue(false)
+      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
+
+      const { result } = renderHook(() =>
+        useShowHypernativeAssessment({
+          isQueue: true,
           safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
         }),
       )
@@ -74,6 +102,9 @@ describe('useShowHypernativeAssessment', () => {
         ...defaultMocks.useIsHypernativeEligible,
         isHypernativeEligible: false,
       })
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -94,6 +125,9 @@ describe('useShowHypernativeAssessment', () => {
         ...defaultMocks.useIsHypernativeEligible,
         loading: true,
       })
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -113,6 +147,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -132,6 +169,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -155,6 +195,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -174,6 +217,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
 
       const { result } = renderHook(() =>
@@ -194,6 +240,9 @@ describe('useShowHypernativeAssessment', () => {
         ...defaultMocks.useIsHypernativeEligible,
         isHypernativeEligible: false,
       })
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
@@ -215,6 +264,9 @@ describe('useShowHypernativeAssessment', () => {
       jest
         .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
         .mockReturnValue(defaultMocks.useIsHypernativeEligible)
+      jest
+        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
+        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
       const { result } = renderHook(() =>
