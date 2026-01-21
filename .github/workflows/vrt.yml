@@ -1,0 +1,25 @@
+name: Visual Regression Tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Lost Pixel
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/yarn
+
+      - name: Build app
+        run: yarn workspace @safe-global/web build
+
+      - name: Start server (in background)
+        run: yarn workspace @safe-global/web start &
+
+      - name: Lost Pixel
+        uses: lost-pixel/lost-pixel@v3.16.0
+        env:
+          LOST_PIXEL_API_KEY: ${{ secrets.LOST_PIXEL_API_KEY }}

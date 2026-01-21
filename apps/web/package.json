@@ -162,6 +162,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-fixed-jsdom": "^0.0.10",
     "jest-image-snapshot": "^6.5.1",
+    "lost-pixel": "^3.22.0",
     "mockdate": "^3.0.5",
     "msw": "^2.7.3",
     "next-rspack": "^16.0.1",
