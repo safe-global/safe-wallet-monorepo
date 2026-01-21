@@ -37,16 +37,9 @@ export interface WalletConnectImplementation extends FeatureImplementation {
 
 /**
  * WalletConnect Feature Contract - the full loaded feature type.
- * This is what useFeature('walletconnect') returns.
+ * This is what useFeature<WalletConnectContract>('walletconnect') returns.
  */
 export interface WalletConnectContract extends WalletConnectImplementation {
   readonly name: 'walletconnect'
   useIsEnabled: () => boolean | undefined
-}
-
-// Register in FeatureMap for automatic type inference in useFeature()
-declare module '@/features/__contracts__' {
-  interface FeatureMap {
-    walletconnect: WalletConnectContract
-  }
 }

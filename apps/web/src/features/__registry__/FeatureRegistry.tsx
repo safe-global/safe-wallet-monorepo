@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import type { FeatureHandle, FeatureContract, FeatureMap, FeatureImplementation } from '@/features/__contracts__'
+import type { FeatureHandle, FeatureContract, FeatureImplementation } from '@/features/__contracts__'
 
 /**
  * Interface for the feature registry context value.
@@ -166,12 +166,14 @@ export function useFeatureRegistry(): FeatureRegistryContextValue {
  * 3. Lazily loads the full implementation when enabled
  * 4. Caches the loaded feature for subsequent calls
  *
- * @param name - The feature name to look up (type is inferred from FeatureMap)
+ * @param name - The feature name to look up
  * @returns The full feature contract, or null if not available/enabled/loading
  *
  * @example
+ * import type { WalletConnectContract } from '@/features/walletconnect/contract'
+ *
  * function MyComponent() {
- *   const walletConnect = useFeature('walletconnect')
+ *   const walletConnect = useFeature<WalletConnectContract>('walletconnect')
  *
  *   // null means: not registered, disabled, or still loading
  *   if (!walletConnect) return null
@@ -180,11 +182,6 @@ export function useFeatureRegistry(): FeatureRegistryContextValue {
  *   return <walletConnect.components.WalletConnectWidget />
  * }
  */
-// Overload for features registered in FeatureMap (type is inferred)
-export function useFeature<K extends keyof FeatureMap>(name: K): FeatureMap[K] | null
-// Overload for features not yet in FeatureMap (explicit type required)
-export function useFeature<T extends FeatureContract>(name: string): T | null
-// Implementation
 export function useFeature<T extends FeatureContract>(name: string): T | null {
   // Get context directly to avoid throwing during SSR prerendering
   const context = useContext(FeatureRegistryContext)

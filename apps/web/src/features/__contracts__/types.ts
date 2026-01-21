@@ -164,21 +164,3 @@ export type ExtractSelectorReturn<T extends FeatureContract, K extends keyof Non
 >[K] extends (state: RootState) => infer R
   ? R
   : never
-
-/**
- * Map of feature names to their contract types.
- * This enables type inference in useFeature() calls.
- *
- * Features should extend this interface in their contract files:
- * @example
- * // In features/myfeature/contract.ts:
- * declare module '@/features/__contracts__' {
- *   interface FeatureMap {
- *     myfeature: MyFeatureContract
- *   }
- * }
- */
-
-export interface FeatureMap {
-  // Features extend this via declaration merging
-}

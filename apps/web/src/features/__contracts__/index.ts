@@ -2,7 +2,6 @@ export type {
   FeatureHandle,
   FeatureImplementation,
   FeatureContract,
-  FeatureMap,
   // Individual capability contracts
   ComponentContract,
   HooksContract,

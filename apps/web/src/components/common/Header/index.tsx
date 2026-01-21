@@ -19,8 +19,7 @@ import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import BatchIndicator from '@/components/batch/BatchIndicator'
 import { useFeature } from '@/features/__registry__'
-// Import contract for declaration merging (extends FeatureMap)
-import '@/features/walletconnect/contract'
+import type { WalletConnectContract } from '@/features/walletconnect/contract'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
@@ -46,7 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
-  const walletConnect = useFeature('walletconnect')
+  const walletConnect = useFeature<WalletConnectContract>('walletconnect')
   const isOfficialHost = useIsOfficialHost()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page

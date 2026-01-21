@@ -64,23 +64,21 @@ Each feature exposes a **handle** with two parts:
 | `useIsEnabled()`                  | Yes (tiny) | Flag check via `useHasFeature(FEATURES.X)` |
 | `components`, `hooks`, `services` | No (lazy)  | Actual feature code, loaded on demand      |
 
-The `useFeature()` hook combines registry lookup + flag check in one step:
+The `useFeature()` hook combines registry lookup + flag check + lazy loading in one step:
 
 ```typescript
+import type { HypernativeContract } from '@/features/hypernative/contract'
+
 // Consumer component
 function MyPage() {
   // Returns null if: not registered, disabled, or loading
-  const hypernative = useFeature('hypernative')
+  const hypernative = useFeature<HypernativeContract>('hypernative')
 
   if (!hypernative) return null
 
-  // Feature is enabled - safe to use lazy components
-  const Banner = hypernative.components.Banner
-  return (
-    <Suspense fallback={<Skeleton />}>
-      <Banner />
-    </Suspense>
-  )
+  // Feature is enabled and loaded - safe to use components
+  // Components are pre-wrapped with Suspense via withSuspense()
+  return <hypernative.components.Banner />
 }
 ```
 
@@ -103,15 +101,14 @@ function MyPage() {
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ 2. CONSUMER calls useFeature (combines lookup + flag check)    │
-│    const hypernative = useFeature('hypernative')               │
-│    // Returns null if disabled, handle if enabled              │
+│    const wc = useFeature<WalletConnectContract>('walletconnect')│
+│    // Returns null if disabled, full contract if enabled       │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼ if not null
 ┌─────────────────────────────────────────────────────────────────┐
-│ 3. CONSUMER renders lazy component (triggers code load)        │
-│    const Banner = hypernative.components.Banner                │
-│    return <Suspense><Banner /></Suspense>                      │
+│ 3. CONSUMER renders component (already wrapped with Suspense)  │
+│    return <wc.components.WalletConnectWidget />                │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -124,6 +121,8 @@ Direct imports create compile-time dependencies:
 import { useHypernativeScanner } from '@/features/hypernative/hooks'
 
 // ✅ Registry lookup - runtime discovery, no compile-time coupling
+import type { HypernativeContract } from '@/features/hypernative/contract'
+
 const hypernative = useFeature<HypernativeContract>('hypernative')
 const scanner = hypernative?.hooks.useScanner?.()
 ```
@@ -199,20 +198,27 @@ export type FeatureContract = BaseFeatureContract &
   Partial<SelectorsContract>
 ```
 
-### Type Inference with FeatureMap
+### Explicit Type Parameters
 
-To enable automatic type inference in `useFeature()`, each feature contract should register itself in the `FeatureMap`:
+When calling `useFeature()`, always pass the contract type explicitly:
 
 ```typescript
-// In your contract.ts file:
-declare module '@/features/__contracts__' {
-  interface FeatureMap {
-    'my-feature': MyFeatureContract
-  }
-}
+import { useFeature } from '@/features/__registry__'
+import type { MyFeatureContract } from '@/features/my-feature/contract'
+
+const myFeature = useFeature<MyFeatureContract>('my-feature')
 ```
 
-This allows consumers to call `useFeature('my-feature')` without explicit type parameters.
+**Why explicit generics instead of automatic inference?**
+
+We considered using TypeScript declaration merging (`FeatureMap`) for automatic type inference, but chose explicit generics because:
+
+1. **Import proximity**: The type import sits right next to the variable, making the relationship clear
+2. **IDE navigation**: Cmd+click on `MyFeatureContract` jumps directly to the contract definition
+3. **Explicit dependencies**: The import makes it obvious which contract the consumer depends on
+4. **No magic**: No hidden declaration merging or side-effect imports required
+
+This follows the principle: "explicit is better than implicit" for cross-feature dependencies.
 
 ### IDE Navigation (Jump-to-Definition)
 
@@ -246,22 +252,19 @@ This follows the DI pattern: contracts reference implementation _types_ (not imp
 
 ```typescript
 // src/features/bridge/contract.ts
-import type { BaseFeatureContract, ComponentContract } from '@/features/__contracts__/types'
+import type { ComponentType } from 'react'
+import type { FeatureImplementation } from '@/features/__contracts__'
 
-// Register in FeatureMap for automatic type inference
-declare module '@/features/__contracts__' {
-  interface FeatureMap {
-    bridge: BridgeContract
+export interface BridgeImplementation extends FeatureImplementation {
+  components: {
+    Bridge: ComponentType
+    BridgeWidget: ComponentType
   }
 }
 
-export interface BridgeContract extends BaseFeatureContract, ComponentContract {
+export interface BridgeContract extends BridgeImplementation {
   readonly name: 'bridge'
-  useIsEnabled: () => boolean | undefined // Static flag check
-  components: {
-    Bridge: React.LazyExoticComponent<React.ComponentType> // Lazy
-    BridgeWidget: React.LazyExoticComponent<React.ComponentType> // Lazy
-  }
+  useIsEnabled: () => boolean | undefined
 }
 ```
 
@@ -471,13 +474,12 @@ function App({ children }) {
 ```typescript
 // src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
 import { useFeature } from '@/features/__registry__'
-// Import contract to activate FeatureMap type inference
-import '@/features/hypernative/contract'
+import type { HypernativeContract } from '@/features/hypernative/contract'
 
 function SafeShieldScanner() {
-  // Type is automatically inferred from FeatureMap (no explicit generic needed)
+  // Explicit type parameter for type safety and IDE navigation
   // Returns null if hypernative is disabled or not registered
-  const hypernative = useFeature('hypernative')
+  const hypernative = useFeature<HypernativeContract>('hypernative')
 
   if (!hypernative) return null
 
@@ -715,15 +717,15 @@ function MyComponent() {
 
 ### Communication Patterns Summary
 
-| Need                               | Pattern             | Example                                        |
-| ---------------------------------- | ------------------- | ---------------------------------------------- |
-| Get feature if enabled             | `useFeature()`      | `const x = useFeature('x')` (null if disabled) |
-| Render another feature's component | Registry + Suspense | `<Suspense><x.components.Widget /></Suspense>` |
-| Use another feature's hook         | Registry lookup     | `x.hooks.useY()`                               |
-| Call another feature's service     | Registry lookup     | `x.services.doY()`                             |
-| Read shared state                  | Redux selector      | `useSelector(selectSafeInfo)`                  |
-| Write shared state                 | Redux action        | `dispatch(setSafeInfo(data))`                  |
-| Share types                        | Direct import       | `import type { X } from '@/features/y/types'`  |
+| Need                               | Pattern             | Example                                                   |
+| ---------------------------------- | ------------------- | --------------------------------------------------------- |
+| Get feature if enabled             | `useFeature<T>()`   | `const x = useFeature<XContract>('x')` (null if disabled) |
+| Render another feature's component | Registry + Suspense | `<Suspense><x.components.Widget /></Suspense>`            |
+| Use another feature's hook         | Registry lookup     | `x.hooks.useY()`                                          |
+| Call another feature's service     | Registry lookup     | `x.services.doY()`                                        |
+| Read shared state                  | Redux selector      | `useSelector(selectSafeInfo)`                             |
+| Write shared state                 | Redux action        | `dispatch(setSafeInfo(data))`                             |
+| Share types                        | Direct import       | `import type { X } from '@/features/y/types'`             |
 
 ## Testing Strategy
 
@@ -919,12 +921,11 @@ function SafeShieldScanner() {
 ```typescript
 // src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
 import { useFeature } from '@/features/__registry__'
-// Import contract to activate FeatureMap type inference
-import '@/features/hypernative/contract'
+import type { HypernativeContract } from '@/features/hypernative/contract'
 
 function SafeShieldScanner() {
-  // Type is auto-inferred, null if hypernative is disabled or not registered
-  const hypernative = useFeature('hypernative')
+  // Explicit generic for type safety, null if hypernative is disabled or not registered
+  const hypernative = useFeature<HypernativeContract>('hypernative')
 
   if (!hypernative) return null
 
@@ -991,13 +992,14 @@ Handles are registered at app startup, but they're tiny (just flag lookups + laz
 `useFeature()` combines registry lookup + feature flag check:
 
 ```typescript
-// Type is automatically inferred from FeatureMap
-const feature = useFeature('my-feature')
+import type { MyFeatureContract } from '@/features/my-feature/contract'
+
+const feature = useFeature<MyFeatureContract>('my-feature')
 // Returns:
 // - null if feature not registered
 // - null if feature flag is disabled
 // - null if feature flag is loading (undefined)
-// - the feature handle if enabled
+// - the full feature contract if enabled and loaded
 ```
 
 This means one simple null check handles all cases:
@@ -1037,7 +1039,9 @@ const handle = {
 This means consumers can render components directly without wrapping in `<Suspense>`:
 
 ```typescript
-const feature = useFeature('my-feature')
+import type { MyFeatureContract } from '@/features/my-feature/contract'
+
+const feature = useFeature<MyFeatureContract>('my-feature')
 if (!feature) return null
 return <feature.components.Widget /> // No Suspense wrapper needed
 ```
