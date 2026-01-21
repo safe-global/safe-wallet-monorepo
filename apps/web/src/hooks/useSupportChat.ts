@@ -1,14 +1,34 @@
 import { useContext, useMemo } from 'react'
 import { WalletContext } from '@/components/common/WalletProvider'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { shortenAddress, deriveAliasEmail } from '@safe-global/support-chat-embed'
-import type { SupportChatConfig, UserIdentity } from '@safe-global/support-chat-embed'
 import {
   SUPPORT_CHAT_APP_ID,
   SUPPORT_CHAT_URL,
   SUPPORT_CHAT_ALIAS_DOMAIN,
   SUPPORT_CHAT_ALLOWED_PARENTS,
 } from '@/config/constants'
+
+export type SupportChatConfig = {
+  appId: string
+  chatUrl: string
+  aliasDomain: string
+  allowedParents: string[]
+}
+
+export type UserIdentity = {
+  email: string
+  name: string
+  avatarUrl?: string
+  accountId?: string
+}
+
+const shortenAddress = (address: string): string => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+const deriveAliasEmail = (address: string): string => {
+  return `${address.toLowerCase()}@${SUPPORT_CHAT_ALIAS_DOMAIN}`
+}
 
 export const useSupportChat = () => {
   const { connectedWallet } = useContext(WalletContext) ?? {}

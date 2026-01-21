@@ -1,0 +1,54 @@
+.fab {
+  position: fixed;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #121312 !important;
+  color: #fff !important;
+  z-index: 1301;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fab:hover {
+  background-color: #303033 !important;
+}
+
+.fab svg {
+  color: inherit;
+}
+
+.menu :global .MuiPaper-root {
+  border-radius: 8px !important;
+}
+
+.menu :global .MuiList-root {
+  padding: 4px;
+}
+
+.menu :global .MuiMenuItem-root {
+  padding: 8px 12px;
+  min-height: 40px;
+  border-radius: 8px !important;
+  gap: var(--space-1);
+}
+
+.menu :global .MuiMenuItem-root:hover {
+  background-color: var(--color-secondary-background);
+}
+
+.menu :global .MuiListItemIcon-root {
+  min-width: 26px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.menuItemText {
+  flex: 1;
+}

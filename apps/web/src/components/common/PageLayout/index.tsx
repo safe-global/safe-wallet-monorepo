@@ -12,6 +12,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { AppRoutes } from '@/config/routes'
+import HelpMenu from '@/components/common/HelpMenu'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -58,6 +59,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         {!isSafeLabsTermsPage && <Footer />}
       </div>
+
+      <HelpMenu />
     </>
   )
 }
