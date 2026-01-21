@@ -1,34 +1,44 @@
 name: Visual Regression Tests
 
-on: [push]
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  lost-pixel:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     name: Lost Pixel
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
-      - uses: ./.github/actions/yarn
-
-      - name: Build app
-        run: yarn workspace @safe-global/web build
+      - name: Extract branch name
+        id: branch
         env:
-          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
 
-      - name: Start server (in background)
-        run: npx next start -p 3000 &
-        working-directory: apps/web
-
-      - name: Wait for server to be ready
-        run: npx wait-on http://localhost:3000 --timeout 60000
+      - name: Wait for preview to be ready
+        run: |
+          URL="https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6"
+          echo "Waiting for $URL to be ready..."
+          npx wait-on "$URL" --timeout 120000
 
       - name: Lost Pixel
         uses: lost-pixel/lost-pixel@v3.16.0
         env:
           LOST_PIXEL_API_KEY: ${{ secrets.LOST_PIXEL_API_KEY }}
+          LOST_PIXEL_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev
