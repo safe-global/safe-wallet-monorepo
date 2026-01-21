@@ -10,41 +10,31 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import type { FeatureContract, FeatureMap } from '@/features/__contracts__'
+import type { FeatureHandle, FeatureContract, FeatureMap, FeatureImplementation } from '@/features/__contracts__'
 
 /**
  * Interface for the feature registry context value.
- * Provides methods to register, unregister, and lookup features.
+ * Provides methods to register, unregister, and lookup feature handles.
  */
 interface FeatureRegistryContextValue {
-  /**
-   * Register a feature contract with the registry.
-   * @returns Cleanup function to unregister the feature
-   */
-  register: <T extends FeatureContract>(contract: T) => () => void
-
-  /**
-   * Get a feature contract by name.
-   * @returns The feature contract or undefined if not registered
-   */
-  get: <T extends FeatureContract>(name: string) => T | undefined
-
-  /**
-   * Get all registered feature contracts.
-   * @returns Map of feature names to contracts
-   */
-  getAll: () => ReadonlyMap<string, FeatureContract>
-
-  /**
-   * Check if a feature is registered.
-   */
+  /** Register a feature handle */
+  register: <T extends FeatureImplementation>(handle: FeatureHandle<T>) => () => void
+  /** Get a feature handle by name */
+  getHandle: <T extends FeatureImplementation>(name: string) => FeatureHandle<T> | undefined
+  /** Get all registered handles */
+  getAllHandles: () => ReadonlyMap<string, FeatureHandle>
+  /** Check if a feature is registered */
   has: (name: string) => boolean
-
-  /**
-   * Subscribe to registry changes.
-   * @returns Cleanup function to unsubscribe
-   */
+  /** Subscribe to registry changes */
   subscribe: (callback: () => void) => () => void
+  /** Get cached loaded feature (internal use) */
+  getLoaded: <T extends FeatureContract>(name: string) => T | undefined
+  /** Set cached loaded feature (internal use) */
+  setLoaded: <T extends FeatureContract>(name: string, feature: T) => void
+  /** Check if a feature is currently being loaded (internal use) */
+  isLoading: (name: string) => boolean
+  /** Mark a feature as loading (internal use) - returns true if load should proceed */
+  startLoading: (name: string) => boolean
 }
 
 const FeatureRegistryContext = createContext<FeatureRegistryContextValue | null>(null)
@@ -52,69 +42,64 @@ const FeatureRegistryContext = createContext<FeatureRegistryContextValue | null>
 /**
  * Provider component that creates and provides the feature registry.
  * Should be placed near the root of the application.
- *
- * @example
- * function App() {
- *   return (
- *     <FeatureRegistryProvider>
- *       <MyApp />
- *     </FeatureRegistryProvider>
- *   )
- * }
  */
 interface FeatureRegistryProviderProps {
   children: ReactNode
-  /** Feature handles to register at startup (static, tiny) */
-  initialFeatures?: FeatureContract[]
+  /** Feature handles to register at startup (minimal, tiny) */
+  initialFeatures?: FeatureHandle[]
 }
 
 export function FeatureRegistryProvider({ children, initialFeatures = [] }: FeatureRegistryProviderProps) {
-  // Use refs to maintain stable identity across renders
-  const registryRef = useRef(new Map<string, FeatureContract>())
+  // Registry of minimal handles
+  const handlesRef = useRef(new Map<string, FeatureHandle>())
+  // Cache of loaded features
+  const loadedRef = useRef(new Map<string, FeatureContract>())
+  // Set of features currently being loaded (prevents concurrent loads)
+  const loadingRef = useRef(new Set<string>())
+  // Subscribers for registry changes
   const subscribersRef = useRef(new Set<() => void>())
 
-  // Register initial features once on mount
+  // Register initial handles once on mount
   const initializedRef = useRef(false)
   if (!initializedRef.current) {
-    initialFeatures.forEach((feature) => {
-      registryRef.current.set(feature.name, feature)
+    initialFeatures.forEach((handle) => {
+      handlesRef.current.set(handle.name, handle)
     })
     initializedRef.current = true
   }
 
-  // Notify all subscribers of registry changes
   const notifySubscribers = useCallback(() => {
     subscribersRef.current.forEach((callback) => callback())
   }, [])
 
   const register = useCallback(
-    <T extends FeatureContract>(contract: T): (() => void) => {
-      if (registryRef.current.has(contract.name)) {
-        console.warn(`Feature "${contract.name}" is already registered. Replacing.`)
+    <T extends FeatureImplementation>(handle: FeatureHandle<T>): (() => void) => {
+      if (handlesRef.current.has(handle.name)) {
+        console.warn(`Feature "${handle.name}" is already registered. Replacing.`)
       }
 
-      registryRef.current.set(contract.name, contract)
+      handlesRef.current.set(handle.name, handle)
       notifySubscribers()
 
-      // Return unregister function
       return () => {
-        registryRef.current.delete(contract.name)
+        handlesRef.current.delete(handle.name)
+        loadedRef.current.delete(handle.name)
         notifySubscribers()
       }
     },
     [notifySubscribers],
   )
 
-  const get = useCallback(<T extends FeatureContract>(name: string): T | undefined => {
-    return registryRef.current.get(name) as T | undefined
+  const getHandle = useCallback(<T extends FeatureImplementation>(name: string): FeatureHandle<T> | undefined => {
+    return handlesRef.current.get(name) as FeatureHandle<T> | undefined
   }, [])
 
-  const getAll = useCallback((): ReadonlyMap<string, FeatureContract> => {
-    return registryRef.current
+  const getAllHandles = useCallback((): ReadonlyMap<string, FeatureHandle> => {
+    return handlesRef.current
   }, [])
 
   const has = useCallback((name: string): boolean => {
-    return registryRef.current.has(name)
+    return handlesRef.current.has(name)
   }, [])
 
   const subscribe = useCallback((callback: () => void): (() => void) => {
@@ -124,14 +109,43 @@ export function FeatureRegistryProvider({ children, initialFeatures = [] }: Feat
     }
   }, [])
 
-  const value = useMemo(() => ({ register, get, getAll, has, subscribe }), [register, get, getAll, has, subscribe])
+  const getLoaded = useCallback(<T extends FeatureContract>(name: string): T | undefined => {
+    return loadedRef.current.get(name) as T | undefined
+  }, [])
+
+  const setLoaded = useCallback(
+    <T extends FeatureContract>(name: string, feature: T) => {
+      loadedRef.current.set(name, feature)
+      loadingRef.current.delete(name)
+      notifySubscribers()
+    },
+    [notifySubscribers],
+  )
+
+  const isLoading = useCallback((name: string): boolean => {
+    return loadingRef.current.has(name)
+  }, [])
+
+  const startLoading = useCallback((name: string): boolean => {
+    // Returns true if load should proceed (wasn't already loading)
+    if (loadingRef.current.has(name)) {
+      return false
+    }
+    loadingRef.current.add(name)
+    return true
+  }, [])
+
+  const value = useMemo(
+    () => ({ register, getHandle, getAllHandles, has, subscribe, getLoaded, setLoaded, isLoading, startLoading }),
+    [register, getHandle, getAllHandles, has, subscribe, getLoaded, setLoaded, isLoading, startLoading],
+  )
 
   return <FeatureRegistryContext.Provider value={value}>{children}</FeatureRegistryContext.Provider>
 }
 
 /**
  * Hook to access the feature registry directly.
- * Prefer using `useFeature` or `useRegisterFeature` for most cases.
+ * Prefer using `useFeature` for most cases.
  *
  * @throws Error if used outside of FeatureRegistryProvider
  */
@@ -144,29 +158,26 @@ export function useFeatureRegistry(): FeatureRegistryContextValue {
 }
 
 /**
- * Hook to get a specific feature's contract from the registry.
- * Returns null if the feature is not registered OR if its feature flag is disabled.
+ * Hook to get a fully loaded feature from the registry.
  *
- * This combines registry lookup + feature flag check in one step:
- * - Feature not registered → null
- * - Feature flag disabled → null
- * - Feature flag loading (undefined) → null
- * - Feature flag enabled → returns the feature contract
+ * This handles the complete loading flow:
+ * 1. Gets the minimal handle from registry
+ * 2. Checks if the feature flag is enabled
+ * 3. Lazily loads the full implementation when enabled
+ * 4. Caches the loaded feature for subsequent calls
  *
  * @param name - The feature name to look up (type is inferred from FeatureMap)
- * @returns The feature contract, or null if not available/enabled
+ * @returns The full feature contract, or null if not available/enabled/loading
  *
  * @example
  * function MyComponent() {
- *   // Type is automatically inferred from FeatureMap
  *   const walletConnect = useFeature('walletconnect')
  *
  *   // null means: not registered, disabled, or still loading
  *   if (!walletConnect) return null
  *
- *   // Feature is enabled - safe to use
- *   const WcWidget = walletConnect.components.WalletConnectWidget
- *   return <Suspense fallback={<Skeleton />}><WcWidget /></Suspense>
+ *   // Feature is loaded - safe to use
+ *   return <walletConnect.components.WalletConnectWidget />
  * }
  */
 // Overload for features registered in FeatureMap (type is inferred)
@@ -178,73 +189,95 @@ export function useFeature<T extends FeatureContract>(name: string): T | null {
   // Get context directly to avoid throwing during SSR prerendering
   const context = useContext(FeatureRegistryContext)
 
-  // Get the feature handle from registry (or return undefined if no context)
-  const feature = useSyncExternalStore(
+  // Get the minimal handle from registry
+  const handle = useSyncExternalStore(
     context?.subscribe ?? (() => () => {}),
-    () => context?.get<T>(name),
-    () => context?.get<T>(name), // Server snapshot (same as client for SSR)
+    () => context?.getHandle(name),
+    () => context?.getHandle(name),
   )
 
-  // Check feature flag (this is a hook call, so must be unconditional)
-  const isEnabled = feature?.useIsEnabled()
+  // Check feature flag (must be called unconditionally as it's a hook)
+  const isEnabled = handle?.useIsEnabled()
 
-  // Return null if no context, not registered, disabled, or loading
-  if (!context || !feature || isEnabled !== true) {
+  // Get cached loaded feature
+  const cachedFeature = useSyncExternalStore(
+    context?.subscribe ?? (() => () => {}),
+    () => context?.getLoaded<T>(name),
+    () => context?.getLoaded<T>(name),
+  )
+
+  // Load the feature when enabled and not already loaded
+  useEffect(() => {
+    if (!context || !handle || isEnabled !== true || cachedFeature) {
+      return
+    }
+
+    // Use centralized loading tracking to prevent concurrent loads
+    if (!context.startLoading(name)) {
+      return // Already loading
+    }
+
+    handle.load().then((module) => {
+      // Combine handle info with loaded implementation
+      const fullFeature: T = {
+        name: handle.name,
+        useIsEnabled: handle.useIsEnabled,
+        ...module.default,
+      } as T
+
+      context.setLoaded(name, fullFeature)
+    })
+  }, [context, handle, isEnabled, cachedFeature, name])
+
+  // Return null if not available, disabled, or still loading
+  if (!context || !handle || isEnabled !== true || !cachedFeature) {
     return null
   }
 
-  return feature
+  return cachedFeature
 }
 
 /**
- * Hook to check if a feature is registered.
- * Automatically re-renders when the feature's registration status changes.
+ * Hook to check if a feature is registered (handle exists).
  *
  * @param name - The feature name to check
- * @returns true if the feature is registered
+ * @returns true if the feature handle is registered
  */
 export function useHasFeature(name: string): boolean {
-  const registry = useFeatureRegistry()
+  const context = useContext(FeatureRegistryContext)
 
   return useSyncExternalStore(
-    registry.subscribe,
-    () => registry.has(name),
-    () => registry.has(name),
+    context?.subscribe ?? (() => () => {}),
+    () => context?.has(name) ?? false,
+    () => context?.has(name) ?? false,
   )
 }
 
 /**
- * Hook to register a feature with the registry.
+ * Hook to register a feature handle with the registry.
  * Automatically unregisters when the component unmounts.
  *
- * @param contract - The feature contract to register
- *
- * @example
- * function WalletConnectProvider({ children }: { children: ReactNode }) {
- *   useRegisterFeature(walletConnectContract)
- *   return <>{children}</>
- * }
+ * @param handle - The feature handle to register
  */
-export function useRegisterFeature<T extends FeatureContract>(contract: T): void {
+export function useRegisterFeature<T extends FeatureImplementation>(handle: FeatureHandle<T>): void {
   const registry = useFeatureRegistry()
 
   useEffect(() => {
-    return registry.register(contract)
-  }, [registry, contract])
+    return registry.register(handle)
+  }, [registry, handle])
 }
 
 /**
- * Hook to get all registered features.
- * Automatically re-renders when any feature is registered or unregistered.
+ * Hook to get all registered feature handles.
  *
- * @returns Map of feature names to contracts
+ * @returns Map of feature names to handles
  */
-export function useAllFeatures(): ReadonlyMap<string, FeatureContract> {
-  const registry = useFeatureRegistry()
+export function useAllFeatures(): ReadonlyMap<string, FeatureHandle> {
+  const context = useContext(FeatureRegistryContext)
 
   return useSyncExternalStore(
-    registry.subscribe,
-    () => registry.getAll(),
-    () => registry.getAll(),
+    context?.subscribe ?? (() => () => {}),
+    () => context?.getAllHandles() ?? new Map(),
+    () => context?.getAllHandles() ?? new Map(),
   )
 }

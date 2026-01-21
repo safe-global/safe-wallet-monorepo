@@ -1,74 +1,52 @@
 import type { ComponentType } from 'react'
-import type { BaseFeatureContract, ComponentContract, ServicesContract } from '@/features/__contracts__'
+import type { FeatureImplementation } from '@/features/__contracts__'
 
 // Type imports from implementations - enables IDE jump-to-definition
-// This follows the DI pattern: contract references implementation types
 import type WalletConnectWallet from './__internal__/services/WalletConnectWallet'
 import type { isSafePassApp } from './__internal__/services/utils'
 import type { wcPopupStore } from './__internal__/store/wcPopupStore'
 import type { wcChainSwitchStore } from './__internal__/store/wcChainSwitchSlice'
 
-// Register in FeatureMap for automatic type inference in useFeature()
-declare module '@/features/__contracts__' {
-  interface FeatureMap {
-    walletconnect: WalletConnectContract
-  }
-}
-
 /**
- * WalletConnect Feature Contract
- *
- * This feature provides WalletConnect v2 integration for Safe, allowing
- * dApps to connect to Safe wallets via the WalletConnect protocol.
- *
- * Tier: Full (complex feature with components and services)
- *
- * External consumers:
- * - Header: WalletConnectWidget component
- * - useSafeWalletProvider: wcPopupStore, wcChainSwitchStore, walletConnectInstance
- * - AppFrame: isSafePassApp
+ * WalletConnect Feature Implementation - the lazy-loaded part.
+ * This is what gets loaded when handle.load() is called.
  */
-export interface WalletConnectContract extends BaseFeatureContract, ComponentContract, ServicesContract {
-  readonly name: 'walletconnect'
-
-  /**
-   * Feature flag hook - checks NATIVE_WALLETCONNECT feature flag.
-   * @returns true if enabled, false if disabled, undefined if loading
-   */
-  useIsEnabled: () => boolean | undefined
-
+export interface WalletConnectImplementation extends FeatureImplementation {
   components: {
     /**
      * Main WalletConnect widget for the header.
-     * Pre-wrapped with Suspense - consumers can render directly.
      * @see {@link ./__internal__/components/WalletConnectUi/index.tsx}
      */
     WalletConnectWidget: ComponentType
   }
 
   services: {
-    /**
-     * Singleton WalletConnect wallet instance for session management.
-     * Used by safe-wallet-provider for WalletConnect integration.
-     */
+    /** Singleton WalletConnect wallet instance for session management. */
     walletConnectInstance: WalletConnectWallet
 
-    /**
-     * Check if an origin is the SafePass app.
-     * Used by AppFrame to detect SafePass connections.
-     */
+    /** Check if an origin is the SafePass app. */
     isSafePassApp: typeof isSafePassApp
 
-    /**
-     * Store for WalletConnect popup open state.
-     * Used by safe-wallet-provider to control popup visibility.
-     */
+    /** Store for WalletConnect popup open state. */
     wcPopupStore: typeof wcPopupStore
 
-    /**
-     * Store for chain switch modal requests.
-     * Used by safe-wallet-provider for chain switching flow.
-     */
+    /** Store for chain switch modal requests. */
     wcChainSwitchStore: typeof wcChainSwitchStore
+  }
+}
+
+/**
+ * WalletConnect Feature Contract - the full loaded feature type.
+ * This is what useFeature('walletconnect') returns.
+ */
+export interface WalletConnectContract extends WalletConnectImplementation {
+  readonly name: 'walletconnect'
+  useIsEnabled: () => boolean | undefined
+}
+
+// Register in FeatureMap for automatic type inference in useFeature()
+declare module '@/features/__contracts__' {
+  interface FeatureMap {
+    walletconnect: WalletConnectContract
   }
 }

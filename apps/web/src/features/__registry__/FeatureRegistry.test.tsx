@@ -1,4 +1,4 @@
-import { render, screen, renderHook, act } from '@testing-library/react'
+import { render, screen, renderHook, act, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import {
   FeatureRegistryProvider,
@@ -8,8 +8,13 @@ import {
   useAllFeatures,
   useFeatureRegistry,
 } from './FeatureRegistry'
-import { createMockFeatureContract, createFeatureTestWrapper } from './testUtils'
-import type { FeatureContract } from '@/features/__contracts__'
+import {
+  createMockFeatureHandle,
+  createDisabledFeatureHandle,
+  createLoadingFeatureHandle,
+  createFeatureTestWrapper,
+} from './testUtils'
+import type { FeatureContract, FeatureHandle } from '@/features/__contracts__'
 
 describe('FeatureRegistry', () => {
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -31,8 +36,8 @@ describe('FeatureRegistry', () => {
       const { result } = renderHook(() => useFeatureRegistry(), { wrapper })
 
       expect(result.current.register).toBeInstanceOf(Function)
-      expect(result.current.get).toBeInstanceOf(Function)
-      expect(result.current.getAll).toBeInstanceOf(Function)
+      expect(result.current.getHandle).toBeInstanceOf(Function)
+      expect(result.current.getAllHandles).toBeInstanceOf(Function)
       expect(result.current.has).toBeInstanceOf(Function)
       expect(result.current.subscribe).toBeInstanceOf(Function)
     })
@@ -46,10 +51,8 @@ describe('FeatureRegistry', () => {
     })
 
     it('returns null when feature flag is disabled', () => {
-      const disabledFeature = createMockFeatureContract('disabled-feature', {
-        useIsEnabled: () => false,
-      })
-      const { wrapper: testWrapper } = createFeatureTestWrapper([disabledFeature])
+      const disabledHandle = createDisabledFeatureHandle('disabled-feature')
+      const { wrapper: testWrapper } = createFeatureTestWrapper([disabledHandle])
 
       const { result } = renderHook(() => useFeature('disabled-feature'), { wrapper: testWrapper })
 
@@ -57,46 +60,66 @@ describe('FeatureRegistry', () => {
     })
 
     it('returns null when feature flag is loading (undefined)', () => {
-      const loadingFeature = createMockFeatureContract('loading-feature', {
-        useIsEnabled: () => undefined,
-      })
-      const { wrapper: testWrapper } = createFeatureTestWrapper([loadingFeature])
+      const loadingHandle = createLoadingFeatureHandle('loading-feature')
+      const { wrapper: testWrapper } = createFeatureTestWrapper([loadingHandle])
 
       const { result } = renderHook(() => useFeature('loading-feature'), { wrapper: testWrapper })
 
       expect(result.current).toBeNull()
     })
 
-    it('returns feature when enabled', () => {
-      const enabledFeature = createMockFeatureContract('enabled-feature', {
-        useIsEnabled: () => true,
-      })
-      const { wrapper: testWrapper } = createFeatureTestWrapper([enabledFeature])
+    it('returns loaded feature when enabled', async () => {
+      const mockImplementation = { services: { customData: 'test-value' } }
+      const enabledHandle = createMockFeatureHandle('enabled-feature', mockImplementation)
+      const { wrapper: testWrapper } = createFeatureTestWrapper([enabledHandle])
 
       const { result } = renderHook(() => useFeature('enabled-feature'), { wrapper: testWrapper })
 
-      expect(result.current).toEqual(enabledFeature)
+      // Initially null while loading
+      expect(result.current).toBeNull()
+
+      // Wait for async load to complete
+      await waitFor(() => {
+        expect(result.current).not.toBeNull()
+      })
+
+      expect(result.current?.name).toBe('enabled-feature')
+      expect(result.current?.services?.customData).toBe('test-value')
     })
 
-    it('returns typed contract with custom methods', () => {
+    it('returns typed contract with custom hooks', async () => {
+      interface TestImplementation {
+        hooks: {
+          useCustomData: () => string
+        }
+      }
+
       interface TestContract extends FeatureContract {
         readonly name: 'typed-feature'
-        customMethod: () => string
+        hooks: {
+          useCustomData: () => string
+        }
       }
 
-      const typedFeature: TestContract = {
-        name: 'typed-feature',
-        useIsEnabled: () => true,
-        customMethod: () => 'test',
+      const mockImplementation: TestImplementation = {
+        hooks: {
+          useCustomData: () => 'test',
+        },
       }
 
-      const { wrapper: testWrapper } = createFeatureTestWrapper([typedFeature])
+      const typedHandle = createMockFeatureHandle('typed-feature', mockImplementation)
+      const { wrapper: testWrapper } = createFeatureTestWrapper([typedHandle])
+
       const { result } = renderHook(() => useFeature<TestContract>('typed-feature'), {
         wrapper: testWrapper,
       })
 
+      await waitFor(() => {
+        expect(result.current).not.toBeNull()
+      })
+
       expect(result.current?.name).toBe('typed-feature')
-      expect(result.current?.customMethod()).toBe('test')
+      expect(result.current?.hooks?.useCustomData()).toBe('test')
     })
   })
 
@@ -108,8 +131,8 @@ describe('FeatureRegistry', () => {
     })
 
     it('returns true for registered feature', () => {
-      const mockFeature = createMockFeatureContract('has-test')
-      const { wrapper: testWrapper } = createFeatureTestWrapper([mockFeature])
+      const mockHandle = createMockFeatureHandle('has-test')
+      const { wrapper: testWrapper } = createFeatureTestWrapper([mockHandle])
 
       const { result } = renderHook(() => useHasFeature('has-test'), { wrapper: testWrapper })
 
@@ -118,11 +141,11 @@ describe('FeatureRegistry', () => {
   })
 
   describe('useRegisterFeature', () => {
-    it('registers feature on mount', () => {
-      const mockFeature = createMockFeatureContract('register-test')
+    it('registers feature on mount', async () => {
+      const mockHandle = createMockFeatureHandle('register-test')
 
       function TestComponent() {
-        useRegisterFeature(mockFeature)
+        useRegisterFeature(mockHandle)
         return null
       }
 
@@ -138,18 +161,21 @@ describe('FeatureRegistry', () => {
         </FeatureRegistryProvider>,
       )
 
-      expect(screen.getByTestId('result')).toHaveTextContent('found')
+      // Wait for async load
+      await waitFor(() => {
+        expect(screen.getByTestId('result')).toHaveTextContent('found')
+      })
     })
 
-    it('unregisters feature on unmount', () => {
-      const mockFeature = createMockFeatureContract('unregister-test')
+    it('unregisters feature on unmount', async () => {
+      const mockHandle = createMockFeatureHandle('unregister-test')
 
       function TestComponent({ show }: { show: boolean }) {
         return show ? <FeatureProvider /> : null
       }
 
       function FeatureProvider() {
-        useRegisterFeature(mockFeature)
+        useRegisterFeature(mockHandle)
         return null
       }
 
@@ -165,7 +191,9 @@ describe('FeatureRegistry', () => {
         </FeatureRegistryProvider>,
       )
 
-      expect(screen.getByTestId('result')).toHaveTextContent('found')
+      await waitFor(() => {
+        expect(screen.getByTestId('result')).toHaveTextContent('found')
+      })
 
       rerender(
         <FeatureRegistryProvider>
@@ -185,10 +213,10 @@ describe('FeatureRegistry', () => {
       expect(result.current.size).toBe(0)
     })
 
-    it('returns all registered features', () => {
-      const feature1 = createMockFeatureContract('feature-1')
-      const feature2 = createMockFeatureContract('feature-2')
-      const { wrapper: testWrapper } = createFeatureTestWrapper([feature1, feature2])
+    it('returns all registered feature handles', () => {
+      const handle1 = createMockFeatureHandle('feature-1')
+      const handle2 = createMockFeatureHandle('feature-2')
+      const { wrapper: testWrapper } = createFeatureTestWrapper([handle1, handle2])
 
       const { result } = renderHook(() => useAllFeatures(), { wrapper: testWrapper })
 
@@ -201,13 +229,13 @@ describe('FeatureRegistry', () => {
   describe('registry.register', () => {
     it('warns when registering duplicate feature', () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-      const mockFeature = createMockFeatureContract('duplicate-test')
+      const mockHandle = createMockFeatureHandle('duplicate-test')
 
       const { result } = renderHook(() => useFeatureRegistry(), { wrapper })
 
       act(() => {
-        result.current.register(mockFeature)
-        result.current.register(mockFeature)
+        result.current.register(mockHandle)
+        result.current.register(mockHandle)
       })
 
       expect(consoleSpy).toHaveBeenCalledWith('Feature "duplicate-test" is already registered. Replacing.')
@@ -216,13 +244,13 @@ describe('FeatureRegistry', () => {
     })
 
     it('returns unregister function', () => {
-      const mockFeature = createMockFeatureContract('unregister-fn-test')
+      const mockHandle = createMockFeatureHandle('unregister-fn-test')
 
       const { result: registryResult } = renderHook(() => useFeatureRegistry(), { wrapper })
       let unregister: () => void
 
       act(() => {
-        unregister = registryResult.current.register(mockFeature)
+        unregister = registryResult.current.register(mockHandle)
       })
 
       expect(registryResult.current.has('unregister-fn-test')).toBe(true)
@@ -236,19 +264,91 @@ describe('FeatureRegistry', () => {
   })
 
   describe('initialFeatures prop', () => {
-    it('registers initial features on mount', () => {
-      const feature1 = createMockFeatureContract('initial-1')
-      const feature2 = createMockFeatureContract('initial-2')
+    it('registers initial feature handles on mount', () => {
+      const handle1 = createMockFeatureHandle('initial-1')
+      const handle2 = createMockFeatureHandle('initial-2')
 
       const { result } = renderHook(() => useAllFeatures(), {
         wrapper: ({ children }) => (
-          <FeatureRegistryProvider initialFeatures={[feature1, feature2]}>{children}</FeatureRegistryProvider>
+          <FeatureRegistryProvider initialFeatures={[handle1, handle2]}>{children}</FeatureRegistryProvider>
         ),
       })
 
       expect(result.current.size).toBe(2)
       expect(result.current.has('initial-1')).toBe(true)
       expect(result.current.has('initial-2')).toBe(true)
+    })
+  })
+
+  describe('lazy loading behavior', () => {
+    it('does not call load() when feature is disabled', async () => {
+      const loadFn = jest.fn().mockResolvedValue({ default: {} })
+      const disabledHandle: FeatureHandle = {
+        name: 'disabled-lazy',
+        useIsEnabled: () => false,
+        load: loadFn,
+      }
+      const { wrapper: testWrapper } = createFeatureTestWrapper([disabledHandle])
+
+      renderHook(() => useFeature('disabled-lazy'), { wrapper: testWrapper })
+
+      // Give time for any potential load call
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      expect(loadFn).not.toHaveBeenCalled()
+    })
+
+    it('calls load() once when feature is enabled', async () => {
+      const loadFn = jest.fn().mockResolvedValue({ default: { data: 'test' } })
+      const enabledHandle: FeatureHandle = {
+        name: 'enabled-lazy',
+        useIsEnabled: () => true,
+        load: loadFn,
+      }
+      const { wrapper: testWrapper } = createFeatureTestWrapper([enabledHandle])
+
+      const { result } = renderHook(() => useFeature('enabled-lazy'), { wrapper: testWrapper })
+
+      await waitFor(() => {
+        expect(result.current).not.toBeNull()
+      })
+
+      expect(loadFn).toHaveBeenCalledTimes(1)
+    })
+
+    it('caches loaded feature across multiple hook calls within same provider', async () => {
+      const loadFn = jest.fn().mockResolvedValue({ default: { services: { data: 'cached' } } })
+      const cachedHandle: FeatureHandle = {
+        name: 'cached-feature',
+        useIsEnabled: () => true,
+        load: loadFn,
+      }
+
+      // Use a single component that calls useFeature twice to test caching
+      function TestComponent() {
+        const feature1 = useFeature('cached-feature')
+        const feature2 = useFeature('cached-feature')
+        return (
+          <div>
+            <span data-testid="result1">{feature1 ? 'loaded1' : 'loading1'}</span>
+            <span data-testid="result2">{feature2 ? 'loaded2' : 'loading2'}</span>
+          </div>
+        )
+      }
+
+      render(
+        <FeatureRegistryProvider initialFeatures={[cachedHandle]}>
+          <TestComponent />
+        </FeatureRegistryProvider>,
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId('result1')).toHaveTextContent('loaded1')
+        expect(screen.getByTestId('result2')).toHaveTextContent('loaded2')
+      })
+
+      // load() should only have been called once despite two useFeature calls
+      expect(loadFn).toHaveBeenCalledTimes(1)
     })
   })
 })

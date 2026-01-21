@@ -1,37 +1,35 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { FeatureRegistryProvider, useFeatureRegistry } from './FeatureRegistry'
-import type { FeatureContract } from '@/features/__contracts__'
+import type { FeatureHandle, FeatureContract, FeatureImplementation } from '@/features/__contracts__'
 
 /**
- * Helper component that registers mock features for testing.
- * Registers all provided features on mount and unregisters on unmount.
+ * Helper component that registers mock feature handles for testing.
+ * Registers all provided handles on mount and unregisters on unmount.
  *
  * @example
- * const mockFeature = {
- *   name: 'my-feature',
- *   useIsEnabled: () => true,
+ * const mockHandle = createMockFeatureHandle('my-feature', {
  *   components: {
  *     Widget: () => <div>Mock Widget</div>,
  *   },
- * }
+ * })
  *
  * render(
- *   <MockFeatureRegistrar features={[mockFeature]}>
+ *   <MockFeatureRegistrar handles={[mockHandle]}>
  *     <ComponentUnderTest />
  *   </MockFeatureRegistrar>
  * )
  */
-export function MockFeatureRegistrar({ features, children }: { features: FeatureContract[]; children: ReactNode }) {
+export function MockFeatureRegistrar({ handles, children }: { handles: FeatureHandle[]; children: ReactNode }) {
   const registry = useFeatureRegistry()
 
   useEffect(() => {
-    const unregisterFns = features.map((feature) => registry.register(feature))
+    const unregisterFns = handles.map((handle) => registry.register(handle))
 
     return () => {
       unregisterFns.forEach((unregister) => unregister())
     }
-  }, [registry, features])
+  }, [registry, handles])
 
   return <>{children}</>
 }
@@ -41,15 +39,15 @@ export function MockFeatureRegistrar({ features, children }: { features: Feature
  * Use this as a render wrapper in tests.
  *
  * @example
- * const { wrapper } = createFeatureTestWrapper([mockWalletConnect, mockHypernative])
+ * const { wrapper } = createFeatureTestWrapper([mockWalletConnectHandle])
  *
  * render(<MyComponent />, { wrapper })
  */
-export function createFeatureTestWrapper(features: FeatureContract[] = []) {
+export function createFeatureTestWrapper(handles: FeatureHandle[] = []) {
   function TestWrapper({ children }: { children: ReactNode }) {
     return (
       <FeatureRegistryProvider>
-        <MockFeatureRegistrar features={features}>{children}</MockFeatureRegistrar>
+        <MockFeatureRegistrar handles={handles}>{children}</MockFeatureRegistrar>
       </FeatureRegistryProvider>
     )
   }
@@ -58,52 +56,68 @@ export function createFeatureTestWrapper(features: FeatureContract[] = []) {
 }
 
 /**
- * Creates a minimal mock feature contract for testing.
+ * Creates a minimal mock feature handle for testing.
+ * The load() function returns a mock implementation synchronously wrapped in a Promise.
  * useIsEnabled defaults to () => true (enabled).
- * Override any properties as needed.
  *
  * @example
- * const mockFeature = createMockFeatureContract('my-feature', {
+ * const mockHandle = createMockFeatureHandle('my-feature', {
  *   components: {
  *     Widget: () => <div>Test</div>,
  *   },
  * })
  */
-export function createMockFeatureContract<T extends FeatureContract>(
+export function createMockFeatureHandle<T extends FeatureImplementation>(
   name: string,
-  overrides: Partial<Omit<T, 'name'>> = {},
-): T {
+  implementation: T = {} as T,
+  overrides: { useIsEnabled?: () => boolean | undefined } = {},
+): FeatureHandle<T> {
   return {
     name,
-    useIsEnabled: () => true, // Default: feature is enabled
-    ...overrides,
-  } as T
+    useIsEnabled: overrides.useIsEnabled ?? (() => true),
+    load: () => Promise.resolve({ default: implementation }),
+  }
 }
 
 /**
- * Creates a disabled mock feature contract for testing disabled states.
+ * Creates a disabled mock feature handle for testing disabled states.
  *
  * @example
- * const disabledFeature = createDisabledFeatureContract('my-feature')
+ * const disabledHandle = createDisabledFeatureHandle('my-feature')
  * // useIsEnabled will return false
  */
-export function createDisabledFeatureContract(name: string): FeatureContract {
+export function createDisabledFeatureHandle(name: string): FeatureHandle {
   return {
     name,
     useIsEnabled: () => false,
+    load: () => Promise.resolve({ default: {} }),
   }
 }
 
 /**
- * Creates a loading mock feature contract for testing loading states.
+ * Creates a loading mock feature handle for testing loading states.
  *
  * @example
- * const loadingFeature = createLoadingFeatureContract('my-feature')
+ * const loadingHandle = createLoadingFeatureHandle('my-feature')
  * // useIsEnabled will return undefined
  */
-export function createLoadingFeatureContract(name: string): FeatureContract {
+export function createLoadingFeatureHandle(name: string): FeatureHandle {
   return {
     name,
     useIsEnabled: () => undefined,
+    load: () => Promise.resolve({ default: {} }),
   }
 }
+
+// Legacy exports for backwards compatibility during migration
+/** @deprecated Use createMockFeatureHandle instead */
+export const createMockFeatureContract = createMockFeatureHandle as <T extends FeatureContract>(
+  name: string,
+  overrides?: Partial<Omit<T, 'name'>>,
+) => FeatureHandle
+
+/** @deprecated Use createDisabledFeatureHandle instead */
+export const createDisabledFeatureContract = createDisabledFeatureHandle
+
+/** @deprecated Use createLoadingFeatureHandle instead */
+export const createLoadingFeatureContract = createLoadingFeatureHandle

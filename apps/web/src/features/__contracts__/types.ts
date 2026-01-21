@@ -2,12 +2,19 @@ import type { ComponentType } from 'react'
 import type { RootState } from '@/store'
 
 /**
- * Base contract that all features extend.
+ * Minimal feature handle - always bundled, tiny (~100 bytes).
  *
- * Key concept: useIsEnabled is STATIC (always bundled, just a FEATURES enum lookup).
- * Components/hooks/services are LAZY (code-split, loaded on demand).
+ * This is the ONLY part that gets bundled at app startup.
+ * Contains just the name, flag check, and a lazy loader for the full implementation.
+ *
+ * @example
+ * export const myFeatureHandle: FeatureHandle<MyFeatureImpl> = {
+ *   name: 'my-feature',
+ *   useIsEnabled: () => useHasFeature(FEATURES.MY_FEATURE),
+ *   load: () => import('./__internal__/feature'),
+ * }
  */
-export interface BaseFeatureContract {
+export interface FeatureHandle<TImpl extends FeatureImplementation = FeatureImplementation> {
   /** Unique feature identifier used for registry lookup */
   readonly name: string
 
@@ -15,11 +22,22 @@ export interface BaseFeatureContract {
    * Feature flag hook - STATIC, always bundled.
    * Implementation should be: () => useHasFeature(FEATURES.MY_FEATURE)
    *
-   * This is intentionally NOT lazy - it's just a flag lookup so consumers
-   * can check if a feature is enabled BEFORE loading its code.
-   *
    * @returns true if enabled, false if disabled, undefined if still loading
    */
+  useIsEnabled: () => boolean | undefined
+
+  /**
+   * Lazy loader for the full feature implementation.
+   * Only called when the feature is enabled AND accessed.
+   */
+  load: () => Promise<{ default: TImpl }>
+}
+
+/**
+ * @deprecated Use FeatureHandle instead. Kept for backward compatibility.
+ */
+export interface BaseFeatureContract {
+  readonly name: string
   useIsEnabled: () => boolean | undefined
 }
 
@@ -87,8 +105,18 @@ export interface SelectorsContract {
 }
 
 /**
- * Full feature contract combining all capability contracts.
- * Use this as the base for complex features that expose multiple capabilities.
+ * Feature implementation - the lazy-loaded part of a feature.
+ * Contains components, hooks, services, and selectors.
+ * This is what gets loaded when handle.load() is called.
+ */
+export type FeatureImplementation = Partial<ComponentContract> &
+  Partial<HooksContract> &
+  Partial<ServicesContract> &
+  Partial<SelectorsContract>
+
+/**
+ * Full loaded feature - what useFeature() returns to consumers.
+ * Combines the handle (name, useIsEnabled) with the loaded implementation.
  *
  * @example
  * interface MyFeatureContract extends FeatureContract {
@@ -97,16 +125,15 @@ export interface SelectorsContract {
  *   components: {
  *     Widget: ComponentType<WidgetProps>
  *   }
- *   hooks: {
- *     useData: () => MyData
+ *   services: {
+ *     myService: MyServiceType
  *   }
  * }
  */
-export type FeatureContract = BaseFeatureContract &
-  Partial<ComponentContract> &
-  Partial<HooksContract> &
-  Partial<ServicesContract> &
-  Partial<SelectorsContract>
+export type FeatureContract = {
+  readonly name: string
+  useIsEnabled: () => boolean | undefined
+} & FeatureImplementation
 
 /**
  * Type helper to extract component props from a contract.
@@ -151,7 +178,7 @@ export type ExtractSelectorReturn<T extends FeatureContract, K extends keyof Non
  *   }
  * }
  */
- 
+
 export interface FeatureMap {
   // Features extend this via declaration merging
 }

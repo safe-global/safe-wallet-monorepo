@@ -1,14 +1,19 @@
 export type {
-  BaseFeatureContract,
+  FeatureHandle,
+  FeatureImplementation,
+  FeatureContract,
+  FeatureMap,
+  // Individual capability contracts
   ComponentContract,
   HooksContract,
   ServicesContract,
   SelectorsContract,
-  FeatureContract,
-  FeatureMap,
+  // Type helpers
   ExtractComponentProps,
   ExtractHookReturn,
   ExtractSelectorReturn,
+  // Deprecated
+  BaseFeatureContract,
 } from './types'
 
 export { withSuspense } from './withSuspense'
