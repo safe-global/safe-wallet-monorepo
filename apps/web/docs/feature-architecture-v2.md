@@ -71,7 +71,7 @@ The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 // Consumer component
 function MyPage() {
@@ -118,7 +118,7 @@ function MyPage() {
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 const walletConnect = useLoadFeature(WalletConnectFeature)
 ```
@@ -138,7 +138,7 @@ Every feature MUST export a contract type that defines its public API.
 ### Contract Interface
 
 ```typescript
-// src/features/__contracts__/types.ts
+// src/features/__core__/types.ts
 
 /**
  * Base contract that all features extend.
@@ -201,7 +201,7 @@ When calling `useLoadFeature()`, types are automatically inferred from the handl
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 // Type is automatically inferred from WalletConnectFeature
 const walletConnect = useLoadFeature(WalletConnectFeature)
@@ -245,7 +245,7 @@ export interface MyFeatureContract {
 ```typescript
 // src/features/bridge/contract.ts
 import type { ComponentType } from 'react'
-import type { FeatureImplementation } from '@/features/__contracts__'
+import type { FeatureImplementation } from '@/features/__core__'
 
 export interface BridgeImplementation extends FeatureImplementation {
   components: {
@@ -264,7 +264,7 @@ export interface BridgeContract extends BridgeImplementation {
 
 ```typescript
 // src/features/multichain/contract.ts
-import type { BaseFeatureContract, ComponentContract, HooksContract } from '@/features/__contracts__/types'
+import type { BaseFeatureContract, ComponentContract, HooksContract } from '@/features/__core__/types'
 
 export interface MultichainContract extends BaseFeatureContract, ComponentContract, HooksContract {
   readonly name: 'multichain'
@@ -284,7 +284,7 @@ export interface MultichainContract extends BaseFeatureContract, ComponentContra
 
 ```typescript
 // src/features/walletconnect/contract.ts
-import type { FeatureContract } from '@/features/__contracts__/types'
+import type { FeatureContract } from '@/features/__core__/types'
 
 export interface WalletConnectContract extends FeatureContract {
   readonly name: 'walletconnect'
@@ -321,7 +321,7 @@ The `useLoadFeature()` hook provides:
 - Module-level caching with `useSyncExternalStore` for reactivity
 
 ```typescript
-// src/features/__contracts__/useLoadFeature.ts
+// src/features/__core__/useLoadFeature.ts
 import { useEffect, useSyncExternalStore } from 'react'
 import type { FeatureHandle, FeatureImplementation, FeatureContract } from './types'
 
@@ -364,7 +364,7 @@ export function useLoadFeature<T extends FeatureImplementation>(
 // This file is SMALL (~100 bytes) - only flag lookup + lazy import
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { FeatureHandle } from '@/features/__contracts__'
+import type { FeatureHandle } from '@/features/__core__'
 import type { WalletConnectImplementation } from './contract'
 
 export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
@@ -392,7 +392,7 @@ export type { WalletConnectContract } from './contract'
 ```typescript
 // src/components/common/Header/index.tsx
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 function Header() {
   // Type is automatically inferred from WalletConnectFeature
@@ -560,7 +560,7 @@ Each feature exposes exactly three things:
 // IMPORTANT: This file must be SMALL (~100 bytes) - only flag lookup + lazy loader
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { FeatureHandle } from '@/features/__contracts__'
+import type { FeatureHandle } from '@/features/__core__'
 import type { MyFeatureImplementation } from './contract'
 
 export const myFeatureHandle: FeatureHandle<MyFeatureImplementation> = {
@@ -602,7 +602,7 @@ Features access other features' **capabilities** through handles:
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 function MyComponent() {
   // Get feature (null if disabled or still loading)
@@ -639,7 +639,7 @@ The module-level cache pattern makes testing straightforward.
 ```typescript
 // src/features/safe-shield/components/__tests__/SafeShieldScanner.test.tsx
 import { render, screen, waitFor } from '@testing-library/react'
-import { clearFeatureCache } from '@/features/__contracts__'
+import { clearFeatureCache } from '@/features/__core__'
 
 // Mock the feature module
 jest.mock('@/features/walletconnect', () => ({
@@ -748,8 +748,8 @@ import { myFeatureHandle } from '@/features/my-feature/handle' // Use index.ts i
 
 ### Phase 1: Add Infrastructure
 
-1. Create `src/features/__contracts__/types.ts` with base contract types
-2. Create `src/features/__contracts__/useLoadFeature.ts` with the loading hook
+1. Create `src/features/__core__/types.ts` with base contract types
+2. Create `src/features/__core__/useLoadFeature.ts` with the loading hook
 3. Update ESLint rules (keep as warnings initially)
 
 ### Phase 2: Migrate Features (One at a Time)
@@ -790,7 +790,7 @@ function SafeShieldScanner() {
 ```typescript
 // src/features/safe-shield/components/SafeShieldScanner.tsx
 import { HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 function SafeShieldScanner() {
   // Type inferred from HypernativeFeature, null if disabled or loading
@@ -858,7 +858,7 @@ The handle is imported at app startup, but it's tiny (~100 bytes). The actual fe
 
 ```typescript
 import { WalletConnectFeature } from '@/features/walletconnect'
-import { useLoadFeature } from '@/features/__contracts__'
+import { useLoadFeature } from '@/features/__core__'
 
 const feature = useLoadFeature(WalletConnectFeature)
 // Returns:
@@ -893,7 +893,7 @@ Components in the feature implementation should use `withSuspense` to wrap lazy 
 ```typescript
 // feature.ts
 import { lazy } from 'react'
-import { withSuspense } from '@/features/__contracts__'
+import { withSuspense } from '@/features/__core__'
 
 export default {
   components: {

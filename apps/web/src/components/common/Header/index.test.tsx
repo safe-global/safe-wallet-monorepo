@@ -3,7 +3,7 @@ import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
 import * as useSafeTokenEnabled from '@/hooks/useSafeTokenEnabled'
-import * as contracts from '@/features/__contracts__'
+import * as contracts from '@/features/__core__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
@@ -16,8 +16,8 @@ jest.mock(
     },
 )
 
-jest.mock('@/features/__contracts__', () => ({
-  ...jest.requireActual('@/features/__contracts__'),
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
   useLoadFeature: jest.fn(),
 }))
 

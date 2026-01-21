@@ -14,7 +14,7 @@
  * is NOT included in the bundle when the feature is disabled.
  */
 import type { WalletConnectImplementation } from './contract'
-import { withSuspense } from '@/features/__contracts__'
+import { withSuspense } from '@/features/__core__'
 import { lazy } from 'react'
 
 // Services and stores - loaded as part of this chunk

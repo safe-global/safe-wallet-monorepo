@@ -12,7 +12,7 @@
  */
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { FeatureHandle } from '@/features/__contracts__'
+import type { FeatureHandle } from '@/features/__core__'
 import type { WalletConnectImplementation } from './contract'
 
 export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {

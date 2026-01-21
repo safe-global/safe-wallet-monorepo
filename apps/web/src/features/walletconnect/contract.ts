@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { FeatureImplementation } from '@/features/__contracts__'
+import type { FeatureImplementation } from '@/features/__core__'
 
 // Type imports from implementations - enables IDE jump-to-definition
 import type WalletConnectWallet from './services/WalletConnectWallet'
