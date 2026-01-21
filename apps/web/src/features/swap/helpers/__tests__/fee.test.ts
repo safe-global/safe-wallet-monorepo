@@ -319,4 +319,86 @@ describe('calculateFeePercentageInBps', () => {
       expect(resultOmitted).toBe(35) // Both should return default regular tier 1 fee
     })
   })
+
+  describe('EURCV boost zero fee', () => {
+    const EURCV_ADDRESS = '0x5f7827fdeb7c20b443265fc2f40845b715385ff2'
+
+    it('returns 0 fee when buyToken is EURCV and isEurcvBoostEnabled is true', () => {
+      const orderParams: OnTradeParamsPayload = {
+        sellToken: { address: 'any-token-address' },
+        buyToken: { address: EURCV_ADDRESS },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      // Should return 0 regardless of V2 flag when EURCV boost is enabled
+      expect(calculateFeePercentageInBps(orderParams, false, true)).toBe(0)
+      expect(calculateFeePercentageInBps(orderParams, true, true)).toBe(0)
+    })
+
+    it('returns normal fee when buyToken is EURCV but isEurcvBoostEnabled is false', () => {
+      const orderParams: OnTradeParamsPayload = {
+        sellToken: { address: 'any-token-address' },
+        buyToken: { address: EURCV_ADDRESS },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      // EURCV is now a stablecoin, but only one token is EURCV so normal fees apply
+      expect(calculateFeePercentageInBps(orderParams, false, false)).toBe(35)
+      expect(calculateFeePercentageInBps(orderParams, true, false)).toBe(70)
+    })
+
+    it('returns normal fee when sellToken is EURCV (not buyToken)', () => {
+      const orderParams: OnTradeParamsPayload = {
+        sellToken: { address: EURCV_ADDRESS },
+        buyToken: { address: 'any-token-address' },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      // Zero fee only applies when BUYING EURCV, not selling
+      expect(calculateFeePercentageInBps(orderParams, false, true)).toBe(35)
+      expect(calculateFeePercentageInBps(orderParams, true, true)).toBe(70)
+    })
+
+    it('handles case-insensitive EURCV address comparison', () => {
+      const orderParamsUpperCase: OnTradeParamsPayload = {
+        sellToken: { address: 'any-token-address' },
+        buyToken: { address: EURCV_ADDRESS.toUpperCase() },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      const orderParamsMixedCase: OnTradeParamsPayload = {
+        sellToken: { address: 'any-token-address' },
+        buyToken: { address: '0x5F7827FDeb7c20b443265fc2f40845b715385FF2' },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      expect(calculateFeePercentageInBps(orderParamsUpperCase, false, true)).toBe(0)
+      expect(calculateFeePercentageInBps(orderParamsMixedCase, false, true)).toBe(0)
+    })
+
+    it('returns stablecoin fees when both tokens are stablecoins including EURCV (boost disabled)', () => {
+      const stableCoinAddressesKeys = Object.keys(stableCoinAddresses)
+      const orderParams: OnTradeParamsPayload = {
+        sellToken: { address: stableCoinAddressesKeys[0] },
+        buyToken: { address: EURCV_ADDRESS },
+        sellTokenFiatAmount: '1000',
+        buyTokenFiatAmount: '1000',
+        orderKind: 'sell',
+      } as OnTradeParamsPayload
+
+      // Both tokens are stablecoins, so stablecoin fees apply
+      expect(calculateFeePercentageInBps(orderParams, false, false)).toBe(10)
+      expect(calculateFeePercentageInBps(orderParams, true, false)).toBe(15)
+    })
+  })
 })

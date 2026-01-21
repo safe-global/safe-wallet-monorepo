@@ -1,0 +1,1 @@
+export const MIN_SAFE_VERSION_FOR_MULTICHAIN = '1.4.1'

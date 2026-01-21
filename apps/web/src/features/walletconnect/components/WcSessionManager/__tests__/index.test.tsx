@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import WcSessionManager from '../index'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext } from '../../WalletConnectContext'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

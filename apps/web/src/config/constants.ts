@@ -93,8 +93,6 @@ export const IPFS_HOSTS = /app\.safe\.eth\.limo|app\.5afedev\.eth\.limo/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
 
-export const REDEFINE_ARTICLE = 'https://safe.mirror.xyz/rInLWZwD_sf7enjoFerj6FIzCYmVMGrrV8Nhg4THdwI'
-
 export const CHAINALYSIS_OFAC_CONTRACT = '0x40c57923924b5c5c5455c48d93317139addac8fb'
 
 export const SAFE_PASS_URL = 'community.safe.global'
@@ -106,6 +104,12 @@ export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-mu
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
   process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID ?? `${11}`,
+)
+export const PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${6}`,
+)
+export const STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${14}`,
 )
 
 // Deployment specifics

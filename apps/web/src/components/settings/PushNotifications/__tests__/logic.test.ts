@@ -3,7 +3,7 @@ import { BrowserProvider, type JsonRpcSigner, toBeHex } from 'ethers'
 
 import * as logic from '../logic'
 import * as web3 from '@/hooks/wallets/web3'
-import packageJson from '../../../../../package.json'
+import { APP_VERSION } from '@/config/version'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 
@@ -124,7 +124,7 @@ describe('Notifications', () => {
         buildNumber: '0',
         bundle: 'safe',
         deviceType: 'WEB',
-        version: packageJson.version,
+        version: APP_VERSION,
         timestamp: expect.any(String),
         safeRegistrations: [
           {

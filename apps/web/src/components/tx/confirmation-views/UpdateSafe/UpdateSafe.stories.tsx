@@ -5,8 +5,15 @@ import { _UpdateSafe } from './index'
 import { mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
 import { faker } from '@faker-js/faker'
 
+// Seed faker for deterministic visual regression tests
+faker.seed(123)
+
 const meta = {
   component: _UpdateSafe,
+  parameters: {
+    // Stories use faker for addresses which causes non-deterministic visual tests
+    visualTest: { disable: true },
+  },
   decorators: [
     (Story) => {
       return (

@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
-import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '@/features/walletconnect/constants'
+import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
 
 export const isPairingUri = (uri: string): boolean => {
   return uri.startsWith('wc:')

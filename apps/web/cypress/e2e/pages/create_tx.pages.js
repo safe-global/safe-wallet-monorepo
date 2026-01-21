@@ -3,9 +3,13 @@ import * as main from '../pages/main.page'
 import * as wallet from '../pages/create_wallet.pages'
 import * as modal from '../pages/modals.page'
 import { dataRow } from '../pages/tables.page'
+import * as navigation from './navigation.page'
+import * as walletUtils from '../../support/utils/wallet.js'
+import * as owner from './owners.pages'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
+export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
@@ -24,6 +28,7 @@ export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-track="batching: Add to batch"]'
+export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
@@ -101,8 +106,6 @@ const QueueLabel = 'needs to be executed first'
 export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
-const txHashesStr = 'Transaction hashes'
-const txAcknowledgementStr = 'I understand what'
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
@@ -113,6 +116,7 @@ const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
+const executeBtnStr = 'Execute'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
@@ -537,10 +541,6 @@ export function verifytxAccordionDetailsScroll(data) {
   main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
 }
 
-export function checkDataDecodingRoot(data) {
-  main.checkTextsExistWithinElement(decodedDataTop, data)
-}
-
 export function switchView(view) {
   if (view === advancedDetailsViewOptions.table) {
     cy.get(tableViewBtn).click()
@@ -773,7 +773,7 @@ export function verifyRelayerAttemptsAvailable() {
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {
-  cy.get(tokenAddressInput).prev().click()
+  cy.get(tokenSelector).click()
   cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
 }
 
@@ -912,6 +912,32 @@ export function clickOnConfirmTransactionBtn() {
 
 export function verifyConfirmTransactionBtnIsVisible() {
   cy.get('button').contains(confirmBtnStr).should('be.visible')
+}
+
+export function clickOnConfirmBtn(index) {
+  cy.wait(2000)
+  cy.get(transactionItem)
+    .eq(index)
+    .within(() => {
+      cy.get('button')
+        .contains(confirmBtnStr)
+        .then((elements) => {
+          cy.wrap(elements[0]).click()
+        })
+    })
+}
+
+export function clickOnExecuteBtn(index) {
+  cy.wait(2000)
+  cy.get(transactionItem)
+    .eq(index)
+    .within(() => {
+      cy.get('button')
+        .contains(executeBtnStr)
+        .then((elements) => {
+          cy.wrap(elements[0]).click()
+        })
+    })
 }
 
 export function waitForProposeRequest() {
@@ -1103,4 +1129,46 @@ export function checkThatComboButtonOptionIsNotPresent(option) {
       })
     }
   })
+}
+//Functions for the happy path flow
+export function cleanTransactionQueue(safeAddress, signer) {
+  cy.visit(constants.transactionQueueUrl + safeAddress)
+  walletUtils.connectSigner(signer)
+  deleteAllTx()
+  navigation.clickOnWalletExpandMoreIcon()
+  navigation.clickOnDisconnectBtn()
+}
+
+export function switchToSignerAndConfirm(signer) {
+  navigation.clickOnWalletExpandMoreIcon()
+  navigation.clickOnDisconnectBtn()
+  walletUtils.connectSigner(signer)
+  clickOnConfirmTransactionBtn()
+  clickOnContinueSignTransactionBtn()
+  selectComboButtonOption('sign')
+  clickOnSignTransactionBtn()
+}
+
+export function deleteTransactionAndSwitchToSigner(signer) {
+  navigation.clickOnWalletExpandMoreIcon()
+  navigation.clickOnDisconnectBtn()
+  walletUtils.connectSigner(signer)
+  deleteTx()
+}
+
+export function createAddOwnerTransaction(safeAddress, signer, ownerAddress, ownerIndex = 2) {
+  // Create add owner transaction
+  cy.visit(constants.setupUrl + safeAddress)
+  walletUtils.connectSigner(signer)
+  owner.waitForConnectionStatus()
+  owner.openManageSignersWindow()
+  owner.clickOnAddSignerBtn()
+  owner.typeOwnerAddressManage(ownerIndex, ownerAddress)
+  changeNonce(1)
+  owner.clickOnNextBtnManage()
+  owner.verifyConfirmTransactionWindowDisplayed()
+  clickOnContinueSignTransactionBtn()
+  selectComboButtonOption('sign')
+  clickOnSignTransactionBtn()
+  clickViewTransaction()
 }

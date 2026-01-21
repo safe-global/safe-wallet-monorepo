@@ -1,10 +1,10 @@
 import { init, ErrorBoundary, captureException } from '@sentry/react'
 import { SENTRY_DSN } from '@/config/constants'
-import packageJson from '../../package.json'
+import { APP_VERSION } from '@/config/version'
 
 init({
   dsn: SENTRY_DSN,
-  release: `safe-wallet-web@${packageJson.version}`,
+  release: `safe-wallet-web@${APP_VERSION}`,
   sampleRate: 0.1,
   // ignore MetaMask errors we don't control
   ignoreErrors: ['Internal JSON-RPC error', 'JsonRpcEngine', 'Non-Error promise rejection captured with keys: code'],

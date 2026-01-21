@@ -2,7 +2,7 @@ import SingleAccountItem from '@/features/myAccounts/components/AccountItems/Sin
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 
 export type SafeListProps = {
   safes?: AllSafeItems

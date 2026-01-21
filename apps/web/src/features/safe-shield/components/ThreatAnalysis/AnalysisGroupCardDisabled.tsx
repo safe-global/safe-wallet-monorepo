@@ -10,11 +10,7 @@ export const AnalysisGroupCardDisabled = ({ children, ...props }: PropsWithChild
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ padding: '12px' }} {...props}>
       <Stack direction="row" alignItems="center" gap={1}>
-        <SvgIcon
-          component={LockIcon}
-          inheritViewBox
-          sx={({ palette }) => ({ width: 16, height: 16, '& path': { fill: palette.text.disabled } })}
-        />
+        <SvgIcon component={LockIcon} inheritViewBox sx={{ width: 16, height: 16, color: 'text.disabled' }} />
         <Typography variant="body2" color="text.disabled">
           {children}
         </Typography>

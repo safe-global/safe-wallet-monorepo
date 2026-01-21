@@ -3,7 +3,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { predictSafeAddress } from '@/features/multichain/utils/utils'
+import { predictSafeAddress } from '@/features/multichain'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useAddressBook from '@/hooks/useAddressBook'

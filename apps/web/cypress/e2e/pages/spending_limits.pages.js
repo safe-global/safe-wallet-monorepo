@@ -3,6 +3,7 @@ import * as main from './main.page'
 import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
+import { tokenSelector } from './create_tx.pages'
 import 'cypress-file-upload'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
@@ -22,7 +23,6 @@ const resetTimeInfo = '[data-testid="reset-time"]'
 const spentAmountInfo = '[data-testid="spent-amount"]'
 export const spendingLimitTxOption = '[data-testid="spending-limit-tx"]'
 export const standardTx = '[data-testid="standard-tx"]'
-const tokenBalance = '[data-testid="token-balance"]'
 const tokenItem = '[data-testid="token-item"]'
 const maxBtn = '[data-testid="max-btn"]'
 const nonceFld = '[data-testid="nonce-fld"]'
@@ -86,7 +86,7 @@ export function verifySpendingLimitsIcons() {
 }
 
 export function clickOnTokenDropdown() {
-  cy.get(tokenBalance).click()
+  cy.get(tokenSelector).click()
 }
 export function verifyMandatoryTokensExist() {
   main.verifyValuesExist(tokenItem, [constants.tokenNames.sepoliaEther, constants.tokenNames.qaToken])
@@ -95,13 +95,13 @@ export function verifyMandatoryTokensExist() {
 export function selectToken(token) {
   clickOnTokenDropdown()
   cy.get(tokenItem).contains(token).click({ force: true })
-  main.verifyValuesExist(tokenBalance, [token])
+  main.verifyValuesExist(tokenSelector, [token])
 }
 
 export function checkMaxValue() {
   const maxValue = []
 
-  main.extractDigitsToArray(tokenBalance, maxValue)
+  main.extractDigitsToArray(tokenSelector, maxValue)
   cy.get(tokenAmountFld)
     .find('input')
     .invoke('val')

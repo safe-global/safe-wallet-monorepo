@@ -40,7 +40,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   }
 
   const renderStepContent = () => {
-    const calendlyUrl: string = 'https://calendly.com/d/ctgh-yrs-dnr'
+    const calendlyUrl = 'https://calendly.com/d/ctgh-yrs-dnr'
 
     switch (activeStep) {
       case 0:

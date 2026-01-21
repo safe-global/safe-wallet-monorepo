@@ -7,7 +7,7 @@ import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBoo
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
 import { useAppSelector } from '@/store'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { isMultiChainSafeItem } from '@/features/multichain'
 
 export type MultiChainSafeItem = {
   address: string

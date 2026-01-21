@@ -53,3 +53,14 @@ export const stripUrlParams = (url: string): string => {
     return url
   }
 }
+
+// Safely encode a URI by first decoding it to avoid double-encoding
+// e.g., "image_%281%29.png" should not become "image_%25281%2529.png"
+export const safeEncodeURI = (url: string): string => {
+  try {
+    return encodeURI(decodeURI(url))
+  } catch {
+    // If decodeURI fails (malformed URI), just encode the original
+    return encodeURI(url)
+  }
+}

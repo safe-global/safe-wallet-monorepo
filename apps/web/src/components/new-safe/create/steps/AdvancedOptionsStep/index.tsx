@@ -1,4 +1,4 @@
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
+import { predictAddressBasedOnReplayData } from '@/features/multichain'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { Button, MenuItem, Divider, Box, TextField, Stack, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'

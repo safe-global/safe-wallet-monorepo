@@ -127,41 +127,15 @@ jobs:
 
       - name: Upload screenshots to branch
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
-
-          SCREENSHOT_DIR="page-screenshots/${{ steps.pr.outputs.number }}"
-
-          cd /tmp
-          rm -rf screenshots-storage
-
-          if git clone --depth 1 --branch page-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
-            echo "Cloned existing storage branch"
-            cd screenshots-storage
-          else
-            echo "Storage branch doesn't exist, creating it"
-            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
-            cd screenshots-storage
-            git checkout --orphan page-screenshots-storage
-            git rm -rf . 2>/dev/null || true
-            echo "# Page Screenshots Storage" > README.md
-            git add README.md
-            git commit -m "Initialize page-screenshots-storage branch"
-          fi
-
-          mkdir -p "$SCREENSHOT_DIR"
-          cp $GITHUB_WORKSPACE/page-screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
-
-          git add "$SCREENSHOT_DIR"
-          if git commit -m "Add page screenshots for PR ${{ steps.pr.outputs.number }}"; then
-            git push origin page-screenshots-storage
-          else
-            echo "No changes to commit"
-          fi
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: ${{ steps.branch.outputs.normalized }}-screenshots
+          source_dir: page-screenshots
+          target_dir: page-screenshots/${{ steps.pr.outputs.number }}
+          file_pattern: '*.png'
+          commit_message: 'Add page screenshots for PR ${{ steps.pr.outputs.number }}'
+          readme_title: 'Page Screenshots Storage'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post PR comment with screenshots
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
@@ -192,7 +166,8 @@ jobs:
 
             const prNumber = ${{ steps.pr.outputs.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/page-screenshots-storage/page-screenshots/${prNumber}`;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/page-screenshots/${prNumber}`;
             const previewBaseUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev`;
 
             let body = '## 📸 Page Screenshots\n\n';

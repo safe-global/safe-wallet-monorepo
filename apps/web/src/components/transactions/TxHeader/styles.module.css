@@ -1,0 +1,9 @@
+@media (max-width: 599.95px) {
+  .actionsWrapper {
+    display: flex;
+    row-gap: var(--space-1);
+    flex-flow: column-reverse;
+    align-items: start;
+    padding-bottom: 0;
+  }
+}

@@ -20,6 +20,11 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
+import { HnQueueAssessment } from '@/features/hypernative/components/HnQueueAssessment'
+import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
+import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -38,6 +43,15 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const isPending = useIsPending(tx.id)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
+
+  // Extract safeTxHash for assessment
+  const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
+  const assessment = useQueueAssessment(safeTxHash)
+  const { isAuthenticated } = useHypernativeOAuth()
+  const showAssessment = useShowHypernativeAssessment({
+    isQueue,
+    safeTxHash,
+  })
 
   return (
     <Box
@@ -90,6 +104,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
           ) : (
             <TxProposalChip />
           )}
+        </Box>
+      )}
+
+      {showAssessment && (
+        <Box gridArea="assessment" className={css.assessment}>
+          <HnQueueAssessment safeTxHash={safeTxHash!} assessment={assessment} isAuthenticated={isAuthenticated} />
         </Box>
       )}
 

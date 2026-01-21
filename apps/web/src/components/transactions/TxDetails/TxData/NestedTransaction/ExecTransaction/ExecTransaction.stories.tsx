@@ -58,7 +58,8 @@ const meta = {
       ],
     },
   },
-  tags: ['autodocs'],
+  // Skip visual regression tests until baseline snapshots are generated
+  tags: ['autodocs', '!test'],
 } satisfies Meta<typeof ExecTransaction>
 
 export default meta

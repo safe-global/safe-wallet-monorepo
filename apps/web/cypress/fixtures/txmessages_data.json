@@ -3,9 +3,9 @@
     "general": {
       "confirmed": "Confirmed",
       "sign": "Sign",
-      "zeroOftwo": "0 out of 2",
-      "oneOftwo": "1 out of 2",
-      "twoOftwo": "2 out of 2"
+      "zeroOftwo": "0/2",
+      "oneOftwo": "1/2",
+      "twoOftwo": "2/2"
     },
     "offChain": {
       "walletConnect": "WalletConnect",
@@ -14,8 +14,8 @@
       "testMessage3": "Test message 1 off-c…",
       "altTmage": "Message type",
       "sign": "Sign",
-      "oneOftwo": "1 out of 2",
-      "twoOftwo": "2 out of 2",
+      "oneOftwo": "1/2",
+      "twoOftwo": "2/2",
       "message2": "Test message 2 off-chain",
       "message3": "Test message 3 off-chain",
       "EIP712Domain": "EIP712Domain",
@@ -29,7 +29,7 @@
       "contractAddress": "sep:0x98FFBBF51bb33A056B08ddf711f289936AafF717",
       "delegateCall": "Delegate call",
       "signMessage": "signMessage",
-      "oneOftwo": "1 out of 2",
+      "oneOftwo": "1/2",
       "altImage": "Safe: SignMessageLib 1.3.0",
       "success": "Success"
     }

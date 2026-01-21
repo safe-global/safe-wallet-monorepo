@@ -45,7 +45,7 @@ describe('SecurityLogin', () => {
       loaded: true,
       loading: false,
     })
-    jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
+    jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
   })
 
   describe('when Hypernative guard is active', () => {
@@ -105,7 +105,7 @@ describe('SecurityLogin', () => {
     })
 
     it('should show HnBannerForSettings for targeted Safe even with insufficient balance', () => {
-      jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+      jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
       jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
         balances: { fiatTotal: '0.5', items: [] },
         loaded: true,
@@ -205,7 +205,7 @@ describe('SecurityLogin', () => {
         isHypernativeGuard: true,
         loading: false,
       })
-      jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+      jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
 
       render(<SecurityLogin />)
 
