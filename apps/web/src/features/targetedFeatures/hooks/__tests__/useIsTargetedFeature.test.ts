@@ -24,7 +24,7 @@ describe('useIsTargetedFeature', () => {
   it('returns true if the Safe is targeted and the feature is enabled', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
     const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
@@ -35,7 +35,7 @@ describe('useIsTargetedFeature', () => {
   it('returns true if the the feature is unlocked and enabled', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
     const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
@@ -46,7 +46,7 @@ describe('useIsTargetedFeature', () => {
   it('returns false if the Safe is targeted but the feature is disabled', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(false)
-    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[], jest.fn()])
 
     const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
@@ -57,7 +57,7 @@ describe('useIsTargetedFeature', () => {
   it('returns false if the Safe is targeted and the feature is unlocked', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(false)
-    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
     jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
 
     const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
@@ -69,13 +69,26 @@ describe('useIsTargetedFeature', () => {
     const feature = faker.helpers.arrayElement(targetedFeatures)
     const setLocalStorageMock = jest.fn()
     jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
-    jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], jest.fn()])
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
+    jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[feature], setLocalStorageMock])
 
     renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
 
     waitFor(() => {
       expect(setLocalStorageMock).toHaveBeenCalledWith([feature])
     })
+  })
+
+  it('does not unlock features while outreach targeting is loading', () => {
+    const feature = faker.helpers.arrayElement(targetedFeatures)
+    const setLocalStorageMock = jest.fn()
+    jest.spyOn(useChainsHook, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: true })
+    jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([[], setLocalStorageMock])
+
+    const { result } = renderHook(() => useIsTargetedFeature(feature as TargetedFeatures))
+
+    expect(result.current).toBe(false)
+    expect(setLocalStorageMock).not.toHaveBeenCalled()
   })
 })

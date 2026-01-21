@@ -7,7 +7,7 @@ import { useContext, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -25,7 +25,7 @@ export function useThreatAnalysis(
   const signer = useSigner()
   const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
   const walletAddress = signer?.address ?? ''
-  const { isHypernativeGuard, loading: HNGuardCheckLoading } = useIsHypernativeGuard()
+  const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
 
   const chain = useCurrentChain()
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
@@ -47,18 +47,19 @@ export function useThreatAnalysis(
 
   const blockaidThreatAnalysis = useThreatAnalysisUtils({
     ...mainTxProps,
-    skip: isHypernativeGuard || HNGuardCheckLoading,
+    skip: isHypernativeEligible || eligibilityLoading,
   })
 
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
     ...mainTxProps,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeGuard || !hypernativeAuthToken,
+    skip: !isHypernativeEligible || !hypernativeAuthToken,
   })
 
   const threatAnalysis = useMemo(
-    (): AsyncResult<ThreatAnalysisResults> => (isHypernativeGuard ? hypernativeThreatAnalysis : blockaidThreatAnalysis),
-    [isHypernativeGuard, hypernativeThreatAnalysis, blockaidThreatAnalysis],
+    (): AsyncResult<ThreatAnalysisResults> =>
+      isHypernativeEligible ? hypernativeThreatAnalysis : blockaidThreatAnalysis,
+    [isHypernativeEligible, hypernativeThreatAnalysis, blockaidThreatAnalysis],
   )
 
   const nestedThreatAnalysis = useNestedThreatAnalysis(safeTxToCheck, hypernativeAuthToken)
@@ -67,7 +68,7 @@ export function useThreatAnalysis(
     const [mainResult, mainError, mainLoading] = threatAnalysis
     const [nestedResult, nestedError, nestedLoading] = nestedThreatAnalysis
 
-    if (HNGuardCheckLoading) {
+    if (eligibilityLoading) {
       return [undefined, undefined, true]
     }
 
@@ -88,7 +89,7 @@ export function useThreatAnalysis(
       : nestedResult
 
     return [combinedResult, mainError || nestedError, mainLoading || nestedLoading]
-  }, [threatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading, HNGuardCheckLoading])
+  }, [threatAnalysis, nestedThreatAnalysis, isNested, isNestedLoading, eligibilityLoading])
 
   return combinedThreatAnalysis
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { clearAuthCookie, getAuthCookieData, setAuthCookie } from '../store/cookieStorage'
 
 type AuthTokenResult = {
@@ -27,7 +27,7 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     isExpired: false,
   })
 
-  const checkAuthState = () => {
+  const checkAuthState = useCallback(() => {
     const { token, expiry, tokenType } = getAuthCookieData() || {}
     // Default to 'Bearer' if tokenType is missing, undefined, or empty
     // This handles legacy cookies or corrupted data gracefully
@@ -35,12 +35,25 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
-    setAuthState({
-      token: token ? `${normalizedTokenType} ${token}` : undefined,
-      isAuthenticated: !!token,
-      isExpired,
+    const newToken = token ? `${normalizedTokenType} ${token}` : undefined
+    const newIsAuthenticated = !!token
+
+    setAuthState((prevState) => {
+      // Only update state if values actually changed
+      if (
+        prevState.token === newToken &&
+        prevState.isAuthenticated === newIsAuthenticated &&
+        prevState.isExpired === isExpired
+      ) {
+        return prevState
+      }
+      return {
+        token: newToken,
+        isAuthenticated: newIsAuthenticated,
+        isExpired,
+      }
     })
-  }
+  }, [])
 
   const setToken = (token: string, tokenType: string, expiresIn: number) => {
     setAuthCookie(token, tokenType, expiresIn)

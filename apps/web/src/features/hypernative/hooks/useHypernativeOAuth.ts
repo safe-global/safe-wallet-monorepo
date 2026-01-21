@@ -28,9 +28,9 @@ export type HypernativeAuthStatus = {
 const PKCE_KEY = 'hn_pkce'
 
 /**
- * Token expiry time in seconds
+ * PKCE cookie expiry time in seconds
  */
-const TOKEN_EXPIRES_IN = 10 * 60 // 10 minutes
+const PKCE_COOKIE_EXPIRES_IN = 10 * 60 // 10 minutes
 
 /**
  * Cookie options for PKCE storage
@@ -39,13 +39,13 @@ const TOKEN_EXPIRES_IN = 10 * 60 // 10 minutes
  * - Path: Root path so it's accessible from callback route
  * - Expires: Token expiry time in days
  */
-const getCookieOptions = (): Cookies.CookieAttributes => {
+const getPkceCookieOptions = (): Cookies.CookieAttributes => {
   const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:'
   return {
     secure: isSecure,
     sameSite: 'lax',
     path: '/',
-    expires: TOKEN_EXPIRES_IN / (24 * 60 * 60), // Convert seconds to days
+    expires: PKCE_COOKIE_EXPIRES_IN / (24 * 60 * 60), // Convert seconds to days
   }
 }
 
@@ -54,6 +54,11 @@ const getCookieOptions = (): Cookies.CookieAttributes => {
  * Simulates network latency for realistic testing
  */
 const MOCK_AUTH_DELAY_MS = 1000
+
+/**
+ * Mock authentication token expiry time in seconds
+ */
+const MOCK_AUTH_TOKEN_EXPIRES_IN = 10 * 60 // 10 minutes
 
 /**
  * OAuth popup window dimensions
@@ -93,7 +98,7 @@ export interface PkceData {
  */
 export function savePkce(state: string, codeVerifier: string): void {
   const data = JSON.stringify({ state, codeVerifier })
-  Cookies.set(PKCE_KEY, data, getCookieOptions())
+  Cookies.set(PKCE_KEY, data, getPkceCookieOptions())
 }
 
 /**
@@ -296,7 +301,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         await new Promise((resolve) => setTimeout(resolve, MOCK_AUTH_DELAY_MS))
 
         const mockToken = `mock-token-${Date.now()}`
-        setToken(mockToken, 'Bearer', TOKEN_EXPIRES_IN)
+        setToken(mockToken, 'Bearer', MOCK_AUTH_TOKEN_EXPIRES_IN)
         return
       }
 

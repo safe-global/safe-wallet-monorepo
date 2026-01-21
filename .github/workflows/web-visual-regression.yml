@@ -40,7 +40,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -195,59 +195,19 @@ jobs:
 
       - name: Upload screenshots to storage branch
         if: always() && steps.visual-tests.outputs.update_mode == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          STORAGE_BRANCH="${{ steps.storage.outputs.storage_branch }}"
-          BASELINES_DIR="apps/web/__visual_snapshots__"
-
-          # Check if there are any baselines to upload
-          if [ ! -d "$BASELINES_DIR" ] || [ -z "$(ls -A $BASELINES_DIR/*.png 2>/dev/null)" ]; then
-            echo "No baselines to upload"
-            exit 0
-          fi
-
-          BASELINE_COUNT=$(ls "$BASELINES_DIR"/*.png 2>/dev/null | wc -l)
-          echo "Uploading $BASELINE_COUNT baseline(s) to $STORAGE_BRANCH"
-
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          cd /tmp
-          rm -rf baseline-upload
-
-          # Clone or create storage branch
-          if git ls-remote --heads origin "$STORAGE_BRANCH" | grep -q "$STORAGE_BRANCH"; then
-            git clone --depth 1 --branch "$STORAGE_BRANCH" \
-              https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git baseline-upload
-            cd baseline-upload
-          else
-            git clone --depth 1 \
-              https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git baseline-upload
-            cd baseline-upload
-            git checkout --orphan "$STORAGE_BRANCH"
-            git rm -rf . 2>/dev/null || true
-            echo "# Screenshots Storage" > README.md
-            git add README.md
-            git commit -m "Initialize $STORAGE_BRANCH branch"
-          fi
-
-          # Copy baselines
-          mkdir -p visual-baselines
-          cp "$GITHUB_WORKSPACE/$BASELINES_DIR"/*.png visual-baselines/
-
-          # Commit and push
-          git add visual-baselines/
-          if git commit -m "Update visual regression baselines from ${{ github.sha }}"; then
-            git push origin "$STORAGE_BRANCH"
-            echo "Successfully uploaded baselines to $STORAGE_BRANCH"
-          else
-            echo "No changes to baselines"
-          fi
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: ${{ steps.storage.outputs.storage_branch }}
+          source_dir: apps/web/__visual_snapshots__
+          target_dir: visual-baselines
+          file_pattern: '*.png'
+          commit_message: 'Update visual regression baselines from ${{ github.sha }}'
+          readme_title: 'Visual Regression Baselines'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload visual diff artifacts
         if: failure() && steps.visual-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: visual-regression-diffs
           path: apps/web/__visual_snapshots__/__diff_output__/
@@ -255,7 +215,7 @@ jobs:
 
       - name: Post PR comment with screenshots
         if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v7
         env:
           CHANGED_STORIES: ${{ steps.changed-stories.outputs.files }}
           HAS_CHANGES: ${{ steps.changed-stories.outputs.has_changes }}

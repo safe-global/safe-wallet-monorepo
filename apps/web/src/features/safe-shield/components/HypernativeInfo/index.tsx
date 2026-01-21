@@ -8,8 +8,10 @@ import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHype
 
 export const HypernativeInfo = ({
   hypernativeAuth,
+  showActiveStatus = true,
 }: {
   hypernativeAuth?: HypernativeAuthStatus
+  showActiveStatus?: boolean
 }): ReactElement | null => {
   // If hypernativeAuth is not provided, don't show the HypernativeInfo
   if (!hypernativeAuth) {
@@ -21,29 +23,35 @@ export const HypernativeInfo = ({
   // Show login card if user is not authenticated or token is expired
   const showLoginCard = !isAuthenticated || isTokenExpired
 
+  if (!showActiveStatus && !showLoginCard) {
+    return null
+  }
+
   return (
     <Stack gap={2} p={1.5} pb={2}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Stack direction="row" alignItems="center" gap={1}>
-          <SvgIcon
-            component={SafeShieldLogo}
-            inheritViewBox
-            sx={{
-              width: 16,
-              height: 16,
-              '& .shield-img': {
-                fill: 'var(--color-border-light)',
-              },
-            }}
-          />
-          <Typography variant="body2" color="primary.light">
-            Hypernative Guardian is active
-          </Typography>
+      {showActiveStatus && (
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" alignItems="center" gap={1}>
+            <SvgIcon
+              component={SafeShieldLogo}
+              inheritViewBox
+              sx={{
+                width: 16,
+                height: 16,
+                '& .shield-img': {
+                  fill: 'var(--color-border-light)',
+                },
+              }}
+            />
+            <Typography variant="body2" color="primary.light">
+              Hypernative Guardian is active
+            </Typography>
+          </Stack>
+          <HypernativeTooltip title="Hypernative Guardian is actively monitoring this transaction.">
+            <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
+          </HypernativeTooltip>
         </Stack>
-        <HypernativeTooltip title="Hypernative Guardian is actively monitoring this transaction.">
-          <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
-        </HypernativeTooltip>
-      </Stack>
+      )}
 
       {/* Show login card if user is not authenticated or token is expired */}
       {showLoginCard && (
