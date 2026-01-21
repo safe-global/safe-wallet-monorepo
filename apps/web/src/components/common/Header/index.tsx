@@ -18,8 +18,8 @@ import SafeLogoMobile from '@/public/images/logo-no-text.svg'
 import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import BatchIndicator from '@/components/batch/BatchIndicator'
-import { useFeature } from '@/features/__registry__'
-import type { WalletConnectContract } from '@/features/walletconnect/contract'
+import { useLoadFeature } from '@/features/__contracts__'
+import { WalletConnectFeature } from '@/features/walletconnect'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
@@ -45,7 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
-  const walletConnect = useFeature<WalletConnectContract>('walletconnect')
+  const walletConnect = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page

@@ -51,8 +51,6 @@ import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
-import { FeatureRegistryProvider } from '@/features/__registry__'
-import { featureHandles } from '@/features/__registry__/handles'
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -95,23 +93,21 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   return (
-    <FeatureRegistryProvider initialFeatures={featureHandles}>
-      <SafeThemeProvider mode={themeMode}>
-        {(safeTheme: Theme) => (
-          <ThemeProvider theme={safeTheme}>
-            <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-              <WalletProvider>
-                <GeoblockingProvider>
-                  <TxModalProvider>
-                    <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
-                  </TxModalProvider>
-                </GeoblockingProvider>
-              </WalletProvider>
-            </SentryErrorBoundary>
-          </ThemeProvider>
-        )}
-      </SafeThemeProvider>
-    </FeatureRegistryProvider>
+    <SafeThemeProvider mode={themeMode}>
+      {(safeTheme: Theme) => (
+        <ThemeProvider theme={safeTheme}>
+          <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
+            <WalletProvider>
+              <GeoblockingProvider>
+                <TxModalProvider>
+                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                </TxModalProvider>
+              </GeoblockingProvider>
+            </WalletProvider>
+          </SentryErrorBoundary>
+        </ThemeProvider>
+      )}
+    </SafeThemeProvider>
   )
 }
 

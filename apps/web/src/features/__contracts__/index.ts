@@ -16,3 +16,4 @@ export type {
 } from './types'
 
 export { withSuspense } from './withSuspense'
+export { useLoadFeature, clearFeatureCache } from './useLoadFeature'

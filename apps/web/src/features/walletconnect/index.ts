@@ -5,14 +5,14 @@
  *
  * ## Usage
  *
- * For external consumers, prefer using the feature registry:
  * ```typescript
- * import { useFeature } from '@/features/__registry__'
- * import type { WalletConnectContract } from '@/features/walletconnect/contract'
+ * import { WalletConnectFeature } from '@/features/walletconnect'
+ * import { useLoadFeature } from '@/features/__contracts__'
  *
- * const walletConnect = useFeature<WalletConnectContract>('walletconnect')
- * if (walletConnect) {
- *   // Feature is enabled and available
+ * function MyComponent() {
+ *   const walletConnect = useLoadFeature(WalletConnectFeature)
+ *   if (!walletConnect) return null
+ *   return <walletConnect.components.WalletConnectWidget />
  * }
  * ```
  *
@@ -23,7 +23,10 @@
  * - Some services/stores that are used directly by safe-wallet-provider
  */
 
-// Feature handle (for registration in app startup)
+// Feature handle - primary export for use with useLoadFeature()
+export { walletConnectHandle as WalletConnectFeature } from './handle'
+
+// Also export with original name for backward compatibility
 export { walletConnectHandle } from './handle'
 
 // Contract type (for type-safe registry lookup)

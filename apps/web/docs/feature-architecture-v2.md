@@ -1,13 +1,13 @@
 # Feature Architecture Standard v2
 
-This document defines the revised architecture pattern for features in the Safe{Wallet} web application. It addresses tight coupling, unclear boundaries, testing difficulties, and circular import issues through **Feature Contracts**, a **Feature Registry**, and **tiered structure**.
+This document defines the revised architecture pattern for features in the Safe{Wallet} web application. It addresses tight coupling, unclear boundaries, testing difficulties, and circular import issues through **Feature Contracts**, **Feature Handles**, and **tiered structure**.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Core Concepts](#core-concepts)
 - [Feature Contract](#feature-contract)
-- [Feature Registry](#feature-registry)
+- [Feature Handles](#feature-handles)
 - [Feature Tiers](#feature-tiers)
 - [Folder Structure by Tier](#folder-structure-by-tier)
 - [Public API Pattern](#public-api-pattern)
@@ -22,28 +22,27 @@ This document defines the revised architecture pattern for features in the Safe{
 A **feature** is a self-contained domain module that:
 
 - Implements a typed **Feature Contract** interface
-- Registers itself with the **Feature Registry** for discovery
+- Exports a **Feature Handle** for lazy loading
 - Follows one of three **tiers** based on complexity
 - Has explicit **public** and **internal** boundaries
-- Communicates with other features via **Redux** (data) or **Registry** (components/hooks/services)
+- Communicates with other features via **Redux** (data) or direct imports of feature handles
 
 ### Key Principles
 
 1. **Contract-First**: Every feature defines what it exposes through a typed contract
-2. **Loose Coupling**: Features discover each other through the registry, not direct imports
+2. **Lazy Loading**: Features are loaded on-demand via handles with `useLoadFeature()`
 3. **Tiered Complexity**: Simple features stay simple; complex features have structure
-4. **Testability**: DI through registry enables isolated testing without circular imports
+4. **Type Safety**: Direct handle imports provide full type inference
 
 ### Problems This Architecture Solves
 
 | Problem                              | Solution                                                 |
 | ------------------------------------ | -------------------------------------------------------- |
-| Tight coupling between features      | Feature Registry for discovery instead of direct imports |
+| Tight coupling between features      | Feature handles with lazy loading                        |
 | Unclear boundaries                   | Feature Contract defines exactly what's public           |
-| Testing difficulties                 | Registry can be mocked; no import cycles                 |
-| Circular imports in Jest             | No inter-feature imports; registry lookup at runtime     |
+| Testing difficulties                 | Module-level cache can be cleared; handles can be mocked |
 | Forced structure for simple features | Three tiers: Minimal, Standard, Full                     |
-| No DI mechanism                      | Feature Registry provides runtime lookup                 |
+| Bundle size                          | Lazy loading ensures disabled features aren't bundled    |
 
 ## Core Concepts
 
@@ -51,9 +50,13 @@ A **feature** is a self-contained domain module that:
 
 A **Feature Contract** is a TypeScript interface that explicitly declares what a feature exposes to the outside world. Think of it as the feature's "API surface".
 
-### What is the Feature Registry?
+### What is a Feature Handle?
 
-The **Feature Registry** is a React Context that holds references to all **loaded** features' contracts. Features register when their code mounts; other features discover them via runtime lookup.
+A **Feature Handle** is a tiny object (~100 bytes) that contains:
+
+- The feature name
+- A `useIsEnabled()` hook for flag checking
+- A `load()` function that lazily imports the full implementation
 
 ### Feature Handles: Static + Lazy
 
@@ -64,44 +67,43 @@ Each feature exposes a **handle** with two parts:
 | `useIsEnabled()`                  | Yes (tiny) | Flag check via `useHasFeature(FEATURES.X)` |
 | `components`, `hooks`, `services` | No (lazy)  | Actual feature code, loaded on demand      |
 
-The `useFeature()` hook combines registry lookup + flag check + lazy loading in one step:
+The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 
 ```typescript
-import type { HypernativeContract } from '@/features/hypernative/contract'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
 // Consumer component
 function MyPage() {
-  // Returns null if: not registered, disabled, or loading
-  const hypernative = useFeature<HypernativeContract>('hypernative')
+  // Returns null if: disabled or still loading
+  const walletConnect = useLoadFeature(WalletConnectFeature)
 
-  if (!hypernative) return null
+  if (!walletConnect) return null
 
   // Feature is enabled and loaded - safe to use components
-  // Components are pre-wrapped with Suspense via withSuspense()
-  return <hypernative.components.Banner />
+  return <walletConnect.components.WalletConnectWidget />
 }
 ```
 
-**`useFeature()` return values:**
+**`useLoadFeature()` return values:**
 | Condition | Returns |
 |-----------|---------|
-| Feature not registered | `null` |
 | Feature flag disabled | `null` |
 | Feature flag loading (undefined) | `null` |
-| Feature flag enabled | The feature handle |
+| Feature flag enabled + loaded | The loaded feature contract |
 
 ### The Loading Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ 1. APP STARTUP: Feature handles registered (static, tiny)      │
-│    <FeatureRegistryProvider initialFeatures={[...handles]} />  │
+│ 1. CONSUMER imports feature handle (static, tiny ~100 bytes)   │
+│    import { WalletConnectFeature } from '@/features/walletconnect'│
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│ 2. CONSUMER calls useFeature (combines lookup + flag check)    │
-│    const wc = useFeature<WalletConnectContract>('walletconnect')│
+│ 2. CONSUMER calls useLoadFeature (flag check + lazy load)      │
+│    const wc = useLoadFeature(WalletConnectFeature)             │
 │    // Returns null if disabled, full contract if enabled       │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -112,27 +114,22 @@ function MyPage() {
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Why Not Direct Imports?
-
-Direct imports create compile-time dependencies:
+### Benefits of This Pattern
 
 ```typescript
-// ❌ Direct import - creates compile-time coupling
-import { useHypernativeScanner } from '@/features/hypernative/hooks'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
-// ✅ Registry lookup - runtime discovery, no compile-time coupling
-import type { HypernativeContract } from '@/features/hypernative/contract'
-
-const hypernative = useFeature<HypernativeContract>('hypernative')
-const scanner = hypernative?.hooks.useScanner?.()
+const walletConnect = useLoadFeature(WalletConnectFeature)
 ```
 
 Benefits:
 
-- No circular import issues (registry lookup happens at runtime)
-- Features can be mocked entirely in tests
-- Features remain truly lazy-loadable (no static imports from features)
-- Clear API boundaries enforced by TypeScript
+- **Type-safe**: Full TypeScript inference from the handle
+- **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
+- **Tree-shakeable**: Unused features won't be bundled
+- **Simple**: No context providers, no string lookups
+- **Testable**: Module-level cache can be cleared with `clearFeatureCache()`
 
 ## Feature Contract
 
@@ -198,53 +195,48 @@ export type FeatureContract = BaseFeatureContract &
   Partial<SelectorsContract>
 ```
 
-### Explicit Type Parameters
+### Type Inference
 
-When calling `useFeature()`, always pass the contract type explicitly:
+When calling `useLoadFeature()`, types are automatically inferred from the handle:
 
 ```typescript
-import { useFeature } from '@/features/__registry__'
-import type { MyFeatureContract } from '@/features/my-feature/contract'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
-const myFeature = useFeature<MyFeatureContract>('my-feature')
+// Type is automatically inferred from WalletConnectFeature
+const walletConnect = useLoadFeature(WalletConnectFeature)
 ```
 
-**Why explicit generics instead of automatic inference?**
+Benefits of this approach:
 
-We considered using TypeScript declaration merging (`FeatureMap`) for automatic type inference, but chose explicit generics because:
-
-1. **Import proximity**: The type import sits right next to the variable, making the relationship clear
-2. **IDE navigation**: Cmd+click on `MyFeatureContract` jumps directly to the contract definition
-3. **Explicit dependencies**: The import makes it obvious which contract the consumer depends on
-4. **No magic**: No hidden declaration merging or side-effect imports required
-
-This follows the principle: "explicit is better than implicit" for cross-feature dependencies.
+1. **Automatic inference**: No need to specify the type explicitly
+2. **IDE navigation**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
+3. **Explicit dependencies**: The import makes it obvious which feature the consumer depends on
+4. **No string lookups**: Direct import instead of magic strings
 
 ### IDE Navigation (Jump-to-Definition)
 
-The registry pattern trades direct imports for loose coupling, which normally breaks IDE "jump to definition". To restore navigation, use `typeof` imports in contracts:
+With direct feature handle imports, IDE navigation works naturally:
+
+```typescript
+import { WalletConnectFeature } from '@/features/walletconnect'
+//       ^^^^^^^^^^^^^^^^^^^^
+//       Cmd+click jumps to handle definition in index.ts
+```
+
+For navigating to implementation details from contracts, use `typeof` imports:
 
 ```typescript
 // contract.ts
-// Type imports from implementations - enables IDE jump-to-definition
 import type { myService } from './__internal__/services/myService'
-import type { myStore } from './__internal__/store/myStore'
 
 export interface MyFeatureContract {
   services: {
     // Cmd+click on 'typeof myService' jumps to implementation
     myService: typeof myService
-    myStore: typeof myStore
-  }
-  components: {
-    // Components wrapped with withSuspense use ComponentType + JSDoc
-    /** @see {@link ./__internal__/components/Widget/index.tsx} */
-    Widget: ComponentType
   }
 }
 ```
-
-This follows the DI pattern: contracts reference implementation _types_ (not implementations). The actual wiring happens in the handle, while the contract defines the expected shape.
 
 ### Example Contracts
 
@@ -316,175 +308,100 @@ export interface WalletConnectContract extends FeatureContract {
 }
 ```
 
-## Feature Registry
+## Feature Handles
 
-The registry provides runtime feature discovery without compile-time imports.
+Features are loaded lazily via handles and the `useLoadFeature()` hook.
 
-### Registry Implementation
+### useLoadFeature Implementation
+
+The `useLoadFeature()` hook provides:
+
+- Feature flag checking via `handle.useIsEnabled()`
+- Lazy loading of the full implementation
+- Module-level caching with `useSyncExternalStore` for reactivity
 
 ```typescript
-// src/features/__registry__/FeatureRegistry.tsx
-import { createContext, useContext, useCallback, useMemo, useRef, type ReactNode } from 'react'
-import type { FeatureContract } from '@/features/__contracts__/types'
+// src/features/__contracts__/useLoadFeature.ts
+import { useEffect, useSyncExternalStore } from 'react'
+import type { FeatureHandle, FeatureImplementation, FeatureContract } from './types'
 
-interface FeatureRegistryContextValue {
-  register: <T extends FeatureContract>(contract: T) => () => void
-  get: <T extends FeatureContract>(name: string) => T | undefined
-  getAll: () => Map<string, FeatureContract>
-}
+// Module-level cache shared across all components
+const cache = new Map<string, FeatureContract>()
+const loading = new Set<string>()
+const subscribers = new Set<() => void>()
 
-const FeatureRegistryContext = createContext<FeatureRegistryContextValue | null>(null)
+export function useLoadFeature<T extends FeatureImplementation>(
+  handle: FeatureHandle<T>,
+): (T & { name: string; useIsEnabled: () => boolean | undefined }) | null {
+  const isEnabled = handle.useIsEnabled()
 
-export function FeatureRegistryProvider({ children }: { children: ReactNode }) {
-  const registryRef = useRef(new Map<string, FeatureContract>())
-  const subscribersRef = useRef(new Set<() => void>())
-
-  const register = useCallback(<T extends FeatureContract>(contract: T) => {
-    registryRef.current.set(contract.name, contract)
-    subscribersRef.current.forEach((cb) => cb())
-
-    // Return unregister function
-    return () => {
-      registryRef.current.delete(contract.name)
-      subscribersRef.current.forEach((cb) => cb())
-    }
-  }, [])
-
-  const get = useCallback(<T extends FeatureContract>(name: string): T | undefined => {
-    return registryRef.current.get(name) as T | undefined
-  }, [])
-
-  const getAll = useCallback(() => {
-    return new Map(registryRef.current)
-  }, [])
-
-  const value = useMemo(() => ({ register, get, getAll }), [register, get, getAll])
-
-  return (
-    <FeatureRegistryContext.Provider value={value}>
-      {children}
-    </FeatureRegistryContext.Provider>
+  const cached = useSyncExternalStore(
+    subscribe,
+    () => getSnapshot(handle.name),
+    () => getSnapshot(handle.name),
   )
-}
-
-/**
- * Hook to access the feature registry
- */
-export function useFeatureRegistry(): FeatureRegistryContextValue {
-  const context = useContext(FeatureRegistryContext)
-  if (!context) {
-    throw new Error('useFeatureRegistry must be used within FeatureRegistryProvider')
-  }
-  return context
-}
-
-/**
- * Hook to get a specific feature's contract
- */
-export function useFeature<T extends FeatureContract>(name: string): T | undefined {
-  const registry = useFeatureRegistry()
-  return registry.get<T>(name)
-}
-
-/**
- * Hook to register a feature (call in feature's provider/entry component)
- */
-export function useRegisterFeature<T extends FeatureContract>(contract: T): void {
-  const registry = useFeatureRegistry()
 
   useEffect(() => {
-    return registry.register(contract)
-  }, [registry, contract])
+    if (isEnabled !== true || cached || loading.has(handle.name)) return
+
+    loading.add(handle.name)
+    handle.load().then((module) => {
+      cache.set(handle.name, { name: handle.name, useIsEnabled: handle.useIsEnabled, ...module.default })
+      loading.delete(handle.name)
+      notifySubscribers()
+    })
+  }, [isEnabled, cached, handle])
+
+  if (isEnabled !== true || !cached) return null
+  return cached
 }
 ```
 
-### Using the Registry
-
-**Feature Handle Definition (tiny, static file):**
+### Feature Handle Definition
 
 ```typescript
 // src/features/walletconnect/handle.ts
-// This file is SMALL - only flag lookup + lazy import references
-import { lazy } from 'react'
+// This file is SMALL (~100 bytes) - only flag lookup + lazy import
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { WalletConnectContract } from './contract'
+import type { FeatureHandle } from '@/features/__contracts__'
+import type { WalletConnectImplementation } from './contract'
 
-export const walletConnectHandle: WalletConnectContract = {
+export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
   name: 'walletconnect',
 
   // STATIC: Just a flag lookup, no heavy imports
   useIsEnabled: () => useHasFeature(FEATURES.NATIVE_WALLETCONNECT),
 
-  // LAZY: These only load when the component is rendered
-  components: {
-    WalletConnectWidget: lazy(() => import('./__internal__/components/WalletConnectWidget')),
-    WcSessionManager: lazy(() => import('./__internal__/components/WcSessionManager')),
-  },
-
-  // LAZY: Hooks are wrapped - internal code loads on first call
-  hooks: {
-    useWcUri: () => {
-      const { useWcUri } = require('./__internal__/hooks/useWcUri')
-      return useWcUri()
-    },
-  },
-
-  // LAZY: Services load on first access
-  services: {
-    connect: async (uri: string) => {
-      const { walletConnectService } = await import('./__internal__/services/walletConnectService')
-      return walletConnectService.connect(uri)
-    },
-  },
+  // LAZY: Loads the full feature only when enabled + accessed
+  load: () => import('./__internal__/feature'),
 }
 ```
 
-**App Startup Registration:**
+### Feature Public API (index.ts)
 
 ```typescript
-// src/features/registry.ts
-// All handles are imported here - they're tiny (just flag + lazy refs)
-import { walletConnectHandle } from '@/features/walletconnect/handle'
-import { hypernativeHandle } from '@/features/hypernative/handle'
-import { bridgeHandle } from '@/features/bridge/handle'
-// ... other handles
-
-export const featureHandles = [
-  walletConnectHandle,
-  hypernativeHandle,
-  bridgeHandle,
-  // ... other handles
-]
-
-// In _app.tsx or layout
-import { featureHandles } from '@/features/registry'
-
-function App({ children }) {
-  return (
-    <FeatureRegistryProvider initialFeatures={featureHandles}>
-      {children}
-    </FeatureRegistryProvider>
-  )
-}
+// src/features/walletconnect/index.ts
+// Export the handle as {FeatureName}Feature for use with useLoadFeature()
+export { walletConnectHandle as WalletConnectFeature } from './handle'
+export type { WalletConnectContract } from './contract'
 ```
 
-**Feature Consumption:**
+### Feature Consumption
 
 ```typescript
-// src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
-import { useFeature } from '@/features/__registry__'
-import type { HypernativeContract } from '@/features/hypernative/contract'
+// src/components/common/Header/index.tsx
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
-function SafeShieldScanner() {
-  // Explicit type parameter for type safety and IDE navigation
-  // Returns null if hypernative is disabled or not registered
-  const hypernative = useFeature<HypernativeContract>('hypernative')
+function Header() {
+  // Type is automatically inferred from WalletConnectFeature
+  const walletConnect = useLoadFeature(WalletConnectFeature)
 
-  if (!hypernative) return null
+  if (!walletConnect) return null
 
-  // Feature is enabled - render component directly (already wrapped with Suspense)
-  return <hypernative.components.Scanner />
+  // Feature is enabled - render component directly
+  return <walletConnect.components.WalletConnectWidget />
 }
 ```
 
@@ -690,142 +607,105 @@ dispatch(setTransactionStatus({ id, status: 'pending' }))
 const status = useSelector(selectTransactionStatus(id))
 ```
 
-### For Components/Hooks/Services: Use Registry
+### For Components/Hooks/Services: Use Feature Handles
 
-Features access other features' **capabilities** through the registry:
+Features access other features' **capabilities** through handles:
 
 ```typescript
-import { Suspense } from 'react'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
 function MyComponent() {
-  // Get feature (null if disabled or not registered)
-  const walletConnect = useFeature<WalletConnectContract>('walletconnect')
+  // Get feature (null if disabled or still loading)
+  const walletConnect = useLoadFeature(WalletConnectFeature)
 
   if (!walletConnect) return null
 
-  // Use its hooks (lazy, loads on call)
-  const uri = walletConnect.hooks.useWcUri()
+  // Use its services
+  const handleConnect = () => walletConnect.services.walletConnectInstance.connect(uri)
 
-  // Use its services (lazy, loads on call)
-  const handleConnect = () => walletConnect.services.connect(uri)
-
-  // Render its components (lazy, loads when rendered)
-  const WcWidget = walletConnect.components.WalletConnectWidget
-  return WcWidget ? <WcWidget /> : null
+  // Render its components
+  return <walletConnect.components.WalletConnectWidget />
 }
 ```
 
 ### Communication Patterns Summary
 
-| Need                               | Pattern             | Example                                                   |
-| ---------------------------------- | ------------------- | --------------------------------------------------------- |
-| Get feature if enabled             | `useFeature<T>()`   | `const x = useFeature<XContract>('x')` (null if disabled) |
-| Render another feature's component | Registry + Suspense | `<Suspense><x.components.Widget /></Suspense>`            |
-| Use another feature's hook         | Registry lookup     | `x.hooks.useY()`                                          |
-| Call another feature's service     | Registry lookup     | `x.services.doY()`                                        |
-| Read shared state                  | Redux selector      | `useSelector(selectSafeInfo)`                             |
-| Write shared state                 | Redux action        | `dispatch(setSafeInfo(data))`                             |
-| Share types                        | Direct import       | `import type { X } from '@/features/y/types'`             |
+| Need                               | Pattern            | Example                                           |
+| ---------------------------------- | ------------------ | ------------------------------------------------- |
+| Get feature if enabled             | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)` |
+| Render another feature's component | Feature handle     | `<wc.components.Widget />`                        |
+| Use another feature's hook         | Feature handle     | `wc.hooks.useY()`                                 |
+| Call another feature's service     | Feature handle     | `wc.services.doY()`                               |
+| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                     |
+| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                     |
+| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`     |
 
 ## Testing Strategy
 
-The registry pattern makes testing significantly easier.
+The module-level cache pattern makes testing straightforward.
 
 ### Unit Testing a Feature
 
 ```typescript
 // src/features/safe-shield/__internal__/components/__tests__/SafeShieldScanner.test.tsx
-import { render, screen } from '@testing-library/react'
-import { FeatureRegistryProvider, createMockFeatureContract } from '@/features/__registry__'
-import SafeShieldScanner from '../SafeShieldScanner'
+import { render, screen, waitFor } from '@testing-library/react'
+import { clearFeatureCache } from '@/features/__contracts__'
 
-// Mock the hypernative feature handle
-const mockHypernative = createMockFeatureContract('hypernative', {
-  useIsEnabled: () => true,
-  components: {
-    Scanner: () => <div data-testid="scanner">Mocked Scanner</div>,
+// Mock the feature module
+jest.mock('@/features/walletconnect', () => ({
+  WalletConnectFeature: {
+    name: 'walletconnect',
+    useIsEnabled: () => true,
+    load: () => Promise.resolve({
+      default: {
+        components: {
+          WalletConnectWidget: () => <div data-testid="widget">Mock Widget</div>,
+        },
+      },
+    }),
   },
-})
+}))
 
-// Test wrapper with mock features
-function TestWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <FeatureRegistryProvider initialFeatures={[mockHypernative]}>
-      {children}
-    </FeatureRegistryProvider>
-  )
-}
-
-describe('SafeShieldScanner', () => {
-  it('renders hypernative scanner when enabled', () => {
-    render(<SafeShieldScanner />, { wrapper: TestWrapper })
-    expect(screen.getByTestId('scanner')).toBeInTheDocument()
+describe('Component using WalletConnect', () => {
+  beforeEach(() => {
+    // Clear the feature cache before each test
+    clearFeatureCache()
   })
 
-  it('renders nothing when hypernative is disabled', () => {
-    const disabledHypernative = createMockFeatureContract('hypernative', {
-      useIsEnabled: () => false,
-    })
+  it('renders widget when feature is enabled', async () => {
+    render(<MyComponent />)
 
-    render(<SafeShieldScanner />, {
-      wrapper: ({ children }) => (
-        <FeatureRegistryProvider initialFeatures={[disabledHypernative]}>
-          {children}
-        </FeatureRegistryProvider>
-      ),
+    await waitFor(() => {
+      expect(screen.getByTestId('widget')).toBeInTheDocument()
     })
-
-    expect(screen.queryByTestId('scanner')).not.toBeInTheDocument()
-  })
-
-  it('renders nothing when hypernative not registered', () => {
-    render(<SafeShieldScanner />, {
-      wrapper: ({ children }) => (
-        <FeatureRegistryProvider>{children}</FeatureRegistryProvider>
-      )
-    })
-    expect(screen.getByTestId('skeleton')).toBeInTheDocument()
   })
 })
 ```
 
-### Integration Testing
+### Testing with Disabled Features
 
 ```typescript
-// Test with real feature handles
-import { walletConnectHandle } from '@/features/walletconnect/handle'
-import { hypernativeHandle } from '@/features/hypernative/handle'
+jest.mock('@/features/walletconnect', () => ({
+  WalletConnectFeature: {
+    name: 'walletconnect',
+    useIsEnabled: () => false, // Feature disabled
+    load: () => Promise.resolve({ default: {} }),
+  },
+}))
 
-function IntegrationTestWrapper({ children }) {
-  return (
-    <FeatureRegistryProvider initialFeatures={[walletConnectHandle, hypernativeHandle]}>
-      {children}
-    </FeatureRegistryProvider>
-  )
-}
+it('renders nothing when feature is disabled', () => {
+  render(<MyComponent />)
+  expect(screen.queryByTestId('widget')).not.toBeInTheDocument()
+})
 ```
 
-### Why This Solves Circular Imports
+### Benefits for Testing
 
-**Before (direct imports):**
-
-```
-Feature A imports from Feature B's internals
-Feature B imports from Feature A's internals
-→ Circular dependency at compile time
-→ Jest module resolution breaks
-```
-
-**After (registry):**
-
-```
-Feature A registers itself
-Feature B registers itself
-Feature A looks up Feature B at runtime
-Feature B looks up Feature A at runtime
-→ No compile-time dependency
-→ Jest works correctly
-```
+- **No context providers needed**: Module-level cache doesn't require wrapping
+- **Easy mocking**: Just mock the feature module with Jest
+- **Clean state**: `clearFeatureCache()` resets between tests
+- **Async handling**: Use `waitFor()` to wait for lazy loading
 
 ## ESLint Enforcement
 
@@ -860,10 +740,10 @@ Feature B looks up Feature A at runtime
 ### Allowed Imports
 
 ```typescript
-// ✅ Allowed: Feature handle (for registration in registry.ts)
-import { myFeatureHandle } from '@/features/my-feature/handle'
+// ✅ Allowed: Feature export (for use with useLoadFeature)
+import { MyFeature } from '@/features/my-feature'
 
-// ✅ Allowed: Contract type (for type-safe registry lookup)
+// ✅ Allowed: Contract type (for type annotations if needed)
 import type { MyFeatureContract } from '@/features/my-feature/contract'
 
 // ✅ Allowed: Public types
@@ -879,9 +759,8 @@ import { InternalComponent } from '@/features/my-feature/__internal__/components
 ### Phase 1: Add Infrastructure
 
 1. Create `src/features/__contracts__/types.ts` with base contract types
-2. Create `src/features/__registry__/` with FeatureRegistry implementation
-3. Add FeatureRegistryProvider to app root
-4. Update ESLint rules (keep as warnings initially)
+2. Create `src/features/__contracts__/useLoadFeature.ts` with the loading hook
+3. Update ESLint rules (keep as warnings initially)
 
 ### Phase 2: Migrate Features (One at a Time)
 
@@ -889,10 +768,10 @@ For each feature:
 
 1. **Determine tier** (Minimal, Standard, or Full)
 2. **Create contract.ts** defining the feature's public API type
-3. **Create handle.ts** with static flag + lazy component/hook refs
-4. **Move internals** to `__internal__/` folder
-5. **Register handle** in `src/features/registry.ts`
-6. **Update consumers** to use registry lookup instead of direct imports
+3. **Create handle.ts** with static flag + lazy load function
+4. **Create index.ts** exporting `{FeatureName}Feature` from handle
+5. **Move internals** to `__internal__/` folder
+6. **Update consumers** to use `useLoadFeature()` with the feature handle
 7. **Verify** with `yarn lint && yarn type-check && yarn test`
 
 ### Phase 3: Enforce
@@ -916,20 +795,19 @@ function SafeShieldScanner() {
 }
 ```
 
-**After (registry lookup - loose coupling):**
+**After (feature handle - lazy loading):**
 
 ```typescript
 // src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
-import { useFeature } from '@/features/__registry__'
-import type { HypernativeContract } from '@/features/hypernative/contract'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__contracts__'
 
 function SafeShieldScanner() {
-  // Explicit generic for type safety, null if hypernative is disabled or not registered
-  const hypernative = useFeature<HypernativeContract>('hypernative')
+  // Type inferred from HypernativeFeature, null if disabled or loading
+  const hypernative = useLoadFeature(HypernativeFeature)
 
   if (!hypernative) return null
 
-  // Components are pre-wrapped with Suspense - no wrapper needed
   return <hypernative.components.Banner />
 }
 ```
@@ -940,63 +818,60 @@ function SafeShieldScanner() {
 
 - [ ] Determined feature tier (Minimal/Standard/Full)
 - [ ] Created `contract.ts` with typed contract interface
-- [ ] Created `handle.ts` with static `useIsEnabled` + lazy component/hook refs
+- [ ] Created `handle.ts` with static `useIsEnabled` + lazy `load()` function
+- [ ] Created `index.ts` exporting `{FeatureName}Feature` from handle
 - [ ] Placed all implementation in `__internal__/` (if Standard or Full tier)
 - [ ] Created `types.ts` for public types (if needed)
-- [ ] Added handle to `src/features/registry.ts`
 - [ ] No direct imports of other features' internals
-- [ ] All cross-feature communication via Redux or registry
+- [ ] All cross-feature communication via Redux or feature handles
 
 ### For Existing Features (Migration)
 
 - [ ] Created `contract.ts`
 - [ ] Created `handle.ts`
+- [ ] Created `index.ts` with `{FeatureName}Feature` export
 - [ ] Moved internals to `__internal__/`
-- [ ] Registered handle in `src/features/registry.ts`
-- [ ] Updated all external consumers to use registry
+- [ ] Updated all external consumers to use `useLoadFeature()`
 - [ ] Removed barrel file exports of internals
 - [ ] Verified no ESLint warnings
-- [ ] Tests pass without circular import issues
+- [ ] Tests pass
 
 ### For Feature Consumers
 
-- [ ] Using `useFeature()` hook for cross-feature access
-- [ ] Handling `null` return (feature disabled or not registered)
-- [ ] Wrapping lazy components in `<Suspense>`
-- [ ] Type-safe with proper contract type parameter
+- [ ] Using `useLoadFeature()` hook with feature handle
+- [ ] Handling `null` return (feature disabled or loading)
+- [ ] Type-safe (types inferred from handle)
 - [ ] No direct imports from `__internal__/`
 
 ## FAQ
 
 ### Q: Can I still use Redux for feature state?
 
-Yes. Redux remains the standard for shared application state. The registry handles discovery of feature capabilities (components, hooks, services), while Redux handles data flow.
+Yes. Redux remains the standard for shared application state. Feature handles provide access to components, hooks, and services, while Redux handles data flow.
 
 ### Q: What's the difference between a handle and a contract?
 
 - **Contract** (`contract.ts`): TypeScript interface that defines the shape of the feature's public API
-- **Handle** (`handle.ts`): Runtime object that implements the contract with actual code
+- **Handle** (`handle.ts`): Runtime object with `name`, `useIsEnabled()`, and `load()` function
 
-The contract is for type safety; the handle is what gets registered in the registry.
+The contract is for type safety; the handle is what you pass to `useLoadFeature()`.
 
 ### Q: When does feature code actually load?
 
-Handles are registered at app startup, but they're tiny (just flag lookups + lazy import references). The actual feature code loads when:
+The handle is imported at app startup, but it's tiny (~100 bytes). The actual feature code loads when:
 
-1. A lazy **component** is first rendered (inside `<Suspense>`)
-2. A lazy **hook** is first called
-3. A lazy **service** method is first invoked
+1. `useLoadFeature()` is called
+2. The feature flag is enabled (`useIsEnabled()` returns `true`)
+3. The `load()` function is invoked
 
-### Q: What does `useFeature()` return?
-
-`useFeature()` combines registry lookup + feature flag check:
+### Q: What does `useLoadFeature()` return?
 
 ```typescript
-import type { MyFeatureContract } from '@/features/my-feature/contract'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useLoadFeature } from '@/features/__contracts__'
 
-const feature = useFeature<MyFeatureContract>('my-feature')
+const feature = useLoadFeature(WalletConnectFeature)
 // Returns:
-// - null if feature not registered
 // - null if feature flag is disabled
 // - null if feature flag is loading (undefined)
 // - the full feature contract if enabled and loaded
@@ -1019,19 +894,21 @@ import type { SafeSetup } from '@/features/multichain/types'
 
 ### Q: What about testing internal components?
 
-Test files inside `__internal__/` can import from the same `__internal__/` directory. External tests should use the registry.
+Test files inside `__internal__/` can import from the same `__internal__/` directory. External tests should mock the feature module.
 
-### Q: How does lazy loading work with the registry?
+### Q: How does lazy loading work?
 
-Components in the handle should use `withSuspense` to wrap lazy components:
+Components in the feature implementation should use `withSuspense` to wrap lazy components:
 
 ```typescript
+// __internal__/feature.ts
+import { lazy } from 'react'
 import { withSuspense } from '@/features/__contracts__'
 
-const handle = {
+export default {
   components: {
     // withSuspense wraps the lazy component with Suspense internally
-    Widget: withSuspense(lazy(() => import('./__internal__/components/Widget'))),
+    Widget: withSuspense(lazy(() => import('./components/Widget'))),
   },
 }
 ```
@@ -1039,14 +916,10 @@ const handle = {
 This means consumers can render components directly without wrapping in `<Suspense>`:
 
 ```typescript
-import type { MyFeatureContract } from '@/features/my-feature/contract'
-
-const feature = useFeature<MyFeatureContract>('my-feature')
+const feature = useLoadFeature(MyFeature)
 if (!feature) return null
 return <feature.components.Widget /> // No Suspense wrapper needed
 ```
-
-The component code is only loaded when first rendered.
 
 ## Reference Implementations
 

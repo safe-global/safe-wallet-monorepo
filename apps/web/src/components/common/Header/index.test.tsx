@@ -3,7 +3,7 @@ import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
 import * as useSafeTokenEnabled from '@/hooks/useSafeTokenEnabled'
-import * as featureRegistry from '@/features/__registry__'
+import * as contracts from '@/features/__contracts__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
@@ -16,8 +16,9 @@ jest.mock(
     },
 )
 
-jest.mock('@/features/__registry__', () => ({
-  useFeature: jest.fn(),
+jest.mock('@/features/__contracts__', () => ({
+  ...jest.requireActual('@/features/__contracts__'),
+  useLoadFeature: jest.fn(),
 }))
 
 jest.mock(
@@ -32,13 +33,13 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: () => true,
 }))
 
-const mockUseFeature = featureRegistry.useFeature as jest.Mock
+const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 
 describe('Header', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    // Default: WalletConnect disabled (useFeature returns null when feature is disabled)
-    mockUseFeature.mockReturnValue(null)
+    // Default: WalletConnect disabled (useLoadFeature returns null when feature is disabled)
+    mockUseLoadFeature.mockReturnValue(null)
   })
 
   it('renders the menu button when onMenuToggle is provided', () => {
@@ -104,7 +105,7 @@ describe('Header', () => {
   })
 
   it('renders the WalletConnect component when feature is enabled', () => {
-    mockUseFeature.mockReturnValue({
+    mockUseLoadFeature.mockReturnValue({
       name: 'walletconnect',
       components: {
         WalletConnectWidget: () => <div>WalletConnect</div>,
@@ -117,7 +118,7 @@ describe('Header', () => {
   })
 
   it('does not render the WalletConnect component when feature is disabled', () => {
-    // useFeature returns null when disabled (default in beforeEach)
+    // useLoadFeature returns null when disabled (default in beforeEach)
     render(<Header />)
     expect(screen.queryByText('WalletConnect')).not.toBeInTheDocument()
   })
