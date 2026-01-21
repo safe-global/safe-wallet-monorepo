@@ -5,7 +5,10 @@ export type {
   ServicesContract,
   SelectorsContract,
   FeatureContract,
+  FeatureMap,
   ExtractComponentProps,
   ExtractHookReturn,
   ExtractSelectorReturn,
 } from './types'
+
+export { withSuspense } from './withSuspense'

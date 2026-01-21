@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import type { FeatureContract } from '@/features/__contracts__'
+import type { FeatureContract, FeatureMap } from '@/features/__contracts__'
 
 /**
  * Interface for the feature registry context value.
@@ -153,12 +153,13 @@ export function useFeatureRegistry(): FeatureRegistryContextValue {
  * - Feature flag loading (undefined) → null
  * - Feature flag enabled → returns the feature contract
  *
- * @param name - The feature name to look up
+ * @param name - The feature name to look up (type is inferred from FeatureMap)
  * @returns The feature contract, or null if not available/enabled
  *
  * @example
  * function MyComponent() {
- *   const walletConnect = useFeature<WalletConnectContract>('walletconnect')
+ *   // Type is automatically inferred from FeatureMap
+ *   const walletConnect = useFeature('walletconnect')
  *
  *   // null means: not registered, disabled, or still loading
  *   if (!walletConnect) return null
@@ -168,43 +169,31 @@ export function useFeatureRegistry(): FeatureRegistryContextValue {
  *   return <Suspense fallback={<Skeleton />}><WcWidget /></Suspense>
  * }
  */
+// Overload for features registered in FeatureMap (type is inferred)
+export function useFeature<K extends keyof FeatureMap>(name: K): FeatureMap[K] | null
+// Overload for features not yet in FeatureMap (explicit type required)
+export function useFeature<T extends FeatureContract>(name: string): T | null
+// Implementation
 export function useFeature<T extends FeatureContract>(name: string): T | null {
-  const registry = useFeatureRegistry()
+  // Get context directly to avoid throwing during SSR prerendering
+  const context = useContext(FeatureRegistryContext)
 
-  // Get the feature handle from registry
+  // Get the feature handle from registry (or return undefined if no context)
   const feature = useSyncExternalStore(
-    registry.subscribe,
-    () => registry.get<T>(name),
-    () => registry.get<T>(name), // Server snapshot (same as client for SSR)
+    context?.subscribe ?? (() => () => {}),
+    () => context?.get<T>(name),
+    () => context?.get<T>(name), // Server snapshot (same as client for SSR)
   )
 
   // Check feature flag (this is a hook call, so must be unconditional)
   const isEnabled = feature?.useIsEnabled()
 
-  // Return null if not registered, disabled, or loading
-  if (!feature || isEnabled !== true) {
+  // Return null if no context, not registered, disabled, or loading
+  if (!context || !feature || isEnabled !== true) {
     return null
   }
 
   return feature
-}
-
-/**
- * Hook to get a feature's handle WITHOUT checking its feature flag.
- * Use this only when you need to access the handle regardless of enabled state.
- * For most cases, prefer `useFeature` which includes the flag check.
- *
- * @param name - The feature name to look up
- * @returns The feature handle or undefined if not registered
- */
-export function useFeatureHandle<T extends FeatureContract>(name: string): T | undefined {
-  const registry = useFeatureRegistry()
-
-  return useSyncExternalStore(
-    registry.subscribe,
-    () => registry.get<T>(name),
-    () => registry.get<T>(name),
-  )
 }
 
 /**

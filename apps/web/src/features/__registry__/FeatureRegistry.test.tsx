@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import {
   FeatureRegistryProvider,
   useFeature,
-  useFeatureHandle,
   useHasFeature,
   useRegisterFeature,
   useAllFeatures,
@@ -98,27 +97,6 @@ describe('FeatureRegistry', () => {
 
       expect(result.current?.name).toBe('typed-feature')
       expect(result.current?.customMethod()).toBe('test')
-    })
-  })
-
-  describe('useFeatureHandle', () => {
-    it('returns undefined for unregistered feature', () => {
-      const { result } = renderHook(() => useFeatureHandle('nonexistent'), { wrapper })
-
-      expect(result.current).toBeUndefined()
-    })
-
-    it('returns handle even when feature flag is disabled', () => {
-      const disabledFeature = createMockFeatureContract('disabled-handle', {
-        useIsEnabled: () => false,
-      })
-      const { wrapper: testWrapper } = createFeatureTestWrapper([disabledFeature])
-
-      const { result } = renderHook(() => useFeatureHandle('disabled-handle'), {
-        wrapper: testWrapper,
-      })
-
-      expect(result.current).toEqual(disabledFeature)
     })
   })
 

@@ -2,7 +2,6 @@ export {
   FeatureRegistryProvider,
   useFeatureRegistry,
   useFeature,
-  useFeatureHandle,
   useHasFeature,
   useRegisterFeature,
   useAllFeatures,

@@ -13,8 +13,8 @@ import { wcPopupStore } from '../../store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
-import { WCLoadingState } from '../../types'
+import type { WalletConnectContextType, WcAutoApproveProps } from '../../../types'
+import { WCLoadingState } from '../../../types'
 
 enum Errors {
   WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',

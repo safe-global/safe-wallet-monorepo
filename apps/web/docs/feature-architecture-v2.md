@@ -199,6 +199,47 @@ export type FeatureContract = BaseFeatureContract &
   Partial<SelectorsContract>
 ```
 
+### Type Inference with FeatureMap
+
+To enable automatic type inference in `useFeature()`, each feature contract should register itself in the `FeatureMap`:
+
+```typescript
+// In your contract.ts file:
+declare module '@/features/__contracts__' {
+  interface FeatureMap {
+    'my-feature': MyFeatureContract
+  }
+}
+```
+
+This allows consumers to call `useFeature('my-feature')` without explicit type parameters.
+
+### IDE Navigation (Jump-to-Definition)
+
+The registry pattern trades direct imports for loose coupling, which normally breaks IDE "jump to definition". To restore navigation, use `typeof` imports in contracts:
+
+```typescript
+// contract.ts
+// Type imports from implementations - enables IDE jump-to-definition
+import type { myService } from './__internal__/services/myService'
+import type { myStore } from './__internal__/store/myStore'
+
+export interface MyFeatureContract {
+  services: {
+    // Cmd+click on 'typeof myService' jumps to implementation
+    myService: typeof myService
+    myStore: typeof myStore
+  }
+  components: {
+    // Components wrapped with withSuspense use ComponentType + JSDoc
+    /** @see {@link ./__internal__/components/Widget/index.tsx} */
+    Widget: ComponentType
+  }
+}
+```
+
+This follows the DI pattern: contracts reference implementation _types_ (not implementations). The actual wiring happens in the handle, while the contract defines the expected shape.
+
 ### Example Contracts
 
 **Minimal Feature Contract (component only):**
@@ -206,6 +247,13 @@ export type FeatureContract = BaseFeatureContract &
 ```typescript
 // src/features/bridge/contract.ts
 import type { BaseFeatureContract, ComponentContract } from '@/features/__contracts__/types'
+
+// Register in FeatureMap for automatic type inference
+declare module '@/features/__contracts__' {
+  interface FeatureMap {
+    bridge: BridgeContract
+  }
+}
 
 export interface BridgeContract extends BaseFeatureContract, ComponentContract {
   readonly name: 'bridge'
@@ -422,24 +470,19 @@ function App({ children }) {
 
 ```typescript
 // src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
-import { Suspense } from 'react'
 import { useFeature } from '@/features/__registry__'
-import type { HypernativeContract } from '@/features/hypernative/contract'
+// Import contract to activate FeatureMap type inference
+import '@/features/hypernative/contract'
 
 function SafeShieldScanner() {
+  // Type is automatically inferred from FeatureMap (no explicit generic needed)
   // Returns null if hypernative is disabled or not registered
-  const hypernative = useFeature<HypernativeContract>('hypernative')
+  const hypernative = useFeature('hypernative')
 
   if (!hypernative) return null
 
-  // Feature is enabled - render lazy component
-  const Scanner = hypernative.components.Scanner
-
-  return (
-    <Suspense fallback={<Skeleton />}>
-      <Scanner />
-    </Suspense>
-  )
+  // Feature is enabled - render component directly (already wrapped with Suspense)
+  return <hypernative.components.Scanner />
 }
 ```
 
@@ -599,6 +642,7 @@ Each feature exposes exactly three things:
 import { lazy } from 'react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { withSuspense } from '@/features/__contracts__'
 import type { MyFeatureContract } from './contract'
 
 export const myFeatureHandle: MyFeatureContract = {
@@ -607,9 +651,9 @@ export const myFeatureHandle: MyFeatureContract = {
   // STATIC: Just a flag lookup - this is bundled, not lazy
   useIsEnabled: () => useHasFeature(FEATURES.MY_FEATURE),
 
-  // LAZY: Components load when rendered
+  // LAZY: Components wrapped with Suspense so consumers don't need to
   components: {
-    Widget: lazy(() => import('./__internal__/components/Widget')),
+    Widget: withSuspense(lazy(() => import('./__internal__/components/Widget'))),
   },
 
   // LAZY: Hooks load on first call
@@ -874,23 +918,18 @@ function SafeShieldScanner() {
 
 ```typescript
 // src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
-import { Suspense } from 'react'
 import { useFeature } from '@/features/__registry__'
-import type { HypernativeContract } from '@/features/hypernative/contract'
+// Import contract to activate FeatureMap type inference
+import '@/features/hypernative/contract'
 
 function SafeShieldScanner() {
-  // null if hypernative is disabled or not registered
-  const hypernative = useFeature<HypernativeContract>('hypernative')
+  // Type is auto-inferred, null if hypernative is disabled or not registered
+  const hypernative = useFeature('hypernative')
 
   if (!hypernative) return null
 
-  const Banner = hypernative.components.Banner
-
-  return (
-    <Suspense fallback={<Skeleton />}>
-      <Banner />
-    </Suspense>
-  )
+  // Components are pre-wrapped with Suspense - no wrapper needed
+  return <hypernative.components.Banner />
 }
 ```
 
@@ -952,7 +991,8 @@ Handles are registered at app startup, but they're tiny (just flag lookups + laz
 `useFeature()` combines registry lookup + feature flag check:
 
 ```typescript
-const feature = useFeature<MyContract>('my-feature')
+// Type is automatically inferred from FeatureMap
+const feature = useFeature('my-feature')
 // Returns:
 // - null if feature not registered
 // - null if feature flag is disabled
@@ -965,15 +1005,6 @@ This means one simple null check handles all cases:
 ```typescript
 if (!feature) return null // Not available (any reason)
 // Feature is enabled and ready to use
-```
-
-### Q: What if I need the handle even when disabled?
-
-Use `useFeatureHandle()` instead - it returns the raw handle without checking the flag:
-
-```typescript
-const handle = useFeatureHandle<MyContract>('my-feature')
-// Returns undefined if not registered, but ignores flag state
 ```
 
 ### Q: How do I share types between features?
@@ -990,17 +1021,28 @@ Test files inside `__internal__/` can import from the same `__internal__/` direc
 
 ### Q: How does lazy loading work with the registry?
 
-Components in the contract can be lazy-loaded:
+Components in the handle should use `withSuspense` to wrap lazy components:
 
 ```typescript
-const contract = {
+import { withSuspense } from '@/features/__contracts__'
+
+const handle = {
   components: {
-    Widget: lazy(() => import('./__internal__/components/Widget')),
+    // withSuspense wraps the lazy component with Suspense internally
+    Widget: withSuspense(lazy(() => import('./__internal__/components/Widget'))),
   },
 }
 ```
 
-The component is only loaded when first rendered.
+This means consumers can render components directly without wrapping in `<Suspense>`:
+
+```typescript
+const feature = useFeature('my-feature')
+if (!feature) return null
+return <feature.components.Widget /> // No Suspense wrapper needed
+```
+
+The component code is only loaded when first rendered.
 
 ## Reference Implementations
 
