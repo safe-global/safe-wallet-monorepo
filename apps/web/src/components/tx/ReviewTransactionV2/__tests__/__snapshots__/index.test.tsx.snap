@@ -205,7 +205,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Safe Utils
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Transaction Decoder
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"

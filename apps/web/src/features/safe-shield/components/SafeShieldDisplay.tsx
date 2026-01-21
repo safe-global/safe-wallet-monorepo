@@ -47,12 +47,16 @@ export const SafeShieldDisplay = ({
   threat,
   safeTx,
   hypernativeAuth,
+  showHypernativeInfo = true,
+  showHypernativeActiveStatus = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
   hypernativeAuth?: HypernativeAuthStatus
+  showHypernativeInfo?: boolean
+  showHypernativeActiveStatus?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -82,6 +86,8 @@ export const SafeShieldDisplay = ({
           safeTx={safeTx}
           overallStatus={overallStatus}
           hypernativeAuth={hypernativeAuth}
+          showHypernativeInfo={showHypernativeInfo}
+          showHypernativeActiveStatus={showHypernativeActiveStatus}
         />
       </Card>
 

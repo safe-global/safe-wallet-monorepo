@@ -1,5 +1,6 @@
 import {
   HypernativeAssessmentData,
+  HypernativeBalanceChanges,
   HypernativeRiskSeverity,
   HypernativeTx,
 } from '@safe-global/utils/features/safe-shield/types/hypernative.type'
@@ -38,6 +39,53 @@ export function isHypernativeAssessmentFailedResponse(error: unknown): error is 
 
 export type HypernativeAssessmentRequestWithAuthDto = HypernativeAssessmentRequestDto & {
   authToken: string
+}
+
+/**
+ * DTOs for Hypernative batch assessment retrieval
+ */
+
+export type HypernativeBatchAssessmentRequestDto = {
+  safeTxHashes: `0x${string}`[]
+}
+
+export type HypernativeBatchAssessmentResponseItemDto = {
+  safeTxHash: `0x${string}`
+  status: 'OK' | 'NOT_FOUND'
+  assessmentData: HypernativeAssessmentData | null
+  parsedActions?: {
+    approval?: unknown[]
+    transfer?: unknown[]
+  }
+  balanceChanges?: HypernativeBalanceChanges
+}
+
+export type HypernativeBatchAssessmentResponseDto = { data: HypernativeBatchAssessmentResponseItemDto[] }
+
+export type HypernativeBatchAssessmentRequestWithAuthDto = HypernativeBatchAssessmentRequestDto & {
+  authToken: string
+}
+
+export type HypernativeBatchAssessmentErrorDto = {
+  status: 'FAILED'
+  error: {
+    reason: 'INVALID_REQUEST' | 'INTERNAL_ERROR'
+    message: string
+  }
+}
+
+export function isHypernativeBatchAssessmentErrorResponse(error: unknown): error is HypernativeBatchAssessmentErrorDto {
+  return (
+    typeof error === 'object' &&
+    error != null &&
+    'status' in error &&
+    error.status === 'FAILED' &&
+    'error' in error &&
+    typeof (error as HypernativeBatchAssessmentErrorDto).error === 'object' &&
+    (error as HypernativeBatchAssessmentErrorDto).error != null &&
+    'reason' in (error as HypernativeBatchAssessmentErrorDto).error &&
+    'message' in (error as HypernativeBatchAssessmentErrorDto).error
+  )
 }
 
 /**

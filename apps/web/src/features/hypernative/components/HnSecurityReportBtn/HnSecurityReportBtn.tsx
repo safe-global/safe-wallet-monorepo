@@ -4,6 +4,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from './config'
 import type { ReactElement } from 'react'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
+import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
 
 import css from './styles.module.css'
 
@@ -11,15 +12,6 @@ interface HnSecurityReportBtnProps {
   chainId: string
   safe: string
   tx: string
-}
-
-const buildSecurityReportUrl = (baseUrl: string, chainId: string, safe: string, tx: string): string => {
-  const url = new URL(baseUrl)
-  url.searchParams.set('chain', `evm:${chainId}`)
-  url.searchParams.set('safe', safe)
-  url.searchParams.set('tx', tx)
-  url.searchParams.set('referrer', 'safe')
-  return url.toString()
 }
 
 const onBtnClick = () => {

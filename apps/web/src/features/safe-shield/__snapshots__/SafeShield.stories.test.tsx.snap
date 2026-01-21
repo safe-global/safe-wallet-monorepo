@@ -2146,7 +2146,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1ozroib-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1yrwrlj-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
@@ -2180,7 +2180,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                   >
                     <mock-icon
                       aria-hidden=""
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1ozroib-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1yrwrlj-MuiSvgIcon-root"
                       focusable="false"
                     />
                     <p
@@ -4321,7 +4321,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                         fallback handler
                                         <svg
                                           aria-hidden="true"
-                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                           data-testid="OpenInNewRoundedIcon"
                                           focusable="false"
                                           viewBox="0 0 24 24"
@@ -5220,7 +5220,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                         fallback handler
                                         <svg
                                           aria-hidden="true"
-                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                           data-testid="OpenInNewRoundedIcon"
                                           focusable="false"
                                           viewBox="0 0 24 24"
@@ -5919,7 +5919,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                         fallback handler
                                         <svg
                                           aria-hidden="true"
-                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                           data-testid="OpenInNewRoundedIcon"
                                           focusable="false"
                                           viewBox="0 0 24 24"
@@ -6608,7 +6608,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                         fallback handler
                                         <svg
                                           aria-hidden="true"
-                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                           data-testid="OpenInNewRoundedIcon"
                                           focusable="false"
                                           viewBox="0 0 24 24"

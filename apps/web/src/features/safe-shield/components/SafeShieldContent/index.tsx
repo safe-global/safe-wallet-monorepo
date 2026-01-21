@@ -31,6 +31,8 @@ export const SafeShieldContent = ({
   safeTx,
   overallStatus,
   hypernativeAuth,
+  showHypernativeInfo = true,
+  showHypernativeActiveStatus = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -38,6 +40,8 @@ export const SafeShieldContent = ({
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
+  showHypernativeInfo?: boolean
+  showHypernativeActiveStatus?: boolean
 }): ReactElement => {
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
@@ -68,7 +72,9 @@ export const SafeShieldContent = ({
           position: 'relative',
         }}
       >
-        <HypernativeInfo hypernativeAuth={hypernativeAuth} />
+        {showHypernativeInfo && (
+          <HypernativeInfo hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+        )}
 
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
 
