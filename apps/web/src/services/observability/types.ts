@@ -10,18 +10,4 @@ export interface IObservabilityProvider {
   init: () => void | Promise<void>
   getLogger: () => ILogger
   captureException: (error: Error, context?: Record<string, unknown>) => void
-  getErrorBoundary?: () =>
-    | React.ComponentType<{
-        children: React.ReactNode
-        onError?: (error: Error, componentStack?: string) => void
-        fallback?: React.ReactNode
-        showDialog?: boolean
-      }>
-    | undefined
-}
-
-export interface ObservabilityConfig {
-  enabled: boolean
-  environment?: string
-  version?: string
 }

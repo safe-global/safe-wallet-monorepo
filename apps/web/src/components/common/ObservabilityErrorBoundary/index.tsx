@@ -5,7 +5,6 @@ interface ObservabilityErrorBoundaryProps {
   children: ReactNode
   onError?: (error: Error, componentStack?: string) => void
   fallback?: ReactNode
-  showDialog?: boolean
 }
 
 interface ObservabilityErrorBoundaryState {
