@@ -24,7 +24,7 @@ A **feature** is a self-contained domain module that:
 - Implements a typed **Feature Contract** interface
 - Exports a **Feature Handle** for lazy loading
 - Follows one of three **tiers** based on complexity
-- Has explicit **public** and **internal** boundaries
+- Has explicit **public API** enforced via ESLint (only `index.ts` exports)
 - Communicates with other features via **Redux** (data) or direct imports of feature handles
 
 ### Key Principles
@@ -228,7 +228,7 @@ For navigating to implementation details from contracts, use `typeof` imports:
 
 ```typescript
 // contract.ts
-import type { myService } from './__internal__/services/myService'
+import type { myService } from './services/myService'
 
 export interface MyFeatureContract {
   services: {
@@ -374,7 +374,7 @@ export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
   useIsEnabled: () => useHasFeature(FEATURES.NATIVE_WALLETCONNECT),
 
   // LAZY: Loads the full feature only when enabled + accessed
-  load: () => import('./__internal__/feature'),
+  load: () => import('./feature'),
 }
 ```
 
@@ -438,10 +438,10 @@ For features with hooks, selectors, or shared state.
 
 **Required files:**
 
-- `index.ts` - Default export + contract registration
+- `index.ts` - Public API (only externally-accessible exports)
 - `contract.ts` - Feature contract type definition
 - `types.ts` - Public type definitions (optional if no public types)
-- `__internal__/` - All implementation details
+- `components/`, `hooks/`, etc. - Implementation (ESLint blocks external imports)
 
 **Examples:** multichain, positions, myAccounts
 
@@ -457,29 +457,26 @@ For complex features with services, extensive state, and cross-feature interacti
 
 **Required files:**
 
-- `index.ts` - Contract registration and lazy exports
+- `index.ts` - Public API (only externally-accessible exports)
 - `contract.ts` - Full feature contract
 - `types.ts` - Public type definitions
-- `__internal__/` - All implementation details
-  - `components/`
-  - `hooks/`
-  - `services/`
-  - `store/`
+- `handle.ts` - Feature handle (internal)
+- `feature.ts` - Lazy-loaded implementation
+- `components/`, `hooks/`, `services/`, `store/` - Implementation details
 
 **Examples:** walletconnect, recovery, hypernative
 
 ### Tier Comparison
 
-| Aspect          | Minimal  | Standard  | Full   |
-| --------------- | -------- | --------- | ------ |
-| `contract.ts`   | ✓        | ✓         | ✓      |
-| `index.ts`      | ✓        | ✓         | ✓      |
-| `types.ts`      | Optional | If needed | ✓      |
-| `__internal__/` | Optional | ✓         | ✓      |
-| Feature flag    | Optional | ✓         | ✓      |
-| Redux store     | ✗        | Optional  | Common |
-| Services        | ✗        | Optional  | Common |
-| Registry hooks  | Optional | ✓         | ✓      |
+| Aspect        | Minimal  | Standard  | Full   |
+| ------------- | -------- | --------- | ------ |
+| `contract.ts` | ✓        | ✓         | ✓      |
+| `index.ts`    | ✓        | ✓         | ✓      |
+| `types.ts`    | Optional | If needed | ✓      |
+| `handle.ts`   | Optional | ✓         | ✓      |
+| Feature flag  | Optional | ✓         | ✓      |
+| Redux store   | ✗        | Optional  | Common |
+| Services      | ✗        | Optional  | Common |
 
 ## Folder Structure by Tier
 
@@ -507,43 +504,46 @@ export default Bridge
 
 ```
 src/features/multichain/
+├── index.ts              # Public API exports
 ├── handle.ts             # Feature handle (static flag + lazy refs)
 ├── contract.ts           # MultichainContract type
 ├── types.ts              # Public types (SafeSetup, etc.)
-└── __internal__/
-    ├── components/
-    │   ├── CreateSafeOnNewChain.tsx
-    │   └── NetworkLogosList.tsx
-    ├── hooks/
-    │   └── useIsMultichainSafe.ts
-    └── utils/
-        └── addressPrediction.ts
+├── components/           # (ESLint blocks external imports)
+│   ├── CreateSafeOnNewChain.tsx
+│   └── NetworkLogosList.tsx
+├── hooks/
+│   └── useIsMultichainSafe.ts
+└── utils/
+    └── addressPrediction.ts
 ```
 
 ### Tier 3: Full
 
 ```
 src/features/walletconnect/
+├── index.ts              # Public API exports
 ├── handle.ts             # Feature handle (static flag + lazy refs)
 ├── contract.ts           # WalletConnectContract type
 ├── types.ts              # Public types
-└── __internal__/
-    ├── components/
-    │   ├── WalletConnectWidget/
-    │   │   ├── index.tsx
-    │   │   └── index.test.tsx
-    │   └── WcSessionManager/
-    ├── hooks/
-    │   ├── useWcUri.ts
-    │   └── index.ts      # Internal barrel (optional)
-    ├── services/
-    │   ├── walletConnectService.ts
-    │   └── sessionManager.ts
-    ├── store/
-    │   ├── wcSlice.ts
-    │   └── selectors.ts
-    └── constants.ts
+├── feature.ts            # Lazy-loaded implementation
+├── constants.ts          # Feature constants
+├── components/           # (ESLint blocks external imports)
+│   ├── WalletConnectWidget/
+│   │   ├── index.tsx
+│   │   └── index.test.tsx
+│   └── WcSessionManager/
+├── hooks/
+│   ├── useWcUri.ts
+│   └── index.ts
+├── services/
+│   ├── walletConnectService.ts
+│   └── sessionManager.ts
+└── store/
+    ├── wcSlice.ts
+    └── selectors.ts
 ```
+
+**Note:** ESLint enforces that external code can only import from `index.ts`, `contract.ts`, and `types.ts`. All other files (components/, hooks/, services/, etc.) are internal and blocked from external imports.
 
 ## Public API Pattern
 
@@ -557,31 +557,20 @@ Each feature exposes exactly three things:
 
 ```typescript
 // src/features/{feature-name}/handle.ts
-// IMPORTANT: This file must be SMALL - only static imports for flag lookup
-import { lazy } from 'react'
+// IMPORTANT: This file must be SMALL (~100 bytes) - only flag lookup + lazy loader
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { withSuspense } from '@/features/__contracts__'
-import type { MyFeatureContract } from './contract'
+import type { FeatureHandle } from '@/features/__contracts__'
+import type { MyFeatureImplementation } from './contract'
 
-export const myFeatureHandle: MyFeatureContract = {
+export const myFeatureHandle: FeatureHandle<MyFeatureImplementation> = {
   name: 'my-feature',
 
   // STATIC: Just a flag lookup - this is bundled, not lazy
   useIsEnabled: () => useHasFeature(FEATURES.MY_FEATURE),
 
-  // LAZY: Components wrapped with Suspense so consumers don't need to
-  components: {
-    Widget: withSuspense(lazy(() => import('./__internal__/components/Widget'))),
-  },
-
-  // LAZY: Hooks load on first call
-  hooks: {
-    useData: () => {
-      const { useData } = require('./__internal__/hooks/useData')
-      return useData()
-    },
-  },
+  // LAZY: Loads the full feature only when enabled + accessed
+  load: () => import('./feature'),
 }
 ```
 
@@ -648,7 +637,7 @@ The module-level cache pattern makes testing straightforward.
 ### Unit Testing a Feature
 
 ```typescript
-// src/features/safe-shield/__internal__/components/__tests__/SafeShieldScanner.test.tsx
+// src/features/safe-shield/components/__tests__/SafeShieldScanner.test.tsx
 import { render, screen, waitFor } from '@testing-library/react'
 import { clearFeatureCache } from '@/features/__contracts__'
 
@@ -714,23 +703,23 @@ it('renders nothing when feature is disabled', () => {
 ```javascript
 // apps/web/eslint.config.mjs
 'no-restricted-imports': [
-  'error',
+  'warn', // 'error' after migration is complete
   {
     patterns: [
-      // Block all __internal__ imports from outside the feature
       {
-        group: ['@/features/*/__internal__/*', '@/features/*/__internal__/**/*'],
-        message: 'Cannot import feature internals. Use the feature registry instead.',
-      },
-      // Block direct imports from feature subdirectories (legacy pattern)
-      {
+        // Block internal feature folders
         group: [
           '@/features/*/components/*',
           '@/features/*/hooks/*',
           '@/features/*/services/*',
           '@/features/*/store/*',
         ],
-        message: 'Import from feature index or use feature registry.',
+        message: 'Import from feature index file only (e.g., @/features/walletconnect).',
+      },
+      {
+        // Block internal file imports (handle.ts is internal)
+        group: ['@/features/*/handle'],
+        message: 'Import from feature index file only. The handle is internal.',
       },
     ],
   },
@@ -750,8 +739,9 @@ import type { MyFeatureContract } from '@/features/my-feature/contract'
 import type { MyFeatureData } from '@/features/my-feature/types'
 
 // ❌ Blocked: Internal imports
-import { useInternalHook } from '@/features/my-feature/__internal__/hooks'
-import { InternalComponent } from '@/features/my-feature/__internal__/components'
+import { useInternalHook } from '@/features/my-feature/hooks/useInternal'
+import { InternalComponent } from '@/features/my-feature/components/Internal'
+import { myFeatureHandle } from '@/features/my-feature/handle' // Use index.ts instead
 ```
 
 ## Migration Guide
@@ -770,7 +760,7 @@ For each feature:
 2. **Create contract.ts** defining the feature's public API type
 3. **Create handle.ts** with static flag + lazy load function
 4. **Create index.ts** exporting `{FeatureName}Feature` from handle
-5. **Move internals** to `__internal__/` folder
+5. **Organize internals** in `components/`, `hooks/`, `services/`, `store/` folders
 6. **Update consumers** to use `useLoadFeature()` with the feature handle
 7. **Verify** with `yarn lint && yarn type-check && yarn test`
 
@@ -798,7 +788,7 @@ function SafeShieldScanner() {
 **After (feature handle - lazy loading):**
 
 ```typescript
-// src/features/safe-shield/__internal__/components/SafeShieldScanner.tsx
+// src/features/safe-shield/components/SafeShieldScanner.tsx
 import { HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__contracts__'
 
@@ -820,9 +810,9 @@ function SafeShieldScanner() {
 - [ ] Created `contract.ts` with typed contract interface
 - [ ] Created `handle.ts` with static `useIsEnabled` + lazy `load()` function
 - [ ] Created `index.ts` exporting `{FeatureName}Feature` from handle
-- [ ] Placed all implementation in `__internal__/` (if Standard or Full tier)
+- [ ] Organized implementation in `components/`, `hooks/`, `services/`, `store/`
 - [ ] Created `types.ts` for public types (if needed)
-- [ ] No direct imports of other features' internals
+- [ ] No direct imports of other features' internal folders
 - [ ] All cross-feature communication via Redux or feature handles
 
 ### For Existing Features (Migration)
@@ -830,9 +820,9 @@ function SafeShieldScanner() {
 - [ ] Created `contract.ts`
 - [ ] Created `handle.ts`
 - [ ] Created `index.ts` with `{FeatureName}Feature` export
-- [ ] Moved internals to `__internal__/`
+- [ ] Organized internals in `components/`, `hooks/`, `services/`, `store/`
 - [ ] Updated all external consumers to use `useLoadFeature()`
-- [ ] Removed barrel file exports of internals
+- [ ] Removed direct exports of internal files from `index.ts`
 - [ ] Verified no ESLint warnings
 - [ ] Tests pass
 
@@ -841,7 +831,7 @@ function SafeShieldScanner() {
 - [ ] Using `useLoadFeature()` hook with feature handle
 - [ ] Handling `null` return (feature disabled or loading)
 - [ ] Type-safe (types inferred from handle)
-- [ ] No direct imports from `__internal__/`
+- [ ] No direct imports from feature internal folders (components/, hooks/, etc.)
 
 ## FAQ
 
@@ -894,14 +884,14 @@ import type { SafeSetup } from '@/features/multichain/types'
 
 ### Q: What about testing internal components?
 
-Test files inside `__internal__/` can import from the same `__internal__/` directory. External tests should mock the feature module.
+Test files inside a feature can import from other files within the same feature freely. External tests should mock the feature module.
 
 ### Q: How does lazy loading work?
 
 Components in the feature implementation should use `withSuspense` to wrap lazy components:
 
 ```typescript
-// __internal__/feature.ts
+// feature.ts
 import { lazy } from 'react'
 import { withSuspense } from '@/features/__contracts__'
 

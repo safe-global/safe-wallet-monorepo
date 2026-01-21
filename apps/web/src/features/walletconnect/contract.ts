@@ -2,10 +2,10 @@ import type { ComponentType } from 'react'
 import type { FeatureImplementation } from '@/features/__contracts__'
 
 // Type imports from implementations - enables IDE jump-to-definition
-import type WalletConnectWallet from './__internal__/services/WalletConnectWallet'
-import type { isSafePassApp } from './__internal__/services/utils'
-import type { wcPopupStore } from './__internal__/store/wcPopupStore'
-import type { wcChainSwitchStore } from './__internal__/store/wcChainSwitchSlice'
+import type WalletConnectWallet from './services/WalletConnectWallet'
+import type { isSafePassApp } from './services/utils'
+import type { wcPopupStore } from './store/wcPopupStore'
+import type { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 
 /**
  * WalletConnect Feature Implementation - the lazy-loaded part.
@@ -15,7 +15,7 @@ export interface WalletConnectImplementation extends FeatureImplementation {
   components: {
     /**
      * Main WalletConnect widget for the header.
-     * @see {@link ./__internal__/components/WalletConnectUi/index.tsx}
+     * @see {@link ./components/WalletConnectUi/index.tsx}
      */
     WalletConnectWidget: ComponentType
   }

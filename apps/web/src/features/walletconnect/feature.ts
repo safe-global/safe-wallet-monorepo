@@ -13,7 +13,7 @@
  * This ensures the WalletConnect SDK and all related code
  * is NOT included in the bundle when the feature is disabled.
  */
-import type { WalletConnectImplementation } from '../contract'
+import type { WalletConnectImplementation } from './contract'
 import { withSuspense } from '@/features/__contracts__'
 import { lazy } from 'react'
 

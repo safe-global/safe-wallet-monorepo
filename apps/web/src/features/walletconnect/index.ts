@@ -41,22 +41,19 @@ export { WCLoadingState } from './types'
 // New code should use the feature registry instead.
 
 // Stores (used by safe-wallet-provider)
-export { wcPopupStore, openWalletConnect, wcChainSwitchStore } from './__internal__/store'
+export { wcPopupStore, openWalletConnect, wcChainSwitchStore } from './store'
 
 // Services (used by safe-wallet-provider, AppFrame)
-export { isSafePassApp } from './__internal__/services/utils'
-export { default as walletConnectInstance } from './__internal__/services/walletConnectInstance'
+export { isSafePassApp } from './services/utils'
+export { default as walletConnectInstance } from './services/walletConnectInstance'
 
 // Hooks (used by wc.tsx page)
-export {
-  WC_URI_SEARCH_PARAM,
-  useWalletConnectSearchParamUri,
-} from './__internal__/hooks/useWalletConnectSearchParamUri'
-export { useIsWalletConnectEnabled } from './__internal__/hooks/useIsWalletConnectEnabled'
-export { default as useWcUri } from './__internal__/hooks/useWcUri'
+export { WC_URI_SEARCH_PARAM, useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
+export { useIsWalletConnectEnabled } from './hooks/useIsWalletConnectEnabled'
+export { default as useWcUri } from './hooks/useWcUri'
 
 // Components (used by Header)
-export { WalletConnectContext, WalletConnectProvider } from './__internal__/components/WalletConnectContext'
+export { WalletConnectContext, WalletConnectProvider } from './components/WalletConnectContext'
 
 // Constants (exported for completeness)
 export {
@@ -67,11 +64,8 @@ export {
   BlockedBridges,
   WarnedBridges,
   WarnedBridgeNames,
-} from './__internal__/constants'
+} from './constants'
 
-// Default export: Lazy-loaded WalletConnect widget
-import dynamic from 'next/dynamic'
-
-const WalletConnectWidget = dynamic(() => import('./__internal__/components/WalletConnectUi'), { ssr: false })
-
-export default WalletConnectWidget
+// Default export: WalletConnect widget component
+// Note: For lazy loading, use useLoadFeature(WalletConnectFeature) instead
+export { default as default } from './components/WalletConnectUi'

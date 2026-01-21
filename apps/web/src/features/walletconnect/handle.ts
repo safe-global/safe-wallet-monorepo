@@ -22,5 +22,5 @@ export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
   useIsEnabled: () => useHasFeature(FEATURES.NATIVE_WALLETCONNECT),
 
   // LAZY: Loads the full feature only when enabled + accessed
-  load: () => import('./__internal__/feature'),
+  load: () => import('./feature'),
 }

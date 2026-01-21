@@ -4,7 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type WalletConnectWallet from './__internal__/services/WalletConnectWallet'
+import type WalletConnectWallet from './services/WalletConnectWallet'
 
 export enum WCLoadingState {
   APPROVE = 'Approve',
