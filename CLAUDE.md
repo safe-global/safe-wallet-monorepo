@@ -21,6 +21,14 @@ yarn workspace @safe-global/web test
 git add .
 git commit -m "feat: your change description"
 
+# Semantic commit prefixes:
+# - feat: new features
+# - fix: bug fixes
+# - chore: CI/CD, build, config changes (NEVER use feat/fix for CI)
+# - tests: changes in unit or e2e tests (NEVER use feat/fix for tests)
+# - refactor: code refactoring
+# - docs: documentation
+
 # Push to your branch
 git push -u origin feature/your-feature-name
 
