@@ -7,6 +7,7 @@ import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useFilteredNestedSafes } from '@/hooks/useFilteredNestedSafes'
 
 import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
@@ -26,7 +27,16 @@ export function NestedSafesButton({
     { ownerAddress: safeAddress },
     { skip: !isEnabled || !safeAddress },
   )
-  const nestedSafes = ownedSafes?.[chainId] ?? []
+  const rawNestedSafes = ownedSafes?.[chainId] ?? []
+  const {
+    nestedSafes,
+    isLoading: isFilteringNestedSafes,
+    startFiltering,
+    hasStarted,
+  } = useFilteredNestedSafes(rawNestedSafes, chainId)
+
+  // Show count based on filtering state
+  const displayCount = hasStarted && !isFilteringNestedSafes ? nestedSafes.length : rawNestedSafes.length
 
   if (!isEnabled || !safe.deployed) {
     return null
@@ -34,6 +44,8 @@ export function NestedSafesButton({
 
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
+    // Start filtering when popover is opened
+    startFiltering()
   }
   const onClose = () => {
     setAnchorEl(null)
@@ -42,7 +54,7 @@ export function NestedSafesButton({
   return (
     <>
       <Tooltip title="Nested Safes" placement="top">
-        <Badge invisible={nestedSafes.length > 0} variant="dot" className={css.badge}>
+        <Badge invisible={displayCount > 0} variant="dot" className={css.badge}>
           <IconButton
             className={headerCss.iconButton}
             sx={{
@@ -53,15 +65,20 @@ export function NestedSafesButton({
             onClick={onClick}
           >
             <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" fontSize="small" />
-            {nestedSafes.length > 0 && (
+            {displayCount > 0 && (
               <Typography component="span" variant="caption" className={css.count}>
-                {nestedSafes.length}
+                {displayCount}
               </Typography>
             )}
           </IconButton>
         </Badge>
       </Tooltip>
-      <NestedSafesPopover anchorEl={anchorEl} onClose={onClose} nestedSafes={nestedSafes} />
+      <NestedSafesPopover
+        anchorEl={anchorEl}
+        onClose={onClose}
+        nestedSafes={hasStarted && !isFilteringNestedSafes ? nestedSafes : []}
+        isLoading={isFilteringNestedSafes}
+      />
     </>
   )
 }

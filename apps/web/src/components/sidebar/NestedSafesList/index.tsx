@@ -1,5 +1,5 @@
 import { ChevronRight } from '@mui/icons-material'
-import { List, Typography, Box } from '@mui/material'
+import { List, Typography, Box, SvgIcon, Tooltip } from '@mui/material'
 
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
@@ -13,6 +13,8 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { skipToken } from '@reduxjs/toolkit/query'
+import type { NestedSafeItem } from '@/hooks/useFilteredNestedSafes'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 
 const MAX_NESTED_SAFES = 5
 
@@ -21,26 +23,37 @@ export function NestedSafesList({
   nestedSafes,
 }: {
   onClose: () => void
-  nestedSafes: Array<string>
+  nestedSafes: Array<NestedSafeItem>
 }): ReactElement {
   const [showAll, setShowAll] = useState(false)
   const chain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
   const wallet = useWallet()
 
-  const safeItems: SafeItem[] = useMemo(() => {
+  const safeItems: (SafeItem & { isValid: boolean })[] = useMemo(() => {
     if (!chain) return []
-    return nestedSafes.map((address) => ({
+    return nestedSafes.map(({ address, isValid }) => ({
       address,
       chainId: chain.chainId,
       isReadOnly: false,
       isPinned: false,
       lastVisited: 0,
       name: undefined,
+      isValid,
     }))
   }, [nestedSafes, chain])
 
-  const nestedSafesToShow = showAll ? safeItems : safeItems.slice(0, MAX_NESTED_SAFES)
+  const validSafes = useMemo(() => safeItems.filter((item) => item.isValid), [safeItems])
+  const invalidSafes = useMemo(() => safeItems.filter((item) => !item.isValid), [safeItems])
+
+  // Always show first N valid safes
+  const initialSafes = validSafes.slice(0, MAX_NESTED_SAFES)
+
+  // Hidden safes: remaining valid safes + all invalid safes
+  const hiddenSafes = [...validSafes.slice(MAX_NESTED_SAFES), ...invalidSafes]
+
+  // Show accordion if there are hidden safes
+  const hasMoreToShow = hiddenSafes.length > 0
 
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
     safeItems.length > 0 && chain
@@ -52,31 +65,54 @@ export function NestedSafesList({
       : skipToken,
   )
 
-  const onShowAll = () => {
-    setShowAll(true)
+  const renderSafeItem = (safeItem: (typeof safeItems)[0]) => {
+    const safeOverview = safeOverviews?.find(
+      (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
+    )
+    return (
+      <Box
+        key={safeItem.address}
+        sx={{
+          width: '100%',
+          opacity: safeItem.isValid ? 1 : 0.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+        }}
+      >
+        {!safeItem.isValid && (
+          <Tooltip title="This Safe was not created by the parent Safe or its signers" placement="top">
+            <SvgIcon
+              component={WarningIcon}
+              inheritViewBox
+              fontSize="small"
+              sx={{ color: 'warning.main', flexShrink: 0 }}
+            />
+          </Tooltip>
+        )}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
+            <SingleAccountItem
+              onLinkClick={onClose}
+              safeItem={safeItem}
+              safeOverview={safeOverview}
+              showActions={false}
+              showChainBadge={false}
+              hidePendingTxs={!safeItem.isValid}
+            />
+          </Track>
+        </Box>
+      </Box>
+    )
   }
 
   return (
     <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
-      {nestedSafesToShow.map((safeItem) => {
-        const safeOverview = safeOverviews?.find(
-          (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
-        )
-        return (
-          <Box key={safeItem.address} sx={{ width: '100%' }}>
-            <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
-              <SingleAccountItem
-                onLinkClick={onClose}
-                safeItem={safeItem}
-                safeOverview={safeOverview}
-                showActions={false}
-                showChainBadge={false}
-              />
-            </Track>
-          </Box>
-        )
-      })}
-      {safeItems.length > MAX_NESTED_SAFES && !showAll && (
+      {/* Always show initial valid safes */}
+      {initialSafes.map(renderSafeItem)}
+
+      {/* Accordion header */}
+      {hasMoreToShow && (
         <Track {...NESTED_SAFE_EVENTS.SHOW_ALL}>
           <Typography
             variant="caption"
@@ -84,13 +120,20 @@ export function NestedSafesList({
             textTransform="uppercase"
             fontWeight={700}
             sx={{ cursor: 'pointer', textAlign: 'center', py: 1 }}
-            onClick={onShowAll}
+            onClick={() => setShowAll((prev) => !prev)}
           >
-            Show all Nested Safes
-            <ChevronRight color="border" sx={{ transform: 'rotate(90deg)', ml: 1 }} fontSize="inherit" />
+            {showAll ? 'Show less' : 'Show all Nested Safes'}
+            <ChevronRight
+              color="border"
+              sx={{ transform: showAll ? 'rotate(-90deg)' : 'rotate(90deg)', ml: 1 }}
+              fontSize="inherit"
+            />
           </Typography>
         </Track>
       )}
+
+      {/* Hidden safes shown when expanded */}
+      {showAll && hiddenSafes.map(renderSafeItem)}
     </List>
   )
 }

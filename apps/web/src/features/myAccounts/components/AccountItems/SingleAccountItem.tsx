@@ -48,6 +48,7 @@ type AccountItemProps = {
   onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
   showActions?: boolean
   showChainBadge?: boolean
+  hidePendingTxs?: boolean
 }
 
 const SingleAccountItem = ({
@@ -59,6 +60,7 @@ const SingleAccountItem = ({
   onSelectSafe,
   showActions = true,
   showChainBadge = true,
+  hidePendingTxs = false,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useChain(chainId)
@@ -205,6 +207,7 @@ const SingleAccountItem = ({
             href={href}
             onLinkClick={onLinkClick}
             trackingLabel={trackingLabel}
+            hidePendingTxs={hidePendingTxs}
           />
         )}
       </Typography>
@@ -274,6 +277,7 @@ const SingleAccountItem = ({
           href={href}
           onLinkClick={onLinkClick}
           trackingLabel={trackingLabel}
+          hidePendingTxs={hidePendingTxs}
         />
       )}
     </>

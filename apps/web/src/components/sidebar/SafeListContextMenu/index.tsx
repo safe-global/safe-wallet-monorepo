@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react'
-import { useState, type ReactElement } from 'react'
+import { useState, useMemo, type ReactElement } from 'react'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import IconButton from '@mui/material/IconButton'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -23,6 +23,7 @@ import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/A
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
+import type { NestedSafeItem } from '@/hooks/useFilteredNestedSafes'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -91,7 +92,12 @@ const SafeListContextMenu = ({
     setOpen(defaultOpen)
   }
 
-  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
+  const rawNestedSafes = ownedSafes?.[chainId] ?? []
+  // Convert to NestedSafeItem[] - mark all as valid since we don't have deployer context here
+  const nestedSafesForChain: NestedSafeItem[] = useMemo(
+    () => rawNestedSafes.map((address) => ({ address, isValid: true })),
+    [rawNestedSafes],
+  )
 
   return (
     <>
@@ -99,7 +105,7 @@ const SafeListContextMenu = ({
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        {isNestedSafesEnabled && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
+        {isNestedSafesEnabled && !undeployedSafe && rawNestedSafes.length > 0 && (
           <MenuItem
             onClick={handleOpenModal(ModalType.NESTED_SAFES, {
               ...NESTED_SAFE_EVENTS.OPEN_LIST,

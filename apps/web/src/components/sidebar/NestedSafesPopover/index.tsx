@@ -1,4 +1,4 @@
-import { SvgIcon, Popover, Button, Box, Stack } from '@mui/material'
+import { SvgIcon, Popover, Button, Box, Stack, CircularProgress } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
@@ -11,17 +11,20 @@ import { NestedSafeInfo } from '@/components/sidebar/NestedSafeInfo'
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import CheckWallet from '@/components/common/CheckWallet'
+import type { NestedSafeItem } from '@/hooks/useFilteredNestedSafes'
 
 export function NestedSafesPopover({
   anchorEl,
   onClose,
   nestedSafes,
   hideCreationButton = false,
+  isLoading = false,
 }: {
   anchorEl: HTMLElement | null
   onClose: () => void
-  nestedSafes: Array<string>
+  nestedSafes: Array<NestedSafeItem>
   hideCreationButton?: boolean
+  isLoading?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
 
@@ -71,7 +74,11 @@ export function NestedSafesPopover({
         flex={1}
         overflow="hidden"
       >
-        {nestedSafes.length === 0 ? (
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" flex={1} py={4}>
+            <CircularProgress size={32} />
+          </Box>
+        ) : nestedSafes.length === 0 ? (
           <NestedSafeInfo />
         ) : (
           <Box

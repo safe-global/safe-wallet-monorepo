@@ -59,6 +59,7 @@ export const AccountInfoChips = ({
   href,
   onLinkClick,
   trackingLabel,
+  hidePendingTxs = false,
 }: {
   isActivating: boolean
   isReadOnly: boolean
@@ -69,10 +70,11 @@ export const AccountInfoChips = ({
   href: UrlObject | string
   onLinkClick: (() => void) | undefined
   trackingLabel: string
+  hidePendingTxs?: boolean
 }) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const showQueueActions = isVisible && !undeployedSafe && !isReadOnly
+  const showQueueActions = isVisible && !undeployedSafe && !isReadOnly && !hidePendingTxs
 
   return (
     <Box sx={{ width: '100%', mt: 0.3 }}>
