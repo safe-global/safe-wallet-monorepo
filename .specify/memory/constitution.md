@@ -1,195 +1,173 @@
 <!--
-SYNC IMPACT REPORT
+Sync Impact Report
 ==================
-Version Change: N/A → 1.0.0 (Initial constitution)
-Modified Principles: N/A (Initial creation)
-Added Sections:
-  - Core Principles (5 principles established)
-  - Architecture Constraints
-  - Quality Standards
-  - Governance
-Removed Sections: N/A (Initial creation)
-Templates Status:
-  ✅ plan-template.md - Constitution Check section aligns with principles
-  ✅ spec-template.md - Scope/requirements align with testing and quality principles
-  ✅ tasks-template.md - Task categorization reflects principle-driven task types
-  ⚠ Command files - Generic guidance ready, no CLAUDE-specific references
-Follow-up TODOs:
-  - RATIFICATION_DATE needs to be set (currently marked TODO)
-  - Future reviews should validate compliance with monorepo-specific constraints
-==================
+Version change: 1.0.0 (initial)
+Modified principles: N/A (initial constitution)
+Added sections:
+  - I. Type Safety (NON-NEGOTIABLE)
+  - II. Branch Protection & Quality Gates
+  - III. Cross-Platform Consistency
+  - IV. Testing Discipline
+  - V. Feature Organization
+  - VI. Theme System Integrity
+  - Technology Stack section
+  - Development Workflow section
+Templates requiring updates:
+  - .specify/templates/plan-template.md ✅ (Constitution Check section compatible)
+  - .specify/templates/spec-template.md ✅ (no changes required)
+  - .specify/templates/tasks-template.md ✅ (no changes required)
+Follow-up TODOs: None
 -->
 
-# Safe{Wallet} Constitution
+# Safe{Wallet} Monorepo Constitution
 
 ## Core Principles
 
-### I. Monorepo Unity
+### I. Type Safety (NON-NEGOTIABLE)
 
-The Safe{Wallet} monorepo MUST maintain unified standards and shared infrastructure across web and mobile platforms.
+TypeScript's type system is the first line of defense against bugs. The `any` type is
+strictly forbidden across the entire codebase.
 
-**Rules:**
+- **MUST** never use `any` type - create proper interfaces/types instead
+- **MUST** use `as` type assertions only when TypeScript cannot infer correctly, never to bypass type errors
+- **MUST** use Zod for runtime validation at system boundaries (API responses, user input)
+- **MUST** prefer interfaces over type aliases for object shapes
+- Test helpers MUST be properly typed - no `as any` escapes in tests
 
-- Shared packages (`packages/**`) MUST work for both web and mobile environments
-- Environment variables MUST follow dual-prefix patterns (`NEXT_PUBLIC_*` || `EXPO_PUBLIC_*`) in shared code
-- Theme tokens MUST be defined in `@safe-global/theme` as the single source of truth
-- Breaking changes to shared packages MUST be validated against both platforms before merging
-- Redux store state changes MUST be compatible with both web and mobile consumers
+**Rationale**: A single `any` can cascade through the codebase, silently breaking type guarantees
+and allowing runtime errors that TypeScript was designed to prevent.
 
-**Rationale:** The monorepo architecture enables code reuse and consistency. Violations create platform-specific bugs, deployment blockers, and maintenance overhead that compound over time.
+### II. Branch Protection & Quality Gates
 
-### II. Type Safety
+All changes flow through pull requests. Direct pushes to protected branches are forbidden.
 
-TypeScript's type system MUST be strictly enforced without exceptions.
+- **MUST** never push directly to `dev` (default) or `main` (production) branches
+- **MUST** create feature branches for all changes: `feature/your-feature-name`
+- **MUST** pass all quality gates before committing:
+  - `yarn workspace @safe-global/web type-check` (or mobile)
+  - `yarn workspace @safe-global/web lint`
+  - `yarn workspace @safe-global/web prettier`
+  - `yarn workspace @safe-global/web test`
+- **MUST** use semantic commit messages: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`
+- **MUST** never commit failing code - all tests must pass
 
-**Rules:**
+**Rationale**: Pre-commit hooks enforce these gates, but understanding them prevents wasted cycles
+debugging hook failures.
 
-- The `any` type is PROHIBITED in all code (production and tests)
-- Type assertions (`as any`) are PROHIBITED - create properly typed helpers instead
-- All functions, variables, and component props MUST have explicit types
-- Type-check MUST pass before committing: `yarn workspace @safe-global/{web|mobile} type-check`
-- Generated type files (e.g., `packages/utils/src/types/contracts/`) MUST NOT be manually edited
+### III. Cross-Platform Consistency
 
-**Rationale:** Type safety prevents runtime errors, enables refactoring confidence, and provides documentation. The `any` escape hatch creates hidden bugs that surface in production. Properly typed code is self-documenting and maintainable.
+The monorepo serves both web (Next.js) and mobile (Expo/React Native). Changes to shared code
+MUST work for both platforms.
 
-### III. Test-First Development
+- **MUST** test shared package changes (`packages/**`) against both web and mobile
+- **MUST** use dual environment variable patterns in shared packages:
+  `process.env.NEXT_PUBLIC_* || process.env.EXPO_PUBLIC_*`
+- **MUST** ensure Redux store changes work for both platforms
+- **MUST** never import platform-specific code into shared packages
+- Web-only features go in `apps/web/`, mobile-only in `apps/mobile/`
 
-All new logic, services, and hooks MUST be covered by unit tests.
+**Rationale**: Breaking mobile when changing web (or vice versa) creates silent regressions that
+surface late in the development cycle.
 
-**Rules:**
+### IV. Testing Discipline
 
-- Business logic MUST have unit tests before merging
-- Tests MUST verify behavior, not implementation details (avoid checking specific Redux actions dispatched)
-- Network requests MUST be mocked using Mock Service Worker (MSW), not by mocking `fetch` or ethers.js
-- Test data MUST be generated using faker for consistency and coverage
-- Redux tests MUST verify resulting state changes using properly typed helpers
-- Shared package tests MUST validate behavior for both web and mobile environments
-- E2E smoke tests (web) MUST pass in CI before deployment
+Tests validate behavior, not implementation details. Network mocking uses MSW, not function mocks.
 
-**Rationale:** Tests prevent regressions, document intended behavior, and enable confident refactoring. Implementation-detail tests break during legitimate refactors and provide false confidence.
+- **MUST** use Mock Service Worker (MSW) for network request mocking, not `jest.mock(fetch)`
+- **MUST** use MSW for blockchain RPC call mocking, not ethers.js mocks
+- **MUST** use faker for test data generation
+- **MUST** colocate test files with source: `Component.tsx` → `Component.test.tsx`
+- **MUST** verify Redux state changes, not action dispatch calls
+- **MUST** cover new logic, services, and hooks with unit tests
 
-### IV. Design System Compliance
+**Rationale**: Mocking implementation details (function calls) creates brittle tests that break
+on refactoring. Mocking boundaries (network) validates actual behavior.
 
-UI implementation MUST follow established design system patterns and theme tokens.
+### V. Feature Organization
 
-**Rules:**
+Features are modular, isolated, and controlled by feature flags.
 
-- **Web:** MUST use MUI components with Safe MUI theme; MUST use theme variables from `vars.css`
-- **Mobile:** MUST use Tamagui components; MUST use theme tokens from `@safe-global/theme`
-- Hard-coded colors, spacing, or typography values are PROHIBITED
-- `apps/web/src/styles/vars.css` MUST NOT be manually edited (auto-generated)
-- New components MUST have corresponding Storybook stories (`.stories.tsx`) for web
-- Component stories MUST document all important states and variations
-- Light and dark mode theming MUST be updated together for consistency
+- **MUST** create new web features in `src/features/[feature-name]/`
+- **MUST** gate new web features behind feature flags (CGW API chains config)
+- **MUST** create Storybook stories for new web components (`.stories.tsx`)
+- Only truly global code belongs in top-level `src/` folders
+- **MUST** handle loading, error, and empty states in all UI components
 
-**Rationale:** Consistent design system implementation ensures brand consistency, accessibility, and maintainability. Theme tokens enable global styling changes without code modifications. Storybook provides visual documentation and isolated component development.
+**Rationale**: Feature flags enable incremental rollout and quick rollback. Feature folders
+prevent cross-feature coupling and make code ownership clear.
 
-### V. Safe-Specific Security
+### VI. Theme System Integrity
 
-Safe{Wallet} handles multi-signature transactions and must enforce security best practices.
+The `@safe-global/theme` package is the single source of truth for all design tokens.
 
-**Rules:**
+- **MUST** never hardcode colors, spacing, or typography values
+- **MUST** never edit `apps/web/src/styles/vars.css` directly - it's auto-generated
+- **MUST** use theme tokens: MUI theme (web) or Tamagui tokens (mobile)
+- **MUST** update both light and dark mode palettes together for consistency
+- **MUST** run `yarn workspace @safe-global/web css-vars` after theme changes
 
-- Private keys or sensitive data MUST NEVER be hardcoded - use environment variables
-- Ethereum addresses MUST be validated using `ethers.js` utilities (e.g., `isAddress`)
-- Safe addresses MUST always be referenced with their `chainId` (Safes are chain-specific)
-- Transaction building MUST use Safe SDK patterns (`@safe-global/protocol-kit`, `@safe-global/api-kit`)
-- Wallet provider integration MUST follow established Web3-Onboard patterns
-- Security-critical changes MUST be reviewed by security-knowledgeable maintainers
-- Multi-signature threshold and owner validation MUST be respected in all transaction flows
+**Rationale**: Hardcoded values create visual inconsistencies and make theme updates impossible
+to apply uniformly.
 
-**Rationale:** Safe{Wallet} is a smart contract wallet managing user assets. Security vulnerabilities can lead to loss of funds. These patterns are established best practices from the Safe ecosystem and MUST be preserved.
+## Technology Stack
 
-## Architecture Constraints
+The monorepo enforces specific technology choices to maintain consistency:
 
-### Code Organization
+| Layer           | Web (apps/web)       | Mobile (apps/mobile) | Shared (packages/) |
+| --------------- | -------------------- | -------------------- | ------------------ |
+| Framework       | Next.js              | Expo (React Native)  | Platform-agnostic  |
+| UI Library      | MUI                  | Tamagui              | N/A                |
+| State           | Redux + RTK Query    | Redux + RTK Query    | Redux slices       |
+| Styling         | CSS vars + MUI theme | Tamagui tokens       | @safe-global/theme |
+| Testing         | Jest + MSW + Cypress | Jest + MSW           | Jest + MSW         |
+| Package Manager | Yarn 4 workspaces    | Yarn 4 workspaces    | Yarn 4 workspaces  |
 
-**Web Application:**
+**Web3/Blockchain stack**:
 
-- New features MUST be created in `src/features/` with dedicated folders
-- Only globally-used components, hooks, and services belong in top-level `src/` folders
-- Each new feature MUST be behind a feature flag (managed via CGW API chain configs)
+- Safe SDK: `@safe-global/protocol-kit`, `@safe-global/api-kit`
+- Wallet connection: Web3-Onboard
+- Ethereum: ethers.js
+- Address validation: Always use `isAddress` from ethers.js
+- Chain awareness: Always include `chainId` when referencing a Safe
 
-**Shared Packages:**
+## Development Workflow
 
-- Cross-platform logic MUST reside in `packages/` directory
-- Shared code MUST NOT import platform-specific dependencies directly
-- Package changes MUST be validated against both web and mobile consumers
+Every code change follows this sequence:
 
-### Dependency Management
+1. **Branch**: Create feature branch from `dev`
+2. **Implement**: Write code following platform-specific code style guides
+   - Web: `apps/web/docs/code-style.md`
+   - Mobile: `apps/mobile/docs/code-style.md`
+3. **Validate**: Run quality gates (type-check → lint → prettier → test)
+4. **Commit**: Use semantic commit messages, ensure hooks pass
+5. **PR**: Fill out PR template, ensure CI passes
+6. **Review**: Address feedback, maintain all quality gates
 
-- Yarn 4 workspaces MUST be used for all dependency management
-- Dependencies MUST be added via `yarn workspace <workspace-name> add <package>`
-- Monorepo-wide dependencies belong in root `package.json`
-- Breaking dependency updates MUST be validated across all affected workspaces
+**Generated files** - MUST NOT be manually edited:
 
-### Workflow Enforcement
-
-- Pre-commit hooks (Husky) MUST run lint-staged (prettier) and type-check
-- Pre-push hooks MUST run linting before pushing
-- All checks (type-check, lint, prettier, tests) MUST pass before committing
-- Commit messages MUST follow semantic commit conventions (feat:, fix:, refactor:, etc.)
-
-## Quality Standards
-
-### Code Quality
-
-**Principles:**
-
-- Follow DRY (Don't Repeat Yourself) - extract reusable functions, hooks, and components
-- Prefer functional programming - use pure functions, avoid side effects
-- Use declarative patterns - React hooks, derived state over manual synchronization
-- Keep implementations simple - avoid over-engineering and premature abstraction
-
-**Error Handling:**
-
-- All UI components MUST handle loading, error, and empty states
-- Network errors MUST be properly caught and communicated to users
-- Chain-specific logic MUST handle multi-chain scenarios appropriately
-
-### Performance
-
-- Yarn commands MUST be scoped to specific workspaces when possible (e.g., `yarn workspace @safe-global/web dev`)
-- Build artifacts (`.next`, `node_modules/.cache`) MUST be cleared when troubleshooting build issues
-- Images and assets MUST be optimized before committing
-
-### Documentation
-
-- Storybook stories MUST document component props and usage patterns (web)
-- Complex business logic MUST include explanatory comments where non-obvious
-- Code style guidelines MUST be followed:
-  - Web: `apps/web/docs/code-style.md`
-  - Mobile: `apps/mobile/docs/code-style.md`
+- `packages/utils/src/types/contracts/` - auto-generated from ABIs
+- `apps/web/src/styles/vars.css` - auto-generated from theme
 
 ## Governance
 
-### Amendment Process
+This constitution supersedes informal practices. All PRs and code reviews MUST verify compliance
+with these principles.
 
-This constitution supersedes all other development practices and guidelines.
+**Amendment process**:
 
-**Amendment Requirements:**
+1. Propose changes via PR to this file
+2. Justify why the change is necessary
+3. Update version according to semantic versioning:
+   - MAJOR: Principle removal or fundamental redefinition
+   - MINOR: New principle or materially expanded guidance
+   - PATCH: Clarifications and typo fixes
+4. Document migration plan if breaking change
 
-1. Proposed changes MUST be documented with rationale
-2. Proposed changes MUST include impact analysis on existing principles
-3. Amendments MUST be reviewed and approved by repository maintainers
-4. Version MUST be incremented following semantic versioning:
-   - **MAJOR**: Backward-incompatible governance changes or principle removals
-   - **MINOR**: New principles or materially expanded guidance
-   - **PATCH**: Clarifications, wording improvements, non-semantic refinements
-5. Dependent templates (plan, spec, tasks, commands) MUST be updated for consistency
-6. Migration plan MUST be provided for breaking changes
+**Compliance verification**:
 
-### Compliance Review
+- Pre-commit hooks enforce type-check, lint, and formatting
+- CI enforces full test suite
+- Code review MUST verify principle adherence
+- Feature flag requirement verified at PR review
 
-- All PRs MUST verify compliance with constitutional principles
-- Complexity that violates principles MUST be explicitly justified in plan documentation
-- Pre-commit and pre-push hooks enforce automated compliance for type-checking, linting, and formatting
-- Constitution violations discovered post-merge MUST be addressed with high priority
-
-### Runtime Guidance
-
-- AI contributors MUST reference `AGENTS.md` for comprehensive development guidelines
-- `CLAUDE.md` provides quick-reference instructions for critical workflows
-- Constitution provides non-negotiable principles; guidance files provide implementation patterns
-
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-01-08
+**Version**: 1.0.0 | **Ratified**: 2026-01-12 | **Last Amended**: 2026-01-12

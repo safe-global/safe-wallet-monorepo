@@ -138,6 +138,8 @@ Specifically for the web app:
 
 5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
    - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
+   - **CI/CD changes**: Always use `chore:` prefix for CI, workflows, build configs (NEVER `feat:` or `fix:`)
+   - **Test changes**: Always use `tests:` prefix for changes in unit or e2e tests (NEVER `feat:` or `fix:`)
 
 6. **Code style**: follow the guidelines in:
    - `apps/web/docs/code-style.md` for the web app.

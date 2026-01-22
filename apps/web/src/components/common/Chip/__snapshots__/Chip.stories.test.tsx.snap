@@ -13,7 +13,7 @@ exports[`./Chip.stories CustomLabel 1`] = `
       <span
         class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
       >
-        Beta
+        Testing VRT
       </span>
     </span>
   </span>

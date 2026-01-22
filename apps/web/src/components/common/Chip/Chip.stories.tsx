@@ -18,7 +18,7 @@ export const Default: Story = {
 
 export const CustomLabel: Story = {
   args: {
-    label: 'Beta',
+    label: 'Testing VRT',
   },
 }
 
