@@ -3074,31 +3074,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/browser-rum-react@npm:^6.24.1":
-  version: 6.24.1
-  resolution: "@datadog/browser-rum-react@npm:6.24.1"
-  dependencies:
-    "@datadog/browser-core": "npm:6.24.1"
-    "@datadog/browser-rum-core": "npm:6.24.1"
-  peerDependencies:
-    react: 18 || 19
-    react-router: 6 || 7
-    react-router-dom: 6 || 7
-  peerDependenciesMeta:
-    "@datadog/browser-rum":
-      optional: true
-    "@datadog/browser-rum-slim":
-      optional: true
-    react:
-      optional: true
-    react-router:
-      optional: true
-    react-router-dom:
-      optional: true
-  checksum: 10/d8e8da89beec586c14c9e1d7725230c9ff77e5b8b646f4cb82269abff21ad24098ba3590f4cec5f146be0ead248f3025c6f9d54889ced9a1c63c0197dfdee996
-  languageName: node
-  linkType: hard
-
 "@datadog/browser-rum@npm:^6.24.1":
   version: 6.24.1
   resolution: "@datadog/browser-rum@npm:6.24.1"
@@ -11691,7 +11666,6 @@ __metadata:
     "@cowprotocol/widget-react": "npm:^0.13.0"
     "@datadog/browser-logs": "npm:^6.24.1"
     "@datadog/browser-rum": "npm:^6.24.1"
-    "@datadog/browser-rum-react": "npm:^6.24.1"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
     "@emotion/react": "npm:^11.13.5"
