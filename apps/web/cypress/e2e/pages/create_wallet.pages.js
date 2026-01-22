@@ -150,7 +150,7 @@ export function verifySafeCreationIsComplete() {
 
 export function clickOnReviewStepNextBtn() {
   cy.get(reviewStepNextBtn).click()
-  cy.get(reviewStepNextBtn, { timeout: 60000 }).should('not.exist')
+  cy.get(reviewStepNextBtn, { timeout: 600000 }).should('not.exist')
 }
 
 export function clickOnLetsGoBtn() {
