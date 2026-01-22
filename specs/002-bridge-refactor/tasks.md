@@ -137,11 +137,9 @@ All paths are relative to `apps/web/src/features/bridge/` unless otherwise speci
 
 **Phase 1** (all parallel):
 
-
 ```
 T001 || T002 || T003 || T004
 ```
-
 
 **Phase 3** (T007 and T008 parallel, then T009 and T010 sequential):
 
@@ -172,7 +170,6 @@ T009 → T010 → T011
 5. Total estimated time: ~50 minutes
 
 ### Rollback Strategy
-
 
 If issues arise at any phase:
 
