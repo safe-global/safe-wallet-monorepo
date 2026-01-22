@@ -129,7 +129,7 @@ Benefits:
 - **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
 - **Tree-shakeable**: Unused features won't be bundled
 - **Simple**: No context providers, no string lookups
-- **Testable**: Module-level cache can be cleared with `clearFeatureCache()`
+- **Testable**: Just mock the feature module with Jest
 
 ## Feature Contract
 
@@ -632,14 +632,13 @@ function MyComponent() {
 
 ## Testing Strategy
 
-The module-level cache pattern makes testing straightforward.
+Testing is straightforward - just mock the feature module.
 
 ### Unit Testing a Feature
 
 ```typescript
 // src/features/safe-shield/components/__tests__/SafeShieldScanner.test.tsx
 import { render, screen, waitFor } from '@testing-library/react'
-import { clearFeatureCache } from '@/features/__core__'
 
 // Mock the feature module
 jest.mock('@/features/walletconnect', () => ({
@@ -657,11 +656,6 @@ jest.mock('@/features/walletconnect', () => ({
 }))
 
 describe('Component using WalletConnect', () => {
-  beforeEach(() => {
-    // Clear the feature cache before each test
-    clearFeatureCache()
-  })
-
   it('renders widget when feature is enabled', async () => {
     render(<MyComponent />)
 
@@ -691,9 +685,8 @@ it('renders nothing when feature is disabled', () => {
 
 ### Benefits for Testing
 
-- **No context providers needed**: Module-level cache doesn't require wrapping
+- **No context providers needed**: Each component manages its own state
 - **Easy mocking**: Just mock the feature module with Jest
-- **Clean state**: `clearFeatureCache()` resets between tests
 - **Async handling**: Use `waitFor()` to wait for lazy loading
 
 ## ESLint Enforcement
