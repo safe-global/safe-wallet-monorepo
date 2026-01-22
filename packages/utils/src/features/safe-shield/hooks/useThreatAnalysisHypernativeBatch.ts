@@ -75,7 +75,7 @@ export function useThreatAnalysisHypernativeBatch({
   const resultsMap = useMemo(() => {
     const results: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
 
-    if (skip) {
+    if (skip || !batchRequest || (!batchResponse && !isLoading)) {
       return results
     }
 
@@ -148,11 +148,6 @@ export function useThreatAnalysisHypernativeBatch({
           // Unexpected status
           results[hash] = [undefined, new Error(`Unexpected status: ${responseItem.status}`), false]
         }
-      })
-    } else if (!isLoading) {
-      // No response and not loading - all results are undefined
-      requestedHashes.forEach((hash) => {
-        results[hash] = [undefined, undefined, false]
       })
     }
 

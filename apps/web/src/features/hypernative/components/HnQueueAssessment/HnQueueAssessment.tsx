@@ -43,9 +43,14 @@ export const HnQueueAssessment = ({
   assessment,
   isAuthenticated,
 }: HnQueueAssessmentProps): ReactElement | null => {
-  const [assessmentData, error, isLoading] = assessment || [undefined, undefined, false]
   const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
+
+  if (!assessment) {
+    return null
+  }
+
+  const [assessmentData, error, isLoading] = assessment || [undefined, undefined, false]
 
   // Scan unavailable state (not logged in)
   if (!isAuthenticated) {
