@@ -1,25 +1,35 @@
-import dynamic from 'next/dynamic'
+/**
+ * WalletConnect Feature - Public API
+ *
+ * This feature provides WalletConnect v2 integration for Safe wallets.
+ *
+ * ## Usage
+ *
+ * ```typescript
+ * import { WalletConnectFeature } from '@/features/walletconnect'
+ * import { useLoadFeature } from '@/features/__core__'
+ *
+ * function MyComponent() {
+ *   const walletConnect = useLoadFeature(WalletConnectFeature)
+ *   if (!walletConnect) return null
+ *   return <walletConnect.components.WalletConnectWidget />
+ * }
+ * ```
+ *
+ * All feature functionality (components, services, stores) is accessed via
+ * the loaded feature object from useLoadFeature(). This ensures proper
+ * lazy loading and code splitting.
+ */
 
+// Feature handle - primary export for use with useLoadFeature()
+export { walletConnectHandle as WalletConnectFeature } from './handle'
+
+// Contract type (for type-safe registry lookup)
+export type { WalletConnectContract } from './contract'
+
+// Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'
 export { WCLoadingState } from './types'
-export { useIsWalletConnectEnabled } from './hooks'
-export { useWcUri, useWalletConnectSearchParamUri, WC_URI_SEARCH_PARAM } from './hooks'
-export { wcPopupStore, openWalletConnect, wcChainSwitchStore } from './store'
-export { walletConnectInstance, isSafePassApp } from './services'
-export { WalletConnectContext, WalletConnectProvider } from './components/WalletConnectContext'
-export {
-  SAFE_COMPATIBLE_METHODS,
-  SAFE_COMPATIBLE_EVENTS,
-  SAFE_WALLET_METADATA,
-  EIP155,
-  BlockedBridges,
-  WarnedBridges,
-  WarnedBridgeNames,
-} from './constants'
 
-const WalletConnectWidget = dynamic(
-  () => import('./components/WalletConnectUi').then((mod) => ({ default: mod.default })),
-  { ssr: false },
-)
-
-export default WalletConnectWidget
+// Lightweight constant for wc.tsx page (no heavy imports)
+export { WC_URI_SEARCH_PARAM } from './constants'
