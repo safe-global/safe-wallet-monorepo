@@ -47,6 +47,51 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Security and Safe-specific patterns
 - Common pitfalls and debugging tips
 
+## 🚨 Feature Architecture Import Rules
+
+**When working with code in `apps/web/src/features/`:**
+
+Features use a lazy-loading architecture to optimize bundle size. ESLint warns about these import restrictions (warnings until all features are migrated):
+
+### Allowed Imports
+
+```typescript
+import { SomeType, useLightweightHook } from '@/features/myfeature' // Feature barrel
+import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
+import { lightweightUtil } from '@/features/myfeature/services' // Services barrel
+```
+
+### Forbidden Imports (ESLint will warn)
+
+```typescript
+// ❌ NEVER import components directly - defeats lazy loading
+import { MyComponent } from '@/features/myfeature/components'
+import MyComponent from '@/features/myfeature/components/MyComponent'
+
+// ❌ NEVER import hooks from internal folder - use barrel
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
+
+// ❌ NEVER import internal service files - use barrel or useLoadFeature
+import { heavyService } from '@/features/myfeature/services/heavyService'
+```
+
+### Accessing Feature Components
+
+Use the `useLoadFeature` hook to access lazy-loaded components:
+
+```typescript
+import { useLoadFeature } from '@/features/__core__'
+import { MyFeature } from '@/features/myfeature'
+
+function ParentComponent() {
+  const feature = useLoadFeature(MyFeature)
+  if (!feature) return null
+  return <feature.components.MyComponent />
+}
+```
+
+**📖 See `apps/web/docs/feature-architecture.md` for the complete guide including the two-tier handle pattern and bundle leak pitfalls.**
+
 ## Active Technologies
 
 - TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
