@@ -18,6 +18,10 @@ export type SettingsState = {
     [chainId: string]: string[]
   }
 
+  hiddenNestedSafes: {
+    [safeAddress: string]: string[]
+  }
+
   tokenList: TOKEN_LISTS
 
   hideDust?: boolean
@@ -45,6 +49,8 @@ export const initialState: SettingsState = {
   tokenList: TOKEN_LISTS.TRUSTED,
 
   hiddenTokens: {},
+
+  hiddenNestedSafes: {},
 
   hideDust: true,
 
@@ -96,6 +102,10 @@ export const settingsSlice = createSlice({
       const { chainId, assets } = payload
       state.hiddenTokens[chainId] = assets
     },
+    setHiddenNestedSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+      const { safeAddress, nestedSafes } = payload
+      state.hiddenNestedSafes[safeAddress] = nestedSafes
+    },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
@@ -136,6 +146,7 @@ export const {
   setQrShortName,
   setDarkMode,
   setHiddenTokensForChain,
+  setHiddenNestedSafes,
   setTokenList,
   setHideDust,
   hideSuspiciousTransactions,
@@ -174,3 +185,10 @@ export const isEnvInitialState = createSelector([selectSettings, (_, chainId) =>
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
 export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)
+
+export const selectHiddenNestedSafes = createSelector(
+  [selectSettings, (_, safeAddress: string) => safeAddress],
+  (settings, safeAddress) => {
+    return settings.hiddenNestedSafes?.[safeAddress] || []
+  },
+)

@@ -7,6 +7,7 @@ import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useHiddenNestedSafes from '@/hooks/useHiddenNestedSafes'
 
 import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
@@ -27,6 +28,8 @@ export function NestedSafesButton({
     { skip: !isEnabled || !safeAddress },
   )
   const nestedSafes = ownedSafes?.[chainId] ?? []
+  const hiddenSafes = useHiddenNestedSafes()
+  const visibleNestedSafes = nestedSafes.filter((address) => !hiddenSafes.includes(address))
 
   if (!isEnabled || !safe.deployed) {
     return null
@@ -42,7 +45,7 @@ export function NestedSafesButton({
   return (
     <>
       <Tooltip title="Nested Safes" placement="top">
-        <Badge invisible={nestedSafes.length > 0} variant="dot" className={css.badge}>
+        <Badge invisible={visibleNestedSafes.length > 0} variant="dot" className={css.badge}>
           <IconButton
             className={headerCss.iconButton}
             sx={{
@@ -53,9 +56,9 @@ export function NestedSafesButton({
             onClick={onClick}
           >
             <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" fontSize="small" />
-            {nestedSafes.length > 0 && (
+            {visibleNestedSafes.length > 0 && (
               <Typography component="span" variant="caption" className={css.count}>
-                {nestedSafes.length}
+                {visibleNestedSafes.length}
               </Typography>
             )}
           </IconButton>

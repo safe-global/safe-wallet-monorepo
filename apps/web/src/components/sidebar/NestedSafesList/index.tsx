@@ -1,5 +1,5 @@
 import { ChevronRight } from '@mui/icons-material'
-import { List, Typography, Box } from '@mui/material'
+import { List, Typography, Box, Checkbox } from '@mui/material'
 
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
@@ -19,9 +19,15 @@ const MAX_NESTED_SAFES = 5
 export function NestedSafesList({
   onClose,
   nestedSafes,
+  isManageMode = false,
+  onToggleSafe,
+  isSafeSelected,
 }: {
   onClose: () => void
   nestedSafes: Array<string>
+  isManageMode?: boolean
+  onToggleSafe?: (address: string) => void
+  isSafeSelected?: (address: string) => boolean
 }): ReactElement {
   const [showAll, setShowAll] = useState(false)
   const chain = useCurrentChain()
@@ -56,23 +62,49 @@ export function NestedSafesList({
     setShowAll(true)
   }
 
+  const handleCheckboxChange = (address: string) => () => {
+    onToggleSafe?.(address)
+  }
+
   return (
     <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
       {nestedSafesToShow.map((safeItem) => {
         const safeOverview = safeOverviews?.find(
           (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
         )
+        const isSelected = isSafeSelected?.(safeItem.address) ?? false
+
         return (
-          <Box key={safeItem.address} sx={{ width: '100%' }}>
-            <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
-              <SingleAccountItem
-                onLinkClick={onClose}
-                safeItem={safeItem}
-                safeOverview={safeOverview}
-                showActions={false}
-                showChainBadge={false}
+          <Box key={safeItem.address} sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+            {isManageMode && (
+              <Checkbox
+                checked={isSelected}
+                onChange={handleCheckboxChange(safeItem.address)}
+                size="small"
+                sx={{ mr: 1 }}
+                data-testid={`manage-nested-safe-checkbox-${safeItem.address}`}
               />
-            </Track>
+            )}
+            <Box sx={{ flex: 1 }}>
+              {isManageMode ? (
+                <SingleAccountItem
+                  safeItem={safeItem}
+                  safeOverview={safeOverview}
+                  showActions={false}
+                  showChainBadge={false}
+                />
+              ) : (
+                <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
+                  <SingleAccountItem
+                    onLinkClick={onClose}
+                    safeItem={safeItem}
+                    safeOverview={safeOverview}
+                    showActions={false}
+                    showChainBadge={false}
+                  />
+                </Track>
+              )}
+            </Box>
           </Box>
         )
       })}
