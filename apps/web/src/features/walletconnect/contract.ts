@@ -3,7 +3,6 @@ import type { FeatureImplementation } from '@/features/__core__'
 
 // Type imports from implementations - enables IDE jump-to-definition
 import type WalletConnectWallet from './services/WalletConnectWallet'
-import type { isSafePassApp } from './services/utils'
 import type { wcPopupStore } from './store/wcPopupStore'
 import type { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 
@@ -23,9 +22,6 @@ export interface WalletConnectImplementation extends FeatureImplementation {
   services: {
     /** Singleton WalletConnect wallet instance for session management. */
     walletConnectInstance: WalletConnectWallet
-
-    /** Check if an origin is the SafePass app. */
-    isSafePassApp: typeof isSafePassApp
 
     /** Store for WalletConnect popup open state. */
     wcPopupStore: typeof wcPopupStore

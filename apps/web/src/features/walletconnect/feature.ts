@@ -20,7 +20,6 @@ import { lazy } from 'react'
 // Services and stores - loaded as part of this chunk
 import { wcPopupStore } from './store/wcPopupStore'
 import { wcChainSwitchStore } from './store/wcChainSwitchSlice'
-import { isSafePassApp } from './services/utils'
 import walletConnectInstance from './services/walletConnectInstance'
 
 const feature: WalletConnectImplementation = {
@@ -32,7 +31,6 @@ const feature: WalletConnectImplementation = {
 
   services: {
     walletConnectInstance,
-    isSafePassApp,
     wcPopupStore,
     wcChainSwitchStore,
   },
