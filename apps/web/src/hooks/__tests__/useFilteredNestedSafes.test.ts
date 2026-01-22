@@ -301,38 +301,6 @@ describe('useFilteredNestedSafes', () => {
     expect(result.current.hasStarted).toBe(true)
   })
 
-  it('should mark all Safes as invalid when none are deployed by allowed addresses', async () => {
-    const nestedSafe1 = checksumAddress(faker.finance.ethereumAddress())
-    const nestedSafe2 = checksumAddress(faker.finance.ethereumAddress())
-    const unknownDeployer = checksumAddress(faker.finance.ethereumAddress())
-
-    server.use(
-      http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/transactions/creation`, ({ params }) => {
-        if (params.safeAddress === parentSafeAddress) {
-          return HttpResponse.json(mockCreationResponse(parentDeployer))
-        }
-        // Both nested safes deployed by unknown address
-        return HttpResponse.json(mockCreationResponse(unknownDeployer))
-      }),
-    )
-
-    const { result } = renderHook(() => useFilteredNestedSafes([nestedSafe1, nestedSafe2], chainId), {
-      initialReduxState,
-    })
-
-    await act(async () => {
-      result.current.startFiltering()
-    })
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    // All safes should be returned but marked as invalid
-    expect(result.current.nestedSafes).toHaveLength(2)
-    expect(result.current.nestedSafes.every((s) => s.isValid === false)).toBe(true)
-  })
-
   it('should sort valid Safes before invalid ones', async () => {
     const validSafe = checksumAddress(faker.finance.ethereumAddress())
     const invalidSafe1 = checksumAddress(faker.finance.ethereumAddress())

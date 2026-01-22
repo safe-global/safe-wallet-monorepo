@@ -11,7 +11,7 @@ import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import useWallet from '@/hooks/wallets/useWallet'
+import useSafeAddress from '@/hooks/useSafeAddress'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeItem } from '@/hooks/useFilteredNestedSafes'
 import WarningIcon from '@/public/images/notifications/warning.svg'
@@ -28,7 +28,7 @@ export function NestedSafesList({
   const [showAll, setShowAll] = useState(false)
   const chain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
-  const wallet = useWallet()
+  const parentSafeAddress = useSafeAddress()
 
   const safeItems: (SafeItem & { isValid: boolean })[] = useMemo(() => {
     if (!chain) return []
@@ -55,12 +55,13 @@ export function NestedSafesList({
   // Show accordion if there are hidden safes
   const hasMoreToShow = hiddenSafes.length > 0
 
+  // Use parent Safe address as walletAddress since the parent Safe is the owner of nested Safes
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
     safeItems.length > 0 && chain
       ? {
           safes: safeItems,
           currency,
-          walletAddress: wallet?.address,
+          walletAddress: parentSafeAddress,
         }
       : skipToken,
   )
