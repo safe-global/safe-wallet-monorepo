@@ -52,15 +52,24 @@ function titleToStoryId(title) {
 
 /**
  * Fallback: Convert file path to story ID
+ * Storybook auto-generates titles from file paths like:
+ * apps/web/src/components/common/Chip/Chip.stories.tsx -> Components/Common/Chip
+ * Which becomes story ID: components-common-chip
  */
 function filePathToStoryId(filePath) {
   let normalized = filePath.replace(/^apps\/web\//, '')
   normalized = normalized.replace(/^src\//, '')
   normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
   normalized = normalized.replace(/\/index$/, '')
-  // Get just the component name (last part of path)
+
+  // Remove duplicate filename if it matches parent directory (e.g., Chip/Chip -> Chip)
   const parts = normalized.split('/')
-  return parts[parts.length - 1].toLowerCase()
+  if (parts.length >= 2 && parts[parts.length - 1].toLowerCase() === parts[parts.length - 2].toLowerCase()) {
+    parts.pop()
+  }
+
+  // Convert path to story ID format (path/to/Component -> path-to-component)
+  return parts.join('-').toLowerCase()
 }
 
 /**

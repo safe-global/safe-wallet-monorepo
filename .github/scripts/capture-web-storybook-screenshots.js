@@ -39,7 +39,7 @@ async function captureScreenshots() {
     try {
       console.log(`  📸 Loading: ${url}`)
       await page.goto(url, {
-        waitUntil: 'networkidle',
+        waitUntil: 'domcontentloaded',
         timeout: 30000,
       })
 
