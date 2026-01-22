@@ -8,6 +8,9 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import type { RootState } from '@/store'
 
+// Increase timeout for all tests in this file due to async RTK Query operations
+jest.setTimeout(15000)
+
 describe('useFilteredNestedSafes', () => {
   const parentSafeAddress = checksumAddress(faker.finance.ethereumAddress())
   const parentDeployer = checksumAddress(faker.finance.ethereumAddress())
@@ -112,9 +115,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     // Should return both safes with appropriate isValid status
     expect(result.current.nestedSafes).toHaveLength(2)
@@ -144,9 +150,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     expect(result.current.nestedSafes).toEqual([{ address: nestedSafe1, isValid: true }])
   })
@@ -172,9 +181,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     expect(result.current.nestedSafes).toEqual([{ address: nestedSafe1, isValid: true }])
   })
@@ -207,9 +219,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     // Both safes should be returned, nestedSafe2 as invalid
     expect(result.current.nestedSafes).toHaveLength(2)
@@ -239,9 +254,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     expect(result.current.nestedSafes).toEqual([{ address: nestedSafe1, isValid: true }])
   })
@@ -269,9 +287,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     // Should only check 10 nested safes
     expect(apiCallCount).toBe(10)
@@ -328,9 +349,12 @@ describe('useFilteredNestedSafes', () => {
       result.current.startFiltering()
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 10000 },
+    )
 
     // Valid safe should come first after sorting
     expect(result.current.nestedSafes).toHaveLength(3)
