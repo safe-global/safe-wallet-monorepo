@@ -28,8 +28,7 @@ import SafeAppIframe from './SafeAppIframe'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
-import { useLoadFeature } from '@/features/__core__'
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { isSafePassApp } from '@/features/walletconnect'
 import { BRAND_NAME } from '@/config/constants'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
@@ -47,8 +46,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   const chainId = useChainId()
   const chain = useCurrentChain()
   const router = useRouter()
-  const walletConnect = useLoadFeature(WalletConnectFeature)
-  const isSafePass = walletConnect?.services.isSafePassApp(appUrl) ?? false
+  const isSafePass = isSafePassApp(appUrl)
   const sanctionedAddress = useSanctionedAddress(isSafePass)
   const {
     expanded: queueBarExpanded,

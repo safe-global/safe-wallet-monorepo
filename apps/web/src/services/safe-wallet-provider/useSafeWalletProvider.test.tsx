@@ -18,6 +18,7 @@ import * as chainHooks from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
 import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
+import { wcPopupStore, wcChainSwitchStore, walletConnectInstance } from '@/features/walletconnect'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const createMockStore = <T,>(initialValue: T) => {
@@ -35,38 +36,32 @@ const createMockStore = <T,>(initialValue: T) => {
 }
 
 const mockWcPopupStore = createMockStore<boolean>(false)
-
-const mockWcChainSwitchStore = createMockStore<any>(undefined)
+const mockWcChainSwitchStore = createMockStore<unknown>(undefined)
 const mockWalletConnectInstance = {
   init: jest.fn(),
   updateSessions: jest.fn().mockResolvedValue(undefined),
 }
 
-// Mock useLoadFeature to return the WalletConnect services
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: jest.fn(() => ({
-    services: {
-      wcPopupStore: mockWcPopupStore,
-      wcChainSwitchStore: mockWcChainSwitchStore,
-      walletConnectInstance: mockWalletConnectInstance,
+jest.mock('@/features/walletconnect', () => {
+  return {
+    __esModule: true,
+    get wcPopupStore() {
+      return mockWcPopupStore
     },
-  })),
-}))
+    get wcChainSwitchStore() {
+      return mockWcChainSwitchStore
+    },
+    get walletConnectInstance() {
+      return mockWalletConnectInstance
+    },
+  }
+})
 
-// Mock the feature handle export (not used directly, but imported)
-jest.mock('@/features/walletconnect', () => ({
-  WalletConnectFeature: {
-    name: 'walletconnect',
-    useIsEnabled: () => true,
-    load: jest.fn(),
-  },
-}))
-
-const updateSessionsMock = mockWalletConnectInstance.updateSessions as jest.MockedFunction<
-  typeof mockWalletConnectInstance.updateSessions
+const updateSessionsMock = walletConnectInstance.updateSessions as jest.MockedFunction<
+  (typeof walletConnectInstance)['updateSessions']
 >
 
-updateSessionsMock.mockResolvedValue(undefined)
+updateSessionsMock.mockResolvedValue()
 
 jest.mock('@/features/myAccounts/hooks/useAllSafes', () => ({
   __esModule: true,
@@ -119,8 +114,8 @@ describe('useSafeWalletProvider', () => {
       query: { safe: `${chain.shortName}:${address}` },
     }))
 
-    mockWcPopupStore._reset(false)
-    mockWcChainSwitchStore._reset(undefined)
+    wcPopupStore.setStore(false)
+    wcChainSwitchStore.setStore(undefined)
   })
 
   describe('useSafeWalletProvider', () => {
@@ -438,7 +433,7 @@ describe('useSafeWalletProvider', () => {
 
       const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
-      mockWcPopupStore.setStore(true)
+      wcPopupStore.setStore(true)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -452,7 +447,7 @@ describe('useSafeWalletProvider', () => {
 
       expect(promise).toBeInstanceOf(Promise)
 
-      const request = mockWcChainSwitchStore.getStore()
+      const request = wcChainSwitchStore.getStore()
       expect(request).toBeDefined()
       expect(request?.safes).toEqual([safeItem])
       expect(request?.chain.chainId).toBe('5')
@@ -466,8 +461,8 @@ describe('useSafeWalletProvider', () => {
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
-      expect(mockWcPopupStore.getStore()).toBe(true)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(true)
       expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
@@ -508,8 +503,8 @@ describe('useSafeWalletProvider', () => {
       const promise = result.current?.switchChain('0x5', appInfo)
 
       expect(promise).toBeInstanceOf(Promise)
-      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
-      expect(mockWcPopupStore.getStore()).toBe(false)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
 
       await act(async () => {
         await expect(promise).resolves.toBeNull()
@@ -554,9 +549,9 @@ describe('useSafeWalletProvider', () => {
       const promise = result.current?.switchChain('0x5', appInfo)
 
       expect(promise).toBeInstanceOf(Promise)
-      expect(mockWcPopupStore.getStore()).toBe(true)
+      expect(wcPopupStore.getStore()).toBe(true)
 
-      const request = mockWcChainSwitchStore.getStore()
+      const request = wcChainSwitchStore.getStore()
       expect(request).toBeDefined()
       expect(request?.chain.chainId).toBe('5')
       expect(request?.safes).toEqual([safeItem])
@@ -571,8 +566,8 @@ describe('useSafeWalletProvider', () => {
         code: RpcErrorCode.USER_REJECTED,
         message: 'User rejected chain switch',
       })
-      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
-      expect(mockWcPopupStore.getStore()).toBe(false)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
       expect(updateSessionsMock).not.toHaveBeenCalled()
       expect(mockPush).not.toHaveBeenCalled()
     })
@@ -609,7 +604,7 @@ describe('useSafeWalletProvider', () => {
 
       const promise = result.current?.switchChain('0x5', appInfo)
 
-      const request = mockWcChainSwitchStore.getStore()
+      const request = wcChainSwitchStore.getStore()
       expect(request).toBeDefined()
 
       await act(async () => {
@@ -621,14 +616,14 @@ describe('useSafeWalletProvider', () => {
       })
 
       await expect(promise).resolves.toBeNull()
-      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
-      expect(mockWcPopupStore.getStore()).toBe(false)
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcPopupStore.getStore()).toBe(false)
 
       expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
 
       request?.onCancel()
 
-      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(wcChainSwitchStore.getStore()).toBeUndefined()
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
         query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
@@ -696,7 +691,7 @@ describe('useSafeWalletProvider', () => {
       const firstPromise = result.current?.switchChain('0x5', appInfo)
       expect(firstPromise).toBeInstanceOf(Promise)
 
-      const firstRequest = mockWcChainSwitchStore.getStore()
+      const firstRequest = wcChainSwitchStore.getStore()
       expect(firstRequest?.safes).toEqual(safes)
 
       await act(async () => {
@@ -720,7 +715,7 @@ describe('useSafeWalletProvider', () => {
       const secondPromise = result.current?.switchChain('0x5', appInfo)
       expect(secondPromise).toBeInstanceOf(Promise)
 
-      const secondRequest = mockWcChainSwitchStore.getStore()
+      const secondRequest = wcChainSwitchStore.getStore()
       expect(secondRequest?.safes).toEqual(safes)
 
       await act(async () => {
