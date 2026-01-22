@@ -163,7 +163,8 @@ export function NestedSafesPopover({
         )}
         {!isLoading && rawNestedSafes.length > visibleSafes.length && !isManageMode && (
           <Typography variant="caption" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
-            {rawNestedSafes.length - visibleSafes.length} {rawNestedSafes.length - visibleSafes.length === 1 ? 'safe' : 'safes'} hidden
+            {rawNestedSafes.length - visibleSafes.length}{' '}
+            {rawNestedSafes.length - visibleSafes.length === 1 ? 'safe' : 'safes'} hidden
           </Typography>
         )}
         {isManageMode ? (

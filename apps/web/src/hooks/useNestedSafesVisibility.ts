@@ -39,10 +39,7 @@ type UseNestedSafesVisibilityResult = {
  * - Invalid safes are auto-hidden unless user explicitly unhid them
  * - Manually hidden safes are always hidden (both valid and invalid)
  */
-export function useNestedSafesVisibility(
-  rawNestedSafes: string[],
-  chainId: string,
-): UseNestedSafesVisibilityResult {
+export function useNestedSafesVisibility(rawNestedSafes: string[], chainId: string): UseNestedSafesVisibilityResult {
   const { validatedSafes, isLoading, startFiltering, hasStarted } = useFilteredNestedSafes(rawNestedSafes, chainId)
   const manuallyHiddenSafes = useHiddenNestedSafes()
   const userUnhiddenSafes = useUserUnhiddenNestedSafes()

@@ -39,10 +39,7 @@ describe('useManageNestedSafes hook', () => {
     userUnhiddenNestedSafes: {},
   }
 
-  const renderHookWithStore = (
-    safesWithStatus: NestedSafeWithStatus[],
-    initialReduxState?: Partial<RootState>,
-  ) => {
+  const renderHookWithStore = (safesWithStatus: NestedSafeWithStatus[], initialReduxState?: Partial<RootState>) => {
     const store = makeStore(initialReduxState, { skipBroadcast: true })
     const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
     const result = rtlRenderHook(() => useManageNestedSafes(safesWithStatus), { wrapper })
