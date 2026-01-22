@@ -89,6 +89,7 @@ describe('HiddenTokenToggle', () => {
           },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })

@@ -8,24 +8,44 @@ import { Provider } from 'react-redux'
 import { renderHook as rtlRenderHook } from '@testing-library/react'
 import type { RootState } from '@/store'
 import { TOKEN_LISTS, initialState as settingsInitialState } from '@/store/settingsSlice'
+import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 
 describe('useManageNestedSafes hook', () => {
   const parentSafe = toBeHex('0x1', 20)
   const nestedSafe1 = toBeHex('0x10', 20)
   const nestedSafe2 = toBeHex('0x20', 20)
   const nestedSafe3 = toBeHex('0x30', 20)
-  const allNestedSafes = [nestedSafe1, nestedSafe2, nestedSafe3]
+
+  // Helper to create NestedSafeWithStatus array
+  const createSafesWithStatus = (
+    addresses: string[],
+    options: { invalidAddresses?: string[] } = {},
+  ): NestedSafeWithStatus[] => {
+    return addresses.map((address) => ({
+      address,
+      isValid: !options.invalidAddresses?.includes(address),
+      isAutoHidden: options.invalidAddresses?.includes(address) ?? false,
+      isManuallyHidden: false,
+      isUserUnhidden: false,
+    }))
+  }
+
+  const allSafesWithStatus = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3])
 
   const defaultSettings = {
     ...settingsInitialState,
     tokenList: TOKEN_LISTS.TRUSTED,
     hiddenNestedSafes: {},
+    userUnhiddenNestedSafes: {},
   }
 
-  const renderHookWithStore = (initialReduxState?: Partial<RootState>) => {
+  const renderHookWithStore = (
+    safesWithStatus: NestedSafeWithStatus[],
+    initialReduxState?: Partial<RootState>,
+  ) => {
     const store = makeStore(initialReduxState, { skipBroadcast: true })
     const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
-    const result = rtlRenderHook(() => useManageNestedSafes(allNestedSafes), { wrapper })
+    const result = rtlRenderHook(() => useManageNestedSafes(safesWithStatus), { wrapper })
     return { ...result, store }
   }
 
@@ -43,9 +63,9 @@ describe('useManageNestedSafes hook', () => {
     jest.restoreAllMocks()
   })
 
-  describe('toggleSafe', () => {
+  describe('toggleSafe for valid safes (manual hide)', () => {
     it('should mark a visible safe for hiding when toggled', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -59,7 +79,7 @@ describe('useManageNestedSafes hook', () => {
     })
 
     it('should unmark a safe for hiding when toggled twice', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -75,7 +95,11 @@ describe('useManageNestedSafes hook', () => {
     })
 
     it('should mark a hidden safe for unhiding when toggled', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const safesWithManuallyHidden = allSafesWithStatus.map((s) =>
+        s.address === nestedSafe1 ? { ...s, isManuallyHidden: true } : s,
+      )
+
+      const { result } = renderHook(() => useManageNestedSafes(safesWithManuallyHidden), {
         initialReduxState: {
           settings: {
             ...defaultSettings,
@@ -94,9 +118,57 @@ describe('useManageNestedSafes hook', () => {
     })
   })
 
+  describe('toggleSafe for invalid safes (user unhide)', () => {
+    it('should mark an auto-hidden (invalid) safe for user-unhiding when toggled', () => {
+      const safesWithInvalid = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3], {
+        invalidAddresses: [nestedSafe1],
+      })
+
+      const { result } = renderHook(() => useManageNestedSafes(safesWithInvalid), {
+        initialReduxState: { settings: defaultSettings },
+      })
+
+      // Invalid safe should be selected (auto-hidden) by default
+      expect(result.current.isSafeSelected(nestedSafe1)).toBe(true)
+
+      act(() => {
+        result.current.toggleSafe(nestedSafe1)
+      })
+
+      // After toggle, should be unselected (user wants to unhide)
+      expect(result.current.isSafeSelected(nestedSafe1)).toBe(false)
+    })
+
+    it('should re-auto-hide a user-unhidden safe when toggled again', () => {
+      const safesWithUserUnhidden = [
+        { address: nestedSafe1, isValid: false, isAutoHidden: false, isManuallyHidden: false, isUserUnhidden: true },
+        ...createSafesWithStatus([nestedSafe2, nestedSafe3]),
+      ]
+
+      const { result } = renderHook(() => useManageNestedSafes(safesWithUserUnhidden), {
+        initialReduxState: {
+          settings: {
+            ...defaultSettings,
+            userUnhiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
+          },
+        },
+      })
+
+      // User-unhidden safe should be unselected
+      expect(result.current.isSafeSelected(nestedSafe1)).toBe(false)
+
+      act(() => {
+        result.current.toggleSafe(nestedSafe1)
+      })
+
+      // After toggle, should be selected (re-auto-hide)
+      expect(result.current.isSafeSelected(nestedSafe1)).toBe(true)
+    })
+  })
+
   describe('isSafeSelected', () => {
-    it('should return false for visible safes by default', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+    it('should return false for visible valid safes by default', () => {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -104,8 +176,12 @@ describe('useManageNestedSafes hook', () => {
       expect(result.current.isSafeSelected(nestedSafe2)).toBe(false)
     })
 
-    it('should return true for already hidden safes', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+    it('should return true for already manually hidden safes', () => {
+      const safesWithManuallyHidden = allSafesWithStatus.map((s) =>
+        [nestedSafe1, nestedSafe2].includes(s.address) ? { ...s, isManuallyHidden: true } : s,
+      )
+
+      const { result } = renderHook(() => useManageNestedSafes(safesWithManuallyHidden), {
         initialReduxState: {
           settings: {
             ...defaultSettings,
@@ -118,11 +194,24 @@ describe('useManageNestedSafes hook', () => {
       expect(result.current.isSafeSelected(nestedSafe2)).toBe(true)
       expect(result.current.isSafeSelected(nestedSafe3)).toBe(false)
     })
+
+    it('should return true for auto-hidden (invalid) safes', () => {
+      const safesWithInvalid = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3], {
+        invalidAddresses: [nestedSafe1],
+      })
+
+      const { result } = renderHook(() => useManageNestedSafes(safesWithInvalid), {
+        initialReduxState: { settings: defaultSettings },
+      })
+
+      expect(result.current.isSafeSelected(nestedSafe1)).toBe(true) // auto-hidden
+      expect(result.current.isSafeSelected(nestedSafe2)).toBe(false)
+    })
   })
 
   describe('selectedCount', () => {
     it('should return 0 when no safes are selected', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -130,7 +219,7 @@ describe('useManageNestedSafes hook', () => {
     })
 
     it('should return correct count when safes are marked for hiding', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -145,16 +234,16 @@ describe('useManageNestedSafes hook', () => {
       expect(result.current.selectedCount).toBe(2)
     })
 
-    it('should include already hidden safes in count', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
-        initialReduxState: {
-          settings: {
-            ...defaultSettings,
-            hiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
-          },
-        },
+    it('should include auto-hidden safes in count', () => {
+      const safesWithInvalid = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3], {
+        invalidAddresses: [nestedSafe1],
       })
 
+      const { result } = renderHook(() => useManageNestedSafes(safesWithInvalid), {
+        initialReduxState: { settings: defaultSettings },
+      })
+
+      // nestedSafe1 is auto-hidden
       expect(result.current.selectedCount).toBe(1)
 
       act(() => {
@@ -164,17 +253,16 @@ describe('useManageNestedSafes hook', () => {
       expect(result.current.selectedCount).toBe(2)
     })
 
-    it('should decrease count when hidden safe is toggled for unhiding', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
-        initialReduxState: {
-          settings: {
-            ...defaultSettings,
-            hiddenNestedSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
-          },
-        },
+    it('should decrease count when auto-hidden safe is toggled for user-unhiding', () => {
+      const safesWithInvalid = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3], {
+        invalidAddresses: [nestedSafe1, nestedSafe2],
       })
 
-      expect(result.current.selectedCount).toBe(2)
+      const { result } = renderHook(() => useManageNestedSafes(safesWithInvalid), {
+        initialReduxState: { settings: defaultSettings },
+      })
+
+      expect(result.current.selectedCount).toBe(2) // both auto-hidden
 
       act(() => {
         result.current.toggleSafe(nestedSafe1)
@@ -186,7 +274,7 @@ describe('useManageNestedSafes hook', () => {
 
   describe('cancel', () => {
     it('should reset all pending changes', () => {
-      const { result } = renderHook(() => useManageNestedSafes(allNestedSafes), {
+      const { result } = renderHook(() => useManageNestedSafes(allSafesWithStatus), {
         initialReduxState: { settings: defaultSettings },
       })
 
@@ -212,7 +300,7 @@ describe('useManageNestedSafes hook', () => {
 
   describe('saveChanges', () => {
     it('should persist newly hidden safes to Redux', () => {
-      const { result, store } = renderHookWithStore({ settings: defaultSettings })
+      const { result, store } = renderHookWithStore(allSafesWithStatus, { settings: defaultSettings })
 
       act(() => {
         result.current.toggleSafe(nestedSafe1)
@@ -231,7 +319,11 @@ describe('useManageNestedSafes hook', () => {
     })
 
     it('should preserve existing hidden safes when adding new ones', () => {
-      const { result, store } = renderHookWithStore({
+      const safesWithManuallyHidden = allSafesWithStatus.map((s) =>
+        s.address === nestedSafe1 ? { ...s, isManuallyHidden: true } : s,
+      )
+
+      const { result, store } = renderHookWithStore(safesWithManuallyHidden, {
         settings: {
           ...defaultSettings,
           hiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
@@ -252,7 +344,11 @@ describe('useManageNestedSafes hook', () => {
     })
 
     it('should unhide safes that were toggled off', () => {
-      const { result, store } = renderHookWithStore({
+      const safesWithManuallyHidden = allSafesWithStatus.map((s) =>
+        [nestedSafe1, nestedSafe2].includes(s.address) ? { ...s, isManuallyHidden: true } : s,
+      )
+
+      const { result, store } = renderHookWithStore(safesWithManuallyHidden, {
         settings: {
           ...defaultSettings,
           hiddenNestedSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
@@ -272,8 +368,28 @@ describe('useManageNestedSafes hook', () => {
       expect(state.settings.hiddenNestedSafes[parentSafe]).toContain(nestedSafe2)
     })
 
+    it('should persist user-unhidden safes to Redux', () => {
+      const safesWithInvalid = createSafesWithStatus([nestedSafe1, nestedSafe2, nestedSafe3], {
+        invalidAddresses: [nestedSafe1],
+      })
+
+      const { result, store } = renderHookWithStore(safesWithInvalid, { settings: defaultSettings })
+
+      // Toggle to unhide the auto-hidden safe
+      act(() => {
+        result.current.toggleSafe(nestedSafe1)
+      })
+
+      act(() => {
+        result.current.saveChanges()
+      })
+
+      const state = store.getState()
+      expect(state.settings.userUnhiddenNestedSafes[parentSafe]).toEqual([nestedSafe1])
+    })
+
     it('should reset local state after saving', () => {
-      const { result, store } = renderHookWithStore({ settings: defaultSettings })
+      const { result, store } = renderHookWithStore(allSafesWithStatus, { settings: defaultSettings })
 
       act(() => {
         result.current.toggleSafe(nestedSafe1)

@@ -94,6 +94,7 @@ describe('AssetsTable', () => {
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })
@@ -184,6 +185,7 @@ describe('AssetsTable', () => {
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })
@@ -270,6 +272,7 @@ describe('AssetsTable', () => {
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })
@@ -357,6 +360,7 @@ describe('AssetsTable', () => {
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })
@@ -457,6 +461,7 @@ describe('AssetsTable', () => {
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
           hiddenNestedSafes: {},
+          userUnhiddenNestedSafes: {},
         },
       },
     })

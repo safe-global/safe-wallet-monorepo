@@ -48,6 +48,7 @@ type AccountItemProps = {
   onSelectSafe?: (safeItem: SafeItem) => void | Promise<void>
   showActions?: boolean
   showChainBadge?: boolean
+  suffixElement?: React.ReactNode
 }
 
 const SingleAccountItem = ({
@@ -59,6 +60,7 @@ const SingleAccountItem = ({
   onSelectSafe,
   showActions = true,
   showChainBadge = true,
+  suffixElement,
 }: AccountItemProps) => {
   const { chainId, address, isReadOnly, isPinned } = safeItem
   const chain = useChain(chainId)
@@ -311,6 +313,7 @@ const SingleAccountItem = ({
       </Track>
 
       {showActions ? actions : null}
+      {suffixElement}
     </ListItemButton>
   )
 }

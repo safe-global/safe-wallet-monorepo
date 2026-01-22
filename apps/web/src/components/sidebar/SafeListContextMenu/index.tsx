@@ -23,6 +23,7 @@ import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/A
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
+import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -67,6 +68,12 @@ const SafeListContextMenu = ({
   const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
+  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
+  const { allSafesWithStatus, visibleSafes, isLoading, startFiltering } = useNestedSafesVisibility(
+    nestedSafesForChain,
+    chainId,
+  )
+
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
@@ -82,6 +89,9 @@ const SafeListContextMenu = ({
     if (type !== ModalType.NESTED_SAFES) {
       handleCloseContextMenu()
     }
+    if (type === ModalType.NESTED_SAFES) {
+      startFiltering()
+    }
     setOpen((prev) => ({ ...prev, [type]: true }))
 
     trackEvent({ ...event, label: trackingLabel })
@@ -90,8 +100,6 @@ const SafeListContextMenu = ({
   const handleCloseModal = () => {
     setOpen(defaultOpen)
   }
-
-  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
 
   return (
     <>
@@ -148,7 +156,10 @@ const SafeListContextMenu = ({
             handleCloseModal()
             onClose?.()
           }}
-          nestedSafes={nestedSafesForChain}
+          rawNestedSafes={nestedSafesForChain}
+          allSafesWithStatus={allSafesWithStatus}
+          visibleSafes={visibleSafes}
+          isLoading={isLoading}
           hideCreationButton
         />
       )}

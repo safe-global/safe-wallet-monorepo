@@ -1,4 +1,4 @@
-import { SvgIcon, Popover, Button, Box, Stack, IconButton, Typography, Tooltip } from '@mui/material'
+import { SvgIcon, Popover, Button, Box, Stack, IconButton, Typography, Tooltip, CircularProgress } from '@mui/material'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -13,25 +13,28 @@ import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useManageNestedSafes } from '@/components/sidebar/NestedSafesList/useManageNestedSafes'
-import useHiddenNestedSafes from '@/hooks/useHiddenNestedSafes'
+import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 
 export function NestedSafesPopover({
   anchorEl,
   onClose,
-  nestedSafes,
+  rawNestedSafes,
+  allSafesWithStatus,
+  visibleSafes,
+  isLoading = false,
   hideCreationButton = false,
 }: {
   anchorEl: HTMLElement | null
   onClose: () => void
-  nestedSafes: Array<string>
+  rawNestedSafes: string[]
+  allSafesWithStatus: NestedSafeWithStatus[]
+  visibleSafes: NestedSafeWithStatus[]
+  isLoading?: boolean
   hideCreationButton?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
   const [isManageMode, setIsManageMode] = useState(false)
-  const hiddenSafes = useHiddenNestedSafes()
-  const { toggleSafe, isSafeSelected, saveChanges, cancel, selectedCount } = useManageNestedSafes(nestedSafes)
-
-  const visibleNestedSafes = nestedSafes.filter((address) => !hiddenSafes.includes(address))
+  const { toggleSafe, isSafeSelected, saveChanges, cancel, selectedCount } = useManageNestedSafes(allSafesWithStatus)
 
   const onAdd = () => {
     setTxFlow(<CreateNestedSafeFlow />)
@@ -52,7 +55,8 @@ export function NestedSafesPopover({
     setIsManageMode(false)
   }
 
-  const safesToShow = isManageMode ? nestedSafes : visibleNestedSafes
+  // In manage mode, show all safes; otherwise show only visible
+  const safesToShow = isManageMode ? allSafesWithStatus : visibleSafes
 
   return (
     <Popover
@@ -86,17 +90,24 @@ export function NestedSafesPopover({
       >
         <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
           <span>Nested Safes</span>
-          {nestedSafes.length > 0 && !isManageMode && (
-            <Tooltip title="Manage Safes">
-              <IconButton
-                onClick={handleManageClick}
-                size="small"
-                sx={{ ml: 1 }}
-                data-testid="manage-nested-safes-button"
-              >
-                <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" />
-              </IconButton>
-            </Tooltip>
+          {isManageMode ? (
+            <Typography variant="body2" color="text.secondary">
+              {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected to hide
+            </Typography>
+          ) : (
+            rawNestedSafes.length > 0 &&
+            !isLoading && (
+              <Tooltip title="Manage Safes">
+                <IconButton
+                  onClick={handleManageClick}
+                  size="small"
+                  sx={{ ml: 1 }}
+                  data-testid="manage-nested-safes-button"
+                >
+                  <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )
           )}
         </Box>
       </ModalDialogTitle>
@@ -109,14 +120,11 @@ export function NestedSafesPopover({
         flex={1}
         overflow="hidden"
       >
-        {isManageMode && (
-          <Box mb={2}>
-            <Typography variant="body2" color="text.secondary">
-              {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected to hide
-            </Typography>
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" flex={1} py={4}>
+            <CircularProgress size={32} />
           </Box>
-        )}
-        {safesToShow.length === 0 && !isManageMode ? (
+        ) : safesToShow.length === 0 && !isManageMode ? (
           <NestedSafeInfo />
         ) : (
           <Box
@@ -124,16 +132,39 @@ export function NestedSafesPopover({
               overflowX: 'hidden',
               overflowY: 'auto',
               flex: 1,
+              pr: 1.5,
+              mr: -1.5,
+              // Custom scrollbar styling
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'var(--color-border-light) transparent',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'var(--color-border-light)',
+                borderRadius: '3px',
+                '&:hover': {
+                  backgroundColor: 'var(--color-border-main)',
+                },
+              },
             }}
           >
             <NestedSafesList
               onClose={onClose}
-              nestedSafes={safesToShow}
+              safesWithStatus={safesToShow}
               isManageMode={isManageMode}
               onToggleSafe={toggleSafe}
               isSafeSelected={isSafeSelected}
             />
           </Box>
+        )}
+        {!isLoading && rawNestedSafes.length > visibleSafes.length && !isManageMode && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+            {rawNestedSafes.length - visibleSafes.length} {rawNestedSafes.length - visibleSafes.length === 1 ? 'safe' : 'safes'} hidden
+          </Typography>
         )}
         {isManageMode ? (
           <Stack direction="row" spacing={2} mt={3}>

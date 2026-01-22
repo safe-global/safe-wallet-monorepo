@@ -22,6 +22,10 @@ export type SettingsState = {
     [safeAddress: string]: string[]
   }
 
+  userUnhiddenNestedSafes: {
+    [safeAddress: string]: string[]
+  }
+
   tokenList: TOKEN_LISTS
 
   hideDust?: boolean
@@ -51,6 +55,8 @@ export const initialState: SettingsState = {
   hiddenTokens: {},
 
   hiddenNestedSafes: {},
+
+  userUnhiddenNestedSafes: {},
 
   hideDust: true,
 
@@ -106,6 +112,10 @@ export const settingsSlice = createSlice({
       const { safeAddress, nestedSafes } = payload
       state.hiddenNestedSafes[safeAddress] = nestedSafes
     },
+    setUserUnhiddenNestedSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+      const { safeAddress, nestedSafes } = payload
+      state.userUnhiddenNestedSafes[safeAddress] = nestedSafes
+    },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
@@ -147,6 +157,7 @@ export const {
   setDarkMode,
   setHiddenTokensForChain,
   setHiddenNestedSafes,
+  setUserUnhiddenNestedSafes,
   setTokenList,
   setHideDust,
   hideSuspiciousTransactions,
@@ -190,5 +201,12 @@ export const selectHiddenNestedSafes = createSelector(
   [selectSettings, (_, safeAddress: string) => safeAddress],
   (settings, safeAddress) => {
     return settings.hiddenNestedSafes?.[safeAddress] || []
+  },
+)
+
+export const selectUserUnhiddenNestedSafes = createSelector(
+  [selectSettings, (_, safeAddress: string) => safeAddress],
+  (settings, safeAddress) => {
+    return settings.userUnhiddenNestedSafes?.[safeAddress] || []
   },
 )
