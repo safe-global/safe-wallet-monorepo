@@ -35,7 +35,7 @@ const createMockStore = <T,>(initialValue: T) => {
 }
 
 const mockWcPopupStore = createMockStore<boolean>(false)
- 
+
 const mockWcChainSwitchStore = createMockStore<any>(undefined)
 const mockWalletConnectInstance = {
   init: jest.fn(),
