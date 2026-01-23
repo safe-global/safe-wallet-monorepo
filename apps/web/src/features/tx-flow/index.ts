@@ -56,19 +56,14 @@ export type {
 } from './components/flows/TokenTransfer'
 
 // ============================================================
-// BACKWARDS COMPATIBILITY EXPORTS
-// These allow gradual migration from @/components/tx-flow
+// COMPONENTS & PROVIDERS
+// Direct exports for convenience (part of public API)
 // ============================================================
 
-// Re-export TxModalContext and TxModalProvider directly for _app.tsx and other consumers
-// that need synchronous access (not through useLoadFeature)
+// TxModalProvider and Context - used in _app.tsx and throughout the app
 export { TxModalContext, TxModalProvider } from './TxModalProvider'
 
-// Re-export all flows from the component location for backwards compatibility
-// Consumers can migrate from:
-//   import { TokenTransferFlow } from '@/features/tx-flow/components/flows'
-// To:
-//   import { TokenTransferFlow } from '@/features/tx-flow'
+// All flow components - public API for easy imports
 export {
   AddOwnerFlow,
   CancelRecoveryFlow,

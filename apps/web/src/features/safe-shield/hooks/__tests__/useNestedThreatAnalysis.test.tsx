@@ -29,7 +29,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => ({ address: '0xWallet' })),
 }))
 
-jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
+jest.mock('@/features/tx-flow/contexts/SafeTxProvider', () => ({
   SafeTxContext: {
     _currentValue: {
       safeTx: undefined,
