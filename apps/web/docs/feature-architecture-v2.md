@@ -224,17 +224,50 @@ import { WalletConnectFeature } from '@/features/walletconnect'
 //       Cmd+click jumps to handle definition in index.ts
 ```
 
-For navigating to implementation details from contracts, use `typeof` imports:
+**IMPORTANT: Always use `typeof` pattern in contracts for IDE navigation.**
+
+For navigating to implementation details from contracts, use `typeof` imports. This enables Cmd+click to jump directly to the implementation:
 
 ```typescript
 // contract.ts
+import type MyComponent from './components/MyComponent'
 import type { myService } from './services/myService'
+import type { myStore } from './store/myStore'
 
 export interface MyFeatureContract {
-  services: {
-    // Cmd+click on 'typeof myService' jumps to implementation
-    myService: typeof myService
+  components: {
+    // ✅ CORRECT: Cmd+click on 'typeof MyComponent' jumps to implementation
+    MyComponent: typeof MyComponent
   }
+  services: {
+    // ✅ CORRECT: Cmd+click on 'typeof myService' jumps to implementation
+    myService: typeof myService
+
+    // ✅ CORRECT: For stores, always use typeof
+    myStore: typeof myStore
+  }
+}
+```
+
+**Why this matters:**
+
+- **IDE Navigation**: `typeof` creates a direct link to the implementation file
+- **Type Safety**: Automatically keeps the contract in sync with implementation changes
+- **Refactoring**: Renaming/moving files updates the type automatically
+- **Developer Experience**: Cmd+click takes you directly to the source
+
+**Anti-patterns to avoid:**
+
+```typescript
+// ❌ WRONG: Generic ComponentType loses IDE navigation
+import type { ComponentType } from 'react'
+components: {
+  MyComponent: ComponentType // Can't jump to definition
+}
+
+// ❌ WRONG: Manual type annotation requires maintenance
+components: {
+  MyComponent: React.FC<{ prop: string }> // Must update manually when props change
 }
 ```
 
@@ -244,13 +277,15 @@ export interface MyFeatureContract {
 
 ```typescript
 // src/features/bridge/contract.ts
-import type { ComponentType } from 'react'
 import type { FeatureImplementation } from '@/features/__core__'
+import type Bridge from './components/Bridge'
+import type BridgeWidget from './components/BridgeWidget'
 
 export interface BridgeImplementation extends FeatureImplementation {
   components: {
-    Bridge: ComponentType
-    BridgeWidget: ComponentType
+    // Use typeof for IDE navigation (Cmd+click jumps to implementation)
+    Bridge: typeof Bridge
+    BridgeWidget: typeof BridgeWidget
   }
 }
 
@@ -265,17 +300,23 @@ export interface BridgeContract extends BridgeImplementation {
 ```typescript
 // src/features/multichain/contract.ts
 import type { BaseFeatureContract, ComponentContract, HooksContract } from '@/features/__core__/types'
+import type CreateSafeOnNewChain from './components/CreateSafeOnNewChain'
+import type NetworkLogosList from './components/NetworkLogosList'
+import type { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
+import type { useSafeCreationData } from './hooks/useSafeCreationData'
 
 export interface MultichainContract extends BaseFeatureContract, ComponentContract, HooksContract {
   readonly name: 'multichain'
   useIsEnabled: () => boolean | undefined // Static flag check
   components: {
-    CreateSafeOnNewChain: React.LazyExoticComponent<React.ComponentType>
-    NetworkLogosList: React.LazyExoticComponent<React.ComponentType<{ chainIds: string[] }>>
+    // Use typeof for IDE navigation
+    CreateSafeOnNewChain: typeof CreateSafeOnNewChain
+    NetworkLogosList: typeof NetworkLogosList
   }
   hooks: {
-    useIsMultichainSafe: () => boolean
-    useSafeCreationData: (chainId: string) => SafeCreationData | undefined
+    // Use typeof for hooks too
+    useIsMultichainSafe: typeof useIsMultichainSafe
+    useSafeCreationData: typeof useSafeCreationData
   }
 }
 ```
@@ -285,25 +326,34 @@ export interface MultichainContract extends BaseFeatureContract, ComponentContra
 ```typescript
 // src/features/walletconnect/contract.ts
 import type { FeatureContract } from '@/features/__core__/types'
+import type WalletConnectWidget from './components/WalletConnectWidget'
+import type WcSessionManager from './components/WcSessionManager'
+import type { useWcUri } from './hooks/useWcUri'
+import type { useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
+import type WalletConnectWallet from './services/WalletConnectWallet'
+import type { wcPopupStore } from './store/wcPopupStore'
+import type { wcSessionStore } from './store/wcSessionStore'
 
 export interface WalletConnectContract extends FeatureContract {
   readonly name: 'walletconnect'
   useIsEnabled: () => boolean | undefined // Static flag check
   components: {
-    WalletConnectWidget: React.LazyExoticComponent<React.ComponentType>
-    WcSessionManager: React.LazyExoticComponent<React.ComponentType>
+    // Use typeof for components - enables IDE navigation
+    WalletConnectWidget: typeof WalletConnectWidget
+    WcSessionManager: typeof WcSessionManager
   }
   hooks: {
-    useWcUri: () => string | undefined
-    useWalletConnectSearchParamUri: () => string | null
+    // Use typeof for hooks
+    useWcUri: typeof useWcUri
+    useWalletConnectSearchParamUri: typeof useWalletConnectSearchParamUri
   }
   services: {
-    connect: (uri: string) => Promise<void>
-    disconnect: (topic: string) => Promise<void>
-  }
-  selectors: {
-    selectWcPopupOpen: (state: RootState) => boolean
-    selectWcSessions: (state: RootState) => WcSession[]
+    // Use typeof for services
+    walletConnectInstance: WalletConnectWallet
+
+    // Use typeof for stores
+    wcPopupStore: typeof wcPopupStore
+    wcSessionStore: typeof wcSessionStore
   }
 }
 ```
@@ -801,6 +851,7 @@ function SafeShieldScanner() {
 
 - [ ] Determined feature tier (Minimal/Standard/Full)
 - [ ] Created `contract.ts` with typed contract interface
+- [ ] **Used `typeof` pattern in contract for all components, hooks, services, and stores (for IDE navigation)**
 - [ ] Created `handle.ts` with static `useIsEnabled` + lazy `load()` function
 - [ ] Created `index.ts` exporting `{FeatureName}Feature` from handle
 - [ ] Organized implementation in `components/`, `hooks/`, `services/`, `store/`
@@ -811,6 +862,7 @@ function SafeShieldScanner() {
 ### For Existing Features (Migration)
 
 - [ ] Created `contract.ts`
+- [ ] **Used `typeof` pattern in contract for all components, hooks, services, and stores (for IDE navigation)**
 - [ ] Created `handle.ts`
 - [ ] Created `index.ts` with `{FeatureName}Feature` export
 - [ ] Organized internals in `components/`, `hooks/`, `services/`, `store/`
