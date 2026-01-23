@@ -2,7 +2,13 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": ["src/pages/**/*.tsx", "src/pages/**/*.ts", "src/app/**/*.tsx", "src/app/**/*.ts"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["**/*.test.{ts,tsx}", "**/*.stories.{ts,tsx}", "**/__tests__/**", "src/types/contracts/**"],
+  "ignore": [
+    "**/*.test.{ts,tsx}",
+    "**/*.stories.{ts,tsx}",
+    "**/__tests__/**",
+    "src/types/contracts/**",
+    "src/components/common/Mui/index.tsx"
+  ],
   "ignoreDependencies": [
     "@storybook/*",
     "storybook",
