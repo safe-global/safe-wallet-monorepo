@@ -8,6 +8,28 @@ const CHUNKS_DIR = path.join(OUT_DIR, '_next', 'static', 'chunks')
 const MANIFEST_JS_FILENAME = 'chunks-sri-manifest.js'
 
 /**
+ * Finds the minified method name webpack uses for creating script URLs.
+ * This is typically `c.tu` but the minifier can use any identifier.
+ *
+ * Looks for: varName.methodName=e=>varName.tt().createScriptURL(e)
+ *
+ * @param {string} content - The webpack runtime file content
+ * @returns {{varName: string, methodName: string} | null} The extracted identifiers or null
+ */
+function findWebpackUrlMethod(content) {
+  // Match: someVar.someMethod=e=>someVar.tt().createScriptURL(e)
+  // This is webpack's Trusted Types URL creator: __webpack_require__.tu
+  const match = content.match(/(\w)\.(\w+)=\w=>\1\.tt\(\)\.createScriptURL\(\w\)/)
+  if (match) {
+    return {
+      varName: match[1],
+      methodName: match[2],
+    }
+  }
+  return null
+}
+
+/**
  * Patch webpack runtime to inject SRI lookup for dynamically loaded chunks.
  *
  * Webpack's chunk loader (`__webpack_require__.l`) creates script tags for dynamic imports.
@@ -31,24 +53,39 @@ function patchWebpackRuntime() {
     let content = fs.readFileSync(filePath, 'utf8')
     const originalContent = content
 
-    // Pattern: varName.src = webpackObj.tu(urlVar)
+    // Dynamically find the webpack URL method name (e.g., 'tu', 'ab', etc.)
+    const urlMethod = findWebpackUrlMethod(content)
+    if (!urlMethod) {
+      console.warn('Warning: Could not find webpack URL method in', path.basename(filePath))
+      continue
+    }
+
+    // Pattern: scriptVar.src = webpackObj.urlMethod(urlVar)
     // This is webpack's __webpack_require__.l function setting script.src
     // We inject SRI lookup right after the src is set
     //
-    // Matches patterns like:
+    // Example matches (depending on minified names):
     //   r.src=c.tu(d)
-    //   a.src=o.tu(e)
+    //   a.src=o.ab(e)
     //
     // Transforms to:
     //   r.src=c.tu(d);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[d])r.integrity=_sri[d]
+    const pattern = new RegExp(
+      `(\\w)\\.src=(\\w)\\.${urlMethod.methodName}\\((\\w)\\)`,
+      'g',
+    )
+
     content = content.replace(
-      /(\w)\.src=(\w)\.tu\((\w)\)/g,
-      '$1.src=$2.tu($3);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[$3])$1.integrity=_sri[$3]',
+      pattern,
+      `$1.src=$2.${urlMethod.methodName}($3);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[$3])$1.integrity=_sri[$3]`,
     )
 
     if (content !== originalContent) {
       fs.writeFileSync(filePath, content, 'utf8')
-      console.log('Patched webpack runtime for SRI:', path.basename(filePath))
+      console.log(
+        `Patched webpack runtime for SRI (using method: ${urlMethod.methodName}):`,
+        path.basename(filePath),
+      )
     } else {
       console.warn('Warning: Could not find webpack chunk loader pattern in', path.basename(filePath))
     }
