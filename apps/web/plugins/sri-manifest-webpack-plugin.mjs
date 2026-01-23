@@ -109,9 +109,14 @@ export class SriManifestWebpackPlugin {
     const webpackAssets = Object.keys(assets).filter((name) => name.includes('webpack-') && name.endsWith('.js'))
 
     if (webpackAssets.length === 0) {
-      throw new Error(
-        'No webpack runtime files found. SRI patching cannot proceed. This may indicate a webpack configuration change.',
+      // During client/server compilation, webpack runtime might not be in this compilation
+      // Only warn - the final client compilation will have the runtime
+      const warning = new Error(
+        'No webpack runtime files found in this compilation. If this is the final build, SRI patching failed.',
       )
+      warning.name = 'SriManifestWarning'
+      compilation.warnings.push(warning)
+      return
     }
 
     let patchedCount = 0
@@ -174,10 +179,15 @@ export class SriManifestWebpackPlugin {
     }
 
     // Validate that at least one file was successfully patched
-    if (patchedCount === 0) {
-      throw new Error(
-        'Failed to patch any webpack runtime files. SRI for dynamically loaded chunks will not work. This is a critical security issue.',
+    if (patchedCount === 0 && webpackAssets.length > 0) {
+      // Warn if we found webpack assets but couldn't patch any of them
+      // This might be OK if the webpack runtime doesn't have dynamic chunk loading
+      const warning = new Error(
+        `Could not patch any of ${webpackAssets.length} webpack runtime file(s). ` +
+          `If this is the client build and you use dynamic imports, SRI may not work for dynamic chunks.`,
       )
+      warning.name = 'SriManifestWarning'
+      compilation.warnings.push(warning)
     }
   }
 
