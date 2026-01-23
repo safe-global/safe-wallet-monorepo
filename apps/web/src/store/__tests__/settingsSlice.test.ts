@@ -1,11 +1,11 @@
 import { toBeHex } from 'ethers'
 import {
   setHiddenTokensForChain,
-  setHiddenNestedSafes,
+  setManuallyHiddenSafes,
   settingsSlice,
   isEnvInitialState,
   initialState,
-  selectHiddenNestedSafes,
+  selectManuallyHiddenSafes,
 } from '../settingsSlice'
 import type { SettingsState } from '../settingsSlice'
 import type { RootState } from '..'
@@ -152,36 +152,36 @@ describe('settingsSlice', () => {
     })
   })
 
-  describe('setHiddenNestedSafes', () => {
+  describe('setManuallyHiddenSafes', () => {
     const parentSafe1 = toBeHex('0x1', 20)
     const parentSafe2 = toBeHex('0x2', 20)
     const nestedSafe1 = toBeHex('0x10', 20)
     const nestedSafe2 = toBeHex('0x20', 20)
     const nestedSafe3 = toBeHex('0x30', 20)
 
-    it('should set hidden nested safes for a parent safe', () => {
+    it('should set manually hidden safes for a parent safe', () => {
       const state = settingsSlice.reducer(
         undefined,
-        setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1] }),
       )
 
-      expect(state.hiddenNestedSafes).toEqual({
+      expect(state.manuallyHiddenSafes).toEqual({
         [parentSafe1]: [nestedSafe1],
       })
     })
 
-    it('should update hidden nested safes for an existing parent safe', () => {
+    it('should update manually hidden safes for an existing parent safe', () => {
       let state = settingsSlice.reducer(
         undefined,
-        setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1] }),
       )
 
       state = settingsSlice.reducer(
         state,
-        setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
       )
 
-      expect(state.hiddenNestedSafes).toEqual({
+      expect(state.manuallyHiddenSafes).toEqual({
         [parentSafe1]: [nestedSafe1, nestedSafe2],
       })
     })
@@ -189,15 +189,15 @@ describe('settingsSlice', () => {
     it('should handle multiple parent safes independently', () => {
       let state = settingsSlice.reducer(
         undefined,
-        setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
       )
 
       state = settingsSlice.reducer(
         state,
-        setHiddenNestedSafes({ safeAddress: parentSafe2, nestedSafes: [nestedSafe3] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe2, nestedSafes: [nestedSafe3] }),
       )
 
-      expect(state.hiddenNestedSafes).toEqual({
+      expect(state.manuallyHiddenSafes).toEqual({
         [parentSafe1]: [nestedSafe1, nestedSafe2],
         [parentSafe2]: [nestedSafe3],
       })
@@ -206,54 +206,54 @@ describe('settingsSlice', () => {
     it('should allow clearing hidden safes for a parent', () => {
       let state = settingsSlice.reducer(
         undefined,
-        setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
+        setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [nestedSafe1, nestedSafe2] }),
       )
 
-      state = settingsSlice.reducer(state, setHiddenNestedSafes({ safeAddress: parentSafe1, nestedSafes: [] }))
+      state = settingsSlice.reducer(state, setManuallyHiddenSafes({ safeAddress: parentSafe1, nestedSafes: [] }))
 
-      expect(state.hiddenNestedSafes).toEqual({
+      expect(state.manuallyHiddenSafes).toEqual({
         [parentSafe1]: [],
       })
     })
   })
 
-  describe('selectHiddenNestedSafes', () => {
+  describe('selectManuallyHiddenSafes', () => {
     const parentSafe = toBeHex('0x1', 20)
     const nestedSafe1 = toBeHex('0x10', 20)
     const nestedSafe2 = toBeHex('0x20', 20)
 
-    it('should return hidden nested safes for a parent safe', () => {
+    it('should return manually hidden safes for a parent safe', () => {
       const state = {
         settings: {
           ...initialState,
-          hiddenNestedSafes: {
+          manuallyHiddenSafes: {
             [parentSafe]: [nestedSafe1, nestedSafe2],
           },
         },
       } as unknown as RootState
 
-      expect(selectHiddenNestedSafes(state, parentSafe)).toEqual([nestedSafe1, nestedSafe2])
+      expect(selectManuallyHiddenSafes(state, parentSafe)).toEqual([nestedSafe1, nestedSafe2])
     })
 
-    it('should return empty array when parent safe has no hidden nested safes', () => {
+    it('should return empty array when parent safe has no manually hidden safes', () => {
       const state = {
         settings: {
           ...initialState,
-          hiddenNestedSafes: {},
+          manuallyHiddenSafes: {},
         },
       } as unknown as RootState
 
-      expect(selectHiddenNestedSafes(state, parentSafe)).toEqual([])
+      expect(selectManuallyHiddenSafes(state, parentSafe)).toEqual([])
     })
 
-    it('should return empty array when hiddenNestedSafes is undefined', () => {
+    it('should return empty array when manuallyHiddenSafes is undefined', () => {
       const state = {
         settings: {
           ...initialState,
         },
       } as unknown as RootState
 
-      expect(selectHiddenNestedSafes(state, parentSafe)).toEqual([])
+      expect(selectManuallyHiddenSafes(state, parentSafe)).toEqual([])
     })
   })
 })

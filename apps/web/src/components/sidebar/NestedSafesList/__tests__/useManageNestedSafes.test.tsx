@@ -35,8 +35,8 @@ describe('useManageNestedSafes hook', () => {
   const defaultSettings = {
     ...settingsInitialState,
     tokenList: TOKEN_LISTS.TRUSTED,
-    hiddenNestedSafes: {},
-    userUnhiddenNestedSafes: {},
+    manuallyHiddenSafes: {},
+    overriddenAutoHideSafes: {},
   }
 
   const renderHookWithStore = (safesWithStatus: NestedSafeWithStatus[], initialReduxState?: Partial<RootState>) => {
@@ -100,7 +100,7 @@ describe('useManageNestedSafes hook', () => {
         initialReduxState: {
           settings: {
             ...defaultSettings,
-            hiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
+            manuallyHiddenSafes: { [parentSafe]: [nestedSafe1] },
           },
         },
       })
@@ -146,7 +146,7 @@ describe('useManageNestedSafes hook', () => {
         initialReduxState: {
           settings: {
             ...defaultSettings,
-            userUnhiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
+            overriddenAutoHideSafes: { [parentSafe]: [nestedSafe1] },
           },
         },
       })
@@ -182,7 +182,7 @@ describe('useManageNestedSafes hook', () => {
         initialReduxState: {
           settings: {
             ...defaultSettings,
-            hiddenNestedSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
+            manuallyHiddenSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
           },
         },
       })
@@ -312,7 +312,7 @@ describe('useManageNestedSafes hook', () => {
       })
 
       const state = store.getState()
-      expect(state.settings.hiddenNestedSafes[parentSafe]).toEqual([nestedSafe1, nestedSafe2])
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).toEqual([nestedSafe1, nestedSafe2])
     })
 
     it('should preserve existing hidden safes when adding new ones', () => {
@@ -323,7 +323,7 @@ describe('useManageNestedSafes hook', () => {
       const { result, store } = renderHookWithStore(safesWithManuallyHidden, {
         settings: {
           ...defaultSettings,
-          hiddenNestedSafes: { [parentSafe]: [nestedSafe1] },
+          manuallyHiddenSafes: { [parentSafe]: [nestedSafe1] },
         },
       })
 
@@ -336,8 +336,8 @@ describe('useManageNestedSafes hook', () => {
       })
 
       const state = store.getState()
-      expect(state.settings.hiddenNestedSafes[parentSafe]).toContain(nestedSafe1)
-      expect(state.settings.hiddenNestedSafes[parentSafe]).toContain(nestedSafe2)
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).toContain(nestedSafe1)
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).toContain(nestedSafe2)
     })
 
     it('should unhide safes that were toggled off', () => {
@@ -348,7 +348,7 @@ describe('useManageNestedSafes hook', () => {
       const { result, store } = renderHookWithStore(safesWithManuallyHidden, {
         settings: {
           ...defaultSettings,
-          hiddenNestedSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
+          manuallyHiddenSafes: { [parentSafe]: [nestedSafe1, nestedSafe2] },
         },
       })
 
@@ -361,8 +361,8 @@ describe('useManageNestedSafes hook', () => {
       })
 
       const state = store.getState()
-      expect(state.settings.hiddenNestedSafes[parentSafe]).not.toContain(nestedSafe1)
-      expect(state.settings.hiddenNestedSafes[parentSafe]).toContain(nestedSafe2)
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).not.toContain(nestedSafe1)
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).toContain(nestedSafe2)
     })
 
     it('should persist user-unhidden safes to Redux', () => {
@@ -382,7 +382,7 @@ describe('useManageNestedSafes hook', () => {
       })
 
       const state = store.getState()
-      expect(state.settings.userUnhiddenNestedSafes[parentSafe]).toEqual([nestedSafe1])
+      expect(state.settings.overriddenAutoHideSafes[parentSafe]).toEqual([nestedSafe1])
     })
 
     it('should reset local state after saving', () => {
@@ -397,7 +397,7 @@ describe('useManageNestedSafes hook', () => {
       })
 
       const state = store.getState()
-      expect(state.settings.hiddenNestedSafes[parentSafe]).toEqual([nestedSafe1])
+      expect(state.settings.manuallyHiddenSafes[parentSafe]).toEqual([nestedSafe1])
       expect(result.current.isSafeSelected(nestedSafe1)).toBe(true)
     })
   })

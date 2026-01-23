@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import useHiddenNestedSafes from './useHiddenNestedSafes'
-import useUserUnhiddenNestedSafes from './useUserUnhiddenNestedSafes'
+import useManuallyHiddenSafes from './useManuallyHiddenSafes'
+import useOverriddenAutoHideSafes from './useOverriddenAutoHideSafes'
 import { useFilteredNestedSafes, type NestedSafeValidation } from './useFilteredNestedSafes'
 
 export type NestedSafeWithStatus = {
@@ -41,8 +41,8 @@ type UseNestedSafesVisibilityResult = {
  */
 export function useNestedSafesVisibility(rawNestedSafes: string[], chainId: string): UseNestedSafesVisibilityResult {
   const { validatedSafes, isLoading, startFiltering, hasStarted } = useFilteredNestedSafes(rawNestedSafes, chainId)
-  const manuallyHiddenSafes = useHiddenNestedSafes()
-  const userUnhiddenSafes = useUserUnhiddenNestedSafes()
+  const manuallyHiddenSafes = useManuallyHiddenSafes()
+  const overriddenAutoHideSafes = useOverriddenAutoHideSafes()
 
   const allSafesWithStatus = useMemo((): NestedSafeWithStatus[] => {
     // Before validation starts, return empty statuses
@@ -58,8 +58,8 @@ export function useNestedSafesVisibility(rawNestedSafes: string[], chainId: stri
 
     return validatedSafes.map((validated: NestedSafeValidation) => {
       const isManuallyHidden = manuallyHiddenSafes.includes(validated.address)
-      const isUserUnhidden = userUnhiddenSafes.includes(validated.address)
-      // Auto-hidden = invalid AND not user-unhidden
+      const isUserUnhidden = overriddenAutoHideSafes.includes(validated.address)
+      // Auto-hidden = invalid AND not overridden by user
       const isAutoHidden = !validated.isValid && !isUserUnhidden
 
       return {
@@ -70,7 +70,7 @@ export function useNestedSafesVisibility(rawNestedSafes: string[], chainId: stri
         isUserUnhidden,
       }
     })
-  }, [validatedSafes, manuallyHiddenSafes, userUnhiddenSafes, hasStarted, isLoading, rawNestedSafes])
+  }, [validatedSafes, manuallyHiddenSafes, overriddenAutoHideSafes, hasStarted, isLoading, rawNestedSafes])
 
   const visibleSafes = useMemo(() => {
     return allSafesWithStatus.filter((safe) => !safe.isAutoHidden && !safe.isManuallyHidden)

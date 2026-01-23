@@ -88,8 +88,8 @@ describe('HiddenTokenToggle', () => {
             blindSigning: false,
           },
           transactionExecution: true,
-          hiddenNestedSafes: {},
-          userUnhiddenNestedSafes: {},
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })

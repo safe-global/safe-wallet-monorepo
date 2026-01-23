@@ -1,10 +1,10 @@
 import { toBeHex } from 'ethers'
-import useHiddenNestedSafes from '@/hooks/useHiddenNestedSafes'
+import useManuallyHiddenSafes from '@/hooks/useManuallyHiddenSafes'
 import { renderHook } from '@/tests/test-utils'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { TOKEN_LISTS, initialState as settingsInitialState } from '@/store/settingsSlice'
 
-describe('useHiddenNestedSafes hook', () => {
+describe('useManuallyHiddenSafes hook', () => {
   const parentSafe = toBeHex('0x1', 20)
   const nestedSafe1 = toBeHex('0x10', 20)
   const nestedSafe2 = toBeHex('0x20', 20)
@@ -28,12 +28,12 @@ describe('useHiddenNestedSafes hook', () => {
     jest.restoreAllMocks()
   })
 
-  it('should return hidden nested safes for current parent safe', () => {
-    const { result } = renderHook(() => useHiddenNestedSafes(), {
+  it('should return manually hidden safes for current parent safe', () => {
+    const { result } = renderHook(() => useManuallyHiddenSafes(), {
       initialReduxState: {
         settings: {
           ...defaultSettings,
-          hiddenNestedSafes: {
+          manuallyHiddenSafes: {
             [parentSafe]: [nestedSafe1, nestedSafe2],
           },
         },
@@ -43,12 +43,12 @@ describe('useHiddenNestedSafes hook', () => {
     expect(result.current).toEqual([nestedSafe1, nestedSafe2])
   })
 
-  it('should return empty array when no hidden nested safes exist', () => {
-    const { result } = renderHook(() => useHiddenNestedSafes(), {
+  it('should return empty array when no manually hidden safes exist', () => {
+    const { result } = renderHook(() => useManuallyHiddenSafes(), {
       initialReduxState: {
         settings: {
           ...defaultSettings,
-          hiddenNestedSafes: {},
+          manuallyHiddenSafes: {},
         },
       },
     })
@@ -56,8 +56,8 @@ describe('useHiddenNestedSafes hook', () => {
     expect(result.current).toEqual([])
   })
 
-  it('should return empty array when hiddenNestedSafes is undefined', () => {
-    const { result } = renderHook(() => useHiddenNestedSafes(), {
+  it('should return empty array when manuallyHiddenSafes is undefined', () => {
+    const { result } = renderHook(() => useManuallyHiddenSafes(), {
       initialReduxState: {
         settings: defaultSettings,
       },
@@ -78,11 +78,11 @@ describe('useHiddenNestedSafes hook', () => {
       safeError: undefined,
     })
 
-    const { result } = renderHook(() => useHiddenNestedSafes(), {
+    const { result } = renderHook(() => useManuallyHiddenSafes(), {
       initialReduxState: {
         settings: {
           ...defaultSettings,
-          hiddenNestedSafes: {
+          manuallyHiddenSafes: {
             [parentSafe]: [nestedSafe1, nestedSafe2],
             [anotherParentSafe]: [anotherNestedSafe],
           },

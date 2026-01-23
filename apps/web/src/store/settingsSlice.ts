@@ -18,11 +18,11 @@ export type SettingsState = {
     [chainId: string]: string[]
   }
 
-  hiddenNestedSafes: {
+  manuallyHiddenSafes: {
     [safeAddress: string]: string[]
   }
 
-  userUnhiddenNestedSafes: {
+  overriddenAutoHideSafes: {
     [safeAddress: string]: string[]
   }
 
@@ -54,9 +54,9 @@ export const initialState: SettingsState = {
 
   hiddenTokens: {},
 
-  hiddenNestedSafes: {},
+  manuallyHiddenSafes: {},
 
-  userUnhiddenNestedSafes: {},
+  overriddenAutoHideSafes: {},
 
   hideDust: true,
 
@@ -108,13 +108,13 @@ export const settingsSlice = createSlice({
       const { chainId, assets } = payload
       state.hiddenTokens[chainId] = assets
     },
-    setHiddenNestedSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+    setManuallyHiddenSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
       const { safeAddress, nestedSafes } = payload
-      state.hiddenNestedSafes[safeAddress] = nestedSafes
+      state.manuallyHiddenSafes[safeAddress] = nestedSafes
     },
-    setUserUnhiddenNestedSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+    setOverriddenAutoHideSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
       const { safeAddress, nestedSafes } = payload
-      state.userUnhiddenNestedSafes[safeAddress] = nestedSafes
+      state.overriddenAutoHideSafes[safeAddress] = nestedSafes
     },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
@@ -156,8 +156,8 @@ export const {
   setQrShortName,
   setDarkMode,
   setHiddenTokensForChain,
-  setHiddenNestedSafes,
-  setUserUnhiddenNestedSafes,
+  setManuallyHiddenSafes,
+  setOverriddenAutoHideSafes,
   setTokenList,
   setHideDust,
   hideSuspiciousTransactions,
@@ -197,16 +197,16 @@ export const selectOnChainSigning = createSelector(selectSettings, (settings) =>
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
 export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)
 
-export const selectHiddenNestedSafes = createSelector(
+export const selectManuallyHiddenSafes = createSelector(
   [selectSettings, (_, safeAddress: string) => safeAddress],
   (settings, safeAddress) => {
-    return settings.hiddenNestedSafes?.[safeAddress] || []
+    return settings.manuallyHiddenSafes?.[safeAddress] || []
   },
 )
 
-export const selectUserUnhiddenNestedSafes = createSelector(
+export const selectOverriddenAutoHideSafes = createSelector(
   [selectSettings, (_, safeAddress: string) => safeAddress],
   (settings, safeAddress) => {
-    return settings.userUnhiddenNestedSafes?.[safeAddress] || []
+    return settings.overriddenAutoHideSafes?.[safeAddress] || []
   },
 )
