@@ -23,13 +23,16 @@
 
 import { createFeatureHandle } from '@/features/__core__'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type featureImpl from './feature'
+import type { WalletConnectImplementation } from './contract'
 
-// Feature handle - uses convention-based factory with typeof inference
-export const WalletConnectFeature = createFeatureHandle<typeof featureImpl>(
+// Feature handle - uses convention-based factory with contract type
+export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>(
   'walletconnect',
   FEATURES.NATIVE_WALLETCONNECT,
 )
+
+// Contract type (for type-safe feature access)
+export type { WalletConnectContract } from './contract'
 
 // Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'
