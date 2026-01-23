@@ -4,8 +4,8 @@ import { type ReactElement, useContext } from 'react'
 import Button from '@mui/material/Button'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
-import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TxModalContext } from '@/features/tx-flow'
+import { NewTxFlow } from '@/features/tx-flow'
 
 const NewTxButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)

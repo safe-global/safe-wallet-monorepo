@@ -1,10 +1,10 @@
 import { Box, Button, Grid, Typography } from '@mui/material'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics'
-import { ChangeThresholdFlow } from '@/components/tx-flow/flows'
+import { ChangeThresholdFlow } from '@/features/tx-flow'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const RequiredConfirmation = ({ threshold, owners }: { threshold: number; owners: number }) => {

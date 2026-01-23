@@ -16,7 +16,7 @@ import type {
   TransactionResult,
 } from '@safe-global/types-kit'
 import { didRevert } from '@/utils/ethers-utils'
-import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
+import { type SpendingLimitTxParams } from '@/features/tx-flow/components/flows/TokenTransfer/ReviewSpendingLimitTx'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
 import type { ContractTransactionResponse, Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 import type { RequestId } from '@safe-global/safe-apps-sdk'

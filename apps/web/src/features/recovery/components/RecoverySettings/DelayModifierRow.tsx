@@ -4,12 +4,12 @@ import { IconButton, SvgIcon, Tooltip } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import { RemoveRecoveryFlow, UpsertRecoveryFlow } from '@/components/tx-flow/flows'
+import { RemoveRecoveryFlow, UpsertRecoveryFlow } from '@/features/tx-flow'
 import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
 
 export function DelayModifierRow({ delayModifier }: { delayModifier: RecoveryStateItem }): ReactElement | null {

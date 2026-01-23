@@ -1,5 +1,5 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import Approvals from '@/components/tx/ApprovalEditor/Approvals'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { decodeSafeTxToBaseTransactions } from '@/utils/transactions'

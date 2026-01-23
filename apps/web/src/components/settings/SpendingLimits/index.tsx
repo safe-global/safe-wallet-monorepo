@@ -5,11 +5,11 @@ import { SpendingLimitsTable } from '@/components/settings/SpendingLimits/Spendi
 import { useSelector } from 'react-redux'
 import { selectSpendingLimits, selectSpendingLimitsLoading } from '@/store/spendingLimitsSlice'
 import { useHasFeature } from '@/hooks/useChains'
-import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
+import { NewSpendingLimitFlow } from '@/features/tx-flow'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SpendingLimits = () => {

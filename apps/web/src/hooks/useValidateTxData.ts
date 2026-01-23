@@ -1,4 +1,4 @@
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError } from '@/services/exceptions'

@@ -1,4 +1,4 @@
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import useDeployGasLimit from '../../hooks/useDeployGasLimit'
 import { deploySafeAndExecuteTx } from '../../services/safeDeployment'
 
@@ -23,7 +23,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import commonCss from '@/features/tx-flow/components/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'

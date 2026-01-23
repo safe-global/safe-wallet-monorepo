@@ -20,7 +20,7 @@ import { type ReactNode, useContext, useMemo, useRef, useState, useEffect } from
 import SettingsChange from './SettingsChange'
 import ChangeThreshold from './ChangeThreshold'
 import BatchTransactions from './BatchTransactions'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import { isSettingsChangeView, isChangeThresholdView, isConfirmBatchView, isManageSignersView } from './utils'
 import { OnChainConfirmation } from '@/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from '@/components/transactions/TxDetails/TxData/NestedTransaction/ExecTransaction'

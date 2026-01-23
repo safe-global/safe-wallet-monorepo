@@ -2,7 +2,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
+import { type SpendingLimitTxParams } from '@/features/tx-flow/components/flows/TokenTransfer/ReviewSpendingLimitTx'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from './useSafeInfo'
 

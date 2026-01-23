@@ -9,8 +9,8 @@ import { hasSafeFeature } from '@/utils/safe-versions'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
-import { TxModalContext } from '@/components/tx-flow'
-import { RemoveGuardFlow } from '@/components/tx-flow/flows'
+import { TxModalContext } from '@/features/tx-flow'
+import { RemoveGuardFlow } from '@/features/tx-flow'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const NoTransactionGuard = () => {

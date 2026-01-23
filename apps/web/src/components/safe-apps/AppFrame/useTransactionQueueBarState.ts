@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from 'react'
 import useTxQueue from '@/hooks/useTxQueue'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 
 const useTransactionQueueBarState = () => {
   const [expanded, setExpanded] = useState(false)

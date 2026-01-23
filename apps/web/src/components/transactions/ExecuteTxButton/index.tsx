@@ -12,8 +12,8 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { ReplaceTxHoverContext } from '../GroupedTxListItems/ReplaceTxHoverProvider'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { TxModalContext } from '@/components/tx-flow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { TxModalContext } from '@/features/tx-flow'
+import { ConfirmTxFlow } from '@/features/tx-flow'
 
 const ExecuteTxButton = ({
   txSummary,

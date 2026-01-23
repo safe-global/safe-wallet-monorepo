@@ -1,11 +1,11 @@
 import { useContext } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import ReviewTransactionSkeleton from './ReviewTransactionSkeleton'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import type { ReviewTransactionContentProps } from './ReviewTransactionContent'
 import ReviewTransactionContent from './ReviewTransactionContent'
-import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { TxFlowStep } from '@/features/tx-flow/components/TxFlowStep'
+import { TxFlowContext } from '@/features/tx-flow/contexts/TxFlowProvider'
 import ErrorTransactionPreview from './ErrorTransactionPreview'
 
 export type ReviewTransactionProps = {

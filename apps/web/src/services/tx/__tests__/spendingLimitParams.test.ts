@@ -1,4 +1,4 @@
-import type { NewSpendingLimitFlowProps } from '@/components/tx-flow/flows/NewSpendingLimit'
+import type { NewSpendingLimitFlowProps } from '@/features/tx-flow/components/flows/NewSpendingLimit'
 import { chainBuilder } from '@/tests/builders/chains'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'

@@ -7,8 +7,8 @@ import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useCurrentChain } from '@/hooks/useChains'
-import { TxModalContext } from '@/components/tx-flow'
-import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
+import { TxModalContext } from '@/features/tx-flow'
+import { RecoveryAttemptFlow } from '@/features/tx-flow'
 
 export function ExecuteRecoveryButton({
   recovery,

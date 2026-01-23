@@ -1,6 +1,6 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import { useContext } from 'react'
-import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
+import { TxInfoContext } from '@/features/tx-flow/contexts/TxInfoProvider'
 import { useNestedTransaction } from '../components/useNestedTransaction'
 import { isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { isSimulationError } from '@safe-global/utils/components/tx/security/tenderly/utils'

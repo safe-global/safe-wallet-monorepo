@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import type { ReactNode } from 'react'
 
 jest.mock('../hooks', () => ({

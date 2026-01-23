@@ -4,7 +4,7 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
-import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
+import SendAmountBlock from '@/features/tx-flow/components/flows/TokenTransfer/SendAmountBlock'
 import StakingConfirmationTxDeposit from '@/features/stake/components/StakingConfirmationTx/Deposit'
 
 const StakingTxDepositDetails = ({

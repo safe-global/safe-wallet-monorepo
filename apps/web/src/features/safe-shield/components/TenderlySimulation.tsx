@@ -5,7 +5,7 @@ import LaunchIcon from '@mui/icons-material/Launch'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
+import { TxInfoContext } from '@/features/tx-flow/contexts/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
   isTxSimulationEnabled,

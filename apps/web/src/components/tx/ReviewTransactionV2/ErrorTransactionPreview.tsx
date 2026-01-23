@@ -1,4 +1,4 @@
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@/features/tx-flow/components/common/TxCard'
 import { Box, Typography } from '@mui/material'
 
 const ErrorTransactionPreview = () => (

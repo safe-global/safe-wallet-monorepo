@@ -11,7 +11,7 @@ import {
 import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import {
   type ContractAnalysisResults,
   type ThreatAnalysisResults,

@@ -6,8 +6,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import useSpendingLimit from '@/hooks/useSpendingLimit'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
-import { TxModalContext } from '@/components/tx-flow'
+import { TokenTransferFlow } from '@/features/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import css from '@/components/common/AssetActionButton/styles.module.css'
 
 const SendButton = ({

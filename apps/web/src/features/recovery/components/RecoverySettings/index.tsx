@@ -11,12 +11,12 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getPeriod } from '@safe-global/utils/utils/date'
-import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
+import { TOOLTIP_TITLES } from '@/features/tx-flow/components/common/constants'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
-import { TxModalContext } from '@/components/tx-flow'
-import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
+import { TxModalContext } from '@/features/tx-flow'
+import UpsertRecoveryFlow from '@/features/tx-flow/components/flows/UpsertRecovery'
 
 enum HeadCells {
   Recoverer = 'recoverer',

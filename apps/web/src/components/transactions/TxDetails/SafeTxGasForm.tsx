@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import { Link, Box, Paper, Button } from '@mui/material'
 import { useForm } from 'react-hook-form'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import NumberField from '@/components/common/NumberField'
 import useSafeInfo from '@/hooks/useSafeInfo'
 

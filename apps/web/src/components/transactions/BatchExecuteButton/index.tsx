@@ -4,12 +4,12 @@ import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecute
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
 import useBatchedTxs from '@/hooks/useBatchedTxs'
-import { ExecuteBatchFlow } from '@/components/tx-flow/flows'
+import { ExecuteBatchFlow } from '@/features/tx-flow'
 import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import useWallet from '@/hooks/wallets/useWallet'
 import useTxQueue from '@/hooks/useTxQueue'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 
 const BatchExecuteButton = () => {
   const { setTxFlow } = useContext(TxModalContext)

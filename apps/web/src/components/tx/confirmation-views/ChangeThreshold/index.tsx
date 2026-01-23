@@ -2,7 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { Box, Divider, Typography } from '@mui/material'
 
 import React from 'react'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import commonCss from '@/features/tx-flow/components/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { isChangeThresholdView } from '../utils'

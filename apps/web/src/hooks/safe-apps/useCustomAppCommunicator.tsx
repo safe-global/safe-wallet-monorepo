@@ -9,7 +9,7 @@ import {
   type SafeSettings,
   type SendTransactionRequestParams,
 } from '@safe-global/safe-apps-sdk'
-import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
+import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/features/tx-flow'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import { cgwApi, useMessagesGetMessagesBySafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getTransactionDetails } from '@/utils/transactions'
@@ -17,7 +17,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { getStoreInstance } from '@/store'
 import useGetSafeInfo from '@/components/safe-apps/AppFrame/useGetSafeInfo'
 import { isSafeMessageListItem } from '@/utils/safe-message-guards'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext } from '@/features/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'

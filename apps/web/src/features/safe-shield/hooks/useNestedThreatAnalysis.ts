@@ -4,7 +4,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useContext, useMemo } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'

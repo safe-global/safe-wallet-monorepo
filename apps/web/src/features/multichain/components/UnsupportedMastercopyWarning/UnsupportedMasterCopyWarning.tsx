@@ -1,5 +1,5 @@
-import { TxModalContext } from '@/components/tx-flow'
-import { MigrateSafeL2Flow } from '@/components/tx-flow/flows'
+import { TxModalContext } from '@/features/tx-flow'
+import { MigrateSafeL2Flow } from '@/features/tx-flow'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Button, Stack, Typography } from '@mui/material'

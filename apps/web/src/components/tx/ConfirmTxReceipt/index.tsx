@@ -1,17 +1,17 @@
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@/features/tx-flow/components/common/TxCard'
 import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
 import { type PropsWithChildren, useContext } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@/features/tx-flow/contexts/SafeTxProvider'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
-import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
+import { TxFlowStep } from '@/features/tx-flow/components/TxFlowStep'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
-import { Slot, SlotName } from '@/components/tx-flow/slots'
-import { Sign } from '@/components/tx-flow/actions/Sign'
+import { Slot, SlotName } from '@/features/tx-flow/contexts/slots'
+import { Sign } from '@/features/tx-flow/actions/Sign'
 
 const InfoSteps = [
   {

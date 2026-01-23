@@ -3,9 +3,9 @@ import type { TransactionDetails, SwapOwner } from '@safe-global/store/gateway/A
 import { render } from '@/tests/test-utils'
 import SettingsChange from '.'
 import { ownerAddress, txInfo } from './mockData'
-import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
-import { type AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
-import { type ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
+import { SettingsChangeContext } from '@/features/tx-flow/components/flows/AddOwner/context'
+import { type AddOwnerFlowProps } from '@/features/tx-flow/components/flows/AddOwner'
+import { type ReplaceOwnerFlowProps } from '@/features/tx-flow/components/flows/ReplaceOwner'
 
 describe('SettingsChange', () => {
   it('should display the SettingsChange component with owner details', () => {
