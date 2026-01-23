@@ -8,6 +8,54 @@ const CHUNKS_DIR = path.join(OUT_DIR, '_next', 'static', 'chunks')
 const MANIFEST_JS_FILENAME = 'chunks-sri-manifest.js'
 
 /**
+ * Patch webpack runtime to inject SRI lookup for dynamically loaded chunks.
+ *
+ * Webpack's chunk loader (`__webpack_require__.l`) creates script tags for dynamic imports.
+ * This function patches the minified webpack runtime to add integrity attributes
+ * by looking up hashes from `window.__CHUNK_SRI_MANIFEST`.
+ *
+ * Must run BEFORE buildSriManifest() so the patched webpack file gets hashed correctly.
+ */
+function patchWebpackRuntime() {
+  const entries = fs.readdirSync(CHUNKS_DIR, { withFileTypes: true })
+  const webpackFiles = entries
+    .filter((entry) => entry.isFile() && entry.name.startsWith('webpack-') && entry.name.endsWith('.js'))
+    .map((entry) => path.join(CHUNKS_DIR, entry.name))
+
+  if (webpackFiles.length === 0) {
+    console.warn('Warning: No webpack-*.js files found in', CHUNKS_DIR)
+    return
+  }
+
+  for (const filePath of webpackFiles) {
+    let content = fs.readFileSync(filePath, 'utf8')
+    const originalContent = content
+
+    // Pattern: varName.src = webpackObj.tu(urlVar)
+    // This is webpack's __webpack_require__.l function setting script.src
+    // We inject SRI lookup right after the src is set
+    //
+    // Matches patterns like:
+    //   r.src=c.tu(d)
+    //   a.src=o.tu(e)
+    //
+    // Transforms to:
+    //   r.src=c.tu(d);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[d])r.integrity=_sri[d]
+    content = content.replace(
+      /(\w)\.src=(\w)\.tu\((\w)\)/g,
+      '$1.src=$2.tu($3);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[$3])$1.integrity=_sri[$3]',
+    )
+
+    if (content !== originalContent) {
+      fs.writeFileSync(filePath, content, 'utf8')
+      console.log('Patched webpack runtime for SRI:', path.basename(filePath))
+    } else {
+      console.warn('Warning: Could not find webpack chunk loader pattern in', path.basename(filePath))
+    }
+  }
+}
+
+/**
  * Recursively find all JS files in `out/_next/static/chunks`
  */
 function getAllChunkFiles(dir = CHUNKS_DIR) {
@@ -157,15 +205,23 @@ function addSRIToAllHtmlFiles(dirPath) {
  * Main
  */
 function main() {
+  // 1) Patch webpack runtime to inject SRI lookup for dynamic imports
+  //    Must run BEFORE buildSriManifest() so patched file gets correct hash
+  patchWebpackRuntime()
+
+  // 2) Build SRI manifest (hashes all chunk files including patched webpack)
   const sriManifest = buildSriManifest()
-  // 1) Write the external JS file
+
+  // 3) Write the external manifest JS file
   const manifestScriptPublicPath = writeExternalManifest(sriManifest)
-  // 2) Insert <script src="..."> references in each .html
+
+  // 4) Insert <script src="..."> references in each .html
   insertManifestScriptIntoHtml(manifestScriptPublicPath)
-  // 3) Insert integrity hashes for all static html files
+
+  // 5) Insert integrity hashes for all static script tags in html files
   addSRIToAllHtmlFiles(OUT_DIR)
 
-  console.log(`Added SRI manifest script to all .html files.`)
+  console.log(`SRI processing complete: patched webpack runtime, added manifest to all .html files.`)
 }
 
 main()
