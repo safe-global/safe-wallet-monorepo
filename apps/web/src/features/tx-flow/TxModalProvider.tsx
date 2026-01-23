@@ -1,6 +1,6 @@
 import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
 import TxModalDialog from '@/components/common/TxModalDialog'
-import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './components/flows'
+import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './components/flows/successFlows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
 

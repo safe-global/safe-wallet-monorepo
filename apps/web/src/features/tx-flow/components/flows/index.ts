@@ -1,5 +1,8 @@
 import dynamic from 'next/dynamic'
 
+// Re-export success flows from their dedicated file (used by TxModalProvider)
+export { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './successFlows'
+
 export const AddOwnerFlow = dynamic(() => import('./AddOwner'))
 export const CancelRecoveryFlow = dynamic(() => import('./CancelRecovery'))
 export const ChangeThresholdFlow = dynamic(() => import('./ChangeThreshold'))
@@ -9,7 +12,6 @@ export const CreateNestedSafeFlow = dynamic(() => import('./CreateNestedSafe'))
 export const ExecuteBatchFlow = dynamic(() => import('./ExecuteBatch'))
 export const ManageSignersFlow = dynamic(() => import('./ManagerSigners'))
 export const MigrateSafeL2Flow = dynamic(() => import('./MigrateSafeL2'))
-export const NestedTxSuccessScreenFlow = dynamic(() => import('./NestedTxSuccessScreen'))
 export const NewSpendingLimitFlow = dynamic(() => import('./NewSpendingLimit'))
 export const NewTxFlow = dynamic(() => import('./NewTx'))
 export const NftTransferFlow = dynamic(() => import('./NftTransfer'))
@@ -26,7 +28,6 @@ export const ReplaceTxFlow = dynamic(() => import('./ReplaceTx'))
 export const SafeAppsTxFlow = dynamic(() => import('./SafeAppsTx'))
 export const SignMessageFlow = dynamic(() => import('./SignMessage'))
 export const SignMessageOnChainFlow = dynamic(() => import('./SignMessageOnChain'))
-export const SuccessScreenFlow = dynamic(() => import('./SuccessScreen'))
 export const TokenTransferFlow = dynamic(() => import('./TokenTransfer'))
 export const UpdateSafeFlow = dynamic(() => import('./UpdateSafe'))
 export const UpsertRecoveryFlow = dynamic(() => import('./UpsertRecovery'))

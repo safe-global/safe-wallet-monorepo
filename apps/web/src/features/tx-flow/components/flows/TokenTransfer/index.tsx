@@ -2,40 +2,27 @@ import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/features/tx-flow/components/flows/TokenTransfer/ReviewTokenTx'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TokenAmountFields } from '@/components/common/TokenAmountInput'
 import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '@/features/tx-flow/components/TxFlow'
 import { TxFlowStep } from '@/features/tx-flow/components/TxFlowStep'
+import {
+  TokenTransferType,
+  TokenTransferFields,
+  MultiTransfersFields,
+  MultiTokenTransferFields,
+  type TokenTransferParams,
+  type MultiTokenTransferParams,
+} from './types'
 
-export enum TokenTransferType {
-  multiSig = 'multiSig',
-  spendingLimit = 'spendingLimit',
+// Re-export types for consumers
+export {
+  TokenTransferType,
+  TokenTransferFields,
+  MultiTransfersFields,
+  MultiTokenTransferFields,
 }
-
-enum Fields {
-  recipient = 'recipient',
-}
-
-export const TokenTransferFields = { ...Fields, ...TokenAmountFields }
-
-export type TokenTransferParams = {
-  [TokenTransferFields.recipient]: string
-  [TokenTransferFields.tokenAddress]: string
-  [TokenTransferFields.amount]: string
-}
-
-export enum MultiTransfersFields {
-  recipients = 'recipients',
-  type = 'type',
-}
-
-export const MultiTokenTransferFields = { ...MultiTransfersFields }
-
-export type MultiTokenTransferParams = {
-  [MultiTransfersFields.recipients]: TokenTransferParams[]
-  [MultiTransfersFields.type]: TokenTransferType
-}
+export type { TokenTransferParams, MultiTokenTransferParams }
 
 type MultiTokenTransferFlowProps = {
   recipients?: Partial<TokenTransferParams>[]

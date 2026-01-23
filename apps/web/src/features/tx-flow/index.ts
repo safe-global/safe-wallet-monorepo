@@ -44,16 +44,16 @@ export type {
 // Direct hook export for convenience (doesn't require useLoadFeature)
 export { useTxFlow } from './hooks/useTxFlow'
 
-// TokenTransfer flow types
+// TokenTransfer flow types (from lightweight types file, not the component)
 export {
   TokenTransferType,
   TokenTransferFields,
   MultiTokenTransferFields,
-} from './components/flows/TokenTransfer'
+} from './components/flows/TokenTransfer/types'
 export type {
   TokenTransferParams,
   MultiTokenTransferParams,
-} from './components/flows/TokenTransfer'
+} from './components/flows/TokenTransfer/types'
 
 // ============================================================
 // COMPONENTS & PROVIDERS
