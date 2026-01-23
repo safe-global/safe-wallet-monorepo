@@ -547,9 +547,20 @@ export { MyFeatureHandle } from './handle'
 export type { MyFeatureContract } from './contract'
 ```
 
-**Simplified approach (typeof inference):**
+**Simplified approach (factory + manual contract):**
 
 ```typescript
+// contract.ts (~50 lines) - KEEP THIS
+import type { FeatureContract } from '@/features/__core__'
+import type MyComponent from './components/MyComponent'
+import type { useMyHook } from './hooks/useMyHook'
+
+export interface MyFeatureContract extends FeatureContract {
+  readonly name: 'my-feature'
+  components: { MyComponent: typeof MyComponent }
+  hooks: { useMyHook: typeof useMyHook }
+}
+
 // feature.ts (~20 lines)
 import MyComponent from './components/MyComponent'
 import { useMyHook } from './hooks/useMyHook'
@@ -557,31 +568,59 @@ import { useMyHook } from './hooks/useMyHook'
 export default {
   components: { MyComponent },
   hooks: { useMyHook },
-}
+} satisfies MyFeatureContract
 
-// index.ts (~5 lines)
+// index.ts (~8 lines) - Use factory, no handle.ts needed!
 import { createFeatureHandle } from '@/features/__core__'
-import featureImpl from './feature'
+import type { MyFeatureContract } from './contract'
 
-export const MyFeature = createFeatureHandle<typeof featureImpl>('my-feature')
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
 export type * from './types'
 ```
 
-**Reduction: 100 lines across 4 files → 25 lines across 2 files (75% reduction)**
+**Reduction: 4 files → 3 files (removes handle.ts, ~15 lines saved)**
 
-### Bundle Size Impact
+### ⚠️ CRITICAL: Bundle Size Caveat
 
-**Zero impact.** TypeScript types are compile-time only and completely stripped during transpilation:
+**The typeof pattern with dynamic imports can cause bundle bloat!**
+
+While TypeScript types are normally compile-time only, using `import type ... from './feature'` with `typeof` can confuse bundlers:
 
 ```typescript
-// TypeScript source
+// ❌ DANGEROUS - Can bundle feature code in main chunk!
+import type featureImpl from './feature'
 export const MyFeature = createFeatureHandle<typeof featureImpl>('my-feature')
-
-// Compiled JavaScript (all types removed)
-export const MyFeature = createFeatureHandle('my-feature')
 ```
 
-All `interface`, `type`, `typeof`, and generic parameters are erased before bundling.
+**Why this happens:**
+
+- Bundlers may not distinguish `import type` from regular imports when analyzing dependencies
+- The `./feature` module gets included in the main bundle instead of code-split
+- Feature code loads eagerly instead of lazily
+
+**✅ SAFE: Use manual contract types instead:**
+
+```typescript
+// contract.ts - Manual but safe
+import type { FeatureContract } from '@/features/__core__'
+import type MyComponent from './components/MyComponent'
+
+export interface MyFeatureContract extends FeatureContract {
+  components: { MyComponent: typeof MyComponent }
+}
+
+// index.ts - Uses contract type
+import { createFeatureHandle } from '@/features/__core__'
+import type { MyFeatureContract } from './contract'
+
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+```
+
+**Recommended approach:**
+
+- Delete `handle.ts` (use `createFeatureHandle` factory)
+- Keep `contract.ts` with manual types (prevents bundle bloat)
+- Result: 3 files instead of 4, safe lazy loading
 
 ### Type Safety Preserved
 
@@ -602,35 +641,62 @@ feature.hooks.useMyHook() // ✅ Type-safe
 
 ### Benefits
 
-- ✅ **Less boilerplate**: No manual contract definitions to maintain
-- ✅ **Auto-sync**: Types update automatically when implementation changes
+- ✅ **Less boilerplate**: Eliminates handle.ts (~15 lines saved per feature)
+- ✅ **Convention-based**: Auto-derives feature flags from folder names
 - ✅ **Zero bundle cost**: TypeScript types don't affect bundle size
 - ✅ **Type-safe**: Full type checking and IDE autocomplete preserved
-- ✅ **Fewer files**: Eliminates contract.ts and handle.ts
+- ✅ **Safe lazy loading**: Proper code-splitting maintained
 
-### Trade-offs
+### Comparison
 
-- ⚠️ **IDE navigation**: Cmd+click on `MyFeature` goes to index.ts first, not directly to components
-- ⚠️ **Anonymous type**: No explicitly named contract interface
-- ⚠️ **Less documentation**: Contract interface can serve as API documentation
+| Aspect          | Traditional (4 files)                           | Balanced (3 files)                  |
+| --------------- | ----------------------------------------------- | ----------------------------------- |
+| Files           | handle.ts + contract.ts + feature.ts + index.ts | contract.ts + feature.ts + index.ts |
+| Lines           | ~100 lines                                      | ~85 lines                           |
+| Handle creation | Manual (15 lines)                               | Factory (1 line)                    |
+| Type safety     | ✅ Full                                         | ✅ Full                             |
+| Bundle safety   | ✅ Safe                                         | ✅ Safe                             |
+| IDE navigation  | ✅ Direct                                       | ✅ Direct                           |
 
-### When to Use
+### Recommendation
 
-**Use typeof pattern when:**
+**Always use the balanced approach:**
 
-- Feature has simple to moderate complexity
-- You want minimal boilerplate
-- Types naturally describe themselves through implementation
+✅ **DO:**
 
-**Keep manual contracts when:**
+- Use `createFeatureHandle<ContractType>()` factory (eliminates handle.ts)
+- Keep manual `contract.ts` with type definitions (safe lazy loading)
+- Use `typeof` for individual exports in contract (e.g., `typeof MyComponent`)
 
-- Feature contract serves as important API documentation
-- Multiple features depend on explicit contract interface
-- You need named contract types for external references
+❌ **DON'T:**
 
-### Example: Standard Feature
+- Use `import type featureImpl from './feature'` with `typeof featureImpl` (bundles feature code)
+- Try to infer types from the full feature module (bundler confusion)
+
+**Result:** 3 files (index, contract, feature) instead of 4, safe and minimal.
+
+### Example: Safe Balanced Approach
 
 ```typescript
+// src/features/multichain/contract.ts
+import type { FeatureContract } from '@/features/__core__'
+import type CreateSafeOnNewChain from './components/CreateSafeOnNewChain'
+import type NetworkLogosList from './components/NetworkLogosList'
+import type { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
+import type { useSafeCreationData } from './hooks/useSafeCreationData'
+
+export interface MultichainContract extends FeatureContract {
+  readonly name: 'multichain'
+  components: {
+    CreateSafeOnNewChain: typeof CreateSafeOnNewChain
+    NetworkLogosList: typeof NetworkLogosList
+  }
+  hooks: {
+    useIsMultichainSafe: typeof useIsMultichainSafe
+    useSafeCreationData: typeof useSafeCreationData
+  }
+}
+
 // src/features/multichain/feature.ts
 import { lazy } from 'react'
 import { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
@@ -649,11 +715,10 @@ export default {
 
 // src/features/multichain/index.ts
 import { createFeatureHandle } from '@/features/__core__'
-import featureImpl from './feature'
+import type { MultichainContract } from './contract'
 
-export const MultichainFeature = createFeatureHandle<typeof featureImpl>('multichain')
-
-// Re-export public types
+export const MultichainFeature = createFeatureHandle<MultichainContract>('multichain')
+export type { MultichainContract } from './contract'
 export type * from './types'
 
 // Consumers can now use the feature with full type safety
