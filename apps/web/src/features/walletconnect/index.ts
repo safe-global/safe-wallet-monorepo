@@ -21,15 +21,8 @@
  * lazy loading and code splitting.
  */
 
-import { createFeatureHandle } from '@/features/__core__'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { WalletConnectImplementation } from './contract'
-
-// Feature handle - uses convention-based factory with contract type
-export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>(
-  'walletconnect',
-  FEATURES.NATIVE_WALLETCONNECT,
-)
+// Feature handle - primary export for use with useLoadFeature()
+export { walletConnectHandle as WalletConnectFeature } from './handle'
 
 // Contract type (for type-safe feature access)
 export type { WalletConnectContract } from './contract'
