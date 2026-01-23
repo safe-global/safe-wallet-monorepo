@@ -22,14 +22,10 @@
  */
 
 import { createFeatureHandle } from '@/features/__core__'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { WalletConnectImplementation } from './contract'
 
-// Feature handle - uses convention-based factory
-export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>(
-  'walletconnect',
-  FEATURES.NATIVE_WALLETCONNECT,
-)
+// Feature handle - uses semantic mapping (walletconnect → FEATURES.NATIVE_WALLETCONNECT)
+export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>('walletconnect')
 
 // Contract type (for type-safe feature access)
 export type { WalletConnectContract } from './contract'
