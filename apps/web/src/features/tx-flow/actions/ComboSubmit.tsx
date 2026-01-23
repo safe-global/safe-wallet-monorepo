@@ -1,5 +1,12 @@
 import { useContext, useMemo } from 'react'
-import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '@/features/tx-flow/contexts/slots'
+import {
+  Slot,
+  type SlotComponentProps,
+  SlotName,
+  useSlot,
+  useSlotIds,
+  withSlot,
+} from '@/features/tx-flow/contexts/slots'
 import { Box } from '@mui/material'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import ErrorMessage from '@/components/tx/ErrorMessage'

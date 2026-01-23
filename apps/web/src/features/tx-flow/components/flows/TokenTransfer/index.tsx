@@ -16,12 +16,7 @@ import {
 } from './types'
 
 // Re-export types for consumers
-export {
-  TokenTransferType,
-  TokenTransferFields,
-  MultiTransfersFields,
-  MultiTokenTransferFields,
-}
+export { TokenTransferType, TokenTransferFields, MultiTransfersFields, MultiTokenTransferFields }
 export type { TokenTransferParams, MultiTokenTransferParams }
 
 type MultiTokenTransferFlowProps = {

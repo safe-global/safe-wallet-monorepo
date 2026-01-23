@@ -8,7 +8,10 @@ import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
-import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/features/tx-flow/components/flows/TokenTransfer'
+import {
+  MultiTokenTransferFields,
+  type MultiTokenTransferParams,
+} from '@/features/tx-flow/components/flows/TokenTransfer'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 

@@ -50,10 +50,7 @@ export {
   TokenTransferFields,
   MultiTokenTransferFields,
 } from './components/flows/TokenTransfer/types'
-export type {
-  TokenTransferParams,
-  MultiTokenTransferParams,
-} from './components/flows/TokenTransfer/types'
+export type { TokenTransferParams, MultiTokenTransferParams } from './components/flows/TokenTransfer/types'
 
 // ============================================================
 // COMPONENTS & PROVIDERS

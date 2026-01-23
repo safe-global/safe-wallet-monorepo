@@ -2,12 +2,23 @@ import React, { useCallback, useMemo, type ReactNode } from 'react'
 import useTxStepper from '@/features/tx-flow/hooks/useTxStepper'
 import SafeTxProvider from '@/features/tx-flow/contexts/SafeTxProvider'
 import { TxInfoProvider } from '@/features/tx-flow/contexts/TxInfoProvider'
-import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from '@/features/tx-flow/contexts/TxFlowProvider'
+import TxFlowProvider, {
+  type TxFlowProviderProps,
+  type TxFlowContextType,
+} from '@/features/tx-flow/contexts/TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '@/components/tx/ConfirmTxReceipt'
 import { TxNote, SignerSelect, BalanceChanges, RiskConfirmation } from '@/features/tx-flow/features'
-import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from '@/features/tx-flow/actions'
+import {
+  Batching,
+  ComboSubmit,
+  Counterfactual,
+  Execute,
+  ExecuteThroughRole,
+  Propose,
+  Sign,
+} from '@/features/tx-flow/actions'
 import { SlotProvider } from '@/features/tx-flow/contexts/slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import LedgerHashComparison from '@/features/ledger'
