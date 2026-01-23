@@ -21,11 +21,15 @@
  * lazy loading and code splitting.
  */
 
-// Feature handle - primary export for use with useLoadFeature()
-export { walletConnectHandle as WalletConnectFeature } from './handle'
+import { createFeatureHandle } from '@/features/__core__'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import type featureImpl from './feature'
 
-// Contract type (for type-safe registry lookup)
-export type { WalletConnectContract } from './contract'
+// Feature handle - uses convention-based factory with typeof inference
+export const WalletConnectFeature = createFeatureHandle<typeof featureImpl>(
+  'walletconnect',
+  FEATURES.NATIVE_WALLETCONNECT,
+)
 
 // Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'

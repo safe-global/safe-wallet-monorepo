@@ -13,8 +13,6 @@
  * This ensures the WalletConnect SDK and all related code
  * is NOT included in the bundle when the feature is disabled.
  */
-import type { WalletConnectImplementation } from './contract'
-import type WalletConnectUi from './components/WalletConnectUi'
 import { withSuspense } from '@/features/__core__'
 import { lazy } from 'react'
 
@@ -23,11 +21,12 @@ import { wcPopupStore } from './store/wcPopupStore'
 import { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 import walletConnectInstance from './services/walletConnectInstance'
 
-const feature: WalletConnectImplementation = {
+// Default export - types are inferred from this object structure
+export default {
   components: {
     // Component is still lazy within this chunk for code splitting
     // (in case the feature is loaded but widget isn't rendered yet)
-    WalletConnectWidget: withSuspense(lazy(() => import('./components/WalletConnectUi'))) as typeof WalletConnectUi,
+    WalletConnectWidget: withSuspense(lazy(() => import('./components/WalletConnectUi'))),
   },
 
   services: {
@@ -36,5 +35,3 @@ const feature: WalletConnectImplementation = {
     wcChainSwitchStore,
   },
 }
-
-export default feature
