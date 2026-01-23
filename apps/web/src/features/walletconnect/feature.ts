@@ -14,6 +14,7 @@
  * is NOT included in the bundle when the feature is disabled.
  */
 import type { WalletConnectImplementation } from './contract'
+import type WalletConnectUi from './components/WalletConnectUi'
 import { withSuspense } from '@/features/__core__'
 import { lazy } from 'react'
 
@@ -26,7 +27,7 @@ const feature: WalletConnectImplementation = {
   components: {
     // Component is still lazy within this chunk for code splitting
     // (in case the feature is loaded but widget isn't rendered yet)
-    WalletConnectWidget: withSuspense(lazy(() => import('./components/WalletConnectUi'))),
+    WalletConnectWidget: withSuspense(lazy(() => import('./components/WalletConnectUi'))) as typeof WalletConnectUi,
   },
 
   services: {

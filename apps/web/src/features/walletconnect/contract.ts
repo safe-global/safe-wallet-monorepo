@@ -1,8 +1,8 @@
-import type { ComponentType } from 'react'
 import type { FeatureImplementation } from '@/features/__core__'
 
 // Type imports from implementations - enables IDE jump-to-definition
 import type WalletConnectWallet from './services/WalletConnectWallet'
+import type WalletConnectUi from './components/WalletConnectUi'
 import type { wcPopupStore } from './store/wcPopupStore'
 import type { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 
@@ -16,7 +16,7 @@ export interface WalletConnectImplementation extends FeatureImplementation {
      * Main WalletConnect widget for the header.
      * @see {@link ./components/WalletConnectUi/index.tsx}
      */
-    WalletConnectWidget: ComponentType
+    WalletConnectWidget: typeof WalletConnectUi
   }
 
   services: {
