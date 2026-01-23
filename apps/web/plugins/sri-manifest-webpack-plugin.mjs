@@ -43,7 +43,10 @@ export class SriManifestWebpackPlugin {
             // 3. Emit the manifest file as a webpack asset
             this.emitManifest(compilation, manifest)
 
-            console.log(`[${pluginName}] Generated SRI manifest with ${Object.keys(manifest).length} chunks`)
+            // Log success info
+            const info = new Error(`Generated SRI manifest with ${Object.keys(manifest).length} chunks`)
+            info.name = 'SriManifestInfo'
+            compilation.warnings.push(info)
           } catch (error) {
             compilation.errors.push(new Error(`${pluginName}: ${error.message}`))
           }
@@ -56,21 +59,36 @@ export class SriManifestWebpackPlugin {
    * Finds the minified method name webpack uses for creating script URLs.
    * This is typically `c.tu` but the minifier can use any identifier.
    *
-   * Looks for: varName.methodName=e=>varName.tt().createScriptURL(e)
+   * Tries multiple patterns to handle different minification strategies.
    *
    * @param {string} content - The webpack runtime file content
    * @returns {{varName: string, methodName: string} | null} The extracted identifiers or null
    */
   findWebpackUrlMethod(content) {
-    // Match: someVar.someMethod=e=>someVar.tt().createScriptURL(e)
-    // This is webpack's Trusted Types URL creator: __webpack_require__.tu
-    const match = content.match(/(\w)\.(\w+)=\w=>\1\.tt\(\)\.createScriptURL\(\w\)/)
-    if (match) {
-      return {
-        varName: match[1],
-        methodName: match[2],
+    // Try multiple patterns to handle different minification strategies
+    const patterns = [
+      // Pattern 1: Standard minified format with arrow function
+      // someVar.someMethod=e=>someVar.tt().createScriptURL(e)
+      /(\w)\.(\w+)=\w=>\1\.tt\(\)\.createScriptURL\(\w\)/,
+
+      // Pattern 2: With function keyword (less common but possible)
+      // someVar.someMethod=function(e){return someVar.tt().createScriptURL(e)}
+      /(\w)\.(\w+)=function\(\w\)\{return \1\.tt\(\)\.createScriptURL\(\w\)\}/,
+
+      // Pattern 3: With different whitespace/formatting
+      /(\w)\.(\w+)\s*=\s*\w\s*=>\s*\1\.tt\(\)\.createScriptURL\(\w\)/,
+    ]
+
+    for (const pattern of patterns) {
+      const match = content.match(pattern)
+      if (match) {
+        return {
+          varName: match[1],
+          methodName: match[2],
+        }
       }
     }
+
     return null
   }
 
@@ -83,6 +101,7 @@ export class SriManifestWebpackPlugin {
    *
    * @param {import('webpack').Compilation} compilation - Webpack compilation object
    * @param {Object} assets - Webpack assets object
+   * @throws {Error} If webpack runtime files are not found or patching fails
    */
   patchWebpackRuntime(compilation, assets) {
     // Find webpack runtime assets (typically webpack-*.js)
@@ -90,9 +109,12 @@ export class SriManifestWebpackPlugin {
     const webpackAssets = Object.keys(assets).filter((name) => name.includes('webpack-') && name.endsWith('.js'))
 
     if (webpackAssets.length === 0) {
-      console.warn('[SriManifestWebpackPlugin] Warning: No webpack runtime files found')
-      return
+      throw new Error(
+        'No webpack runtime files found. SRI patching cannot proceed. This may indicate a webpack configuration change.',
+      )
     }
+
+    let patchedCount = 0
 
     for (const assetName of webpackAssets) {
       const asset = assets[assetName]
@@ -102,9 +124,11 @@ export class SriManifestWebpackPlugin {
       // Dynamically find the webpack URL method name (e.g., 'tu', 'ab', etc.)
       const urlMethod = this.findWebpackUrlMethod(content)
       if (!urlMethod) {
-        console.warn(
-          `[SriManifestWebpackPlugin] Warning: Could not find webpack URL method in ${path.basename(assetName)}`,
+        const warning = new Error(
+          `Could not find webpack URL method in ${path.basename(assetName)}. The webpack runtime structure may have changed. SRI for dynamic chunks will not work.`,
         )
+        warning.name = 'SriManifestWarning'
+        compilation.warnings.push(warning)
         continue
       }
 
@@ -126,17 +150,34 @@ export class SriManifestWebpackPlugin {
       )
 
       if (content !== originalContent) {
+        // Validate that the patch was applied correctly by checking for our marker
+        if (!content.includes('__CHUNK_SRI_MANIFEST')) {
+          throw new Error(`Failed to inject SRI code into ${path.basename(assetName)}. Build validation failed.`)
+        }
+
         // Update the asset with the patched content
         compilation.updateAsset(assetName, new compilation.compiler.webpack.sources.RawSource(content))
 
-        console.log(
-          `[SriManifestWebpackPlugin] Patched webpack runtime for SRI (using method: ${urlMethod.methodName}): ${path.basename(assetName)}`,
+        patchedCount++
+        const info = new Error(
+          `Patched webpack runtime for SRI (method: ${urlMethod.methodName}): ${path.basename(assetName)}`,
         )
+        info.name = 'SriManifestInfo'
+        compilation.warnings.push(info)
       } else {
-        console.warn(
-          `[SriManifestWebpackPlugin] Warning: Could not find webpack chunk loader pattern in ${path.basename(assetName)}`,
+        const warning = new Error(
+          `Could not find webpack chunk loader pattern in ${path.basename(assetName)}. The script.src assignment may have changed. SRI for dynamic chunks will not work.`,
         )
+        warning.name = 'SriManifestWarning'
+        compilation.warnings.push(warning)
       }
+    }
+
+    // Validate that at least one file was successfully patched
+    if (patchedCount === 0) {
+      throw new Error(
+        'Failed to patch any webpack runtime files. SRI for dynamically loaded chunks will not work. This is a critical security issue.',
+      )
     }
   }
 
@@ -190,11 +231,38 @@ export class SriManifestWebpackPlugin {
   emitManifest(compilation, manifest) {
     const manifestJson = JSON.stringify(manifest, null, 2)
 
+    // Add runtime validation and integrity check
     const fileContents = `/**
  * Auto-generated chunk SRI manifest.
  * DO NOT EDIT.
+ * Generated at: ${new Date().toISOString()}
  */
-window.__CHUNK_SRI_MANIFEST = ${manifestJson};
+(function() {
+  'use strict';
+
+  // Validate manifest integrity
+  var manifest = ${manifestJson};
+
+  // Basic validation: check manifest is an object with valid SRI hashes
+  if (typeof manifest !== 'object' || manifest === null) {
+    console.error('[SRI] Invalid manifest: not an object');
+    return;
+  }
+
+  // Validate hash format for first entry (sha384-base64)
+  var firstKey = Object.keys(manifest)[0];
+  if (firstKey && !/^sha384-[A-Za-z0-9+/=]+$/.test(manifest[firstKey])) {
+    console.error('[SRI] Invalid manifest: malformed hash format');
+    return;
+  }
+
+  // Freeze manifest to prevent tampering
+  if (Object.freeze) {
+    Object.freeze(manifest);
+  }
+
+  window.__CHUNK_SRI_MANIFEST = manifest;
+})();
 `
 
     // Emit the manifest file in the chunks directory
@@ -203,6 +271,8 @@ window.__CHUNK_SRI_MANIFEST = ${manifestJson};
 
     compilation.emitAsset(manifestPath, new compilation.compiler.webpack.sources.RawSource(fileContents))
 
-    console.log(`[SriManifestWebpackPlugin] Emitted manifest: ${manifestPath}`)
+    const info = new Error(`Emitted SRI manifest: ${manifestPath}`)
+    info.name = 'SriManifestInfo'
+    compilation.warnings.push(info)
   }
 }
