@@ -9,6 +9,7 @@ This document defines the revised architecture pattern for features in the Safe{
 - [Feature Contract](#feature-contract)
 - [Feature Handles](#feature-handles)
 - [Helper: createFeatureHandle](#helper-createfeaturehandle)
+- [Reducing Boilerplate with typeof Pattern](#reducing-boilerplate-with-typeof-pattern)
 - [Folder Structure](#folder-structure)
 - [Public API Pattern](#public-api-pattern)
 - [Cross-Feature Communication](#cross-feature-communication)
@@ -503,6 +504,174 @@ export const WalletConnectFeature = createFeatureHandle('walletconnect', FEATURE
 
 - When the feature flag doesn't follow folder name convention
 - Example: `walletconnect` folder uses `FEATURES.NATIVE_WALLETCONNECT`
+
+## Reducing Boilerplate with typeof Pattern
+
+You can further reduce boilerplate by using TypeScript's `typeof` operator to infer types from implementation instead of manually defining contract interfaces.
+
+### The Pattern
+
+**Traditional approach (manual contract):**
+
+```typescript
+// contract.ts (~50 lines)
+import type { FeatureContract } from '@/features/__core__'
+import type MyComponent from './components/MyComponent'
+import type { useMyHook } from './hooks/useMyHook'
+
+export interface MyFeatureContract extends FeatureContract {
+  readonly name: 'my-feature'
+  components: {
+    MyComponent: typeof MyComponent
+  }
+  hooks: {
+    useMyHook: typeof useMyHook
+  }
+}
+
+// handle.ts (~15 lines)
+export const MyFeatureHandle: FeatureHandle<MyFeatureContract> = {
+  name: 'my-feature',
+  useIsEnabled: () => useHasFeature(FEATURES.MY_FEATURE),
+  load: () => import('./feature'),
+}
+
+// feature.ts
+export default {
+  components: { MyComponent },
+  hooks: { useMyHook },
+} satisfies MyFeatureContract
+
+// index.ts
+export { MyFeatureHandle } from './handle'
+export type { MyFeatureContract } from './contract'
+```
+
+**Simplified approach (typeof inference):**
+
+```typescript
+// feature.ts (~20 lines)
+import MyComponent from './components/MyComponent'
+import { useMyHook } from './hooks/useMyHook'
+
+export default {
+  components: { MyComponent },
+  hooks: { useMyHook },
+}
+
+// index.ts (~5 lines)
+import { createFeatureHandle } from '@/features/__core__'
+import featureImpl from './feature'
+
+export const MyFeature = createFeatureHandle<typeof featureImpl>('my-feature')
+export type * from './types'
+```
+
+**Reduction: 100 lines across 4 files → 25 lines across 2 files (75% reduction)**
+
+### Bundle Size Impact
+
+**Zero impact.** TypeScript types are compile-time only and completely stripped during transpilation:
+
+```typescript
+// TypeScript source
+export const MyFeature = createFeatureHandle<typeof featureImpl>('my-feature')
+
+// Compiled JavaScript (all types removed)
+export const MyFeature = createFeatureHandle('my-feature')
+```
+
+All `interface`, `type`, `typeof`, and generic parameters are erased before bundling.
+
+### Type Safety Preserved
+
+Full type inference and autocomplete still work:
+
+```typescript
+const feature = useLoadFeature(MyFeature)
+//    ^? {
+//      components: { MyComponent: ComponentType<...> },
+//      hooks: { useMyHook: () => ... }
+//    } | null | undefined
+
+if (!feature) return null
+
+feature.components.MyComponent // ✅ Full autocomplete
+feature.hooks.useMyHook() // ✅ Type-safe
+```
+
+### Benefits
+
+- ✅ **Less boilerplate**: No manual contract definitions to maintain
+- ✅ **Auto-sync**: Types update automatically when implementation changes
+- ✅ **Zero bundle cost**: TypeScript types don't affect bundle size
+- ✅ **Type-safe**: Full type checking and IDE autocomplete preserved
+- ✅ **Fewer files**: Eliminates contract.ts and handle.ts
+
+### Trade-offs
+
+- ⚠️ **IDE navigation**: Cmd+click on `MyFeature` goes to index.ts first, not directly to components
+- ⚠️ **Anonymous type**: No explicitly named contract interface
+- ⚠️ **Less documentation**: Contract interface can serve as API documentation
+
+### When to Use
+
+**Use typeof pattern when:**
+
+- Feature has simple to moderate complexity
+- You want minimal boilerplate
+- Types naturally describe themselves through implementation
+
+**Keep manual contracts when:**
+
+- Feature contract serves as important API documentation
+- Multiple features depend on explicit contract interface
+- You need named contract types for external references
+
+### Example: Standard Feature
+
+```typescript
+// src/features/multichain/feature.ts
+import { lazy } from 'react'
+import { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
+import { useSafeCreationData } from './hooks/useSafeCreationData'
+
+export default {
+  components: {
+    CreateSafeOnNewChain: lazy(() => import('./components/CreateSafeOnNewChain')),
+    NetworkLogosList: lazy(() => import('./components/NetworkLogosList')),
+  },
+  hooks: {
+    useIsMultichainSafe,
+    useSafeCreationData,
+  },
+}
+
+// src/features/multichain/index.ts
+import { createFeatureHandle } from '@/features/__core__'
+import featureImpl from './feature'
+
+export const MultichainFeature = createFeatureHandle<typeof featureImpl>('multichain')
+
+// Re-export public types
+export type * from './types'
+
+// Consumers can now use the feature with full type safety
+import { MultichainFeature } from '@/features/multichain'
+import { useLoadFeature } from '@/features/__core__'
+
+function MyComponent() {
+  const mc = useLoadFeature(MultichainFeature)
+  if (!mc) return null
+
+  return (
+    <div>
+      <mc.components.CreateSafeOnNewChain />
+      <mc.components.NetworkLogosList networks={mc.hooks.useIsMultichainSafe()} />
+    </div>
+  )
+}
+```
 
 ## Folder Structure
 
