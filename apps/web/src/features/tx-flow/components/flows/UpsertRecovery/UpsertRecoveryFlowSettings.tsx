@@ -1,0 +1,326 @@
+import { trackEvent } from '@/services/analytics'
+import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
+import {
+  Divider,
+  CardActions,
+  Button,
+  Typography,
+  SvgIcon,
+  MenuItem,
+  TextField,
+  Collapse,
+  Checkbox,
+  FormControlLabel,
+  Tooltip,
+  Alert,
+  Box,
+  FormControl,
+} from '@mui/material'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useForm, FormProvider, Controller } from 'react-hook-form'
+import { useContext, useState } from 'react'
+import type { ReactElement } from 'react'
+
+import TxCard from '@/features/tx-flow/components/common/TxCard'
+import { useRecoveryPeriods } from './useRecoveryPeriods'
+import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
+import AddressBookInput from '@/components/common/AddressBookInput'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { RecovererWarning } from './RecovererSmartContractWarning'
+import ExternalLink from '@/components/common/ExternalLink'
+import { BRAND_NAME } from '@/config/constants'
+import { TOOLTIP_TITLES } from '../../common/constants'
+import Track from '@/components/common/Track'
+import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+
+import commonCss from '@/features/tx-flow/components/common/styles.module.css'
+import css from './styles.module.css'
+import NumberField from '@/components/common/NumberField'
+import { getDelay, isCustomDelaySelected } from './utils'
+import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
+import { TxFlowContext, type TxFlowContextType } from '@/features/tx-flow/contexts/TxFlowProvider'
+import { isSmartContractWallet } from '@/utils/wallets'
+import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import useChainId from '@/hooks/useChainId'
+
+enum AddressType {
+  EOA = 'EOA',
+  Safe = 'Safe',
+  Other = 'Other',
+}
+
+export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: RecoveryStateItem }): ReactElement {
+  const chainId = useChainId()
+  const { safeAddress } = useSafeInfo()
+  const { data, onNext } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
+  const [showAdvanced, setShowAdvanced] = useState(data?.[UpsertRecoveryFlowFields.expiry] !== '0')
+  const [understandsRisk, setUnderstandsRisk] = useState(false)
+  const periods = useRecoveryPeriods()
+  const [triggerGetSafe] = useLazySafesGetSafeV1Query()
+
+  const getAddressType = async (address: string, chainId: string) => {
+    const isSmartContract = await isSmartContractWallet(chainId, address)
+    if (!isSmartContract) return AddressType.EOA
+
+    try {
+      const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
+      if (result) return AddressType.Safe
+    } catch {
+      // Not a safe
+    }
+
+    return AddressType.Other
+  }
+
+  const formMethods = useForm<UpsertRecoveryFlowProps>({
+    defaultValues: data,
+    mode: 'onChange',
+  })
+
+  const recoverer = formMethods.watch(UpsertRecoveryFlowFields.recoverer)
+  const expiry = formMethods.watch(UpsertRecoveryFlowFields.expiry)
+  const selectedDelay = formMethods.watch(UpsertRecoveryFlowFields.selectedDelay)
+  const customDelay = formMethods.watch(UpsertRecoveryFlowFields.customDelay)
+  const customDelayState = formMethods.getFieldState(UpsertRecoveryFlowFields.customDelay)
+
+  const delay = getDelay(customDelay, selectedDelay)
+
+  // RHF's dirty check is tempermental with our address input dropdown
+  const isDirty = delayModifier
+    ? // Updating settings
+      !sameAddress(recoverer, delayModifier.recoverers[0]) ||
+      delayModifier.delay !== BigInt(delay) ||
+      delayModifier.expiry !== BigInt(expiry)
+    : // Setting up recovery
+      recoverer && delay && expiry
+
+  const validateRecoverer = (recoverer: string) => {
+    if (sameAddress(recoverer, safeAddress)) {
+      return 'The Safe Account cannot be a Recoverer of itself'
+    }
+  }
+
+  const validateCustomDelay = (delay: string) => {
+    if (!delay) return ''
+    if (delay === '0' || !Number.isInteger(Number(delay))) {
+      return 'Invalid number'
+    }
+  }
+
+  const onShowAdvanced = () => {
+    setShowAdvanced((prev) => !prev)
+    trackEvent(RECOVERY_EVENTS.SHOW_ADVANCED)
+  }
+
+  const isDisabled = !understandsRisk || !isDirty || !!customDelayState.error
+
+  const isEdit = !!delayModifier
+
+  const handleSubmit = async () => {
+    const addressType = await getAddressType(recoverer, chainId)
+    const creationEvent = isEdit ? RECOVERY_EVENTS.SUBMIT_RECOVERY_EDIT : RECOVERY_EVENTS.SUBMIT_RECOVERY_CREATE
+    const settings = `delay_${delay},expiry_${expiry},type_${addressType}`
+
+    trackEvent({ ...creationEvent })
+    trackEvent({ ...RECOVERY_EVENTS.RECOVERY_SETTINGS, label: settings })
+
+    onNext({ expiry, delay, customDelay, selectedDelay, recoverer, moduleAddress: data?.moduleAddress })
+  }
+
+  return (
+    <TxCard>
+      <FormProvider {...formMethods}>
+        <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
+          <Alert severity="warning" sx={{ border: 'unset' }}>
+            Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
+            <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
+              <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+                Learn more
+              </ExternalLink>
+            </Track>
+          </Alert>
+
+          <Box my={2}>
+            <Typography variant="h5" gutterBottom>
+              Trusted Recoverer
+            </Typography>
+
+            <Typography variant="body2">
+              Choose a Recoverer, such as a hardware wallet or a Safe Account controlled by family or friends, that can
+              initiate the recovery process in the future.
+            </Typography>
+          </Box>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <AddressBookInput
+              label="Recoverer address or ENS"
+              name={UpsertRecoveryFlowFields.recoverer}
+              required
+              fullWidth
+              validate={validateRecoverer}
+            />
+            <RecovererWarning />
+          </FormControl>
+
+          <Box mb={2}>
+            <Typography variant="h5" gutterBottom>
+              Review window
+              <Tooltip placement="top" arrow title={TOOLTIP_TITLES.REVIEW_WINDOW}>
+                <span>
+                  <SvgIcon
+                    component={InfoIcon}
+                    inheritViewBox
+                    fontSize="small"
+                    color="border"
+                    sx={{ verticalAlign: 'middle', ml: 0.5 }}
+                  />
+                </span>
+              </Tooltip>
+            </Typography>
+
+            <Typography variant="body2">
+              The recovery proposal will be available for execution after this period of time. You can cancel any
+              recovery proposal when it is not needed or wanted during this period.
+            </Typography>
+          </Box>
+
+          <Box my={2}>
+            <Controller
+              control={formMethods.control}
+              name={UpsertRecoveryFlowFields.selectedDelay}
+              render={({ field: { ref, ...field } }) => (
+                <TextField
+                  data-testid="recovery-delay-select"
+                  fullWidth
+                  inputRef={ref}
+                  {...field}
+                  select
+                  sx={{ width: '55%', maxWidth: '240px' }}
+                >
+                  {periods.delay.map(({ label, value }, index) => (
+                    <MenuItem key={index} value={value}>
+                      {label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+
+            <Box
+              sx={{
+                display: 'flex',
+                flex: '1',
+                gap: 2,
+                maxWidth: '180px',
+                minWidth: '140px',
+              }}
+            >
+              {isCustomDelaySelected(selectedDelay) && (
+                <>
+                  <Controller
+                    control={formMethods.control}
+                    name={UpsertRecoveryFlowFields.customDelay}
+                    rules={{ validate: validateCustomDelay }}
+                    render={({ field: { ref, ...field }, fieldState }) => (
+                      <NumberField
+                        label={fieldState.error?.message}
+                        error={!!fieldState.error}
+                        inputRef={ref}
+                        {...field}
+                        required
+                        placeholder="E.g. 100"
+                      />
+                    )}
+                  />
+                  <Typography
+                    sx={{
+                      my: 'auto',
+                    }}
+                  >
+                    days.
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Box>
+
+          <Box mb={3}>
+            <Typography
+              data-testid="advanced-btn"
+              variant="body2"
+              onClick={onShowAdvanced}
+              role="button"
+              className={css.advanced}
+            >
+              Advanced {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </Typography>
+
+            <Collapse in={showAdvanced}>
+              <Box>
+                <Typography variant="h5" gutterBottom>
+                  Proposal expiry
+                  <Tooltip placement="top" arrow title={TOOLTIP_TITLES.PROPOSAL_EXPIRY}>
+                    <span>
+                      <SvgIcon
+                        component={InfoIcon}
+                        inheritViewBox
+                        fontSize="small"
+                        color="border"
+                        sx={{ verticalAlign: 'middle', ml: 0.5 }}
+                      />
+                    </span>
+                  </Tooltip>
+                </Typography>
+
+                <Typography mb={2} variant="body2">
+                  Set a period of time after which the recovery proposal will expire and can no longer be executed.
+                </Typography>
+              </Box>
+
+              <Controller
+                control={formMethods.control}
+                name={UpsertRecoveryFlowFields.expiry}
+                // Don't reset value if advanced section is collapsed
+                shouldUnregister={false}
+                render={({ field: { ref, ...field } }) => (
+                  <TextField
+                    data-testid="recovery-expiry-select"
+                    inputRef={ref}
+                    {...field}
+                    fullWidth
+                    select
+                    sx={{ width: '55%', maxWidth: '240px' }}
+                  >
+                    {periods.expiration.map(({ label, value }, index) => (
+                      <MenuItem key={index} value={value}>
+                        {label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </Collapse>
+          </Box>
+
+          <Divider className={commonCss.nestedDivider} />
+
+          <FormControlLabel
+            data-testid="warning-section"
+            label={`I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the ${BRAND_NAME}.`}
+            control={<Checkbox checked={understandsRisk} onChange={(_, checked) => setUnderstandsRisk(checked)} />}
+            sx={{ my: 2, pl: 2 }}
+          />
+
+          <CardActions>
+            <Button data-testid="next-btn" variant="contained" type="submit" disabled={isDisabled}>
+              Next
+            </Button>
+          </CardActions>
+        </form>
+      </FormProvider>
+    </TxCard>
+  )
+}

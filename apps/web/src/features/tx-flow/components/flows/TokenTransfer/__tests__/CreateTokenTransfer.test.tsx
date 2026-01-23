@@ -1,0 +1,115 @@
+import { TokenTransferType } from '@/features/tx-flow/components/flows/TokenTransfer'
+import {
+  CreateTokenTransfer,
+  type CreateTokenTransferProps,
+} from '@/features/tx-flow/components/flows/TokenTransfer/CreateTokenTransfer'
+import * as tokenUtils from '@/features/tx-flow/components/flows/TokenTransfer/utils'
+import * as useHasPermission from '@/permissions/hooks/useHasPermission'
+import { Permission } from '@/permissions/config'
+import { render } from '@/tests/test-utils'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { TokenType } from '@safe-global/store/gateway/types'
+import TxFlowProvider from '@/features/tx-flow/contexts/TxFlowProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import * as useBalances from '@/hooks/useBalances'
+
+describe('CreateTokenTransfer', () => {
+  const mockParams = {
+    recipients: [
+      {
+        recipient: '',
+        tokenAddress: ZERO_ADDRESS,
+        amount: '',
+      },
+    ],
+    type: TokenTransferType.multiSig,
+  }
+
+  const useHasPermissionSpy = jest.spyOn(useHasPermission, 'useHasPermission')
+  const useRecipientAnalysisSpy = jest.spyOn(useRecipientAnalysis, 'useRecipientAnalysis')
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    useHasPermissionSpy.mockReturnValue(true)
+    useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
+  })
+
+  const renderCreateTokenTransfer = (
+    props: CreateTokenTransferProps = {},
+    options: Parameters<typeof render>[1] = undefined,
+  ) => {
+    return render(
+      <SafeShieldProvider>
+        <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+          <CreateTokenTransfer {...props} />
+        </TxFlowProvider>
+      </SafeShieldProvider>,
+      options,
+    )
+  }
+
+  it('should display a token amount input', () => {
+    const { getByText } = renderCreateTokenTransfer()
+
+    expect(getByText('Amount')).toBeInTheDocument()
+  })
+
+  it('should display a recipient input', () => {
+    const { getAllByText } = renderCreateTokenTransfer()
+
+    expect(getAllByText('Recipient address')[0]).toBeInTheDocument()
+  })
+
+  it('should display a type selection if a spending limit token is selected', () => {
+    jest
+      .spyOn(tokenUtils, 'useTokenAmount')
+      .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
+
+    const tokenAddress = ZERO_ADDRESS
+
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: tokenAddress,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+
+    const { getByText } = renderCreateTokenTransfer()
+
+    expect(getByText('Send as')).toBeInTheDocument()
+
+    expect(useHasPermissionSpy).toHaveBeenCalledWith(Permission.CreateSpendingLimitTransaction)
+  })
+
+  it('should not display a type selection if user does not have `CreateSpendingLimitTransaction` permission', () => {
+    useHasPermissionSpy.mockReturnValueOnce(false)
+    const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+    expect(useHasPermissionSpy).toHaveBeenCalledWith(Permission.CreateSpendingLimitTransaction)
+  })
+
+  it('should not display a type selection if there is a txNonce', () => {
+    const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+})

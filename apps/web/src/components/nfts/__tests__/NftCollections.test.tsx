@@ -16,9 +16,13 @@ jest.mock('@/services/datadog', () => ({
   },
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () => {
+  const actual = jest.requireActual('@/services/analytics')
+  return {
+    ...actual,
+    trackEvent: jest.fn(),
+  }
+})
 
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,

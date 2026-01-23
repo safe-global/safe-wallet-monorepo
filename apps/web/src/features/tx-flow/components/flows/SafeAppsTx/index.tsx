@@ -1,0 +1,63 @@
+import type { BaseTransaction, RequestId, SendTransactionRequestParams } from '@safe-global/safe-apps-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import ReviewSafeAppsTx from './ReviewSafeAppsTx'
+import { AppTitle } from '@/features/tx-flow/components/flows/SignMessage'
+import { useCallback } from 'react'
+import { type SubmitCallback, TxFlow } from '@/features/tx-flow/components/TxFlow'
+import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
+import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
+import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
+
+export type SafeAppsTxParams = {
+  appId?: string
+  app?: Partial<SafeAppData>
+  requestId: RequestId
+  txs: BaseTransaction[]
+  params?: SendTransactionRequestParams
+}
+
+const SafeAppsTxFlow = ({
+  data,
+  onSubmit,
+}: {
+  data: SafeAppsTxParams
+  onSubmit?: (txId: string, safeTxHash: string) => void
+}) => {
+  const ReviewTransactionComponent = useCallback(
+    (props: ReviewTransactionContentProps) => {
+      return <ReviewSafeAppsTx safeAppsTx={data} {...props} />
+    },
+    [data],
+  )
+
+  const handleSubmit: SubmitCallback = useCallback(
+    (args) => {
+      if (!args || !args.txId) {
+        return
+      }
+
+      const safeTxHash = getSafeTxHashFromTxId(args.txId)
+
+      if (!safeTxHash) {
+        return
+      }
+
+      trackSafeAppTxCount(Number(data.appId))
+      dispatchSafeAppsTx({ safeAppRequestId: data.requestId, txId: args.txId, safeTxHash })
+      onSubmit?.(args.txId, safeTxHash)
+    },
+    [data.appId, data.requestId, onSubmit],
+  )
+
+  return (
+    <TxFlow
+      initialData={data}
+      onSubmit={handleSubmit}
+      subtitle={<AppTitle name={data.app?.name} logoUri={data.app?.iconUrl} txs={data.txs} />}
+      ReviewTransactionComponent={ReviewTransactionComponent}
+    />
+  )
+}
+
+export default SafeAppsTxFlow

@@ -1,4 +1,2 @@
-export * from './Slot'
-export * from './SlotProvider'
-export * from './hooks'
-export * from './withSlot'
+/** @deprecated Import from '@/features/tx-flow/contexts/slots' instead */
+export * from '@/features/tx-flow/contexts/slots'
