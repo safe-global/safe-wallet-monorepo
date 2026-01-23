@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useReducer } from 'react'
 import type { ReactNode } from 'react'
 import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -20,15 +20,11 @@ export function AnalysisDetailsDropdown({
   defaultExpanded = false,
   contentWrapper,
 }: AnalysisDetailsDropdownProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded)
-
-  const toggle = useCallback(() => {
-    setExpanded(!expanded)
-  }, [expanded])
+  const [expanded, toggle] = useReducer((state: boolean) => !state, defaultExpanded)
 
   return (
     <View marginTop={-6}>
-      <TouchableOpacity onPress={toggle}>
+      <TouchableOpacity onPress={toggle} accessibilityLabel={expanded ? hideLabel : showLabel}>
         <View
           flexDirection="row"
           alignItems="center"
