@@ -4,110 +4,7 @@ const crypto = require('crypto')
 const cheerio = require('cheerio')
 
 const OUT_DIR = 'out'
-const CHUNKS_DIR = path.join(OUT_DIR, '_next', 'static', 'chunks')
 const MANIFEST_JS_FILENAME = 'chunks-sri-manifest.js'
-
-/**
- * Finds the minified method name webpack uses for creating script URLs.
- * This is typically `c.tu` but the minifier can use any identifier.
- *
- * Looks for: varName.methodName=e=>varName.tt().createScriptURL(e)
- *
- * @param {string} content - The webpack runtime file content
- * @returns {{varName: string, methodName: string} | null} The extracted identifiers or null
- */
-function findWebpackUrlMethod(content) {
-  // Match: someVar.someMethod=e=>someVar.tt().createScriptURL(e)
-  // This is webpack's Trusted Types URL creator: __webpack_require__.tu
-  const match = content.match(/(\w)\.(\w+)=\w=>\1\.tt\(\)\.createScriptURL\(\w\)/)
-  if (match) {
-    return {
-      varName: match[1],
-      methodName: match[2],
-    }
-  }
-  return null
-}
-
-/**
- * Patch webpack runtime to inject SRI lookup for dynamically loaded chunks.
- *
- * Webpack's chunk loader (`__webpack_require__.l`) creates script tags for dynamic imports.
- * This function patches the minified webpack runtime to add integrity attributes
- * by looking up hashes from `window.__CHUNK_SRI_MANIFEST`.
- *
- * Must run BEFORE buildSriManifest() so the patched webpack file gets hashed correctly.
- */
-function patchWebpackRuntime() {
-  const entries = fs.readdirSync(CHUNKS_DIR, { withFileTypes: true })
-  const webpackFiles = entries
-    .filter((entry) => entry.isFile() && entry.name.startsWith('webpack-') && entry.name.endsWith('.js'))
-    .map((entry) => path.join(CHUNKS_DIR, entry.name))
-
-  if (webpackFiles.length === 0) {
-    console.warn('Warning: No webpack-*.js files found in', CHUNKS_DIR)
-    return
-  }
-
-  for (const filePath of webpackFiles) {
-    let content = fs.readFileSync(filePath, 'utf8')
-    const originalContent = content
-
-    // Dynamically find the webpack URL method name (e.g., 'tu', 'ab', etc.)
-    const urlMethod = findWebpackUrlMethod(content)
-    if (!urlMethod) {
-      console.warn('Warning: Could not find webpack URL method in', path.basename(filePath))
-      continue
-    }
-
-    // Pattern: scriptVar.src = webpackObj.urlMethod(urlVar)
-    // This is webpack's __webpack_require__.l function setting script.src
-    // We inject SRI lookup right after the src is set
-    //
-    // Example matches (depending on minified names):
-    //   r.src=c.tu(d)
-    //   a.src=o.ab(e)
-    //
-    // Transforms to:
-    //   r.src=c.tu(d);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[d])r.integrity=_sri[d]
-    const pattern = new RegExp(
-      `(\\w)\\.src=(\\w)\\.${urlMethod.methodName}\\((\\w)\\)`,
-      'g',
-    )
-
-    content = content.replace(
-      pattern,
-      `$1.src=$2.${urlMethod.methodName}($3);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[$3])$1.integrity=_sri[$3]`,
-    )
-
-    if (content !== originalContent) {
-      fs.writeFileSync(filePath, content, 'utf8')
-      console.log(
-        `Patched webpack runtime for SRI (using method: ${urlMethod.methodName}):`,
-        path.basename(filePath),
-      )
-    } else {
-      console.warn('Warning: Could not find webpack chunk loader pattern in', path.basename(filePath))
-    }
-  }
-}
-
-/**
- * Recursively find all JS files in `out/_next/static/chunks`
- */
-function getAllChunkFiles(dir = CHUNKS_DIR) {
-  let results = []
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
-  for (const entry of entries) {
-    const entryPath = path.join(dir, entry.name)
-    if (entry.isDirectory()) {
-      results = results.concat(getAllChunkFiles(entryPath))
-    } else if (entry.isFile() && entry.name.endsWith('.js')) {
-      results.push(entryPath)
-    }
-  }
-  return results
-}
 
 /**
  * Compute the SHA-384 SRI hash for a given file
@@ -116,46 +13,6 @@ function computeSriHash(filePath) {
   const content = fs.readFileSync(filePath)
   const hash = crypto.createHash('sha384').update(content).digest('base64')
   return `sha384-${hash}`
-}
-
-/**
- * Build a mapping from each chunk's public path to its integrity hash
- * e.g.: { "/_next/static/chunks/foo.js": "sha384-abc..." }
- */
-function buildSriManifest() {
-  const allJsFiles = getAllChunkFiles(CHUNKS_DIR)
-  const manifest = {}
-
-  for (const filePath of allJsFiles) {
-    // filePath is absolute, e.g. /path/to/out/_next/static/chunks/foo.js
-    // We want to create a key like "/_next/static/chunks/foo.js"
-    const relPath = path.relative(OUT_DIR, filePath).replace(/\\/g, '/')
-    // On Windows, ensure forward slashes
-    const publicPath = `/${relPath}`
-    manifest[publicPath] = computeSriHash(filePath)
-  }
-
-  return manifest
-}
-
-/**
- * Write the manifest file in `out/_next/static/`.
- * The script sets the global window.__CHUNK_SRI_MANIFEST
- */
-function writeExternalManifest(manifestObj) {
-  const manifestJson = JSON.stringify(manifestObj, null, 2)
-
-  const fileContents = `
-/**
- * Auto-generated chunk SRI manifest.
- * DO NOT EDIT.
- */
-window.__CHUNK_SRI_MANIFEST = ${manifestJson};
-`
-  const manifestJsPath = path.join(OUT_DIR, '_next', 'static', MANIFEST_JS_FILENAME)
-  fs.writeFileSync(manifestJsPath, fileContents, 'utf8')
-
-  return `/_next/static/${MANIFEST_JS_FILENAME}`
 }
 
 /**
@@ -242,23 +99,20 @@ function addSRIToAllHtmlFiles(dirPath) {
  * Main
  */
 function main() {
-  // 1) Patch webpack runtime to inject SRI lookup for dynamic imports
-  //    Must run BEFORE buildSriManifest() so patched file gets correct hash
-  patchWebpackRuntime()
+  // The SRI manifest has already been generated by the webpack plugin during build.
+  // We only need to:
+  // 1. Insert <script src="..."> reference to the manifest in HTML files
+  // 2. Add integrity hashes to static script tags
 
-  // 2) Build SRI manifest (hashes all chunk files including patched webpack)
-  const sriManifest = buildSriManifest()
+  const manifestScriptPublicPath = `/_next/static/chunks/${MANIFEST_JS_FILENAME}`
 
-  // 3) Write the external manifest JS file
-  const manifestScriptPublicPath = writeExternalManifest(sriManifest)
-
-  // 4) Insert <script src="..."> references in each .html
+  // 1) Insert <script src="..."> references in each .html
   insertManifestScriptIntoHtml(manifestScriptPublicPath)
 
-  // 5) Insert integrity hashes for all static script tags in html files
+  // 2) Insert integrity hashes for all static script tags in html files
   addSRIToAllHtmlFiles(OUT_DIR)
 
-  console.log(`SRI processing complete: patched webpack runtime, added manifest to all .html files.`)
+  console.log('SRI processing complete: added manifest and integrity to all .html files.')
 }
 
 main()
