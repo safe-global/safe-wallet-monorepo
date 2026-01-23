@@ -73,24 +73,34 @@ The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 import { WalletConnectFeature } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
-// Consumer component
+// Consumer component with loading state
 function MyPage() {
-  // Returns null if: disabled or still loading
   const walletConnect = useLoadFeature(WalletConnectFeature)
 
-  if (!walletConnect) return null
+  // Show skeleton while loading (feature flag or code)
+  if (walletConnect === undefined) return <Skeleton />
 
-  // Feature is enabled and loaded - safe to use components
+  // Hide if feature is disabled
+  if (walletConnect === null) return null
+
+  // Feature is loaded - safe to use
+  return <walletConnect.components.WalletConnectWidget />
+}
+
+// Simple pattern: treat loading same as disabled
+function SimpleComponent() {
+  const walletConnect = useLoadFeature(WalletConnectFeature)
+  if (!walletConnect) return null
   return <walletConnect.components.WalletConnectWidget />
 }
 ```
 
 **`useLoadFeature()` return values:**
-| Condition | Returns |
-|-----------|---------|
-| Feature flag disabled | `null` |
-| Feature flag loading (undefined) | `null` |
-| Feature flag enabled + loaded | The loaded feature contract |
+| Condition | Returns | When to use |
+|-----------|---------|-------------|
+| Feature flag or code loading | `undefined` | Show loading UI (Skeleton, Spinner) |
+| Feature flag disabled | `null` | Hide feature completely |
+| Feature loaded successfully | Feature object | Render feature components |
 
 ### The Loading Flow
 
@@ -104,14 +114,18 @@ function MyPage() {
 ┌─────────────────────────────────────────────────────────────────┐
 │ 2. CONSUMER calls useLoadFeature (flag check + lazy load)      │
 │    const wc = useLoadFeature(WalletConnectFeature)             │
-│    // Returns null if disabled, full contract if enabled       │
+│    // Returns: undefined | null | feature                      │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              ▼ if not null
-┌─────────────────────────────────────────────────────────────────┐
-│ 3. CONSUMER renders component (already wrapped with Suspense)  │
-│    return <wc.components.WalletConnectWidget />                │
-└─────────────────────────────────────────────────────────────────┘
+                 ┌────────────┼────────────┐
+                 ▼            ▼            ▼
+           ┌──────────┐ ┌──────────┐ ┌─────────┐
+           │   null   │ │undefined │ │ feature │
+           │(disabled)│ │(loading) │ │(loaded) │
+           └──────────┘ └──────────┘ └─────────┘
+                 │            │            │
+                 ▼            ▼            ▼
+            return null  <Skeleton/>  <wc.components.Widget />
 ```
 
 ### Benefits of This Pattern
@@ -126,9 +140,12 @@ const walletConnect = useLoadFeature(WalletConnectFeature)
 Benefits:
 
 - **Type-safe**: Full TypeScript inference from the handle
+- **Simple API**: Returns `undefined` (loading), `null` (disabled), or the feature object
+- **Loading states**: Can distinguish between loading and disabled for better UX
 - **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
 - **Tree-shakeable**: Unused features won't be bundled
-- **Simple**: No context providers, no string lookups
+- **No boilerplate**: No context providers, no string lookups
+- **Better UX**: Show skeletons/spinners during loading instead of blank screens
 - **Testable**: Just mock the feature module with Jest
 
 ## Feature Contract
@@ -836,10 +853,13 @@ import { HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 
 function SafeShieldScanner() {
-  // Type inferred from HypernativeFeature, null if disabled or loading
   const hypernative = useLoadFeature(HypernativeFeature)
 
-  if (!hypernative) return null
+  // Show loading state
+  if (hypernative === undefined) return <Skeleton />
+
+  // Hide if disabled
+  if (hypernative === null) return null
 
   return <hypernative.components.Banner />
 }
@@ -874,7 +894,8 @@ function SafeShieldScanner() {
 ### For Feature Consumers
 
 - [ ] Using `useLoadFeature()` hook with feature handle
-- [ ] Handling `null` return (feature disabled or loading)
+- [ ] Handling return values: `undefined` (loading), `null` (disabled), or feature object (loaded)
+- [ ] Optionally showing loading UI for better UX (instead of blank screen)
 - [ ] Type-safe (types inferred from handle)
 - [ ] No direct imports from feature internal folders (components/, hooks/, etc.)
 
@@ -907,16 +928,24 @@ import { useLoadFeature } from '@/features/__core__'
 
 const feature = useLoadFeature(WalletConnectFeature)
 // Returns:
+// - undefined if feature flag or code is loading
 // - null if feature flag is disabled
-// - null if feature flag is loading (undefined)
 // - the full feature contract if enabled and loaded
 ```
 
-This means one simple null check handles all cases:
+You can handle loading states explicitly:
 
 ```typescript
-if (!feature) return null // Not available (any reason)
-// Feature is enabled and ready to use
+if (feature === undefined) return <Skeleton />  // Loading
+if (feature === null) return null  // Disabled
+return <feature.components.Widget />  // Loaded
+```
+
+Or use a simple null check to treat loading same as disabled:
+
+```typescript
+if (!feature) return null  // Not available (loading or disabled)
+return <feature.components.Widget />  // Loaded
 ```
 
 ### Q: How do I share types between features?
