@@ -11,6 +11,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { AppRoutes } from '@/config/routes'
+import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -48,7 +49,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && <Breadcrumbs />}
-            {children}
+            <QueueAssessmentProvider>{children}</QueueAssessmentProvider>
           </SafeLoadingError>
         </div>
 

@@ -48,11 +48,11 @@ const TxPage = ({
   const lastPageRef = useRef<QueuedItemPage>(undefined)
 
   useEffect(() => {
-    if (page && isQueue && (!lastPageRef.current || !isSamePage(page, lastPageRef.current))) {
+    if (page && (!lastPageRef.current || !isSamePage(page, lastPageRef.current))) {
       lastPageRef.current = page as QueuedItemPage
       onPageLoaded(page as QueuedItemPage)
     }
-  }, [page, onPageLoaded, isQueue])
+  }, [page, onPageLoaded])
 
   return (
     <>
@@ -96,7 +96,6 @@ const PaginatedTxns = ({
   // Reset the pages when the Safe Account or filter changes
   useEffect(() => {
     setPages([''])
-    setLoadedPages(new Map())
   }, [filter, safe.chainId, safeAddress, useTxns])
 
   // Trigger the next page load
@@ -124,11 +123,14 @@ const PaginatedTxns = ({
   // Notify parent when pages change
   useEffect(() => {
     const pageItems = pages.map((url) => loadedPages.get(url)).filter((item) => !!item)
-    if (pageItems.length !== lastPageItemsRef.current.length || pageItems.some((item, index) => !isSamePage(item, lastPageItemsRef.current[index]))) {
+
+    if (
+      pageItems.length !== lastPageItemsRef.current.length ||
+      pageItems.some((item, index) => !isSamePage(item, lastPageItemsRef.current[index]))
+    ) {
       onPagesChange?.(pageItems)
       lastPageItemsRef.current = pageItems
     }
-
   }, [pages, lastPageItemsRef.current, loadedPages, onPagesChange])
 
   return (

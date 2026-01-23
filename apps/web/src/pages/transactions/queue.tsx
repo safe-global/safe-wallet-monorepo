@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import useTxQueue from '@/hooks/useTxQueue'
-import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 import { Box, Skeleton } from '@mui/material'
@@ -15,9 +14,7 @@ import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/u
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
-import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
-import { useState, useCallback, useMemo } from 'react'
-import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import PaginatedTxnsWithAssessment from '@/components/common/PaginatedTxns/PaginatedTxnsWithAssessment'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
@@ -26,22 +23,6 @@ const Queue: NextPage = () => {
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
 
   const showHnLoginCard = !eligibilityLoading && isHypernativeEligible && isHypernativeQueueScanEnabled
-
-  // Collect pages from main queue for assessment provider
-  const [mainQueuePages, setMainQueuePages] = useState<(QueuedItemPage | undefined)[]>([])
-  const handleMainQueuePagesChange = useCallback((pages: (QueuedItemPage | undefined)[]) => {
-    setMainQueuePages(pages)
-  }, [])
-
-  const [pendingQueuePages, setPendingQueuePages] = useState<(QueuedItemPage | undefined)[]>([])
-  const handlePendingQueuePagesChange = useCallback((pages: (QueuedItemPage | undefined)[]) => {
-    setPendingQueuePages(pages)
-  }, [])
-
-  // Combine pages (for now just main queue, pending queue can be added later if needed)
-  const allPages = useMemo(() => {
-    return [...mainQueuePages, ...pendingQueuePages]
-  }, [mainQueuePages, pendingQueuePages])
 
   return (
     <>
@@ -70,15 +51,11 @@ const Queue: NextPage = () => {
 
             <RecoveryList />
 
-            <QueueAssessmentProvider pages={allPages}>
-              {/* Pending unsigned transactions */}
-              {showPending && (
-                <PaginatedTxns useTxns={usePendingTxsQueue} onPagesChange={handlePendingQueuePagesChange} />
-              )}
+            {/* Pending unsigned transactions */}
+            {showPending && <PaginatedTxnsWithAssessment useTxns={usePendingTxsQueue} />}
 
-              {/* The main queue of signed transactions */}
-              <PaginatedTxns useTxns={useTxQueue} onPagesChange={handleMainQueuePagesChange} />
-            </QueueAssessmentProvider>
+            {/* The main queue of signed transactions */}
+            <PaginatedTxnsWithAssessment useTxns={useTxQueue} />
           </Box>
         </main>
       </BatchExecuteHoverProvider>
