@@ -2,7 +2,6 @@
  * Contract types for the tx-flow feature.
  * Defines the interface that the feature implementation must satisfy.
  */
-import type { ComponentType, ReactNode } from 'react'
 import type { TxModalContextType, TxFlowContextType } from './types'
 
 // Import flow component types (import type is erased at compile time - no bundle impact)
