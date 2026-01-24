@@ -117,6 +117,7 @@ export const InconsistentSignerSetupWarning = () => {
           minWidth: 'auto',
           textTransform: 'none',
           textDecoration: 'none !important',
+          cursor: 'pointer',
           '&:hover': {
             textDecoration: 'underline !important',
             backgroundColor: 'transparent',
