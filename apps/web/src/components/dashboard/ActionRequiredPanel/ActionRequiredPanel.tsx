@@ -50,7 +50,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
   return (
     <Card
       data-testid="action-required-panel"
-      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 2.5, height: 1, width: 1 }}
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: isExpanded ? 2.5 : 1.5, height: 1, width: 1 }}
       component="section"
     >
       <Stack
@@ -59,7 +59,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         alignItems="center"
         onClick={toggleExpanded}
         className={css.header}
-        sx={{ px: 1.5, mb: 1 }}
+        sx={{ px: 1.5, mb: 1, cursor: 'pointer' }}
       >
         <Typography fontWeight={700} className={css.headerText}>
           Attention required <SidebarListItemCounter count={warningCount.toString()} />

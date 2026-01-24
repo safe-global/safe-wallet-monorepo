@@ -1,6 +1,6 @@
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import { ActionCard } from '@/components/common/ActionCard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery } from '@/store/slices'
@@ -8,8 +8,7 @@ import { useAllSafesGrouped } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '../../utils'
-import { Typography, Button, Box } from '@mui/material'
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+import { Typography, Box } from '@mui/material'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -100,32 +99,11 @@ export const InconsistentSignerSetupWarning = () => {
   }
 
   return (
-    <ErrorMessage level="warning">
-      <Typography>
-        <strong>Your account has different signers</strong> on {chainNamesText}. It could impact cross-chain transaction
-        approvals.
-      </Typography>
-      <Button
-        variant="text"
-        size="small"
-        endIcon={<KeyboardArrowRightRoundedIcon />}
-        onClick={handleReviewSigners}
-        sx={{
-          mt: 1,
-          ml: -1,
-          p: 1,
-          minWidth: 'auto',
-          textTransform: 'none',
-          textDecoration: 'none !important',
-          cursor: 'pointer',
-          '&:hover': {
-            textDecoration: 'underline !important',
-            backgroundColor: 'transparent',
-          },
-        }}
-      >
-        Review signers
-      </Button>
-    </ErrorMessage>
+    <ActionCard
+      severity="warning"
+      title="Your account has different signers"
+      content={`Your account has different signers on ${chainNamesText}. It could impact cross-chain transaction approvals.`}
+      actions={[{ label: 'Review signers', onClick: handleReviewSigners }]}
+    />
   )
 }

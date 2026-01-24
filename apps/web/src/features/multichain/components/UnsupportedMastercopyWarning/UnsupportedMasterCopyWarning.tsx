@@ -1,9 +1,7 @@
 import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow } from '@/components/tx-flow/flows'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import { ActionCard } from '@/components/common/ActionCard'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button, Typography } from '@mui/material'
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import { useCallback, useContext } from 'react'
 import {
   canMigrateUnsupportedMastercopy,
@@ -44,55 +42,22 @@ export const UnsupportedMastercopyWarning = () => {
     : 'This Safe Account was created with an unsupported base contract. The web interface might not work correctly. We recommend using the command line interface instead.'
 
   return (
-    <ErrorMessage level="warning" title="Base contract is not supported">
-      <Typography>{message}</Typography>
-      {canMigrate ? (
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<KeyboardArrowRightRoundedIcon />}
-          onClick={openUpgradeModal}
-          sx={{
-            mt: 1,
-            ml: -1,
-            p: 1,
-            minWidth: 'auto',
-            textTransform: 'none',
-            textDecoration: 'none !important',
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline !important',
-              backgroundColor: 'transparent',
-            },
-          }}
-        >
-          Migrate
-        </Button>
-      ) : (
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<KeyboardArrowRightRoundedIcon />}
-          href={CLI_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{
-            mt: 1,
-            ml: -1,
-            p: 1,
-            minWidth: 'auto',
-            textTransform: 'none',
-            textDecoration: 'none !important',
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline !important',
-              backgroundColor: 'transparent',
-            },
-          }}
-        >
-          Get CLI
-        </Button>
-      )}
-    </ErrorMessage>
+    <ActionCard
+      severity="warning"
+      title="Base contract is not supported"
+      content={message}
+      actions={
+        canMigrate
+          ? [{ label: 'Migrate', onClick: openUpgradeModal }]
+          : [
+              {
+                label: 'Get CLI',
+                href: CLI_LINK,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+              },
+            ]
+      }
+    />
   )
 }

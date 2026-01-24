@@ -2,13 +2,12 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
-import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@/components/common/ExternalLink'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import { ActionCard } from '@/components/common/ActionCard'
 import { RecoverAccountFlow } from '@/components/tx-flow/flows'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
@@ -75,31 +74,13 @@ export function InternalRecoveryProposalCard({
 
   if (orientation === 'horizontal') {
     return (
-      <ErrorMessage level="info" title={title}>
-        <Typography>{desc}</Typography>
-        <Button
-          data-testid="start-recovery-btn"
-          variant="text"
-          size="small"
-          endIcon={<KeyboardArrowRightRoundedIcon />}
-          onClick={onRecover}
-          sx={{
-            mt: 1,
-            ml: -1,
-            p: 1,
-            minWidth: 'auto',
-            textTransform: 'none',
-            textDecoration: 'none !important',
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline !important',
-              backgroundColor: 'transparent',
-            },
-          }}
-        >
-          Start recovery
-        </Button>
-      </ErrorMessage>
+      <ActionCard
+        severity="info"
+        title={title}
+        content={desc}
+        actions={[{ label: 'Start recovery', onClick: onRecover }]}
+        testId="recovery-proposal-card"
+      />
     )
   }
 
