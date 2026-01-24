@@ -69,7 +69,7 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
             {!isExecutable && !isExpired && <Countdown seconds={remainingSeconds} />}
           </>
         }
-        actions={[{ label: 'Go to queue', onClick }]}
+        action={{ label: 'Go to queue', onClick }}
         testId="recovery-in-progress-card"
       />
     )

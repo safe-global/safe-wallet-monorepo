@@ -58,41 +58,28 @@ describe('ActionCard', () => {
     })
   })
 
-  describe('Actions', () => {
-    it('should render single action button', () => {
+  describe('Action', () => {
+    it('should render action button', () => {
       const onClick = jest.fn()
-      const actions: ActionCardButton[] = [{ label: 'Click Me', onClick }]
-      const { getByText } = render(<ActionCard severity="info" title="Title" actions={actions} />)
+      const action: ActionCardButton = { label: 'Click Me', onClick }
+      const { getByText } = render(<ActionCard severity="info" title="Title" action={action} />)
 
       const button = getByText('Click Me')
       fireEvent.click(button)
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('should render multiple action buttons', () => {
-      const onClick1 = jest.fn()
-      const onClick2 = jest.fn()
-      const actions: ActionCardButton[] = [
-        { label: 'First', onClick: onClick1 },
-        { label: 'Second', onClick: onClick2 },
-      ]
-      const { getByText } = render(<ActionCard severity="info" title="Title" actions={actions} />)
-
-      expect(getByText('First')).toBeInTheDocument()
-      expect(getByText('Second')).toBeInTheDocument()
-    })
-
     it('should handle button with href', () => {
-      const actions: ActionCardButton[] = [{ label: 'Link', href: 'https://example.com' }]
-      const { getByText } = render(<ActionCard severity="info" title="Title" actions={actions} />)
+      const action: ActionCardButton = { label: 'Link', href: 'https://example.com' }
+      const { getByText } = render(<ActionCard severity="info" title="Title" action={action} />)
 
       const button = getByText('Link')
       expect(button).toHaveAttribute('href', 'https://example.com')
     })
 
     it('should always render button with arrow endIcon', () => {
-      const actions: ActionCardButton[] = [{ label: 'Test Button', onClick: () => {} }]
-      const { container } = render(<ActionCard severity="info" title="Title" actions={actions} />)
+      const action: ActionCardButton = { label: 'Test Button', onClick: () => {} }
+      const { container } = render(<ActionCard severity="info" title="Title" action={action} />)
 
       // Verify endIcon is present (KeyboardArrowRightRoundedIcon is always rendered)
       const button = container.querySelector('button')
@@ -100,17 +87,9 @@ describe('ActionCard', () => {
       expect(button?.querySelector('.MuiButton-endIcon')).toBeInTheDocument()
     })
 
-    it('should not render actions section when actions is empty array', () => {
-      const { container } = render(<ActionCard severity="info" title="Title" actions={[]} />)
-      const buttons = container.querySelectorAll('button')
-      // Should have no buttons (empty actions array)
-      expect(buttons.length).toBe(0)
-    })
-
-    it('should not render actions section when actions is undefined', () => {
+    it('should not render action section when action is undefined', () => {
       const { container } = render(<ActionCard severity="info" title="Title" />)
       const buttons = container.querySelectorAll('button')
-      // Should have no buttons (undefined actions)
       expect(buttons.length).toBe(0)
     })
   })
@@ -130,14 +109,14 @@ describe('ActionCard', () => {
   describe('Complex scenarios', () => {
     it('should render with all props combined', () => {
       const onClick = jest.fn()
-      const actions: ActionCardButton[] = [{ label: 'Action', onClick }]
+      const action: ActionCardButton = { label: 'Action', onClick }
 
       const { getByText, getByTestId } = render(
         <ActionCard
           severity="warning"
           title="Complex Title"
           content={<div data-testid="complex-content">Complex content</div>}
-          actions={actions}
+          action={action}
           testId="complex-card"
         />,
       )
@@ -149,15 +128,13 @@ describe('ActionCard', () => {
     })
 
     it('should handle button with target and rel attributes', () => {
-      const actions: ActionCardButton[] = [
-        {
-          label: 'External Link',
-          href: 'https://example.com',
-          target: '_blank',
-          rel: 'noopener noreferrer',
-        },
-      ]
-      const { getByText } = render(<ActionCard severity="info" title="Title" actions={actions} />)
+      const action: ActionCardButton = {
+        label: 'External Link',
+        href: 'https://example.com',
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+      const { getByText } = render(<ActionCard severity="info" title="Title" action={action} />)
 
       const button = getByText('External Link')
       expect(button).toHaveAttribute('target', '_blank')

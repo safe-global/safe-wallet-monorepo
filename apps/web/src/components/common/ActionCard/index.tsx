@@ -19,7 +19,7 @@ export interface ActionCardProps {
   severity: ActionCardSeverity
   title: string
   content?: ReactNode
-  actions?: ActionCardButton[]
+  action?: ActionCardButton
   testId?: string
 }
 
@@ -62,7 +62,7 @@ export const ActionCard = ({
   severity,
   title,
   content,
-  actions = [],
+  action,
   testId = 'action-card',
 }: ActionCardProps): ReactElement => {
   const config = severityConfig[severity]
@@ -100,39 +100,27 @@ export const ActionCard = ({
         </Box>
       )}
 
-      {/* Actions */}
-      {actions.length > 0 && (
+      {/* Action */}
+      {action && (
         <Box sx={{ paddingLeft: '28px' }}>
-          {actions.map((action, index) => {
-            const buttonProps = {
-              variant: 'text' as const,
-              size: 'small' as const,
-              endIcon: <KeyboardArrowRightRoundedIcon />,
-              sx: ACTION_BUTTON_SX,
-            }
-
-            // Handle href vs onClick separately for proper typing
-            if (action.href) {
-              return (
-                <Button
-                  key={index}
-                  {...buttonProps}
-                  href={action.href}
-                  target={action.target}
-                  rel={action.rel}
-                  component="a"
-                >
-                  {action.label}
-                </Button>
-              )
-            }
-
-            return (
-              <Button key={index} {...buttonProps} onClick={action.onClick}>
-                {action.label}
-              </Button>
-            )
-          })}
+          <Button
+            variant="text"
+            size="small"
+            endIcon={<KeyboardArrowRightRoundedIcon />}
+            sx={ACTION_BUTTON_SX}
+            {...(action.href
+              ? {
+                  href: action.href,
+                  target: action.target,
+                  rel: action.rel,
+                  component: 'a' as const,
+                }
+              : {
+                  onClick: action.onClick,
+                })}
+          >
+            {action.label}
+          </Button>
         </Box>
       )}
     </Paper>

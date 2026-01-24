@@ -46,17 +46,15 @@ export const UnsupportedMastercopyWarning = () => {
       severity="warning"
       title="Base contract is not supported"
       content={message}
-      actions={
+      action={
         canMigrate
-          ? [{ label: 'Migrate', onClick: openUpgradeModal }]
-          : [
-              {
-                label: 'Get CLI',
-                href: CLI_LINK,
-                target: '_blank',
-                rel: 'noopener noreferrer',
-              },
-            ]
+          ? { label: 'Migrate', onClick: openUpgradeModal }
+          : {
+              label: 'Get CLI',
+              href: CLI_LINK,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            }
       }
     />
   )

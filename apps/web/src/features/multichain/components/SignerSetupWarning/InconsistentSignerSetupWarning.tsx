@@ -103,7 +103,7 @@ export const InconsistentSignerSetupWarning = () => {
       severity="warning"
       title="Your account has different signers"
       content={`Your account has different signers on ${chainNamesText}. It could impact cross-chain transaction approvals.`}
-      actions={[{ label: 'Review signers', onClick: handleReviewSigners }]}
+      action={{ label: 'Review signers', onClick: handleReviewSigners }}
     />
   )
 }

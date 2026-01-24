@@ -78,7 +78,7 @@ export function InternalRecoveryProposalCard({
         severity="info"
         title={title}
         content={desc}
-        actions={[{ label: 'Start recovery', onClick: onRecover }]}
+        action={{ label: 'Start recovery', onClick: onRecover }}
         testId="recovery-proposal-card"
       />
     )
