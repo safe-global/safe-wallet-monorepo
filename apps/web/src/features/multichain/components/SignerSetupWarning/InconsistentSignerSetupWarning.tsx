@@ -8,9 +8,16 @@ import { useAllSafesGrouped } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '../../utils'
-import { Box, Typography } from '@mui/material'
+import { Typography, Button, Box } from '@mui/material'
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
 
+/**
+ * ChainIndicatorList component displays a list of chains with their logos and names
+ * Used in address book and other contexts where chain visualization is needed
+ */
 export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   const { configs } = useChains()
 
@@ -32,13 +39,37 @@ export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   )
 }
 
+/**
+ * Formats chain names for display in a natural language list
+ * Examples:
+ * - ["1"] -> "Ethereum"
+ * - ["1", "137"] -> "Ethereum and Polygon"
+ * - ["1", "8453", "137"] -> "Ethereum, Base, and Polygon"
+ */
+const formatChainNames = (chainIds: string[], chains: ReturnType<typeof useChains>['configs']): string => {
+  const chainNames = chainIds
+    .map((chainId) => chains.find((chain) => chain.chainId === chainId)?.chainName)
+    .filter(Boolean) as string[]
+
+  if (chainNames.length === 0) return ''
+  if (chainNames.length === 1) return chainNames[0]
+  if (chainNames.length === 2) return `${chainNames[0]} and ${chainNames[1]}`
+
+  // For 3 or more: "A, B, and C"
+  const allButLast = chainNames.slice(0, -1).join(', ')
+  const last = chainNames[chainNames.length - 1]
+  return `${allButLast}, and ${last}`
+}
+
 export const InconsistentSignerSetupWarning = () => {
+  const router = useRouter()
   const isMultichainSafe = useIsMultichainSafe()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { allMultiChainSafes } = useAllSafesGrouped()
+  const { configs } = useChains()
 
   const multiChainGroupSafes = useMemo(
     () => allMultiChainSafes?.find((account) => sameAddress(safeAddress, account.safes[0].address))?.safes ?? [],
@@ -57,17 +88,43 @@ export const InconsistentSignerSetupWarning = () => {
   const deviatingSetups = getDeviatingSetups(safeSetups, currentChain?.chainId)
   const deviatingChainIds = deviatingSetups.map((setup) => setup?.chainId)
 
+  const chainNamesText = useMemo(() => formatChainNames(deviatingChainIds, configs), [deviatingChainIds, configs])
+
   if (!isMultichainSafe || !deviatingChainIds.length) return
 
+  const handleReviewSigners = () => {
+    router.push({
+      pathname: AppRoutes.settings.setup,
+      query: { safe: router.query.safe },
+    })
+  }
+
   return (
-    <ErrorMessage level="warning" title="Signers are not consistent">
-      <Typography display="inline" mr={1}>
-        Signers are different on these networks of this account:
+    <ErrorMessage level="warning">
+      <Typography>
+        <strong>Your account has different signers</strong> on {chainNamesText}. It could impact cross-chain transaction
+        approvals.
       </Typography>
-      <ChainIndicatorList chainIds={deviatingChainIds} />
-      <Typography display="inline">
-        To manage your account easier and to prevent lose of funds, we recommend keeping the same signers.
-      </Typography>
+      <Button
+        variant="text"
+        size="small"
+        endIcon={<KeyboardArrowRightRoundedIcon />}
+        onClick={handleReviewSigners}
+        sx={{
+          mt: 1,
+          ml: -1,
+          p: 1,
+          minWidth: 'auto',
+          textTransform: 'none',
+          textDecoration: 'none !important',
+          '&:hover': {
+            textDecoration: 'underline !important',
+            backgroundColor: 'transparent',
+          },
+        }}
+      >
+        Review signers
+      </Button>
     </ErrorMessage>
   )
 }

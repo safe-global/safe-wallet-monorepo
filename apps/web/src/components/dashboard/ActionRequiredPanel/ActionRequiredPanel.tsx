@@ -1,0 +1,90 @@
+import { useState, useRef, type ReactElement, type ReactNode } from 'react'
+import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
+
+import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { useWarningCount } from './useWarningCount'
+import css from './styles.module.css'
+
+export interface ActionRequiredPanelProps {
+  children: ReactNode
+}
+
+/**
+ * Collapsible panel that displays warning banners and attention items on the dashboard
+ *
+ * Features:
+ * - Displays a badge with count of active warnings
+ * - Collapsible with chevron icon
+ * - Default state: collapsed
+ * - No state persistence (resets on page load)
+ * - Hidden when no warnings are present
+ *
+ * Usage:
+ * ```tsx
+ * <ActionRequiredPanel>
+ *   <RecoveryHeader />
+ *   <InconsistentSignerSetupWarning />
+ *   <UnsupportedMastercopyWarning />
+ * </ActionRequiredPanel>
+ * ```
+ */
+export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): ReactElement => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const warningCount = useWarningCount(containerRef)
+
+  const toggleExpanded = () => {
+    setIsExpanded((prev) => !prev)
+  }
+
+  // Render children in hidden container for counting, but don't show panel if no warnings
+  if (warningCount === 0) {
+    return (
+      <div ref={containerRef} style={{ display: 'none' }}>
+        {children}
+      </div>
+    )
+  }
+
+  return (
+    <Card
+      data-testid="action-required-panel"
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      component="section"
+    >
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        onClick={toggleExpanded}
+        className={css.header}
+        sx={{ px: 1.5, mb: 1 }}
+      >
+        <Typography fontWeight={700} className={css.headerText}>
+          Attention required <SidebarListItemCounter count={warningCount.toString()} />
+        </Typography>
+
+        <IconButton
+          size="small"
+          aria-label={isExpanded ? 'Collapse attention required panel' : 'Expand attention required panel'}
+          sx={{ ml: 1, pointerEvents: 'none' }}
+        >
+          <KeyboardArrowDownRoundedIcon
+            className={css.chevron}
+            sx={{
+              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease-in-out',
+            }}
+          />
+        </IconButton>
+      </Stack>
+
+      <Collapse in={isExpanded}>
+        <div ref={containerRef} className={css.warningsContainer}>
+          {children}
+        </div>
+      </Collapse>
+    </Card>
+  )
+}
