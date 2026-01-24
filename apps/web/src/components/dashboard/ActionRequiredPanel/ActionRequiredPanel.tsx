@@ -50,7 +50,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
   return (
     <Card
       data-testid="action-required-panel"
-      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 2.5, height: 1, width: 1 }}
       component="section"
     >
       <Stack

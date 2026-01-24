@@ -16,14 +16,20 @@ import { useLayoutEffect, useState, type RefObject } from 'react'
  */
 export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>): number {
   const [count, setCount] = useState(0)
+  const [container, setContainer] = useState<HTMLDivElement | null>(null)
+
+  // Track when containerRef.current changes
+  useLayoutEffect(() => {
+    if (containerRef.current !== container) {
+      setContainer(containerRef.current)
+    }
+  })
 
   useLayoutEffect(() => {
-    if (!containerRef.current) {
+    if (!container) {
       setCount(0)
       return
     }
-
-    const container = containerRef.current
 
     // Count direct children that are actually rendered (excludes null returns)
     const updateCount = () => {
@@ -46,7 +52,7 @@ export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>):
     return () => {
       observer.disconnect()
     }
-  }, [containerRef])
+  }, [container])
 
   return count
 }

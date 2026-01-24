@@ -2,11 +2,13 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@/components/common/ExternalLink'
+import ErrorMessage from '@/components/tx/ErrorMessage'
 import { RecoverAccountFlow } from '@/components/tx-flow/flows'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
@@ -73,44 +75,31 @@ export function InternalRecoveryProposalCard({
 
   if (orientation === 'horizontal') {
     return (
-      <Card data-testid="recovery-proposal-hr" sx={{ py: 3, px: 4 }}>
-        <Grid
-          container
+      <ErrorMessage level="info" title={title}>
+        <Typography>{desc}</Typography>
+        <Button
+          data-testid="start-recovery-btn"
+          variant="text"
+          size="small"
+          endIcon={<KeyboardArrowRightRoundedIcon />}
+          onClick={onRecover}
           sx={{
-            display: 'flex',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 3,
-            flexDirection: { xs: 'column', md: 'row' },
+            mt: 1,
+            ml: -1,
+            p: 1,
+            minWidth: 'auto',
+            textTransform: 'none',
+            textDecoration: 'none !important',
+            cursor: 'pointer',
+            '&:hover': {
+              textDecoration: 'underline !important',
+              backgroundColor: 'transparent',
+            },
           }}
         >
-          <Grid item>{icon}</Grid>
-
-          <Grid item xs>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              {title}
-            </Typography>
-
-            <Typography
-              sx={{
-                color: 'primary.light',
-                mb: 1,
-              }}
-            >
-              {desc}
-            </Typography>
-
-            <Typography>{link}</Typography>
-          </Grid>
-
-          {recoveryButton}
-        </Grid>
-      </Card>
+          Start recovery
+        </Button>
+      </ErrorMessage>
     )
   }
 

@@ -1,12 +1,13 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
+import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded'
 import { useRouter } from 'next/dist/client/router'
 import type { ReactElement } from 'react'
-
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import { Countdown } from '@/components/common/Countdown'
 import RecoveryPending from '@/public/images/common/recovery-pending.svg'
+import ErrorMessage from '@/components/tx/ErrorMessage'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
@@ -60,44 +61,32 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
 
   if (orientation === 'horizontal') {
     return (
-      <Card sx={{ py: 3, px: 4 }}>
-        <Grid
-          container
+      <ErrorMessage level="info" title={title}>
+        <Typography>{desc}</Typography>
+        {!isExecutable && !isExpired && <Countdown seconds={remainingSeconds} />}
+        <Button
+          data-testid="queue-btn"
+          variant="text"
+          size="small"
+          endIcon={<KeyboardArrowRightRoundedIcon />}
+          onClick={onClick}
           sx={{
-            display: 'flex',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 3,
-            flexDirection: { xs: 'column', md: 'row' },
+            mt: 1,
+            ml: -1,
+            p: 1,
+            minWidth: 'auto',
+            textTransform: 'none',
+            textDecoration: 'none !important',
+            cursor: 'pointer',
+            '&:hover': {
+              textDecoration: 'underline !important',
+              backgroundColor: 'transparent',
+            },
           }}
         >
-          <Grid item>{icon}</Grid>
-
-          <Grid item xs>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              {title}
-            </Typography>
-
-            <Typography
-              sx={{
-                color: 'primary.light',
-                mb: 1,
-              }}
-            >
-              {desc}
-            </Typography>
-
-            <Countdown seconds={remainingSeconds} />
-          </Grid>
-
-          <Grid item>{link}</Grid>
-        </Grid>
-      </Card>
+          Go to queue
+        </Button>
+      </ErrorMessage>
     )
   }
 

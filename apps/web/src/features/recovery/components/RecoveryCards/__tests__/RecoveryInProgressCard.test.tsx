@@ -134,10 +134,9 @@ describe('RecoveryInProgressCard', () => {
       ;['days', 'hrs', 'mins'].forEach((unit) => {
         expect(queryByText(unit)).toBeFalsy()
       })
-      expect(queryByText('Go to queue')).toBeFalsy()
 
       expect(queryByText('Account can be recovered')).toBeTruthy()
-      expect(queryByText('Learn more')).toBeTruthy()
+      expect(queryByText('Go to queue')).toBeTruthy()
     })
 
     it('should render the expired state correctly', async () => {
@@ -161,7 +160,7 @@ describe('RecoveryInProgressCard', () => {
           'The pending recovery proposal has expired and needs to be cancelled before a new one can be created.',
         ),
       ).toBeTruthy()
-      expect(queryByText('Learn more')).toBeTruthy()
+      expect(queryByText('Go to queue')).toBeTruthy()
     })
 
     it('should render non-executable recovery state correctly', () => {
@@ -174,14 +173,12 @@ describe('RecoveryInProgressCard', () => {
         <RecoveryInProgressCard orientation="horizontal" recovery={{ validFrom: BigInt(0) } as RecoveryQueueItem} />,
       )
 
-      expect(queryByText('Go to queue')).toBeFalsy()
-
       expect(queryByText('Account recovery in progress')).toBeTruthy()
       expect(queryByText('The recovery process has started. This Account will be ready to recover in:')).toBeTruthy()
       ;['days', 'hrs', 'mins'].forEach((unit) => {
         expect(queryByText(unit)).toBeTruthy()
       })
-      expect(queryByText('Learn more')).toBeTruthy()
+      expect(queryByText('Go to queue')).toBeTruthy()
     })
   })
 })

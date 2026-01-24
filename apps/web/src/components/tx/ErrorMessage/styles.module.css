@@ -1,6 +1,5 @@
 .container {
   padding: var(--space-2);
-  margin: var(--space-2) 0;
   border-radius: 6px;
 }
 
