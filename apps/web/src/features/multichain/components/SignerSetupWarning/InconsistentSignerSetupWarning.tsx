@@ -12,6 +12,7 @@ import { Typography, Box } from '@mui/material'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 
 /**
  * ChainIndicatorList component displays a list of chains with their logos and names
@@ -104,6 +105,7 @@ export const InconsistentSignerSetupWarning = () => {
       title="Your account has different signers"
       content={`Your account has different signers on ${chainNamesText}. It could impact cross-chain transaction approvals.`}
       action={{ label: 'Review signers', onClick: handleReviewSigners }}
+      trackingEvent={ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS}
     />
   )
 }

@@ -9,6 +9,7 @@ import {
   isValidMasterCopy,
 } from '@safe-global/utils/services/contracts/safeContracts'
 import { useBytecodeComparison } from '@/hooks/useBytecodeComparison'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 
 const CLI_LINK = 'https://github.com/5afe/safe-cli'
 
@@ -56,6 +57,7 @@ export const UnsupportedMastercopyWarning = () => {
               rel: 'noopener noreferrer',
             }
       }
+      trackingEvent={canMigrate ? ATTENTION_PANEL_EVENTS.MIGRATE_MASTERCOPY : ATTENTION_PANEL_EVENTS.GET_CLI_MASTERCOPY}
     />
   )
 }

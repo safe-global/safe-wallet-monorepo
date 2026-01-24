@@ -1,6 +1,11 @@
 import { render, fireEvent } from '@/tests/test-utils'
 import { ActionCard } from '.'
 import type { ActionCardButton } from '.'
+import { trackEvent } from '@/services/analytics'
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
 
 describe('ActionCard', () => {
   describe('Severity variants', () => {
@@ -139,6 +144,73 @@ describe('ActionCard', () => {
       const button = getByText('External Link')
       expect(button).toHaveAttribute('target', '_blank')
       expect(button).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+  })
+
+  describe('Analytics tracking', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('should track event when action button is clicked with trackingEvent prop', () => {
+      const onClick = jest.fn()
+      const trackingEvent = { action: 'Test action', category: 'test' }
+      const action: ActionCardButton = { label: 'Click Me', onClick }
+
+      const { getByText } = render(
+        <ActionCard severity="info" title="Title" action={action} trackingEvent={trackingEvent} />,
+      )
+
+      const button = getByText('Click Me')
+      fireEvent.click(button)
+
+      expect(trackEvent).toHaveBeenCalledWith(trackingEvent)
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('should track event for href links when trackingEvent provided', () => {
+      const trackingEvent = { action: 'Test link', category: 'test' }
+      const action: ActionCardButton = { label: 'Link', href: 'https://example.com' }
+
+      const { getByText } = render(
+        <ActionCard severity="info" title="Title" action={action} trackingEvent={trackingEvent} />,
+      )
+
+      const link = getByText('Link')
+      fireEvent.click(link)
+
+      expect(trackEvent).toHaveBeenCalledWith(trackingEvent)
+    })
+
+    it('should not track when trackingEvent is not provided', () => {
+      const onClick = jest.fn()
+      const action: ActionCardButton = { label: 'Click Me', onClick }
+
+      const { getByText } = render(<ActionCard severity="info" title="Title" action={action} />)
+
+      const button = getByText('Click Me')
+      fireEvent.click(button)
+
+      expect(trackEvent).not.toHaveBeenCalled()
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('should track event before calling onClick handler', () => {
+      const callOrder: string[] = []
+      const onClick = jest.fn(() => callOrder.push('onClick'))
+      const trackingEvent = { action: 'Test action', category: 'test' }
+      const action: ActionCardButton = { label: 'Click Me', onClick }
+
+      ;(trackEvent as jest.Mock).mockImplementation(() => callOrder.push('trackEvent'))
+
+      const { getByText } = render(
+        <ActionCard severity="info" title="Title" action={action} trackingEvent={trackingEvent} />,
+      )
+
+      const button = getByText('Click Me')
+      fireEvent.click(button)
+
+      expect(callOrder).toEqual(['trackEvent', 'onClick'])
     })
   })
 })

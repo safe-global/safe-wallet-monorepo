@@ -1,6 +1,7 @@
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
@@ -44,7 +45,10 @@ export function InternalRecoveryProposalCard({
   const onRecover = async () => {
     onClose?.()
     setTxFlow(<RecoverAccountFlow />)
-    trackEvent({ ...RECOVERY_EVENTS.START_RECOVERY, label: orientation === 'vertical' ? 'pop-up' : 'dashboard' })
+    // Only track for vertical orientation; horizontal ActionCard handles its own tracking
+    if (orientation === 'vertical') {
+      trackEvent({ ...ATTENTION_PANEL_EVENTS.START_RECOVERY, label: 'pop-up' })
+    }
   }
 
   const icon = (
@@ -79,6 +83,7 @@ export function InternalRecoveryProposalCard({
         title={title}
         content={desc}
         action={{ label: 'Start recovery', onClick: onRecover }}
+        trackingEvent={ATTENTION_PANEL_EVENTS.START_RECOVERY}
         testId="recovery-proposal-card"
       />
     )

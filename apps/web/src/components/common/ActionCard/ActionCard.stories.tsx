@@ -82,3 +82,19 @@ export const LongContent: Story = {
     action: { label: 'Migrate', onClick: () => alert('Migrate clicked') },
   },
 }
+
+export const WithTracking: Story = {
+  args: {
+    severity: 'info',
+    title: 'Card with Analytics',
+    content: 'This card tracks button clicks to Mixpanel. Check the console for tracking events.',
+    action: {
+      label: 'Track Me',
+      onClick: () => console.log('Button clicked!'),
+    },
+    trackingEvent: {
+      action: 'Example tracked action',
+      category: 'storybook',
+    },
+  },
+}

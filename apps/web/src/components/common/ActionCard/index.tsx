@@ -4,6 +4,8 @@ import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRigh
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
+import { trackEvent } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
 
 export type ActionCardSeverity = 'info' | 'warning' | 'critical'
 
@@ -20,6 +22,7 @@ export interface ActionCardProps {
   title: string
   content?: ReactNode
   action?: ActionCardButton
+  trackingEvent?: AnalyticsEvent
   testId?: string
 }
 
@@ -63,6 +66,7 @@ export const ActionCard = ({
   title,
   content,
   action,
+  trackingEvent,
   testId = 'action-card',
 }: ActionCardProps): ReactElement => {
   const config = severityConfig[severity]
@@ -114,9 +118,15 @@ export const ActionCard = ({
                   target: action.target,
                   rel: action.rel,
                   component: 'a' as const,
+                  onClick: trackingEvent ? () => trackEvent(trackingEvent) : undefined,
                 }
               : {
-                  onClick: action.onClick,
+                  onClick: () => {
+                    if (trackingEvent) {
+                      trackEvent(trackingEvent)
+                    }
+                    action.onClick?.()
+                  },
                 })}
           >
             {action.label}

@@ -1,5 +1,6 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
 import { useRouter } from 'next/dist/client/router'
 import type { ReactElement } from 'react'
@@ -70,6 +71,7 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
           </>
         }
         action={{ label: 'Go to queue', onClick }}
+        trackingEvent={ATTENTION_PANEL_EVENTS.CHECK_RECOVERY_PROPOSAL}
         testId="recovery-in-progress-card"
       />
     )
