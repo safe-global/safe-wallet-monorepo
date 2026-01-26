@@ -22,7 +22,7 @@ export const queueAssessmentsSlice = createSlice({
       state.assessments[payload.safeTxHash] = payload.result
     },
     setBatchAssessments: (state, { payload }: PayloadAction<Record<`0x${string}`, ThreatAnalysisResults | null>>) => {
-      Object.assign(state.assessments, payload)
+      state.assessments = { ...state.assessments, ...payload }
     },
     clearAssessments: (state) => {
       state.assessments = {}
