@@ -1,5 +1,5 @@
 import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useEffect, useState, useCallback, useRef } from 'react'
 import { Box } from '@mui/material'
 import TxList from '@/components/transactions/TxList'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -30,17 +30,29 @@ const TxPage = ({
   useTxns,
   onNextPage,
   isFirstPage,
+  onPageLoaded,
 }: {
   pageUrl: string
   useTxns: typeof useTxHistory | typeof useTxQueue
   onNextPage?: (pageUrl: string) => void
   isFirstPage: boolean
+  onPageLoaded: (page: QueuedItemPage | undefined) => void
 }): ReactElement => {
   const { page, error, loading } = useTxns(pageUrl)
   const [filter] = useTxFilter()
   const isQueue = useTxns === useTxQueue
   const recoveryQueue = useRecoveryQueue()
   const hasPending = useHasPendingTxs()
+
+  const lastPageUrlRef = useRef<string | undefined>(undefined)
+
+  // Notify parent when page loads (only when page actually changes and it's a queue page)
+  useEffect(() => {
+    if (page && isQueue && pageUrl !== lastPageUrlRef.current) {
+      lastPageUrlRef.current = pageUrl
+      onPageLoaded(page as QueuedItemPage)
+    }
+  }, [page, pageUrl, onPageLoaded, isQueue])
 
   return (
     <>
@@ -68,10 +80,17 @@ const TxPage = ({
   )
 }
 
-const PaginatedTxns = ({ useTxns }: { useTxns: typeof useTxHistory | typeof useTxQueue }): ReactElement => {
+const PaginatedTxns = ({
+  useTxns,
+  onPagesChange,
+}: {
+  useTxns: typeof useTxHistory | typeof useTxQueue
+  onPagesChange?: (pages: (QueuedItemPage | undefined)[]) => void
+}): ReactElement => {
   const [pages, setPages] = useState<string[]>([''])
   const [filter] = useTxFilter()
   const { safeAddress, safe } = useSafeInfo()
+  const [loadedPages, setLoadedPages] = useState<Map<string, QueuedItemPage | undefined>>(new Map())
 
   // Reset the pages when the Safe Account or filter changes
   useEffect(() => {
@@ -83,6 +102,29 @@ const PaginatedTxns = ({ useTxns }: { useTxns: typeof useTxHistory | typeof useT
     setPages((prev) => prev.concat(pageUrl))
   }
 
+  // Handle page loaded callback - memoized to prevent infinite loops
+  const handlePageLoaded = useCallback(
+    (pageUrl: string) => (page: QueuedItemPage | undefined) => {
+      setLoadedPages((prev) => {
+        const currentPage = prev.get(pageUrl)
+        // Only update if the page actually changed
+        if (currentPage === page) {
+          return prev
+        }
+        const updated = new Map(prev)
+        updated.set(pageUrl, page)
+        return updated
+      })
+    },
+    [],
+  )
+
+  // Notify parent when pages change
+  useEffect(() => {
+    const pageUrls = pages.map((url) => loadedPages.get(url))
+    onPagesChange?.(pageUrls)
+  }, [pages, loadedPages, onPagesChange])
+
   return (
     <Box position="relative">
       {pages.map((pageUrl, index) => (
@@ -92,6 +134,7 @@ const PaginatedTxns = ({ useTxns }: { useTxns: typeof useTxHistory | typeof useT
           useTxns={useTxns}
           isFirstPage={index === 0}
           onNextPage={index === pages.length - 1 ? onNextPage : undefined}
+          onPageLoaded={handlePageLoaded(pageUrl)}
         />
       ))}
     </Box>

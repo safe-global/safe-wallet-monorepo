@@ -25,7 +25,7 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/services'
 import {
   getSafeContractDeployment,
   getCanonicalOrFirstAddress,
@@ -36,7 +36,7 @@ import {
   Safe_to_l2_setup__factory,
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { hasMultiChainCreationFeatures } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 export type SafeCreationProps = {

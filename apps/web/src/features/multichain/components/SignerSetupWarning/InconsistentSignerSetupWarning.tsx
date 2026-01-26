@@ -7,7 +7,7 @@ import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery
 import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
-import { getDeviatingSetups, getSafeSetups } from '@/features/multichain/utils/utils'
+import { getDeviatingSetups, getSafeSetups } from '../../utils'
 import { Box, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 

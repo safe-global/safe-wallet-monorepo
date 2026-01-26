@@ -1,4 +1,4 @@
-import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
+import { CounterfactualStatusButton } from '@/features/counterfactual/components'
 import { type ReactElement } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'

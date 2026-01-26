@@ -3,7 +3,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
+import { predictAddressBasedOnReplayData } from '@/features/multichain'
 
 export const getAvailableSaltNonce = async (
   customRpcs: {

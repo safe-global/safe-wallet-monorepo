@@ -4,14 +4,21 @@ import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernative
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
-export const HnLoginCard = (): ReactElement => {
+export const HnLoginCard = (): ReactElement | null => {
+  const isSafeOwner = useIsSafeOwner()
   const { isAuthenticated, isTokenExpired, initiateLogin } = useHypernativeOAuth()
 
   const handleLogin = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     e.stopPropagation()
     initiateLogin()
+  }
+
+  // Only show login card if the connected wallet is a signer of the Safe
+  if (!isSafeOwner) {
+    return null
   }
 
   // Show login card if user is not authenticated or token is expired
@@ -24,7 +31,15 @@ export const HnLoginCard = (): ReactElement => {
         variant="standard"
         severity="warning"
         icon={<SvgIcon component={AlertIcon} fontSize="small" inheritViewBox color="warning" />}
-        sx={{ px: 2, py: 0, alignItems: 'center', lineHeight: 'initial', '& .MuiAlert-action': { pt: 0, mr: 0 } }}
+        sx={{
+          px: 2,
+          py: 0,
+          alignItems: 'center',
+          lineHeight: 'initial',
+          minWidth: '303px',
+          '& .MuiAlert-icon': { mr: 1 },
+          '& .MuiAlert-action': { pt: 0, pl: 1, mr: 0 },
+        }}
         action={
           <ExternalLink href="#" onClick={handleLogin}>
             Log in
@@ -37,7 +52,7 @@ export const HnLoginCard = (): ReactElement => {
   }
 
   return (
-    <Stack direction="row" alignItems="center" gap={0.5} px={2}>
+    <Stack direction="row" alignItems="center" gap={0.5} pr={2} py={1}>
       <SvgIcon component={HypernativeIcon} fontSize="small" inheritViewBox color="primary" />
       <Typography variant="body2" color="text.secondary" letterSpacing={1}>
         Logged in to Hypernative

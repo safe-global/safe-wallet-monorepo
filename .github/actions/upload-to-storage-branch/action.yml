@@ -1,0 +1,134 @@
+name: 'Upload to Storage Branch'
+description: 'Uploads files to a separate storage branch (creates orphan branch if needed)'
+
+inputs:
+  storage_branch:
+    description: 'Name of the storage branch'
+    required: true
+  source_dir:
+    description: 'Source directory containing files to upload'
+    required: true
+  target_dir:
+    description: 'Target directory within the storage branch (optional, defaults to root)'
+    required: false
+    default: ''
+  file_pattern:
+    description: 'Glob pattern for files to copy (e.g., "*.png")'
+    required: false
+    default: '*'
+  commit_message:
+    description: 'Commit message for the upload'
+    required: true
+  readme_title:
+    description: 'Title for the README.md if creating new branch'
+    required: false
+    default: 'Storage Branch'
+  github_token:
+    description: 'GitHub token for authentication'
+    required: true
+
+outputs:
+  uploaded:
+    description: 'Whether files were uploaded (true/false)'
+    value: ${{ steps.upload.outputs.uploaded }}
+  files_count:
+    description: 'Number of files uploaded'
+    value: ${{ steps.upload.outputs.files_count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Upload to storage branch
+      id: upload
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        STORAGE_BRANCH: ${{ inputs.storage_branch }}
+        SOURCE_DIR: ${{ inputs.source_dir }}
+        TARGET_DIR: ${{ inputs.target_dir }}
+        FILE_PATTERN: ${{ inputs.file_pattern }}
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        README_TITLE: ${{ inputs.readme_title }}
+      run: |
+        # Check if source directory exists and has files
+        if [ ! -d "$SOURCE_DIR" ]; then
+          echo "Source directory does not exist: $SOURCE_DIR"
+          echo "uploaded=false" >> $GITHUB_OUTPUT
+          echo "files_count=0" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        FILES_COUNT=$(find "$SOURCE_DIR" -maxdepth 1 -name "$FILE_PATTERN" -type f 2>/dev/null | wc -l)
+        if [ "$FILES_COUNT" -eq 0 ]; then
+          echo "No files matching pattern '$FILE_PATTERN' in $SOURCE_DIR"
+          echo "uploaded=false" >> $GITHUB_OUTPUT
+          echo "files_count=0" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        echo "Found $FILES_COUNT file(s) to upload"
+
+        # Configure git
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+        cd /tmp
+        rm -rf storage-upload
+
+        # Clone or create storage branch
+        if git ls-remote --heads origin "$STORAGE_BRANCH" | grep -q "$STORAGE_BRANCH"; then
+          echo "Cloning existing storage branch: $STORAGE_BRANCH"
+          git clone --depth 1 --branch "$STORAGE_BRANCH" \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" storage-upload
+          cd storage-upload
+        else
+          echo "Creating new orphan storage branch: $STORAGE_BRANCH"
+          git clone --depth 1 \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" storage-upload
+          cd storage-upload
+          git checkout --orphan "$STORAGE_BRANCH"
+          git rm -rf . 2>/dev/null || true
+          echo "# $README_TITLE" > README.md
+          git add README.md
+          git commit -m "Initialize $STORAGE_BRANCH branch"
+        fi
+
+        # Determine target path
+        if [ -n "$TARGET_DIR" ]; then
+          mkdir -p "$TARGET_DIR"
+          DEST_PATH="$TARGET_DIR"
+        else
+          DEST_PATH="."
+        fi
+
+        # Copy files
+        cp "$GITHUB_WORKSPACE/$SOURCE_DIR"/$FILE_PATTERN "$DEST_PATH/" 2>/dev/null || true
+
+        # Commit and push with retry logic for concurrent runs
+        git add .
+        if git commit -m "$COMMIT_MESSAGE"; then
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if git push origin "$STORAGE_BRANCH"; then
+              echo "Successfully uploaded to $STORAGE_BRANCH"
+              echo "uploaded=true" >> $GITHUB_OUTPUT
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Push failed, pulling latest changes and retrying ($RETRY_COUNT/$MAX_RETRIES)..."
+                git pull --rebase origin "$STORAGE_BRANCH"
+              else
+                echo "Push failed after $MAX_RETRIES attempts"
+                echo "uploaded=false" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+          done
+        else
+          echo "No changes to commit"
+          echo "uploaded=false" >> $GITHUB_OUTPUT
+        fi
+
+        echo "files_count=$FILES_COUNT" >> $GITHUB_OUTPUT

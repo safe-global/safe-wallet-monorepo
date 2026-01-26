@@ -6,8 +6,8 @@ import StatusMessage from '@/components/new-safe/create/steps/StatusStep/StatusM
 import useUndeployedSafe from '@/components/new-safe/create/steps/StatusStep/useUndeployedSafe'
 import { lightPalette } from '@safe-global/theme'
 import { AppRoutes } from '@/config/routes'
-import { safeCreationPendingStatuses } from '@/features/counterfactual/hooks/usePendingSafeStatuses'
-import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
+import { safeCreationPendingStatuses } from '@/features/counterfactual'
+import { SafeCreationEvent, safeCreationSubscribe, isPredictedSafeProps } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
 import Rocket from '@/public/images/common/rocket.svg'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
@@ -16,7 +16,6 @@ import { Alert, AlertTitle, Box, Button, Paper, Stack, SvgIcon, Typography } fro
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { isPredictedSafeProps } from '@/features/counterfactual/utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const SPEED_UP_THRESHOLD_IN_SECONDS = 15

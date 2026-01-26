@@ -9,7 +9,7 @@ exports[`./index.stories Default 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-9rbzef-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a204je-MuiChip-root"
     >
       <span
         class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"

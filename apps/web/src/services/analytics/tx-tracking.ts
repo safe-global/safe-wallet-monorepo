@@ -13,7 +13,7 @@ import {
   isNestedConfirmationTxInfo,
   isAnyEarnTxInfo,
 } from '@/utils/transaction-guards'
-import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
+import { BRIDGE_WIDGET_URL } from '@/features/bridge'
 import { SWAP_WIDGET_URL } from '@/features/swap/components/FallbackSwapWidget'
 export const getTransactionTrackingType = (
   details: TransactionDetails | undefined,

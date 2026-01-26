@@ -1,4 +1,4 @@
-import CheckBalance from '@/features/counterfactual/CheckBalance'
+import { CheckBalance } from '@/features/counterfactual/components'
 import React, { type ReactElement } from 'react'
 import { Box, Card, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import classNames from 'classnames'

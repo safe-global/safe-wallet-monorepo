@@ -27,7 +27,7 @@ describe('Nested safes review step tests', () => {
     nsafes.clickOnAddNextBtn()
     nsafes.actionsExist(nsafes.fundAssetsActions)
     createTx.clickOnAdvancedDetails()
-    createTx.verifytxAccordionDetails(createTx.MultisendData)
+    createTx.verifytxAccordionDetailsScroll(createTx.MultisendData)
   })
 
   it('Verify middle step without Fund new assets in create nestedsafe tx flow', () => {

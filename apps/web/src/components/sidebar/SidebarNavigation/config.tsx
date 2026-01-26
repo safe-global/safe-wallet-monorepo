@@ -12,7 +12,6 @@ import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
 import { SvgIcon } from '@mui/material'
-import { Chip } from '@/components/common/Chip'
 
 export type NavItem = { label: string; icon?: ReactElement; href: string; tag?: ReactElement; disabled?: boolean }
 
@@ -50,24 +49,7 @@ export const transactionNavItems = [
 
 export const balancesNavItems = [
   { label: 'Tokens', href: AppRoutes.balances.index },
-  {
-    label: 'Positions',
-    href: AppRoutes.balances.positions,
-    tag: (
-      <Chip
-        label="Beta"
-        sx={{
-          backgroundColor: 'background.lightGrey',
-          letterSpacing: '0.4px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontStyle: 'regular',
-          textTransform: 'none',
-          fontWeight: '400 !important',
-        }}
-      />
-    ),
-  },
+  { label: 'Positions', href: AppRoutes.balances.positions },
   { label: 'NFTs', href: AppRoutes.balances.nfts },
 ]
 

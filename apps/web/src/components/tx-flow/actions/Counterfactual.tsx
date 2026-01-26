@@ -1,8 +1,8 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { CounterfactualForm } from '@/features/counterfactual/components'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {

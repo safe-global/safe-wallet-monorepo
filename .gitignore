@@ -103,3 +103,7 @@ apps/web/src/types/contracts/*
 
 # expo-plugins/notifications-service-ios
 /expo-plugins/notification-service-ios/dist/*
+
+
+# tx-builder
+apps/tx-builder/build/*

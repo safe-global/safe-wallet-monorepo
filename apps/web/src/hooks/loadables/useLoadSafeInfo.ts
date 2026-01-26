@@ -1,5 +1,5 @@
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { getUndeployedSafeInfo } from '@/features/counterfactual/utils'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
+import { getUndeployedSafeInfo } from '@/features/counterfactual/services'
 import { useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'

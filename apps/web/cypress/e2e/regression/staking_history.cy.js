@@ -8,7 +8,8 @@ const safe = 'eth:0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B'
 const historyData = staking_data.type.history
 
 describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
-  it('Verify Claim tx shows amount received', () => {
+  //Skipped until we find out why it’s flaky on the CGW side.
+  it.skip('Verify Claim tx shows amount received', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.claim)
     main.waitForElementByTextInContainer(create_tx.transactionItem, historyData.claim)
     staking.checkTxHeaderData([historyData.ETH_3205184, historyData.claim])
