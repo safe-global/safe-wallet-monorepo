@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -7,6 +7,8 @@ import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { useAuthToken } from './useAuthToken'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useAppSelector, useAppDispatch } from '@/store'
+import { selectAssessmentsByHashes, setBatchAssessments } from '../store/queueAssessmentsSlice'
 
 type UseQueueBatchAssessmentsProps = {
   pages: (QueuedItemPage | undefined)[]
@@ -29,6 +31,7 @@ export function useQueueBatchAssessments({
 }: UseQueueBatchAssessmentsProps): Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> {
   const { safeAddress } = useSafeInfo()
   const [{ token: authToken }] = useAuthToken()
+  const dispatch = useAppDispatch()
 
   // Extract all safeTxHashes from all queue pages
   const safeTxHashes = useMemo(() => {
@@ -70,13 +73,65 @@ export function useQueueBatchAssessments({
     return hashes
   }, [pages, skip])
 
-  // Fetch batch assessments using the existing hook
-  const assessments = useThreatAnalysisHypernativeBatch({
-    safeTxHashes,
+  // Get cached assessments from Redux
+  const cachedAssessments = useAppSelector((state) => selectAssessmentsByHashes(state, safeTxHashes))
+
+  // Determine which hashes need to be fetched (not in cache)
+  const hashesToFetch = useMemo(
+    () => safeTxHashes.filter((hash) => cachedAssessments[hash] === undefined),
+    [safeTxHashes, cachedAssessments],
+  )
+
+  // Fetch batch assessments for hashes not in cache
+  const fetchedAssessments = useThreatAnalysisHypernativeBatch({
+    safeTxHashes: hashesToFetch,
     safeAddress: safeAddress as `0x${string}`,
     authToken,
-    skip: skip || safeTxHashes.length === 0,
+    skip,
   })
+
+  // Store fetched results in Redux when they become available
+  useEffect(() => {
+    const resultsToStore: Record<`0x${string}`, ThreatAnalysisResults | null> = {}
+
+    Object.entries(fetchedAssessments).forEach(([hash, result]) => {
+      const [data, error, loading] = result
+
+      if (!loading) {
+        resultsToStore[hash as `0x${string}`] = error ? null : (data ?? null)
+      }
+    })
+
+    if (Object.keys(resultsToStore).length > 0) {
+      dispatch(setBatchAssessments(resultsToStore))
+    }
+  }, [fetchedAssessments, dispatch])
+
+  // Merge cached and fetched assessments
+  const assessments = useMemo(() => {
+    const merged: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
+
+    // Ensure all safeTxHashes are in the result
+    safeTxHashes.forEach((hash) => {
+      const cached = cachedAssessments[hash]
+
+      // Check if we have a fetched assessment for this hash (takes precedence)
+      if (fetchedAssessments[hash]) {
+        merged[hash] = fetchedAssessments[hash]
+      } else if (cachedAssessments.hasOwnProperty(hash)) {
+        // Use cached assessment
+        if (cached === null) {
+          merged[hash] = [undefined, new Error('Assessment failed'), false]
+        } else {
+          merged[hash] = [cached, undefined, false]
+        }
+      }
+      // If hash is not cached and not fetched, it will be missing from merged
+      // This is expected if fetching hasn't started yet
+    })
+
+    return merged
+  }, [safeTxHashes, cachedAssessments, fetchedAssessments])
 
   return assessments
 }

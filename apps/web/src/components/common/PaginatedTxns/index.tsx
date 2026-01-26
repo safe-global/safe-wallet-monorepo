@@ -131,7 +131,7 @@ const PaginatedTxns = ({
       onPagesChange?.(pageItems)
       lastPageItemsRef.current = pageItems
     }
-  }, [pages, lastPageItemsRef.current, loadedPages, onPagesChange])
+  }, [pages, loadedPages, onPagesChange])
 
   return (
     <Box position="relative">

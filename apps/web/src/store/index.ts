@@ -54,6 +54,7 @@ const rootReducer = combineReducers({
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
+  [slices.queueAssessmentsSlice.name]: slices.queueAssessmentsSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,

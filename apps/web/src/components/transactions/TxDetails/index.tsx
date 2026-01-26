@@ -107,14 +107,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const moduleAddressInfo = moduleAddress ? txDetails.txData?.addressInfoIndex?.[moduleAddress.value] : undefined
 
   // Hypernative assessment for banner
-  const { safe } = useSafeInfo()
-  const chainId = safe.chainId
   const assessment = useQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
-  const showAssessmentBanner = useShowHypernativeAssessment({
-    isQueue,
-    safeTxHash,
-  })
+  const showAssessmentBanner = useShowHypernativeAssessment() && isQueue
 
   return (
     <>
@@ -207,7 +202,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             proposer={proposer}
           />
 
-          {showAssessmentBanner && safeTxHash && chainId && (
+          {showAssessmentBanner && safeTxHash && (
             <HnQueueAssessmentBanner
               safeTxHash={safeTxHash}
               assessment={assessment}

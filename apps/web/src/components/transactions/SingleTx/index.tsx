@@ -1,7 +1,8 @@
-import { LabelValue } from '@safe-global/store/gateway/types'
+import { ConflictType, LabelValue, TransactionListItemType } from '@safe-global/store/gateway/types'
 import type {
   LabelQueuedItem,
   ModuleTransaction,
+  QueuedItemPage,
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -19,6 +20,7 @@ import GroupLabel from '../GroupLabel'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { useSetQueuePages } from '@/features/hypernative/hooks/useSetQueuePages'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: ModuleTransaction = makeTxFromDetails(txDetails)
@@ -43,6 +45,7 @@ const SingleTx = () => {
   const { id } = router.query
   const transactionId = Array.isArray(id) ? id[0] : id
   const { safe, safeAddress } = useSafeInfo()
+  const setPages = useSetQueuePages()
 
   const {
     data: txDetails,
@@ -67,6 +70,31 @@ const SingleTx = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safe.txHistoryTag, safe.txQueuedTag, safeAddress])
+
+  useEffect(() => {
+    if (setPages && txDetails) {
+      // Create a single page with the transaction
+      const page: QueuedItemPage = {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            type: TransactionListItemType.TRANSACTION,
+            transaction: {
+              txInfo: txDetails.txInfo,
+              id: txDetails.txId,
+              timestamp: txDetails.executedAt ?? Date.now(),
+              txStatus: txDetails.txStatus,
+              txHash: txDetails.txHash,
+            },
+            conflictType: ConflictType.NONE,
+          },
+        ],
+      }
+      setPages([page], 'single-tx')
+    }
+  }, [setPages, txDetails])
 
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
     txDetailsError = new Error('Transaction with this id was not found in this Safe Account')

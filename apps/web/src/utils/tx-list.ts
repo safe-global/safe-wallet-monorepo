@@ -144,6 +144,9 @@ export const getLatestTransactions = (list: QueuedItemPage['results'] = []): Tra
   )
 }
 
-export const isSamePage = (pageA: QueuedItemPage | TransactionItemPage, pageB: QueuedItemPage | TransactionItemPage): boolean => {
+export const isSamePage = (
+  pageA: QueuedItemPage | TransactionItemPage,
+  pageB: QueuedItemPage | TransactionItemPage,
+): boolean => {
   return pageA.count === pageB.count && pageA.next === pageB.next
 }

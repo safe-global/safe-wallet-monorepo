@@ -5,10 +5,11 @@ import {
   type QueueAssessmentContextValue,
 } from '../../contexts/QueueAssessmentContext'
 import { useQueueBatchAssessments } from '../../hooks/useQueueBatchAssessments'
-import { useIsHypernativeEligible } from '../../hooks/useIsHypernativeEligible'
-import { useIsHypernativeQueueScanFeature } from '../../hooks/useIsHypernativeQueueScanFeature'
 import { isSamePage } from '@/utils/tx-list'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useAppDispatch } from '@/store'
+import { clearAssessments } from '../../store/queueAssessmentsSlice'
+import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
 
 interface QueueAssessmentProviderProps {
   children: ReactNode
@@ -19,19 +20,18 @@ interface QueueAssessmentProviderProps {
  * and provides them through context to child components
  */
 export const QueueAssessmentProvider = ({ children }: QueueAssessmentProviderProps): ReactElement => {
-  const { isHypernativeEligible, loading: hnEligibilityLoading } = useIsHypernativeEligible()
-  const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
   const { safe, safeAddress } = useSafeInfo()
-
+  const dispatch = useAppDispatch()
   const pagesSourcesRef = useRef<Map<string | symbol, QueuedItemPage[]>>(new Map())
   const [pages, setPages] = useState<QueuedItemPage[]>([])
+  const showAssessment = useShowHypernativeAssessment()
 
-  const skip = !isHypernativeQueueScanEnabled || !isHypernativeEligible || hnEligibilityLoading
-
-  // Reset the pages when the Safe Account or chain changes
+  // Reset the pages and clear assessments cache when the Safe Account or chain changes
   useEffect(() => {
     pagesSourcesRef.current = new Map()
-  }, [safe.chainId, safeAddress])
+    setPages([])
+    dispatch(clearAssessments())
+  }, [safe.chainId, safeAddress, dispatch])
 
   const updatePages = useCallback(() => {
     const allPages: QueuedItemPage[] = []
@@ -42,14 +42,10 @@ export const QueueAssessmentProvider = ({ children }: QueueAssessmentProviderPro
     if (allPages.length !== pages.length || allPages.some((page, index) => !isSamePage(page, pages[index]))) {
       setPages(allPages)
     }
-  }, [pages, skip])
+  }, [pages])
 
   const setPagesCallback = useCallback(
     (newPages: QueuedItemPage[], sourceKey?: string | symbol) => {
-      if (skip) {
-        return
-      }
-
       const key = sourceKey || Symbol('pages-source')
       pagesSourcesRef.current.set(key, newPages)
       updatePages()
@@ -60,7 +56,7 @@ export const QueueAssessmentProvider = ({ children }: QueueAssessmentProviderPro
   // Fetch batch assessments for all pages
   const assessments = useQueueBatchAssessments({
     pages,
-    skip,
+    skip: !showAssessment,
   })
 
   // Determine if any assessment is currently loading

@@ -1,4 +1,4 @@
-import { useEffect, useId, useCallback } from 'react'
+import { useId, useCallback } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import PaginatedTxns from './index'
 import { useSetQueuePages } from '@/features/hypernative/hooks/useSetQueuePages'
@@ -25,14 +25,6 @@ const PaginatedTxnsWithAssessment = ({ useTxns }: PaginatedTxnsWithAssessmentPro
     },
     [setPages, sourceId],
   )
-
-  useEffect(() => {
-    return () => {
-      if (setPages) {
-        setPages([], sourceId)
-      }
-    }
-  }, [setPages, sourceId])
 
   return <PaginatedTxns useTxns={useTxns} onPagesChange={handlePagesChange} />
 }

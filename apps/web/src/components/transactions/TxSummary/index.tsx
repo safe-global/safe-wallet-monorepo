@@ -48,10 +48,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
   const assessment = useQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
-  const showAssessment = useShowHypernativeAssessment({
-    isQueue,
-    safeTxHash,
-  })
+  const showAssessment = useShowHypernativeAssessment() && isQueue
 
   return (
     <Box
@@ -107,9 +104,9 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         </Box>
       )}
 
-      {showAssessment && (
+      {showAssessment && safeTxHash && (
         <Box gridArea="assessment" className={css.assessment}>
-          <HnQueueAssessment safeTxHash={safeTxHash!} assessment={assessment} isAuthenticated={isAuthenticated} />
+          <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
         </Box>
       )}
 

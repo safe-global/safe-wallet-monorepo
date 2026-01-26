@@ -42,36 +42,9 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(true)
-    })
-  })
-
-  describe('when isQueue is false', () => {
-    it('should return false', () => {
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue(defaultMocks.useSafeInfo)
-      jest
-        .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
-        .mockReturnValue(defaultMocks.useIsHypernativeEligible)
-      jest
-        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
-        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
-      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
-
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: false,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
-
-      expect(result.current).toBe(false)
     })
   })
 
@@ -84,12 +57,7 @@ describe('useShowHypernativeAssessment', () => {
       jest.spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature').mockReturnValue(false)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
@@ -107,12 +75,7 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
@@ -130,56 +93,7 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
-
-      expect(result.current).toBe(false)
-    })
-  })
-
-  describe('when safeTxHash is undefined', () => {
-    it('should return false', () => {
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue(defaultMocks.useSafeInfo)
-      jest
-        .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
-        .mockReturnValue(defaultMocks.useIsHypernativeEligible)
-      jest
-        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
-        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
-      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
-
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: undefined,
-        }),
-      )
-
-      expect(result.current).toBe(false)
-    })
-  })
-
-  describe('when safeTxHash is empty string', () => {
-    it('should return false', () => {
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue(defaultMocks.useSafeInfo)
-      jest
-        .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
-        .mockReturnValue(defaultMocks.useIsHypernativeEligible)
-      jest
-        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
-        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
-      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
-
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
@@ -200,12 +114,7 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
@@ -222,20 +131,19 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(false)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
   })
 
   describe('when multiple conditions are not met', () => {
-    it('should return false when isQueue is false and isHypernativeEligible is false', () => {
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue(defaultMocks.useSafeInfo)
+    it('should return false when isHypernativeEligible is false and chainId is empty', () => {
+      const safeWithoutChainId = extendedSafeInfoBuilder().with({ chainId: '' }).build()
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        ...defaultMocks.useSafeInfo,
+        safe: safeWithoutChainId,
+      })
       jest.spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible').mockReturnValue({
         ...defaultMocks.useIsHypernativeEligible,
         isHypernativeEligible: false,
@@ -245,36 +153,7 @@ describe('useShowHypernativeAssessment', () => {
         .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
       jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
 
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: false,
-          safeTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-        }),
-      )
-
-      expect(result.current).toBe(false)
-    })
-
-    it('should return false when safeTxHash is undefined and chainId is empty', () => {
-      const safeWithoutChainId = extendedSafeInfoBuilder().with({ chainId: '' }).build()
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
-        ...defaultMocks.useSafeInfo,
-        safe: safeWithoutChainId,
-      })
-      jest
-        .spyOn(useIsHypernativeEligibleHook, 'useIsHypernativeEligible')
-        .mockReturnValue(defaultMocks.useIsHypernativeEligible)
-      jest
-        .spyOn(useIsHypernativeQueueScanFeatureHook, 'useIsHypernativeQueueScanFeature')
-        .mockReturnValue(defaultMocks.useIsHypernativeQueueScanFeature)
-      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(defaultMocks.useIsSafeOwner)
-
-      const { result } = renderHook(() =>
-        useShowHypernativeAssessment({
-          isQueue: true,
-          safeTxHash: undefined,
-        }),
-      )
+      const { result } = renderHook(() => useShowHypernativeAssessment())
 
       expect(result.current).toBe(false)
     })
