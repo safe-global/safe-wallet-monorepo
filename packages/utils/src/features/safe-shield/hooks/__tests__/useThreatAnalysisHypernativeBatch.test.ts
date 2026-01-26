@@ -140,7 +140,7 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       })
     })
 
-    it('should return error when authToken is missing', async () => {
+    it('should return empty results when authToken is missing', async () => {
       const hashes = [faker.string.hexadecimal({ length: 64 }) as `0x${string}`]
 
       mockBuildHypernativeBatchRequestData.mockReturnValue({
@@ -155,8 +155,8 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       )
 
       await waitFor(() => {
-        expect(result.current[hashes[0]]).toEqual([undefined, expect.any(Error), false])
-        expect((result.current[hashes[0]][1] as Error).message).toBe('authToken is required')
+        expect(result.current[hashes[0]]).toBeUndefined()
+        expect(mockTriggerBatchAssessment).not.toHaveBeenCalled()
       })
     })
 

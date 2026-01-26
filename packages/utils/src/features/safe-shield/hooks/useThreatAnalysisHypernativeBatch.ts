@@ -50,9 +50,12 @@ export function useThreatAnalysisHypernativeBatch({
 
     // Hashes changed, update refs and build new request
     const newRequest = buildHypernativeBatchRequestData(safeTxHashes)
-    setRequest(newRequest)
-    prevHashesRef.current = safeTxHashes
-    prevRequestRef.current = newRequest
+
+    if (newRequest) {
+      setRequest(newRequest)
+      prevHashesRef.current = safeTxHashes
+      prevRequestRef.current = newRequest
+    }
   }, [safeTxHashes])
 
   // Trigger batch assessment when request is ready
@@ -68,19 +71,11 @@ export function useThreatAnalysisHypernativeBatch({
   // Process batch response into individual results
   const resultsMap = useMemo(() => {
     const results: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
-    if (skip || !request) {
+    if (skip || !request || !authToken) {
       return results
     }
 
     const requestedHashes = request?.safeTxHashes || []
-
-    // Handle missing authToken case
-    if (!authToken) {
-      requestedHashes.forEach((hash) => {
-        results[hash] = [undefined, new Error('authToken is required'), false]
-      })
-      return results
-    }
 
     // Return early if no response, not loading, and no error
     if (!batchResponse && !isLoading && !error) {

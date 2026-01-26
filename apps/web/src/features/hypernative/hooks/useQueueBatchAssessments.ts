@@ -105,8 +105,16 @@ export function useQueueBatchAssessments({
     Object.entries(fetchedAssessments).forEach(([hash, result]) => {
       const [data, error, loading] = result
 
-      if (!loading) {
-        resultsToStore[hash as `0x${string}`] = error ? null : (data ?? null)
+      if (loading) {
+        return
+      }
+
+      if (error) {
+        resultsToStore[hash as `0x${string}`] = null
+      }
+
+      if (data !== undefined) {
+        resultsToStore[hash as `0x${string}`] = data
       }
     })
 

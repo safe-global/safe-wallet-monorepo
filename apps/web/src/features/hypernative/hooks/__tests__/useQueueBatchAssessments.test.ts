@@ -409,6 +409,41 @@ describe('useQueueBatchAssessments', () => {
         }),
       )
     })
+
+    it('should not retry null assessments when authToken is still undefined', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      mockUseAuthToken.mockReturnValue([
+        {
+          token: undefined,
+          isAuthenticated: false,
+          isExpired: false,
+        },
+        jest.fn(),
+        jest.fn(),
+      ])
+
+      renderHook(() => useQueueBatchAssessments({ pages }), {
+        initialReduxState: createInitialState({
+          [safeTxHash]: null,
+        }),
+      })
+
+      expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
+        safeTxHashes: [],
+        safeAddress: mockSafeAddress,
+        authToken: undefined,
+        skip: false,
+      })
+    })
   })
 
   describe('return value', () => {
