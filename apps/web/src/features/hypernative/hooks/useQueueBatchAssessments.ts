@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -87,6 +87,17 @@ export function useQueueBatchAssessments({
     skip,
   })
 
+  // Track the safeAddress and authToken used when fetch was initiated
+  // This prevents storing results for the wrong Safe if user switches accounts during fetch
+  const fetchContextRef = useRef<{ safeAddress: string; authToken?: string } | null>(null)
+
+  // Update fetch context when a new fetch is initiated (hashesToFetch changes)
+  useEffect(() => {
+    if (hashesToFetch.length > 0) {
+      fetchContextRef.current = { safeAddress, authToken }
+    }
+  }, [hashesToFetch.length, safeAddress, authToken])
+
   // Store fetched results in Redux when they become available
   useEffect(() => {
     const resultsToStore: Record<`0x${string}`, ThreatAnalysisResults | null> = {}
@@ -99,10 +110,15 @@ export function useQueueBatchAssessments({
       }
     })
 
+    // Only store if safeAddress and authToken match the context when fetch was initiated
+    // This prevents storing results for the wrong Safe if user switched accounts during fetch
     if (Object.keys(resultsToStore).length > 0) {
-      dispatch(setBatchAssessments(resultsToStore))
+      const fetchContext = fetchContextRef.current
+      if (fetchContext && fetchContext.safeAddress === safeAddress && fetchContext.authToken === authToken) {
+        dispatch(setBatchAssessments(resultsToStore))
+      }
     }
-  }, [fetchedAssessments, dispatch])
+  }, [fetchedAssessments, dispatch, safeAddress, authToken])
 
   // Merge cached and fetched assessments
   const assessments = useMemo(() => {
