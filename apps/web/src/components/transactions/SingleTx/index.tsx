@@ -93,6 +93,10 @@ const SingleTx = () => {
         ],
       }
       setPages([page], 'single-tx')
+
+      return () => {
+        setPages([], 'single-tx')
+      }
     }
   }, [setPages, txDetails])
 
