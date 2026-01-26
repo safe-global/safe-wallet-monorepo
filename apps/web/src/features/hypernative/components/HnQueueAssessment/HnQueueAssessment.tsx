@@ -64,7 +64,7 @@ export const HnQueueAssessment = ({
         arrow
         placement="top"
       >
-        <Stack direction="row" alignItems="center" gap={0.5}>
+        <Stack direction="row" alignItems="center" maxWidth="fit-content" gap={0.5}>
           <SvgIcon inheritViewBox component={LockIcon} sx={{ width: '16px', height: '16px', color: 'text.disabled' }} />
           <Typography variant="caption" color="text.disabled">
             {getSeverityMessage(Severity.ERROR)}
@@ -115,6 +115,7 @@ export const HnQueueAssessment = ({
         href={assessmentUrl}
         color="text.secondary"
         display="flex"
+        maxWidth="fit-content"
         sx={{
           textDecoration: 'none',
           '&:not(:hover)': { '.external-link-icon': { display: 'none' } },
