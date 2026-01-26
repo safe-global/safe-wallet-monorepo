@@ -39,7 +39,7 @@ export function useQueueBatchAssessments({
       return []
     }
 
-    const hashes: `0x${string}`[] = []
+    const hashSet = new Set<`0x${string}`>()
 
     for (const page of pages) {
       if (!page?.results) {
@@ -63,14 +63,11 @@ export function useQueueBatchAssessments({
           continue
         }
 
-        // Avoid duplicates
-        if (!hashes.includes(safeTxHash as `0x${string}`)) {
-          hashes.push(safeTxHash as `0x${string}`)
-        }
+        hashSet.add(safeTxHash as `0x${string}`)
       }
     }
 
-    return hashes
+    return Array.from(hashSet)
   }, [pages, skip])
 
   // Get cached assessments from Redux
