@@ -1,4 +1,11 @@
-import type { FeatureImplementation } from '@/features/__core__'
+/**
+ * WalletConnect Feature Contract - v3 flat structure
+ *
+ * Naming conventions determine stub behavior:
+ * - PascalCase → component (stub renders null)
+ * - useSomething → hook (stub returns {})
+ * - camelCase → service (stub is no-op)
+ */
 
 // Type imports from implementations - enables IDE jump-to-definition
 import type WalletConnectWallet from './services/WalletConnectWallet'
@@ -7,33 +14,27 @@ import type { wcPopupStore } from './store/wcPopupStore'
 import type { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 
 /**
- * WalletConnect Feature Implementation - the lazy-loaded part.
+ * WalletConnect Feature Implementation - flat structure
  * This is what gets loaded when handle.load() is called.
  */
-export interface WalletConnectImplementation extends FeatureImplementation {
-  components: {
-    /**
-     * Main WalletConnect widget for the header.
-     * @see {@link ./components/WalletConnectUi/index.tsx}
-     */
-    WalletConnectWidget: typeof WalletConnectUi
-  }
+export interface WalletConnectImplementation {
+  // Components (PascalCase) - stub renders null
+  /** Main WalletConnect widget for the header */
+  WalletConnectWidget: typeof WalletConnectUi
 
-  services: {
-    /** Singleton WalletConnect wallet instance for session management. */
-    walletConnectInstance: WalletConnectWallet
+  // Services (camelCase) - stub is no-op
+  /** Singleton WalletConnect wallet instance for session management */
+  walletConnectInstance: WalletConnectWallet
 
-    /** Store for WalletConnect popup open state. */
-    wcPopupStore: typeof wcPopupStore
+  /** Store for WalletConnect popup open state */
+  wcPopupStore: typeof wcPopupStore
 
-    /** Store for chain switch modal requests. */
-    wcChainSwitchStore: typeof wcChainSwitchStore
-  }
+  /** Store for chain switch modal requests */
+  wcChainSwitchStore: typeof wcChainSwitchStore
 }
 
 /**
  * WalletConnect Feature Contract - the full loaded feature type.
- * This is what useFeature<WalletConnectContract>('walletconnect') returns.
  */
 export interface WalletConnectContract extends WalletConnectImplementation {
   readonly name: 'walletconnect'

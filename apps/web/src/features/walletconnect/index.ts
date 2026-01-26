@@ -10,15 +10,28 @@
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
- *   const walletConnect = useLoadFeature(WalletConnectFeature)
- *   if (!walletConnect) return null
- *   return <walletConnect.components.WalletConnectWidget />
+ *   const wc = useLoadFeature(WalletConnectFeature)
+ *
+ *   // No null check needed - always returns an object
+ *   // Components render null when not ready (proxy stub)
+ *   return <wc.WalletConnectWidget />
+ * }
+ *
+ * // For explicit loading/disabled states:
+ * function MyComponentWithStates() {
+ *   const wc = useLoadFeature(WalletConnectFeature)
+ *
+ *   if (wc.$isLoading) return <Skeleton />
+ *   if (wc.$isDisabled) return null
+ *
+ *   return <wc.WalletConnectWidget />
  * }
  * ```
  *
- * All feature functionality (components, services, stores) is accessed via
- * the loaded feature object from useLoadFeature(). This ensures proper
- * lazy loading and code splitting.
+ * All feature functionality is accessed via flat structure from useLoadFeature().
+ * Naming conventions determine stub behavior:
+ * - PascalCase → component (stub renders null)
+ * - camelCase → service (stub is no-op)
  */
 
 import { createFeatureHandle } from '@/features/__core__'

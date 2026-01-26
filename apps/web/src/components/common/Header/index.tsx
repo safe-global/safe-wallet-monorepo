@@ -108,7 +108,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
 
         {walletConnect && (
           <div className={classnames(css.element, css.hideMobile)}>
-            <walletConnect.components.WalletConnectWidget />
+            <walletConnect.WalletConnectWidget />
           </div>
         )}
       </Box>

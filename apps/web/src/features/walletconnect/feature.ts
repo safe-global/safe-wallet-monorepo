@@ -1,40 +1,35 @@
 /**
- * WalletConnect Feature Implementation - LAZY LOADED
+ * WalletConnect Feature Implementation - LAZY LOADED (v3 flat structure)
  *
- * This file contains the full feature implementation:
- * - Components
- * - Services
- * - Stores
+ * This entire file is lazy-loaded via createFeatureHandle.
+ * Use direct imports - do NOT use lazy() inside (one dynamic import per feature).
  *
- * It is ONLY loaded when:
+ * Loaded when:
  * 1. The feature flag is enabled
- * 2. A consumer calls useFeature('walletconnect')
+ * 2. A consumer calls useLoadFeature(WalletConnectFeature)
  *
  * This ensures the WalletConnect SDK and all related code
  * is NOT included in the bundle when the feature is disabled.
  */
 import type { WalletConnectImplementation } from './contract'
-import type WalletConnectUi from './components/WalletConnectUi'
-import { withSuspense } from '@/features/__core__'
-import { lazy } from 'react'
 
-// Services and stores - loaded as part of this chunk
+// Direct imports - this file is already lazy-loaded
+import WalletConnectWidget from './components/WalletConnectUi'
 import { wcPopupStore } from './store/wcPopupStore'
 import { wcChainSwitchStore } from './store/wcChainSwitchSlice'
 import walletConnectInstance from './services/walletConnectInstance'
 
+// Flat structure - naming conventions determine stub behavior:
+// - PascalCase → component (stub renders null)
+// - camelCase → service (stub is no-op)
 const feature: WalletConnectImplementation = {
-  components: {
-    // Component is still lazy within this chunk for code splitting
-    // (in case the feature is loaded but widget isn't rendered yet)
-    WalletConnectWidget: withSuspense(lazy(() => import('./components/WalletConnectUi'))) as typeof WalletConnectUi,
-  },
+  // Components
+  WalletConnectWidget,
 
-  services: {
-    walletConnectInstance,
-    wcPopupStore,
-    wcChainSwitchStore,
-  },
+  // Services
+  walletConnectInstance,
+  wcPopupStore,
+  wcChainSwitchStore,
 }
 
 export default feature

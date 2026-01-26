@@ -184,20 +184,20 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           : undefined
 
         if (matchingSafe) {
-          await walletConnect?.services.walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
+          await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
           await router.push(getHref(targetChain, matchingSafe.address))
           return null
         }
 
         return await new Promise<null>((resolve, reject) => {
           let settled = false
-          const previousPopupOpen = walletConnect?.services.wcPopupStore.getStore() ?? false
+          const previousPopupOpen = walletConnect?.wcPopupStore.getStore() ?? false
 
           const closeRequestIfActive = () => {
             if (settled) return false
             settled = true
-            walletConnect?.services.wcChainSwitchStore.setStore(undefined)
-            walletConnect?.services.wcPopupStore.setStore(previousPopupOpen)
+            walletConnect?.wcChainSwitchStore.setStore(undefined)
+            walletConnect?.wcPopupStore.setStore(previousPopupOpen)
             return true
           }
 
@@ -214,7 +214,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
             if (settled) return
 
             try {
-              await walletConnect?.services.walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
+              await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
             } catch (error) {
               closeRequestIfActive()
               reject(error as Error)
@@ -231,8 +231,8 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
             }
           }
 
-          walletConnect?.services.wcPopupStore.setStore(true)
-          walletConnect?.services.wcChainSwitchStore.setStore({
+          walletConnect?.wcPopupStore.setStore(true)
+          walletConnect?.wcChainSwitchStore.setStore({
             appInfo,
             chain: targetChain as any,
             safes: safesOnTargetChain,
