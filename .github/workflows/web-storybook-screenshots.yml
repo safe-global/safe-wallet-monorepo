@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: web-storybook-screenshots
           path: web-storybook-screenshots/
