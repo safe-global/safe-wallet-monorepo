@@ -14,7 +14,17 @@ export * from './safeAppsSlice'
 export { safeMessagesListener } from './safeMessagesSlice'
 export * from './pendingSafeMessagesSlice'
 export * from './batchSlice'
-export * from '@/features/counterfactual/store/undeployedSafesSlice'
+export {
+  undeployedSafesSlice,
+  addUndeployedSafe,
+  addUndeployedSafes,
+  updateUndeployedSafeStatus,
+  removeUndeployedSafe,
+  selectUndeployedSafes,
+  selectUndeployedSafe,
+  selectUndeployedSafesByAddress,
+  selectIsUndeployedSafe,
+} from '@/features/counterfactual/store'
 export * from '@/features/swap/store/swapParamsSlice'
 export * from './swapOrderSlice'
 export * from './api/gateway'

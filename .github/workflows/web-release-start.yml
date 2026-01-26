@@ -206,7 +206,7 @@ jobs:
           1. ✅ PR created - **YOU ARE HERE**
           2. ⏳ QA team reviews and tests
           3. ⏳ **Merge PR to main WITHOUT SQUASHING** (after QA approval)
-          4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge to dev
+          4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge PR
 
           ---
 
@@ -283,6 +283,6 @@ jobs:
           echo "1. ✅ **Release branch created and PR opened**" >> $GITHUB_STEP_SUMMARY
           echo "2. ⏳ QA team should test the changes" >> $GITHUB_STEP_SUMMARY
           echo "3. ⏳ When QA approves, merge the PR to main" >> $GITHUB_STEP_SUMMARY
-          echo "4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge to dev" >> $GITHUB_STEP_SUMMARY
+          echo "4. ⏳ Auto: Tag, release, build, upload to S3 & back-merge PR" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 [View Pull Request](${{ steps.create_pr.outputs.pr_url }})" >> $GITHUB_STEP_SUMMARY

@@ -13,7 +13,7 @@ import {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
-import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
 import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'

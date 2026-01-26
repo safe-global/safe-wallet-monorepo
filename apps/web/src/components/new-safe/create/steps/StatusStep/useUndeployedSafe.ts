@@ -1,4 +1,4 @@
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'

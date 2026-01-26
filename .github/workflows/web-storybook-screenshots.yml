@@ -1,0 +1,254 @@
+name: Web Storybook Screenshots
+
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  screenshot:
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Install Playwright
+        run: |
+          cd .github/scripts
+          npm init -y 2>/dev/null || true
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Get PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Exit if no PR found
+        if: steps.pr.outputs.number == ''
+        run: |
+          echo "No PR found"
+          exit 0
+
+      - name: Get changed story files
+        id: changed-stories
+        run: |
+          BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
+          HEAD_SHA=${{ github.event.workflow_run.head_sha }}
+
+          # Get all changed files in web app
+          ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' || true)
+
+          STORY_FILES=""
+
+          for file in $ALL_CHANGED; do
+            # If it's already a story file, include it
+            if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
+              STORY_FILES="$STORY_FILES$file"$'\n'
+              continue
+            fi
+
+            # For component files, check if a corresponding story file exists
+            dir=$(dirname "$file")
+            base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
+
+            for ext in stories.tsx story.tsx stories.ts story.ts; do
+              story_file="$dir/$base.$ext"
+              if [ -f "$story_file" ]; then
+                STORY_FILES="$STORY_FILES$story_file"$'\n'
+                break
+              fi
+            done
+          done
+
+          # Remove duplicates and empty lines
+          STORY_FILES=$(echo "$STORY_FILES" | sort -u | grep -v '^$' || true)
+
+          if [ -z "$STORY_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No story files found for changed components"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Story files with changes:"
+            echo "$STORY_FILES"
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo "$STORY_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract branch name
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: branch
+        env:
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> $GITHUB_OUTPUT
+          echo "Normalized branch: $NORMALIZED"
+
+      - name: Generate story URLs
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: story-urls
+        run: |
+          node ./.github/scripts/generate-web-story-urls.js
+        env:
+          CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
+
+      - name: Take screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        run: |
+          node ./.github/scripts/capture-web-storybook-screenshots.js
+        env:
+          NODE_PATH: ./.github/scripts/node_modules
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
+
+      - name: Upload screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: web-storybook-screenshots
+          path: web-storybook-screenshots/
+          retention-days: 5
+
+      - name: Upload screenshots to branch
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: ${{ steps.branch.outputs.normalized }}-screenshots
+          source_dir: web-storybook-screenshots
+          target_dir: web-storybook-screenshots/${{ steps.pr.outputs.number }}
+          file_pattern: '*.png'
+          commit_message: 'Add web storybook screenshots for PR #${{ steps.pr.outputs.number }}'
+          readme_title: 'Web Storybook Screenshots Storage'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post PR comment with screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const screenshotDir = 'web-storybook-screenshots';
+            if (!fs.existsSync(screenshotDir)) {
+              console.log('No screenshots directory found');
+              return;
+            }
+
+            const screenshots = fs.readdirSync(screenshotDir).filter(f => f.endsWith('.png'));
+
+            if (screenshots.length === 0) {
+              console.log('No screenshots found');
+              return;
+            }
+
+            const prNumber = ${{ steps.pr.outputs.number }};
+            const repo = context.repo;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/web-storybook-screenshots/${prNumber}`;
+            const storybookUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook`;
+
+            // Group screenshots by component
+            const components = {};
+            for (const file of screenshots) {
+              const match = file.match(/^(.+?)--(.+?)\.png$/);
+              if (match) {
+                const [, componentName, storyName] = match;
+                if (!components[componentName]) {
+                  components[componentName] = [];
+                }
+                components[componentName].push({ storyName, file });
+              }
+            }
+
+            let body = '## 📸 Storybook Component Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for components modified in this PR.\n\n`;
+            body += `**[View Storybook](${storybookUrl})**\n\n`;
+
+            const useCollapsible = screenshots.length >= 10;
+
+            for (const [componentName, stories] of Object.entries(components)) {
+              body += `### ${componentName}\n\n`;
+              for (const { storyName, file } of stories) {
+                const imageUrl = `${baseUrl}/${file}`;
+                if (useCollapsible) {
+                  body += `<details>\n<summary>${storyName}</summary>\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                  body += `</details>\n\n`;
+                } else {
+                  body += `**${storyName}**\n\n`;
+                  body += `![${storyName}](${imageUrl})\n\n`;
+                }
+              }
+            }
+
+            body += '\n---\n';
+            body += '*Screenshots captured from deployed Storybook preview.*';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: prNumber
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user?.type === 'Bot' &&
+              comment.body.includes('📸 Storybook Component Screenshots')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+      - name: Delete comment if no changes
+        if: steps.changed-stories.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }}
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user?.type === 'Bot' &&
+              comment.body.includes('📸 Storybook Component Screenshots')
+            );
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }

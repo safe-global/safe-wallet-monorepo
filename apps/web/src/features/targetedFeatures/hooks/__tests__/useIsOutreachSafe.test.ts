@@ -30,7 +30,6 @@ describe('useIsOutreachSafe', () => {
         address: safeInfo.address.value,
       },
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 
@@ -56,7 +55,6 @@ describe('useIsOutreachSafe', () => {
       data: undefined,
       error: new Error('Safe not targeted'),
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 
@@ -81,7 +79,6 @@ describe('useIsOutreachSafe', () => {
     jest.spyOn(targetedMessages, 'useTargetedMessagingGetTargetedSafeV1Query').mockReturnValue({
       data: undefined, // Yet to be fetched
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 
@@ -110,7 +107,6 @@ describe('useIsOutreachSafe', () => {
         address: safeInfo.address.value,
       },
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 
@@ -139,7 +135,6 @@ describe('useIsOutreachSafe', () => {
         address: otherAddress,
       },
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 
@@ -166,7 +161,6 @@ describe('useIsOutreachSafe', () => {
         data: undefined,
         error: { status: 404, data: { detail: 'Not found' } },
         isLoading: false,
-        isFetching: false,
         refetch: jest.fn(),
       })
 
@@ -192,7 +186,6 @@ describe('useIsOutreachSafe', () => {
         data: undefined,
         error: { status: 500, data: { detail: 'Internal server error' } },
         isLoading: false,
-        isFetching: false,
         refetch: jest.fn(),
       })
 
@@ -218,7 +211,6 @@ describe('useIsOutreachSafe', () => {
         data: undefined,
         error: { status: 'FETCH_ERROR', error: 'Network request failed' },
         isLoading: false,
-        isFetching: false,
         refetch: jest.fn(),
       })
 
@@ -244,7 +236,6 @@ describe('useIsOutreachSafe', () => {
       jest.spyOn(targetedMessages, 'useTargetedMessagingGetTargetedSafeV1Query').mockReturnValue({
         data: undefined,
         isLoading: true,
-        isFetching: false,
         refetch: jest.fn(),
       })
 
@@ -270,7 +261,6 @@ describe('useIsOutreachSafe', () => {
     jest.spyOn(targetedMessages, 'useTargetedMessagingGetTargetedSafeV1Query').mockReturnValue({
       data: undefined,
       isLoading: false,
-      isFetching: false,
       refetch: jest.fn(),
     })
 

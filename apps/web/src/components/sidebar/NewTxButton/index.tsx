@@ -1,5 +1,5 @@
-import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { ActivateAccountButton } from '@/features/counterfactual/components'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { type ReactElement, useContext } from 'react'
 import Button from '@mui/material/Button'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'

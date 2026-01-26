@@ -2,10 +2,13 @@ import { Chip, Stack, Tooltip, Typography } from '@mui/material'
 import TokenIcon from '@/components/common/TokenIcon'
 import FiatValue from '@/components/common/FiatValue'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 const PositionsHeader = ({ protocol, fiatTotal }: { protocol: Protocol; fiatTotal?: number }) => {
-  const shareOfFiatTotal = fiatTotal ? formatPercentage(Number(protocol.fiatTotal) / fiatTotal) : null
+  const shareOfFiatTotal = fiatTotal
+    ? formatPercentage(calculateProtocolPercentage(protocol.fiatTotal, fiatTotal))
+    : null
 
   return (
     <>

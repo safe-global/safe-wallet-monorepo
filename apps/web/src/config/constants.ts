@@ -88,7 +88,7 @@ export const RECOVERY_FEEDBACK_FORM =
 
 // Legal
 export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
-export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000/
+export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000|localhost:4000/
 export const IPFS_HOSTS = /app\.safe\.eth\.limo|app\.5afedev\.eth\.limo/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
@@ -106,11 +106,10 @@ export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
   process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID ?? `${11}`,
 )
 export const PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
-  process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${6}`,
+  process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${7}`,
 )
 export const STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
-  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${14}`,
+  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${15}`,
 )
-
 // Deployment specifics
 export const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'

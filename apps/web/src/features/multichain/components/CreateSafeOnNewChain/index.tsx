@@ -9,7 +9,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
-import { replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
+import { replayCounterfactualSafeDeployment } from '@/features/counterfactual/services'
 
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'

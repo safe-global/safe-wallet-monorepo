@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { SlotName, withSlot } from '../slots'
 import ExecuteCheckbox from '@/components/tx/ExecuteCheckbox'
 

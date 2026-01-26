@@ -25,7 +25,7 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/services'
 import {
   getSafeContractDeployment,
   getCanonicalOrFirstAddress,

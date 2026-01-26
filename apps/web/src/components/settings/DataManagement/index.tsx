@@ -8,7 +8,7 @@ import { addressBookSlice, selectAllAddressBooks } from '@/store/addressBookSlic
 import { addedSafesSlice, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { safeAppsSlice, selectSafeApps } from '@/store/safeAppsSlice'
 import { selectSettings, settingsSlice } from '@/store/settingsSlice'
-import { selectUndeployedSafes, undeployedSafesSlice } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes, undeployedSafesSlice } from '@/features/counterfactual/store'
 import { ImportFileUpload } from '@/components/settings/DataManagement/ImportFileUpload'
 import { ImportDialog } from '@/components/settings/DataManagement/ImportDialog'
 import { SAFE_EXPORT_VERSION } from '@/components/settings/DataManagement/useGlobalImportFileParser'

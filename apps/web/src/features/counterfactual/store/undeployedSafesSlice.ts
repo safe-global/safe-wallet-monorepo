@@ -1,15 +1,15 @@
 import { type RootState } from '@/store'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
 import type {
-  ReplayedSafeProps,
   UndeployedSafe,
   UndeployedSafesState,
   UndeployedSafeStatus,
-} from '@safe-global/utils/features/counterfactual/store/types'
-import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
-import type { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+  PredictedSafeProps,
+  ReplayedSafeProps,
+  PayMethod,
+} from '../types'
+import { PendingSafeStatus } from '../types'
 
 const initialState: UndeployedSafesState = {}
 
@@ -76,7 +76,8 @@ export const undeployedSafesSlice = createSlice({
   },
 })
 
-export const { removeUndeployedSafe, addUndeployedSafe, updateUndeployedSafeStatus } = undeployedSafesSlice.actions
+export const { removeUndeployedSafe, addUndeployedSafe, addUndeployedSafes, updateUndeployedSafeStatus } =
+  undeployedSafesSlice.actions
 
 export const selectUndeployedSafes = (state: RootState): UndeployedSafesState => {
   return state[undeployedSafesSlice.name]

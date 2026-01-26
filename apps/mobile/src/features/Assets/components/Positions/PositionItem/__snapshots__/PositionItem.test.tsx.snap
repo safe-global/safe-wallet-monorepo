@@ -1,0 +1,262 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PositionItem renders correctly 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+    testID="theme-light"
+  >
+    <View
+      collapsable={false}
+      style={
+        {
+          "alignItems": "flex-start",
+          "backgroundColor": "transparent",
+          "borderBottomLeftRadius": 7,
+          "borderBottomRightRadius": 7,
+          "borderBottomWidth": 0,
+          "borderLeftWidth": 0,
+          "borderRightWidth": 0,
+          "borderStyle": "solid",
+          "borderTopLeftRadius": 7,
+          "borderTopRightRadius": 7,
+          "borderTopWidth": 0,
+          "flexDirection": "column",
+          "flexWrap": "wrap",
+          "gap": 12,
+          "justifyContent": "flex-start",
+          "paddingBottom": 8,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 8,
+        }
+      }
+      testID="position-USDC"
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 12,
+              "maxWidth": "55%",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "width": 32,
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "position": "absolute",
+                  "right": -10,
+                  "top": -10,
+                  "zIndex": 1,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "backgroundColor": "#EEEFF0",
+                  "borderBottomLeftRadius": "50%",
+                  "borderBottomRightRadius": "50%",
+                  "borderTopLeftRadius": "50%",
+                  "borderTopRightRadius": "50%",
+                  "height": 32,
+                  "width": 32,
+                }
+              }
+            >
+              <ViewManagerAdapter_ExpoImage
+                accessibilityLabel="USD Coin"
+                borderRadius={50}
+                containerViewRef={"[React.ref]"}
+                contentFit="cover"
+                contentPosition={
+                  {
+                    "left": "50%",
+                    "top": "50%",
+                  }
+                }
+                flex={1}
+                nativeViewRef={"[React.ref]"}
+                onError={[Function]}
+                onLoad={[Function]}
+                onLoadStart={[Function]}
+                onProgress={[Function]}
+                placeholder={[]}
+                source={
+                  [
+                    {
+                      "uri": "https://example.com/token.png",
+                    },
+                  ]
+                }
+                style={
+                  {
+                    "borderRadius": 50,
+                    "flex": 1,
+                  }
+                }
+                testID="logo-image"
+                transition={null}
+              />
+            </View>
+          </View>
+          <View>
+            <View>
+              <Text
+                style={
+                  {
+                    "color": "#121312",
+                    "fontFamily": "DMSans-SemiBold",
+                    "fontSize": 14,
+                    "lineHeight": 20,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                USD Coin
+              </Text>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 4,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#A1A3A7",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                      "lineHeight": 16,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  1 USDC
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#A1A3A7",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  •
+                </Text>
+                <Text
+                  style={
+                    {
+                      "color": "#A1A3A7",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  Deposited
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DM Sans",
+                "fontSize": 14,
+              }
+            }
+            suppressHighlighting={true}
+            testID="position-USDC-fiat-balance"
+          >
+            $ 1,500.00
+          </Text>
+          <View
+            style={
+              {
+                "marginTop": 4,
+              }
+            }
+          >
+            <View
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 4,
+                  }
+                }
+              >
+                <Text
+                  style={
+                    {
+                      "color": "#00B460",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 13,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  +
+                  2.50%
+                   (
+                  $ 38
+                  )
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;

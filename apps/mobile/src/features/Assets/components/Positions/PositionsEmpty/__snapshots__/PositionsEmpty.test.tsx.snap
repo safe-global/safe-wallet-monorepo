@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PositionsEmpty renders correctly 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+    testID="theme-light"
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "gap": 16,
+          "marginTop": 16,
+        }
+      }
+      testID="positions-empty"
+    >
+      <Text
+        accessibilityRole="header"
+        style={
+          {
+            "color": "#121312",
+            "fontFamily": "DMSans-SemiBold",
+            "fontSize": 16,
+            "letterSpacing": 0,
+            "lineHeight": 17.6,
+            "marginBottom": 0,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "marginTop": 0,
+            "userSelect": "auto",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        No positions yet
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontFamily": "DM Sans",
+            "textAlign": "center",
+            "width": "80%",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Your DeFi positions will appear here once you have assets deposited in protocols like Aave, Lido, or others.
+      </Text>
+    </View>
+  </View>
+</View>
+`;

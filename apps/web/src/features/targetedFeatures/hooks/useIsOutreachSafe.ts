@@ -13,7 +13,7 @@ export function useIsOutreachSafe(outreachId: number, options?: { skip?: boolean
   const isSafeUnavailable = !safe.address.value
   const shouldSkip = options?.skip || isSafeUnavailable
 
-  const { data, isLoading, isFetching } = useTargetedMessagingGetTargetedSafeV1Query(
+  const { data, isLoading } = useTargetedMessagingGetTargetedSafeV1Query(
     {
       outreachId,
       chainId: safe.chainId,
@@ -23,7 +23,10 @@ export function useIsOutreachSafe(outreachId: number, options?: { skip?: boolean
   )
 
   const isTargeted = data?.outreachId === outreachId && sameAddress(data.address, safe.address.value)
-  const loading = isSafeUnavailable || (!options?.skip && (isLoading || isFetching))
+  // Only report loading during the initial fetch (isLoading), not during background refetches (isFetching)
+  // This prevents showing skeleton indefinitely for non-targeted Safes during background refetches
+  // Once the initial query completes (isLoading becomes false), we have a definitive answer
+  const loading = isSafeUnavailable ? false : !options?.skip && isLoading
 
   return { isTargeted, loading }
 }
