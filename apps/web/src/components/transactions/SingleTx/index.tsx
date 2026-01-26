@@ -72,7 +72,7 @@ const SingleTx = () => {
   }, [safe.txHistoryTag, safe.txQueuedTag, safeAddress])
 
   useEffect(() => {
-    if (setPages && txDetails) {
+    if (txDetails) {
       // Create a single page with the transaction
       const page: QueuedItemPage = {
         count: 1,

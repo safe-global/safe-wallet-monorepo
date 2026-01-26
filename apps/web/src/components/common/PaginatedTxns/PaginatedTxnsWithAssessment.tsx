@@ -19,9 +19,7 @@ const PaginatedTxnsWithAssessment = ({ useTxns }: PaginatedTxnsWithAssessmentPro
 
   const handlePagesChange = useCallback(
     (pages: QueuedItemPage[]) => {
-      if (setPages) {
-        setPages(pages, sourceId)
-      }
+      setPages(pages, sourceId)
     },
     [setPages, sourceId],
   )

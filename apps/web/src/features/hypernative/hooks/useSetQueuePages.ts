@@ -6,14 +6,14 @@ import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/t
  * Hook to get the setPages function from QueueAssessmentContext
  * Allows child components to register their pages with the provider
  *
- * @returns setPages function or undefined if context is not available
+ * @returns setPages function
+ * @throws Error if used outside QueueAssessmentProvider
  */
-export function useSetQueuePages(): ((pages: QueuedItemPage[], sourceKey?: string | symbol) => void) | undefined {
+export function useSetQueuePages(): (pages: QueuedItemPage[], sourceKey?: string | symbol) => void {
   const context = useContext(QueueAssessmentContext)
 
   if (!context) {
-    console.error('QueueAssessmentContext not found - please add QueueAssessmentProvider to the parent component')
-    return undefined
+    throw new Error('useSetQueuePages must be used within a QueueAssessmentProvider')
   }
 
   return context.setPages
