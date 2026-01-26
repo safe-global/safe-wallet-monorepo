@@ -116,7 +116,7 @@ export function useQueueBatchAssessments({
       // Fetched assessments take precedence over cached ones
       if (fetchedAssessments[hash]) {
         merged[hash] = fetchedAssessments[hash]
-      } else if (cachedAssessments.hasOwnProperty(hash)) {
+      } else if (Object.hasOwn(cachedAssessments, hash)) {
         // Use cached assessment (convert null error state back to AsyncResult)
         const cached = cachedAssessments[hash]
         if (cached === null) {

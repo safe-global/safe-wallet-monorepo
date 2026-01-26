@@ -54,7 +54,7 @@ export const selectAssessmentsByHashes = createSelector(
   (assessmentsState, hashes): Record<`0x${string}`, ThreatAnalysisResults | null | undefined> => {
     const result: Record<`0x${string}`, ThreatAnalysisResults | null | undefined> = {}
     hashes.forEach((hash) => {
-      if (assessmentsState.assessments.hasOwnProperty(hash)) {
+      if (Object.hasOwn(assessmentsState.assessments, hash)) {
         result[hash] = assessmentsState.assessments[hash]
       }
     })
