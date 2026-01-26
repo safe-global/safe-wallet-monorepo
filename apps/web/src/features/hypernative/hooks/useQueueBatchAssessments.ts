@@ -111,15 +111,14 @@ export function useQueueBatchAssessments({
   const assessments = useMemo(() => {
     const merged: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
 
-    // Ensure all safeTxHashes are in the result
+    // Process all safeTxHashes to ensure they're represented in the result
     safeTxHashes.forEach((hash) => {
-      const cached = cachedAssessments[hash]
-
-      // Check if we have a fetched assessment for this hash (takes precedence)
+      // Fetched assessments take precedence over cached ones
       if (fetchedAssessments[hash]) {
         merged[hash] = fetchedAssessments[hash]
       } else if (cachedAssessments.hasOwnProperty(hash)) {
-        // Use cached assessment
+        // Use cached assessment (convert null error state back to AsyncResult)
+        const cached = cachedAssessments[hash]
         if (cached === null) {
           merged[hash] = [undefined, new Error('Assessment failed'), false]
         } else {
