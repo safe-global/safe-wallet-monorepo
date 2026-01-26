@@ -3,7 +3,7 @@ import { ThreatAnalysis } from '../ThreatAnalysis'
 import type { ThreatAnalysisResults, ThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { Severity, ThreatStatus, CommonSharedStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 
 // Mock AnalysisGroupCard
 jest.mock('../../AnalysisGroupCard', () => ({

@@ -14,14 +14,16 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForHistory } from '@/features/hypernative/components/HnBanner'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature, BannerType } from '@/features/hypernative'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
   const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
-  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
+  const hypernative = useLoadFeature(HypernativeFeature)
+  const bannerVisibility = hypernative?.hooks.useBannerVisibility(BannerType.Promo)
+  const showHnBanner = bannerVisibility?.showBanner ?? false
+  const hnLoading = bannerVisibility?.loading ?? true
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
@@ -97,9 +99,9 @@ const History: NextPage = () => {
               <Skeleton variant="rounded" height={30} />
             </Box>
           )}
-          {showHnBanner && !hnLoading && (
+          {showHnBanner && !hnLoading && hypernative && (
             <Box mb={3}>
-              <HnBannerForHistory />
+              <hypernative.components.HnBannerForHistory />
             </Box>
           )}
 

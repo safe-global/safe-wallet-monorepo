@@ -14,6 +14,20 @@ jest.mock('../hooks', () => ({
   useThreatAnalysis: jest.fn(),
 }))
 
+// Mock useLoadFeature to return a mock feature with useAuthToken
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    hooks: {
+      useAuthToken: () => [undefined, jest.fn()],
+    },
+  })),
+  createFeatureHandle: jest.fn(() => ({
+    name: 'hypernative',
+    useIsEnabled: jest.fn(() => true),
+    load: jest.fn(),
+  })),
+}))
+
 const mockSafeTxContextValue = {
   safeTx: undefined,
   setSafeTx: jest.fn(),

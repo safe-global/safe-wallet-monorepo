@@ -9,6 +9,21 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
+// Mock useLoadFeature to return a mock feature with useAuthToken
+const mockSetAuthToken = jest.fn()
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    hooks: {
+      useAuthToken: () => [undefined, mockSetAuthToken],
+    },
+  })),
+  createFeatureHandle: jest.fn(() => ({
+    name: 'hypernative',
+    useIsEnabled: jest.fn(() => true),
+    load: jest.fn(),
+  })),
+}))
+
 // Mock PKCE utilities
 jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
   const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')

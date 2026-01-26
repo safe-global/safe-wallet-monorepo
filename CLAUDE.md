@@ -49,6 +49,9 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 
 ## Active Technologies
 
+- TypeScript 5.x with Next.js 14.x + React 18, Redux Toolkit, `@/features/__core__` (useLoadFeature, createFeatureHandle, withSuspense) (002-migrate-hypernative)
+- Redux store (hnStateSlice for banner dismissals, form completion) (002-migrate-hypernative)
+
 - TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
 - N/A (architecture pattern, no new data storage) (001-feature-architecture)
 

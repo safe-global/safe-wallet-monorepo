@@ -4,7 +4,7 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { AnalysisGroupCardDisabled } from '../ThreatAnalysis/AnalysisGroupCardDisabled'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 
 interface HypernativeCustomChecksProps {
   threat: AsyncResult<ThreatAnalysisResults>

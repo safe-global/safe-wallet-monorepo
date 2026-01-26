@@ -9,23 +9,27 @@ import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecut
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
-import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
-import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/useIsHypernativeQueueScanFeature'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
-import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature, BannerType } from '@/features/hypernative'
 import { useState, useCallback, useMemo } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
-  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
-  const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
-  const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
+  const hypernative = useLoadFeature(HypernativeFeature)
 
-  const showHnLoginCard = !eligibilityLoading && isHypernativeEligible && isHypernativeQueueScanEnabled
+  // Use hypernative hooks via feature handle
+  const bannerVisibility = hypernative?.hooks.useBannerVisibility(BannerType.Promo)
+  const showHnBanner = bannerVisibility?.showBanner ?? false
+  const hnLoading = bannerVisibility?.loading ?? true
+
+  const eligibility = hypernative?.hooks.useIsHypernativeEligible()
+  const isHypernativeEligible = eligibility?.isHypernativeEligible ?? false
+  const eligibilityLoading = eligibility?.loading ?? true
+
+  const isHypernativeQueueScanEnabled = hypernative?.hooks.useIsHypernativeQueueScanFeature() ?? false
+
+  const showHnLoginCard = !eligibilityLoading && isHypernativeEligible && isHypernativeQueueScanEnabled && hypernative
 
   // Collect pages from main queue for assessment provider
   const [mainQueuePages, setMainQueuePages] = useState<(QueuedItemPage | undefined)[]>([])
@@ -51,7 +55,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {showHnLoginCard && <HnLoginCard />}
+          {showHnLoginCard && <hypernative.components.HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 
@@ -62,23 +66,35 @@ const Queue: NextPage = () => {
                 <Skeleton variant="rounded" height={30} />
               </Box>
             )}
-            {showHnBanner && !hnLoading && (
+            {showHnBanner && !hnLoading && hypernative && (
               <Box mb={3}>
-                <HnBannerForQueue />
+                <hypernative.components.HnBannerForQueue />
               </Box>
             )}
 
             <RecoveryList />
 
-            <QueueAssessmentProvider pages={allPages}>
-              {/* Pending unsigned transactions */}
-              {showPending && (
-                <PaginatedTxns useTxns={usePendingTxsQueue} onPagesChange={handlePendingQueuePagesChange} />
-              )}
+            {hypernative ? (
+              <hypernative.components.QueueAssessmentProvider pages={allPages}>
+                {/* Pending unsigned transactions */}
+                {showPending && (
+                  <PaginatedTxns useTxns={usePendingTxsQueue} onPagesChange={handlePendingQueuePagesChange} />
+                )}
 
-              {/* The main queue of signed transactions */}
-              <PaginatedTxns useTxns={useTxQueue} onPagesChange={handleMainQueuePagesChange} />
-            </QueueAssessmentProvider>
+                {/* The main queue of signed transactions */}
+                <PaginatedTxns useTxns={useTxQueue} onPagesChange={handleMainQueuePagesChange} />
+              </hypernative.components.QueueAssessmentProvider>
+            ) : (
+              <>
+                {/* Pending unsigned transactions */}
+                {showPending && (
+                  <PaginatedTxns useTxns={usePendingTxsQueue} onPagesChange={handlePendingQueuePagesChange} />
+                )}
+
+                {/* The main queue of signed transactions */}
+                <PaginatedTxns useTxns={useTxQueue} onPagesChange={handleMainQueuePagesChange} />
+              </>
+            )}
           </Box>
         </main>
       </BatchExecuteHoverProvider>

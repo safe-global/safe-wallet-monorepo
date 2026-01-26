@@ -25,10 +25,8 @@ import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
 import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
-import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature, BannerType } from '@/features/hypernative'
 import { EurcvBoostBanner, eurcvBoostBannerID } from '@/components/dashboard/NewsCarousel/banners/EurcvBoostBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
@@ -50,11 +48,17 @@ const Dashboard = (): ReactElement => {
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { isEligible } = useNoFeeCampaignEligibility()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
-  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
+  const hypernative = useLoadFeature(HypernativeFeature)
+  const bannerVisibility = hypernative?.hooks.useBannerVisibility(BannerType.Promo)
+  const showHnBanner = bannerVisibility?.showBanner ?? false
+  const hnLoading = bannerVisibility?.loading ?? true
+  const hnBannerID = hypernative?.hnBannerID ?? 'hnBanner'
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
 
   const banners = [
-    showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
+    showHnBanner &&
+      !hnLoading &&
+      hypernative && { id: hnBannerID, element: hypernative.components.HnBannerForCarousel },
     isEurcvBoostEnabled && { id: eurcvBoostBannerID, element: EurcvBoostBanner },
     isNoFeeCampaignEnabled && {
       id: noFeeCampaignBannerID,
@@ -91,7 +95,7 @@ const Dashboard = (): ReactElement => {
 
           {noAssets ? (
             <Stack spacing={1}>
-              {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
+              {showHnBanner && hypernative && <hypernative.components.HnBannerForCarousel onDismiss={() => {}} />}
               {!showHnBanner && <AddFundsToGetStarted />}
             </Stack>
           ) : (
@@ -124,7 +128,7 @@ const Dashboard = (): ReactElement => {
         <div className={css.rightCol}>
           {safe.deployed && <PendingTxsList />}
 
-          <HnPendingBanner />
+          {hypernative && <hypernative.components.HnPendingBanner />}
         </div>
       </div>
     </>

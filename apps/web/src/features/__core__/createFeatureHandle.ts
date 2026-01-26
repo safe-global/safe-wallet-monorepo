@@ -14,6 +14,7 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   speedup: FEATURES.SPEED_UP_TX,
   portfolio: FEATURES.PORTFOLIO_ENDPOINT,
   targetedOutreach: FEATURES.TARGETED_SURVEY,
+  hypernative: FEATURES.HYPERNATIVE,
 }
 
 /**

@@ -21,7 +21,7 @@ import {
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
 
 export const SafeShieldContent = ({

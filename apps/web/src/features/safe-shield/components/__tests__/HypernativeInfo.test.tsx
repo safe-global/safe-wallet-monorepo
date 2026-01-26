@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { HypernativeInfo } from '../HypernativeInfo'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 
 const makeAuthStatus = (overrides: Partial<HypernativeAuthStatus> = {}): HypernativeAuthStatus => ({
   isAuthenticated: false,

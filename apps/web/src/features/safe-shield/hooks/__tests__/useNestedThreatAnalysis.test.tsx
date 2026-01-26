@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useNestedThreatAnalysis } from '../useNestedThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import type { HypernativeEligibility } from '@/features/hypernative'
 
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
@@ -49,8 +49,18 @@ const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hype
 
 const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
-  useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
+// Mock useLoadFeature to return a mock feature with useIsHypernativeEligible
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    hooks: {
+      useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
+    },
+  })),
+  createFeatureHandle: jest.fn(() => ({
+    name: 'hypernative',
+    useIsEnabled: jest.fn(() => true),
+    load: jest.fn(),
+  })),
 }))
 
 const mockUseThreatAnalysisUtils = jest.requireMock('@safe-global/utils/features/safe-shield/hooks').useThreatAnalysis

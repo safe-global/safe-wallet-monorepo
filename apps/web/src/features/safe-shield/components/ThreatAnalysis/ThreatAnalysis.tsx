@@ -8,7 +8,7 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { AnalysisGroupCardDisabled } from './AnalysisGroupCardDisabled'
 
 interface ThreatAnalysisProps {

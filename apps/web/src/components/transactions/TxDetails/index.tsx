@@ -44,10 +44,8 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
-import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
-import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature } from '@/features/hypernative'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -109,12 +107,15 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Hypernative assessment for banner
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
-  const assessment = useQueueAssessment(safeTxHash)
-  const { isAuthenticated } = useHypernativeOAuth()
-  const showAssessmentBanner = useShowHypernativeAssessment({
-    isQueue,
-    safeTxHash,
-  })
+  const hypernative = useLoadFeature(HypernativeFeature)
+  const assessment = hypernative?.hooks.useQueueAssessment(safeTxHash)
+  const authStatus = hypernative?.hooks.useHypernativeOAuth()
+  const isAuthenticated = authStatus?.isAuthenticated ?? false
+  const showAssessmentBanner =
+    hypernative?.hooks.useShowHypernativeAssessment({
+      isQueue,
+      safeTxHash,
+    }) ?? false
 
   return (
     <>
@@ -207,8 +208,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             proposer={proposer}
           />
 
-          {showAssessmentBanner && safeTxHash && chainId && (
-            <HnQueueAssessmentBanner
+          {showAssessmentBanner && safeTxHash && chainId && hypernative && (
+            <hypernative.components.HnQueueAssessmentBanner
               safeTxHash={safeTxHash}
               assessment={assessment}
               isAuthenticated={isAuthenticated}

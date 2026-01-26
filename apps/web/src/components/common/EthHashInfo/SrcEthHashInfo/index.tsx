@@ -13,7 +13,8 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
-import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature } from '@/features/hypernative'
 import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
 export type EthHashInfoProps = {
@@ -67,6 +68,7 @@ const SrcEthHashInfo = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
+  const hypernative = useLoadFeature(HypernativeFeature)
 
   const highlightedAddress = highlight4bytes ? (
     <>
@@ -135,10 +137,10 @@ const SrcEthHashInfo = ({
               {name}
             </Box>
 
-            {showShieldIcon ? (
-              <HypernativeTooltip placement="right">
+            {showShieldIcon && hypernative ? (
+              <hypernative.components.HypernativeTooltip placement="right">
                 <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </HypernativeTooltip>
+              </hypernative.components.HypernativeTooltip>
             ) : (
               !!addressBookNameSource && (
                 <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
@@ -156,11 +158,12 @@ const SrcEthHashInfo = ({
           </Box>
         ) : (
           /* Show shield icon even when there's no name */
-          showShieldIcon && (
+          showShieldIcon &&
+          hypernative && (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <HypernativeTooltip placement="right">
+              <hypernative.components.HypernativeTooltip placement="right">
                 <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </HypernativeTooltip>
+              </hypernative.components.HypernativeTooltip>
             </Box>
           )
         )}

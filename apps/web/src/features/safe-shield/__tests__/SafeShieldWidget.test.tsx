@@ -7,19 +7,31 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { useSafeShield } from '../SafeShieldContext'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
-import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import type { HypernativeEligibility } from '@/features/hypernative'
 
 jest.mock('../SafeShieldContext')
-jest.mock('@/features/hypernative/hooks/useHypernativeOAuth')
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible')
 jest.mock('../hooks/useCheckSimulation')
 
+const mockUseHypernativeOAuth = jest.fn()
+const mockUseIsHypernativeEligible = jest.fn()
+
+// Mock useLoadFeature to return a mock feature with hooks
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    hooks: {
+      useHypernativeOAuth: () => mockUseHypernativeOAuth(),
+      useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
+    },
+  })),
+  createFeatureHandle: jest.fn(() => ({
+    name: 'hypernative',
+    useIsEnabled: jest.fn(() => true),
+    load: jest.fn(),
+  })),
+}))
+
 const mockUseSafeShield = useSafeShield as jest.MockedFunction<typeof useSafeShield>
-const mockUseHypernativeOAuth = useHypernativeOAuth as jest.MockedFunction<typeof useHypernativeOAuth>
-const mockUseIsHypernativeEligible = useIsHypernativeEligible as jest.MockedFunction<typeof useIsHypernativeEligible>
 const mockUseCheckSimulation = useCheckSimulation as jest.MockedFunction<typeof useCheckSimulation>
 
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]

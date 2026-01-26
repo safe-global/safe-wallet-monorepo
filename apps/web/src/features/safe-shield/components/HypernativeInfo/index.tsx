@@ -1,10 +1,10 @@
 import { type ReactElement } from 'react'
-import { Box, Button, SvgIcon, Stack, Typography } from '@mui/material'
+import { Box, Button, SvgIcon, Stack, Tooltip, Typography } from '@mui/material'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 
 export const HypernativeInfo = ({
   hypernativeAuth,
@@ -13,6 +13,8 @@ export const HypernativeInfo = ({
   hypernativeAuth?: HypernativeAuthStatus
   showActiveStatus?: boolean
 }): ReactElement | null => {
+  const hypernative = useLoadFeature(HypernativeFeature)
+
   // If hypernativeAuth is not provided, don't show the HypernativeInfo
   if (!hypernativeAuth) {
     return null
@@ -26,6 +28,9 @@ export const HypernativeInfo = ({
   if (!showActiveStatus && !showLoginCard) {
     return null
   }
+
+  // Use HypernativeTooltip if available, otherwise fall back to MUI Tooltip
+  const TooltipComponent = hypernative?.components?.HypernativeTooltip ?? Tooltip
 
   return (
     <Stack gap={2} p={1.5} pb={2}>
@@ -47,9 +52,9 @@ export const HypernativeInfo = ({
               Hypernative Guardian is active
             </Typography>
           </Stack>
-          <HypernativeTooltip title="Hypernative Guardian is actively monitoring this transaction.">
+          <TooltipComponent title="Hypernative Guardian is actively monitoring this transaction.">
             <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
-          </HypernativeTooltip>
+          </TooltipComponent>
         </Stack>
       )}
 
