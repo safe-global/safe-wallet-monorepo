@@ -7,6 +7,7 @@ import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
+import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
@@ -60,7 +61,11 @@ describe('SingleTx', () => {
       }),
     )
 
-    const screen = render(<SingleTx />)
+    const screen = render(
+      <QueueAssessmentProvider>
+        <SingleTx />
+      </QueueAssessmentProvider>,
+    )
 
     const button = screen.queryByText('Details')
     expect(button).not.toBeInTheDocument()
@@ -75,7 +80,11 @@ describe('SingleTx', () => {
       }),
     )
 
-    const screen = render(<SingleTx />)
+    const screen = render(
+      <QueueAssessmentProvider>
+        <SingleTx />
+      </QueueAssessmentProvider>,
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
@@ -97,7 +106,11 @@ describe('SingleTx', () => {
       }),
     )
 
-    const screen = render(<SingleTx />)
+    const screen = render(
+      <QueueAssessmentProvider>
+        <SingleTx />
+      </QueueAssessmentProvider>,
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Failed to load transaction')).toBeInTheDocument()
