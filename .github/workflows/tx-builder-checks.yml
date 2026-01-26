@@ -65,7 +65,7 @@ jobs:
       - name: Run unit tests
         run: yarn workspace @safe-global/tx-builder test --ci --coverage
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           flags: tx-builder
           fail_ci_if_error: false
