@@ -40,7 +40,18 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualHooks } from '@/features/counterfactual/components'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
+
+/**
+ * Wrapper that lazy-loads CounterfactualHooks via the feature system.
+ * This ensures the entire counterfactual feature loads as a single chunk
+ * through handle.ts rather than scattered next/dynamic imports.
+ */
+const CounterfactualHooksLoader = () => {
+  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
+  return <CounterfactualHooks />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
@@ -159,7 +170,7 @@ const SafeWalletApp = ({
 
             <Recovery />
 
-            <CounterfactualHooks />
+            <CounterfactualHooksLoader />
 
             <Analytics />
 

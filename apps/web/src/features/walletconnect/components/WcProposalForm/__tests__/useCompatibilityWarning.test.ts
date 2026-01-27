@@ -2,7 +2,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { renderHook, getAppName } from '@/tests/test-utils'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
-import * as wcUtils from '@/features/walletconnect/services/utils'
+import * as wcUtils from '../../../services/utils'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 

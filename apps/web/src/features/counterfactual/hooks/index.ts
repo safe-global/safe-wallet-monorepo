@@ -2,4 +2,5 @@
 export { useIsCounterfactualEnabled } from './useIsCounterfactualEnabled'
 export { default as useIsCounterfactualSafe } from './useIsCounterfactualSafe'
 export { useCounterfactualBalances } from './useCounterfactualBalances'
-export { safeCreationPendingStatuses } from './usePendingSafeStatuses'
+// Lightweight status mapping - separate from hook to prevent pulling in heavy deps
+export { safeCreationPendingStatuses } from './safeCreationPendingStatuses'
