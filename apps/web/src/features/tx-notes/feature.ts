@@ -4,6 +4,9 @@
  * This entire file is lazy-loaded via createFeatureHandle.
  * Use direct imports - do NOT use lazy() inside (one dynamic import per feature).
  *
+ * IMPORTANT: Hooks are NOT included here - they're exported from index.ts
+ * to avoid Rules of Hooks violations (lazy-loading hooks changes hook count between renders).
+ *
  * Loaded when:
  * 1. The feature flag is enabled
  * 2. A consumer calls useLoadFeature(TxNotesFeature)
@@ -20,8 +23,8 @@ import { encodeTxNote } from './services/encodeTxNote'
 
 // Flat structure - naming conventions determine stub behavior:
 // - PascalCase → component (stub renders null)
-// - useSomething → hook (stub returns {})
-// - camelCase → service (stub is no-op)
+// - camelCase → service (undefined when not ready)
+// NO hooks here - they're exported from index.ts
 const feature: TxNotesContract = {
   // Components
   TxNote,

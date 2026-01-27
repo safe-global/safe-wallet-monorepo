@@ -25,11 +25,14 @@ This tool helps automate the migration of features from the old architecture to 
 
 ### What requires manual cleanup
 
-- Adjusting the public API in `contract.ts`
+- Adjusting the public API in `contract.ts` (components and services only, NO hooks)
 - Completing the migration in consumer files:
-  - Adding `useLoadFeature()` calls
-  - Converting component/hook/service usage
-  - Removing unnecessary null checks
+  - Adding `useLoadFeature()` calls for components/services
+  - Importing hooks directly from feature index
+  - Converting component usage to `feature.Component`
+  - Converting service usage to `feature.service?.method()` with `$isReady` checks
+  - Removing unnecessary null checks for components
+- Keeping hooks lightweight (minimal imports, heavy logic in services)
 - Fixing type errors
 - Updating tests
 
@@ -200,17 +203,22 @@ function Consumer() {
 }
 
 // After
-import { MyFeature } from '@/features/myfeature'
+import { MyFeature, useMyHook } from '@/features/myfeature'
 import { useLoadFeature } from '@/features/__core__'
 
 function Consumer() {
   const feature = useLoadFeature(MyFeature)
 
+  // Hooks are imported directly (always loaded, not lazy)
+  const data = useMyHook()
+
+  // Components render via feature handle (lazy-loaded)
   // No null checks needed - proxy stubs handle it
-  const data = feature.useMyHook()
   return <feature.MyComponent data={data} />
 }
 ```
+
+**Important:** Hooks are exported directly from `index.ts` (not lazy-loaded) to avoid Rules of Hooks violations. Services are accessed via the feature handle and should check `$isReady` before calling.
 
 ### 3. Fix Type Errors
 
@@ -231,12 +239,14 @@ jest.mock('@/features/myfeature', () => ({
     useIsEnabled: () => true,
     load: () => Promise.resolve({
       default: {
-        // Flat structure
+        // Flat structure - components and services only (NO hooks)
         MyComponent: () => <div>Mock</div>,
-        useMyHook: () => ({ data: 'mock' }),
+        myService: jest.fn(),
       },
     }),
   },
+  // Hooks are exported directly (always loaded, not in lazy-loaded feature)
+  useMyHook: jest.fn(() => ({ data: 'mock' })),
 }))
 ```
 
@@ -260,10 +270,11 @@ For the complete architecture guide, see:
 
 Key principles:
 
-- **Flat structure** - no nested `components`/`hooks`/`services`
-- **Proxy-based stubs** - always returns an object, never null
-- **Naming conventions** - `PascalCase` (component), `useSomething` (hook), `camelCase` (service)
-- **One dynamic import** - `feature.ts` is lazy-loaded, use direct imports inside it
+- **Flat structure** - no nested `components`/`services` in contract (hooks exported separately)
+- **Hooks are NOT lazy-loaded** - exported directly from `index.ts` to avoid Rules of Hooks violations
+- **Proxy-based stubs** - always returns an object for components/services, never null
+- **Naming conventions** - `PascalCase` (component), `camelCase` (service)
+- **One dynamic import** - `feature.ts` is lazy-loaded, use direct imports inside it (NO hooks in feature.ts)
 - **typeof pattern** - use `typeof` in contracts for IDE navigation
 
 ## Troubleshooting

@@ -1,7 +1,7 @@
 /**
  * TxNotes Feature - Public API
  *
- * This feature provides [brief description].
+ * This feature provides transaction notes functionality.
  *
  * ## Usage
  *
@@ -28,11 +28,12 @@
  * }
  * ```
  *
- * All feature functionality is accessed via flat structure from useLoadFeature().
+ * Components and services are accessed via flat structure from useLoadFeature().
+ * Hooks are exported directly (always loaded, not lazy) to avoid Rules of Hooks violations.
+ *
  * Naming conventions determine stub behavior:
  * - PascalCase → component (stub renders null)
- * - useSomething → hook (stub returns {})
- * - camelCase → service (stub is no-op)
+ * - camelCase → service (undefined when not ready)
  */
 
 import { createFeatureHandle } from '@/features/__core__'
@@ -40,3 +41,6 @@ import type { TxNotesContract } from './contract'
 
 // Feature handle - uses semantic mapping
 export const TxNotesFeature = createFeatureHandle<TxNotesContract>('tx-notes')
+
+// Contract type (for type annotations if needed)
+export type { TxNotesContract } from './contract'
