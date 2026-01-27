@@ -1,4 +1,5 @@
-import { CounterfactualStatusButton } from '@/features/counterfactual/components'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -33,6 +34,7 @@ const SafeHeader = (): ReactElement => {
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
+  const { CounterfactualStatusButton } = useLoadFeature(CounterfactualFeature)
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
@@ -84,7 +86,7 @@ const SafeHeader = (): ReactElement => {
             <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 
-          <CounterfactualStatusButton />
+          {CounterfactualStatusButton && <CounterfactualStatusButton />}
 
           <EnvHintButton />
         </div>
