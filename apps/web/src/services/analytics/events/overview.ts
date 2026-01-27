@@ -221,16 +221,11 @@ export enum PIN_SAFE_LABELS {
 }
 
 export enum OPEN_SAFE_LABELS {
-  sidebar = 'sidebar',
-  after_create = 'after_create',
   after_add = 'after_add',
-  login_page = 'login_page',
 }
 
 export enum OVERVIEW_LABELS {
   sidebar = 'sidebar',
-  quick_add = 'quick_add',
-  quick_remove = 'quick_remove',
   top_bar = 'top_bar',
   welcome_page = 'welcome_page',
   login_page = 'login_page',

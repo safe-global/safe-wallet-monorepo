@@ -1,5 +1,5 @@
 import { render } from '@/tests/test-utils'
-import { AccountCenter } from '@/components/common/ConnectWallet/AccountCenter'
+import AccountCenter from '@/components/common/ConnectWallet/AccountCenter'
 import { type EIP1193Provider } from '@web3-onboard/core'
 import { act, waitFor } from '@testing-library/react'
 

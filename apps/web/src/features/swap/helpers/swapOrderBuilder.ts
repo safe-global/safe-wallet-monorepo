@@ -48,7 +48,7 @@ export function orderTokenBuilder(): IBuilder<TokenInfo> {
   })
 }
 
-export function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
+function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
   const sellToken = orderTokenBuilder().build()
   const executedFee = faker.string.numeric()
   return Builder.new<SwapOrderTransactionInfo>().with({
@@ -72,7 +72,7 @@ export function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
   })
 }
 
-export function twapOrderBuilder(): IBuilder<TwapOrderTransactionInfo> {
+function twapOrderBuilder(): IBuilder<TwapOrderTransactionInfo> {
   const sellToken = orderTokenBuilder().build()
   const executedFee = faker.string.numeric()
   return Builder.new<TwapOrderTransactionInfo>().with({

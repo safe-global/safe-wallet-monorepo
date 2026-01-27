@@ -70,7 +70,7 @@ export interface FeatureHandle<TImpl extends FeatureImplementation = FeatureImpl
  *   myService: MyServiceType
  * }
  */
-export type FeatureContract = {
+type FeatureContract = {
   readonly name: string
   useIsEnabled: () => boolean | undefined
 } & FeatureImplementation

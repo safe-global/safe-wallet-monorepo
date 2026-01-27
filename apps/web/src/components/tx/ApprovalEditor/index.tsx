@@ -32,7 +32,7 @@ const Title = ({ isErc721 }: { isErc721: boolean }) => {
   )
 }
 
-export const ApprovalEditor = ({
+const ApprovalEditor = ({
   safeTransaction,
   safeMessage,
 }: {

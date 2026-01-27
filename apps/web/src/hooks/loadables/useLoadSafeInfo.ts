@@ -6,14 +6,14 @@ import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useChainId } from '../useChainId'
+import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
-export const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
+const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const address = useSafeAddressFromUrl()
   const chainId = useChainId()
   const chain = useCurrentChain()

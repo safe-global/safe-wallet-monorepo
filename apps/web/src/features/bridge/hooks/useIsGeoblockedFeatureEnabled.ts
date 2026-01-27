@@ -6,7 +6,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 
 // TODO: Refactor useIsStakingFeatureEnabled/useIsStakingFeatureEnabled to use this
-export function useIsGeoblockedFeatureEnabled(feature: FEATURES): boolean | undefined {
+function useIsGeoblockedFeatureEnabled(feature: FEATURES): boolean | undefined {
   const isBlockedCountry = useContext(GeoblockingContext)
   return useHasFeature(feature) && !isBlockedCountry
 }

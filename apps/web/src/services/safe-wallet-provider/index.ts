@@ -93,7 +93,6 @@ interface RpcRequest {
 export enum RpcErrorCode {
   INVALID_PARAMS = -32602,
   USER_REJECTED = 4001,
-  UNSUPPORTED_METHOD = 4200,
   UNSUPPORTED_CHAIN = 4901,
 }
 

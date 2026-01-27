@@ -106,7 +106,7 @@ type TxSignersProps = {
   proposer?: string
 }
 
-export const TxSigners = ({
+const TxSigners = ({
   txDetails,
   txSummary,
   isTxFromProposer,

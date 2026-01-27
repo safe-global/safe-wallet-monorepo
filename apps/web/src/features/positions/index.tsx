@@ -13,7 +13,7 @@ import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefre
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 
-export const Positions = () => {
+const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false

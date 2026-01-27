@@ -81,10 +81,6 @@ export const UntrustedFallbackHandlerWarning = ({
   />
 )
 
-export const ApprovalWarning = ({ approvalTxCount }: { approvalTxCount: number }): ReactElement => (
-  <Warning title="" severity="warning" text={`${approvalTxCount} ERC20 approval${maybePlural(approvalTxCount)}`} />
-)
-
 export const ThresholdWarning = (): ReactElement => (
   <Warning
     datatestid="threshold-warning"

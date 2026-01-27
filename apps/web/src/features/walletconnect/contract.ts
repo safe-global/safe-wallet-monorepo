@@ -36,7 +36,7 @@ export interface WalletConnectImplementation {
 /**
  * WalletConnect Feature Contract - the full loaded feature type.
  */
-export interface WalletConnectContract extends WalletConnectImplementation {
+interface WalletConnectContract extends WalletConnectImplementation {
   readonly name: 'walletconnect'
   useIsEnabled: () => boolean | undefined
 }

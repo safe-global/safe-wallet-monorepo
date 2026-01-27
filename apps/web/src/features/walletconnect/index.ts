@@ -40,9 +40,6 @@ import type { WalletConnectImplementation } from './contract'
 // Feature handle - uses semantic mapping (walletconnect → FEATURES.NATIVE_WALLETCONNECT)
 export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>('walletconnect')
 
-// Contract type (for type-safe feature access)
-export type { WalletConnectContract } from './contract'
-
 // Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'
 export { WCLoadingState } from './types'

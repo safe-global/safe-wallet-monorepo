@@ -80,7 +80,7 @@ class SuspenseErrorBoundary extends Component<
  * const feature = useFeature('my-feature')
  * return <feature.components.Widget />
  */
-export function withSuspense<P extends object>(
+function withSuspense<P extends object>(
   LazyComponent: LazyExoticComponent<ComponentType<P>>,
   options: WithSuspenseOptions = {},
 ): ComponentType<P> {

@@ -57,7 +57,7 @@ const statusMap: Record<CustomOrderStatuses, StatusProps> = {
     icon: BlockIcon,
   },
 }
-export const StatusLabel = (props: Props): ReactElement => {
+const StatusLabel = (props: Props): ReactElement => {
   const { status } = props
   const { label, color, icon } = statusMap[status]
 

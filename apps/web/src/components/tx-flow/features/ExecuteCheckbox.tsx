@@ -20,5 +20,3 @@ const ExecuteCheckboxSlot = withSlot({
   id: 'executeCheckbox',
   useSlotCondition: useShouldRegisterSlot,
 })
-
-export default ExecuteCheckboxSlot

@@ -23,13 +23,6 @@ const validateTransaction = (t: BaseTransaction): boolean => {
 
 export const isTxValid = (txs: BaseTransaction[]): boolean => txs.length > 0 && txs.every((t) => validateTransaction(t))
 
-export const getInteractionTitle = (value?: string, chain?: ChainInfo) => {
-  const { decimals, symbol } = chain!.nativeCurrency
-  return `Interact with${
-    Number(value) !== 0 ? ` (and send ${formatVisualAmount(value || 0, decimals)} ${symbol} to)` : ''
-  }:`
-}
-
 /**
  * If message is a hex value and is Utf8 encoded string we decode it, else we return the raw message
  * @param {string} message raw input message

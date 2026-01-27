@@ -17,7 +17,7 @@ interface Props {
   isWarningEnabled?: boolean
 }
 
-export const DecodedData = ({
+const DecodedData = ({
   txData,
   toInfo,
   isTxExecuted = false,

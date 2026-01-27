@@ -10,7 +10,7 @@ interface HypernativeLogoProps extends Omit<SvgIconProps, 'component'> {
  * HypernativeLogo component that wraps the SVG to prevent ID collisions
  * when rendered multiple times. Uses React's useId hook to generate unique IDs.
  */
-export const HypernativeLogo = (props: HypernativeLogoProps) => {
+const HypernativeLogo = (props: HypernativeLogoProps) => {
   const uniqueId = useId()
   const filterId = `invert-${uniqueId}`
   const maskId = `logoMask-${uniqueId}`

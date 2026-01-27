@@ -7,7 +7,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { getDomainHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
-export const SafeTxHashDataRow = ({
+const SafeTxHashDataRow = ({
   safeTxData,
   safeTxHash,
 }: {

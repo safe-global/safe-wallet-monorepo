@@ -4,7 +4,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { getSafeTxHashFromDetails } from '../../services/safeTxHashCalculation'
-import { HnSecurityReportBtn } from './HnSecurityReportBtn'
+import HnSecurityReportBtn from './HnSecurityReportBtn'
 
 export interface HnSecurityReportBtnWithTxHashProps {
   txDetails: TransactionDetails
@@ -28,7 +28,7 @@ export const useSafeTxHash = (txDetails: TransactionDetails): string | null => {
  * and passes it to HnSecurityReportBtn. The hash is the hash of the transaction
  * struct without signatures, which is the correct hash for security reports.
  */
-export const HnSecurityReportBtnWithTxHash = ({
+const HnSecurityReportBtnWithTxHash = ({
   txDetails,
 }: HnSecurityReportBtnWithTxHashProps): ReactElement | null => {
   const chainId = useChainId()
