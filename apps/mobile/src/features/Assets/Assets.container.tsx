@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 
@@ -7,24 +7,38 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 import { TokensContainer } from '@/src/features/Assets/components/Tokens'
 import { NFTsContainer } from '@/src/features/Assets/components/NFTs'
+import { PositionsContainer } from '@/src/features/Assets/components/Positions'
 import { AssetsHeaderContainer } from '@/src/features/Assets/components/AssetsHeader'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-const tabItems = [
-  {
-    label: 'Tokens',
-    Component: TokensContainer,
-  },
-  {
-    label: `NFTs`,
-    Component: NFTsContainer,
-  },
-]
-
 export function AssetsContainer() {
   const router = useRouter()
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const hasPositions = useHasFeature(FEATURES.POSITIONS)
+
+  const tabItems = useMemo(() => {
+    const items = [
+      {
+        label: 'Tokens',
+        Component: TokensContainer,
+      },
+    ]
+
+    if (hasPositions) {
+      items.push({
+        label: 'Positions',
+        Component: PositionsContainer,
+      })
+    }
+
+    items.push({
+      label: 'NFTs',
+      Component: NFTsContainer,
+    })
+
+    return items
+  }, [hasPositions])
 
   const handleOpenManageTokens = () => {
     router.push('/manage-tokens-sheet')

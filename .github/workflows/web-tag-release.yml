@@ -16,6 +16,7 @@ jobs:
       attestations: write
       contents: write
       id-token: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     steps:
@@ -131,9 +132,14 @@ jobs:
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
           VERSION_TAG: ${{ steps.version.outputs.version }}
 
-      - name: Back-merge to dev
+      - name: Create back-merge PR
         continue-on-error: true
         id: backmerge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -141,30 +147,70 @@ jobs:
           # Fetch latest changes
           git fetch origin main dev
 
-          # Checkout dev branch with proper tracking (fixes "unrelated histories" error)
-          git checkout -B dev origin/dev
+          # Create a branch for the back-merge PR
+          BRANCH_NAME="backmerge/main-to-dev-${VERSION}"
+          git checkout -B "$BRANCH_NAME" origin/dev
 
-          # Attempt to merge main into dev
-          if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
-            # Push to dev if merge succeeded
-            git push origin dev
-            echo "✅ Back-merge completed: main → dev"
+          # Attempt to merge main into the branch
+          if git merge origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
+            git push origin "$BRANCH_NAME"
+
+            # Create PR body file to avoid shell interpolation issues
+            cat > /tmp/pr-body.md << EOF
+          ## Back-merge from main
+
+          This PR syncs changes from \`main\` back to \`dev\` after release ${VERSION}.
+
+          ✅ Clean merge - no conflicts detected.
+
+          🤖 *Created automatically by [Tag Release workflow](https://github.com/${REPO}/actions/runs/${RUN_ID})*
+          EOF
+
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$BRANCH_NAME" \
+              --title "🔄 Back-merge main to dev after ${VERSION}" \
+              --body-file /tmp/pr-body.md \
+              | tail -n 1)
+
+            echo "✅ Back-merge PR created: $PR_URL"
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
           else
-            # Merge failed due to conflicts
-            echo "⚠️ Back-merge failed due to conflicts"
-            echo "Please manually resolve conflicts using the instructions in the documentation"
+            # Merge failed due to conflicts - abort and create PR with conflict note
             git merge --abort
-            exit 1
-          fi
+            git checkout -B "$BRANCH_NAME" origin/dev
+            git push origin "$BRANCH_NAME"
 
-      - name: Report back-merge status
-        if: always()
-        run: |
-          if [ "${{ steps.backmerge.outcome }}" = "success" ]; then
-            echo "✅ Back-merge to dev completed successfully"
-          else
-            echo "⚠️ Back-merge to dev failed - manual intervention required"
-            echo "See troubleshooting docs: https://github.com/${{ github.repository }}/blob/dev/apps/web/docs/release-procedure-automated.md#back-merge-conflicts"
+            # Create PR body file to avoid shell interpolation issues
+            cat > /tmp/pr-body.md << EOF
+          ## ⚠️ Back-merge from main - CONFLICTS DETECTED
+
+          This PR syncs changes from \`main\` back to \`dev\` after release ${VERSION}.
+
+          **Action Required:** Please resolve merge conflicts manually by merging \`main\` into this branch.
+
+          \`\`\`bash
+          git fetch origin
+          git checkout ${BRANCH_NAME}
+          git merge origin/main
+          # Resolve conflicts
+          git push
+          \`\`\`
+
+          🤖 *Created automatically by [Tag Release workflow](https://github.com/${REPO}/actions/runs/${RUN_ID})*
+          EOF
+
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$BRANCH_NAME" \
+              --title "🔄 Back-merge main to dev after ${VERSION} (CONFLICTS)" \
+              --body-file /tmp/pr-body.md \
+              | tail -n 1)
+
+            echo "Back-merge PR created with conflicts: $PR_URL"
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "has_conflicts=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Publish GitHub release
@@ -185,12 +231,17 @@ jobs:
 
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
-          BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
+          BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
+          HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
 
-          if [ "$BACKMERGE_STATUS" = "success" ]; then
-            BACKMERGE_MSG="_Back-merge to dev completed automatically_ 🔄"
+          if [ -n "$BACKMERGE_PR_URL" ]; then
+            if [ "$HAS_CONFLICTS" = "true" ]; then
+              BACKMERGE_MSG="🔄 <$BACKMERGE_PR_URL|Back-merge PR> created (conflicts need resolution)"
+            else
+              BACKMERGE_MSG="🔄 <$BACKMERGE_PR_URL|Back-merge PR> created - please review and merge"
+            fi
           else
-            BACKMERGE_MSG="_⚠️ Back-merge failed - manual resolution needed_"
+            BACKMERGE_MSG="_⚠️ Back-merge PR creation failed - manual action needed_"
           fi
 
           jq -n \

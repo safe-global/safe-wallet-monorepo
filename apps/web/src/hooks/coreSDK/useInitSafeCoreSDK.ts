@@ -1,4 +1,4 @@
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import useSafeInfo from '@/hooks/useSafeInfo'

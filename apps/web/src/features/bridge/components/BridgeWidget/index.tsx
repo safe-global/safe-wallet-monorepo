@@ -8,8 +8,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-
-export const BRIDGE_WIDGET_URL = 'https://iframe.jumper.exchange/bridge'
+import { BRIDGE_WIDGET_URL } from '../../constants'
 
 export function BridgeWidget(): ReactElement | null {
   const isDarkMode = useDarkMode()

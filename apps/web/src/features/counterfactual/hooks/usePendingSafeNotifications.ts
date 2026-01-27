@@ -1,4 +1,4 @@
-import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/services/safeCreationEvents'
+import { SafeCreationEvent, safeCreationSubscribe } from '../services/safeCreationEvents'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useEffect } from 'react'
 import { formatError } from '@safe-global/utils/utils/formatters'

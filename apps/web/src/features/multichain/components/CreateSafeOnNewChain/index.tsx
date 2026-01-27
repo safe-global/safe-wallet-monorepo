@@ -9,8 +9,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
-import { replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
-
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
@@ -50,6 +50,7 @@ const ReplaySafeDialog = ({
 
   const customRpc = useAppSelector(selectRpc)
   const dispatch = useAppDispatch()
+  const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
@@ -89,7 +90,7 @@ const ReplaySafeDialog = ({
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
       // 2. Replay Safe creation and add it to the counterfactual Safes
-      replayCounterfactualSafeDeployment(
+      replayCounterfactualSafeDeployment?.(
         selectedChain.chainId,
         safeAddress,
         safeCreationData,

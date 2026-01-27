@@ -4,8 +4,10 @@ import ExternalLink from '@/components/common/ExternalLink'
 import ModalDialog from '@/components/common/ModalDialog'
 import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
-import FirstTxFlow from '@/features/counterfactual/FirstTxFlow'
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
+import { isReplayedSafeProps } from '@/features/counterfactual/services'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -23,8 +25,6 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
-import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
-import { isReplayedSafeProps } from '@/features/counterfactual/utils'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
 import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
@@ -261,7 +261,13 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
   )
 }
 
-const FirstTransactionWidget = ({ completed }: { completed: boolean }) => {
+const FirstTransactionWidget = ({
+  completed,
+  FirstTxFlow,
+}: {
+  completed: boolean
+  FirstTxFlow?: React.ComponentType<{ open: boolean; onClose: () => void }>
+}) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const title = 'Create your first transaction'
@@ -298,12 +304,20 @@ const FirstTransactionWidget = ({ completed }: { completed: boolean }) => {
           </CheckWallet>
         )}
       </StatusCard>
-      <FirstTxFlow open={open} onClose={() => setOpen(false)} />
+      {FirstTxFlow && <FirstTxFlow open={open} onClose={() => setOpen(false)} />}
     </>
   )
 }
 
-const ActivateSafeWidget = ({ chain }: { chain: Chain | undefined }) => {
+const ActivateSafeWidget = ({
+  chain,
+  ActivateAccountButton,
+  FirstTxFlow,
+}: {
+  chain: Chain | undefined
+  ActivateAccountButton?: React.ComponentType
+  FirstTxFlow?: React.ComponentType<{ open: boolean; onClose: () => void }>
+}) => {
   const [open, setOpen] = useState<boolean>(false)
 
   const title = `Activate account ${chain ? 'on ' + chain.chainName : ''}`
@@ -326,10 +340,10 @@ const ActivateSafeWidget = ({ chain }: { chain: Chain | undefined }) => {
             mt: 2,
           }}
         >
-          <ActivateAccountButton />
+          {ActivateAccountButton && <ActivateAccountButton />}
         </Box>
       </StatusCard>
-      <FirstTxFlow open={open} onClose={() => setOpen(false)} />
+      {FirstTxFlow && <FirstTxFlow open={open} onClose={() => setOpen(false)} />}
     </>
   )
 }
@@ -361,6 +375,7 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
+  const { ActivateAccountButton, FirstTxFlow } = useLoadFeature(CounterfactualFeature)
 
   // Check if banner should show (for conditional rendering of AccountReadyWidget)
   // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well
@@ -469,9 +484,13 @@ const FirstSteps = () => {
             {isActivating ? (
               <UsefulHintsWidget />
             ) : isMultiSig || isReplayedSafe ? (
-              <ActivateSafeWidget chain={chain} />
+              <ActivateSafeWidget
+                chain={chain}
+                ActivateAccountButton={ActivateAccountButton}
+                FirstTxFlow={FirstTxFlow}
+              />
             ) : (
-              <FirstTransactionWidget completed={hasOutgoingTransactions} />
+              <FirstTransactionWidget completed={hasOutgoingTransactions} FirstTxFlow={FirstTxFlow} />
             )}
           </Grid>
 

@@ -1,13 +1,14 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import CounterfactualForm from '@/features/counterfactual/CounterfactualForm'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe, CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { isCreation, trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
+  const { CounterfactualForm } = useLoadFeature(CounterfactualFeature)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {

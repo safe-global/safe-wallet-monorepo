@@ -1,19 +1,12 @@
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
-import {
-  safeCreationDispatch,
-  SafeCreationEvent,
-  safeCreationSubscribe,
-} from '@/features/counterfactual/services/safeCreationEvents'
-import {
-  removeUndeployedSafe,
-  selectUndeployedSafes,
-  updateUndeployedSafeStatus,
-} from '@/features/counterfactual/store/undeployedSafesSlice'
+import { safeCreationDispatch, SafeCreationEvent, safeCreationSubscribe } from '../services/safeCreationEvents'
+import { removeUndeployedSafe, selectUndeployedSafes, updateUndeployedSafeStatus } from '../store/undeployedSafesSlice'
 import {
   checkSafeActionViaRelay,
   checkSafeActivation,
   extractCounterfactualSafeSetup,
-} from '@/features/counterfactual/utils'
+} from '../services/safeDeployment'
+import { safeCreationPendingStatuses } from './safeCreationPendingStatuses'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -25,16 +18,6 @@ import { isSmartContract } from '@/utils/wallets'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
-
-export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
-  [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
-  [SafeCreationEvent.PROCESSING]: PendingSafeStatus.PROCESSING,
-  [SafeCreationEvent.RELAYING]: PendingSafeStatus.RELAYING,
-  [SafeCreationEvent.SUCCESS]: null,
-  [SafeCreationEvent.INDEXED]: null,
-  [SafeCreationEvent.FAILED]: null,
-  [SafeCreationEvent.REVERTED]: null,
-}
 
 const usePendingSafeMonitor = (): void => {
   const undeployedSafesByChain = useAppSelector(selectUndeployedSafes)

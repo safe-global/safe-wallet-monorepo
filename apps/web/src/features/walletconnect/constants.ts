@@ -41,6 +41,9 @@ export const SAFE_WALLET_METADATA = {
 
 export const EIP155 = 'eip155' as const
 
+// WalletConnect URI search parameter name
+export const WC_URI_SEARCH_PARAM = 'wc'
+
 // Bridges enforcing same address on destination chains
 export const BlockedBridges = [
   'app.chainport.io',

@@ -4,7 +4,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
+import { useCounterfactualBalances } from '@/features/counterfactual/hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { type PortfolioBalances, createPortfolioBalances, useTokenListSetting } from './useLoadBalances'
 

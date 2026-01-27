@@ -1,11 +1,10 @@
 import usePositions from '@/features/positions/hooks/usePositions'
+import { calculatePositionsFiatTotal } from '@safe-global/utils/features/positions'
 
 const usePositionsFiatTotal = () => {
   const { data: protocols } = usePositions()
 
-  if (!protocols) return 0
-
-  return protocols.reduce((acc, protocol) => acc + Number(protocol.fiatTotal), 0)
+  return calculatePositionsFiatTotal(protocols)
 }
 
 export default usePositionsFiatTotal

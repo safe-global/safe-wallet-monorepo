@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PositionsError renders correctly 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+    testID="theme-light"
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "gap": 16,
+          "marginTop": 16,
+        }
+      }
+      testID="positions-error"
+    >
+      <Text
+        accessibilityRole="header"
+        style={
+          {
+            "color": "#121312",
+            "fontFamily": "DMSans-SemiBold",
+            "fontSize": 16,
+            "letterSpacing": 0,
+            "lineHeight": 17.6,
+            "marginBottom": 0,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "marginTop": 0,
+            "userSelect": "auto",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Couldn't load positions
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontFamily": "DM Sans",
+            "textAlign": "center",
+            "width": "80%",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Something went wrong. Please try to load the page again.
+      </Text>
+      <View
+        focusVisibleStyle={{}}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#DDDEE0",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 8,
+            "borderBottomRightRadius": 8,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 8,
+            "borderTopRightRadius": 8,
+            "borderTopWidth": 1,
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "fontWeight": 700,
+            "height": "auto",
+            "justifyContent": "center",
+            "marginBottom": 0,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "marginTop": 0,
+            "paddingBottom": 14,
+            "paddingLeft": 20,
+            "paddingRight": 20,
+            "paddingTop": 14,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "$colorPrimary",
+                "fontSize": 16,
+              },
+              undefined,
+              {
+                "fontFamily": "SafeIcons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "height": 0,
+              "minHeight": 0,
+              "minWidth": 3.78,
+              "width": 3.78,
+            }
+          }
+        />
+        <Text
+          lineBreakMode="clip"
+          numberOfLines={1}
+          style={
+            {
+              "color": "#121312",
+              "flexGrow": 0,
+              "flexShrink": 1,
+              "fontFamily": "DMSans-Bold",
+              "fontSize": 14,
+              "letterSpacing": -0.1,
+              "lineHeight": 15.400000000000002,
+              "marginBottom": -2.5,
+              "userSelect": "none",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Retry
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
