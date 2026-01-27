@@ -7,7 +7,7 @@ import * as path from 'path'
 import type { FeatureConfig } from '../types.js'
 import { getFeaturePath, moveFile } from '../utils.js'
 
-interface FileMove {
+export interface FileMove {
   from: string
   to: string
 }

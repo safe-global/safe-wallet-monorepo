@@ -114,6 +114,55 @@ function discoverExports(featurePath: string): ExportInfo[] {
 }
 
 /**
+ * Parse default import from a regex match
+ */
+function parseDefaultImport(
+  defaultImport: string,
+  featurePathPattern: string,
+  subPath: string | undefined,
+  isTypeOnly: boolean,
+): ImportInfo {
+  return {
+    name: defaultImport,
+    type: getExportType(defaultImport),
+    importPath: `${featurePathPattern}${subPath || ''}`,
+    isDefault: true,
+    isTypeOnly,
+  }
+}
+
+/**
+ * Parse named imports from a regex match
+ */
+function parseNamedImports(
+  namedImportsString: string,
+  featurePathPattern: string,
+  subPath: string | undefined,
+  isTypeOnly: boolean,
+): ImportInfo[] {
+  const names = namedImportsString
+    .split(',')
+    .map((n) =>
+      n
+        .trim()
+        .split(/\s+as\s+/)[0]!
+        .trim(),
+    )
+    .filter((n) => n.length > 0)
+
+  return names.map((name) => {
+    const cleanName = name.replace(/^type\s+/, '')
+    return {
+      name: cleanName,
+      type: getExportType(cleanName),
+      importPath: `${featurePathPattern}${subPath || ''}`,
+      isDefault: false,
+      isTypeOnly: isTypeOnly || name.startsWith('type '),
+    }
+  })
+}
+
+/**
  * Parse imports from a TypeScript file
  */
 function parseImports(filePath: string, featureName: string): ImportInfo[] {
@@ -131,39 +180,16 @@ function parseImports(filePath: string, featureName: string): ImportInfo[] {
 
   for (const match of content.matchAll(importRegex)) {
     const isTypeOnly = match[0]!.includes('import type')
-    const namedImports = match[1]
+    const namedImportsString = match[1]
     const defaultImport = match[2]
     const subPath = match[3]
 
     if (defaultImport) {
-      imports.push({
-        name: defaultImport,
-        type: getExportType(defaultImport),
-        importPath: `${featurePathPattern}${subPath || ''}`,
-        isDefault: true,
-        isTypeOnly,
-      })
+      imports.push(parseDefaultImport(defaultImport, featurePathPattern, subPath, isTypeOnly))
     }
 
-    if (namedImports) {
-      const names = namedImports.split(',').map((n) =>
-        n
-          .trim()
-          .split(/\s+as\s+/)[0]!
-          .trim(),
-      )
-      for (const name of names) {
-        const cleanName = name.replace(/^type\s+/, '')
-        if (cleanName) {
-          imports.push({
-            name: cleanName,
-            type: getExportType(cleanName),
-            importPath: `${featurePathPattern}${subPath || ''}`,
-            isDefault: false,
-            isTypeOnly: isTypeOnly || name.startsWith('type '),
-          })
-        }
-      }
+    if (namedImportsString) {
+      imports.push(...parseNamedImports(namedImportsString, featurePathPattern, subPath, isTypeOnly))
     }
   }
 
@@ -197,46 +223,52 @@ function findConsumers(featureName: string): Consumer[] {
 }
 
 /**
+ * Add unique export name to the appropriate category
+ */
+function addToCategoryIfUnique(categories: Record<string, string[]>, type: string, name: string): void {
+  if (!categories[type]) {
+    categories[type] = []
+  }
+  if (!categories[type]!.includes(name)) {
+    categories[type]!.push(name)
+  }
+}
+
+/**
  * Categorize exports into public API
  */
 function categorizeExports(exports: ExportInfo[]) {
-  const components: string[] = []
-  const hooks: string[] = []
-  const services: string[] = []
-  const types: string[] = []
-  const constants: string[] = []
+  const categories: Record<string, string[]> = {
+    components: [],
+    hooks: [],
+    services: [],
+    types: [],
+    constants: [],
+  }
+
+  // Map export types to category names
+  const typeToCategory: Record<string, string> = {
+    component: 'components',
+    hook: 'hooks',
+    service: 'services',
+    type: 'types',
+    constant: 'constants',
+  }
 
   for (const exp of exports) {
-    switch (exp.type) {
-      case 'component':
-        if (!components.includes(exp.name)) {
-          components.push(exp.name)
-        }
-        break
-      case 'hook':
-        if (!hooks.includes(exp.name)) {
-          hooks.push(exp.name)
-        }
-        break
-      case 'service':
-        if (!services.includes(exp.name)) {
-          services.push(exp.name)
-        }
-        break
-      case 'type':
-        if (!types.includes(exp.name)) {
-          types.push(exp.name)
-        }
-        break
-      case 'constant':
-        if (!constants.includes(exp.name)) {
-          constants.push(exp.name)
-        }
-        break
+    const category = typeToCategory[exp.type]
+    if (category) {
+      addToCategoryIfUnique(categories, category, exp.name)
     }
   }
 
-  return { components, hooks, services, types, constants }
+  return {
+    components: categories.components!,
+    hooks: categories.hooks!,
+    services: categories.services!,
+    types: categories.types!,
+    constants: categories.constants!,
+  }
 }
 
 /**
