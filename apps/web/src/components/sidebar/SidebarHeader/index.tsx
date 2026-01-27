@@ -86,7 +86,7 @@ const SafeHeader = (): ReactElement => {
             <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
           </Track>
 
-          {CounterfactualStatusButton && <CounterfactualStatusButton />}
+          <CounterfactualStatusButton />
 
           <EnvHintButton />
         </div>
