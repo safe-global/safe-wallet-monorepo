@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useRefetch } from '@/features/positions/hooks/useRefetch'
+import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import * as useChainId from '@/hooks/useChainId'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
@@ -15,7 +15,7 @@ import { toBeHex } from 'ethers'
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 const CHAIN_ID = '5'
 
-describe('useRefetch', () => {
+describe('useRefetchBalances', () => {
   const mockSafe = extendedSafeInfoBuilder()
     .with({
       address: { value: SAFE_ADDRESS },
@@ -62,7 +62,7 @@ describe('useRefetch', () => {
     it('should return false when portfolio feature is disabled', async () => {
       jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await waitFor(() => {
         expect(result.current.shouldUsePortfolioEndpoint).toBe(false)
@@ -73,7 +73,7 @@ describe('useRefetch', () => {
       jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
       jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(true)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await waitFor(() => {
         expect(result.current.shouldUsePortfolioEndpoint).toBe(true)
@@ -84,7 +84,7 @@ describe('useRefetch', () => {
       jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
       jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(false)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await waitFor(() => {
         expect(result.current.shouldUsePortfolioEndpoint).toBe(false)
@@ -100,7 +100,7 @@ describe('useRefetch', () => {
         refetch: portfolioRefetch,
       } as any)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await result.current.refetch()
 
@@ -119,7 +119,7 @@ describe('useRefetch', () => {
         refetch: txServiceBalancesRefetch,
       } as any)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await result.current.refetch()
 
@@ -136,7 +136,7 @@ describe('useRefetch', () => {
         refetch: portfolioRefetch,
       } as any)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await result.current.refetchPositions()
 
@@ -155,7 +155,7 @@ describe('useRefetch', () => {
         refetch: txServiceBalancesRefetch,
       } as any)
 
-      const { result } = renderHook(() => useRefetch())
+      const { result } = renderHook(() => useRefetchBalances())
 
       await result.current.refetchPositions()
 

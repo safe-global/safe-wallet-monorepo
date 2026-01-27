@@ -9,11 +9,13 @@ import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
-import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
+import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 
 /**
- * Hook for refetching positions and balances data.
+ * Shared hook for refetching positions and balances data.
  * Automatically selects the appropriate endpoint (portfolio or positions/balances) based on feature flags.
+ *
+ * Used by both the portfolio and positions features.
  *
  * @returns Object containing:
  *   - `refetch`: Function to refetch all data (positions + balances)
@@ -22,7 +24,7 @@ import useIsPositionsFeatureEnabled from './useIsPositionsFeatureEnabled'
  *   - `fulfilledTimeStamp`: Timestamp of the last successful fetch (undefined if no data yet)
  *   - `isFetching`: Boolean indicating if a fetch is currently in progress
  */
-export const useRefetch = () => {
+export const useRefetchBalances = () => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()
   const currency = useAppSelector(selectCurrency)

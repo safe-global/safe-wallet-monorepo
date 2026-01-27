@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Box, IconButton, Tooltip, Typography, type SvgIconProps } from '@mui/material'
 import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
 import { formatDistanceToNow } from 'date-fns'
-import { useRefetch } from '@/features/positions/hooks/useRefetch'
+import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import { PORTFOLIO_CACHE_TIME_MS } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { PORTFOLIO_EVENTS } from '@/services/analytics/events/portfolio'
@@ -36,7 +36,7 @@ const PortfolioRefreshHint = ({
   _isFetching,
   _freezeTime,
 }: PortfolioRefreshHintProps) => {
-  const { refetch, fulfilledTimeStamp: hookFulfilledTimeStamp, isFetching: hookIsFetching } = useRefetch()
+  const { refetch, fulfilledTimeStamp: hookFulfilledTimeStamp, isFetching: hookIsFetching } = useRefetchBalances()
   const fulfilledTimeStamp = _fulfilledTimeStamp ?? hookFulfilledTimeStamp
   const isFetching = _isFetching ?? hookIsFetching
   const [now, setNow] = useState(Date.now)

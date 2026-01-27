@@ -1,0 +1,26 @@
+{
+  "featureName": "portfolio",
+  "featureDir": "apps/web/src/features/portfolio",
+  "featureFlag": "PORTFOLIO_ENDPOINT",
+  "publicApi": {
+    "components": ["PortfolioRefreshHint"],
+    "hooks": ["usePortfolioBalances", "usePortfolioRefetchOnTxHistory"],
+    "services": []
+  },
+  "consumers": [
+    "apps/web/src/pages/_app.tsx",
+    "apps/web/src/pages/balances/index.tsx",
+    "apps/web/src/features/positions/index.tsx",
+    "apps/web/src/components/dashboard/Overview/Overview.tsx",
+    "apps/web/src/hooks/loadables/useLoadBalances.ts"
+  ],
+  "sharedHooks": {
+    "useRefetchBalances": {
+      "movedFrom": "apps/web/src/features/positions/hooks/useRefetch.ts",
+      "movedTo": "apps/web/src/hooks/useRefetchBalances.ts",
+      "reason": "Shared by both portfolio and positions features"
+    }
+  },
+  "migratedAt": "2026-01-27",
+  "notes": "Migrated to v3 feature architecture. Moved useRefetch to shared hooks as useRefetchBalances since it's used by both portfolio and positions features."
+}
