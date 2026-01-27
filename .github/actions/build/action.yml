@@ -71,7 +71,13 @@ runs:
 
     - name: Generate SRI for static scripts
       shell: bash
-      run: yarn workspace @safe-global/web integrity
+      # Skip SRI for Cypress test builds (NODE_ENV=cypress)
+      run: |
+        if [ "$NODE_ENV" != "cypress" ]; then
+          yarn workspace @safe-global/web integrity
+        else
+          echo "Skipping SRI generation for Cypress test environment"
+        fi
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'
