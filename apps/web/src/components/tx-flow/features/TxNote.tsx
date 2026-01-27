@@ -8,17 +8,18 @@ import { SlotName, withSlot } from '../slots'
 
 const TxNote = (): ReactElement => {
   const txNotes = useLoadFeature(TxNotesFeature)
+  const { encodeTxNote, TxNoteForm } = txNotes
   const { txOrigin, setTxOrigin } = useContext(SafeTxContext)
   const { txDetails, isCreation } = useContext(TxFlowContext)
 
   const onNoteChange = useCallback(
     (note: string) => {
-      setTxOrigin(txNotes.encodeTxNote(note, txOrigin))
+      setTxOrigin(encodeTxNote(note, txOrigin))
     },
-    [setTxOrigin, txOrigin, txNotes],
+    [setTxOrigin, txOrigin, encodeTxNote],
   )
 
-  return <txNotes.TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
+  return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }
 
 const useShouldRegisterSlot = () => {

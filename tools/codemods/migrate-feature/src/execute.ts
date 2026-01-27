@@ -10,6 +10,7 @@ import { generateContractTemplate, generateFeatureTemplate, generateIndexTemplat
 import { ensureFolderStructure, planFileReorganization, executeFileReorganization } from './transforms/fileStructure.js'
 import { transformConsumerFile } from './transforms/imports.js'
 import { convertExportsInFiles } from './transforms/exports.js'
+import { updateImportsInMovedFiles } from './transforms/relativeImports.js'
 
 /**
  * Execute the complete migration
@@ -73,8 +74,18 @@ export async function executeMigration(config: FeatureConfig, dryRun: boolean = 
     }
   }
 
+  // Build a map of component exports for import updates
+  const componentExports = new Map<string, string>()
+
   if (componentFiles.length > 0) {
     const exportResult = convertExportsInFiles(componentFiles, dryRun)
+
+    // Build export map from conversion results
+    if (!dryRun) {
+      exportResult.conversions.forEach((c) => {
+        componentExports.set(c.file, c.exportName)
+      })
+    }
 
     if (dryRun) {
       console.log(`   Would convert ${exportResult.filesConverted} component(s) to default exports`)
@@ -94,6 +105,38 @@ export async function executeMigration(config: FeatureConfig, dryRun: boolean = 
     }
   } else {
     console.log('   No component files found')
+  }
+
+  // Step 3.5: Update relative imports in moved files
+  if (moves.length > 0) {
+    console.log('🔗 Step 3.5: Updating relative imports...')
+
+    const importUpdateResult = updateImportsInMovedFiles(moves, componentExports, dryRun)
+
+    if (dryRun) {
+      if (importUpdateResult.filesUpdated > 0) {
+        console.log(
+          `   Would update imports in ${importUpdateResult.filesUpdated} file(s) (${importUpdateResult.totalUpdates} import(s))`,
+        )
+      } else {
+        console.log('   No import updates needed')
+      }
+    } else {
+      if (importUpdateResult.filesUpdated > 0) {
+        console.log(
+          `   ✓ Updated imports in ${importUpdateResult.filesUpdated} file(s) (${importUpdateResult.totalUpdates} import(s))`,
+        )
+        importUpdateResult.details.forEach((d) => {
+          console.log(`     - ${path.basename(path.dirname(d.file))}: ${d.updates} import(s)`)
+        })
+      } else {
+        console.log('   No import updates needed')
+      }
+
+      if (importUpdateResult.errors.length > 0) {
+        result.errors.push(...importUpdateResult.errors)
+      }
+    }
   }
 
   // Step 4: Generate boilerplate files
@@ -211,8 +254,7 @@ export async function executeMigration(config: FeatureConfig, dryRun: boolean = 
   // Manual steps
   console.log('\n📋 Manual steps required:')
   console.log('  1. Review generated contract.ts and adjust public API as needed')
-  console.log('  2. Check for internal imports in moved files (e.g., relative paths)')
-  console.log('  3. Review consumer files and complete the migration:')
+  console.log('  2. Review consumer files and complete the migration:')
   console.log('     - Add: const feature = useLoadFeature(FeatureNameFeature)')
   console.log('     - Replace: <Component /> → <feature.Component />')
   console.log('     - Replace: useHook() → feature.useHook()')
