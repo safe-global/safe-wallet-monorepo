@@ -3,9 +3,15 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useContext } from 'react'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 
-const useIsEarnFeatureEnabled = () => {
+export function useIsEarnFeatureEnabled(): boolean | undefined {
   const isBlockedCountry = useContext(GeoblockingContext)
-  return useHasFeature(FEATURES.EARN) && !isBlockedCountry
+  const hasFeature = useHasFeature(FEATURES.EARN)
+
+  if (hasFeature === undefined) {
+    return undefined
+  }
+
+  return hasFeature && !isBlockedCountry
 }
 
 export const useIsEarnPromoEnabled = () => {

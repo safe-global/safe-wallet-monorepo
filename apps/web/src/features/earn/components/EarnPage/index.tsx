@@ -4,8 +4,8 @@ import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import useConsent from '@/hooks/useConsent'
-import { EARN_CONSENT_STORAGE_KEY } from '@/features/earn/constants'
-import EarnView from '@/features/earn/components/EarnView'
+import { EARN_CONSENT_STORAGE_KEY } from '../../constants'
+import EarnView from '../EarnView'
 
 const EarnPage = () => {
   const { isConsentAccepted, onAccept } = useConsent(EARN_CONSENT_STORAGE_KEY)

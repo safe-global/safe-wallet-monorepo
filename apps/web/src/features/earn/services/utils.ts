@@ -1,4 +1,4 @@
-import { EligibleEarnTokens } from '@/features/earn/constants'
+import { EligibleEarnTokens } from '../constants'
 
 export const vaultTypeToLabel = {
   VaultDeposit: 'Deposit',

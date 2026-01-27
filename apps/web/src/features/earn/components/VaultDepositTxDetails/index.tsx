@@ -1,5 +1,5 @@
 import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import VaultDepositConfirmation from '@/features/earn/components/VaultDepositConfirmation'
+import VaultDepositConfirmation from '../VaultDepositConfirmation'
 import { Box } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import TokenAmount from '@/components/common/TokenAmount'
