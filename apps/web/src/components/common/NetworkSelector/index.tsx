@@ -44,7 +44,7 @@ import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
-const _ChainIndicatorWithFiatBalance = ({
+const ChainIndicatorWithFiatBalance = ({
   isSelected,
   chain,
   safeAddress,
