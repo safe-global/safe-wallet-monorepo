@@ -9,11 +9,6 @@ import {
   INCREASE_ALLOWANCE_SIGNATURE_HASH,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
-const MULTISEND_METHOD = 'multiSend'
-
-const APPROVE_METHOD = 'approve'
-
-
 export enum PSEUDO_APPROVAL_VALUES {
   UNLIMITED = 'Unlimited amount',
 }
