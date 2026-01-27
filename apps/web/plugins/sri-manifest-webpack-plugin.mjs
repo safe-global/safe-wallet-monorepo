@@ -158,8 +158,9 @@ export class SriManifestWebpackPlugin {
 
       content = content.replace(pattern, (match, scriptVar, webpackObj, urlVar, trailingChar) => {
         // Use comma operator to chain expressions without breaking syntax
-        // The && operator short-circuits if no SRI hash exists
-        return `${scriptVar}.src=${webpackObj}.${urlMethod.methodName}(${urlVar}),_sri=window.__CHUNK_SRI_MANIFEST||{},_sri[${urlVar}]&&(${scriptVar}.integrity=_sri[${urlVar}])${trailingChar}`
+        // Check if manifest exists and has the hash, then set integrity attribute
+        // Repeating the window lookup avoids variable scoping issues in strict mode
+        return `${scriptVar}.src=${webpackObj}.${urlMethod.methodName}(${urlVar}),window.__CHUNK_SRI_MANIFEST&&window.__CHUNK_SRI_MANIFEST[${urlVar}]&&(${scriptVar}.integrity=window.__CHUNK_SRI_MANIFEST[${urlVar}])${trailingChar}`
       })
 
       if (content !== originalContent) {
