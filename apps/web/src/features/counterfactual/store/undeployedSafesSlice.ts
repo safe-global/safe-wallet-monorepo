@@ -1,6 +1,6 @@
 import { type RootState } from '@/store'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
+import { selectChainIdAndSafeAddress } from '@/store/common'
 import type {
   UndeployedSafe,
   UndeployedSafesState,

@@ -11,7 +11,7 @@ const useShouldRegisterSlot = () => {
   return (canExecute || canExecuteThroughRole) && !onlyExecute && !isCounterfactualSafe && !isProposing
 }
 
-const ExecuteCheckboxSlot = withSlot({
+const _ExecuteCheckboxSlot = withSlot({
   Component: () => {
     const { setShouldExecute } = useContext(TxFlowContext)
     return <ExecuteCheckbox onChange={setShouldExecute} />

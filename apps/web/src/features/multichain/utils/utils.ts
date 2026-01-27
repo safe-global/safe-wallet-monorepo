@@ -1,4 +1,3 @@
-import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'

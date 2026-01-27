@@ -1,9 +1,8 @@
 import { isHexString, toUtf8String } from 'ethers'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import type { BaseTransaction, ChainInfo } from '@safe-global/safe-apps-sdk'
+import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { validateAddress } from '@safe-global/utils/utils/validation'
 import type { SafeAppDataWithPermissions } from './types'
 import { SafeAppsTag } from '@/config/constants'

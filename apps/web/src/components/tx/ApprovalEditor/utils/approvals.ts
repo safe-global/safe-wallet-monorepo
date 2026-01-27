@@ -1,7 +1,6 @@
 import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { parseUnits } from 'ethers'
-import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type ApprovalInfo } from '../hooks/useApprovalInfos'
 import { UNLIMITED_APPROVAL_AMOUNT } from '@safe-global/utils/utils/tokens'
 import {
