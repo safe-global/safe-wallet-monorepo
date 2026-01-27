@@ -156,14 +156,11 @@ export class SriManifestWebpackPlugin {
       // Using comma operator to maintain expression flow without semicolons
       const pattern = new RegExp(`(\\w)\\.src=(\\w)\\.${urlMethod.methodName}\\((\\w)\\)([,);])`, 'g')
 
-      content = content.replace(
-        pattern,
-        (match, scriptVar, webpackObj, urlVar, trailingChar) => {
-          // Use comma operator to chain expressions without breaking syntax
-          // The && operator short-circuits if no SRI hash exists
-          return `${scriptVar}.src=${webpackObj}.${urlMethod.methodName}(${urlVar}),_sri=window.__CHUNK_SRI_MANIFEST||{},_sri[${urlVar}]&&(${scriptVar}.integrity=_sri[${urlVar}])${trailingChar}`
-        },
-      )
+      content = content.replace(pattern, (match, scriptVar, webpackObj, urlVar, trailingChar) => {
+        // Use comma operator to chain expressions without breaking syntax
+        // The && operator short-circuits if no SRI hash exists
+        return `${scriptVar}.src=${webpackObj}.${urlMethod.methodName}(${urlVar}),_sri=window.__CHUNK_SRI_MANIFEST||{},_sri[${urlVar}]&&(${scriptVar}.integrity=_sri[${urlVar}])${trailingChar}`
+      })
 
       if (content !== originalContent) {
         // Validate that the patch was applied correctly by checking for our marker
