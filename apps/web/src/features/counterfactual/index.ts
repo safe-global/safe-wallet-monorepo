@@ -6,11 +6,16 @@
  * ## Usage
  *
  * ```typescript
- * import { CounterfactualFeature } from '@/features/counterfactual'
+ * import {
+ *   CounterfactualFeature,
+ *   useIsCounterfactualEnabled,
+ *   useIsCounterfactualSafe
+ * } from '@/features/counterfactual'
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
  *   const cf = useLoadFeature(CounterfactualFeature)
+ *   const isEnabled = useIsCounterfactualEnabled()  // Hook (always loaded)
  *
  *   // No null check needed - always returns an object
  *   // Components render null when not ready (proxy stub)
@@ -31,7 +36,10 @@
  * All feature functionality is accessed via flat structure from useLoadFeature().
  * Naming conventions determine stub behavior:
  * - PascalCase → component (stub renders null)
- * - camelCase → service (stub is no-op)
+ * - camelCase → service (undefined when not ready)
+ *
+ * Hooks are exported directly from this file (always loaded, not lazy) to avoid
+ * Rules of Hooks violations.
  *
  * For store exports (slice, selectors, actions), import directly:
  *   import { selectUndeployedSafe } from '@/features/counterfactual/store'
