@@ -38,8 +38,13 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Header', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    // Default: WalletConnect disabled (useLoadFeature returns null when feature is disabled)
-    mockUseLoadFeature.mockReturnValue(null)
+    // Default: WalletConnect disabled - useLoadFeature always returns an object with stubs
+    mockUseLoadFeature.mockReturnValue({
+      $isLoading: false,
+      $isDisabled: true,
+      $isReady: false,
+      WalletConnectWidget: () => null,
+    })
   })
 
   it('renders the menu button when onMenuToggle is provided', () => {
@@ -115,7 +120,7 @@ describe('Header', () => {
   })
 
   it('does not render the WalletConnect component when feature is disabled', () => {
-    // useLoadFeature returns null when disabled (default in beforeEach)
+    // useLoadFeature returns stub that renders null when disabled (default in beforeEach)
     render(<Header />)
     expect(screen.queryByText('WalletConnect')).not.toBeInTheDocument()
   })
