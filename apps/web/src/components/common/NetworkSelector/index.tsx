@@ -34,6 +34,7 @@ import { useSafeCreationData, CreateSafeOnSpecificChain, hasMultiChainAddNetwork
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
+import useChainId from '@/hooks/useChainId'
 import { InfoOutlined } from '@mui/icons-material'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
