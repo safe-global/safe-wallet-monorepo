@@ -34,6 +34,16 @@ export class SriManifestWebpackPlugin {
         },
         (assets) => {
           try {
+            // Next.js runs multiple compilations (client, server, edge).
+            // Only process the client compilation which has the actual chunks.
+            // Server/edge compilations don't have browser chunks and would generate empty manifests.
+            const isClient = !compilation.options.name || compilation.options.name === 'client'
+
+            if (!isClient) {
+              // Skip server/edge compilations - they don't have browser chunks
+              return
+            }
+
             // 1. First patch webpack runtime chunks (before computing their hashes)
             this.patchWebpackRuntime(compilation, assets)
 
