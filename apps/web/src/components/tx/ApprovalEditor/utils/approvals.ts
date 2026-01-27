@@ -13,10 +13,6 @@ const MULTISEND_METHOD = 'multiSend'
 
 const APPROVE_METHOD = 'approve'
 
-const _TRANSACTIONS_PARAM = 'transactions'
-
-const _ADDRESS_TYPE = 'address'
-const _UINT256_TYPE = 'uint256'
 
 export enum PSEUDO_APPROVAL_VALUES {
   UNLIMITED = 'Unlimited amount',
