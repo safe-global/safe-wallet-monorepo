@@ -2,7 +2,7 @@
 
 import type { MessagePayload } from 'firebase/messaging'
 
-export const isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
+const _isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
   return Object.values(WebhookType).some((type) => type === data?.type)
 }
 

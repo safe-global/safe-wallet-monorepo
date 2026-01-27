@@ -7,7 +7,13 @@
     "**/*.stories.{ts,tsx}",
     "**/__tests__/**",
     "src/types/contracts/**",
-    "src/components/common/Mui/index.tsx"
+    "src/components/common/Mui/index.tsx",
+    "src/services/contracts/ContractErrorCodes.ts",
+    "src/service-workers/firebase-messaging/webhook-types.ts",
+    "src/features/counterfactual/contract.ts",
+    "src/features/ledger/types.ts",
+    "src/features/multichain/types.ts",
+    "src/store/**/*Slice.ts"
   ],
   "ignoreDependencies": [
     "@storybook/*",

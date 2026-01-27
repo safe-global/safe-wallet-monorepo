@@ -56,4 +56,3 @@ export interface FeatureHandle<TImpl extends FeatureImplementation = FeatureImpl
    */
   load: () => Promise<{ default: TImpl }>
 }
-
