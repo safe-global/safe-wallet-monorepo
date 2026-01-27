@@ -1,0 +1,55 @@
+{
+  "featureName": "tx-notes",
+  "featureFlag": "TX_NOTES",
+  "publicAPI": {
+    "components": ["TxNote", "TxNoteForm", "TxNoteInput"],
+    "hooks": [],
+    "services": ["encodeTxNote"],
+    "types": [],
+    "constants": []
+  },
+  "structure": {
+    "hasComponentsFolder": false,
+    "hasHooksFolder": false,
+    "hasServicesFolder": false,
+    "hasStoreFolder": false,
+    "hasUtilsFolder": false,
+    "hasContextsFolder": false,
+    "hasTypesFile": false,
+    "hasConstantsFile": false,
+    "hasReadme": false
+  },
+  "consumers": [
+    {
+      "filePath": "/Users/ivan/Sites/safe-wallet-monorepo/apps/web/src/components/transactions/TxDetails/index.tsx",
+      "imports": [
+        {
+          "name": "TxNote",
+          "type": "component",
+          "importPath": "@/features/tx-notes",
+          "isDefault": false,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/ivan/Sites/safe-wallet-monorepo/apps/web/src/components/tx-flow/features/TxNote.tsx",
+      "imports": [
+        {
+          "name": "encodeTxNote",
+          "type": "service",
+          "importPath": "@/features/tx-notes",
+          "isDefault": false,
+          "isTypeOnly": false
+        },
+        {
+          "name": "TxNoteForm",
+          "type": "component",
+          "importPath": "@/features/tx-notes",
+          "isDefault": false,
+          "isTypeOnly": false
+        }
+      ]
+    }
+  ]
+}

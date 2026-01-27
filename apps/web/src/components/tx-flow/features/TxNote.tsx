@@ -2,21 +2,23 @@ import type { ReactElement } from 'react'
 import { useCallback, useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { encodeTxNote, TxNoteForm } from '@/features/tx-notes'
+import { TxNotesFeature } from '@/features/tx-notes'
+import { useLoadFeature } from '@/features/__core__'
 import { SlotName, withSlot } from '../slots'
 
 const TxNote = (): ReactElement => {
+  const txNotes = useLoadFeature(TxNotesFeature)
   const { txOrigin, setTxOrigin } = useContext(SafeTxContext)
   const { txDetails, isCreation } = useContext(TxFlowContext)
 
   const onNoteChange = useCallback(
     (note: string) => {
-      setTxOrigin(encodeTxNote(note, txOrigin))
+      setTxOrigin(txNotes.encodeTxNote(note, txOrigin))
     },
-    [setTxOrigin, txOrigin],
+    [setTxOrigin, txOrigin, txNotes],
   )
 
-  return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
+  return <txNotes.TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }
 
 const useShouldRegisterSlot = () => {

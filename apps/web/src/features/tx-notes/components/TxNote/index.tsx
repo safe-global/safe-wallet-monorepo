@@ -4,7 +4,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
-export function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
+export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
   const note = txDetails?.note
   if (!note) return null
 

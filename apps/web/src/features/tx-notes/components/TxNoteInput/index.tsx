@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 
 const MAX_NOTE_LENGTH = 60
 
-export const TxNoteInput = ({ onChange }: { onChange: (note: string) => void }) => {
+export default function TxNoteInput({ onChange }: { onChange: (note: string) => void }) {
   const {
     register,
     watch,

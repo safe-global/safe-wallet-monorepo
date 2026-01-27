@@ -38,7 +38,8 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { TxNote } from '@/features/tx-notes'
+import { TxNotesFeature } from '@/features/tx-notes'
+import { useLoadFeature } from '@/features/__core__'
 import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -57,6 +58,7 @@ type TxDetailsProps = {
 }
 
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
+  const txNotes = useLoadFeature(TxNotesFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
@@ -121,7 +123,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* /Details */}
       <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
         <div className={css.txNote}>
-          <TxNote txDetails={txDetails} />
+          <txNotes.TxNote txDetails={txDetails} />
         </div>
 
         <div className={css.detailsWrapper}>

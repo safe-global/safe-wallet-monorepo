@@ -1,9 +1,9 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TxNote } from './TxNote'
-import { TxNoteInput } from './TxNoteInput'
+import TxNote from '../TxNote'
+import TxNoteInput from '../TxNoteInput'
 import { Box } from '@mui/material'
 
-export function TxNoteForm({
+export default function TxNoteForm({
   isCreation,
   txDetails,
   onChange,
