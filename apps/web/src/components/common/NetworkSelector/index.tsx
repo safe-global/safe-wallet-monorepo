@@ -44,28 +44,6 @@ import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 
-const ChainIndicatorWithFiatBalance = ({
-  isSelected,
-  chain,
-  safeAddress,
-}: {
-  isSelected: boolean
-  chain: Pick<Chain, 'chainId'>
-  safeAddress: string
-}) => {
-  const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chain.chainId, safeAddress))
-  const currentChainId = useChainId()
-  const isCurrentChain = currentChainId === chain.chainId
-
-  const { balances } = useVisibleBalances()
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    !isCurrentChain && !undeployedSafe ? { safeAddress, chainId: chain.chainId } : skipToken,
-  )
-  const fiatValue = isCurrentChain ? balances.fiatTotal : safeOverview?.fiatTotal
-
-  return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue} inline />
-}
-
 export const getNetworkLink = (
   router: NextRouter,
   safeAddress: string,
