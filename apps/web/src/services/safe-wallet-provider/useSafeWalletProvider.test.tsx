@@ -42,14 +42,12 @@ const mockWalletConnectInstance = {
   updateSessions: jest.fn().mockResolvedValue(undefined),
 }
 
-// Mock useLoadFeature to return the WalletConnect services
+// Mock useLoadFeature to return the WalletConnect feature (flat structure)
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(() => ({
-    services: {
-      wcPopupStore: mockWcPopupStore,
-      wcChainSwitchStore: mockWcChainSwitchStore,
-      walletConnectInstance: mockWalletConnectInstance,
-    },
+    wcPopupStore: mockWcPopupStore,
+    wcChainSwitchStore: mockWcChainSwitchStore,
+    walletConnectInstance: mockWalletConnectInstance,
   })),
 }))
 

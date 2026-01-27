@@ -107,10 +107,7 @@ describe('Header', () => {
   it('renders the WalletConnect component when feature is enabled', () => {
     mockUseLoadFeature.mockReturnValue({
       name: 'walletconnect',
-      components: {
-        WalletConnectWidget: () => <div>WalletConnect</div>,
-      },
-      services: {},
+      WalletConnectWidget: () => <div>WalletConnect</div>,
     })
 
     render(<Header />)
