@@ -79,15 +79,19 @@ Each feature exposes a **handle** with two parts:
 The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 
 ```typescript
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
+// Components can render before ready (stub renders null)
 function MyPage() {
   const wc = useLoadFeature(WalletConnectFeature)
+  return <wc.WalletConnectWidget />  // Renders null when not ready
+}
 
-  // No null checks needed! Always returns an object.
-  // Hooks return {} when not ready (safe destructuring), components render null.
-  const uri = wc.useWcUri()
+// Hooks are imported directly, always safe to call
+function MyPageWithHooks() {
+  const wc = useLoadFeature(WalletConnectFeature)
+  const uri = useWcUri()  // Direct import, always safe
 
   return <wc.WalletConnectWidget />
 }
@@ -109,13 +113,12 @@ function MyPageWithStates() {
 
 | Naming Pattern              | Type      | Stub Behavior                     |
 | --------------------------- | --------- | --------------------------------- |
-| `useSomething`              | Hook      | Returns `{}` (empty object)       |
 | `PascalCase` (not `use...`) | Component | Renders `null`                    |
 | `camelCase` (not `use...`)  | Service   | Property is `undefined` (no stub) |
 
-**Why `{}` for hooks?** Allows safe destructuring: `const { data } = feature.useMyHook()` won't throw when not ready (individual values will be `undefined`).
+**Why `undefined` for services?** Services are `undefined` when not ready (no stub function). Attempting to call them throws `TypeError: X is not a function`, which helps catch missing `$isReady` checks.
 
-**Why `undefined` for services?** The service property is `undefined` when not ready (no stub function). Attempting to call it throws `TypeError: X is not a function`. This catches developer mistakes when they forget to check `$isReady` before calling a service. Components and hooks can safely "do nothing" when not ready, but services typically have side effects that shouldn't silently fail.
+**What about hooks?** Hooks are NOT part of the lazy-loaded feature. They are exported directly from the feature's `index.ts` and imported directly by consumers. See "Hooks Pattern" section.
 
 **Meta properties** (prefixed with `$`) provide state information:
 
@@ -128,23 +131,147 @@ function MyPageWithStates() {
 
 ### Why Proxy-Based Stubs?
 
-This design solves two problems:
-
-1. **No optional chaining** - Eliminates `feature?.hooks.useX() ?? default` patterns that increase cyclomatic complexity
-2. **React hooks rules** - Hooks are always called unconditionally (stubs return defaults when not ready)
+This design eliminates optional chaining patterns that increase cyclomatic complexity:
 
 ```typescript
-// ❌ OLD: Optional chaining + null checks (complexity, rules violation)
+// ❌ OLD: Optional chaining + null checks (complexity)
 const feature = useLoadFeature(MyFeature)
-const show = feature?.hooks.useShowBanner() ?? false  // Conditional hook call!
 if (!feature) return null
-return <feature.components.Banner />
+return <feature.Banner />
 
 // ✅ NEW: Always callable, no optional chaining
 const feature = useLoadFeature(MyFeature)
-const show = feature.useShowBanner()  // Always called, returns {} if not ready
-return <feature.Banner />              // Always renders, returns null if not ready
+return <feature.Banner />  // Always renders, returns null if not ready
 ```
+
+## Hooks Pattern
+
+**IMPORTANT:** Hooks are NOT part of the lazy-loaded feature. They are exported directly from the feature's `index.ts` and imported directly by consumers.
+
+### The Problem with Lazy-Loading Hooks
+
+```typescript
+// ❌ VIOLATES RULES OF HOOKS
+const feature = useLoadFeature(MyFeature)
+const data = feature.useMyHook() // Called every render
+
+// First render (not loaded):  feature.useMyHook = stub function    // Calls 0 React hooks
+// After loading:               feature.useMyHook = real hook       // Calls useState, useEffect, etc.
+// The number of hooks changes between renders - VIOLATION!
+```
+
+**Swapping a stub function for a real hook violates Rules of Hooks** because the number of internal hook calls changes between renders.
+
+### The Solution: Direct Exports (Not Lazy-Loaded)
+
+**Hooks are exported directly from `index.ts`** and imported directly by consumers. They are always loaded (not lazy).
+
+```typescript
+// hooks/useMyHook.ts - Keep lightweight (minimal imports)
+export function useMyHook() {
+  const [data, setData] = useState(null)
+  // Minimal logic here
+  return data
+}
+
+// index.ts - Export hook directly
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Direct export, always loaded
+
+// contract.ts - NO hooks
+import type MyComponent from './components/MyComponent'
+import type { myService } from './services/myService'
+
+export interface MyFeatureContract {
+  MyComponent: typeof MyComponent
+  myService: typeof myService
+  // NO hooks in contract
+}
+
+// feature.ts - NO hooks
+import MyComponent from './components/MyComponent'
+import { myService } from './services/myService'
+
+export default {
+  MyComponent, // Lazy-loaded
+  myService, // Lazy-loaded
+  // NO hooks here
+}
+```
+
+### Usage Pattern
+
+```typescript
+// Consumer - direct import
+import { MyFeature, useMyHook } from '@/features/myfeature'
+import { useLoadFeature } from '@/features/__core__'
+
+function MyComponent() {
+  const feature = useLoadFeature(MyFeature)
+  const data = useMyHook()  // Direct import, always safe
+
+  return <feature.MyComponent />
+}
+```
+
+### Hook Guidelines
+
+1. **DO** export hooks directly from `index.ts` (not in `feature.ts`)
+2. **DO NOT** include hooks in the feature contract
+3. **DO** keep hooks lightweight - minimal imports, minimal bundle size
+4. **DO** put heavy logic/imports in services (lazy-loaded), not hooks
+5. **PREFER** components and services over hooks when possible
+
+### Example: Keeping Hooks Lightweight
+
+```typescript
+// ❌ DISCOURAGED: Hook with heavy imports (always bundled)
+import HeavyChartLibrary from 'chart-library' // 800KB! Always loaded!
+
+export function useChart(data) {
+  const [chart, setChart] = useState(null)
+
+  useEffect(() => {
+    setChart(HeavyChartLibrary.create(data))
+  }, [data])
+
+  return chart
+}
+
+// ✅ BETTER: Lightweight hook + lazy-loaded service
+// hooks/useChart.ts (always loaded, but lightweight)
+import { useLoadFeature } from '@/features/__core__'
+import { MyFeature } from '../index'
+
+export function useChart(data) {
+  const [chart, setChart] = useState(null)
+  const feature = useLoadFeature(MyFeature)
+
+  useEffect(() => {
+    if (feature.$isReady) {
+      // Heavy logic in lazy-loaded service
+      setChart(feature.chartService.create(data))
+    }
+  }, [data, feature])
+
+  return chart
+}
+
+// services/chartService.ts (lazy-loaded with feature)
+import HeavyChartLibrary from 'chart-library' // 800KB - only loaded when feature is used
+
+export const chartService = {
+  create: (data) => HeavyChartLibrary.create(data),
+}
+```
+
+### Benefits of Direct Export
+
+- ✅ No Rules of Hooks violations (always the same function)
+- ✅ Simple to use (direct import, no `$isReady` checks)
+- ✅ Hooks are typically small, acceptable to always load
+- ✅ Heavy logic stays in lazy-loaded services
+- ✅ Clearer separation of concerns
 
 ### The Loading Flow
 
@@ -188,9 +315,11 @@ Feature contracts use a **flat structure** - no nested `components`, `hooks`, or
 /**
  * Base feature implementation type.
  * Uses flat structure with naming conventions:
- * - useSomething → hook (stub returns {})
  * - PascalCase → component (stub renders null)
  * - camelCase → service/function (undefined, no stub)
+ *
+ * NOTE: Hooks should NOT be part of the feature implementation.
+ * Export hooks directly from index.ts (always loaded, not lazy).
  */
 export type FeatureImplementation = Record<string, unknown>
 
@@ -251,21 +380,21 @@ For navigating to implementation details from contracts, use `typeof` imports. T
 // contract.ts
 import type MyComponent from './components/MyComponent'
 import type AnotherComponent from './components/AnotherComponent'
-import type { useMyHook } from './hooks/useMyHook'
 import type { myService } from './services/myService'
 
-// Flat structure - no nested categories
+// Flat structure - no nested categories, NO hooks
 export interface MyFeatureContract {
   // Components (PascalCase)
   MyComponent: typeof MyComponent
   AnotherComponent: typeof AnotherComponent
 
-  // Hooks (useSomething)
-  useMyHook: typeof useMyHook
-
   // Services (camelCase)
   myService: typeof myService
 }
+
+// index.ts - hooks exported separately
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 **Why this matters:**
@@ -289,11 +418,26 @@ export interface BadContract {
   MyComponent: React.FC<{ prop: string }> // Must update manually when props change
 }
 
+// ❌ WRONG: Including hooks in the contract
+export interface BadContract {
+  MyComponent: typeof MyComponent
+  useMyHook: typeof useMyHook // ❌ Hooks violate Rules of Hooks when lazy-loaded!
+}
+
 // ❌ WRONG: Nested structure (old pattern)
 export interface OldContract {
   components: { MyComponent: typeof MyComponent } // Don't nest!
-  hooks: { useMyHook: typeof useMyHook } // Don't nest!
 }
+
+// ✅ CORRECT: Export hooks directly from index.ts
+// contract.ts - NO hooks
+export interface GoodContract {
+  MyComponent: typeof MyComponent
+}
+
+// index.ts - hooks exported separately
+export const MyFeature = createFeatureHandle<GoodContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 ### Example Contracts
@@ -312,14 +456,13 @@ export interface BridgeContract {
 }
 ```
 
-**Standard Feature Contract (with hooks):**
+**Standard Feature Contract (with services):**
 
 ```typescript
 // src/features/multichain/contract.ts
 import type CreateSafeOnNewChain from './components/CreateSafeOnNewChain'
 import type NetworkLogosList from './components/NetworkLogosList'
-import type { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
-import type { useSafeCreationData } from './hooks/useSafeCreationData'
+import type { multichainService } from './services/multichainService'
 
 // Flat structure - naming conventions distinguish types
 export interface MultichainContract {
@@ -327,37 +470,43 @@ export interface MultichainContract {
   CreateSafeOnNewChain: typeof CreateSafeOnNewChain
   NetworkLogosList: typeof NetworkLogosList
 
-  // Hooks (useSomething) - stub returns {}
-  useIsMultichainSafe: typeof useIsMultichainSafe
-  useSafeCreationData: typeof useSafeCreationData
+  // Services (camelCase) - undefined when not ready
+  multichainService: typeof multichainService
 }
+
+// src/features/multichain/index.ts
+export const MultichainFeature = createFeatureHandle<MultichainContract>('multichain')
+// Hooks exported directly (always loaded, not in contract)
+export { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
 ```
 
-**Full Feature Contract (with services):**
+**Note:** Hooks are NOT in the contract. They are exported directly from `index.ts` (always loaded) to avoid Rules of Hooks violations. See the "Hooks Pattern" section.
+
+**Full Feature Contract (components and services):**
 
 ```typescript
 // src/features/walletconnect/contract.ts
 import type WalletConnectWidget from './components/WalletConnectWidget'
 import type WcSessionManager from './components/WcSessionManager'
-import type { useWcUri } from './hooks/useWcUri'
-import type { useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
 import type WalletConnectWallet from './services/WalletConnectWallet'
 import type { wcPopupStore } from './store/wcPopupStore'
 
-// Flat structure - all exports at top level
+// Flat structure - all exports at top level (NO hooks)
 export interface WalletConnectContract {
   // Components (PascalCase)
   WalletConnectWidget: typeof WalletConnectWidget
   WcSessionManager: typeof WcSessionManager
 
-  // Hooks (useSomething)
-  useWcUri: typeof useWcUri
-  useWalletConnectSearchParamUri: typeof useWalletConnectSearchParamUri
-
   // Services (camelCase)
   walletConnectInstance: WalletConnectWallet
   wcPopupStore: typeof wcPopupStore
 }
+
+// src/features/walletconnect/index.ts
+export const WalletConnectFeature = createFeatureHandle<WalletConnectContract>('walletconnect')
+// Hooks exported directly (always loaded, not in contract)
+export { useWcUri } from './hooks/useWcUri'
+export { useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
 ```
 
 ## Feature Handles
@@ -551,11 +700,11 @@ You can further reduce boilerplate by using TypeScript's `typeof` operator to in
 ```typescript
 // contract.ts
 import type MyComponent from './components/MyComponent'
-import type { useMyHook } from './hooks/useMyHook'
+import type { myService } from './services/myService'
 
 export interface MyFeatureContract {
   MyComponent: typeof MyComponent
-  useMyHook: typeof useMyHook
+  myService: typeof myService
 }
 
 // handle.ts
@@ -567,32 +716,34 @@ export const MyFeatureHandle: FeatureHandle<MyFeatureContract> = {
 
 // feature.ts
 import MyComponent from './components/MyComponent'
-import { useMyHook } from './hooks/useMyHook'
+import { myService } from './services/myService'
 
-export default { MyComponent, useMyHook } satisfies MyFeatureContract
+export default { MyComponent, myService } satisfies MyFeatureContract
 
 // index.ts
 export { MyFeatureHandle } from './handle'
 export type { MyFeatureContract } from './contract'
+// Hooks exported directly (lightweight wrappers)
+export { useMyThing } from './hooks/useMyThing'
 ```
 
 **Simplified approach (3 files - use factory):**
 
 ```typescript
-// contract.ts - KEEP THIS
+// contract.ts - KEEP THIS (NO hooks)
 import type MyComponent from './components/MyComponent'
-import type { useMyHook } from './hooks/useMyHook'
+import type { myService } from './services/myService'
 
 export interface MyFeatureContract {
   MyComponent: typeof MyComponent
-  useMyHook: typeof useMyHook
+  myService: typeof myService
 }
 
-// feature.ts
+// feature.ts (NO hooks)
 import MyComponent from './components/MyComponent'
-import { useMyHook } from './hooks/useMyHook'
+import { myService } from './services/myService'
 
-export default { MyComponent, useMyHook } satisfies MyFeatureContract
+export default { MyComponent, myService } satisfies MyFeatureContract
 
 // index.ts - Use factory, no handle.ts needed!
 import { createFeatureHandle } from '@/features/__core__'
@@ -600,6 +751,8 @@ import type { MyFeatureContract } from './contract'
 
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
 export type * from './types'
+// Hooks exported directly (always loaded, not in contract)
+export { useMyThing } from './hooks/useMyThing'
 ```
 
 **Reduction: 4 files → 3 files (removes handle.ts, ~15 lines saved)**
@@ -827,23 +980,26 @@ load: () => import('./feature') // This is THE lazy load
 // feature.ts - This entire file IS the lazy-loaded chunk
 import MyComponent from './components/MyComponent'
 import AnotherComponent from './components/AnotherComponent'
-import { useMyHook } from './hooks/useMyHook'
 import { myService } from './services/myService'
 
 export default {
   // Flat structure - no nested categories
   MyComponent, // PascalCase → component (stub renders null)
   AnotherComponent, // PascalCase → component (stub renders null)
-  useMyHook, // useSomething → hook (stub returns {})
-  myService, // camelCase → service (stub is no-op)
+  myService, // camelCase → service (undefined when not ready)
+  // NO HOOKS HERE - export hooks directly from index.ts
 }
+
+// Hooks exported separately in index.ts:
+// export { useMyThing } from './hooks/useMyThing'
 ```
 
 **Naming conventions determine stub behavior:**
 
-- `useSomething` → Hook → stub returns `{}` (safe destructuring)
 - `PascalCase` → Component → stub renders `null`
 - `camelCase` → Service/function → `undefined` (no stub - check `$isReady` before calling)
+
+**Hooks are NOT lazy-loaded** - they are exported directly from `index.ts` as lightweight wrappers that call lazy-loaded services. See the "Hooks Pattern" section for details.
 
 ### Anti-Pattern: Multiple lazy() Calls Inside feature.ts
 
@@ -890,23 +1046,25 @@ export default {
 ### Benefits of This Pattern
 
 ```typescript
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
 const wc = useLoadFeature(WalletConnectFeature)
 
-// Always callable - no optional chaining
-const uri = wc.useWcUri()
+// Components - always callable, no optional chaining
 return <wc.WalletConnectWidget />
+
+// Hooks - direct import, always safe
+const uri = useWcUri()
 ```
 
 Benefits:
 
-- **No optional chaining**: Proxy stubs eliminate `?.` complexity
-- **React hooks compliant**: Hooks always called unconditionally
+- **No optional chaining**: Proxy stubs eliminate `?.` complexity for components
+- **React hooks compliant**: Hooks are direct imports (always loaded), no Rules of Hooks violations
 - **Type-safe**: Full TypeScript inference from the handle
 - **Simple API**: Always returns an object, use `$isReady`/`$isLoading`/`$isDisabled` for state
-- **Flat structure**: No nested `.components.` or `.hooks.` - just `feature.MyComponent`
+- **Flat structure**: No nested `.components.` - just `feature.MyComponent`
 - **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
 - **Tree-shakeable**: Unused features won't be bundled
 - **No boilerplate**: No context providers, no string lookups
@@ -914,11 +1072,12 @@ Benefits:
 
 ## Public API Pattern
 
-Each feature exposes exactly three things:
+Each feature exposes:
 
 1. **Feature handle**: For use with `useLoadFeature()` (static flag + lazy refs)
 2. **Contract type**: TypeScript interface for type safety
-3. **Public types** (optional): Types needed by consumers
+3. **Hooks** (optional): Direct exports, always loaded
+4. **Public types** (optional): Types needed by consumers
 
 ### index.ts Template
 
@@ -933,23 +1092,26 @@ export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
 // Export contract type
 export type { MyFeatureContract } from './contract'
 
+// Export hooks directly (always loaded, not in contract)
+export { useMyHook } from './hooks/useMyHook'
+
 // Export public types (if any)
 export type * from './types'
 ```
 
 ### Allowed Exports
 
-| Export Type    | Example                                 | Notes                       |
-| -------------- | --------------------------------------- | --------------------------- |
-| Feature handle | `export const MyFeature = ...`          | For use with useLoadFeature |
-| Contract type  | `export type { MyFeatureContract }`     | TypeScript interface        |
-| Public types   | `export type { MyData } from './types'` | Types needed by consumers   |
+| Export Type    | Example                                 | Notes                         |
+| -------------- | --------------------------------------- | ----------------------------- |
+| Feature handle | `export const MyFeature = ...`          | For use with useLoadFeature   |
+| Contract type  | `export type { MyFeatureContract }`     | TypeScript interface          |
+| Hooks          | `export { useMyHook } from './hooks'`   | Direct exports, always loaded |
+| Public types   | `export type { MyData } from './types'` | Types needed by consumers     |
 
 ### What NOT to Export
 
-- ❌ Internal hooks (access via feature handle)
-- ❌ Internal services (access via feature handle)
-- ❌ Internal components (access via feature handle)
+- ❌ Internal services (access via feature handle with `useLoadFeature()`)
+- ❌ Internal components (access via feature handle with `useLoadFeature()`)
 - ❌ Internal utilities
 - ❌ Store slices directly (expose selectors via contract)
 
@@ -972,23 +1134,23 @@ const status = useSelector(selectTransactionStatus(id))
 Features access other features' **capabilities** through handles:
 
 ```typescript
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
 function MyComponent() {
   const wc = useLoadFeature(WalletConnectFeature)
 
-  // No null check needed - flat structure, always callable
-  const uri = wc.useWcUri()
+  // Hooks imported directly, always safe
+  const uri = useWcUri()
 
-  // Services are undefined when not ready - check $isReady before calling
+  // Services require $isReady check
   const handleConnect = () => {
     if (wc.$isReady) {
       wc.walletConnectInstance.connect(uri)
     }
   }
 
-  // Components render null when not ready
+  // Components render null when not ready (no check needed)
   return <wc.WalletConnectWidget />
 }
 ```
@@ -1003,16 +1165,16 @@ function MyComponent() {
 
 ### Communication Patterns Summary
 
-| Need                               | Pattern            | Example                                           |
-| ---------------------------------- | ------------------ | ------------------------------------------------- |
-| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)` |
-| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                            |
-| Render another feature's component | Feature handle     | `<wc.Widget />`                                   |
-| Use another feature's hook         | Feature handle     | `wc.useY()`                                       |
-| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                       |
-| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                     |
-| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                     |
-| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`     |
+| Need                               | Pattern            | Example                                               |
+| ---------------------------------- | ------------------ | ----------------------------------------------------- |
+| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)`     |
+| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                                |
+| Render another feature's component | Feature handle     | `<wc.Widget />`                                       |
+| Use another feature's hook         | Direct import      | `import { useWcUri } from '@/features/walletconnect'` |
+| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                           |
+| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                         |
+| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                         |
+| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`         |
 
 ## Common Mistakes & Anti-Patterns
 
@@ -1335,10 +1497,15 @@ export default function MyComponent(): ReactElement {
 ```
 
 ```typescript
-// src/features/{feature-name}/hooks/useMyHook.ts
-export function useMyHook() {
-  // Hook implementation
-  return { data: null }
+// src/features/{feature-name}/hooks/useMyThing.ts
+// Lightweight wrapper - no heavy imports
+import { useLoadFeature } from '@/features/__core__'
+import { MyFeature } from '../index'
+
+export function useMyThing() {
+  const feature = useLoadFeature(MyFeature)
+  // Just calls lazy-loaded service
+  return feature.myService?.()
 }
 ```
 
@@ -1404,20 +1571,45 @@ function SafeShieldScanner() {
 }
 ```
 
-**After (feature handle - flat structure, proxy stubs):**
+**After (feature handle + direct hook export):**
 
 ```typescript
+// src/features/hypernative/index.ts
+export const HypernativeFeature = createFeatureHandle<HypernativeContract>('hypernative')
+// Hook exported directly (always loaded)
+export { useHypernativeScanner } from './hooks/useHypernativeScanner'
+
+// src/features/hypernative/contract.ts (NO hooks)
+import type Banner from './components/Banner'
+
+export interface HypernativeContract {
+  Banner: typeof Banner
+  // NO hooks in contract
+}
+
+// src/features/hypernative/feature.ts (NO hooks)
+export default {
+  Banner,  // Component, lazy-loaded
+  // NO hooks here!
+}
+
+// src/features/hypernative/hooks/useHypernativeScanner.ts
+// Keep lightweight - minimal imports
+export function useHypernativeScanner() {
+  const [data, setData] = useState(null)
+  // Hook logic here (keep lightweight)
+  return data
+}
+
 // src/features/safe-shield/components/SafeShieldScanner.tsx
-import { HypernativeFeature } from '@/features/hypernative'
+import { HypernativeFeature, useHypernativeScanner } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 
 function SafeShieldScanner() {
   const hn = useLoadFeature(HypernativeFeature)
+  const scanner = useHypernativeScanner()  // Direct import, always safe
 
-  // No null checks needed - flat structure, always callable
-  // Hook returns {} when not ready, component renders null
-  const scanner = hn.useHypernativeScanner()
-
+  // No null checks needed - component renders null when not ready
   return <hn.Banner data={scanner?.data} />
 }
 
@@ -1428,7 +1620,7 @@ function SafeShieldScannerWithStates() {
   if (hn.$isLoading) return <Skeleton />
   if (hn.$isDisabled) return null
 
-  const scanner = hn.useHypernativeScanner()
+  const scanner = useHypernativeScanner()
   return <hn.Banner data={scanner.data} />
 }
 ```
@@ -1437,37 +1629,43 @@ function SafeShieldScannerWithStates() {
 
 ### For New Features
 
-- [ ] Created `contract.ts` with **flat structure** (no nested `components`/`hooks`/`services`)
+- [ ] Created `contract.ts` with **flat structure** (components and services only, NO hooks)
 - [ ] **Used `typeof` pattern in contract for IDE navigation**
-- [ ] **Used naming conventions**: `useSomething` (hooks), `PascalCase` (components), `camelCase` (services)
+- [ ] **Used naming conventions**: `PascalCase` (components), `camelCase` (services)
+- [ ] **NO hooks in contract** - hooks are exported directly from `index.ts`
 - [ ] Created `index.ts` with `createFeatureHandle()` factory
+- [ ] **Exported hooks directly from `index.ts`** (always loaded, minimal imports)
 - [ ] **`feature.ts` uses direct imports** (NOT `lazy()`) - see "Lazy Loading: One Dynamic Import"
-- [ ] **`feature.ts` exports flat object** (no nested categories)
+- [ ] **`feature.ts` exports flat object** with components and services only (NO hooks)
 - [ ] Organized implementation in `components/`, `hooks/`, `services/`, `store/`
+- [ ] **Hooks kept lightweight** - minimal imports, heavy logic in services if needed
 - [ ] Created `types.ts` for public types (if needed)
 - [ ] No direct imports of other features' internal folders
 - [ ] All cross-feature communication via Redux or feature handles
 
 ### For Existing Features (Migration)
 
-- [ ] Created `contract.ts` with **flat structure**
+- [ ] Created `contract.ts` with **flat structure** (components and services only, NO hooks)
 - [ ] **Used `typeof` pattern in contract for IDE navigation**
 - [ ] Created `index.ts` with `{FeatureName}Feature` export
-- [ ] **`feature.ts` uses direct imports and flat structure**
+- [ ] **Moved hooks out of contract** - export directly from `index.ts`
+- [ ] **Kept hooks lightweight** - minimal imports (moved heavy imports to services if needed)
+- [ ] **`feature.ts` uses direct imports and flat structure** (NO hooks)
 - [ ] Organized internals in `components/`, `hooks/`, `services/`, `store/`
-- [ ] Updated consumers to use flat access (e.g., `feature.MyComponent` not `feature.components.MyComponent`)
-- [ ] Removed null checks where proxy stubs suffice
+- [ ] Updated consumers to import hooks directly (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] Removed null checks where proxy stubs suffice (for components)
 - [ ] Verified no ESLint warnings
 - [ ] Tests pass
 
 ### For Feature Consumers
 
-- [ ] Using `useLoadFeature()` hook with feature handle
-- [ ] **No optional chaining** - feature always returns an object (proxy stubs)
-- [ ] Using **flat access**: `feature.MyComponent`, `feature.useMyHook()` (no nested `.components.`)
+- [ ] Using `useLoadFeature()` hook with feature handle for components/services
+- [ ] **Importing hooks directly from feature index** (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] **No optional chaining** - feature always returns an object (proxy stubs for components)
+- [ ] Using **flat access**: `feature.MyComponent`, `feature.myService` (no nested `.components.`)
 - [ ] Using meta properties (`$isLoading`, `$isDisabled`, `$isReady`) for explicit state handling
 - [ ] Type-safe (types inferred from handle)
-- [ ] No direct imports from feature internal folders
+- [ ] No direct imports from feature internal folders (except hooks from index)
 
 ### Verification
 
@@ -1506,14 +1704,16 @@ The handle is imported at app startup, but it's tiny (~100 bytes). The actual fe
 2. **Meta properties** (`$isLoading`, `$isDisabled`, `$isReady`, `$error`)
 
 ```typescript
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
 const wc = useLoadFeature(WalletConnectFeature)
 
-// Always callable - no null checks needed
-const uri = wc.useWcUri()  // Returns undefined if not ready
-return <wc.Widget />        // Renders null if not ready
+// Hooks imported directly, always safe
+const uri = useWcUri()
+
+// Components render null when not ready
+return <wc.Widget />
 ```
 
 For explicit state handling, use meta properties:
@@ -1550,13 +1750,22 @@ The `feature.ts` file is lazy-loaded via `handle.load()` (which is set up by `cr
 ```typescript
 // feature.ts - This entire file is lazy-loaded via handle.load()
 import MyComponent from './components/MyComponent'
-import { useMyHook } from './hooks/useMyHook'
+import { myService } from './services/myService'
 
-// Flat structure - no nested categories
+// Flat structure - no nested categories, NO hooks
 export default {
   MyComponent, // PascalCase → component (stub renders null)
-  useMyHook, // useSomething → hook (stub returns {})
+  myService, // camelCase → service (undefined when not ready)
+  // NO hooks here - they're exported from index.ts
 }
+```
+
+**Hooks are NOT lazy-loaded** - they're exported directly from `index.ts`:
+
+```typescript
+// index.ts
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 **Do NOT use `lazy()` inside `feature.ts`** - the file is already lazy-loaded. Adding more `lazy()` calls creates unnecessary chunks and complexity. See the "Lazy Loading: One Dynamic Import" section above.
@@ -1576,12 +1785,14 @@ export default {
 }
 ```
 
-Consumers use flat access - no null checks needed:
+Consumers use flat access:
 
 ```typescript
+import { MyFeature, useMyHook } from '@/features/myfeature'
+
 const feature = useLoadFeature(MyFeature)
-// Proxy stubs: components render null, hooks return {} when not ready
-return <feature.Widget />
+const data = useMyHook()  // Direct import, always safe
+return <feature.Widget />  // Component stub renders null when not ready
 ```
 
 ## TypeScript Interface Examples
