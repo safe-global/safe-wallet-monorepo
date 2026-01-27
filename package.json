@@ -6,7 +6,8 @@
     "expo-plugins/*",
     "apps/*",
     "config/*",
-    "packages/*"
+    "packages/*",
+    "tools/codemods/*"
   ],
   "scripts": {
     "lint": "yarn workspaces foreach --all -pt run lint",
