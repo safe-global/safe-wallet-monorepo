@@ -26,18 +26,6 @@ const parseApprovalAmount = (amount: string, decimals: number) => {
   return parseUnits(amount, decimals)
 }
 
-function _hasMultiSendParameters(
-  txs: DataDecoded & { to: string },
-): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
-  return txs.method === MULTISEND_METHOD && txs.parameters?.length === 1
-}
-
-function _hasApproveCallParameters(
-  txs: DataDecoded & { to: string },
-): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
-  return txs.method === APPROVE_METHOD && txs.parameters?.length === 2
-}
-
 export const updateApprovalTxs = (
   approvalFormValues: string[],
   approvalInfos: ApprovalInfo[] | undefined,
