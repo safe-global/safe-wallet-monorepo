@@ -22,8 +22,8 @@ interface FeatureMeta {
 
 /**
  * Creates a proxy that provides automatic stubs based on naming conventions.
- * - useSomething → hook returning {}
  * - PascalCase → component returning null
+ * - useSomething → undefined (hooks not stubbed - see Hooks Pattern in docs)
  * - camelCase → undefined (will throw if called, helping catch missing $isReady checks)
  */
 function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T & FeatureMeta {
@@ -46,14 +46,13 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
       const name = String(prop)
       let stub: unknown
 
-      if (name.startsWith('use')) {
-        // Hook stub - returns empty object for safe destructuring
-        stub = () => ({})
-      } else if (name[0] === name[0].toUpperCase()) {
+      if (name[0] === name[0].toUpperCase() && !name.startsWith('use')) {
         // Component stub - renders null
         stub = () => null
       } else {
-        // Service stub - undefined (will throw if called, catching missing $isReady checks)
+        // Hooks and services - undefined (no stub)
+        // Hooks: undefined when not ready (component must not mount until ready)
+        // Services: undefined when not ready (will throw if called, catching missing $isReady checks)
         stub = undefined
       }
 
@@ -68,8 +67,8 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
  *
  * ALWAYS returns an object - never null or undefined. When the feature is
  * loading or disabled, returns a Proxy with automatic stubs based on naming:
- * - useSomething → hook returning {} (safe destructuring)
  * - PascalCase → component returning null
+ * - useSomething → undefined (hooks not stubbed - component must not mount until ready)
  * - camelCase → undefined (will throw if called without checking $isReady)
  *
  * @param handle - The feature handle with name, useIsEnabled, and load function.
@@ -77,33 +76,37 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
  *
  * @example
  * ```typescript
- * const { MyComponent, useMyHook } = useLoadFeature(MyFeature)
+ * // Components can render before ready (stub renders null)
+ * const feature = useLoadFeature(MyFeature)
+ * return <feature.MyComponent />  // Renders null when not ready
+ * ```
  *
- * // Always safe - no null checks needed
- * const { data } = useMyHook()  // Returns {} when not ready
- * return <MyComponent />         // Renders null when not ready
+ * @example
+ * ```typescript
+ * // For hooks, component must not mount until ready:
+ * function Parent() {
+ *   const feature = useLoadFeature(MyFeature)
+ *   if (!feature.$isReady) return <Skeleton />
+ *   return <ChildThatUsesHooks />
+ * }
+ *
+ * function ChildThatUsesHooks() {
+ *   const feature = useLoadFeature(MyFeature)
+ *   // Safe - only mounts when ready, so useMyHook is always defined
+ *   const data = feature.useMyHook()
+ *   return <div>{data}</div>
+ * }
  * ```
  *
  * @example
  * ```typescript
  * // For services, check $isReady first:
- * const { myService, $isReady } = useLoadFeature(MyFeature)
- *
- * if ($isReady) {
- *   myService()  // Safe to call
- * }
- * // myService() without check will throw (undefined is not a function)
- * ```
- *
- * @example
- * ```typescript
- * // For explicit loading/disabled states:
  * const feature = useLoadFeature(MyFeature)
  *
- * if (feature.$isLoading) return <Skeleton />
- * if (feature.$isDisabled) return null
- *
- * return <feature.MyComponent />
+ * if (feature.$isReady) {
+ *   feature.myService()  // Safe to call
+ * }
+ * // feature.myService() without check will throw (undefined is not a function)
  * ```
  */
 export function useLoadFeature<T extends FeatureImplementation>(

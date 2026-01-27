@@ -108,9 +108,9 @@ Features use a lazy-loading architecture to optimize bundle size. ESLint warns a
 **Allowed Imports:**
 
 ```typescript
-import { SomeType, useLightweightHook } from '@/features/myfeature' // Feature barrel
+import { MyFeature, useMyHook } from '@/features/myfeature' // Feature handle + hooks (direct exports)
 import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
-import { lightweightUtil } from '@/features/myfeature/services' // Services barrel
+import type { MyType } from '@/features/myfeature/types' // Public types
 ```
 
 **Forbidden Imports (ESLint will warn):**
@@ -120,27 +120,27 @@ import { lightweightUtil } from '@/features/myfeature/services' // Services barr
 import { MyComponent } from '@/features/myfeature/components'
 import MyComponent from '@/features/myfeature/components/MyComponent'
 
-// ❌ NEVER import hooks from internal folder - use barrel
+// ❌ NEVER import hooks from internal folder - use index.ts export
 import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
 
-// ❌ NEVER import internal service files - use barrel or useLoadFeature
+// ❌ NEVER import internal service files - use useLoadFeature
 import { heavyService } from '@/features/myfeature/services/heavyService'
 ```
 
 **Accessing Feature Exports:**
 
-Use the `useLoadFeature` hook to access lazy-loaded features. Features use a **flat structure** with **proxy-based stubs**:
+Use the `useLoadFeature` hook for components and services. Import hooks directly:
 
 ```typescript
 import { useLoadFeature } from '@/features/__core__'
-import { MyFeature } from '@/features/myfeature'
+import { MyFeature, useMyHook } from '@/features/myfeature'
 
 function ParentComponent() {
   const feature = useLoadFeature(MyFeature)
+  const hookData = useMyHook()  // Direct import, always safe
 
   // No null check needed - always returns an object
   // Components render null when not ready (proxy stub)
-  // Hooks return {} when not ready (safe destructuring)
   // Services are undefined when not ready (check $isReady before calling)
   return <feature.MyComponent />
 }
@@ -158,34 +158,44 @@ function ParentWithStates() {
 
 **feature.ts Pattern (IMPORTANT):**
 
-Use **direct imports** with a **flat structure** - do NOT use `lazy()` or nested categories:
+Use **direct imports** with a **flat structure** - do NOT use `lazy()` or nested categories. **NO hooks in feature.ts**:
 
 ```typescript
 // feature.ts - This file is already lazy-loaded via createFeatureHandle
 import MyComponent from './components/MyComponent'
-import { useMyHook } from './hooks/useMyHook'
 import { myService } from './services/myService'
 
-// ✅ CORRECT: Flat structure, naming conventions determine stub behavior
+// ✅ CORRECT: Flat structure, NO hooks
 export default {
   MyComponent, // PascalCase → component (stub renders null)
-  useMyHook, // useSomething → hook (stub returns {})
   myService, // camelCase → service (undefined when not ready - check $isReady before calling)
+  // NO hooks here!
 }
+
+// index.ts - Hooks exported directly (always loaded, not lazy)
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Direct export, always loaded
 ```
 
 ```typescript
 // ❌ WRONG - Don't use nested categories
 export default {
   components: { MyComponent }, // ❌ No nesting!
-  hooks: { useMyHook }, // ❌ No nesting!
 }
 
 // ❌ WRONG - Don't use lazy() inside feature.ts
 export default {
   MyComponent: lazy(() => import('./components/MyComponent')), // ❌
 }
+
+// ❌ WRONG - Don't include hooks in feature.ts
+export default {
+  MyComponent,
+  useMyHook, // ❌ Violates Rules of Hooks when lazy-loaded!
+}
 ```
+
+**Hooks Pattern:** Hooks are exported directly from `index.ts` (always loaded, not lazy) to avoid Rules of Hooks violations. Keep hooks lightweight with minimal imports. Put heavy logic in services (lazy-loaded).
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isLoading`, `$isDisabled`, `$isReady`).
 

@@ -45,7 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
-  const walletConnect = useLoadFeature(WalletConnectFeature)
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
@@ -106,11 +106,9 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           </div>
         )}
 
-        {walletConnect && (
-          <div className={classnames(css.element, css.hideMobile)}>
-            <walletConnect.WalletConnectWidget />
-          </div>
-        )}
+        <div className={classnames(css.element, css.hideMobile)}>
+          <WalletConnectWidget />
+        </div>
       </Box>
 
       <div className={classnames(css.element, css.connectWallet)}>

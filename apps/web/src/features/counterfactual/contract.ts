@@ -3,12 +3,14 @@
  *
  * Naming conventions determine stub behavior:
  * - PascalCase → component (stub renders null)
- * - useSomething → hook (stub returns {})
- * - camelCase → service (stub is no-op)
+ * - camelCase → service (undefined when not ready)
  *
- * IMPORTANT: Store exports (slice, selectors, actions) are NOT included here
- * because they must be available at Redux store initialization time.
- * Import them directly from '@/features/counterfactual/store'
+ * IMPORTANT:
+ * - Hooks are NOT in the contract. They're exported directly from index.ts
+ *   (always loaded, not lazy) to avoid Rules of Hooks violations.
+ * - Store exports (slice, selectors, actions) are NOT included here
+ *   because they must be available at Redux store initialization time.
+ *   Import them directly from '@/features/counterfactual/store'
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { SignOrExecuteProps } from '@/components/tx/shared/types'
