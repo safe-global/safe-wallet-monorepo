@@ -32,11 +32,3 @@ export interface WalletConnectImplementation {
   /** Store for chain switch modal requests */
   wcChainSwitchStore: typeof wcChainSwitchStore
 }
-
-/**
- * WalletConnect Feature Contract - the full loaded feature type.
- */
-interface WalletConnectContract extends WalletConnectImplementation {
-  readonly name: 'walletconnect'
-  useIsEnabled: () => boolean | undefined
-}

@@ -1,4 +1,3 @@
-import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { parseUnits } from 'ethers'
 import { type ApprovalInfo } from '../hooks/useApprovalInfos'
