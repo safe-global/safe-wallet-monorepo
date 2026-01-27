@@ -22,7 +22,7 @@
  *   myService: typeof myService          // camelCase → service
  * }
  */
- 
+
 export interface FeatureImplementation {}
 
 /**

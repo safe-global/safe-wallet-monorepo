@@ -127,11 +127,6 @@ export default [
             },
             // Same patterns for relative imports
             {
-              // Block internal file imports (handle.ts is internal, only index.ts is public)
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
-            },
-            {
               // Same for relative imports
               group: [
                 '../features/*/components',
