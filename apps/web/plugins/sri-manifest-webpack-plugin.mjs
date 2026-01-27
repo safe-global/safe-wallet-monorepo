@@ -44,17 +44,12 @@ export class SriManifestWebpackPlugin {
               return
             }
 
-            // 1. First patch webpack runtime chunks (before computing their hashes)
+            // Patch webpack runtime chunks to inject SRI lookup for dynamic chunks
+            // Note: The actual SRI manifest is generated post-build by the integrity script
+            // to ensure hashes match the final files on disk (after Next.js export)
             this.patchWebpackRuntime(compilation, assets)
 
-            // 2. Generate SRI manifest for all JS chunks (including patched webpack)
-            const manifest = this.generateManifest(compilation, assets)
-
-            // 3. Emit the manifest file as a webpack asset
-            this.emitManifest(compilation, manifest)
-
-            // Log success info
-            const info = new Error(`Generated SRI manifest with ${Object.keys(manifest).length} chunks`)
+            const info = new Error('Patched webpack runtime for SRI dynamic chunk loading')
             info.name = 'SriManifestInfo'
             compilation.warnings.push(info)
           } catch (error) {
