@@ -69,6 +69,10 @@ runs:
         NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID }}
         NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID }}
 
+    - name: Generate SRI for static scripts
+      shell: bash
+      run: yarn workspace @safe-global/web integrity
+
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'
       uses: ./.github/actions/cache-deps
