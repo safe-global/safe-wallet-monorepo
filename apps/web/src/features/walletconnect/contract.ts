@@ -3,8 +3,12 @@
  *
  * Naming conventions determine stub behavior:
  * - PascalCase → component (stub renders null)
- * - useSomething → hook (stub returns {})
- * - camelCase → service (stub is no-op)
+ * - camelCase → service (undefined when not ready)
+ *
+ * NOTE: Hooks are NOT in the contract. This feature's hooks (useWcUri,
+ * useWalletConnectSearchParamUri) are only used internally and not exported
+ * from index.ts. If hooks need to be public, export them from index.ts
+ * (always loaded, not lazy) to avoid Rules of Hooks violations.
  */
 
 // Type imports from implementations - enables IDE jump-to-definition
