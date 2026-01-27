@@ -146,17 +146,23 @@ export class SriManifestWebpackPlugin {
       // This is webpack's __webpack_require__.l function setting script.src
       // We inject SRI lookup right after the src is set
       //
-      // Example matches (depending on minified names):
-      //   r.src=c.tu(d)
-      //   a.src=o.ab(e)
+      // The pattern needs to capture the character after the closing paren (could be ), comma, semicolon, etc.)
+      // to preserve the original code structure and avoid syntax errors
       //
-      // Transforms to:
-      //   r.src=c.tu(d);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[d])r.integrity=_sri[d]
-      const pattern = new RegExp(`(\\w)\\.src=(\\w)\\.${urlMethod.methodName}\\((\\w)\\)`, 'g')
+      // Example matches (depending on minified names):
+      //   r.src=c.tu(d)),   -> r.src=c.tu(d),_sri=...,_sri[d]&&(r.integrity=_sri[d])),
+      //   a.src=o.ab(e),    -> a.src=o.ab(e),_sri=...,_sri[e]&&(a.integrity=_sri[e]),
+      //
+      // Using comma operator to maintain expression flow without semicolons
+      const pattern = new RegExp(`(\\w)\\.src=(\\w)\\.${urlMethod.methodName}\\((\\w)\\)([,);])`, 'g')
 
       content = content.replace(
         pattern,
-        `$1.src=$2.${urlMethod.methodName}($3);var _sri=window.__CHUNK_SRI_MANIFEST||{};if(_sri[$3])$1.integrity=_sri[$3]`,
+        (match, scriptVar, webpackObj, urlVar, trailingChar) => {
+          // Use comma operator to chain expressions without breaking syntax
+          // The && operator short-circuits if no SRI hash exists
+          return `${scriptVar}.src=${webpackObj}.${urlMethod.methodName}(${urlVar}),_sri=window.__CHUNK_SRI_MANIFEST||{},_sri[${urlVar}]&&(${scriptVar}.integrity=_sri[${urlVar}])${trailingChar}`
+        },
       )
 
       if (content !== originalContent) {
