@@ -28,7 +28,7 @@ export const useSafeTxHash = (txDetails: TransactionDetails): string | null => {
  * and passes it to HnSecurityReportBtn. The hash is the hash of the transaction
  * struct without signatures, which is the correct hash for security reports.
  */
-const HnSecurityReportBtnWithTxHash = ({
+const _HnSecurityReportBtnWithTxHash = ({
   txDetails,
 }: HnSecurityReportBtnWithTxHashProps): ReactElement | null => {
   const chainId = useChainId()

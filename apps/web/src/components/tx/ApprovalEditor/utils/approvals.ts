@@ -13,10 +13,10 @@ const MULTISEND_METHOD = 'multiSend'
 
 const APPROVE_METHOD = 'approve'
 
-const TRANSACTIONS_PARAM = 'transactions'
+const _TRANSACTIONS_PARAM = 'transactions'
 
-const ADDRESS_TYPE = 'address'
-const UINT256_TYPE = 'uint256'
+const _ADDRESS_TYPE = 'address'
+const _UINT256_TYPE = 'uint256'
 
 export enum PSEUDO_APPROVAL_VALUES {
   UNLIMITED = 'Unlimited amount',
@@ -30,13 +30,13 @@ const parseApprovalAmount = (amount: string, decimals: number) => {
   return parseUnits(amount, decimals)
 }
 
-function hasMultiSendParameters(
+function _hasMultiSendParameters(
   txs: DataDecoded & { to: string },
 ): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
   return txs.method === MULTISEND_METHOD && txs.parameters?.length === 1
 }
 
-function hasApproveCallParameters(
+function _hasApproveCallParameters(
   txs: DataDecoded & { to: string },
 ): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
   return txs.method === APPROVE_METHOD && txs.parameters?.length === 2
