@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -35,7 +34,9 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
   it('Verify a batch can be uploaded, saved to library, downloaded and removed', () => {
     cy.enter(iframeSelector).then((getBody) => {
-      getBody().findAllByText('choose a file').attachFile('test-working-batch.json', { subjectType: 'drag-n-drop' })
+      getBody()
+        .findAllByText('choose a file')
+        .selectFile('cypress/fixtures/test-working-batch.json', { action: 'drag-drop' })
       getBody().findAllByText('uploaded').wait(300)
       getBody().find(safeapps.saveToLibraryBtn).click()
       getBody().findByLabelText(safeapps.batchNameStr).type(safeapps.e3eTestStr)
@@ -52,7 +53,9 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
   it('Verify there is notification if uploaded batch is from a different chain', () => {
     cy.enter(iframeSelector).then((getBody) => {
-      getBody().findAllByText('choose a file').attachFile('test-mainnet-batch.json', { subjectType: 'drag-n-drop' })
+      getBody()
+        .findAllByText('choose a file')
+        .selectFile('cypress/fixtures/test-mainnet-batch.json', { action: 'drag-drop' })
       getBody().findAllByText(safeapps.warningStr).should('be.visible')
       getBody().findAllByText(safeapps.anotherChainStr).should('be.visible')
     })
@@ -60,7 +63,9 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
   it('Verify there is error message when a modified batch is uploaded', () => {
     cy.enter(iframeSelector).then((getBody) => {
-      getBody().findAllByText('choose a file').attachFile('test-modified-batch.json', { subjectType: 'drag-n-drop' })
+      getBody()
+        .findAllByText('choose a file')
+        .selectFile('cypress/fixtures/test-modified-batch.json', { action: 'drag-drop' })
       getBody().findAllByText(safeapps.changedPropertiesStr)
       getBody().findAllByText('choose a file').should('be.visible')
     })
@@ -70,7 +75,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     cy.enter(iframeSelector).then((getBody) => {
       getBody()
         .findAllByText('choose a file')
-        .attachFile('test-invalid-batch.json', { subjectType: 'drag-n-drop' })
+        .selectFile('cypress/fixtures/test-invalid-batch.json', { action: 'drag-drop' })
         .findAllByText('choose a file')
         .should('be.visible')
     })
@@ -80,7 +85,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
     cy.enter(iframeSelector).then((getBody) => {
       getBody()
         .findAllByText('choose a file')
-        .attachFile('test-empty-batch.json', { subjectType: 'drag-n-drop' })
+        .selectFile('cypress/fixtures/test-empty-batch.json', { action: 'drag-drop' })
         .findAllByText('choose a file')
         .should('be.visible')
     })

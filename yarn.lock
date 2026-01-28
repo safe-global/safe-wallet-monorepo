@@ -12352,7 +12352,6 @@ __metadata:
     classnames: "npm:^2.5.1"
     cross-env: "npm:^7.0.3"
     cypress: "npm:^15.9.0"
-    cypress-file-upload: "npm:^5.0.8"
     cypress-visual-regression: "npm:^5.3.0"
     date-fns: "npm:^4.1.0"
     eslint: "npm:^9.29.0"
@@ -21664,15 +21663,6 @@ __metadata:
     find-pkg: "npm:^0.1.2"
     fs-exists-sync: "npm:^0.1.0"
   checksum: 10/fdb2d1e8e1317e488bf0b7e569a17f929a45c4f2e706820c843a6be460cf8b334c43ac22c22c58c4f6258e501904ec1d1558d67c345002268fb40e3419f909da
-  languageName: node
-  linkType: hard
-
-"cypress-file-upload@npm:^5.0.8":
-  version: 5.0.8
-  resolution: "cypress-file-upload@npm:5.0.8"
-  peerDependencies:
-    cypress: ">3.0.0"
-  checksum: 10/c2f66b6de7572ef1b2c609bf76ad63831ee20d7a8a2f144eccc2a7a1fb21994c2f5524ad4921a731bbd2e362aa6ff932506fa8c93c875bc1c0edda383e1125ba
   languageName: node
   linkType: hard
 
