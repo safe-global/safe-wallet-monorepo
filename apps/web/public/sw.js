@@ -47,7 +47,7 @@ self.addEventListener('fetch', (event) => {
     cacheName = CACHE_NAMES.fonts
   } else if (url.pathname.startsWith('/_next/static/')) {
     cacheName = CACHE_NAMES.static
-  } else if (/\.(png|jpg|jpeg|gif|webp|ico)$/i.test(url.pathname)) {
+  } else if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)) {
     cacheName = CACHE_NAMES.images
   } else {
     // Network-only for everything else (HTML, API calls, etc.)
