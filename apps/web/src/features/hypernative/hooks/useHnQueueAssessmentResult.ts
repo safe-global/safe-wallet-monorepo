@@ -10,7 +10,9 @@ import { QueueAssessmentContext } from '../contexts/QueueAssessmentContext'
  * @param safeTxHash - The safeTxHash of the transaction
  * @returns AsyncResult containing threat analysis results, or undefined if not available
  */
-export function useQueueAssessment(safeTxHash: string | undefined): AsyncResult<ThreatAnalysisResults> | undefined {
+export function useHnQueueAssessmentResult(
+  safeTxHash: string | undefined,
+): AsyncResult<ThreatAnalysisResults> | undefined {
   const context = useContext(QueueAssessmentContext)
 
   if (!safeTxHash || !context) {

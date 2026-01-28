@@ -45,7 +45,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
-import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
+import { useHnQueueAssessmentResult } from '@/features/hypernative/hooks/useHnQueueAssessmentResult'
 import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
@@ -107,7 +107,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const moduleAddressInfo = moduleAddress ? txDetails.txData?.addressInfoIndex?.[moduleAddress.value] : undefined
 
   // Hypernative assessment for banner
-  const assessment = useQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessmentBanner = useShowHypernativeAssessment() && isQueue
 
