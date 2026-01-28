@@ -13,7 +13,7 @@ import {
   _setPreferences,
   _setUuid,
 } from '../useNotificationPreferences'
-import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
+import { WebhookType } from '@/types/push-notifications/webhook-types'
 
 Object.defineProperty(globalThis, 'crypto', {
   value: {

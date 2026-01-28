@@ -22,8 +22,6 @@ if (process.env.USE_RSPACK === '1') {
   } catch {}
 }
 
-const SERVICE_WORKERS_PATH = './src/service-workers'
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pkgPath = path.join(__dirname, 'package.json')
 const data = await readFile(pkgPath, 'utf-8')
@@ -40,20 +38,8 @@ if (!commitHash) {
 
 const withPWA = withPWAInit({
   dest: 'public',
-  reloadOnOnline: false,
-  cacheStartUrl: false,
-  dynamicStartUrl: false,
-  // Use custom service worker - NO precaching, only runtime caching
-  swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
-  publicExcludes: ['**/*'],
-  // Explicitly empty - disables next-pwa's default caching rules
-  runtimeCaching: [],
-  extendDefaultRuntimeCaching: false,
-  workboxOptions: {
-    mode: 'production',
-    // Don't inject any precache manifest into our custom SW
-    exclude: [/.*/],
-  },
+  sw: 'sw.js', // Use vanilla JS service worker (no build step)
+  disable: process.env.NODE_ENV === 'development',
 })
 
 const isProd = process.env.NODE_ENV === 'production'

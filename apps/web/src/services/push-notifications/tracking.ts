@@ -2,7 +2,7 @@
 
 import { createStore as createIndexedDb } from 'idb-keyval'
 
-import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
+import { WebhookType } from '@/types/push-notifications/webhook-types'
 
 export type NotificationTrackingKey = `${string}:${WebhookType}`
 

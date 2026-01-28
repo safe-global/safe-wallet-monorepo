@@ -5,7 +5,7 @@ import * as tracking from '@/services/analytics'
 import * as useChains from '@/hooks/useChains'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
 import { createNotificationTrackingIndexedDb } from '@/services/push-notifications/tracking'
-import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
+import { WebhookType } from '@/types/push-notifications/webhook-types'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useNotificationTracking } from '../useNotificationTracking'
 

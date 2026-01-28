@@ -11,7 +11,7 @@ import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notif
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { logError } from '@/services/exceptions'
 import type { NotificationTracking, NotificationTrackingKey } from '@/services/push-notifications/tracking'
-import type { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
+import type { WebhookType } from '@/types/push-notifications/webhook-types'
 import { useHasFeature } from '@/hooks/useChains'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'

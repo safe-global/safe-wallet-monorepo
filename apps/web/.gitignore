@@ -1,14 +1,13 @@
-# Ignore auto-generated service workers but allow public/beamer-embed.js
+# Ignore auto-generated service worker files (but not sw.js - it's manually maintained)
 public/work*.js
+public/firebase*.js
+public/fallback*.js
+public/*.map
 
 # testing
 coverage
 reports
 report.json
-public/sw.js
-public/firebase*.js
-public/fallback*.js
-public/*.map
 
 # Storybook
 storybook-static

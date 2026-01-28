@@ -24,6 +24,7 @@ export default [
       '**/cypress/',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
+      '**/public/sw.js', // Vanilla JS service worker, not part of TS project
     ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
