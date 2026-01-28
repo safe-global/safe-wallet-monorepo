@@ -42,32 +42,17 @@ const withPWA = withPWAInit({
   dest: 'public',
   workboxOptions: {
     mode: 'production',
-    // Exclude ALL files from precaching - we only want runtime caching
-    exclude: [/.*/],
+    // Disable precaching entirely
+    maximumFileSizeToCacheInBytes: 0,
   },
   reloadOnOnline: false,
   cacheStartUrl: false,
   dynamicStartUrl: false,
   customWorkerSrc: SERVICE_WORKERS_PATH,
-  // Exclude all public folder assets from precaching (! prefix required)
+  // Exclude all public folder assets from precaching
   publicExcludes: ['!**/*'],
-
-  // Minimal caching - only fonts (static, rarely change, benefit from caching)
-  // All other requests (JS, CSS, images, API calls) go directly to network
-  runtimeCaching: [
-    {
-      // Only cache fonts - they're static and benefit from caching
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\.(woff2?|ttf|eot)$/.test(url.pathname),
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'fonts',
-        expiration: {
-          maxEntries: 30,
-          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-        },
-      },
-    },
-  ],
+  // No runtime caching - let browser handle all caching via HTTP headers
+  runtimeCaching: [],
 })
 
 const isProd = process.env.NODE_ENV === 'production'
