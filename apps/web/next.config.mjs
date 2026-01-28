@@ -40,49 +40,17 @@ if (!commitHash) {
 
 const withPWA = withPWAInit({
   dest: 'public',
-  workboxOptions: {
-    mode: 'production',
-    // Disable precaching - only use runtime (lazy) caching
-    maximumFileSizeToCacheInBytes: 0,
-  },
   reloadOnOnline: false,
   cacheStartUrl: false,
   dynamicStartUrl: false,
-  customWorkerSrc: SERVICE_WORKERS_PATH,
-  // Exclude all public folder assets from precaching
+  // Use custom service worker - NO precaching, only runtime caching
+  swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
   publicExcludes: ['!**/*'],
-
-  // Runtime caching: lazy cache static assets on first request (no precaching)
-  // Only same-origin requests are cached - cross-origin API calls pass through untouched
-  runtimeCaching: [
-    {
-      // Fonts - cache on first load, serve from cache thereafter
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\.(woff2?|ttf|eot)$/i.test(url.pathname),
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'fonts',
-        expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-      },
-    },
-    {
-      // JS/CSS from _next/static - cache on first load
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/_next/static/'),
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-assets',
-        expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 365 },
-      },
-    },
-    {
-      // Images from same origin - cache on first load
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname),
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'images',
-        expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
-      },
-    },
-  ],
+  workboxOptions: {
+    mode: 'production',
+    // Don't inject any precache manifest into our custom SW
+    exclude: [/.*/],
+  },
 })
 
 const isProd = process.env.NODE_ENV === 'production'
