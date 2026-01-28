@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import useTxQueue from '@/hooks/useTxQueue'
@@ -14,13 +15,18 @@ import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/u
 import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
-import PaginatedTxnsWithAssessment from '@/components/common/PaginatedTxns/PaginatedTxnsWithAssessment'
+import PaginatedTxns from '@/components/common/PaginatedTxns'
+import { useSetQueuePages } from '@/features/hypernative/hooks/useSetQueuePages'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
+  const setQueuePages = useSetQueuePages()
+
+  const pendingSourceId = useId()
+  const queueSourceId = useId()
 
   const showHnLoginCard = !eligibilityLoading && isHypernativeEligible && isHypernativeQueueScanEnabled
 
@@ -52,10 +58,15 @@ const Queue: NextPage = () => {
             <RecoveryList />
 
             {/* Pending unsigned transactions */}
-            {showPending && <PaginatedTxnsWithAssessment useTxns={usePendingTxsQueue} />}
+            {showPending && (
+              <PaginatedTxns
+                useTxns={usePendingTxsQueue}
+                onPagesChange={(pages) => setQueuePages(pages, pendingSourceId)}
+              />
+            )}
 
             {/* The main queue of signed transactions */}
-            <PaginatedTxnsWithAssessment useTxns={useTxQueue} />
+            <PaginatedTxns useTxns={useTxQueue} onPagesChange={(pages) => setQueuePages(pages, queueSourceId)} />
           </Box>
         </main>
       </BatchExecuteHoverProvider>
