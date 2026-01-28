@@ -52,11 +52,12 @@ const withPWA = withPWAInit({
   // Exclude all public folder assets from precaching (! prefix required)
   publicExcludes: ['!**/*'],
 
-  // Only cache same-origin static assets - all other requests (API calls, etc.) bypass SW entirely
+  // Minimal caching - only fonts (static, rarely change, benefit from caching)
+  // All other requests (JS, CSS, images, API calls) go directly to network
   runtimeCaching: [
     {
-      // Fonts from /_next/static/ only
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\/_next\/static\/.*\.(ttf|woff2?)$/.test(url.pathname),
+      // Only cache fonts - they're static and benefit from caching
+      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\.(woff2?|ttf|eot)$/.test(url.pathname),
       handler: 'CacheFirst',
       options: {
         cacheName: 'fonts',
@@ -64,32 +65,6 @@ const withPWA = withPWAInit({
           maxEntries: 30,
           maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
         },
-      },
-    },
-    {
-      // Images from same origin only (/_next/ or public folder)
-      urlPattern: ({ url, sameOrigin }) =>
-        sameOrigin && /(\/_next\/|^\/(?!api\/))[^?]*\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(url.pathname),
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'images',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-        },
-      },
-    },
-    {
-      // JS/CSS from /_next/static/ only
-      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\/_next\/static\/.*\.(js|css)$/.test(url.pathname),
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'scripts-styles',
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-        },
-        networkTimeoutSeconds: 3,
       },
     },
   ],
