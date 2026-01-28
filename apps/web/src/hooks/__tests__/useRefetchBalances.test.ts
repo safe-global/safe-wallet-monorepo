@@ -3,7 +3,6 @@ import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import * as useChainId from '@/hooks/useChainId'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
-import * as useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
 import * as positionsQueries from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -11,6 +10,7 @@ import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/por
 import * as store from '@/store'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { toBeHex } from 'ethers'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 const CHAIN_ID = '5'
@@ -39,8 +39,12 @@ describe('useRefetchBalances', () => {
       safeError: undefined,
     })
 
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
-    jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(true)
+    // Mock both PORTFOLIO_ENDPOINT (false) and POSITIONS (true) by default
+    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+      if (feature === FEATURES.PORTFOLIO_ENDPOINT) return false
+      if (feature === FEATURES.POSITIONS) return true
+      return false
+    })
     jest.spyOn(useLoadBalances, 'useTokenListSetting').mockReturnValue(true)
 
     jest.spyOn(store, 'useAppSelector').mockReturnValue('USD')
@@ -70,8 +74,11 @@ describe('useRefetchBalances', () => {
     })
 
     it('should return true when portfolio feature is enabled and positions are enabled', async () => {
-      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-      jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(true)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) return true
+        if (feature === FEATURES.POSITIONS) return true
+        return false
+      })
 
       const { result } = renderHook(() => useRefetchBalances())
 
@@ -81,8 +88,11 @@ describe('useRefetchBalances', () => {
     })
 
     it('should return false when positions feature is disabled', async () => {
-      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-      jest.spyOn(useIsPositionsFeatureEnabled, 'default').mockReturnValue(false)
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) return true
+        if (feature === FEATURES.POSITIONS) return false
+        return false
+      })
 
       const { result } = renderHook(() => useRefetchBalances())
 

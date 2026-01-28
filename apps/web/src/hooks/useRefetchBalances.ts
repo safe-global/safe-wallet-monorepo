@@ -9,7 +9,6 @@ import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
-import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 
 /**
  * Shared hook for refetching positions and balances data.
@@ -31,7 +30,7 @@ export const useRefetchBalances = () => {
   const isTrustedTokenList = useTokenListSetting()
   const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
   const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
-  const isPositionsEnabled = useIsPositionsFeatureEnabled()
+  const isPositionsEnabled = useHasFeature(FEATURES.POSITIONS) ?? false
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
 
