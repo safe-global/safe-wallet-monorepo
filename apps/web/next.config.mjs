@@ -49,6 +49,8 @@ const withPWA = withPWAInit({
   cacheStartUrl: false,
   dynamicStartUrl: false,
   customWorkerSrc: SERVICE_WORKERS_PATH,
+  // Exclude all public folder assets from precaching (! prefix required)
+  publicExcludes: ['!**/*'],
 
   // Only cache same-origin static assets - all other requests (API calls, etc.) bypass SW entirely
   runtimeCaching: [
