@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useRef, type ReactElement, type ReactNode, useEffect } from 'react'
-import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { ConflictType, TransactionListItemType } from '@safe-global/store/gateway/types'
 import {
   QueueAssessmentProvider as ContextProvider,
   type QueueAssessmentContextValue,
@@ -33,6 +34,9 @@ export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProvide
     dispatch(clearAssessments())
   }, [safe.chainId, safeAddress, dispatch])
 
+  /**
+   * Update the pages when the pages sources change
+   */
   const updatePages = useCallback(() => {
     const allPages: QueuedItemPage[] = []
     pagesSourcesRef.current.forEach((sourcePages) => {
@@ -44,10 +48,55 @@ export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProvide
     }
   }, [pages])
 
+  /**
+   * Register a page of transactions for assessment
+   * @param newPages - The new pages to register
+   * @param sourceKey - The source key to identify the page
+   */
   const setPagesCallback = useCallback(
     (newPages: QueuedItemPage[], sourceKey?: string | symbol) => {
       const key = sourceKey || Symbol('pages-source')
       pagesSourcesRef.current.set(key, newPages)
+      updatePages()
+    },
+    [updatePages],
+  )
+
+  /**
+   * Register a single transaction for assessment
+   * @param txDetails - The transaction details
+   * @param sourceKey - The source key to identify the transaction
+   */
+  const setTxCallback = useCallback(
+    (txDetails: TransactionDetails | undefined, sourceKey?: string | symbol) => {
+      const key = sourceKey || Symbol('tx-source')
+
+      if (!txDetails) {
+        pagesSourcesRef.current.set(key, [])
+        updatePages()
+        return
+      }
+
+      const page: QueuedItemPage = {
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            type: TransactionListItemType.TRANSACTION,
+            transaction: {
+              txInfo: txDetails.txInfo,
+              id: txDetails.txId,
+              timestamp: txDetails.executedAt ?? Date.now(),
+              txStatus: txDetails.txStatus,
+              txHash: txDetails.txHash,
+            },
+            conflictType: ConflictType.NONE,
+          },
+        ],
+      }
+
+      pagesSourcesRef.current.set(key, [page])
       updatePages()
     },
     [updatePages],
@@ -69,8 +118,9 @@ export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProvide
       assessments,
       isLoading,
       setPages: setPagesCallback,
+      setTx: setTxCallback,
     }),
-    [assessments, isLoading, setPagesCallback],
+    [assessments, isLoading, setPagesCallback, setTxCallback],
   )
 
   return <ContextProvider value={contextValue}>{children}</ContextProvider>
