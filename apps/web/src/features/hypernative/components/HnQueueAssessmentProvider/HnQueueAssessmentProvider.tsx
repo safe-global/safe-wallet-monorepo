@@ -11,7 +11,7 @@ import { useAppDispatch } from '@/store'
 import { clearAssessments } from '../../store/queueAssessmentsSlice'
 import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
 
-interface QueueAssessmentProviderProps {
+interface HnQueueAssessmentProviderProps {
   children: ReactNode
 }
 
@@ -19,7 +19,7 @@ interface QueueAssessmentProviderProps {
  * Provider component that fetches batch assessments for queue pages
  * and provides them through context to child components
  */
-export const QueueAssessmentProvider = ({ children }: QueueAssessmentProviderProps): ReactElement => {
+export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProviderProps): ReactElement => {
   const { safe, safeAddress } = useSafeInfo()
   const dispatch = useAppDispatch()
   const pagesSourcesRef = useRef<Map<string | symbol, QueuedItemPage[]>>(new Map())

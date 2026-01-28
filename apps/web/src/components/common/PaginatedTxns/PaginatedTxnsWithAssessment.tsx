@@ -10,7 +10,7 @@ interface PaginatedTxnsWithAssessmentProps {
 }
 
 /**
- * Wrapper component that connects PaginatedTxns to QueueAssessmentProvider
+ * Wrapper component that connects PaginatedTxns to HnQueueAssessmentProvider
  * Automatically registers pages with the assessment provider when they change
  */
 const PaginatedTxnsWithAssessment = ({ useTxns }: PaginatedTxnsWithAssessmentProps) => {

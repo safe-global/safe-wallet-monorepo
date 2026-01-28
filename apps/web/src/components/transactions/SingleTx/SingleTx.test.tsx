@@ -7,7 +7,7 @@ import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
+import { HnQueueAssessmentProvider } from '@/features/hypernative/components/HnQueueAssessmentProvider'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
@@ -62,9 +62,9 @@ describe('SingleTx', () => {
     )
 
     const screen = render(
-      <QueueAssessmentProvider>
+      <HnQueueAssessmentProvider>
         <SingleTx />
-      </QueueAssessmentProvider>,
+      </HnQueueAssessmentProvider>,
     )
 
     const button = screen.queryByText('Details')
@@ -81,9 +81,9 @@ describe('SingleTx', () => {
     )
 
     const screen = render(
-      <QueueAssessmentProvider>
+      <HnQueueAssessmentProvider>
         <SingleTx />
-      </QueueAssessmentProvider>,
+      </HnQueueAssessmentProvider>,
     )
 
     await waitFor(() => {
@@ -107,9 +107,9 @@ describe('SingleTx', () => {
     )
 
     const screen = render(
-      <QueueAssessmentProvider>
+      <HnQueueAssessmentProvider>
         <SingleTx />
-      </QueueAssessmentProvider>,
+      </HnQueueAssessmentProvider>,
     )
 
     await waitFor(() => {
