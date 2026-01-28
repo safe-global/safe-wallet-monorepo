@@ -20,7 +20,7 @@ import GroupLabel from '../GroupLabel'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { useSetQueuePages } from '@/features/hypernative/hooks/useSetQueuePages'
+import { useHnQueueAssessment } from '@/features/hypernative/hooks/useHnQueueAssessment'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: ModuleTransaction = makeTxFromDetails(txDetails)
@@ -45,7 +45,7 @@ const SingleTx = () => {
   const { id } = router.query
   const transactionId = Array.isArray(id) ? id[0] : id
   const { safe, safeAddress } = useSafeInfo()
-  const setPages = useSetQueuePages()
+  const { setPages } = useHnQueueAssessment()
 
   const {
     data: txDetails,

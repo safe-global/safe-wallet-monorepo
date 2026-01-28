@@ -16,14 +16,14 @@ import { useBannerVisibility } from '@/features/hypernative/hooks'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
-import { useSetQueuePages } from '@/features/hypernative/hooks/useSetQueuePages'
+import { useHnQueueAssessment } from '@/features/hypernative/hooks/useHnQueueAssessment'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
-  const setQueuePages = useSetQueuePages()
+  const { setPages: setQueuePages } = useHnQueueAssessment()
 
   const pendingSourceId = useId()
   const queueSourceId = useId()
