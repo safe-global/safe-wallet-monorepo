@@ -84,7 +84,7 @@ export const ActionCard = ({
         gap: 1.5,
       }}
     >
-      {/* Header: Icon + Title */}
+      {/* Header: Icon + Title + Content */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.85 }}>
         <SvgIcon
           component={config.icon}
@@ -92,17 +92,17 @@ export const ActionCard = ({
           sx={{ color: config.iconColor, flexShrink: 0, width: 20, height: 20 }}
         />
 
-        <Typography variant="subtitle2" sx={{ flex: 1, fontWeight: 700, lineHeight: 1.5 }}>
-          {title}
+        <Typography variant="subtitle2" sx={{ flex: 1, lineHeight: 1.5 }}>
+          <Box component="span" sx={{ fontWeight: 700 }}>
+            {title}
+          </Box>
+          {content && (
+            <>
+              {typeof content === 'string' ? content : content}
+            </>
+          )}
         </Typography>
       </Box>
-
-      {/* Content */}
-      {content && (
-        <Box sx={{ paddingLeft: '28px' }}>
-          {typeof content === 'string' ? <Typography variant="body2">{content}</Typography> : content}
-        </Box>
-      )}
 
       {/* Action */}
       {action && (

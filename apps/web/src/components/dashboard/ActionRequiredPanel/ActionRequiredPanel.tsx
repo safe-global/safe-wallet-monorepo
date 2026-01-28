@@ -62,12 +62,12 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         sx={{ px: 1.5, mb: 1, cursor: 'pointer' }}
       >
         <Typography fontWeight={700} className={css.headerText}>
-          Attention required <SidebarListItemCounter count={warningCount.toString()} />
+          Action required <SidebarListItemCounter count={warningCount.toString()} />
         </Typography>
 
         <IconButton
           size="small"
-          aria-label={isExpanded ? 'Collapse attention required panel' : 'Expand attention required panel'}
+          aria-label={isExpanded ? 'Collapse action required panel' : 'Expand action required panel'}
           sx={{ ml: 1, pointerEvents: 'none' }}
         >
           <KeyboardArrowDownRoundedIcon

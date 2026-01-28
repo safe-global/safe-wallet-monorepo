@@ -102,8 +102,8 @@ export const InconsistentSignerSetupWarning = () => {
   return (
     <ActionCard
       severity="warning"
-      title="Your account has different signers"
-      content={`Your account has different signers on ${chainNamesText}. It could impact cross-chain transaction approvals.`}
+      title="Different signers across chains "
+      content="can break approvals and risk losing control of this Safe."
       action={{ label: 'Review signers', onClick: handleReviewSigners }}
       trackingEvent={ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS}
     />

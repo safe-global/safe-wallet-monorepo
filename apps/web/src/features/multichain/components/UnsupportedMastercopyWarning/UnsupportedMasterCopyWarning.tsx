@@ -34,19 +34,11 @@ export const UnsupportedMastercopyWarning = () => {
     canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) ||
     (!isValidMasterCopy(safe.implementationVersionState) && isMigrationToL2Possible(safe))
 
-  // Determine the message based on whether bytecode matched and migration is possible
-  const isBytecodeMatch = bytecodeComparison.result?.isMatch
-  const message = canMigrate
-    ? isBytecodeMatch
-      ? `Your Safe Account's base contract is not in the list of officially supported deployments, but its bytecode matches a supported L2 contract (${bytecodeComparison.result?.matchedVersion}). You can migrate it to the corresponding official deployment.`
-      : "Your Safe Account's base contract is not supported. You should migrate it to a compatible version."
-    : 'This Safe Account was created with an unsupported base contract. The web interface might not work correctly. We recommend using the command line interface instead.'
-
   return (
     <ActionCard
       severity="warning"
-      title="Base contract is not supported"
-      content={message}
+      title="This Safe is running an outdated version "
+      content="and may miss security fixes and improvements."
       action={
         canMigrate
           ? { label: 'Migrate', onClick: openUpgradeModal }

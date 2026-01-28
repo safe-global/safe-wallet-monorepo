@@ -41,10 +41,10 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
 
   const icon = <RecoveryPending />
   const title = isExecutable
-    ? 'Account can be recovered'
+    ? 'Account can be recovered. '
     : isExpired
-      ? 'Account recovery expired'
-      : 'Account recovery in progress'
+      ? 'Account recovery expired. '
+      : 'Account recovery in progress. '
   const desc = isExecutable
     ? 'The review window has passed and it is now possible to execute the recovery proposal.'
     : isExpired
@@ -66,8 +66,13 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
         title={title}
         content={
           <>
-            <Typography>{desc}</Typography>
-            {!isExecutable && !isExpired && <Countdown seconds={remainingSeconds} />}
+            {desc} {link}
+            {!isExecutable && !isExpired && (
+              <>
+                {' '}
+                <Countdown seconds={remainingSeconds} />
+              </>
+            )}
           </>
         }
         action={{ label: 'Go to queue', onClick }}

@@ -9,7 +9,7 @@ describe('ActionRequiredPanel', () => {
       </ActionRequiredPanel>,
     )
 
-    expect(screen.getByText('Attention required')).toBeInTheDocument()
+    expect(screen.getByText('Action required')).toBeInTheDocument()
     expect(screen.getByTestId('action-required-panel')).toBeInTheDocument()
   })
 
@@ -21,7 +21,7 @@ describe('ActionRequiredPanel', () => {
     )
 
     // Panel should be rendered but collapsed
-    const expandButton = screen.getByLabelText('Expand attention required panel')
+    const expandButton = screen.getByLabelText('Expand action required panel')
     expect(expandButton).toBeInTheDocument()
 
     // Content should not be visible initially (panel is collapsed)
@@ -37,10 +37,10 @@ describe('ActionRequiredPanel', () => {
       </ActionRequiredPanel>,
     )
 
-    const header = screen.getByText('Attention required').closest('div')
+    const header = screen.getByText('Action required').closest('div')
 
     // Initially collapsed
-    const expandButton = screen.getByLabelText('Expand attention required panel')
+    const expandButton = screen.getByLabelText('Expand action required panel')
     expect(expandButton).toBeInTheDocument()
 
     // Click to expand
@@ -49,7 +49,7 @@ describe('ActionRequiredPanel', () => {
     }
 
     // After expanding, the aria-label should change
-    const collapseButton = screen.getByLabelText('Collapse attention required panel')
+    const collapseButton = screen.getByLabelText('Collapse action required panel')
     expect(collapseButton).toBeInTheDocument()
   })
 
@@ -60,7 +60,7 @@ describe('ActionRequiredPanel', () => {
       </ActionRequiredPanel>,
     )
 
-    const iconButton = screen.getByLabelText('Expand attention required panel')
+    const iconButton = screen.getByLabelText('Expand action required panel')
     const chevronIcon = iconButton.querySelector('svg')
 
     // Initially collapsed (rotated 0deg)
@@ -102,7 +102,7 @@ describe('ActionRequiredPanel', () => {
 
     // Panel should not be visible when there are no warnings
     expect(screen.queryByTestId('action-required-panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Attention required')).not.toBeInTheDocument()
+    expect(screen.queryByText('Action required')).not.toBeInTheDocument()
   })
 
   it('should handle mixed component types', async () => {
@@ -164,14 +164,14 @@ describe('ActionRequiredPanel', () => {
     // Card with component="section" creates a <section> element
     expect(panel.tagName).toBe('SECTION')
 
-    const expandButton = screen.getByLabelText('Expand attention required panel')
+    const expandButton = screen.getByLabelText('Expand action required panel')
     expect(expandButton).toBeInTheDocument()
 
     // Click to expand
     fireEvent.click(expandButton.closest('div')!)
 
     // Aria label should update
-    const collapseButton = screen.getByLabelText('Collapse attention required panel')
+    const collapseButton = screen.getByLabelText('Collapse action required panel')
     expect(collapseButton).toBeInTheDocument()
   })
 
@@ -183,7 +183,7 @@ describe('ActionRequiredPanel', () => {
     )
 
     // The header class is on the Stack containing the Typography
-    const titleElement = screen.getByText('Attention required')
+    const titleElement = screen.getByText('Action required')
     const header = titleElement.closest('.header')
     expect(header).toHaveClass('header')
 

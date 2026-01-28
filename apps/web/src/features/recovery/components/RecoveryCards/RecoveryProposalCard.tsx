@@ -57,10 +57,8 @@ export function InternalRecoveryProposalCard({
       alt="An arrow surrounding a circle containing a vault"
     />
   )
-  const title = 'Recover this Account'
-  const desc = `The connected wallet was chosen as a trusted Recoverer. You can help the owner${maybePlural(
-    safe.owners,
-  )} regain access by resetting the Account setup.`
+  const title = 'Recover this account. '
+  const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const link = (
     <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
