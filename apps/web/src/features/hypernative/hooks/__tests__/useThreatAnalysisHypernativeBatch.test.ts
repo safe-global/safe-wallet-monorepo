@@ -6,7 +6,7 @@ import { ConflictType } from '@safe-global/store/gateway/types'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useAuthTokenHook from '../useAuthToken'
 import * as useThreatAnalysisHypernativeBatchHook from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
-import { queueAssessmentsSlice } from '../../store/queueAssessmentsSlice'
+import { hnQueueAssessmentsSlice } from '../../store/hnQueueAssessmentsSlice'
 import type { RootState } from '@/store'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -53,7 +53,7 @@ describe('useThreatAnalysisHypernativeBatch', () => {
 
   const createInitialState = (assessments: Record<`0x${string}`, any> = {}) => {
     return {
-      [queueAssessmentsSlice.name]: {
+      [hnQueueAssessmentsSlice.name]: {
         assessments,
       },
     } as Partial<RootState>

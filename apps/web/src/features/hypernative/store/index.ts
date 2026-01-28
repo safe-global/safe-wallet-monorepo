@@ -1,3 +1,3 @@
 export * from './hnStateSlice'
-export * from './queueAssessmentsSlice'
+export * from './hnQueueAssessmentsSlice'
 export * from './calendlySlice'

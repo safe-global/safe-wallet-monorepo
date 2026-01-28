@@ -8,7 +8,7 @@ import { isTransactionListItem } from '@/utils/transaction-guards'
 import { useAuthToken } from './useAuthToken'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector, useAppDispatch } from '@/store'
-import { selectAssessmentsByHashes, setBatchAssessments } from '../store/queueAssessmentsSlice'
+import { selectAssessmentsByHashes, setBatchAssessments } from '../store/hnQueueAssessmentsSlice'
 
 type UseThreatAnalysisHypernativeBatchProps = {
   pages: (QueuedItemPage | undefined)[]

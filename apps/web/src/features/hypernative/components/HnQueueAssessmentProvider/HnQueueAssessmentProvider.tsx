@@ -9,7 +9,7 @@ import { useThreatAnalysisHypernativeBatch } from '../../hooks/useThreatAnalysis
 import { isSamePage } from '@/utils/tx-list'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppDispatch } from '@/store'
-import { clearAssessments } from '../../store/queueAssessmentsSlice'
+import { clearAssessments } from '../../store/hnQueueAssessmentsSlice'
 import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
 
 interface HnQueueAssessmentProviderProps {
