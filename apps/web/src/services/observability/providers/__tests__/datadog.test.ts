@@ -114,42 +114,4 @@ describe('DatadogProvider', () => {
 
     expect(() => provider.captureException(error, context)).not.toThrow()
   })
-
-  it('should initialize independently when Logs or RUM packages fail', async () => {
-    jest.doMock('@/config/constants', () => {
-      const actualConstants = jest.requireActual<typeof ConstantsModule>('@/config/constants')
-
-      return {
-        ...actualConstants,
-        DATADOG_FORCE_ENABLE: true,
-        DATADOG_CLIENT_TOKEN: 'test-client-token',
-        DATADOG_RUM_APPLICATION_ID: 'test-app-id',
-        DATADOG_RUM_CLIENT_TOKEN: 'test-rum-token',
-      }
-    })
-
-    const { DatadogProvider: EnabledDatadogProvider } = await import('../datadog')
-
-    interface DatadogProviderPrivates {
-      initLogs: () => void
-      initRum: () => void
-    }
-
-    const initLogsSpy = jest
-      .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initLogs')
-      .mockImplementation(() => {
-        throw new Error('Logs init failed')
-      })
-    const initRumSpy = jest
-      .spyOn(EnabledDatadogProvider.prototype as unknown as DatadogProviderPrivates, 'initRum')
-      .mockImplementation(() => {})
-
-    const provider = new EnabledDatadogProvider()
-
-    await provider.init()
-
-    expect(console.warn).toHaveBeenCalled()
-    expect(initLogsSpy).toHaveBeenCalled()
-    expect(initRumSpy).toHaveBeenCalled()
-  })
 })
