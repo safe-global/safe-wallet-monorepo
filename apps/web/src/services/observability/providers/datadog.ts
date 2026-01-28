@@ -62,19 +62,11 @@ export class DatadogProvider implements IObservabilityProvider {
     }
 
     if (hasLogsToInit) {
-      try {
-        this.initLogs()
-      } catch (error) {
-        console.warn('Failed to initialize Datadog Logs:', error)
-      }
+      this.initLogs()
     }
 
     if (hasRumToInit) {
-      try {
-        this.initRum()
-      } catch (error) {
-        console.warn('Failed to initialize Datadog RUM:', error)
-      }
+      this.initRum()
     }
   }
 

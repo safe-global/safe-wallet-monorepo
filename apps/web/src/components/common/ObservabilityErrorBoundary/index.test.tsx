@@ -11,6 +11,7 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 describe('ObservabilityErrorBoundary', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
+    jest.clearAllMocks()
   })
 
   afterEach(() => {
