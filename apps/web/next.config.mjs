@@ -45,7 +45,7 @@ const withPWA = withPWAInit({
   dynamicStartUrl: false,
   // Use custom service worker - NO precaching, only runtime caching
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
-  publicExcludes: ['!**/*'],
+  publicExcludes: ['**/*'],
   // Explicitly empty - disables next-pwa's default caching rules
   runtimeCaching: [],
   extendDefaultRuntimeCaching: false,
