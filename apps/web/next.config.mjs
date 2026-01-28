@@ -46,6 +46,9 @@ const withPWA = withPWAInit({
   // Use custom service worker - NO precaching, only runtime caching
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
   publicExcludes: ['!**/*'],
+  // Explicitly empty - disables next-pwa's default caching rules
+  runtimeCaching: [],
+  extendDefaultRuntimeCaching: false,
   workboxOptions: {
     mode: 'production',
     // Don't inject any precache manifest into our custom SW
