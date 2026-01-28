@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
-import { useQueueBatchAssessments } from '../useQueueBatchAssessments'
+import { useThreatAnalysisHypernativeBatch } from '../useThreatAnalysisHypernativeBatch'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -20,7 +20,7 @@ const mockUseThreatAnalysisHypernativeBatch =
     typeof useThreatAnalysisHypernativeBatchHook.useThreatAnalysisHypernativeBatch
   >
 
-describe('useQueueBatchAssessments', () => {
+describe('useThreatAnalysisHypernativeBatch', () => {
   const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
   const mockAuthToken = 'Bearer test-token-123'
 
@@ -99,7 +99,7 @@ describe('useQueueBatchAssessments', () => {
 
       mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }), {
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -134,7 +134,7 @@ describe('useQueueBatchAssessments', () => {
 
       mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -167,7 +167,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -188,7 +188,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -214,7 +214,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -243,7 +243,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -265,7 +265,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -286,7 +286,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -311,7 +311,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages, skip: true }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages, skip: true }), {
         initialReduxState: createInitialState(),
       })
 
@@ -332,7 +332,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -367,7 +367,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -399,7 +399,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -431,7 +431,7 @@ describe('useQueueBatchAssessments', () => {
         jest.fn(),
       ])
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState({
           [safeTxHash]: null,
         }),
@@ -469,7 +469,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }), {
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 
@@ -499,7 +499,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }), {
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState({
           [safeTxHash1]: cachedAssessment,
         }),
@@ -520,7 +520,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }), {
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState({
           [safeTxHash]: null,
         }),
@@ -550,7 +550,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }), {
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState({
           [safeTxHash1]: cachedAssessment,
         }),
@@ -583,7 +583,7 @@ describe('useQueueBatchAssessments', () => {
 
       const { result: store } = renderHook(
         () => {
-          const hookResult = useQueueBatchAssessments({ pages })
+          const hookResult = useThreatAnalysisHypernativeBatch({ pages })
           return hookResult
         },
         {
@@ -612,7 +612,7 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }), {
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
         initialReduxState: createInitialState(),
       })
 

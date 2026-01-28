@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useThreatAnalysisHypernativeBatch } from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
+import { useThreatAnalysisHypernativeBatch as useThreatAnalysisHypernativeBatchUtils } from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { useAuthToken } from './useAuthToken'
@@ -10,7 +10,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectAssessmentsByHashes, setBatchAssessments } from '../store/queueAssessmentsSlice'
 
-type UseQueueBatchAssessmentsProps = {
+type UseThreatAnalysisHypernativeBatchProps = {
   pages: (QueuedItemPage | undefined)[]
   skip?: boolean
 }
@@ -25,10 +25,10 @@ type UseQueueBatchAssessmentsProps = {
  * @param skip - Skip the analysis (useful when Hypernative Guard is not installed)
  * @returns Map of safeTxHash to AsyncResult containing threat analysis results
  */
-export function useQueueBatchAssessments({
+export function useThreatAnalysisHypernativeBatch({
   pages,
   skip = false,
-}: UseQueueBatchAssessmentsProps): Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> {
+}: UseThreatAnalysisHypernativeBatchProps): Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> {
   const { safeAddress } = useSafeInfo()
   const [{ token: authToken }] = useAuthToken()
   const dispatch = useAppDispatch()
@@ -80,7 +80,7 @@ export function useQueueBatchAssessments({
   )
 
   // Fetch batch assessments for hashes not in cache
-  const fetchedAssessments = useThreatAnalysisHypernativeBatch({
+  const fetchedAssessments = useThreatAnalysisHypernativeBatchUtils({
     safeTxHashes: hashesToFetch,
     safeAddress: safeAddress as `0x${string}`,
     authToken,

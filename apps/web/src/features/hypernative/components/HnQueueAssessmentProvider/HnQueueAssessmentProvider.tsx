@@ -4,7 +4,7 @@ import {
   QueueAssessmentProvider as ContextProvider,
   type QueueAssessmentContextValue,
 } from '../../contexts/QueueAssessmentContext'
-import { useQueueBatchAssessments } from '../../hooks/useQueueBatchAssessments'
+import { useThreatAnalysisHypernativeBatch } from '../../hooks/useThreatAnalysisHypernativeBatch'
 import { isSamePage } from '@/utils/tx-list'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppDispatch } from '@/store'
@@ -54,7 +54,7 @@ export const HnQueueAssessmentProvider = ({ children }: HnQueueAssessmentProvide
   )
 
   // Fetch batch assessments for all pages
-  const assessments = useQueueBatchAssessments({
+  const assessments = useThreatAnalysisHypernativeBatch({
     pages,
     skip: !showAssessment,
   })
