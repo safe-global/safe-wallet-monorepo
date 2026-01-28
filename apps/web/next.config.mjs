@@ -42,29 +42,55 @@ const withPWA = withPWAInit({
   dest: 'public',
   workboxOptions: {
     mode: 'production',
+    // Exclude ALL files from precaching - we only want runtime caching
+    exclude: [/.*/],
   },
   reloadOnOnline: false,
-  publicExcludes: [],
-  buildExcludes: [/./],
+  cacheStartUrl: false,
+  dynamicStartUrl: false,
   customWorkerSrc: SERVICE_WORKERS_PATH,
-  // Prefer InjectManifest for Web Push
-  swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
 
+  // Only cache same-origin static assets - all other requests (API calls, etc.) bypass SW entirely
   runtimeCaching: [
     {
-      urlPattern: /\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
+      // Fonts from /_next/static/ only
+      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\/_next\/static\/.*\.(ttf|woff2?)$/.test(url.pathname),
       handler: 'CacheFirst',
       options: {
-        cacheName: 'static-assets',
+        cacheName: 'fonts',
         expiration: {
-          maxEntries: 1000,
+          maxEntries: 30,
           maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
         },
       },
     },
+    {
+      // Images from same origin only (/_next/ or public folder)
+      urlPattern: ({ url, sameOrigin }) =>
+        sameOrigin && /(\/_next\/|^\/(?!api\/))[^?]*\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(url.pathname),
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'images',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+        },
+      },
+    },
+    {
+      // JS/CSS from /_next/static/ only
+      urlPattern: ({ url, sameOrigin }) => sameOrigin && /\/_next\/static\/.*\.(js|css)$/.test(url.pathname),
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'scripts-styles',
+        expiration: {
+          maxEntries: 200,
+          maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+        },
+        networkTimeoutSeconds: 3,
+      },
+    },
   ],
-
-  cacheId: pkg.version,
 })
 
 const isProd = process.env.NODE_ENV === 'production'
