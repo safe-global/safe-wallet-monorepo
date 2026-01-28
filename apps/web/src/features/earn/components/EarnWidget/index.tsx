@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import { widgetAppData } from '@/features/earn/constants'
-import useGetWidgetUrl from '@/features/earn/hooks/useGetWidgetUrl'
+import { widgetAppData } from '../../constants'
+import useGetWidgetUrl from '../../hooks/useGetWidgetUrl'
 
 const EarnWidget = ({ asset }: { asset?: string }) => {
   const url = useGetWidgetUrl(asset)

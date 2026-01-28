@@ -25,7 +25,7 @@ type SingleTxDecodedProps = {
   actions?: React.ReactNode
 }
 
-export const SingleTxDecoded = ({
+const SingleTxDecoded = ({
   tx,
   txData,
   actionTitle,

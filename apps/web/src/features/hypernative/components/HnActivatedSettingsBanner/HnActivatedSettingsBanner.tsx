@@ -49,5 +49,3 @@ export const HnActivatedSettingsBanner = () => {
     </Paper>
   )
 }
-
-export default HnActivatedSettingsBanner

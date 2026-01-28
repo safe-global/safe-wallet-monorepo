@@ -42,7 +42,7 @@ const getErrorMessage = (error?: FetchBaseQueryError | SerializedError) => {
   return error.message
 }
 
-export const useCollectibles = (): UseCollectiblesResult => {
+const useCollectibles = (): UseCollectiblesResult => {
   const { safe, safeAddress } = useSafeInfo()
   const isSafeAddressReady = Boolean(safeAddress)
   const shouldSkip = !isSafeAddressReady || !safe.deployed

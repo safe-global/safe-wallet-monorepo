@@ -1,6 +1,6 @@
 import { type PropsWithChildren, type ReactElement, useContext, useEffect } from 'react'
 import { Typography } from '@mui/material'
-import { useChainId } from '@/hooks/useChainId'
+import useChainId from '@/hooks/useChainId'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'

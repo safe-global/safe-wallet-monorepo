@@ -56,21 +56,3 @@ export interface FeatureHandle<TImpl extends FeatureImplementation = FeatureImpl
    */
   load: () => Promise<{ default: TImpl }>
 }
-
-/**
- * Full loaded feature - what useLoadFeature() returns to consumers.
- * Combines the handle (name, useIsEnabled) with the loaded implementation.
- *
- * @example
- * interface MyFeatureContract extends FeatureContract {
- *   readonly name: 'my-feature'
- *   useIsEnabled: () => boolean | undefined
- *   MyComponent: ComponentType<Props>
- *   useMyHook: () => MyHookReturn
- *   myService: MyServiceType
- * }
- */
-export type FeatureContract = {
-  readonly name: string
-  useIsEnabled: () => boolean | undefined
-} & FeatureImplementation

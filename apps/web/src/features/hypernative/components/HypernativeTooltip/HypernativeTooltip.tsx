@@ -30,5 +30,3 @@ export const HypernativeTooltip = ({
     </Tooltip>
   )
 }
-
-export default HypernativeTooltip

@@ -44,7 +44,7 @@ const shouldHideConfirmations = (msg: MessageItem): boolean => {
   return isConfirmed || msg.confirmations.length > 3
 }
 
-export const MsgSigners = ({
+const MsgSigners = ({
   msg,
   showOnlyConfirmations = false,
   showMissingSignatures = false,

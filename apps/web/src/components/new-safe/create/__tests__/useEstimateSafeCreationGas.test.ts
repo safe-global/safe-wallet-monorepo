@@ -39,7 +39,7 @@ describe('useEstimateSafeCreationGas', () => {
     jest.resetAllMocks()
 
     jest.spyOn(store, 'useAppSelector').mockReturnValue({})
-    jest.spyOn(chainIdModule, 'useChainId').mockReturnValue('4')
+    jest.spyOn(chainIdModule, 'default').mockReturnValue('4')
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
       error: undefined,

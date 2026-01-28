@@ -66,9 +66,21 @@ jobs:
         run: yarn type-check
         working-directory: apps/web
 
+  knip-exports:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/yarn
+      - name: Check for unused exports
+        run: yarn workspace @safe-global/web knip:exports
+
   notify:
     if: failure() && github.event_name == 'push'
-    needs: [lint, prettier, type-check]
+    needs: [lint, prettier, type-check, knip-exports]
     runs-on: ubuntu-latest
     permissions: {}
     steps:

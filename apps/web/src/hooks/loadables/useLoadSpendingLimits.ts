@@ -128,7 +128,7 @@ export const getSpendingLimits = async (
   return spendingLimits.flat().filter(discardZeroAllowance)
 }
 
-export const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
+const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chainId = useChainId()
   const provider = useWeb3ReadOnly()

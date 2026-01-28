@@ -28,12 +28,6 @@ const extractFunctionSelectors = (abi: InterfaceAbi): string[] => {
 export const HYPERNATIVE_GUARD_SELECTOR_SETS = HYPERNATIVE_GUARD_ABIS.map(extractFunctionSelectors)
 
 /**
- * @deprecated Use HYPERNATIVE_GUARD_SELECTOR_SETS instead.
- * V1 function selectors for backwards compatibility.
- */
-export const HYPERNATIVE_GUARD_FUNCTION_SELECTORS = HYPERNATIVE_GUARD_SELECTOR_SETS[0]
-
-/**
  * Helper to check if bytecode contains all selectors from a given list
  */
 const bytecodeContainsAllSelectors = (bytecode: string, selectors: string[]): boolean => {

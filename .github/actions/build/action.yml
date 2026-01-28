@@ -118,6 +118,15 @@ runs:
         DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
         NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
         NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE }}
+    - name: Generate SRI for static scripts
+      shell: bash
+      # Skip SRI for Cypress test builds (NODE_ENV=cypress)
+      run: |
+        if [ "$NODE_ENV" != "cypress" ]; then
+          yarn workspace @safe-global/web integrity
+        else
+          echo "Skipping SRI generation for Cypress test environment"
+        fi
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'

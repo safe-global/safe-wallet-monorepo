@@ -44,7 +44,7 @@ export const MultisendActionsHeader = ({
   )
 }
 
-export const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendProps): ReactElement | null => {
+const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendProps): ReactElement | null => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
   const isOpenMapUndefined = openMap == null
 

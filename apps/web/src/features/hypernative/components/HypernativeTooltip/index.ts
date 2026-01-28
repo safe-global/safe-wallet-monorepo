@@ -1,1 +1,1 @@
-export { HypernativeTooltip, default } from './HypernativeTooltip'
+export { HypernativeTooltip } from './HypernativeTooltip'

@@ -81,7 +81,7 @@ export type CreateTokenTransferProps = {
   txNonce?: number
 }
 
-export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)

@@ -3,7 +3,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 
-export async function buildQueryFn<T>(fn: () => Promise<T>) {
+async function _buildQueryFn<T>(fn: () => Promise<T>) {
   try {
     return { data: await fn() }
   } catch (error) {

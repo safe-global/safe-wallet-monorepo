@@ -1,7 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppSelector } from '@/store'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import {
@@ -35,36 +34,10 @@ import { useSafeCreationData, CreateSafeOnSpecificChain, hasMultiChainAddNetwork
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import useChainId from '@/hooks/useChainId'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { InfoOutlined } from '@mui/icons-material'
-import { selectUndeployedSafe } from '@/store/slices'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import { AppRoutes } from '@/config/routes'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-
-export const ChainIndicatorWithFiatBalance = ({
-  isSelected,
-  chain,
-  safeAddress,
-}: {
-  isSelected: boolean
-  chain: Pick<Chain, 'chainId'>
-  safeAddress: string
-}) => {
-  const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chain.chainId, safeAddress))
-  const currentChainId = useChainId()
-  const isCurrentChain = currentChainId === chain.chainId
-
-  const { balances } = useVisibleBalances()
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    !isCurrentChain && !undeployedSafe ? { safeAddress, chainId: chain.chainId } : skipToken,
-  )
-  const fiatValue = isCurrentChain ? balances.fiatTotal : safeOverview?.fiatTotal
-
-  return <ChainIndicator responsive={isSelected} chainId={chain.chainId} fiatValue={fiatValue} inline />
-}
 
 export const getNetworkLink = (
   router: NextRouter,

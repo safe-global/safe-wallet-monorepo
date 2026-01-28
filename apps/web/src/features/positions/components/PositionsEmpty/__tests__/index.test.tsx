@@ -11,13 +11,13 @@ jest.mock('@/services/analytics', () => ({
   },
 }))
 
-jest.mock('@/features/earn/hooks/useIsEarnFeatureEnabled', () => ({
+jest.mock('@/features/earn', () => ({
   __esModule: true,
   default: jest.fn(),
   useIsEarnPromoEnabled: jest.fn(() => true),
 }))
 
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn'
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 const mockUseIsEarnFeatureEnabled = useIsEarnPromoEnabled as jest.MockedFunction<typeof useIsEarnPromoEnabled>

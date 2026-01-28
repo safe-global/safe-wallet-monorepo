@@ -84,16 +84,3 @@ export const unloadBeamer = (): void => {
     BEAMER_COOKIES.forEach((name) => Cookies.remove(name, { domain, path: '/' }))
   }, 100)
 }
-
-export const shouldShowBeamerNps = (): boolean => {
-  if (!isBeamerLoaded() || !window?.Beamer) {
-    return false
-  }
-
-  const COOKIE_NAME = `_BEAMER_NPS_LAST_SHOWN_${BEAMER_ID}`
-
-  // Beamer advise using their '/nps/check' endpoint to see if the NPS should be shown
-  // As we need to check this more than the request limit, we instead check the cookie
-  // @see https://www.getbeamer.com/api
-  return !window.Beamer.getCookie(COOKIE_NAME)
-}
