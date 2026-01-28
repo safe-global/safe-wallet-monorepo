@@ -51,6 +51,7 @@ import { useDatadog } from '@/services/datadog'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import { HnQueueAssessmentProvider } from '@/features/hypernative/components/HnQueueAssessmentProvider'
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -100,7 +101,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
             <WalletProvider>
               <GeoblockingProvider>
                 <TxModalProvider>
-                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                  <HnQueueAssessmentProvider>
+                    <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+                  </HnQueueAssessmentProvider>
                 </TxModalProvider>
               </GeoblockingProvider>
             </WalletProvider>
