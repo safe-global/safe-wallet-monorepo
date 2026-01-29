@@ -7,6 +7,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-comp
 
 const CACHE_VERSION = 'v1'
 const CACHE_NAMES = {
+  pages: `pages-${CACHE_VERSION}`,
   fonts: `fonts-${CACHE_VERSION}`,
   static: `static-${CACHE_VERSION}`,
   images: `images-${CACHE_VERSION}`,
@@ -41,7 +42,30 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Determine cache strategy based on URL pattern
+  // Handle navigation requests (HTML pages) with stale-while-revalidate
+  const isNavigationRequest = request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')
+  if (isNavigationRequest) {
+    event.respondWith(
+      caches.open(CACHE_NAMES.pages).then((cache) =>
+        cache.match(request).then((cached) => {
+          const fetchPromise = fetch(request)
+            .then((response) => {
+              if (response.status === 200) {
+                cache.put(request, response.clone())
+              }
+              return response
+            })
+            .catch(() => cached) // Return cached version if network fails
+
+          // Return cached immediately if available, otherwise wait for network
+          return cached || fetchPromise
+        }),
+      ),
+    )
+    return
+  }
+
+  // Determine cache strategy for static assets
   let cacheName
   if (/\.(woff2?|ttf|eot)$/i.test(url.pathname)) {
     cacheName = CACHE_NAMES.fonts
@@ -50,7 +74,7 @@ self.addEventListener('fetch', (event) => {
   } else if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)) {
     cacheName = CACHE_NAMES.images
   } else {
-    // Network-only for everything else (HTML, API calls, etc.)
+    // Network-only for everything else (API calls, etc.)
     return
   }
 
