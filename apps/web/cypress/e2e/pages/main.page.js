@@ -475,3 +475,34 @@ export function waitForElementByTextInContainer(containerSelector, elementText) 
 export function verifyElementByTextExists(text) {
   cy.contains(text).should('exist')
 }
+
+// ===========================================
+// Generic Helper Functions
+// ===========================================
+
+// Button clicks
+export function clickOnNextBtn(selector) {
+  cy.get(selector).should('be.enabled').click()
+}
+
+export function clickOnBackBtn(selector) {
+  cy.get(selector).should('be.enabled').click()
+}
+
+// Button state verification
+export function verifyBtnIsEnabled(selector) {
+  cy.get(selector).should('not.be.disabled')
+}
+
+export function verifyBtnIsDisabled(selector) {
+  cy.get(selector).should('be.disabled')
+}
+
+// Input helpers
+export function typeInField(selector, value) {
+  cy.get(selector).clear().type(value)
+}
+
+export function clearField(selector) {
+  cy.get(selector).clear()
+}

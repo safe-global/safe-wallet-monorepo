@@ -144,19 +144,23 @@ export function verifyTooltipLabel(label) {
   cy.get(tooltipLabel(label)).should('be.visible')
 }
 export function verifyReplaceBtnIsEnabled() {
-  cy.get(replaceOwnerBtn).should('exist').and('not.be.disabled')
+  cy.get(replaceOwnerBtn).should('exist')
+  main.verifyBtnIsEnabled(replaceOwnerBtn)
 }
 
 export function verifyReplaceBtnIsDisabled() {
-  cy.get(replaceOwnerBtn).should('exist').and('be.disabled')
+  cy.get(replaceOwnerBtn).should('exist')
+  main.verifyBtnIsDisabled(replaceOwnerBtn)
 }
 
 export function verifyManageSignersBtnIsEnabled() {
-  cy.get(manageSignersBtn).should('exist').and('not.be.disabled')
+  cy.get(manageSignersBtn).should('exist')
+  main.verifyBtnIsEnabled(manageSignersBtn)
 }
 
 export function verifyManageSignersBtnIsDisabled() {
-  cy.get(manageSignersBtn).should('exist').and('be.disabled')
+  cy.get(manageSignersBtn).should('exist')
+  main.verifyBtnIsDisabled(manageSignersBtn)
 }
 
 export function hoverOverManageSignersBtn() {
@@ -236,15 +240,15 @@ export function verifyNewOwnerName(name) {
 }
 //next button on Manage signers
 export function clickOnNextBtnManage() {
-  cy.get(submitNextBt).should('be.enabled').click()
+  main.clickOnNextBtn(submitNextBt)
 }
 //Next button for usual tx flow
 export function clickOnNextBtn() {
-  cy.get(addOwnerNextBtn).should('be.enabled').click()
+  main.clickOnNextBtn(addOwnerNextBtn)
 }
 
 export function clickOnBackBtn() {
-  cy.get(navigation.modalBackBtn).should('be.enabled').click()
+  main.clickOnBackBtn(navigation.modalBackBtn)
 }
 
 export function verifyConfirmTransactionWindowDisplayed() {
