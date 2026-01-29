@@ -24,7 +24,6 @@ const thresholdOption = 'li[role="option"]'
 const existingOwnerAddressInput = (index) => `input[name="owners.${index}.address"]`
 const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
-const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
 const manageSignersBtn = '[data-testid="manage-signers-btn"]'
 const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
@@ -39,7 +38,6 @@ const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
 const selectedOwnerStr = 'Signers'
-const processedTransactionStr = 'Transaction was successful'
 const changeThresholdStr = 'Change threshold'
 
 export const safeAccountNonceStr = 'Safe Account nonce'
@@ -54,10 +52,6 @@ export function checkExistingSignerAddress(index, address) {
   cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
 }
 
-export function verifyOwnerTransactionComplted() {
-  cy.get(processedTransactionStr).should('exist')
-  cy.get(finishTransactionBtn).should('exist')
-}
 export function verifyNumberOfOwners(count) {
   const indices = Array.from({ length: count }, (_, index) => index)
   const names = indices.map(existingOwnerNameInput)
@@ -117,10 +111,6 @@ export function verifyRemoveBtnIsDisabled() {
   return cy.get(removeOwnerBtn).should('exist').and('be.disabled')
 }
 
-export function hoverOverDeleteOwnerBtn(index) {
-  cy.get(removeOwnerBtn).eq(index).trigger('mouseover', { force: true })
-}
-
 export function openRemoveOwnerWindow(btn) {
   const minimumCount = btn === 0 ? 1 : btn
   main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
@@ -161,10 +151,6 @@ export function verifyReplaceBtnIsDisabled() {
   cy.get(replaceOwnerBtn).should('exist').and('be.disabled')
 }
 
-export function hoverOverReplaceOwnerBtn() {
-  cy.get(replaceOwnerBtn).trigger('mouseover', { force: true })
-}
-
 export function verifyManageSignersBtnIsEnabled() {
   cy.get(manageSignersBtn).should('exist').and('not.be.disabled')
 }
@@ -189,10 +175,6 @@ export function clickOnWalletExpandMoreIcon() {
 export function clickOnDisconnectBtn() {
   cy.get('button').contains(disconnectBtnStr).click()
   cy.get('button').contains(notConnectedStatus)
-}
-
-export function clickOnConnectBtn() {
-  cy.get('button').contains(notConnectedStatus).click().wait(1000)
 }
 
 export function waitForConnectionStatus() {
@@ -247,10 +229,6 @@ export function typeOwnerName(name) {
 export function typeOwnerNameManage(index, name) {
   cy.get(existingOwnerNameInput(index)).clear().type(name)
   main.verifyInputValue(existingOwnerNameInput(index), name)
-}
-
-export function selectNewOwner(name) {
-  cy.contains(name).click()
 }
 
 export function verifyNewOwnerName(name) {

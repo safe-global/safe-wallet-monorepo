@@ -5,7 +5,6 @@ import * as modal from '../pages/modals.page'
 const nftModalTitle = modal.modalTitle
 const nftModal = modal.modal
 
-const nftModalCloseBtn = main.modalDialogCloseBtn
 const recipientInput = 'input[name="recipient"]'
 export const nftsRow = '[data-testid^="nfts-table-row"]'
 const inactiveNftIcon = '[data-testid="nft-icon-border"]'
@@ -74,15 +73,6 @@ export function verifySelectedNetwrokSepolia() {
   cy.get(nftModal).within(() => {
     cy.get(nftModalTitle).contains(constants.networks.sepolia)
   })
-}
-
-export function verifyNFTModalLink(link) {
-  cy.get(nftModalTitle).contains(`a[href="${link}"]`, 'View on OpenSea')
-}
-
-export function closeNFTModal() {
-  cy.get(nftModalCloseBtn).click()
-  cy.get(nftModalTitle).should('not.exist')
 }
 
 export function clickOnInactiveNFT() {

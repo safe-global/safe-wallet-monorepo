@@ -33,7 +33,6 @@ const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenItem = '[data-testid="token-item"]'
 const sendBtn = '[data-testid="send-button"]'
 
-const hideTokenDefaultString = 'Hide tokens'
 const assetNameSortBtnStr = 'Asset'
 const assetBalanceSortBtnStr = 'Balance'
 const sendBtnStr = 'Send'
@@ -266,14 +265,6 @@ export function checkTokenCounter(value) {
     })
 }
 
-export function checkNFTCounter(value) {
-  cy.get(hiddenTokenIcon)
-    .parent()
-    .within(() => {
-      cy.get('p').should('include.text', value)
-    })
-}
-
 export function checkHiddenTokenBtnCounter(value) {
   cy.get(manageTokensButton).click()
   cy.get(manageTokensMenu)
@@ -407,14 +398,6 @@ export function clickOnTokenCheckbox(token) {
 
 export function saveHiddenTokenSelection() {
   cy.get(hiddenTokenSaveBtn).click()
-}
-
-export function verifyTokenIsVisible(token) {
-  cy.contains(token)
-}
-
-export function verifyMenuButtonLabelIsDefault() {
-  cy.contains(hideTokenDefaultString)
 }
 
 export function verifyInitialTableState() {

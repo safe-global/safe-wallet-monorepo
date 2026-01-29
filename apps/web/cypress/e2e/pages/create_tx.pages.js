@@ -109,7 +109,6 @@ const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
 const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
-const yesStr = 'Yes, '
 const estimatedFeeStr = 'Estimated fee'
 export const executeStr = 'Execute'
 const editBtnStr = 'Edit'
@@ -836,10 +835,6 @@ export function hasNonce() {
 
 export function verifyNonceInputValue(value) {
   cy.get(nonceInput).should('have.value', value)
-}
-
-export function clickOnYesOption() {
-  cy.contains(yesStr).should('exist').click()
 }
 
 export function displayAdvancedDetails() {

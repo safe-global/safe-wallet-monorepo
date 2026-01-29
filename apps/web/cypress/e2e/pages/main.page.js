@@ -156,20 +156,6 @@ export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {
   })
 }
 
-export function getTokenBalance(safeAddress, tokenSymbol) {
-  getSafeBalance(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-    const targetToken = response.body.items.find((token) => token.tokenInfo.symbol === tokenSymbol)
-    console.log('**** TOKEN BALANCE', targetToken.balance)
-  })
-}
-
-export function checkNFTBalance(safeAddress, tokenSymbol, expectedBalance) {
-  getSafeNFTs(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-    const targetToken = response.body.results.find((token) => token.tokenSymbol === tokenSymbol)
-    expect(targetToken.tokenName).to.equal(expectedBalance)
-  })
-}
-
 export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
   let pollCount = 0
 
@@ -277,13 +263,6 @@ export function checkTextsExistWithinElementScroll(element, texts) {
         cy.get('div').contains(text).scrollIntoView().should('be.visible')
       })
   })
-}
-
-export function checkRadioButtonState(selector, state) {
-  if (state === constants.checkboxStates.checked) {
-    cy.get(selector).should('be.checked')
-  } else state === constants.checkboxStates.unchecked
-  cy.get(selector).should('not.be.checked')
 }
 
 export function verifyCheckboxeState(element, index, state) {
@@ -418,10 +397,6 @@ export function formatAddressInCaps(address) {
   } else {
     return 'Invalid address format'
   }
-}
-
-export function getElementText(element) {
-  return cy.get(element).invoke('text')
 }
 
 export function verifyTextVisibility(stringsArray) {

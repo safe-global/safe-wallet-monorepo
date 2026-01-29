@@ -172,13 +172,6 @@ export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).should('not.exist')
 }
 
-export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
-  }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
-}
-
 export function verifyRecoveryProposalModalState(option, horizontal = false) {
   let modal = recoveryProposalModal
   if (horizontal) modal = recoveryProposalHorizontal
