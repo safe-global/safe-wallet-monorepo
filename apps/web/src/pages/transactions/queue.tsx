@@ -8,6 +8,7 @@ import { Box, Skeleton } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/components/RecoveryList'
+import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import {
   useIsHypernativeEligible,
@@ -18,7 +19,6 @@ import {
   QueueAssessmentProvider,
   HypernativeFeature,
 } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
 import { useState, useCallback, useMemo } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
