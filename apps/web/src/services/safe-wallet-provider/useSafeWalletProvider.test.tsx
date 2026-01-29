@@ -2,7 +2,7 @@ import { Provider } from 'react-redux'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as router from 'next/router'
 
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as notifications from './notifications'
 import { act, renderHook, getAppName } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
@@ -740,9 +740,12 @@ describe('useSafeWalletProvider', () => {
     it('should proxy RPC calls', async () => {
       const mockSend = jest.fn(() => Promise.resolve({ result: '0x' }))
 
-      jest.spyOn(web3 as any, 'useWeb3ReadOnly').mockImplementation(() => ({
-        send: mockSend,
-      }))
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(
+        () =>
+          ({
+            send: mockSend,
+          }) as any,
+      )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 

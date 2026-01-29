@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { useCounterpartyAnalysis as useCounterpartyAnalysisUtils } from '@safe-global/utils/features/safe-shield/hooks'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useOwnedSafes from '@/hooks/useOwnedSafes'

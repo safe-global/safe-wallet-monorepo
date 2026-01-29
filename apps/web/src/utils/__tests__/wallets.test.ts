@@ -1,7 +1,7 @@
 import { type JsonRpcProvider, toBeHex } from 'ethers'
 import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
 
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import {
   isSmartContractWallet,
   isSmartContract,
@@ -17,7 +17,7 @@ describe('wallets', () => {
 
     jest.clearAllMocks()
 
-    jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(() => {
+    jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockImplementation(() => {
       return {
         getCode: getCodeMock,
       } as unknown as JsonRpcProvider

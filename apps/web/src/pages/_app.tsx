@@ -4,6 +4,10 @@ import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
+import dynamic from 'next/dynamic'
+
+// Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
+const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
 import { Provider } from 'react-redux'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
@@ -15,9 +19,7 @@ import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import { useInitOnboard } from '@/hooks/wallets/useOnboard'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
 import useTxNotifications from '@/hooks/useTxNotifications'
 import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
@@ -84,9 +86,7 @@ const InitApp = (): null => {
   useNotificationTracking()
   useInitSession()
   useLoadableStores()
-  useInitOnboard()
   useInitWeb3()
-  useInitSafeCoreSDK()
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -165,6 +165,8 @@ const SafeWalletApp = ({
           <CssBaseline />
 
           <InitApp />
+
+          <LazyWeb3Init />
 
           <TermsGate>
             <PageLayout pathname={router.pathname}>
