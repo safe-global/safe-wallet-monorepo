@@ -4,6 +4,7 @@ import * as createtx from '../pages/create_tx.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as ls from '../../support/localstorage_data.js'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -55,7 +56,61 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // 2. Recipient Analyse
   // ========================================
 
-  // TODO: Add Recipient Analyse tests
+  // Helper function for common recipient analysis test setup
+  const setupRecipientAnalysisTest = (transactionId, addressBookData = null) => {
+    if (addressBookData) {
+      main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, addressBookData)
+    }
+
+    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + transactionId)
+    wallet.connectSigner(signer)
+
+    createtx.clickOnConfirmTransactionBtn()
+    shield.verifySafeShieldDisplayed()
+    shield.waitForAnalysisComplete()
+    shield.verifyRecipientAnalysisGroupCard()
+    shield.expandRecipientAnalysisCard()
+  }
+
+  it.only('[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A', () => {
+    setupRecipientAnalysisTest(
+      shield.testTransactions.recipientAnalysisKnownUnknown,
+      ls.addressBookData.safeSchiledAddressBook,
+    )
+    main.verifyTextVisibility([shield.knownRecipientStr, shield.addressInAddressBookStr])
+  })
+
+  it('[Recipient Analyse] Verify that Known recipient is shown when recipient is a Safe you own - 1A', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
+    main.verifyTextVisibility([shield.knownRecipientStr, shield.addressIsSafeYouOwnStr])
+  })
+
+  it('[Recipient Analyse] Verify that Unknown recipient is shown when address is not in address book - 1B', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisKnownUnknown)
+    main.verifyTextVisibility([shield.unknownRecipientStr, shield.addressNotInAddressBookStr])
+  })
+
+  it('[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
+    main.verifyTextVisibility([shield.newRecipientStr, shield.firstTimeInteractionStr])
+  })
+
+  it('[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B', () => {
+    setupRecipientAnalysisTest(
+      shield.testTransactions.recipientAnalysisKnownUnknown,
+      ls.addressBookData.safeSchiledAddressBook,
+    )
+    main.verifyTextVisibility([shield.recurringRecipientStr, shield.interactedTwoTimesStr])
+  })
+
+  it('[Recipient Analyse] Verify that Low activity recipient warning is shown for address with few transactions - 2', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisLowActivity)
+    main.verifyTextVisibility([
+      shield.lowActivityRecipientStr,
+      shield.fewTransactionsStr,
+      shield.firstTimeInteractionStr,
+    ])
+  })
 
   // ========================================
   // 3. Threat Analyse

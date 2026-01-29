@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants'
 import { continueSignBtn } from './create_tx.pages'
+import * as main from './main.page'
 
 // Safe Shield Page Object
 
@@ -58,6 +59,15 @@ export const testTransactions = {
   // Tenderly simulation test - transaction for simulation testing
   tenderlySimulation:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
+  // Recipient analysis test - transaction with low activity recipient (address has few transactions)
+  recipientAnalysisLowActivity:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xc764a15c522af6477ebbe7d808a509806879a68bd097b8594e1437c71fb345f1',
+  // Recipient analysis test - transaction for known/unknown/recurring recipient tests
+  recipientAnalysisKnownUnknown:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xe329b8243ff94c02fa4d9fd382789d669cb5969efbce5e275635ce6d3577fa5e',
+  // Recipient analysis test - transaction where recipient is a Safe you own
+  recipientAnalysisSafeYouOwn:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x32c4f7200e30fd4f23fdc9f1a22a041eb7a64144732a9bf83ff425ecc8dcdbb0',
 }
 
 // ========================================
@@ -96,6 +106,20 @@ export const drainerActivityStr = 'This address shows a wallet drainer behavior 
 export const drainerApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer address'
 export const drainerTransferMessageStr = 'The transaction transfers tokens to a known drainer address'
 export const drainerNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer address'
+
+// Recipient analysis messages
+export const lowActivityRecipientStr = 'Low activity recipient'
+export const recurringRecipientStr = 'Recurring recipient'
+export const newRecipientStr = 'New recipient'
+export const knownRecipientStr = 'Known recipient'
+export const unknownRecipientStr = 'Unknown recipient'
+export const addressInAddressBookStr = 'This address is in your address book'
+export const addressNotInAddressBookStr = 'This address is not in your address book or a Safe you own'
+export const addressIsSafeYouOwnStr = 'This address is a Safe you own'
+export const fewTransactionsStr = 'This address has few transactions'
+export const firstTimeInteractionStr = 'You are interacting with this address for the first time'
+export const interactedMultipleTimesStr = 'You have interacted with this address'
+export const interactedTwoTimesStr = 'You have interacted with this address 2 times'
 // ========================================
 // Helper Functions
 // ========================================
@@ -158,8 +182,7 @@ export function verifyNotEmptyState() {
 
 // Verify contract analysis failed error
 export function verifyContractAnalysisError() {
-  cy.contains(contractAnalysisFailedStr).should('be.visible')
-  cy.contains(reviewBeforeProcessingStr).should('be.visible')
+  main.verifyTextVisibility([contractAnalysisFailedStr, reviewBeforeProcessingStr])
 }
 
 // Verify malicious threat detected message
@@ -221,8 +244,7 @@ export function expandThreatAnalysisCard() {
 
 // Verify threat analysis failed details
 export function verifyThreatAnalysisFailedDetails() {
-  cy.contains(threatAnalysisFailedStr).should('be.visible')
-  cy.contains(threatReviewBeforeProcessingStr).should('be.visible')
+  main.verifyTextVisibility([threatAnalysisFailedStr, threatReviewBeforeProcessingStr])
 }
 
 // Verify threat analysis shows no threat detected state
@@ -232,7 +254,7 @@ export function verifyThreatAnalysisNoThreatState() {
 
 // Verify threat analysis found no issues details
 export function verifyThreatAnalysisFoundNoIssues() {
-  cy.contains(threatAnalysisFoundNoIssuesStr).should('be.visible')
+  main.verifyTextVisibility([threatAnalysisFoundNoIssuesStr])
 }
 
 // Verify threat analysis shows malicious threat detected state
@@ -264,10 +286,19 @@ export function checkRiskConfirmationCheckbox() {
 //Verify continue button is disabled
 
 export function verifyContinueButtonDisabled() {
-  cy.get(continueSignBtn).should('be.disabled')
+  main.verifyBtnIsDisabled(continueSignBtn)
 }
 
 // Verify continue button is enabled
 export function verifyContinueButtonEnabled() {
-  cy.get(continueSignBtn).should('not.be.disabled')
+  main.verifyBtnIsEnabled(continueSignBtn)
+}
+
+// ========================================
+// Recipient Analysis Functions
+// ========================================
+
+// Expand recipient analysis card
+export function expandRecipientAnalysisCard() {
+  cy.get(recipientAnalysisGroupCard).click()
 }
