@@ -1,12 +1,8 @@
-import { TradeType, type CowSwapWidgetParams as BaseCowSwapWidgetParams } from '@cowprotocol/widget-lib'
+import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
 import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
-import dynamic from 'next/dynamic'
-
-const CowSwapWidget = dynamic(() => import('@cowprotocol/widget-react').then((mod) => mod.CowSwapWidget), {
-  ssr: false,
-})
+import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
@@ -41,10 +37,6 @@ import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
 import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-
-type CowSwapWidgetParams = BaseCowSwapWidgetParams & {
-  disableCrossChainSwap?: boolean
-}
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
