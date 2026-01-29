@@ -91,8 +91,11 @@ export const maliciousNativeTransferMessageStr =
   'The transaction transfers native currency to a known malicious address'
 export const maliciousAddressMessageStr = 'The transaction contains a known malicious address'
 export const maliciousActivityStr = 'This address has recorded malicious activity'
-export const drainerActivityStr = 'This address shows a wallet drainer behavior or patterns'
 
+export const drainerActivityStr = 'This address shows a wallet drainer behavior or patterns'
+export const drainerApprovalMessageStr = 'The transaction approves erc20 tokens to a known drainer address'
+export const drainerTransferMessageStr = 'The transaction transfers tokens to a known drainer address'
+export const drainerNativeTransferMessageStr = 'The transaction transfers native currency to a known drainer address'
 // ========================================
 // Helper Functions
 // ========================================

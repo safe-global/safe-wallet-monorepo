@@ -109,7 +109,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.maliciousApprovalMessageStr, shield.drainerActivityStr])
+    main.verifyTextVisibility([shield.drainerApprovalMessageStr, shield.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious Transfer detection - 9A', () => {
@@ -128,7 +128,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.maliciousTransferMessageStr, shield.drainerActivityStr])
+    main.verifyTextVisibility([shield.drainerTransferMessageStr, shield.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious Native Transfer detection - 9A', () => {
@@ -147,7 +147,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     shield.verifyThreatAnalysisGroupCard()
     shield.verifyThreatAnalysisMaliciousState()
     shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.maliciousNativeTransferMessageStr, shield.drainerActivityStr])
+    main.verifyTextVisibility([shield.drainerNativeTransferMessageStr, shield.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A', () => {
