@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.80.0",
+  "version": "1.80.1",
   "type": "module",
   "scripts": {
     "dev": "cross-env USE_RSPACK=1 next dev",
@@ -174,7 +174,7 @@
     "remark-gfm": "^4.0.0",
     "remark-heading-id": "^1.0.1",
     "remark-mdx-frontmatter": "^5.2.0",
-    "storybook": "^10.2.0",
+    "storybook": "^10.2.1",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",
