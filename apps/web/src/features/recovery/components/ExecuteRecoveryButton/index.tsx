@@ -10,7 +10,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
 
-export function ExecuteRecoveryButton({
+export default function ExecuteRecoveryButton({
   recovery,
   compact = false,
 }: {

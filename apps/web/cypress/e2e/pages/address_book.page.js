@@ -152,7 +152,7 @@ export function clickOnImportFileBtn() {
 }
 
 export function importCSVFile(file) {
-  cy.get('[type="file"]').attachFile(file)
+  cy.get('[type="file"]').selectFile(`cypress/fixtures/${file}`, { force: true })
 }
 
 export function clickOnImportBtn() {
