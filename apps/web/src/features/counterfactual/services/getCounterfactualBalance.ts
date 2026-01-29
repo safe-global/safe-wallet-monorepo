@@ -1,6 +1,6 @@
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { BrowserProvider } from 'ethers'

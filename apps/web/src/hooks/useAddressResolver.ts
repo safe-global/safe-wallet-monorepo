@@ -1,5 +1,5 @@
 import useAddressBook from '@/hooks/useAddressBook'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { lookupAddress } from '@/services/ens'
 import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'

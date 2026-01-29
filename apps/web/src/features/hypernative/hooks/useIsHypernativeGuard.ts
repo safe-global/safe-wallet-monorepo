@@ -1,4 +1,4 @@
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError, Errors } from '@/services/exceptions'

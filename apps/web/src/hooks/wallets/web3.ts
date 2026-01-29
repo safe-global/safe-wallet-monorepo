@@ -1,7 +1,10 @@
 import { type Chain, type RpcUri } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { JsonRpcProvider, BrowserProvider, type Eip1193Provider } from 'ethers'
-import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { INFURA_TOKEN, SAFE_APPS_INFURA_TOKEN } from '@safe-global/utils/config/constants'
+
+// Re-export stores from lightweight module for backwards compatibility
+export { setWeb3, useWeb3, getWeb3ReadOnly, setWeb3ReadOnly, useWeb3ReadOnly } from './web3ReadOnly'
+import { getWeb3ReadOnly } from './web3ReadOnly'
 
 /**
  * Infura and other RPC providers limit the max amount included in a batch RPC call.
@@ -48,14 +51,6 @@ export const createSafeAppsWeb3Provider = (chain: Chain, customRpc?: string): Js
     batchMaxCount: BATCH_MAX_COUNT,
   })
 }
-
-export const { setStore: setWeb3, useStore: useWeb3 } = new ExternalStore<BrowserProvider>()
-
-export const {
-  getStore: getWeb3ReadOnly,
-  setStore: setWeb3ReadOnly,
-  useStore: useWeb3ReadOnly,
-} = new ExternalStore<JsonRpcProvider>()
 
 export const getUserNonce = async (userAddress: string): Promise<number> => {
   const web3 = getWeb3ReadOnly()

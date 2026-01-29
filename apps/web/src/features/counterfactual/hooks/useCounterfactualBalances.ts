@@ -1,5 +1,5 @@
 import { getCounterfactualBalance } from '../services/getCounterfactualBalance'
-import { useWeb3 } from '@/hooks/wallets/web3'
+import { useWeb3 } from '@/hooks/wallets/web3ReadOnly'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'

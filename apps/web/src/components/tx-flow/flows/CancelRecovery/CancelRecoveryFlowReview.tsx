@@ -5,7 +5,7 @@ import { useContext } from 'react'
 import type { PropsWithChildren, ReactElement } from 'react'
 
 import { SafeTxContext } from '../../SafeTxProvider'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRecoverySkipTransaction } from '@/features/recovery/services/transaction'
 import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'

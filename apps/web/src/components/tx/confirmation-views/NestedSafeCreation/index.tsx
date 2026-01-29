@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { predictSafeAddress } from '@/features/multichain'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { _getFactoryAddressAndSetupData } from '@/utils/nested-safes'
