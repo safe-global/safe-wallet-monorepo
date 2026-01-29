@@ -18,9 +18,8 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { Box, Stack } from '@mui/material'
 import { BRAND_NAME } from '@/config/constants'
 import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { PortfolioFeature } from '@/features/portfolio'
+import { useLoadFeature } from '@/features/__core__'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
 const Balances: NextPage = () => {
@@ -33,7 +32,7 @@ const Balances: NextPage = () => {
   const [hideNoFeeCampaignBanner, setHideNoFeeCampaignBanner] = useLocalStorage<boolean>(
     'hideNoFeeCampaignAssetsPageBanner',
   )
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const portfolio = useLoadFeature(PortfolioFeature)
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
@@ -75,7 +74,7 @@ const Balances: NextPage = () => {
                 />
 
                 <Stack direction="column" alignItems="flex-end" gap={0.5}>
-                  {isPortfolioEndpointEnabled && <PortfolioRefreshHint entryPoint="Assets" />}
+                  <portfolio.PortfolioRefreshHint entryPoint="Assets" />
                   <Stack direction="row" gap={1} alignItems="center">
                     <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
                     <CurrencySelect />

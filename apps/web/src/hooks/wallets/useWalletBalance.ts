@@ -1,6 +1,6 @@
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useWallet from './useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 
 const useWalletBalance = (): AsyncResult<bigint | undefined> => {
   const web3ReadOnly = useWeb3ReadOnly()

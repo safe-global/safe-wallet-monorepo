@@ -1,7 +1,7 @@
 import { createContext, type ReactElement, type ReactNode, useEffect, useState, useMemo } from 'react'
 import useOnboard, { type ConnectedWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 import { type Eip1193Provider } from 'ethers'

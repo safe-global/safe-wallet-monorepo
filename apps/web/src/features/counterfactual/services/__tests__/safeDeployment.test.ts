@@ -1,5 +1,5 @@
 import { getCounterfactualBalance, getUndeployedSafeInfo } from '../safeDeployment'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { chainBuilder } from '@/tests/builders/chains'
 import { faker } from '@faker-js/faker'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
@@ -53,7 +53,7 @@ describe('Counterfactual utils', () => {
       const mockReadOnlyProvider = {
         getBalance: jest.fn(() => Promise.resolve(mockBalance)),
       } as unknown as JsonRpcProvider
-      jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementationOnce(() => mockReadOnlyProvider)
+      jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockImplementationOnce(() => mockReadOnlyProvider)
 
       await getCounterfactualBalance(mockSafeAddress, undefined, mockChain)
 

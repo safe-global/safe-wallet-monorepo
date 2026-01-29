@@ -2,7 +2,7 @@ import { useAddressResolver } from '@/hooks/useAddressResolver'
 import * as addressBook from '@/hooks/useAddressBook'
 import { zeroPadValue } from 'ethers'
 import * as domains from '@/services/ens'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as useChains from '@/hooks/useChains'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { JsonRpcProvider } from 'ethers'
@@ -13,7 +13,7 @@ const mockProvider = new JsonRpcProvider()
 describe('useAddressResolver', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockImplementation(() => mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(() => mockProvider)
   })
 
   it('returns address book name if found, not resolving ENS domain', async () => {
