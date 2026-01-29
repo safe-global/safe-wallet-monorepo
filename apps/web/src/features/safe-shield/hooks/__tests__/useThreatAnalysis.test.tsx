@@ -49,9 +49,11 @@ const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hype
 })
 
 const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
+const mockUseIsHypernativeFeatureEnabled = jest.fn(() => true)
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative', () => ({
   useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
+  useIsHypernativeFeatureEnabled: () => mockUseIsHypernativeFeatureEnabled(),
 }))
 
 jest.mock('../useNestedThreatAnalysis', () => ({
