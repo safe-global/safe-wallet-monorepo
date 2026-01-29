@@ -201,8 +201,6 @@ export function typeMemberName(name) {
   cy.get(memberNameInput).find('input').clear().type(name)
 }
 
-const pendingInvitationsList = '[data-testid="pending-invitations-list"]'
-
 export function memberIsInList(name) {
   cy.contains(name).should('be.visible')
 }

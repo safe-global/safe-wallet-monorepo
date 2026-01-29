@@ -8,10 +8,8 @@ const signBtn = '[data-testid="sign-btn"]'
 const txConfirmBtn = '[data-track="tx-list: Confirm transaction"] > button'
 const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 
-const executeBtnStr = 'Execute'
 const txCompletedStr = 'Transaction was successful'
 export const relayRemainingAttemptsStr = 'free transactions left today'
-const confirmTx = 'Confirm transaction'
 
 export const fallbackhandlerTx = {
   illegalContract:

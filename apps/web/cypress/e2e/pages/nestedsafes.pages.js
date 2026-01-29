@@ -7,7 +7,6 @@ const nestedSafeNameInput = '[data-testid="nested-safe-name-input"]'
 const nextBtn = '[data-testid="next-button"]'
 const fundAssetBtn = '[data-testid="fund-asset-button"]'
 const assetData = '[data-testid="asset-data"]'
-const amountInput = '[data-testid="amount-input"]'
 const assetsInput = (index) => `input[name="assets.${index}.amount"]`
 const tokenItem = '[data-testid="token-item"]'
 const removeAssetIcon = '[data-testid="remove-asset-icon"]'

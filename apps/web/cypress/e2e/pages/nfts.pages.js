@@ -20,19 +20,10 @@ const modalSelectedNFTs = '[data-testid="selected-nfts"]'
 const nftItemList = '[data-testid="nft-item-list"]'
 const nftItemNane = '[data-testid="nft-item-name"]'
 const txDetailsSummary = '[data-testid="decoded-tx-summary"]'
-const txAccordionDetails = '[data-testid="decoded-tx-details"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 const noneNFTSelected = /0 NFT[s]? selected/
-const sendNFTStr = 'Send NFTs'
-const recipientAddressStr = 'Recipient address or ENS'
-const selectedNFTStr = 'Selected NFTs'
-const executeBtnStr = 'Execute'
-const signBtnStr = 'Sign'
 const nextBtnStr = 'Next'
-const sendStr = 'Send'
-const toStr = 'To'
-const transferFromStr = 'safeTransferFrom'
 
 export function verifySendNFTBtnDisabled() {
   cy.get(disabledSendNFTBtn).should('be.visible')
