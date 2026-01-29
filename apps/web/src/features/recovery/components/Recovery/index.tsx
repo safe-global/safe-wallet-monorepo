@@ -3,11 +3,8 @@ import { useRecoveryTxNotifications } from '@/features/recovery/hooks/useRecover
 import RecoveryContextHooks from '../RecoveryContext/RecoveryContextHooks'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 
-function Recovery() {
-  const isSupported = useIsRecoverySupported()
+function RecoveryContent() {
   useRecoveryTxNotifications()
-
-  if (!isSupported) return null
 
   return (
     <>
@@ -15,6 +12,14 @@ function Recovery() {
       <RecoveryModal />
     </>
   )
+}
+
+function Recovery() {
+  const isSupported = useIsRecoverySupported()
+
+  if (!isSupported) return null
+
+  return <RecoveryContent />
 }
 
 export default Recovery
