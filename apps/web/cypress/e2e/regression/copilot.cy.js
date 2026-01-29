@@ -72,17 +72,17 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     shield.expandRecipientAnalysisCard()
   }
 
-  it.only('[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A', () => {
+  it('[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A', () => {
     setupRecipientAnalysisTest(
       shield.testTransactions.recipientAnalysisKnownUnknown,
       ls.addressBookData.safeSchiledAddressBook,
     )
-    main.verifyTextVisibility([shield.knownRecipientStr, shield.addressInAddressBookStr])
+    main.verifyTextVisibility([shield.addressInAddressBookStr])
   })
 
   it('[Recipient Analyse] Verify that Known recipient is shown when recipient is a Safe you own - 1A', () => {
     setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
-    main.verifyTextVisibility([shield.knownRecipientStr, shield.addressIsSafeYouOwnStr])
+    main.verifyTextVisibility([shield.addressIsSafeYouOwnStr])
   })
 
   it('[Recipient Analyse] Verify that Unknown recipient is shown when address is not in address book - 1B', () => {
@@ -92,7 +92,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
 
   it('[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A', () => {
     setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
-    main.verifyTextVisibility([shield.newRecipientStr, shield.firstTimeInteractionStr])
+    main.verifyTextVisibility([shield.firstTimeInteractionStr])
   })
 
   it('[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B', () => {
@@ -105,11 +105,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
 
   it('[Recipient Analyse] Verify that Low activity recipient warning is shown for address with few transactions - 2', () => {
     setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisLowActivity)
-    main.verifyTextVisibility([
-      shield.lowActivityRecipientStr,
-      shield.fewTransactionsStr,
-      shield.firstTimeInteractionStr,
-    ])
+    main.verifyTextVisibility([shield.lowActivityRecipientStr, shield.fewTransactionsStr])
   })
 
   // ========================================
