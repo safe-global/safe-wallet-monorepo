@@ -36,7 +36,7 @@ function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
   )
 }
 
-export function GroupedRecoveryListItems({
+export default function GroupedRecoveryListItems({
   items,
 }: {
   items: Array<AnyTransactionItem | RecoveryQueueItem>

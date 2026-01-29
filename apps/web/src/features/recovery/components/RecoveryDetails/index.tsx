@@ -11,7 +11,7 @@ import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-st
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 
-export function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { transactionHash, timestamp, validFrom, expiresAt, args, address } = item
 
   const [expanded, setExpanded] = useState(false)

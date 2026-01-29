@@ -16,7 +16,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function InternalRecoveryModal({
+export default function InternalRecoveryModal({
   isOwner,
   isRecoverer,
   queue,

@@ -13,7 +13,7 @@ import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-st
 
 import txSignersCss from '@/components/transactions/TxSigners/styles.module.css'
 
-export function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { isExecutable, isExpired, isNext, remainingSeconds } = useRecoveryTxState(item)
 
   const desc = isExecutable ? (

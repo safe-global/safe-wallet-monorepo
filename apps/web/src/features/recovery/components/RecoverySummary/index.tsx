@@ -11,7 +11,7 @@ import css from '@/components/transactions/TxSummary/styles.module.css'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import DateTime from '@/components/common/DateTime'
 
-export function RecoverySummary({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): ReactElement {
   const wallet = useWallet()
   const { isExecutable, isPending } = useRecoveryTxState(item)
   const { isMalicious } = item

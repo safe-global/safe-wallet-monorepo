@@ -11,7 +11,7 @@ import { WidgetContainer, WidgetBody } from '@/components/dashboard/styled'
 import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function InternalRecoveryHeader({
+export default function InternalRecoveryHeader({
   isProposalInProgress,
   isRecoverer,
   queue,

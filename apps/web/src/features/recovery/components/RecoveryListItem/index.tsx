@@ -36,7 +36,7 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
   )
 }
 
-export function RecoveryListItem(props: ComponentProps<typeof ProvidedRecoveryListItem>): ReactElement {
+export default function RecoveryListItem(props: ComponentProps<typeof ProvidedRecoveryListItem>): ReactElement {
   return (
     <RecoveryListItemProvider>
       <ProvidedRecoveryListItem {...props} />
