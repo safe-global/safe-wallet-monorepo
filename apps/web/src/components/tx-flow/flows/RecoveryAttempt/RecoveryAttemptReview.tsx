@@ -9,9 +9,9 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { RecoveryValidationErrors } from '@/features/recovery/components/RecoveryValidationErrors'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { RecoveryDescription } from '@/features/recovery/components/RecoveryDescription'
+import { RecoveryFeature } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { useAsyncCallback } from '@safe-global/utils/hooks/useAsync'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -25,6 +25,7 @@ type RecoveryAttemptReviewProps = {
 }
 
 const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
+  const recovery = useLoadFeature(RecoveryFeature)
   const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution)
   const wallet = useWallet()
   const { safe } = useSafeInfo()
@@ -85,11 +86,11 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
 
           <Divider sx={{ mx: -3 }} />
 
-          <RecoveryDescription item={item} />
+          <recovery.RecoveryDescription item={item} />
 
           <NetworkWarning />
 
-          <RecoveryValidationErrors item={item} />
+          <recovery.RecoveryValidationErrors item={item} />
 
           {error && <ErrorMessage error={error}>Error submitting the transaction.</ErrorMessage>}
         </Stack>

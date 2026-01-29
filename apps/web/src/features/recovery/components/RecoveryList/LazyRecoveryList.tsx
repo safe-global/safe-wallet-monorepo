@@ -2,11 +2,11 @@ import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import { TxListGrid } from '@/components/transactions/TxList'
-import { RecoveryListItem } from '@/features/recovery/components/RecoveryListItem'
+import RecoveryListItem from '@/features/recovery/components/RecoveryListItem'
 import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import { groupRecoveryTransactions } from '@/utils/tx-list'
 import useTxQueue from '@/hooks/useTxQueue'
-import { GroupedRecoveryListItems } from '../GroupedRecoveryListItems'
+import GroupedRecoveryListItems from '../GroupedRecoveryListItems'
 import { isRecoveryQueueItem } from '@/utils/transaction-guards'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 

@@ -8,7 +8,7 @@ import type { AnyTransactionItem } from '@/utils/tx-list'
 
 import { isRecoveryQueueItem } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
-import { RecoveryListItem } from '../RecoveryListItem'
+import RecoveryListItem from '../RecoveryListItem'
 import ExternalLink from '@/components/common/ExternalLink'
 
 import css from '@/components/transactions/GroupedTxListItems/styles.module.css'

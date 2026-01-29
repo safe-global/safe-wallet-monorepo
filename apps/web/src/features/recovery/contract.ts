@@ -14,6 +14,7 @@ import type Recovery from './components/Recovery'
 import type RecoveryList from './components/RecoveryList'
 import type RecoveryInfo from './components/RecoveryInfo'
 import type RecoveryStatus from './components/RecoveryStatus'
+import type RecoveryType from './components/RecoveryType'
 import type RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import type RecoveryDescription from './components/RecoveryDescription'
 
@@ -47,6 +48,7 @@ export interface RecoveryContract {
   RecoveryList: typeof RecoveryList  
   RecoveryInfo: typeof RecoveryInfo
   RecoveryStatus: typeof RecoveryStatus
+  RecoveryType: typeof RecoveryType
   RecoveryValidationErrors: typeof RecoveryValidationErrors
   RecoveryDescription: typeof RecoveryDescription
 

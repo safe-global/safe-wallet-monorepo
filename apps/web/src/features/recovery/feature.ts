@@ -14,6 +14,7 @@ import Recovery from './components/Recovery'
 import RecoveryList from './components/RecoveryList'
 import RecoveryInfo from './components/RecoveryInfo'
 import RecoveryStatus from './components/RecoveryStatus'
+import RecoveryType from './components/RecoveryType'
 import RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import RecoveryDescription from './components/RecoveryDescription'
 
@@ -42,6 +43,7 @@ const feature: RecoveryContract = {
   RecoveryList,
   RecoveryInfo,
   RecoveryStatus,
+  RecoveryType,
   RecoveryValidationErrors,
   RecoveryDescription,
 
