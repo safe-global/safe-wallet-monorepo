@@ -36,7 +36,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-export type RecoverAccountReviewProps = {
+type RecoverAccountReviewProps = {
   threshold: string
   owners: AddressInfo[]
 }
