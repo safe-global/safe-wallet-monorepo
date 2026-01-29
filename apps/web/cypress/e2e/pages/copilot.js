@@ -68,6 +68,14 @@ export const testTransactions = {
   // Recipient analysis test - transaction where recipient is a Safe you own
   recipientAnalysisSafeYouOwn:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x32c4f7200e30fd4f23fdc9f1a22a041eb7a64144732a9bf83ff425ecc8dcdbb0',
+  // Recipient analysis test - transaction with missing ownership warning
+  // NOTE: Update transaction ID from queue: https://safe-wallet-web.dev.5afe.dev/transactions/queue?safe=matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013
+  recipientAnalysisMissingOwnership:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xPLACEHOLDER_TRANSACTION_ID',
+  // Recipient analysis test - transaction with unsupported network warning
+  // NOTE: Update transaction ID from queue: https://safe-wallet-web.dev.5afe.dev/transactions/queue?safe=matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013
+  recipientAnalysisUnsupportedNetwork:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xPLACEHOLDER_TRANSACTION_ID',
 }
 
 // ========================================
@@ -120,6 +128,12 @@ export const fewTransactionsStr = 'This address has few transactions'
 export const firstTimeInteractionStr = 'You are interacting with this address for the first time'
 export const interactedMultipleTimesStr = 'You have interacted with this address'
 export const interactedTwoTimesStr = 'You have interacted with this address 2 times'
+export const missingOwnershipStr = 'Missing ownership'
+export const missingOwnershipMessageStr =
+  'This Safe account is not activated on the target chain. First, create the Safe, execute a test transaction, and then proceed with bridging. Funds sent may be inaccessible.'
+export const unsupportedNetworkStr = 'Unsupported network'
+export const unsupportedNetworkMessageStr =
+  'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.'
 // ========================================
 // Helper Functions
 // ========================================

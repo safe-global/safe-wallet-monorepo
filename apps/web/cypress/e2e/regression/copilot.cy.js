@@ -108,6 +108,16 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     main.verifyTextVisibility([shield.lowActivityRecipientStr, shield.fewTransactionsStr])
   })
 
+  it('[Recipient Analyse] Verify that Missing ownership warning is shown - 4B', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisMissingOwnership)
+    main.verifyTextVisibility([shield.missingOwnershipStr, shield.missingOwnershipMessageStr])
+  })
+
+  it('[Recipient Analyse] Verify that Unsupported network warning is shown - 4C', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisUnsupportedNetwork)
+    main.verifyTextVisibility([shield.unsupportedNetworkStr, shield.unsupportedNetworkMessageStr])
+  })
+
   // ========================================
   // 3. Threat Analyse
   // ========================================
