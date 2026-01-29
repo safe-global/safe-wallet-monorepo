@@ -251,7 +251,8 @@ export type SignMessageProps = BaseProps & {
 const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactElement => {
   // Hooks & variables
   const { setTxFlow } = useContext(TxModalContext)
-  const { setSafeMessage: setContextSafeMessage } = useContext(SafeTxContext)
+  const { setSafeMessage: setContextSafeMessage, setSafeMessageHash: setContextSafeMessageHash } =
+    useContext(SafeTxContext)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const { palette } = useTheme()
   const { safe } = useSafeInfo()
@@ -260,6 +261,14 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   useHighlightHiddenTab()
 
   const { decodedMessage, safeMessageMessage, safeMessageHash } = useDecodedSafeMessage(message, safe)
+
+  //TODO: Remove this after testing
+  console.log('[SignMessage] RENDER - values:', {
+    safeMessageHash,
+    isEip712: typeof decodedMessage !== 'string',
+    hasDecodedMessage: !!decodedMessage,
+  })
+  //TODO: Remove this after testing
   const [safeMessage, setSafeMessage] = useSafeMessage(safeMessageHash)
   const domainHash = getDomainHash({
     chainId: safe.chainId,
@@ -312,10 +321,17 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
 
   // Set message for Safe Shield threat analysis
   useEffect(() => {
+    console.log('[SignMessage] Setting context for threat analysis:', {
+      isEip712,
+      decodedMessage: !!decodedMessage,
+      safeMessageHash,
+    })
     if (isEip712) {
+      console.log('[SignMessage] Calling setContextSafeMessage and setContextSafeMessageHash')
       setContextSafeMessage(decodedMessage)
+      setContextSafeMessageHash(safeMessageHash as `0x${string}`)
     }
-  }, [decodedMessage, isEip712, setContextSafeMessage])
+  }, [decodedMessage, isEip712, setContextSafeMessage, setContextSafeMessageHash, safeMessageHash])
 
   return (
     <>

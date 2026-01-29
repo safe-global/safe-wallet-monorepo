@@ -43,6 +43,17 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
+
+  //TODO: Remove this after testing
+  console.log('[SafeShieldContext] context values:', {
+    safeTx: !!safeTx,
+    safeTxContextSafeTx: !!safeTxContext.safeTx,
+    safeTxContextSafeMessage: !!safeTxContext.safeMessage,
+    safeTxContextSafeMessageHash: safeTxContext.safeMessageHash,
+    hypernativeAuthToken: !!hypernativeAuthToken,
+  })
+  //TODO: Remove this after testing
+
   const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
   const [threatAnalysisResult] = threat
 

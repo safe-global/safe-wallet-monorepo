@@ -1,6 +1,7 @@
 import {
   useThreatAnalysis as useThreatAnalysisUtils,
   useThreatAnalysisHypernative,
+  useThreatAnalysisHypernativeMessage,
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useContext, useMemo } from 'react'
@@ -18,17 +19,42 @@ export function useThreatAnalysis(
   overrideSafeTx?: SafeTransaction,
   hypernativeAuthToken?: string,
 ): AsyncResult<ThreatAnalysisResults> {
+  console.log('=== useThreatAnalysis CALLED ===')
   const {
     safe: { chainId, version },
     safeAddress,
   } = useSafeInfo()
   const signer = useSigner()
-  const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, safeMessage, safeMessageHash, txOrigin } = useContext(SafeTxContext)
   const walletAddress = signer?.address ?? ''
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
 
+  //TODO: Remove this after testing
+  console.log('[useThreatAnalysis] context values:', {
+    safeMessageHash,
+    safeMessage: !!safeMessage,
+    safeTx: !!safeTx,
+    overrideSafeTx: !!overrideSafeTx,
+    isHypernativeEligible,
+    eligibilityLoading,
+    hypernativeAuthToken: !!hypernativeAuthToken,
+  })
+  //TODO: Remove this after testing
+
   const chain = useCurrentChain()
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
+
+  // Determine if we're analyzing a message or a transaction
+  const isMessageAnalysis = !overrideSafeTx && !safeTx && !!safeMessage && !!safeMessageHash
+
+  //TODO: Remove this after testing
+  console.log('[useThreatAnalysis] isMessageAnalysis:', isMessageAnalysis, {
+    noOverrideSafeTx: !overrideSafeTx,
+    noSafeTx: !safeTx,
+    hasSafeMessage: !!safeMessage,
+    hasSafeMessageHash: !!safeMessageHash,
+  })
+  //TODO: Remove this after testing
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
   const { isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
@@ -53,14 +79,44 @@ export function useThreatAnalysis(
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
     ...mainTxProps,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeEligible || !hypernativeAuthToken,
+    skip: !isHypernativeEligible || !hypernativeAuthToken || isMessageAnalysis,
   })
 
-  const threatAnalysis = useMemo(
-    (): AsyncResult<ThreatAnalysisResults> =>
-      isHypernativeEligible ? hypernativeThreatAnalysis : blockaidThreatAnalysis,
-    [isHypernativeEligible, hypernativeThreatAnalysis, blockaidThreatAnalysis],
-  )
+  // Use message-specific assessment for EIP-712 typed messages
+  const hypernativeMessageThreatAnalysis = useThreatAnalysisHypernativeMessage({
+    safeAddress: safeAddress as `0x${string}`,
+    messageHash: safeMessageHash as `0x${string}`,
+    typedData: safeMessage,
+    origin: txOrigin,
+    authToken: hypernativeAuthToken,
+    skip: !isHypernativeEligible || !hypernativeAuthToken || !isMessageAnalysis,
+  })
+  //TODO: Remove this after testing
+  console.log('[useThreatAnalysis] hypernativeMessageThreatAnalysis:', hypernativeMessageThreatAnalysis)
+  console.log('[useThreatAnalysis] message hook skip condition:', {
+    notHypernativeEligible: !isHypernativeEligible,
+    noAuthToken: !hypernativeAuthToken,
+    notMessageAnalysis: !isMessageAnalysis,
+    skip: !isHypernativeEligible || !hypernativeAuthToken || !isMessageAnalysis,
+  })
+  //TODO: Remove this after testing
+
+  const threatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {
+    if (isHypernativeEligible) {
+      // Use message assessment for messages, transaction assessment for transactions
+      return isMessageAnalysis ? hypernativeMessageThreatAnalysis : hypernativeThreatAnalysis
+    }
+    return blockaidThreatAnalysis
+  }, [
+    isHypernativeEligible,
+    isMessageAnalysis,
+    hypernativeMessageThreatAnalysis,
+    hypernativeThreatAnalysis,
+    blockaidThreatAnalysis,
+  ])
+  //TODO: Remove this after testing
+  console.log('threatAnalysis', threatAnalysis)
+  //TODO: Remove this after testing
 
   const nestedThreatAnalysis = useNestedThreatAnalysis(safeTxToCheck, hypernativeAuthToken)
 

@@ -58,6 +58,16 @@ export const SafeShieldDisplay = ({
   showHypernativeInfo?: boolean
   showHypernativeActiveStatus?: boolean
 }): ReactElement => {
+  //TODO: Remove this after testing
+  console.log('recipient', recipient)
+  console.log('contract', contract)
+  console.log('threat', threat)
+  console.log('safeTx', safeTx)
+  console.log('hypernativeAuth', hypernativeAuth)
+  console.log('showHypernativeInfo', showHypernativeInfo)
+  console.log('showHypernativeActiveStatus', showHypernativeActiveStatus)
+  //TODO: Remove this after testing
+
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
   const [threatResults] = threat || []

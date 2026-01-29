@@ -50,6 +50,11 @@ export function useThreatAnalysisHypernative({
 }: UseThreatAnalysisHypernativeProps): AsyncResult<ThreatAnalysisResults> {
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
+  //TODO: Remove this after testing
+  console.log('hypernativeData', hypernativeData)
+  console.log('error', error)
+  console.log('isLoading', isLoading)
+  //TODO: Remove this after testing
 
   useEffect(() => {
     if (isSafeTransaction(dataProp) && isSafeTransaction(data)) {
