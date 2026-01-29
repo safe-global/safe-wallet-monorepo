@@ -57,12 +57,13 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
 
   // Helper function for common recipient analysis test setup
-  const setupRecipientAnalysisTest = (transactionId, addressBookData = null) => {
+  const setupRecipientAnalysisTest = (transactionId, addressBookData = null, safeAddress = null) => {
     if (addressBookData) {
       main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, addressBookData)
     }
 
-    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + transactionId)
+    const safe = safeAddress || staticSafes.MATIC_STATIC_SAFE_30
+    cy.visit(constants.transactionUrl + safe + transactionId)
     wallet.connectSigner(signer)
 
     createtx.clickOnConfirmTransactionBtn()
@@ -109,13 +110,22 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('[Recipient Analyse] Verify that Missing ownership warning is shown - 4B', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisMissingOwnership)
+    setupRecipientAnalysisTest(
+      shield.testTransactions.recipientAnalysisMissingOwnership,
+      null,
+      staticSafes.MATIC_STATIC_SAFE_28,
+    )
     main.verifyTextVisibility([shield.missingOwnershipStr, shield.missingOwnershipMessageStr])
   })
 
   it('[Recipient Analyse] Verify that Unsupported network warning is shown - 4C', () => {
     setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisUnsupportedNetwork)
     main.verifyTextVisibility([shield.unsupportedNetworkStr, shield.unsupportedNetworkMessageStr])
+  })
+
+  it('[Recipient Analyse] Verify that Different setup warning is shown - 4D', () => {
+    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisDifferentSetup)
+    main.verifyTextVisibility([shield.differentSetupMessageStr])
   })
 
   // ========================================

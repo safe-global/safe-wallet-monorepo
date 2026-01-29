@@ -69,13 +69,14 @@ export const testTransactions = {
   recipientAnalysisSafeYouOwn:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x32c4f7200e30fd4f23fdc9f1a22a041eb7a64144732a9bf83ff425ecc8dcdbb0',
   // Recipient analysis test - transaction with missing ownership warning
-  // NOTE: Update transaction ID from queue: https://safe-wallet-web.dev.5afe.dev/transactions/queue?safe=matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013
   recipientAnalysisMissingOwnership:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xPLACEHOLDER_TRANSACTION_ID',
+    '&id=multisig_0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B_0xa6974dc1f453da73dd5f090b637c91cc1a0bcb17307edb502fb8d8f552b52a4e',
   // Recipient analysis test - transaction with unsupported network warning
-  // NOTE: Update transaction ID from queue: https://safe-wallet-web.dev.5afe.dev/transactions/queue?safe=matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013
   recipientAnalysisUnsupportedNetwork:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xPLACEHOLDER_TRANSACTION_ID',
+  // Recipient analysis test - transaction with different setup warning
+  recipientAnalysisDifferentSetup:
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x2eb17f9f0d196d389f3130e7b9dca0de8d1f7ed60e1d9300aac21f13e9cf691b',
 }
 
 // ========================================
@@ -134,6 +135,8 @@ export const missingOwnershipMessageStr =
 export const unsupportedNetworkStr = 'Unsupported network'
 export const unsupportedNetworkMessageStr =
   'app.safe.global does not support the network. Unless you have a wallet deployed there, we recommend not to bridge. Funds sent may be inaccessible.'
+export const differentSetupMessageStr =
+  'Your Safe exists on the target chain but with a different configuration. Review carefully before proceeding. Funds sent may be inaccessible if the setup is incorrect.'
 // ========================================
 // Helper Functions
 // ========================================
