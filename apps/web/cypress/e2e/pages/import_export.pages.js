@@ -91,10 +91,6 @@ export function clickOnImportBtnDataImportModal() {
   cy.contains('button', 'Import').click()
 }
 
-export function uploadFile(filePath) {
-  cy.get('[type="file"]').attachFile(filePath)
-}
-
 export function verifyImportModalData() {
   //verifies that the modal says the amount of chains/addressbook values it uploaded for file ../fixtures/data_import.json
   cy.contains('Added Safe Accounts on 4 chains').should('be.visible')
