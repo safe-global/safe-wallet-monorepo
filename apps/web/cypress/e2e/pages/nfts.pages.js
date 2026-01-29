@@ -13,8 +13,6 @@ const nftCheckBox = (index) => `[data-testid="nft-checkbox-${index}"] > input`
 const selectAllNFTsCheckbox = 'span[title="Select all"] > input'
 const activeSendNFTBtn = '[data-testid="nft-send-btn-false"]'
 const disabledSendNFTBtn = '[data-testid="nft-send-btn-true"]'
-const modalTitle = '[data-testid="modal-title"]'
-const modalHeader = '[data-testid="modal-header"]'
 const modalSelectedNFTs = '[data-testid="selected-nfts"]'
 const nftItemList = '[data-testid="nft-item-list"]'
 const nftItemNane = '[data-testid="nft-item-name"]'
@@ -22,7 +20,6 @@ const txDetailsSummary = '[data-testid="decoded-tx-summary"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 const noneNFTSelected = /0 NFT[s]? selected/
-const nextBtnStr = 'Next'
 
 export function verifySendNFTBtnDisabled() {
   cy.get(disabledSendNFTBtn).should('be.visible')
@@ -121,7 +118,7 @@ export function sendNFT() {
 }
 
 export function verifyNFTModalData() {
-  main.verifyElementsExist([modalTitle, modalHeader, modalSelectedNFTs])
+  main.verifyElementsExist([main.modalTitle, main.modalHeader, modalSelectedNFTs])
 }
 
 export function typeRecipientAddress(address) {
@@ -129,7 +126,7 @@ export function typeRecipientAddress(address) {
 }
 
 export function clikOnNextBtn() {
-  cy.contains('button', nextBtnStr).click()
+  cy.contains('button', main.nextBtnStr).click()
 }
 
 export function verifyReviewModalData(NFTcount) {

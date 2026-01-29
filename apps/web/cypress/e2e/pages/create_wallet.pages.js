@@ -6,7 +6,6 @@ import * as wallet from '../../support/utils/wallet'
 import * as owner from './owners.pages'
 
 export const welcomeLoginScreen = '[data-testid="welcome-login"]'
-const nameInput = 'input[name="name"]'
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
 const thresholdInput = 'input[name="threshold"]'
@@ -140,7 +139,7 @@ export function verifyPolicy1_1() {
 }
 
 export function verifyDefaultWalletName(name) {
-  cy.get(nameInput).invoke('attr', 'placeholder').should('include', name)
+  cy.get(main.nameInput).invoke('attr', 'placeholder').should('include', name)
 }
 
 export function verifyNextBtnIsDisabled() {
@@ -169,11 +168,11 @@ export function clickOnConnectWalletBtn() {
 }
 
 export function typeWalletName(name) {
-  cy.get(nameInput).type(name).should('have.value', name)
+  cy.get(main.nameInput).type(name).should('have.value', name)
 }
 
 export function clearWalletName() {
-  cy.get(nameInput).clear()
+  cy.get(main.nameInput).clear()
 }
 
 export function openNetworkSelector() {

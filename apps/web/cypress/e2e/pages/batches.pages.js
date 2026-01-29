@@ -4,8 +4,6 @@ import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelect
 
 export const newTransactionBtnStr = 'New transaction'
 const sendTokensButn = 'Send tokens'
-const nextBtn = 'Next'
-const executeBtn = 'Execute'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
 export const batchedTxs = 'Batched transactions'
@@ -47,12 +45,12 @@ function fillTransactionData(EOA, amount) {
   cy.get(tokenSelector).click()
   cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
   cy.get(amountInput).type(amount)
-  cy.contains(nextBtn).click()
+  cy.contains(main.nextBtnStr).click()
 }
 
 function setNonceAndProceed(currentNonce) {
   cy.get(nonceInput).clear().type(currentNonce, { force: true }).blur()
-  cy.contains(executeBtn).scrollIntoView()
+  cy.contains(main.executeBtnStr).scrollIntoView()
 }
 
 function executeTransaction() {

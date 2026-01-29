@@ -27,7 +27,7 @@ export const connectedWalletExecMethod = '[data-testid="connected-wallet-executi
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
 export const connectedWalletMethod = '[data-testid="connected-wallet-execution-method"]'
 export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
-export const addToBatchBtn = '[data-track="batching: Add to batch"]'
+export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
@@ -107,15 +107,14 @@ export const hashesText = 'Hashes'
 const TransactionSummary = 'Send '
 const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
-const nextBtnStr = 'Next'
 const nativeTokenTransferStr = 'ETH'
 const estimatedFeeStr = 'Estimated fee'
+// Re-export for backward compatibility
 export const executeStr = 'Execute'
 const editBtnStr = 'Edit'
 const executionParamsStr = 'Execution parameters'
 const noLaterStr = 'No, later'
 const confirmBtnStr = 'Confirm'
-const executeBtnStr = 'Execute'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
@@ -803,7 +802,7 @@ export function setSendValue_(index, value) {
 }
 
 export function clickOnNextBtn() {
-  cy.contains(nextBtnStr).click()
+  cy.contains(main.nextBtnStr).click()
 }
 
 export function verifySubmitBtnIsEnabled() {

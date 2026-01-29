@@ -1,6 +1,26 @@
 import * as constants from '../../support/constants'
 import * as ls from '../../support/localstorage_data.js'
 
+// Common button text strings
+export const nextBtnStr = 'Next'
+export const executeBtnStr = 'Execute'
+export const acceptSelectionStr = 'Save settings'
+
+// Common table selectors
+export const tableRow = '[data-testid="table-row"]'
+export const tableContainer = '[data-testid="table-container"]'
+export const nextPageBtn = 'button[aria-label="Go to next page"]'
+export const previousPageBtn = 'button[aria-label="Go to previous page"]'
+
+// Common form input selectors
+export const nameInput = 'input[name="name"]'
+export const addressInput = 'input[name="address"]'
+
+// Common modal selectors
+export const modalTitle = '[data-testid="modal-title"]'
+export const modalHeader = '[data-testid="modal-header"]'
+
+// Legacy names for backward compatibility
 const acceptSelection = 'Save settings'
 const executeStr = 'Execute'
 const connectedOwnerBlock = '[data-testid="open-account-center"]'

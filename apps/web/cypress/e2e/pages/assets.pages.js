@@ -2,9 +2,11 @@ import * as main from './main.page'
 import * as addressbook from '../pages/address_book.page'
 import * as createTx from '../pages/create_tx.pages'
 import { tokenSelector } from '../pages/create_tx.pages'
-import { tableRow } from '../pages/address_book.page'
 import { assetsSwapBtn } from '../pages/swaps.pages'
 import { nftsRow } from '../pages/nfts.pages'
+
+// Re-export common selectors from main.page.js for backward compatibility
+export const tableContainer = main.tableContainer
 
 const tokenNameLink = 'a[href*="sepolia.etherscan.io"]'
 const balanceSingleRow = '[aria-labelledby="tableTitle"] > tbody tr'
@@ -21,7 +23,6 @@ const hideTokensMenuItem = '[data-testid="hide-tokens-menu-item"]'
 const showAllTokensSwitch = '[data-testid="show-all-tokens-switch"]'
 const hideSmallBalancesSwitch = '[data-testid="hide-small-balances-switch"]'
 export const tablePaginationContainer = '[data-testid="table-pagination"]'
-export const tableContainer = '[data-testid="table-container"]'
 
 const hiddenTokenSaveBtn = 'span[data-track="assets: Save hide dialog"]'
 const hiddenTokenCancelBtn = 'span[data-track="assets: Cancel hide dialog"]'
@@ -39,15 +40,14 @@ const sendBtnStr = 'Send'
 
 const pageRowsDefault = '25'
 const rowsPerPage10 = '10'
-const nextPageBtn = 'button[aria-label="Go to next page"]'
-const previousPageBtn = 'button[aria-label="Go to previous page"]'
 const tablePageRage21to28 = '21–28 of'
 const rowsPerPageString = 'Rows per page:'
 const pageCountString1to25 = '1–25 of'
 const pageCountString1to10 = '1–10 of'
 const pageCountString10to20 = '11–20 of'
 
-const assetsTableRow = '[data-testid="table-row"]'
+// Use main.tableRow for consistency
+const assetsTableRow = main.tableRow
 const assetsTableAssetCell = '[data-testid="table-cell-asset"]'
 const assetsTableBalanceCell = '[data-testid="table-cell-balance"]'
 const assetsTableValueCell = '[data-testid="table-cell-value"]'
@@ -185,7 +185,7 @@ export function changeCurrency(currency) {
 
 export function clickOnSendBtn(index) {
   cy.wait(4000)
-  cy.get(addressbook.tableRow)
+  cy.get(main.tableRow)
     .eq(index)
     .within(() => {
       cy.get('button')
@@ -418,8 +418,8 @@ export function verifyTableHas10Rows() {
 }
 
 export function navigateToNextPage() {
-  cy.get(nextPageBtn).click({ force: true })
-  cy.get(nextPageBtn).click({ force: true })
+  cy.get(main.nextPageBtn).click({ force: true })
+  cy.get(main.nextPageBtn).click({ force: true })
 }
 
 export function verifyTableHasNRows(assetsLength) {
@@ -428,7 +428,7 @@ export function verifyTableHasNRows(assetsLength) {
 }
 
 export function navigateToPreviousPage() {
-  cy.get(previousPageBtn).click({ force: true })
+  cy.get(main.previousPageBtn).click({ force: true })
 }
 
 export function verifyTableHas10RowsAgain() {
