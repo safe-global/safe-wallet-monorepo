@@ -19,20 +19,11 @@ import RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import RecoveryDescription from './components/RecoveryDescription'
 
 // Service imports
-import { 
-  selectDelayModifierByRecoverer,
-  selectDelayModifierByAddress 
-} from './services/selectors'
+import { selectDelayModifierByRecoverer, selectDelayModifierByAddress } from './services/selectors'
 
-import { 
-  getRecoverySkipTransaction,
-  getRecoveryProposalTransactions 
-} from './services/transaction'
+import { getRecoverySkipTransaction, getRecoveryProposalTransactions } from './services/transaction'
 
-import {
-  dispatchRecoveryProposal,
-  dispatchRecoveryExecution
-} from './services/recovery-sender'
+import { dispatchRecoveryProposal, dispatchRecoveryExecution } from './services/recovery-sender'
 
 import { getRecoveryUpsertTransactions } from './services/setup'
 

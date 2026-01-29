@@ -25,7 +25,7 @@ type RecoveryAttemptReviewProps = {
 }
 
 const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
-  const recovery = useLoadFeature(RecoveryFeature)
+  const { RecoveryDescription, RecoveryValidationErrors } = useLoadFeature(RecoveryFeature)
   const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution)
   const wallet = useWallet()
   const { safe } = useSafeInfo()
@@ -86,11 +86,11 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
 
           <Divider sx={{ mx: -3 }} />
 
-          <recovery.RecoveryDescription item={item} />
+          <RecoveryDescription item={item} />
 
           <NetworkWarning />
 
-          <recovery.RecoveryValidationErrors item={item} />
+          <RecoveryValidationErrors item={item} />
 
           {error && <ErrorMessage error={error}>Error submitting the transaction.</ErrorMessage>}
         </Stack>

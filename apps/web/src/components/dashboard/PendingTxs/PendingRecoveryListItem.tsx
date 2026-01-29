@@ -15,7 +15,7 @@ import classnames from 'classnames'
 
 function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueItem }): ReactElement {
   const router = useRouter()
-  const recovery = useLoadFeature(RecoveryFeature)
+  const { RecoveryType, RecoveryInfo, RecoveryStatus } = useLoadFeature(RecoveryFeature)
   const { isMalicious } = transaction
 
   const url = useMemo(
@@ -29,12 +29,12 @@ function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueIt
   return (
     <Link href={url} passHref>
       <Box className={classnames(css.container, css.recoveryContainer)} sx={{ minHeight: 50 }}>
-        <recovery.RecoveryType isMalicious={isMalicious} date={transaction.timestamp} isDashboard />
+        <RecoveryType isMalicious={isMalicious} date={transaction.timestamp} isDashboard />
 
-        <recovery.RecoveryInfo isMalicious={isMalicious} />
+        <RecoveryInfo isMalicious={isMalicious} />
 
         <Stack direction="row" gap={1.5} alignItems="center" ml="auto">
-          <recovery.RecoveryStatus recovery={transaction} />
+          <RecoveryStatus recovery={transaction} />
           <ChevronRight color="border" fontSize="small" />
         </Stack>
       </Box>

@@ -19,22 +19,13 @@ import type RecoveryValidationErrors from './components/RecoveryValidationErrors
 import type RecoveryDescription from './components/RecoveryDescription'
 
 // Services from selectors.ts
-import type { 
-  selectDelayModifierByRecoverer,
-  selectDelayModifierByAddress 
-} from './services/selectors'
+import type { selectDelayModifierByRecoverer, selectDelayModifierByAddress } from './services/selectors'
 
-// Services from transaction.ts  
-import type { 
-  getRecoverySkipTransaction,
-  getRecoveryProposalTransactions 
-} from './services/transaction'
+// Services from transaction.ts
+import type { getRecoverySkipTransaction, getRecoveryProposalTransactions } from './services/transaction'
 
 // Services from recovery-sender.ts
-import type {
-  dispatchRecoveryProposal,
-  dispatchRecoveryExecution
-} from './services/recovery-sender'
+import type { dispatchRecoveryProposal, dispatchRecoveryExecution } from './services/recovery-sender'
 
 // Services from setup.ts
 import type { getRecoveryUpsertTransactions } from './services/setup'
@@ -45,7 +36,7 @@ import type { getRecoveryUpsertTransactions } from './services/setup'
 export interface RecoveryContract {
   // Components (PascalCase - stub renders null)
   Recovery: typeof Recovery
-  RecoveryList: typeof RecoveryList  
+  RecoveryList: typeof RecoveryList
   RecoveryInfo: typeof RecoveryInfo
   RecoveryStatus: typeof RecoveryStatus
   RecoveryType: typeof RecoveryType

@@ -38,5 +38,4 @@ const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactEle
   return <TxStatusChip color={isExpired ? 'error' : 'warning'}>{status}</TxStatusChip>
 }
 
-
 export default RecoveryStatus

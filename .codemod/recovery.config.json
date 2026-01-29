@@ -57,13 +57,7 @@
       "getRecoveredSafeInfo",
       "getRecoveryProposalTransactions"
     ],
-    "types": [
-      "useRecoveryState",
-      "RecoveryType",
-      "useRecoveryTxState",
-      "MAX_RECOVERER_PAGE_SIZE",
-      "getRecoveryState"
-    ],
+    "types": ["useRecoveryState", "RecoveryType", "useRecoveryTxState", "MAX_RECOVERER_PAGE_SIZE", "getRecoveryState"],
     "constants": []
   },
   "structure": {

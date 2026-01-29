@@ -17,5 +17,4 @@ const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement |
   )
 }
 
-
 export default RecoveryInfo
