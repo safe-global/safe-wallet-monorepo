@@ -66,6 +66,25 @@ export { useAuthToken } from './hooks/useAuthToken'
 // Banner visibility hooks (used by dashboard, queue, history pages)
 export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 
+// Banner components for carousel/pages (used by dashboard, queue, history pages)
+export {
+  HnBannerForCarousel,
+  hnBannerID,
+  HnBannerForQueue,
+  HnBannerForHistory,
+  HnBannerForSettings,
+} from './components/HnBanner'
+
+// Dashboard banner variant (used by FirstSteps)
+export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBanner'
+
+// Queue assessment components (used by TxSummary, queue page)
+export { HnQueueAssessment } from './components/HnQueueAssessment'
+export { QueueAssessmentProvider } from './components/QueueAssessmentProvider'
+
+// OAuth config (used by oauth-callback page)
+export { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from './config/oauth'
+
 // ─────────────────────────────────────────────────────────────────
 // STORE (direct imports, not lazy-loaded)
 // ─────────────────────────────────────────────────────────────────

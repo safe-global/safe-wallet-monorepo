@@ -14,15 +14,17 @@ import {
   useIsHypernativeQueueScanFeature,
   useBannerVisibility,
   BannerType,
+  HnBannerForQueue,
+  QueueAssessmentProvider,
+  HypernativeFeature,
 } from '@/features/hypernative'
-import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
-import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
-import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
+import { useLoadFeature } from '@/features/__core__'
 import { useState, useCallback, useMemo } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const Queue: NextPage = () => {
   const showPending = useShowUnsignedQueue()
+  const hn = useLoadFeature(HypernativeFeature)
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
@@ -53,7 +55,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {showHnLoginCard && <HnLoginCard />}
+          {showHnLoginCard && <hn.HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 

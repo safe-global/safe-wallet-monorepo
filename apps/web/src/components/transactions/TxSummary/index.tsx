@@ -20,8 +20,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
-import { useHnQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
-import { HnQueueAssessment } from '@/features/hypernative/components/HnQueueAssessment'
+import {
+  useHnQueueAssessment,
+  useShowHypernativeAssessment,
+  useHypernativeOAuth,
+  HnQueueAssessment,
+} from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 type TxSummaryProps = {
