@@ -1,7 +1,7 @@
 import { renderHook, waitFor, mockWeb3Provider } from '@/tests/test-utils'
 import { useIsHypernativeGuard } from '../useIsHypernativeGuard'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as useChains from '@/hooks/useChains'
 import * as hypernativeGuardCheck from '../../services/hypernativeGuardCheck'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -13,7 +13,7 @@ describe('useIsHypernativeGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockProvider = mockWeb3Provider([])
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
     // Mock useHasFeature to return false by default (ABI check enabled)
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
   })
@@ -51,7 +51,7 @@ describe('useIsHypernativeGuard', () => {
   })
 
   it('should return loading true when provider is not available', () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safe: extendedSafeInfoBuilder()
         .with({
@@ -351,7 +351,7 @@ describe('useIsHypernativeGuard', () => {
   it('should reset isHnGuard to false when provider becomes unavailable', async () => {
     const guardAddress = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'
     jest.spyOn(hypernativeGuardCheck, 'isHypernativeGuard').mockResolvedValue(true)
-    const web3Spy = jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    const web3Spy = jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
 
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safe: extendedSafeInfoBuilder()
