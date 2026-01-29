@@ -15,7 +15,7 @@ Account recovery uses a [Zodiac Delay Modifier](https://github.com/gnosis/zodiac
 
 ## Architecture
 
-This feature follows the v3 architecture pattern with lazy loading:
+This feature follows the Feature-Sliced Architecture pattern with lazy loading:
 
 - **Components**: Lazy-loaded via `useLoadFeature(RecoveryFeature)`
 - **Hooks**: Direct exports (always loaded, not lazy)
