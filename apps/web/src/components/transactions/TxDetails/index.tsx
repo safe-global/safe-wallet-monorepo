@@ -45,7 +45,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { useQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
+import { useHnQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
 import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
 
 export const NOT_AVAILABLE = 'n/a'
@@ -109,7 +109,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Hypernative assessment for banner
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
-  const assessment = useQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessmentBanner = useShowHypernativeAssessment({
     isQueue,

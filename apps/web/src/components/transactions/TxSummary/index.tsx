@@ -20,7 +20,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
-import { useQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
+import { useHnQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
 import { HnQueueAssessment } from '@/features/hypernative/components/HnQueueAssessment'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
@@ -44,7 +44,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
   // Extract safeTxHash for assessment
   const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
-  const assessment = useQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment({
     isQueue,

@@ -57,7 +57,7 @@ export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueS
 
 // Assessment-related hooks
 export { useHnAssessmentSeverity } from './hooks/useHnAssessmentSeverity'
-export { useQueueAssessment } from './hooks/useQueueAssessment'
+export { useHnQueueAssessment } from './hooks/useHnQueueAssessment'
 export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessment'
 
 // Auth token hook (used by safe-shield context)
