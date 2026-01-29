@@ -47,7 +47,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@cowprotocol/widget-react": "^0.14.3",
+    "@cowprotocol/widget-react": "0.14.6",
     "@datadog/browser-logs": "^6.6.3",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/cache": "^11.13.5",

@@ -3278,29 +3278,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cowprotocol/iframe-transport@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@cowprotocol/iframe-transport@npm:1.1.1"
-  checksum: 10/869695ce3ca8bc8ab8eb8dc954f62e198284afbcd75d9f9923f75893d396302ace0efe38c24f6abdfaf9d57a0fb09dbf17910ff563e12b07c3732181f5c05140
+"@cowprotocol/iframe-transport@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@cowprotocol/iframe-transport@npm:1.2.0"
+  checksum: 10/8e32ffab3a141f9300f2041da5a79a02736ad48ce10f049bd51ade359daab5bc109ec914335a4fe8cf2307737ead7dc6d4f4bfc890537cd2884b34c3f240fa26
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-lib@npm:^0.22.0":
-  version: 0.22.1
-  resolution: "@cowprotocol/widget-lib@npm:0.22.1"
+"@cowprotocol/widget-lib@npm:^0.22.3":
+  version: 0.22.3
+  resolution: "@cowprotocol/widget-lib@npm:0.22.3"
   dependencies:
     "@cowprotocol/events": "npm:^2.1.0"
-    "@cowprotocol/iframe-transport": "npm:^1.1.1"
-  checksum: 10/88ab09961edfe77e3796a33304ebc8c33815ed954bd152eb4e21e5339f6d5fa4423f6eb8df857aff62277ec5a450be44cf0e06d392cfbf042ec7ec4423ae2556
+    "@cowprotocol/iframe-transport": "npm:^1.2.0"
+  checksum: 10/ef6e0228dc6b48b5db0df7d530a0a0b1c0c1e2b9a7b59395e08638b194142b91e74ebd4fa747d84b38aaf6f26bb11115c3388bf6731060d4845fdf4150297a11
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-react@npm:^0.14.3":
-  version: 0.14.3
-  resolution: "@cowprotocol/widget-react@npm:0.14.3"
+"@cowprotocol/widget-react@npm:0.14.6":
+  version: 0.14.6
+  resolution: "@cowprotocol/widget-react@npm:0.14.6"
   dependencies:
-    "@cowprotocol/widget-lib": "npm:^0.22.0"
-  checksum: 10/3a1c191f2cbdbb16b628e31fd4241e14eb70d66fd04b7eb9c5bdc921aa4d0ad5c04d7cace18990bcc82e1d2721c396f6ebb4b71bf4a844837f915bc79fbeb2b6
+    "@cowprotocol/widget-lib": "npm:^0.22.3"
+  checksum: 10/4ce037ad53a2eef33d43c2ade74dfb3e6da034f11ce99339868b50b0c6ea5ae74e8136358ba23a7e6e7fac4ab0b49dcf3294f369a58a65aeb7b9ef58219458f5
   languageName: node
   linkType: hard
 
@@ -12273,7 +12273,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
-    "@cowprotocol/widget-react": "npm:^0.14.3"
+    "@cowprotocol/widget-react": "npm:0.14.6"
     "@datadog/browser-logs": "npm:^6.6.3"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
