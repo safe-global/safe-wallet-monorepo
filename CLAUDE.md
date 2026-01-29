@@ -48,6 +48,8 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Common pitfalls and debugging tips
 
 ## Active Technologies
+- TypeScript 5.x (Next.js 14.x) + Storybook 8.x, MSW 2.x, Chromatic, @storybook/nextjs, shadcn/ui (001-shadcn-storybook-migration)
+- N/A (tooling/documentation feature) (001-shadcn-storybook-migration)
 
 - TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
 - N/A (architecture pattern, no new data storage) (001-feature-architecture)
