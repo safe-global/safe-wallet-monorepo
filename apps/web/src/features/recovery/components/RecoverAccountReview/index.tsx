@@ -41,7 +41,7 @@ type RecoverAccountReviewProps = {
   owners: AddressInfo[]
 }
 
-export function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps): ReactElement | null {
+function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps): ReactElement | null {
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()

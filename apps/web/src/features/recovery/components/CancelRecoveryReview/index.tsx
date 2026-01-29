@@ -13,7 +13,7 @@ import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-st
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
-export function CancelRecoveryReview({
+function CancelRecoveryReview({
   recovery,
   onSubmit,
   children,
