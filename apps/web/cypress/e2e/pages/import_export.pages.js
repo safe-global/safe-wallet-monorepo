@@ -4,9 +4,7 @@ import { format } from 'date-fns'
 const path = require('path')
 
 const pinnedAppsStr = 'My pinned apps'
-const enablePushNotificationsStr = 'Enable push notifications'
 const addressBookBtnStr = 'Address book'
-const dataImportModalStr = 'Data import'
 const appsBtnStr = 'Apps'
 const bookmarkedAppsBtnStr = 'Bookmarked apps'
 const settingsBtnStr = 'Settings'
