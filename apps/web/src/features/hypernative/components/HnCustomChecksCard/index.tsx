@@ -1,12 +1,12 @@
 import { useMemo, type ReactElement } from 'react'
 import type { ThreatAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
-import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { AnalysisGroupCardDisabled } from '../ThreatAnalysis/AnalysisGroupCardDisabled'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { AnalysisGroupCardDisabled } from '@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
+import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
+import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
 
-interface HypernativeCustomChecksProps {
+export interface HnCustomChecksCardProps {
   threat: AsyncResult<ThreatAnalysisResults>
   delay?: number
   highlightedSeverity?: Severity
@@ -14,19 +14,15 @@ interface HypernativeCustomChecksProps {
 }
 
 /**
- * Displays an analysis group card for the Hypernative custom checks
- *
- * @param threat - The threat analysis results
- * @param delay - The delay before showing the custom checks
- * @param highlightedSeverity - The highlighted severity
- * @returns The custom checks analysis group card or null if there are no custom checks
+ * Displays an analysis group card for the Hypernative custom checks.
+ * Shows the "by Hypernative" branding in the footer.
  */
-export const HypernativeCustomChecks = ({
+export const HnCustomChecksCard = ({
   threat: [threatResults],
   delay,
   highlightedSeverity,
   hypernativeAuth,
-}: HypernativeCustomChecksProps): ReactElement | null => {
+}: HnCustomChecksCardProps): ReactElement | null => {
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
 
@@ -45,13 +41,12 @@ export const HypernativeCustomChecks = ({
   }
 
   return (
-    <AnalysisGroupCard
+    <HnAnalysisGroupCard
       data-testid="custom-checks-analysis-group-card"
       data={customChecksData}
       delay={delay}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.CUSTOM_CHECKS_ANALYZED}
-      isByHypernative
     />
   )
 }

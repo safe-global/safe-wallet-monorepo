@@ -26,8 +26,8 @@ import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlin
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { BannerType, useBannerVisibility } from '@/features/hypernative'
 import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
-import { BannerType, useBannerVisibility } from '@/features/hypernative/hooks'
 
 const calculateProgress = (items: boolean[]) => {
   const totalNumberOfItems = items.length

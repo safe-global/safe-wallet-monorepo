@@ -45,10 +45,8 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
+import { useQueueAssessment, useShowHypernativeAssessment, useHypernativeOAuth } from '@/features/hypernative'
 import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
-import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
-import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 
 export const NOT_AVAILABLE = 'n/a'
 

@@ -3,7 +3,7 @@ import { ThreatAnalysis } from '../ThreatAnalysis'
 import type { ThreatAnalysisResults, ThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { Severity, ThreatStatus, CommonSharedStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 
 // Mock AnalysisGroupCard
 jest.mock('../../AnalysisGroupCard', () => ({
@@ -28,6 +28,30 @@ jest.mock('../AnalysisGroupCardDisabled', () => ({
   AnalysisGroupCardDisabled: jest.fn(({ children, 'data-testid': testId }) => (
     <div data-testid={testId}>AnalysisGroupCardDisabled: {children}</div>
   )),
+}))
+
+// Mock useLoadFeature to provide HnAnalysisGroupCard
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: jest.fn(() => ({
+    $isReady: true,
+    $isLoading: false,
+    $isDisabled: false,
+    HnAnalysisGroupCard: jest.fn(
+      ({ children, delay, highlightedSeverity, analyticsEvent, requestId, 'data-testid': testId }) => (
+        <div
+          data-testid={testId}
+          data-delay={delay}
+          data-severity={highlightedSeverity}
+          data-analytics={analyticsEvent}
+          data-request-id={requestId}
+        >
+          HnAnalysisGroupCard
+          {children}
+        </div>
+      ),
+    ),
+  })),
 }))
 
 describe('ThreatAnalysis', () => {
@@ -175,14 +199,14 @@ describe('ThreatAnalysis', () => {
       expect(screen.queryByText('AnalysisGroupCardDisabled')).not.toBeInTheDocument()
     })
 
-    it('should render AnalysisGroupCard when THREAT exists and hypernativeAuth is authenticated', () => {
+    it('should render HnAnalysisGroupCard when THREAT exists and hypernativeAuth is authenticated', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
       const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: false })
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
       expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
-      expect(screen.getByText('AnalysisGroupCard')).toBeInTheDocument()
+      expect(screen.getByText('HnAnalysisGroupCard')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCardDisabled')).not.toBeInTheDocument()
     })
 

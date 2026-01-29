@@ -14,8 +14,7 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
+import { useBannerVisibility, BannerType } from '@/features/hypernative'
 import { HnBannerForHistory } from '@/features/hypernative/components/HnBanner'
 
 const History: NextPage = () => {
