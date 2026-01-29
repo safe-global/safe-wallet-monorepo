@@ -63,10 +63,8 @@ export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessme
 // Auth token hook (used by safe-shield context)
 export { useAuthToken } from './hooks/useAuthToken'
 
-// Banner-related exports (for internal use, may be needed by some consumers)
-export { useBannerVisibility, MIN_BALANCE_USD } from './hooks/useBannerVisibility'
-export type { BannerVisibilityResult } from './hooks/useBannerVisibility'
-export { useBannerStorage, BannerType } from './hooks/useBannerStorage'
+// Banner visibility hooks (used by dashboard, queue, history pages)
+export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 
 // ─────────────────────────────────────────────────────────────────
 // STORE (direct imports, not lazy-loaded)
