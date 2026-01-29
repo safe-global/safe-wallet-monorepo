@@ -135,24 +135,25 @@ Use the `useLoadFeature` hook for components and services. Import hooks directly
 import { useLoadFeature } from '@/features/__core__'
 import { MyFeature, useMyHook } from '@/features/myfeature'
 
+// Prefer destructuring for cleaner component usage
 function ParentComponent() {
-  const feature = useLoadFeature(MyFeature)
+  const { MyComponent } = useLoadFeature(MyFeature)
   const hookData = useMyHook()  // Direct import, always safe
 
   // No null check needed - always returns an object
   // Components render null when not ready (proxy stub)
   // Services are undefined when not ready (check $isReady before calling)
-  return <feature.MyComponent />
+  return <MyComponent />
 }
 
 // For explicit loading/disabled states:
 function ParentWithStates() {
-  const feature = useLoadFeature(MyFeature)
+  const { MyComponent, $isLoading, $isDisabled } = useLoadFeature(MyFeature)
 
-  if (feature.$isLoading) return <Skeleton />
-  if (feature.$isDisabled) return null
+  if ($isLoading) return <Skeleton />
+  if ($isDisabled) return null
 
-  return <feature.MyComponent />
+  return <MyComponent />
 }
 ```
 
@@ -380,6 +381,7 @@ Avoid these common mistakes when contributing:
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components
 9. **Using lazy() or nested structure in feature.ts** – The `feature.ts` file is already lazy-loaded via `createFeatureHandle`. Do NOT add `lazy()` calls for individual components, and do NOT use nested categories (`components`, `hooks`, `services`). Use a flat structure with direct imports. Naming conventions determine stub behavior: `useSomething` → hook, `PascalCase` → component, `camelCase` → service.
+10. **Using lazy loading inside features** – The entire feature is lazy-loaded by default via `createFeatureHandle`. Do NOT use `lazy()`, `dynamic()`, or any other lazy-loading mechanism inside the feature (not in `feature.ts`, not in components, not anywhere). All components and services inside a feature should use direct imports with a flat structure.
 
 ## Debugging Tips
 
