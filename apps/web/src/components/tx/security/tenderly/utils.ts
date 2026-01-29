@@ -64,7 +64,11 @@ export const _getMultiSendCallOnlyPayload = async (
   params: MultiSendTransactionSimulationParams,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
   const data = encodeMultiSendData(params.transactions) as `0x${string}`
-  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(params.safe.version)
+  const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(
+    params.safe.version,
+    params.safe.chainId,
+    params.safe.implementation?.value,
+  )
 
   return {
     to: readOnlyMultiSendContract.getAddress(),

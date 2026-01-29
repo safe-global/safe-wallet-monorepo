@@ -1,4 +1,8 @@
-import { _isL2 } from '@safe-global/utils/services/contracts/deployments'
+import {
+  _isL2,
+  isCanonicalDeployment,
+  getCanonicalMultiSendCallOnlyAddress,
+} from '@safe-global/utils/services/contracts/deployments'
 import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
 import { SafeProvider } from '@safe-global/protocol-kit'
 import {
@@ -78,7 +82,11 @@ export const _getMinimumMultiSendCallOnlyVersion = (safeVersion: SafeState['vers
   return semver.gte(safeVersion, INITIAL_CALL_ONLY_VERSION) ? safeVersion : INITIAL_CALL_ONLY_VERSION
 }
 
-export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeState['version']) => {
+export const getReadOnlyMultiSendCallOnlyContract = async (
+  safeVersion: SafeState['version'],
+  chainId?: string,
+  implementationAddress?: string,
+) => {
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error('Safe SDK not found.')
@@ -89,7 +97,19 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeStat
   // For unsupported mastercopies, use the SDK version if available
   const version = safeVersion ?? safeSDK.getContractVersion()
 
-  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider)
+  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
+  // we must use canonical auxiliary contracts because EVM contracts
+  // cannot delegatecall to EraVM contracts.
+  let customContractAddress: string | undefined
+  if (chainId && implementationAddress && isCanonicalDeployment(implementationAddress, chainId, version)) {
+    customContractAddress = getCanonicalMultiSendCallOnlyAddress(version)
+  }
+
+  return getMultiSendCallOnlyContractInstance(
+    _getValidatedGetContractProps(version).safeVersion,
+    safeProvider,
+    customContractAddress,
+  )
 }
 
 // GnosisSafeProxyFactory

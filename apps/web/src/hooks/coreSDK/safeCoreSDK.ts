@@ -12,6 +12,9 @@ import { keccak256 } from 'ethers'
 import {
   getL2MasterCopyVersionByCodeHash,
   isL2MasterCopyCodeHash,
+  isCanonicalDeployment,
+  getCanonicalMultiSendCallOnlyAddress,
+  getCanonicalMultiSendAddress,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
 
@@ -90,6 +93,23 @@ export const initSafeSDK = async ({
   // Legacy Safe contracts
   if (isLegacyVersion(safeVersion)) {
     isL1SafeSingleton = true
+  }
+
+  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
+  // we must use canonical auxiliary contracts (MultiSend, etc.) because
+  // EVM contracts cannot delegatecall to EraVM contracts.
+  if (isCanonicalDeployment(implementation, chainId, safeVersion)) {
+    const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
+    const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)
+
+    contractNetworks = {
+      ...contractNetworks,
+      [chainId]: {
+        ...contractNetworks?.[chainId],
+        ...(canonicalMultiSendCallOnly && { multiSendCallOnlyAddress: canonicalMultiSendCallOnly }),
+        ...(canonicalMultiSend && { multiSendAddress: canonicalMultiSend }),
+      },
+    }
   }
 
   if (undeployedSafe) {

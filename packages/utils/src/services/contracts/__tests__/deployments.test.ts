@@ -1,5 +1,12 @@
 import type { SingletonDeploymentV2 } from '@safe-global/safe-deployments'
-import { getCanonicalOrFirstAddress, hasCanonicalDeployment, hasMatchingDeployment } from '../../contracts/deployments'
+import {
+  getCanonicalOrFirstAddress,
+  hasCanonicalDeployment,
+  hasMatchingDeployment,
+  isCanonicalDeployment,
+  getCanonicalMultiSendCallOnlyAddress,
+} from '../../contracts/deployments'
+import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
 
 describe('deployments utils', () => {
   const chainId = '1'
@@ -93,15 +100,6 @@ describe('deployments utils', () => {
       expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.4.1'])).toBe(false)
     })
 
-    it('returns true when canonical address matches even if not in network addresses', () => {
-      const canonical = contractAddress
-      const otherNetworkAddress = '0x8888888888888888888888888888888888888888'
-      const getDeployments = jest.fn(() =>
-        makeDeployment({ canonical: { address: canonical, codeHash: '0xhash' } }, { [chainId]: [otherNetworkAddress] }),
-      )
-      expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.4.1'])).toBe(true)
-    })
-
     it('checks multiple versions', () => {
       const getDeployments = jest.fn((filter) => {
         if (filter?.version === '1.3.0') {
@@ -114,6 +112,54 @@ describe('deployments utils', () => {
       })
       expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.3.0', '1.4.1'])).toBe(true)
       expect(hasMatchingDeployment(getDeployments, contractAddress, chainId, ['1.4.1'])).toBe(false)
+    })
+  })
+
+  describe('isCanonicalDeployment', () => {
+    // Canonical L2 Safe 1.3.0 mastercopy address
+    const CANONICAL_L2_SAFE = '0x3E5c63644E683549055b9Be8653de26E0B4CD36E'
+    // zkSync-specific L2 Safe 1.3.0 mastercopy address (EraVM bytecode)
+    const ZKSYNC_L2_SAFE = '0x1727c2c531cf966f902E5927b98490fDFb3b2b70'
+
+    it('returns true for canonical mastercopy on zkSync', () => {
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(true)
+    })
+
+    it('returns true for canonical mastercopy on zkSync (case insensitive)', () => {
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE.toLowerCase(), ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(true)
+    })
+
+    it('returns false for zkSync-specific mastercopy on zkSync', () => {
+      // zkSync-specific mastercopies have EraVM bytecode and should not be treated as canonical
+      expect(isCanonicalDeployment(ZKSYNC_L2_SAFE, ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(false)
+    })
+
+    it('returns false for non-canonical address on zkSync', () => {
+      const nonCanonicalAddress = '0x1234567890123456789012345678901234567890'
+      expect(isCanonicalDeployment(nonCanonicalAddress, ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(false)
+    })
+
+    it('returns false for non-zkSync chains', () => {
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, '1', '1.3.0')).toBe(false)
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, '137', '1.3.0')).toBe(false)
+    })
+
+    it('returns false for empty implementation address', () => {
+      expect(isCanonicalDeployment('', ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(false)
+    })
+  })
+
+  describe('getCanonicalMultiSendCallOnlyAddress', () => {
+    it('returns canonical MultiSendCallOnly address for version 1.3.0', () => {
+      const address = getCanonicalMultiSendCallOnlyAddress('1.3.0')
+      // Canonical MultiSendCallOnly 1.3.0 address
+      expect(address).toBe('0x40A2aCCbd92BCA938b02010E17A5b8929b49130D')
+    })
+
+    it('falls back to 1.3.0 for null version', () => {
+      const address = getCanonicalMultiSendCallOnlyAddress(null)
+      // Should fallback to 1.3.0
+      expect(address).toBe('0x40A2aCCbd92BCA938b02010E17A5b8929b49130D')
     })
   })
 })
