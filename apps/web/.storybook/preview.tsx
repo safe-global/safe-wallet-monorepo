@@ -7,6 +7,10 @@ import createSafeTheme from '../src/components/theme/safeTheme'
 
 import '../src/styles/globals.css'
 
+// Export decorators for use in individual stories
+// These are not applied globally but can be imported and used per-story
+export { withLayout, withMockProvider } from './decorators'
+
 const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
 
 // Syncs data-theme attribute and background color with the theme switcher

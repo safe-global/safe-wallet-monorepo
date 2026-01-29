@@ -27,11 +27,11 @@
 
 **Purpose**: Project structure and shared decorators setup
 
-- [ ] T001 Create decorators directory structure in apps/web/.storybook/decorators/
-- [ ] T002 [P] Create LayoutDecorator.tsx for page-level stories in apps/web/.storybook/decorators/LayoutDecorator.tsx
-- [ ] T003 [P] Create MockProviderDecorator.tsx for Redux/context in apps/web/.storybook/decorators/MockProviderDecorator.tsx
-- [ ] T004 [P] Create barrel export in apps/web/.storybook/decorators/index.ts
-- [ ] T005 Update apps/web/.storybook/preview.tsx to register global decorators
+- [x] T001 Create decorators directory structure in apps/web/.storybook/decorators/
+- [x] T002 [P] Create LayoutDecorator.tsx for page-level stories in apps/web/.storybook/decorators/LayoutDecorator.tsx
+- [x] T003 [P] Create MockProviderDecorator.tsx for Redux/context in apps/web/.storybook/decorators/MockProviderDecorator.tsx
+- [x] T004 [P] Create barrel export in apps/web/.storybook/decorators/index.ts
+- [x] T005 Update apps/web/.storybook/preview.tsx to register global decorators
 
 ---
 
@@ -41,24 +41,26 @@
 
 **⚠️ CRITICAL**: No story work (US3, US4) can begin until this phase is complete
 
-- [ ] T006 Create MSW handlers directory structure in config/test/msw/handlers/
-- [ ] T007 [P] Extract safe-related handlers to config/test/msw/handlers/safe.ts
-- [ ] T008 [P] Extract transaction handlers to config/test/msw/handlers/transactions.ts
-- [ ] T009 [P] Extract balance handlers to config/test/msw/handlers/balances.ts
-- [ ] T010 [P] Create Web3/RPC mock handlers in config/test/msw/handlers/web3.ts
-- [ ] T011 Create handler aggregation barrel in config/test/msw/handlers/index.ts
-- [ ] T012 Create factories directory in config/test/msw/factories/
-- [ ] T013 [P] Create safeFactory.ts with deterministic Safe mock data in config/test/msw/factories/safeFactory.ts
-- [ ] T014 [P] Create transactionFactory.ts with mock transaction data in config/test/msw/factories/transactionFactory.ts
-- [ ] T015 [P] Create tokenFactory.ts with mock token/balance data in config/test/msw/factories/tokenFactory.ts
-- [ ] T016 Create factory barrel export in config/test/msw/factories/index.ts
-- [ ] T017 Create scenarios directory in config/test/msw/scenarios/
-- [ ] T018 [P] Create emptyState.ts scenario handlers in config/test/msw/scenarios/emptyState.ts
-- [ ] T019 [P] Create errorState.ts scenario handlers in config/test/msw/scenarios/errorState.ts
-- [ ] T020 [P] Create loadingState.ts scenario handlers in config/test/msw/scenarios/loadingState.ts
-- [ ] T021 Create scenarios barrel export in config/test/msw/scenarios/index.ts
+**Architecture Decision**: Using **fixture-based handlers** with real API data fetched from staging CGW, instead of hardcoded synthetic data. This ensures mock data matches actual API response shapes exactly.
 
-**Checkpoint**: MSW infrastructure ready - story creation can now begin
+- [x] T006 Create MSW handlers directory structure in config/test/msw/handlers/
+- [x] T007 [P] Extract safe-related handlers to config/test/msw/handlers/safe.ts
+- [x] T008 [P] Extract transaction handlers to config/test/msw/handlers/transactions.ts
+- [x] T009 [P] Create fixture-based handlers in config/test/msw/handlers/fromFixtures.ts (supersedes balances.ts)
+- [x] T010 [P] Create Web3/RPC mock handlers in config/test/msw/handlers/web3.ts
+- [x] T011 Create handler aggregation barrel in config/test/msw/handlers/index.ts with fixtureHandlers as primary API
+- [x] T012 Create fixtures directory in config/test/msw/fixtures/
+- [x] T013 [P] Fetch and store balance fixtures from staging CGW in config/test/msw/fixtures/balances/
+- [x] T014 [P] Fetch and store portfolio fixtures in config/test/msw/fixtures/portfolio/
+- [x] T015 [P] Fetch and store position fixtures in config/test/msw/fixtures/positions/
+- [x] T016 Create fixture barrel export with type-safe imports in config/test/msw/fixtures/index.ts
+- [x] T017 Create scenarios directory in config/test/msw/scenarios/
+- [x] T018 [P] Create emptyState.ts scenario handlers in config/test/msw/scenarios/emptyState.ts
+- [x] T019 [P] Create errorState.ts scenario handlers in config/test/msw/scenarios/errorState.ts
+- [x] T020 [P] Create loadingState.ts scenario handlers in config/test/msw/scenarios/loadingState.ts
+- [x] T021 Create scenarios barrel export in config/test/msw/scenarios/index.ts
+
+**Checkpoint**: MSW infrastructure ready - story creation can now begin ✅
 
 ---
 
@@ -70,43 +72,45 @@
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Create scripts/storybook/ directory structure
-- [ ] T023 [US1] Create ComponentEntry interface types in scripts/storybook/types.ts
-- [ ] T024 [US1] Implement component scanner using AST parser in scripts/storybook/scanner.ts
-- [ ] T025 [US1] Implement story coverage checker in scripts/storybook/coverage.ts
-- [ ] T026 [US1] Implement dependency analyzer (hooks, API calls, Redux) in scripts/storybook/dependencies.ts
-- [ ] T027 [US1] Implement priority scoring algorithm in scripts/storybook/priority.ts
-- [ ] T028 [US1] Create main inventory script in scripts/storybook/inventory.ts
-- [ ] T029 [US1] Create coverage report generator in scripts/storybook/coverage-report.ts
-- [ ] T030 [US1] Add "inventory" script to apps/web/package.json
-- [ ] T031 [US1] Add "coverage-report" script to apps/web/package.json
-- [ ] T032 [US1] Run inventory and generate initial coverage report
-- [ ] T033 [US1] Document inventory tool usage in specs/001-shadcn-storybook-migration/quickstart.md
+- [x] T022 [US1] Create scripts/storybook/ directory structure
+- [x] T023 [US1] Create ComponentEntry interface types in scripts/storybook/types.ts
+- [x] T024 [US1] Implement component scanner using AST parser in scripts/storybook/scanner.ts
+- [x] T025 [US1] Implement story coverage checker in scripts/storybook/coverage.ts
+- [x] T026 [US1] Implement dependency analyzer (hooks, API calls, Redux) in scripts/storybook/dependencies.ts
+- [x] T027 [US1] Implement priority scoring algorithm in scripts/storybook/priority.ts
+- [x] T028 [US1] Create main inventory script in scripts/storybook/inventory.ts
+- [x] T029 [US1] Create coverage report generator in scripts/storybook/coverage-report.ts
+- [x] T030 [US1] Add "inventory" script to apps/web/package.json
+- [x] T031 [US1] Add "coverage-report" script to apps/web/package.json
+- [x] T032 [US1] Run inventory and generate initial coverage report
+- [x] T033 [US1] Document inventory tool usage in specs/001-shadcn-storybook-migration/quickstart.md
 
-**Checkpoint**: Component inventory system complete - provides foundation for systematic story creation
+**Checkpoint**: Component inventory system complete - provides foundation for systematic story creation ✅
 
 ---
 
-## Phase 4: User Story 2 - MSW Mock Database Infrastructure (Priority: P2)
+## Phase 4: User Story 2 - MSW Fixture Expansion (Priority: P2)
 
-**Goal**: Comprehensive mock data for all API endpoints used by components
+**Goal**: Extend fixture coverage for all API endpoints used by components
 
-**Independent Test**: Create a sample story for TransactionsList that renders with realistic mocked data from MSW handlers
+**Independent Test**: Create a sample story for TransactionsList that renders with realistic mocked data from fixture handlers
+
+**Note**: Core fixture infrastructure (balances, portfolio, positions, chains, safes) already complete. This phase adds coverage for remaining endpoints.
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Audit existing handlers.ts against inventory dependency report
-- [ ] T035 [US2] Document missing API endpoints in specs/001-shadcn-storybook-migration/msw-gaps.md
-- [ ] T036 [P] [US2] Add missing Safe Apps handlers to config/test/msw/handlers/safeApps.ts
-- [ ] T037 [P] [US2] Add missing chain config handlers to config/test/msw/handlers/chains.ts
-- [ ] T038 [P] [US2] Add missing notifications handlers to config/test/msw/handlers/notifications.ts
-- [ ] T039 [US2] Update handler aggregation in config/test/msw/handlers/index.ts
+- [ ] T034 [US2] Audit fixture coverage against inventory dependency report - identify uncovered endpoints
+- [ ] T035 [US2] Document fixture scenarios and usage in specs/001-shadcn-storybook-migration/msw-fixtures.md
+- [ ] T036 [P] [US2] Add Safe Apps fixtures to config/test/msw/fixtures/safe-apps/
+- [ ] T037 [P] [US2] Add transaction fixtures to config/test/msw/fixtures/transactions/
+- [ ] T038 [P] [US2] Add notifications fixtures to config/test/msw/fixtures/notifications/
+- [ ] T039 [US2] Update fromFixtures.ts to include new fixture types
 - [ ] T040 [US2] Create MockWeb3Provider component in apps/web/.storybook/decorators/MockWeb3Provider.tsx
 - [ ] T041 [US2] Create MockWeb3Decorator in apps/web/.storybook/decorators/MockWeb3Decorator.tsx
-- [ ] T042 [US2] Create sample TransactionsList story demonstrating MSW usage in apps/web/src/components/transactions/TransactionsList/TransactionsList.stories.tsx
-- [ ] T043 [US2] Verify sample story renders correctly in Storybook
+- [ ] T042 [US2] Create sample TransactionsList story demonstrating fixture usage in apps/web/src/components/transactions/TransactionsList/TransactionsList.stories.tsx
+- [ ] T043 [US2] Verify sample story renders correctly in Storybook with fixtureHandlers
 
-**Checkpoint**: MSW infrastructure complete - all API endpoints mocked for story development
+**Checkpoint**: Fixture coverage complete - all API endpoints covered for story development
 
 ---
 
@@ -274,14 +278,17 @@
 ### Parallel Opportunities
 
 Within Phase 2:
+
 - T007, T008, T009, T010 can run in parallel (different handler files)
 - T013, T014, T015 can run in parallel (different factory files)
 - T018, T019, T020 can run in parallel (different scenario files)
 
 Within Phase 5 (shadcn/ui stories):
+
 - All T044-T077 can run in parallel (different component story files)
 
 Within Phase 6 (page stories):
+
 - T093, T094, T095, T096, T097 can run in parallel (different page story files)
 
 ---
@@ -327,6 +334,7 @@ Task: "Create alert-dialog.stories.tsx in apps/web/src/components/ui/alert-dialo
 **Phase 1 + 2 + 3 + 5.1-5.3** (Setup, MSW, Inventory, shadcn/ui stories)
 
 This delivers:
+
 - Inventory tool for tracking progress
 - Complete story coverage for all 45 shadcn/ui components
 - Foundation for continued story development

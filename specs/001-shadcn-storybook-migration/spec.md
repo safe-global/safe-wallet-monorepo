@@ -103,18 +103,21 @@ As a developer making design changes, I need automated visual regression tests t
 ### Functional Requirements
 
 **Component Inventory & Mapping**
+
 - **FR-001**: System MUST produce an automated inventory of all React components in apps/web/src/
 - **FR-002**: System MUST identify which components have existing Storybook stories
 - **FR-003**: System MUST document data dependencies (hooks, API calls, Redux selectors) for each component
 - **FR-004**: System MUST categorize components by type: UI primitives, common components, feature components, page components
 
 **MSW Mocking Infrastructure**
+
 - **FR-005**: System MUST extend existing MSW handlers to cover all API endpoints used by components
-- **FR-006**: System MUST provide mock data factories for creating realistic test data (using existing faker patterns)
+- **FR-006**: System MUST provide fixture-based mock data using real API responses from staging CGW for realistic test scenarios
 - **FR-007**: System MUST support multiple mock scenarios: success, error, loading, empty states
 - **FR-008**: System MUST mock Web3 provider responses for wallet-dependent components
 
 **Storybook Stories**
+
 - **FR-009**: Every component MUST have at least one Storybook story
 - **FR-010**: Stories MUST demonstrate all significant visual states (default, hover, disabled, loading, error)
 - **FR-011**: Stories MUST use MSW for data mocking, not inline mock data
@@ -122,11 +125,13 @@ As a developer making design changes, I need automated visual regression tests t
 - **FR-013**: Interactive components MUST have stories demonstrating user interactions
 
 **Page-Level Stories**
+
 - **FR-014**: Page stories MUST render with full application layout (sidebar, header)
 - **FR-015**: Page stories MUST support viewport testing for responsive design
 - **FR-016**: Page stories MUST use Storybook decorators to provide layout wrapper
 
 **Visual Regression Testing**
+
 - **FR-017**: All stories MUST be included in Chromatic visual regression testing by default
 - **FR-018**: System MUST allow opting out specific stories from visual testing via parameters
 - **FR-019**: Visual regression MUST run on every PR as part of CI pipeline; PRs with visual changes MUST be blocked until reviewed

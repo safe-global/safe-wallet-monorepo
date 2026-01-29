@@ -6,6 +6,7 @@
 ## Summary
 
 Establish comprehensive Storybook story coverage for the Safe{Wallet} web application to enable designer collaboration on the shadcn design system migration. This includes:
+
 1. Automated component inventory and dependency analysis
 2. Enhanced MSW mocking infrastructure for realistic story rendering
 3. Systematic story creation for all visually-rendered components
@@ -28,14 +29,14 @@ Establish comprehensive Storybook story coverage for the Safe{Wallet} web applic
 
 _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. Type Safety | ✅ PASS | All story files and MSW handlers will be TypeScript with proper types |
-| II. Branch Protection | ✅ PASS | Working on feature branch, will submit PR |
-| III. Cross-Platform | ✅ PASS | Web-only feature (Storybook), no impact on mobile |
-| IV. Testing Discipline | ✅ PASS | Using MSW for mocking per constitution; extending existing patterns |
-| V. Feature Organization | ✅ PASS | Stories colocated with components per existing convention |
-| VI. Theme System | ✅ PASS | Stories use existing theme system, no hardcoded values |
+| Principle               | Status  | Notes                                                                 |
+| ----------------------- | ------- | --------------------------------------------------------------------- |
+| I. Type Safety          | ✅ PASS | All story files and MSW handlers will be TypeScript with proper types |
+| II. Branch Protection   | ✅ PASS | Working on feature branch, will submit PR                             |
+| III. Cross-Platform     | ✅ PASS | Web-only feature (Storybook), no impact on mobile                     |
+| IV. Testing Discipline  | ✅ PASS | Using MSW for mocking per constitution; extending existing patterns   |
+| V. Feature Organization | ✅ PASS | Stories colocated with components per existing convention             |
+| VI. Theme System        | ✅ PASS | Stories use existing theme system, no hardcoded values                |
 
 **Gate Result**: PASS - No violations requiring justification
 
@@ -79,23 +80,29 @@ apps/web/
 │               └── *.stories.tsx  # EXPANDED stories per feature
 
 config/test/msw/
-├── handlers.ts                    # Existing handlers (18 endpoints)
-├── handlers/                      # NEW: Organized handler modules
-│   ├── safe.ts                    # Safe account handlers
-│   ├── transactions.ts            # Transaction handlers
-│   ├── balances.ts                # Balance handlers
-│   ├── web3.ts                    # NEW: Web3 provider mocks
-│   └── index.ts                   # Handler aggregation
-├── factories/                     # NEW: Mock data factories
-│   ├── safeFactory.ts
-│   ├── transactionFactory.ts
-│   ├── tokenFactory.ts
-│   └── index.ts
-└── scenarios/                     # NEW: Predefined mock scenarios
-    ├── emptyState.ts
-    ├── errorState.ts
-    ├── loadingState.ts
-    └── index.ts
+├── handlers.ts                    # Legacy handlers (for reference)
+├── handlers/                      # Organized handler modules
+│   ├── fromFixtures.ts            # PRIMARY: Fixture-based handlers (real API data)
+│   ├── safe.ts                    # Utility: Auth, relay, messages
+│   ├── transactions.ts            # Utility: Tx queue/history
+│   ├── web3.ts                    # Utility: Web3/RPC mocks
+│   └── index.ts                   # Exports fixtureHandlers as primary API
+├── fixtures/                      # Real API response data (JSON)
+│   ├── balances/                  # Balance fixtures by scenario
+│   │   ├── ef-safe.json
+│   │   ├── vitalik.json
+│   │   ├── spam-tokens.json
+│   │   ├── safe-token-holder.json
+│   │   └── empty.json
+│   ├── portfolio/                 # Portfolio fixtures by scenario
+│   ├── positions/                 # DeFi positions fixtures
+│   ├── safes/                     # Safe info fixtures
+│   ├── chains/                    # Chain config fixtures
+│   └── index.ts                   # Type-safe fixture exports
+├── scripts/
+│   └── fetch-fixtures.ts          # Script to refresh fixtures from staging CGW
+├── factories/                     # Deterministic test data builders
+└── scenarios/                     # Empty/Error/Loading state handlers
 
 scripts/                           # NEW: Tooling scripts
 └── storybook/
@@ -165,10 +172,11 @@ See [quickstart.md](./quickstart.md) for developer guide.
    - `common-component.stories.template.tsx` - For data-dependent components
    - `page.stories.template.tsx` - For full-page layouts
 
-3. **MSW Handler Patterns** (`contracts/`)
-   - Handler module structure
-   - Factory function signatures
-   - Scenario composition pattern
+3. **MSW Fixture Patterns** (`config/test/msw/`)
+   - Fixture-based handlers using real API data from staging CGW
+   - Scenario presets: efSafe, vitalik, spamTokens, safeTokenHolder, empty, withoutPositions
+   - Feature flag testing via chain config overrides
+   - Fixture refresh: `npx tsx config/test/msw/scripts/fetch-fixtures.ts`
 
 4. **Quick Start Guide** (`quickstart.md`)
    - How to create a story for each component type

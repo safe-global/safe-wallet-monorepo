@@ -42,7 +42,9 @@
     "test:visual:ci": "cross-env TZ=UTC test-storybook --url http://localhost:6006 --ci",
     "test:visual:update": "cross-env TZ=UTC test-storybook --url http://localhost:6006 -u",
     "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
-    "integrity": "node scripts/integrity-hashes.cjs"
+    "integrity": "node scripts/integrity-hashes.cjs",
+    "inventory": "npx tsx ../../scripts/storybook/inventory.ts",
+    "coverage-report": "npx tsx ../../scripts/storybook/coverage-report.ts"
   },
   "engines": {
     "node": ">=18"

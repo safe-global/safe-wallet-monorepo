@@ -8,12 +8,13 @@ This guide walks you through creating Storybook stories for the Safe{Wallet} des
 
 1. [Prerequisites](#prerequisites)
 2. [Running Storybook](#running-storybook)
-3. [Creating a UI Component Story](#creating-a-ui-component-story)
-4. [Creating a Data-Dependent Story](#creating-a-data-dependent-story)
-5. [Creating a Page-Level Story](#creating-a-page-level-story)
-6. [Adding MSW Handlers](#adding-msw-handlers)
-7. [Chromatic Review Process](#chromatic-review-process)
-8. [Troubleshooting](#troubleshooting)
+3. [Component Inventory Tool](#component-inventory-tool)
+4. [Creating a UI Component Story](#creating-a-ui-component-story)
+5. [Creating a Data-Dependent Story](#creating-a-data-dependent-story)
+6. [Creating a Page-Level Story](#creating-a-page-level-story)
+7. [Adding MSW Handlers](#adding-msw-handlers)
+8. [Chromatic Review Process](#chromatic-review-process)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -44,6 +45,86 @@ yarn workspace @safe-global/web build-storybook
 # Run snapshot tests
 yarn workspace @safe-global/web test:storybook
 ```
+
+---
+
+## Component Inventory Tool
+
+The inventory tool helps you find components that need stories and prioritizes them by importance.
+
+### Running the Inventory
+
+```bash
+# Basic inventory scan
+yarn workspace @safe-global/web inventory
+
+# Verbose output with priority explanations
+yarn workspace @safe-global/web inventory --verbose
+
+# JSON output for processing
+yarn workspace @safe-global/web inventory --json
+
+# Save to file
+yarn workspace @safe-global/web inventory --json --output inventory.json
+```
+
+### Example Output
+
+```
+📦 Component Inventory Scanner
+==============================
+
+📊 Coverage Summary
+-------------------
+Total Components: 330
+With Stories: 14
+Coverage: 4%
+
+📁 Coverage by Category
+-----------------------
+other        [█░░░░░░░░░░░░░░░░░░░] 9/227 (4%)
+transaction  [░░░░░░░░░░░░░░░░░░░░] 0/38 (0%)
+sidebar      [░░░░░░░░░░░░░░░░░░░░] 0/3 (0%)
+
+🎯 Top Priority Components (need stories)
+------------------------------------------
+  SafeHeaderInfo           [sidebar] Score: 20
+  MultiAccountContextMenu  [sidebar] Score: 20
+  QrModal                  [sidebar] Score: 15
+```
+
+### Generating Coverage Reports
+
+```bash
+# Markdown report
+yarn workspace @safe-global/web coverage-report --format md --output coverage.md
+
+# HTML report (visual dashboard)
+yarn workspace @safe-global/web coverage-report --format html --output coverage.html
+
+# JSON report (for CI/tooling)
+yarn workspace @safe-global/web coverage-report --format json --output coverage.json
+```
+
+### Priority Scoring
+
+Components are scored based on:
+
+- **Category weight**: UI (10), Sidebar (15), Common (8)
+- **Dependents**: Components used by many others score higher
+- **Complexity**: Simple components (no mocking needed) score higher for quick wins
+- **MSW needs**: Components that need API mocking get slight boost (common use case)
+
+### Work Order
+
+The tool suggests a phased approach:
+
+1. **Phase 1**: UI primitives (no dependencies)
+2. **Phase 2**: Sidebar components (critical for page stories)
+3. **Phase 3**: Simple common components
+4. **Phase 4**: Redux-dependent components
+5. **Phase 5**: MSW-dependent components
+6. **Phase 6**: Complex components (Web3, multiple decorators)
 
 ---
 
@@ -141,9 +222,9 @@ Before writing the story, check what the component needs:
 
 ```typescript
 // Look for these patterns in the component:
-import { useSelector } from 'react-redux'         // → Need StoreDecorator
+import { useSelector } from 'react-redux' // → Need StoreDecorator
 import { useSafeInfo } from '@/hooks/useSafeInfo' // → Need MSW handler
-import { useRouter } from 'next/router'           // → Need RouterDecorator (usually automatic)
+import { useRouter } from 'next/router' // → Need RouterDecorator (usually automatic)
 ```
 
 ### Step 2: Create mock data
@@ -243,7 +324,7 @@ const meta = {
   title: 'Pages/Dashboard',
   component: DashboardPage,
   parameters: {
-    layout: 'fullscreen',  // Important!
+    layout: 'fullscreen', // Important!
   },
 }
 ```
@@ -295,11 +376,40 @@ export const Mobile: Story = {
 
 ## Adding MSW Handlers
 
-### Option 1: Inline handlers (simple cases)
+### Option 1: Fixture handlers (recommended)
 
-For component-specific mocking:
+Use pre-configured fixtures with real API data from staging CGW:
 
 ```typescript
+import { fixtureHandlers, FIXTURE_SCENARIOS } from '@safe-global/test/msw/handlers'
+
+const GATEWAY_URL = 'https://safe-client.safe.global'
+
+// In your story:
+export const Default: Story = {
+  parameters: {
+    msw: {
+      handlers: fixtureHandlers.efSafe(GATEWAY_URL),
+    },
+  },
+}
+
+// Available scenarios:
+// - efSafe: $142M DeFi positions, 8 protocols (best for testing positions)
+// - vitalik: 1551 tokens, whale scenario (best for performance testing)
+// - spamTokens: Spam token testing
+// - safeTokenHolder: 15 diverse DeFi protocols
+// - empty: Empty state testing
+// - withoutPositions: POSITIONS feature flag disabled
+```
+
+### Option 2: Inline handlers (simple overrides)
+
+For component-specific mocking or overriding fixture data:
+
+```typescript
+import { http, HttpResponse } from 'msw'
+
 parameters: {
   msw: {
     handlers: [
@@ -311,62 +421,35 @@ parameters: {
 },
 ```
 
-### Option 2: Shared handlers (reusable)
+### Option 3: Combining fixtures with overrides
 
-For handlers used across multiple stories, add to `config/test/msw/handlers/`:
-
-```typescript
-// config/test/msw/handlers/balances.ts
-export const balanceHandlers = [
-  http.get('*/v1/chains/:chainId/safes/:address/balances/*', () => {
-    return HttpResponse.json(mockBalances)
-  }),
-]
-
-// In your story:
-import { balanceHandlers } from '@safe-global/test/msw/handlers/balances'
-
-parameters: {
-  msw: {
-    handlers: balanceHandlers,
-  },
-},
-```
-
-### Option 3: Handler scenarios (state variations)
-
-Create scenario helpers for consistent state testing:
+Layer inline handlers on top of fixtures:
 
 ```typescript
-// config/test/msw/scenarios/balances.ts
-export function balanceScenario(type: 'success' | 'error' | 'empty' | 'loading') {
-  switch (type) {
-    case 'error':
-      return [
+import { fixtureHandlers } from '@safe-global/test/msw/handlers'
+import { http, HttpResponse } from 'msw'
+
+export const WithError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...fixtureHandlers.efSafe(GATEWAY_URL),
+        // Override specific endpoint with error
         http.get('*/v1/chains/:chainId/safes/:address/balances/*', () => {
           return HttpResponse.json({ error: 'Failed' }, { status: 500 })
         }),
-      ]
-    case 'empty':
-      return [
-        http.get('*/v1/chains/:chainId/safes/:address/balances/*', () => {
-          return HttpResponse.json({ items: [] })
-        }),
-      ]
-    case 'loading':
-      return [
-        http.get('*/v1/chains/:chainId/safes/:address/balances/*', async () => {
-          await new Promise(() => {}) // Never resolves
-        }),
-      ]
-    default:
-      return [
-        http.get('*/v1/chains/:chainId/safes/:address/balances/*', () => {
-          return HttpResponse.json(mockBalances)
-        }),
-      ]
-  }
+      ],
+    },
+  },
 }
+```
+
+### Refreshing fixtures
+
+To update fixtures with fresh data from staging CGW:
+
+```bash
+npx tsx config/test/msw/scripts/fetch-fixtures.ts
 ```
 
 ---
