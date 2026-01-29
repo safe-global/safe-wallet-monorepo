@@ -66,7 +66,7 @@ const CounterfactualHooksLoader = () => {
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
-import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
+import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useDatadog } from '@/services/datadog'

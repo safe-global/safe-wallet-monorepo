@@ -4,15 +4,18 @@ import { type ReactElement } from 'react'
 const OverviewSkeleton = (): ReactElement => {
   return (
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
+      <Box display="flex" justifyContent="flex-end" mb={-3}>
+        <Skeleton variant="text" width={180} height={24} />
+      </Box>
       <Box>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
+          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
           justifyContent="space-between"
         >
           <Box>
             <Typography fontWeight="700" mb={0.5}>
-              Total asset value
+              Total balance
             </Typography>
 
             <Skeleton
@@ -33,6 +36,16 @@ const OverviewSkeleton = (): ReactElement => {
             width={{ xs: 1, md: 'auto' }}
             mt={{ xs: 2, md: 0 }}
           >
+            <Box flex={1}>
+              <Skeleton
+                variant="rounded"
+                height={42}
+                sx={{
+                  minWidth: 96,
+                  width: '100%',
+                }}
+              />
+            </Box>
             <Box flex={1}>
               <Skeleton
                 variant="rounded"

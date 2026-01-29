@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import RefreshPositionsButton from '../index'
 import * as analytics from '@/services/analytics'
-import * as useRefetch from '@/features/positions/hooks/useRefetch'
+import * as useRefetchBalances from '@/hooks/useRefetchBalances'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
@@ -25,7 +25,7 @@ describe('RefreshPositionsButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    jest.spyOn(useRefetch, 'useRefetch').mockReturnValue({
+    jest.spyOn(useRefetchBalances, 'useRefetchBalances').mockReturnValue({
       refetch: mockRefetch,
       refetchPositions: mockRefetch,
       shouldUsePortfolioEndpoint: false,
@@ -55,7 +55,7 @@ describe('RefreshPositionsButton', () => {
     })
 
     it('should show portfolio tooltip when portfolio endpoint is enabled', async () => {
-      jest.spyOn(useRefetch, 'useRefetch').mockReturnValue({
+      jest.spyOn(useRefetchBalances, 'useRefetchBalances').mockReturnValue({
         refetch: mockRefetch,
         refetchPositions: mockRefetch,
         shouldUsePortfolioEndpoint: true,

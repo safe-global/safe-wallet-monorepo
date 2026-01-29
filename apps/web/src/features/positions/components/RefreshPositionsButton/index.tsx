@@ -5,7 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
-import { useRefetch } from '@/features/positions/hooks/useRefetch'
+import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import css from './styles.module.css'
 
 const COOLDOWN_MS = 30_000
@@ -31,7 +31,7 @@ const RefreshPositionsButton = ({
   disabled = false,
   ...buttonProps
 }: RefreshPositionsButtonProps) => {
-  const { refetch, shouldUsePortfolioEndpoint } = useRefetch()
+  const { refetch, shouldUsePortfolioEndpoint } = useRefetchBalances()
   const [isLoading, setIsLoading] = useState(false)
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null)
 
