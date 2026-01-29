@@ -5,7 +5,8 @@ import type { ReactElement } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
-import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
+import { RecoveryFeature } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext } from '../../TxFlowProvider'
 import type { ManageSignersForm } from '.'
@@ -19,9 +20,10 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
+  const { getRecoveryProposalTransactions } = useLoadFeature(RecoveryFeature)
 
   useEffect(() => {
-    if (!data) {
+    if (!data || !getRecoveryProposalTransactions) {
       return
     }
 
@@ -39,7 +41,7 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [data, safe, setSafeTx, setSafeTxError])
+  }, [data, safe, setSafeTx, setSafeTxError, getRecoveryProposalTransactions])
 
   const addAddressBookEntry = () => {
     if (!data) return

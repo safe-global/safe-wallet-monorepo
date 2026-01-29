@@ -8,7 +8,8 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { Errors, logError } from '@/services/exceptions'
-import { getRecoveryUpsertTransactions } from '@/features/recovery/services/setup'
+import { RecoveryFeature } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { UpsertRecoveryFlowFields } from '.'
@@ -25,11 +26,12 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
   const { safe, safeAddress } = useSafeInfo()
   const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
   const periods = useRecoveryPeriods()
+  const { getRecoveryUpsertTransactions } = useLoadFeature(RecoveryFeature)
 
   const { data } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
 
   useEffect(() => {
-    if (!web3ReadOnly || !data) {
+    if (!web3ReadOnly || !data || !getRecoveryUpsertTransactions) {
       return
     }
 
@@ -44,7 +46,7 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
       })
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
+  }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly, getRecoveryUpsertTransactions])
 
   useEffect(() => {
     if (safeTxError) {

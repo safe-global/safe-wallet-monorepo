@@ -2,7 +2,6 @@ import { type SyntheticEvent, useContext, useCallback, useEffect } from 'react'
 import { CircularProgress, CardActions, Button, Typography, Stack, Divider } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -25,8 +24,9 @@ type RecoveryAttemptReviewProps = {
 }
 
 const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
-  const { RecoveryDescription, RecoveryValidationErrors } = useLoadFeature(RecoveryFeature)
-  const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution)
+  const { RecoveryDescription, RecoveryValidationErrors, dispatchRecoveryExecution, $isReady } =
+    useLoadFeature(RecoveryFeature)
+  const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution ?? (async () => {}))
   const wallet = useWallet()
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
@@ -38,7 +38,7 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
     async (e: SyntheticEvent) => {
       e.preventDefault()
 
-      if (!wallet || !gasPrice) return
+      if (!wallet || !gasPrice || !$isReady) return
 
       const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
       const overrides = isEIP1559
@@ -62,7 +62,7 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
         trackError(Errors._812, err)
       }
     },
-    [wallet, gasPrice, chain, asyncCallback, safe.chainId, item.args, item.address, setTxFlow],
+    [wallet, gasPrice, chain, asyncCallback, safe.chainId, item.args, item.address, setTxFlow, $isReady],
   )
 
   useEffect(() => {

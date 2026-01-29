@@ -6,10 +6,11 @@ import type { PropsWithChildren, ReactElement } from 'react'
 
 import { SafeTxContext } from '../../SafeTxProvider'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getRecoverySkipTransaction } from '@/features/recovery/services/transaction'
 import { createTx } from '@/services/tx/tx-sender'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { RecoveryFeature } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
@@ -23,14 +24,15 @@ export function CancelRecoveryFlowReview({
 }>): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { getRecoverySkipTransaction } = useLoadFeature(RecoveryFeature)
 
   useAsync(async () => {
-    if (!web3ReadOnly) {
+    if (!web3ReadOnly || !getRecoverySkipTransaction) {
       return
     }
     const transaction = await getRecoverySkipTransaction(recovery, web3ReadOnly)
     createTx(transaction).then(setSafeTx).catch(setSafeTxError)
-  }, [setSafeTx, setSafeTxError, recovery, web3ReadOnly])
+  }, [setSafeTx, setSafeTxError, recovery, web3ReadOnly, getRecoverySkipTransaction])
 
   const handleSubmit = () => {
     trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_CANCEL })

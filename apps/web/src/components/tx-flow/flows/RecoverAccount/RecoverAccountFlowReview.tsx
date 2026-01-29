@@ -5,24 +5,22 @@ import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import TxCard from '../../common/TxCard'
 import { SafeTxContext } from '../../SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
-import { dispatchRecoveryProposal } from '@/features/recovery/services/recovery-sender'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { RecoverAccountFlowFields } from '.'
 import { OwnerList } from '../../common/OwnerList'
-import { selectDelayModifierByRecoverer } from '@/features/recovery/services/selectors'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '../..'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
 import { getPeriod } from '@safe-global/utils/utils/date'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import { RecoveryFeature, useRecovery } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { useIsValidRecoveryExecTransactionFromModule } from '@/features/recovery/hooks/useIsValidRecoveryExecution'
 import type { RecoverAccountFlowProps } from '.'
 import { isWalletRejection } from '@/utils/wallets'
@@ -50,7 +48,9 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const wallet = useWallet()
   const onboard = useOnboard()
   const [data] = useRecovery()
-  const recovery = data && selectDelayModifierByRecoverer(data, wallet?.address ?? '')
+  const { selectDelayModifierByRecoverer, getRecoveryProposalTransactions, dispatchRecoveryProposal } =
+    useLoadFeature(RecoveryFeature)
+  const recovery = data && selectDelayModifierByRecoverer?.(data, wallet?.address ?? '')
   const [, executionValidationError] = useIsValidRecoveryExecTransactionFromModule(recovery?.address, safeTx)
   const [gasPrice] = useGasPrice()
   const chain = useCurrentChain()
@@ -62,6 +62,8 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
   const newOwners = params[RecoverAccountFlowFields.owners]
 
   useEffect(() => {
+    if (!getRecoveryProposalTransactions) return
+
     const transactions = getRecoveryProposalTransactions({
       safe,
       newThreshold,
@@ -71,11 +73,11 @@ export function RecoverAccountFlowReview({ params }: { params: RecoverAccountFlo
     const promise = transactions.length > 1 ? createMultiSendCallOnlyTx(transactions) : createTx(transactions[0])
 
     promise.then(setSafeTx).catch(setSafeTxError)
-  }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError])
+  }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError, getRecoveryProposalTransactions])
 
   // On modal submit
   const onSubmit = async () => {
-    if (!recovery || !onboard || !wallet || !safeTx || !gasPrice) {
+    if (!recovery || !onboard || !wallet || !safeTx || !gasPrice || !dispatchRecoveryProposal) {
       return
     }
 
