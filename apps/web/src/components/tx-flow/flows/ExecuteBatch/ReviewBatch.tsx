@@ -1,7 +1,6 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { CircularProgress, Typography, Button, CardActions, Divider, Alert } from '@mui/material'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { getReadOnlyMultiSendCallOnlyContract } from '@/services/contracts/safeContracts'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
@@ -39,6 +38,7 @@ import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useMultiSendContract } from './useMultiSendContract'
 
 /**
  * Build gas overrides for batch execution based on chain EIP-1559 support
@@ -120,15 +120,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     },
   )
 
-  const [multiSendContract] = useAsync(async () => {
-    if (!safe.version) return
-    return await getReadOnlyMultiSendCallOnlyContract(safe.version, safe.chainId, safe.implementation?.value)
-  }, [safe.version, safe.chainId, safe.implementation?.value])
-
-  const [multisendContractAddress = ''] = useAsync(async () => {
-    if (!multiSendContract) return ''
-    return multiSendContract.getAddress()
-  }, [multiSendContract])
+  const { multiSendContract, multiSendContractAddress } = useMultiSendContract(safe)
 
   const [multiSendTxs] = useAsync(async () => {
     if (!txsWithDetails || !chain || !safe.version) return
@@ -229,7 +221,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           execute button.
         </Typography>
 
-        {multiSendContract && <SendToBlock address={multisendContractAddress} title="Interact with" />}
+        {multiSendContract && <SendToBlock address={multiSendContractAddress} title="Interact with" />}
 
         {multiSendTxData && <HexEncodedData title="Data" hexData={multiSendTxData} />}
 
