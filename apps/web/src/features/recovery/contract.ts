@@ -9,7 +9,7 @@
  * - camelCase → service (undefined when not ready)
  */
 
-// Components actually used by consumers
+// Components used by external consumers
 import type Recovery from './components/Recovery'
 import type RecoveryList from './components/RecoveryList'
 import type RecoveryInfo from './components/RecoveryInfo'
@@ -18,17 +18,12 @@ import type RecoveryType from './components/RecoveryType'
 import type RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import type RecoveryDescription from './components/RecoveryDescription'
 
-// Services from selectors.ts
+// Internal review components (used as wrappers by tx-flow)
+import type CancelRecoveryReview from './components/CancelRecoveryReview'
+import type RecoverAccountReview from './components/RecoverAccountReview'
+
+// Lightweight services (selectors) used by external consumers
 import type { selectDelayModifierByRecoverer, selectDelayModifierByAddress } from './services/selectors'
-
-// Services from transaction.ts
-import type { getRecoverySkipTransaction, getRecoveryProposalTransactions } from './services/transaction'
-
-// Services from recovery-sender.ts
-import type { dispatchRecoveryProposal, dispatchRecoveryExecution } from './services/recovery-sender'
-
-// Services from setup.ts
-import type { getRecoveryUpsertTransactions } from './services/setup'
 
 /**
  * Recovery Feature Contract - what's exposed via useLoadFeature()
@@ -43,12 +38,11 @@ export interface RecoveryContract {
   RecoveryValidationErrors: typeof RecoveryValidationErrors
   RecoveryDescription: typeof RecoveryDescription
 
-  // Services (camelCase - undefined when not ready, check $isReady before calling)
+  // Internal review components for tx-flow wrappers
+  CancelRecoveryReview: typeof CancelRecoveryReview
+  RecoverAccountReview: typeof RecoverAccountReview
+
+  // Lightweight services (selectors - safe to use directly)
   selectDelayModifierByRecoverer: typeof selectDelayModifierByRecoverer
   selectDelayModifierByAddress: typeof selectDelayModifierByAddress
-  getRecoverySkipTransaction: typeof getRecoverySkipTransaction
-  getRecoveryProposalTransactions: typeof getRecoveryProposalTransactions
-  dispatchRecoveryProposal: typeof dispatchRecoveryProposal
-  dispatchRecoveryExecution: typeof dispatchRecoveryExecution
-  getRecoveryUpsertTransactions: typeof getRecoveryUpsertTransactions
 }

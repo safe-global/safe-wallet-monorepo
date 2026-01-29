@@ -18,14 +18,12 @@ import RecoveryType from './components/RecoveryType'
 import RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import RecoveryDescription from './components/RecoveryDescription'
 
-// Service imports
+// Internal review components (for tx-flow wrappers)
+import CancelRecoveryReview from './components/CancelRecoveryReview'
+import RecoverAccountReview from './components/RecoverAccountReview'
+
+// Lightweight service imports (selectors only)
 import { selectDelayModifierByRecoverer, selectDelayModifierByAddress } from './services/selectors'
-
-import { getRecoverySkipTransaction, getRecoveryProposalTransactions } from './services/transaction'
-
-import { dispatchRecoveryProposal, dispatchRecoveryExecution } from './services/recovery-sender'
-
-import { getRecoveryUpsertTransactions } from './services/setup'
 
 // Flat structure - NO hooks here
 const feature: RecoveryContract = {
@@ -38,14 +36,13 @@ const feature: RecoveryContract = {
   RecoveryValidationErrors,
   RecoveryDescription,
 
-  // Services
+  // Internal review components
+  CancelRecoveryReview,
+  RecoverAccountReview,
+
+  // Lightweight services (selectors)
   selectDelayModifierByRecoverer,
   selectDelayModifierByAddress,
-  getRecoverySkipTransaction,
-  getRecoveryProposalTransactions,
-  dispatchRecoveryProposal,
-  dispatchRecoveryExecution,
-  getRecoveryUpsertTransactions,
 }
 
 export default feature
