@@ -42,6 +42,7 @@ import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { useLoadFeature } from '@/features/__core__'
+import { useEffect } from 'react'
 
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
@@ -67,6 +68,13 @@ const reduxStore = makeStore()
 setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
+  // Register service worker for PWA support (production only)
+  useEffect(() => {
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker.register('/sw.js').catch(console.error)
+    }
+  }, [])
+
   useHydrateStore(reduxStore)
   useAdjustUrl()
   useDatadog()

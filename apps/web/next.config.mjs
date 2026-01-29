@@ -1,6 +1,5 @@
 import path from 'path'
 import withBundleAnalyzer from '@next/bundle-analyzer'
-import withPWAInit from '@ducanh2912/next-pwa'
 import remarkGfm from 'remark-gfm'
 import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
@@ -35,12 +34,6 @@ if (!commitHash) {
     commitHash = ''
   }
 }
-
-const withPWA = withPWAInit({
-  dest: 'public',
-  sw: 'sw.js', // Use vanilla JS service worker (no build step)
-  disable: process.env.NODE_ENV === 'development',
-})
 
 const isProd = process.env.NODE_ENV === 'production'
 const enableExperimentalOptimizations = process.env.ENABLE_EXPERIMENTAL_OPTIMIZATIONS === '1'
@@ -138,7 +131,6 @@ const nextConfig = {
 }
 
 const isRspack = process.env.USE_RSPACK === '1'
-const enablePWA = process.env.ENABLE_PWA === '1'
 
 const withMDX = isRspack
   ? createMDX({ extension: /\.(md|mdx)?$/, jsx: true, options: {} })
@@ -151,7 +143,6 @@ const withMDX = isRspack
       },
     })
 
-const shouldEnablePWA = isProd || enablePWA
-let config = shouldEnablePWA ? withPWA(withMDX(nextConfig)) : withMDX(nextConfig)
+let config = withMDX(nextConfig)
 if (withRspack) config = withRspack(config)
 export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(config)
