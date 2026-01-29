@@ -8,7 +8,7 @@ import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
 import useBalances from '@/hooks/useBalances'
-import { EligibleEarnTokens, VaultAPYs } from '@/features/earn/constants'
+import { EligibleEarnTokens, VaultAPYs } from '../../constants'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -25,7 +25,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@/components/common/ExternalLink'
-import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '@/features/earn/constants'
+import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '../../constants'
 
 export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()

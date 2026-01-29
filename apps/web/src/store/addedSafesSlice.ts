@@ -72,12 +72,6 @@ export const selectAllAddedSafes = (state: RootState): AddedSafesState => {
   return state[addedSafesSlice.name]
 }
 
-export const selectTotalAdded = (state: RootState): number => {
-  return Object.values(state[addedSafesSlice.name])
-    .map((item) => Object.keys(item))
-    .flat().length
-}
-
 export const selectAddedSafes = createSelector(
   [selectAllAddedSafes, (_: RootState, chainId: string) => chainId],
   (allAddedSafes, chainId): AddedSafesOnChain | undefined => {

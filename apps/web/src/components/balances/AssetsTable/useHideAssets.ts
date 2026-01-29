@@ -6,9 +6,6 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useAppDispatch } from '@/store'
 import { setHiddenTokensForChain } from '@/store/settingsSlice'
 
-// This is the default for MUI Collapse
-export const COLLAPSE_TIMEOUT_MS = 300
-
 export const useHideAssets = (closeDialog: () => void) => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()

@@ -16,7 +16,7 @@ import { BRAND_NAME } from '@/config/constants'
 
 const WC_HINTS_KEY = 'wcHints'
 
-export const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; uri: string }): ReactElement => {
+const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; uri: string }): ReactElement => {
   const [showHints = true, setShowHints] = useLocalStorage<boolean>(WC_HINTS_KEY)
   const { safeLoaded } = useSafeInfo()
 

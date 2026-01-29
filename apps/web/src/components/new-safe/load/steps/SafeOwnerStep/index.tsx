@@ -9,7 +9,7 @@ import useChainId from '@/hooks/useChainId'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { OwnerRow } from '@/components/new-safe/OwnerRow'
+import OwnerRow from '@/components/new-safe/OwnerRow'
 
 enum Field {
   owners = 'owners',

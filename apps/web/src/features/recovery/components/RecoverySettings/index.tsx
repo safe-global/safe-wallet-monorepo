@@ -144,7 +144,7 @@ function RecoverySettings(): ReactElement {
   )
 }
 
-export const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
+const SetupRecoveryButton = ({ eventLabel }: { eventLabel: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
   return (
     <>

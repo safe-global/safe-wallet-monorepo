@@ -1,6 +1,5 @@
 import { TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
-import {
-  CreateTokenTransfer,
+import CreateTokenTransfer, {
   type CreateTokenTransferProps,
 } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import * as tokenUtils from '@/components/tx-flow/flows/TokenTransfer/utils'

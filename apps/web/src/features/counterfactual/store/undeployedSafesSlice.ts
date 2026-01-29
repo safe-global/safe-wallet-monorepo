@@ -1,6 +1,6 @@
 import { type RootState } from '@/store'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
+import { selectChainIdAndSafeAddress } from '@/store/common'
 import type {
   UndeployedSafe,
   UndeployedSafesState,
@@ -76,8 +76,7 @@ export const undeployedSafesSlice = createSlice({
   },
 })
 
-export const { removeUndeployedSafe, addUndeployedSafe, addUndeployedSafes, updateUndeployedSafeStatus } =
-  undeployedSafesSlice.actions
+export const { removeUndeployedSafe, addUndeployedSafe, updateUndeployedSafeStatus } = undeployedSafesSlice.actions
 
 export const selectUndeployedSafes = (state: RootState): UndeployedSafesState => {
   return state[undeployedSafesSlice.name]
@@ -87,15 +86,6 @@ export const selectUndeployedSafe = createSelector(
   [selectUndeployedSafes, selectChainIdAndSafeAddress],
   (undeployedSafes, [chainId, address]): UndeployedSafe | undefined => {
     return undeployedSafes[chainId]?.[address]
-  },
-)
-
-export const selectUndeployedSafesByAddress = createSelector(
-  [selectUndeployedSafes, selectSafeAddress],
-  (undeployedSafes, [address]): UndeployedSafe[] => {
-    return Object.values(undeployedSafes)
-      .flatMap((value) => value[address])
-      .filter(Boolean)
   },
 )
 

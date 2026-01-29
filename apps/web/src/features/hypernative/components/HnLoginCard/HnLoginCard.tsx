@@ -60,5 +60,3 @@ export const HnLoginCard = (): ReactElement | null => {
     </Stack>
   )
 }
-
-export default HnLoginCard

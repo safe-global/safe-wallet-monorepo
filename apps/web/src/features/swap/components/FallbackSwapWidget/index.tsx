@@ -10,7 +10,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export const SWAP_WIDGET_URL = 'https://iframe.jumper.exchange/swap'
 
-export function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
+function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
   const isDarkMode = useDarkMode()
   const chain = useCurrentChain()
 

@@ -101,6 +101,105 @@ Specifically for the web app:
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Use MUI components and the Safe MUI theme
 
+### Feature Architecture Import Rules
+
+Features use a lazy-loading architecture to optimize bundle size. ESLint warns about these import restrictions (warnings until all features are migrated):
+
+**Allowed Imports:**
+
+```typescript
+import { MyFeature, useMyHook } from '@/features/myfeature' // Feature handle + hooks (direct exports)
+import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
+import type { MyType } from '@/features/myfeature/types' // Public types
+```
+
+**Forbidden Imports (ESLint will warn):**
+
+```typescript
+// ❌ NEVER import components directly - defeats lazy loading
+import { MyComponent } from '@/features/myfeature/components'
+import MyComponent from '@/features/myfeature/components/MyComponent'
+
+// ❌ NEVER import hooks from internal folder - use index.ts export
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
+
+// ❌ NEVER import internal service files - use useLoadFeature
+import { heavyService } from '@/features/myfeature/services/heavyService'
+```
+
+**Accessing Feature Exports:**
+
+Use the `useLoadFeature` hook for components and services. Import hooks directly:
+
+```typescript
+import { useLoadFeature } from '@/features/__core__'
+import { MyFeature, useMyHook } from '@/features/myfeature'
+
+// Prefer destructuring for cleaner component usage
+function ParentComponent() {
+  const { MyComponent } = useLoadFeature(MyFeature)
+  const hookData = useMyHook()  // Direct import, always safe
+
+  // No null check needed - always returns an object
+  // Components render null when not ready (proxy stub)
+  // Services are undefined when not ready (check $isReady before calling)
+  return <MyComponent />
+}
+
+// For explicit loading/disabled states:
+function ParentWithStates() {
+  const { MyComponent, $isLoading, $isDisabled } = useLoadFeature(MyFeature)
+
+  if ($isLoading) return <Skeleton />
+  if ($isDisabled) return null
+
+  return <MyComponent />
+}
+```
+
+**feature.ts Pattern (IMPORTANT):**
+
+Use **direct imports** with a **flat structure** - do NOT use `lazy()` or nested categories. **NO hooks in feature.ts**:
+
+```typescript
+// feature.ts - This file is already lazy-loaded via createFeatureHandle
+import MyComponent from './components/MyComponent'
+import { myService } from './services/myService'
+
+// ✅ CORRECT: Flat structure, NO hooks
+export default {
+  MyComponent, // PascalCase → component (stub renders null)
+  myService, // camelCase → service (undefined when not ready - check $isReady before calling)
+  // NO hooks here!
+}
+
+// index.ts - Hooks exported directly (always loaded, not lazy)
+export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
+export { useMyHook } from './hooks/useMyHook' // Direct export, always loaded
+```
+
+```typescript
+// ❌ WRONG - Don't use nested categories
+export default {
+  components: { MyComponent }, // ❌ No nesting!
+}
+
+// ❌ WRONG - Don't use lazy() inside feature.ts
+export default {
+  MyComponent: lazy(() => import('./components/MyComponent')), // ❌
+}
+
+// ❌ WRONG - Don't include hooks in feature.ts
+export default {
+  MyComponent,
+  useMyHook, // ❌ Violates Rules of Hooks when lazy-loaded!
+}
+```
+
+**Hooks Pattern:** Hooks are exported directly from `index.ts` (always loaded, not lazy) to avoid Rules of Hooks violations. Keep hooks lightweight with minimal imports. Put heavy logic in services (lazy-loaded).
+
+See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isLoading`, `$isDisabled`, `$isReady`).
+
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
@@ -281,6 +380,8 @@ Avoid these common mistakes when contributing:
 6. **Not handling chain-specific logic** – Always consider multi-chain scenarios
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components
+9. **Using lazy() or nested structure in feature.ts** – The `feature.ts` file is already lazy-loaded via `createFeatureHandle`. Do NOT add `lazy()` calls for individual components, and do NOT use nested categories (`components`, `hooks`, `services`). Use a flat structure with direct imports. Naming conventions determine stub behavior: `useSomething` → hook, `PascalCase` → component, `camelCase` → service.
+10. **Using lazy loading inside features** – The entire feature is lazy-loaded by default via `createFeatureHandle`. Do NOT use `lazy()`, `dynamic()`, or any other lazy-loading mechanism inside the feature (not in `feature.ts`, not in components, not anywhere). All components and services inside a feature should use direct imports with a flat structure.
 
 ## Debugging Tips
 

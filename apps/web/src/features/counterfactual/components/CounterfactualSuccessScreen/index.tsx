@@ -1,5 +1,5 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationPendingStatuses } from '../../hooks/usePendingSafeStatuses'
+import { safeCreationPendingStatuses } from '../../hooks/safeCreationPendingStatuses'
 import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'

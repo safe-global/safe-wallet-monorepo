@@ -50,10 +50,6 @@ export const isBlockedBridge = (origin: string) => {
   return BlockedBridges.some((bridge) => origin.includes(bridge))
 }
 
-export const isSafePassApp = (origin: string) => {
-  return origin.includes('community.safe.global')
-}
-
 // Bridge defaults to same address on destination chain but allows changing it
 export const isWarnedBridge = (origin: string, name: string) => {
   return WarnedBridges.some((bridge) => origin.includes(bridge)) || WarnedBridgeNames.includes(name)

@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 const path = require('path')
 import { format } from 'date-fns'
 import * as constants from '../../support/constants'
