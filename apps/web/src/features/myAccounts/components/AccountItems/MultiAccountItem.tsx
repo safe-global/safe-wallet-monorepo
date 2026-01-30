@@ -107,6 +107,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 chainId={sortedSafes[0]?.chainId ?? '1'}
                 threshold={sharedSetup?.threshold}
                 owners={sharedSetup?.owners.length}
+                data-testid="group-safe-icon"
               />
               <AccountItem.Info
                 address={address}
@@ -114,9 +115,14 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 name={multiSafeAccountItem.name}
                 showPrefix={false}
                 addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
+                data-testid="group-address"
               />
               <AccountItem.ChainBadge safes={sortedSafes} />
-              <AccountItem.Balance fiatTotal={totalFiatValue} isLoading={totalFiatValue === undefined} />
+              <AccountItem.Balance
+                fiatTotal={totalFiatValue}
+                isLoading={totalFiatValue === undefined}
+                data-testid="group-balance"
+              />
               {!isSpaceSafe && (
                 <AccountItem.PinButton safeItems={sortedSafes} safeOverviews={safeOverviews} name={name} />
               )}

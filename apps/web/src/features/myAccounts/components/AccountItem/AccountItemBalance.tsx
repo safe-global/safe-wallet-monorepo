@@ -6,15 +6,21 @@ export interface AccountItemBalanceProps {
   fiatTotal?: string | number
   isLoading?: boolean
   hideBalance?: boolean
+  'data-testid'?: string
 }
 
-function AccountItemBalance({ fiatTotal, isLoading, hideBalance }: AccountItemBalanceProps) {
+function AccountItemBalance({ fiatTotal, isLoading, hideBalance, 'data-testid': testId }: AccountItemBalanceProps) {
   if (hideBalance) {
     return null
   }
 
   return (
-    <Typography variant="body2" className={css.accountItemBalance} sx={{ fontWeight: 'bold', pl: 1, minWidth: 80 }}>
+    <Typography
+      variant="body2"
+      className={css.accountItemBalance}
+      sx={{ fontWeight: 'bold', pl: 1, minWidth: 80 }}
+      data-testid={testId}
+    >
       {fiatTotal !== undefined ? (
         <FiatValue value={fiatTotal} />
       ) : isLoading ? (
