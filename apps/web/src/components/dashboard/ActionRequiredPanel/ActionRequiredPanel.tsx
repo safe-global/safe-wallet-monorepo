@@ -62,7 +62,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         sx={{ px: 1.5, mb: 1, cursor: 'pointer' }}
       >
         <Typography fontWeight={700} className={css.headerText}>
-          Action required <SidebarListItemCounter count={warningCount.toString()} />
+          Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
         </Typography>
 
         <IconButton
