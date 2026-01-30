@@ -43,8 +43,9 @@
     "test:visual:update": "cross-env TZ=UTC test-storybook --url http://localhost:6006 -u",
     "generate:storybook-tests": "node scripts/generate-storybook-tests.cjs",
     "integrity": "node scripts/integrity-hashes.cjs",
-    "inventory": "npx tsx ../../scripts/storybook/inventory.ts",
-    "coverage-report": "npx tsx ../../scripts/storybook/coverage-report.ts"
+    "storybook:inventory": "npx tsx ../../scripts/storybook/inventory.ts",
+    "storybook:coverage": "npx tsx ../../scripts/storybook/coverage-report.ts",
+    "storybook:dependencies": "npx tsx ../../scripts/storybook/dependency-audit.ts"
   },
   "engines": {
     "node": ">=18"

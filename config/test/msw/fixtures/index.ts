@@ -17,6 +17,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 // Portfolio fixtures
 import portfolioEfSafe from './portfolio/ef-safe.json'
@@ -48,6 +49,9 @@ import safeSafeTokenHolder from './safes/safe-token-holder.json'
 // Chain fixtures
 import chainsAll from './chains/all.json'
 import chainMainnet from './chains/mainnet.json'
+
+// Safe Apps fixtures
+import safeAppsMainnet from './safe-apps/mainnet.json'
 
 /**
  * Portfolio fixtures by scenario
@@ -119,6 +123,16 @@ export const chainFixtures = {
   all: chainsAll as ChainPage,
   /** Ethereum mainnet */
   mainnet: chainMainnet as Chain,
+}
+
+/**
+ * Safe Apps fixtures
+ */
+export const safeAppsFixtures = {
+  /** Mainnet Safe Apps (45+ apps) */
+  mainnet: safeAppsMainnet as SafeApp[],
+  /** Empty Safe Apps list */
+  empty: [] as SafeApp[],
 }
 
 /**

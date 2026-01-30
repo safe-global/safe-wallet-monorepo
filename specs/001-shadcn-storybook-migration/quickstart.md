@@ -56,16 +56,16 @@ The inventory tool helps you find components that need stories and prioritizes t
 
 ```bash
 # Basic inventory scan
-yarn workspace @safe-global/web inventory
+yarn workspace @safe-global/web storybook:inventory
 
 # Verbose output with priority explanations
-yarn workspace @safe-global/web inventory --verbose
+yarn workspace @safe-global/web storybook:inventory --verbose
 
 # JSON output for processing
-yarn workspace @safe-global/web inventory --json
+yarn workspace @safe-global/web storybook:inventory --json
 
 # Save to file
-yarn workspace @safe-global/web inventory --json --output inventory.json
+yarn workspace @safe-global/web storybook:inventory --json --output inventory.json
 ```
 
 ### Example Output
@@ -97,13 +97,13 @@ sidebar      [░░░░░░░░░░░░░░░░░░░░] 0/3 
 
 ```bash
 # Markdown report
-yarn workspace @safe-global/web coverage-report --format md --output coverage.md
+yarn workspace @safe-global/web storybook:coverage --format md --output coverage.md
 
 # HTML report (visual dashboard)
-yarn workspace @safe-global/web coverage-report --format html --output coverage.html
+yarn workspace @safe-global/web storybook:coverage --format html --output coverage.html
 
 # JSON report (for CI/tooling)
-yarn workspace @safe-global/web coverage-report --format json --output coverage.json
+yarn workspace @safe-global/web storybook:coverage --format json --output coverage.json
 ```
 
 ### Priority Scoring

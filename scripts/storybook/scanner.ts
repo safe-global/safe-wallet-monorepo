@@ -9,7 +9,10 @@ import { DEFAULT_EXCLUDE_PATTERNS } from './types'
  * Scans the codebase for React components
  */
 export async function scanComponents(options: ScannerOptions = {}): Promise<ComponentEntry[]> {
-  const { rootDir = 'apps/web/src', excludePatterns = DEFAULT_EXCLUDE_PATTERNS, verbose = false } = options
+  // Determine the correct root directory based on cwd
+  const cwd = process.cwd()
+  const defaultRootDir = cwd.endsWith('apps/web') ? 'src' : 'apps/web/src'
+  const { rootDir = defaultRootDir, excludePatterns = DEFAULT_EXCLUDE_PATTERNS, verbose = false } = options
 
   const componentFiles = await glob('**/*.tsx', {
     cwd: rootDir,

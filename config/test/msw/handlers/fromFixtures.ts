@@ -4,6 +4,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   portfolioFixtures,
@@ -11,6 +12,7 @@ import {
   positionsFixtures,
   safeFixtures,
   chainFixtures,
+  safeAppsFixtures,
   type FixtureScenario,
 } from '../fixtures'
 
@@ -44,9 +46,11 @@ export const createHandlersFromFixture = (
     includePositions?: boolean
     /** Include portfolio endpoint */
     includePortfolio?: boolean
+    /** Include Safe Apps endpoint */
+    includeSafeApps?: boolean
   } = {},
 ) => {
-  const { features, includePositions = true, includePortfolio = true } = options
+  const { features, includePositions = true, includePortfolio = true, includeSafeApps = true } = options
 
   const handlers = [
     // Chain config (with optional feature overrides)
@@ -63,6 +67,10 @@ export const createHandlersFromFixture = (
 
   if (includePortfolio) {
     handlers.push(...createPortfolioHandlersFromFixture(scenario, GATEWAY_URL))
+  }
+
+  if (includeSafeApps) {
+    handlers.push(...createSafeAppsHandlersFromFixture(GATEWAY_URL))
   }
 
   return handlers
@@ -150,6 +158,19 @@ export const createPortfolioHandlersFromFixture = (scenario: ScenarioKey | 'empt
   return [
     http.get<{ address: string }, never, Portfolio>(`${GATEWAY_URL}/v1/portfolio/:address`, () => {
       return HttpResponse.json(portfolioData)
+    }),
+  ]
+}
+
+/**
+ * Create Safe Apps handlers from fixtures
+ */
+export const createSafeAppsHandlersFromFixture = (GATEWAY_URL: string, empty = false) => {
+  const safeAppsData = empty ? safeAppsFixtures.empty : safeAppsFixtures.mainnet
+
+  return [
+    http.get<{ chainId: string }, never, SafeApp[]>(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, () => {
+      return HttpResponse.json(safeAppsData)
     }),
   ]
 }
