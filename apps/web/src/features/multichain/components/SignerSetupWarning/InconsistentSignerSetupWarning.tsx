@@ -39,28 +39,6 @@ export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   )
 }
 
-/**
- * Formats chain names for display in a natural language list
- * Examples:
- * - ["1"] -> "Ethereum"
- * - ["1", "137"] -> "Ethereum and Polygon"
- * - ["1", "8453", "137"] -> "Ethereum, Base, and Polygon"
- */
-const formatChainNames = (chainIds: string[], chains: ReturnType<typeof useChains>['configs']): string => {
-  const chainNames = chainIds
-    .map((chainId) => chains.find((chain) => chain.chainId === chainId)?.chainName)
-    .filter(Boolean) as string[]
-
-  if (chainNames.length === 0) return ''
-  if (chainNames.length === 1) return chainNames[0]
-  if (chainNames.length === 2) return `${chainNames[0]} and ${chainNames[1]}`
-
-  // For 3 or more: "A, B, and C"
-  const allButLast = chainNames.slice(0, -1).join(', ')
-  const last = chainNames[chainNames.length - 1]
-  return `${allButLast}, and ${last}`
-}
-
 export const InconsistentSignerSetupWarning = () => {
   const router = useRouter()
   const isMultichainSafe = useIsMultichainSafe()
@@ -69,7 +47,6 @@ export const InconsistentSignerSetupWarning = () => {
   const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { allMultiChainSafes } = useAllSafesGrouped()
-  const { configs } = useChains()
 
   const multiChainGroupSafes = useMemo(
     () => allMultiChainSafes?.find((account) => sameAddress(safeAddress, account.safes[0].address))?.safes ?? [],
@@ -87,8 +64,6 @@ export const InconsistentSignerSetupWarning = () => {
   )
   const deviatingSetups = getDeviatingSetups(safeSetups, currentChain?.chainId)
   const deviatingChainIds = deviatingSetups.map((setup) => setup?.chainId)
-
-  const chainNamesText = useMemo(() => formatChainNames(deviatingChainIds, configs), [deviatingChainIds, configs])
 
   if (!isMultichainSafe || !deviatingChainIds.length) return
 
