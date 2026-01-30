@@ -1,0 +1,528 @@
+---
+description: Cypress E2E test automation rules and best practices for Safe Wallet
+globs:
+  - "**/cypress/**/*.cy.js"
+  - "**/cypress/**/*.pages.js"
+alwaysApply: false
+---
+
+# Cypress E2E Automation Rules
+
+## Test Structure and Naming
+
+### Test Names
+
+- **MANDATORY**: All test names MUST use "Verify that" format
+- **MANDATORY**: Each test suite can contain only ONE describe block
+- **FORMAT**: `it('Verify that [expected behavior]', () => {})`
+- **EXAMPLES**:
+    - ✅ `'Verify that user can create a new transaction'`
+    - ✅ `'Verify that total asset value is displayed correctly'`
+    - ❌ `'Create a new transaction'`
+    - ❌ `'Test transaction creation'`
+
+### Test Suite Structure
+
+```jsx
+describe('Feature Name tests', () => {
+  before(() => {
+    // Setup code that runs once before all tests
+  })
+
+  beforeEach(() => {
+    // Setup code that runs before each test
+  })
+
+  it('Verify that [specific behavior]', () => {
+    // Test implementation
+  })
+
+  it('Verify that [another specific behavior]', () => {
+    // Test implementation
+  })
+})
+
+```
+
+## Page Object Model (POM)
+
+### Element Definition
+
+- **MANDATORY**: ALL element selectors MUST be defined in `.page.js` files
+- **MANDATORY**: NEVER use element selectors directly in test files
+- **MANDATORY**: Each page file MUST have corresponding functions to interact with elements
+
+### Page File Structure
+
+```jsx
+// dashboard.pages.js
+const overviewSection = '[data-testid="overview-section"]'
+const totalAssetValueAmount = '[data-testid="total-asset-value-amount"]'
+const sendButton = '[data-testid="overview-send-btn"]'
+
+export function verifyTotalAssetValueIsDisplayed() {
+  cy.get(overviewSection).should('be.visible')
+  cy.get(totalAssetValueAmount).should('be.visible')
+}
+
+export function clickSendButton() {
+  cy.get(sendButton).click()
+}
+
+```
+
+### Test File Implementation
+
+```jsx
+// dashboard.cy.js
+import * as dashboard from '../pages/dashboard.pages'
+
+describe('Dashboard tests', () => {
+  it('Verify that total asset value is displayed', () => {
+    dashboard.verifyTotalAssetValueIsDisplayed()
+  })
+
+  it('Verify that send button is clickable', () => {
+    dashboard.clickSendButton()
+  })
+})
+
+```
+
+## Element Selection Strategy
+
+### Prohibited Selectors
+
+- **NEVER** use class names: `'[class*="MuiTypography"]'`
+- **NEVER** use CSS selectors based on styling: `'.red-button'`
+- **NEVER** use element position: `'button:nth-child(2)'`
+- **NEVER** use generic selectors: `'div'`, `'span'`, `'button'`
+
+### Preferred Selectors (in order of preference)
+
+1. **data-testid attributes**: `'[data-testid="send-button"]'`
+2. **Semantic HTML**: `'[role="button"]'`, `'[type="submit"]'`
+3. **Text content**: `cy.contains('Send')`
+4. **ARIA labels**: `'[aria-label="Send transaction"]'`
+
+### Adding Test IDs to Components
+
+When test IDs are missing, add them to React components:
+
+```jsx
+// Component.tsx
+<Button data-testid="send-button">Send</Button>
+<Typography data-testid="total-amount">$1,234.56</Typography>
+
+```
+
+## Function Organization and Reusability
+
+### Function Placement Rules
+
+- **MANDATORY**: Before creating any new function, AI MUST check if a similar function already exists in other page files
+- **MANDATORY**: General functions (click, type, verify visibility, etc.) MUST be placed in `main.page.js`
+- **MANDATORY**: Page-specific functions and helper functions MUST be placed in their respective page files
+- **MANDATORY**: Helper functions that are specific to a page's functionality should be located in that page's `.pages.js` file, not in `main.page.js`
+
+### Function Categories
+
+### General Functions (main.page.js)
+
+- **Purpose**: Truly generic, reusable functions used across multiple pages
+- **Examples**:
+    - Button clicks: `clickButton()`, `clickButtonByText()`
+    - Input interactions: `typeInInput()`, `clearInput()`
+    - Visibility checks: `verifyElementVisible()`, `verifyElementExists()`
+    - Text verification: `verifyTextContent()`, `verifyTextExists()`
+    - Navigation: `navigateToPage()`, `goBack()`
+    - Wait utilities: `waitForElement()`, `waitForPageLoad()`
+- **Rule**: Only functions that are used by 3+ different page files should be in `main.page.js`
+
+### Page-Specific Functions and Helpers (feature.pages.js)
+
+- **Purpose**: Functions specific to a single page or feature
+- **Includes**:
+    - Business logic specific to that page
+    - Complex interactions unique to the feature
+    - Data validation specific to that page's content
+    - **Helper functions** that support the page's functionality but are only used within that page
+    - Internal utility functions that compose general functions for page-specific workflows
+- **Rule**: If a helper function is only used within one page file, it MUST be placed in that page's `.pages.js` file
+
+### Helper Function Placement Guidelines
+
+```jsx
+// ✅ CORRECT: Helper function in the appropriate page file
+// dashboard.pages.js
+import * as main from './main.page'
+
+const totalAssetValueAmount = '[data-testid="total-asset-value-amount"]'
+const sendButton = '[data-testid="send-button"]'
+const assetList = '[data-testid="asset-list"]'
+
+// Helper function - only used within dashboard.pages.js
+function formatAssetValue(value) {
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
+// Helper function - only used for dashboard-specific validation
+function verifyAssetListNotEmpty() {
+  cy.get(assetList).should('have.length.greaterThan', 0)
+}
+
+// Public function that uses the helper
+export function verifyTotalAssetValueIsDisplayed() {
+  main.verifyElementVisible(totalAssetValueAmount)
+  verifyAssetListNotEmpty() // Uses page-specific helper
+}
+
+export function clickSendButton() {
+  main.clickButton(sendButton)
+}
+
+// ❌ INCORRECT: Helper function in main.page.js when it's page-specific
+// main.page.js - WRONG
+export function formatAssetValue(value) { // ❌ Only used in dashboard, shouldn't be here
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
+```
+
+### Decision Tree for Function Placement
+
+1. **Is the function used by 3+ different page files?**
+    - ✅ YES → Place in `main.page.js`
+    - ❌ NO → Continue to step 2
+2. **Is the function specific to one page/feature?**
+    - ✅ YES → Place in that page's `.pages.js` file
+    - ❌ NO → Check if it's a helper for a specific page
+3. **Is the function a helper that supports a specific page's functionality?**
+    - ✅ YES → Place in that page's `.pages.js` file (even if it's a "helper")
+    - ❌ NO → Re-evaluate - might need to be split or refactored
+
+### Function Naming Convention
+
+```jsx
+// main.page.js - General functions
+export function clickButton(selector) {
+  cy.get(selector).click()
+}
+
+export function verifyElementVisible(selector) {
+  cy.get(selector).should('be.visible')
+}
+
+export function verifyTextContent(selector, expectedText) {
+  cy.get(selector).should('contain.text', expectedText)
+}
+
+// dashboard.pages.js - Page-specific functions and helpers
+import * as main from './main.page'
+
+const totalAssetValueAmount = '[data-testid="total-asset-value-amount"]'
+const dashboardTab = '[data-testid="dashboard-tab"]'
+
+// Helper function - only used within this page file
+function verifyAmountFormat(amount) {
+  return amount.match(/^\\$[\\d,]+\\.\\d{2}$/)
+}
+
+export function verifyDashboardTotalAmount() {
+  main.verifyElementVisible(totalAssetValueAmount)
+  main.verifyTextContent(totalAssetValueAmount, '$')
+  // Helper function used internally
+  cy.get(totalAssetValueAmount).then(($el) => {
+    const amount = $el.text()
+    expect(verifyAmountFormat(amount)).to.be.true
+  })
+}
+
+export function navigateToDashboardTab() {
+  main.clickButton(dashboardTab)
+}
+
+```
+
+### Function Reusability Check Process
+
+1. **Search existing page files**: Check if similar functionality exists
+2. **Identify function type**: Determine if it's general or page-specific
+3. **Choose appropriate location**: Place in `main.page.js` or specific page file
+4. **Import and reuse**: Use existing functions instead of creating duplicates
+
+## Test Organization
+
+### File Structure
+
+```
+cypress/
+├── e2e/
+│   ├── smoke/ # Critical path tests
+│   ├── regression/ # Comprehensive feature tests
+│   ├── happypath/ # User journey tests
+│   └── safe-apps/ # Safe Apps specific tests
+├── pages/ # Page Object Model files
+│   ├── main.page.js # General reusable functions
+│   ├── dashboard.pages.js
+│   ├── assets.pages.js
+│   └── ...
+├── support/
+│   ├── commands.js # Custom Cypress commands
+│   ├── constants.js # Test constants
+│   └── utils/ # Utility functions
+└── fixtures/ # Test data files
+
+```
+
+### Test Categories
+
+- **smoke/**: Essential functionality tests, fast execution
+- **regression/**: Comprehensive feature coverage
+- **happypath/**: End-to-end user workflows
+- **safe-apps/**: Safe Apps integration tests
+
+## Data Management
+
+### localStorage Setup
+
+Always use existing localStorage setup patterns:
+
+```jsx
+// Use existing safe data from safesHandler
+import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+
+let staticSafes = []
+
+describe('Test Suite', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  beforeEach(() => {
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+  })
+})
+
+```
+
+### Test Data
+
+- Use `getSafes()` for safe addresses
+- Use constants from `constants.js`
+- Store test data in `fixtures/` directory
+- Use `cy.fixture()` for loading test data
+
+## Error Handling
+
+### Wait Strategies
+
+- **AVOID**: `cy.wait(1000)` - hard coded waits
+- **PREFER**: `cy.get(selector, { timeout: 30000 })` - explicit waits
+- **USE**: `cy.should('be.visible')` - assertion-based waits
+
+### Error Recovery
+
+```jsx
+// ✅ Good error handling - selectors defined in page file
+// transactions.pages.js
+const transactionItem = '[data-testid="transaction-item"]'
+
+export function waitForTransactionToLoad() {
+  cy.get(transactionItem, { timeout: 30000 })
+    .should('be.visible')
+    .and('contain.text', 'Transaction')
+}
+
+// main.page.js
+export function waitForElementWithText(selector, text, timeout = 30000) {
+  cy.get(selector, { timeout })
+    .should('be.visible')
+    .and('contain.text', text)
+}
+
+// Handle network issues
+cy.intercept('GET', '/api/transactions', { fixture: 'transactions.json' })
+
+```
+
+## Performance Guidelines
+
+### Parallel Execution
+
+- Tests should be independent
+- Use `before()` for expensive setup
+- Use `beforeEach()` for test isolation
+
+### Resource Management
+
+- Clean up after tests
+- Use appropriate timeouts
+- Minimize network requests
+
+## Copilot-Specific Patterns
+
+### Setup Functions
+
+For Copilot tests, use these setup functions:
+
+```jsx
+// General Copilot setup (for Threat, Contract, Tenderly tests)
+shield.navigateToTransactionAndSetupCopilot(transactionId, signer, addressBookData?, safeAddress?)
+
+// Recipient Analysis setup (includes card expansion)
+shield.setupRecipientAnalysis(transactionId, signer, addressBookData?, safeAddress?)
+
+```
+
+### Transaction IDs
+
+- Use `shield.testTransactions.*` constants
+- Extract from URL: `&id=multisig_0x..._0x...`
+- Add new transaction IDs to `copilot.js` testTransactions object
+
+### Text Constants
+
+- Use `shield.*Str` constants for text verification
+- Add new constants to `copilot.js` and export them
+- Use `main.verifyTextVisibility([shield.textConstant1, shield.textConstant2])`
+
+### Test Template
+
+```jsx
+it('[Category] Verify that [behavior] - [ID]', () => {
+  shield.navigateToTransactionAndSetupCopilot(
+    shield.testTransactions.[transactionKey],
+    signer
+  )
+
+  shield.verify[Element]()
+  main.verifyTextVisibility([shield.[textConstant]])
+})
+
+```
+
+## Implementation Checklist
+
+When creating or updating tests, ensure:
+
+- [ ]  Test name uses "Verify that" format
+- [ ]  Only one describe block per test suite
+- [ ]  All element selectors are in page files
+- [ ]  Functions are created for element interactions
+- [ ]  No direct selector usage in test files
+- [ ]  No class-based selectors used
+- [ ]  data-testid attributes added to components when missing
+- [ ]  **Check if similar functions already exist in other page files**
+- [ ]  **General functions (used by 3+ pages) placed in main.page.js**
+- [ ]  **Page-specific functions and helper functions placed in their respective page files**
+- [ ]  **Helper functions that are only used within one page are located in that page's `.pages.js` file**
+- [ ]  **Reuse existing functions instead of creating duplicates**
+- [ ]  Proper localStorage setup using existing patterns
+- [ ]  Appropriate wait strategies implemented
+- [ ]  Test data loaded from fixtures or constants
+- [ ]  Error handling implemented
+- [ ]  Comments added for complex logic
+
+## Examples
+
+### ✅ Good Test Structure with Function Reusability
+
+```jsx
+// main.page.js
+export function clickButton(selector) {
+  cy.get(selector).click()
+}
+
+export function verifyElementVisible(selector) {
+  cy.get(selector).should('be.visible')
+}
+
+// dashboard.pages.js
+import * as main from './main.page'
+
+const totalAssetValueAmount = '[data-testid="total-asset-value-amount"]'
+const sendButton = '[data-testid="send-button"]'
+const assetList = '[data-testid="asset-list"]'
+
+// Helper function - page-specific, located in this page file
+function verifyAssetListLoaded() {
+  cy.get(assetList).should('be.visible').and('have.length.greaterThan', 0)
+}
+
+export function verifyTotalAssetValueIsDisplayed() {
+  main.verifyElementVisible(totalAssetValueAmount)
+  verifyAssetListLoaded() // Uses page-specific helper
+}
+
+export function clickSendButton() {
+  main.clickButton(sendButton)
+}
+
+// dashboard.cy.js
+import * as dashboard from '../pages/dashboard.pages'
+import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+
+let staticSafes = []
+
+describe('Dashboard tests', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  beforeEach(() => {
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+  })
+
+  it('Verify that total asset value is displayed correctly', () => {
+    dashboard.verifyTotalAssetValueIsDisplayed()
+  })
+
+  it('Verify that send button is clickable', () => {
+    dashboard.clickSendButton()
+  })
+})
+
+```
+
+### ❌ Bad Test Structure
+
+```jsx
+// dashboard.cy.js - INCORRECT
+describe('Dashboard tests', () => {
+  describe('Asset values', () => { // ❌ Multiple describe blocks
+    it('Check total value', () => { // ❌ Wrong naming format
+      cy.get('[class*="MuiTypography"]').should('be.visible') // ❌ Class selector + direct usage
+      cy.get('[data-testid="total-amount"]').click() // ❌ Direct selector + no function reuse
+    })
+  })
+})
+
+// ❌ INCORRECT: Helper function in wrong location
+// main.page.js - WRONG
+export function formatDashboardAssetValue(value) { // ❌ Page-specific helper in main.page.js
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
+// ✅ CORRECT: Helper function in proper page file
+// dashboard.pages.js - CORRECT
+function formatDashboardAssetValue(value) { // ✅ Page-specific helper in dashboard.pages.js
+  return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
+
+```
+
+## Migration Guide
+
+When updating existing tests:
+
+1. **Update test names**: Add "Verify that" prefix
+2. **Consolidate describe blocks**: One per file
+3. **Move selectors to page files**: Create functions for interactions
+4. **Check for existing functions**: Search all page files before creating new ones
+5. **Move general functions to main.page.js**: Centralize reusable functions (only if used by 3+ pages)
+6. **Place helper functions in proper page files**: Helper functions specific to a page must be in that page's `.pages.js` file, not in `main.page.js`
+7. **Add missing test IDs**: Update React components
+8. **Update localStorage setup**: Use existing patterns
+9. **Remove hard waits**: Replace with proper assertions
+10. **Add error handling**: Implement timeout strategies
