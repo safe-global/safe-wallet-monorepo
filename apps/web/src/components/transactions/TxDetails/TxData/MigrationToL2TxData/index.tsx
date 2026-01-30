@@ -2,7 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getMultiSendContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { createTx } from '@/services/tx/tx-sender/create'
 import { Safe__factory } from '@safe-global/utils/types/contracts'

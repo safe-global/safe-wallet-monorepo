@@ -5,17 +5,17 @@ import { ChevronRight } from '@mui/icons-material'
 import { Box, Stack } from '@mui/material'
 import type { ReactElement } from 'react'
 
-import { RecoveryInfo } from '@/features/recovery/components/RecoveryInfo'
-import { RecoveryStatus } from '@/features/recovery/components/RecoveryStatus'
-import { RecoveryType } from '@/features/recovery/components/RecoveryType'
+import { RecoveryFeature } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery'
 
 import css from './styles.module.css'
 import classnames from 'classnames'
 
 function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueItem }): ReactElement {
   const router = useRouter()
+  const { RecoveryType, RecoveryInfo, RecoveryStatus } = useLoadFeature(RecoveryFeature)
   const { isMalicious } = transaction
 
   const url = useMemo(

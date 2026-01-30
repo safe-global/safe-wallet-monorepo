@@ -1,5 +1,5 @@
 import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'

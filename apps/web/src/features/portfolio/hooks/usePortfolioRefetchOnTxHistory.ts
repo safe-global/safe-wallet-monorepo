@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useRefetch } from '@/features/positions/hooks/useRefetch'
+import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import { PORTFOLIO_CACHE_TIME_MS } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
@@ -10,7 +10,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
  */
 const usePortfolioRefetchOnTxHistory = (): void => {
   const { safe } = useSafeInfo()
-  const { refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint } = useRefetch()
+  const { refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint } = useRefetchBalances()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const prevTxHistoryTagRef = useRef<string | null | undefined>(undefined)
 

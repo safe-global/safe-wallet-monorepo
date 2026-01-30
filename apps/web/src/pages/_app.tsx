@@ -3,6 +3,10 @@ import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
+import dynamic from 'next/dynamic'
+
+// Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
+const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
 import { Provider } from 'react-redux'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
@@ -14,9 +18,7 @@ import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import { useInitOnboard } from '@/hooks/wallets/useOnboard'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
 import useTxNotifications from '@/hooks/useTxNotifications'
 import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
@@ -36,10 +38,19 @@ import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendin
 import useChangedValue from '@/hooks/useChangedValue'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
-import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
+import { RecoveryFeature } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
+
+/**
+ * Wrapper that lazy-loads Recovery via the feature system.
+ * This ensures the entire recovery feature loads as a single chunk.
+ */
+const RecoveryLoader = () => {
+  const { Recovery } = useLoadFeature(RecoveryFeature)
+  return <Recovery />
+}
 
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
@@ -53,7 +64,7 @@ const CounterfactualHooksLoader = () => {
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
-import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
+import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
@@ -79,9 +90,7 @@ const InitApp = (): null => {
   useNotificationTracking()
   useInitSession()
   useLoadableStores()
-  useInitOnboard()
   useInitWeb3()
-  useInitSafeCoreSDK()
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -167,6 +176,8 @@ const SafeWalletApp = ({
 
           <InitApp />
 
+          <LazyWeb3Init />
+
           <TermsGate>
             <PageLayout pathname={router.pathname}>
               <Component {...pageProps} key={safeKey} />
@@ -178,7 +189,7 @@ const SafeWalletApp = ({
 
             <Notifications />
 
-            <Recovery />
+            <RecoveryLoader />
 
             <CounterfactualHooksLoader />
 

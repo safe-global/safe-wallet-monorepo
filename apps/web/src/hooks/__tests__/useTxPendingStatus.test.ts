@@ -1,7 +1,7 @@
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import useTxPendingStatuses, { useTxMonitor } from '@/hooks/useTxPendingStatuses'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import * as txMonitor from '@/services/tx/txMonitor'
 import {
@@ -28,11 +28,11 @@ describe('useTxMonitor', () => {
     jest.spyOn(useChainIdHook, 'default').mockReturnValue(TEST_CHAIN_ID)
 
     mockProvider = jest.fn() as unknown as JsonRpcProvider
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
   })
 
   it('should not monitor transactions if provider is not available', () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
     const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx')
     const mockWaitForRelayedTx = jest.spyOn(txMonitor, 'waitForRelayedTx')
 

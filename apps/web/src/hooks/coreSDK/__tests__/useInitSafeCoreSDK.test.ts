@@ -2,7 +2,7 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { renderHook } from '@/tests/test-utils'
 import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as router from 'next/router'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as coreSDK from '@/hooks/coreSDK/safeCoreSDK'
@@ -37,7 +37,7 @@ describe('useInitSafeCoreSDK hook', () => {
     jest.clearAllMocks()
 
     mockProvider = jest.fn() as unknown as JsonRpcProvider
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
     jest.spyOn(useSafeInfo, 'default').mockReturnValue(mockSafeInfo)
     jest
       .spyOn(router, 'useRouter')
@@ -85,7 +85,7 @@ describe('useInitSafeCoreSDK hook', () => {
     const initMock = jest.spyOn(coreSDK, 'initSafeSDK')
     const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
 
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValueOnce(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValueOnce(undefined)
 
     renderHook(() => useInitSafeCoreSDK())
 

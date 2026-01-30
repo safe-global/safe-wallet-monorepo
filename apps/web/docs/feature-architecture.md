@@ -83,9 +83,10 @@ import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
 import { useLoadFeature } from '@/features/__core__'
 
 // Components can render before ready (stub renders null)
+// Prefer destructuring for cleaner component usage
 function MyPage() {
-  const wc = useLoadFeature(WalletConnectFeature)
-  return <wc.WalletConnectWidget />  // Renders null when not ready
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
+  return <WalletConnectWidget />  // Renders null when not ready
 }
 
 // Hooks are imported directly, always safe to call
@@ -98,12 +99,12 @@ function MyPageWithHooks() {
 
 // If you need explicit loading/disabled handling:
 function MyPageWithStates() {
-  const wc = useLoadFeature(WalletConnectFeature)
+  const { WalletConnectWidget, $isLoading, $isDisabled } = useLoadFeature(WalletConnectFeature)
 
-  if (wc.$isLoading) return <Skeleton />
-  if (wc.$isDisabled) return null
+  if ($isLoading) return <Skeleton />
+  if ($isDisabled) return null
 
-  return <wc.WalletConnectWidget />
+  return <WalletConnectWidget />
 }
 ```
 
@@ -1001,17 +1002,23 @@ export default {
 
 **Hooks are NOT lazy-loaded** - they are exported directly from `index.ts` as lightweight wrappers that call lazy-loaded services. See the "Hooks Pattern" section for details.
 
-### Anti-Pattern: Multiple lazy() Calls Inside feature.ts
+### Anti-Pattern: Nested Lazy Loading Inside Features
+
+**The entire feature is already lazy-loaded via `createFeatureHandle`.** Do NOT add additional lazy loading anywhere inside the feature - not in `feature.ts`, not in components, not anywhere.
 
 ```typescript
-// ❌ WRONG: Don't do this!
+// ❌ WRONG: Don't use lazy() in feature.ts
 import { lazy } from 'react'
 
 export default {
-  // ❌ Unnecessary - feature.ts is already lazy-loaded
-  MyComponent: lazy(() => import('./components/MyComponent')),
-  AnotherComponent: lazy(() => import('./components/AnotherComponent')),
+  MyComponent: lazy(() => import('./components/MyComponent')), // ❌
+  AnotherComponent: lazy(() => import('./components/AnotherComponent')), // ❌
 }
+
+// ❌ WRONG: Don't use dynamic() in components inside the feature
+// components/MyWrapper/index.tsx
+import dynamic from 'next/dynamic'
+const LazyContent = dynamic(() => import('./LazyContent')) // ❌
 ```
 
 This creates unnecessary complexity:
@@ -1020,6 +1027,7 @@ This creates unnecessary complexity:
 - Each component becomes a separate chunk
 - Adds Suspense boundaries everywhere
 - Makes debugging harder
+- The feature is ALREADY lazy-loaded - adding more lazy loading is redundant
 
 ### Rare Exception: Giant Internal Dependencies
 

@@ -5,7 +5,7 @@ import txTypeCss from '@/components/transactions/TxType/styles.module.css'
 import pendingTxCss from '@/components/dashboard/PendingTxs/styles.module.css'
 import { DateTime } from '@/components/common/DateTime/DateTime'
 
-export function RecoveryType({
+export default function RecoveryType({
   isMalicious,
   date,
   isDashboard = false,

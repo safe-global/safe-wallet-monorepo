@@ -9,7 +9,7 @@ import {
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {
+export default function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {
   const { submitError } = useContext(RecoveryListItemContext)
   const [, executeNextTxError] = useIsValidRecoveryExecuteNextTx(item)
   const [, executeSkipExpiredError] = useIsValidRecoverySkipExpired(item)
