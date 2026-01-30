@@ -17,12 +17,11 @@ let staticSafes = []
 const TEST_CONFIG = {
   TOTAL_NESTED_SAFES: 8,
   SUSPICIOUS_SAFES_COUNT: 2,
-  MAX_DISPLAY_COUNT: 5, // UI caps the list at 5 safes before requiring "Show all"
+  MAX_DISPLAY_COUNT: 5,
   get VALID_SAFES_COUNT() {
     return this.TOTAL_NESTED_SAFES - this.SUSPICIOUS_SAFES_COUNT
   },
   get INITIAL_VISIBLE_COUNT() {
-    // Initially shows min of valid safes and max display limit
     return Math.min(this.VALID_SAFES_COUNT, this.MAX_DISPLAY_COUNT)
   },
 }
@@ -34,231 +33,144 @@ describe('Nested safes curation tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_46)
-    cy.wait(2000)
   })
 
-  describe('Default visibility behavior', () => {
-    it('Verify suspicious nested safes are hidden by default', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+  it('Verify that suspicious nested safes are hidden by default', () => {
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
 
-      // Verify visible safes count (capped at MAX_DISPLAY_COUNT, suspicious are hidden)
-      nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.INITIAL_VISIBLE_COUNT)
-
-      // Verify hidden count message is displayed
-      nsafes.verifyHiddenSafesCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
-
-      // Verify manage button exists when there are nested safes
-      nsafes.verifyManageBtnExists()
-    })
-
-    it('Verify "Show all Nested Safes" link appears when more than 5 visible safes', () => {
-      // This test only applies when valid safes exceed the display limit
-      if (TEST_CONFIG.VALID_SAFES_COUNT > TEST_CONFIG.MAX_DISPLAY_COUNT) {
-        sideBar.clickOnOpenNestedSafeListBtn()
-        cy.wait(1000)
-
-        // Verify "Show all" link is visible
-        nsafes.verifyShowAllNestedSafesVisible()
-
-        // Click to show all and verify full count
-        nsafes.clickShowAllNestedSafes()
-        cy.wait(500)
-        nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.VALID_SAFES_COUNT)
-      }
-    })
+    nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.INITIAL_VISIBLE_COUNT)
+    nsafes.verifyHiddenSafesCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
+    nsafes.verifyManageBtnExists()
   })
 
-  describe('Edit mode functionality', () => {
-    it('Verify entering and exiting edit mode', () => {
+  it('Verify that Show all Nested Safes link appears when more than 5 visible safes', () => {
+    if (TEST_CONFIG.VALID_SAFES_COUNT > TEST_CONFIG.MAX_DISPLAY_COUNT) {
       sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+      nsafes.waitForNestedSafeListToLoad()
 
-      // Enter edit mode
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
-
-      // Verify edit mode UI elements
-      nsafes.verifySaveAndCancelBtnsExist()
-      // Suspicious safes are pre-selected (checked) to be hidden by default
-      nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
-
-      // In edit mode, all safes should be visible (including suspicious ones)
-      nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.TOTAL_NESTED_SAFES)
-
-      // Verify warning icons appear for suspicious safes (count should match)
-      nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
-
-      // Cancel to exit edit mode
-      nsafes.clickOnCancelManageBtn()
-      cy.wait(500)
-
-      // Verify we're back to normal view (capped at MAX_DISPLAY_COUNT)
-      nsafes.verifySaveAndCancelBtnsNotExist()
-      nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.INITIAL_VISIBLE_COUNT)
-    })
-
-    it('Verify canceling edit mode discards changes', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
-
-      const initialVisibleCount = TEST_CONFIG.INITIAL_VISIBLE_COUNT
-
-      // Enter edit mode
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
-
-      // Click on a valid safe's checkbox to mark it for hiding
-      // Valid safes are unchecked by default
-      cy.get('[data-testid="nested-safe-list"]')
-        .find('[data-testid="safe-list-item"]')
-        .filter(':not(:has([data-testid="suspicious-safe-warning"]))')
-        .first()
-        .find('input[type="checkbox"]')
-        .click()
-
-      // Verify selection count updated (suspicious + 1 valid now selected)
-      nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT + 1)
-
-      // Cancel changes
-      nsafes.clickOnCancelManageBtn()
-      cy.wait(500)
-
-      // Verify visible safes count is unchanged (changes were discarded)
-      nsafes.verifyVisibleNestedSafesCount(initialVisibleCount)
-    })
+      nsafes.verifyShowAllNestedSafesVisible()
+      nsafes.clickShowAllNestedSafes()
+      nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.VALID_SAFES_COUNT)
+    }
   })
 
-  describe('Hide and unhide safes', () => {
-    it('Verify hiding a valid safe removes it from the default view', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+  it('Verify that entering edit mode shows all safes including suspicious ones', () => {
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
 
-      const initialHiddenCount = TEST_CONFIG.SUSPICIOUS_SAFES_COUNT
-      // After hiding 1 valid safe, new valid count is VALID_SAFES_COUNT - 1
-      const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT - 1
-      const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
 
-      // Enter edit mode
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
+    nsafes.verifySaveAndCancelBtnsExist()
+    nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
+    nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.TOTAL_NESTED_SAFES)
+    nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
 
-      // Click on a valid safe's checkbox (one without warning icon)
-      // Valid safes are unchecked by default, suspicious safes are checked
-      cy.get('[data-testid="nested-safe-list"]')
-        .find('[data-testid="safe-list-item"]')
-        .filter(':not(:has([data-testid="suspicious-safe-warning"]))')
-        .first()
-        .find('input[type="checkbox"]')
-        .click()
-
-      // Verify selection count (suspicious safes + 1 valid safe now selected)
-      nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT + 1)
-
-      // Save changes
-      nsafes.clickOnSaveManageBtn()
-      cy.wait(500)
-
-      // Verify visible count (capped at MAX_DISPLAY_COUNT) and hidden count increased
-      nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
-      nsafes.verifyHiddenSafesCount(initialHiddenCount + 1)
-    })
-
-    it('Verify unhiding a suspicious safe adds it to the default view', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
-
-      const initialHiddenCount = TEST_CONFIG.SUSPICIOUS_SAFES_COUNT
-      // After unhiding 1 suspicious safe, new valid count is VALID_SAFES_COUNT + 1
-      const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT + 1
-      const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
-
-      // Enter edit mode
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
-
-      // Click on a suspicious safe's checkbox (one with warning icon)
-      // Suspicious safes have checkbox checked by default in edit mode (to indicate they will be hidden)
-      // Clicking will uncheck it, meaning it will become visible
-      cy.get('[data-testid="nested-safe-list"]')
-        .find('[data-testid="safe-list-item"]')
-        .filter(':has([data-testid="suspicious-safe-warning"])')
-        .first()
-        .find('input[type="checkbox"]')
-        .click()
-
-      // Save changes
-      nsafes.clickOnSaveManageBtn()
-      cy.wait(500)
-
-      // Verify visible count (capped at MAX_DISPLAY_COUNT) and hidden count decreased
-      nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
-      nsafes.verifyHiddenSafesCount(initialHiddenCount - 1)
-    })
+    nsafes.clickOnCancelManageBtn()
+    nsafes.verifySaveAndCancelBtnsNotExist()
+    nsafes.verifyVisibleNestedSafesCount(TEST_CONFIG.INITIAL_VISIBLE_COUNT)
   })
 
-  describe('Suspicious safe indicators', () => {
-    it('Verify suspicious safes show warning icon in edit mode', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+  it('Verify that canceling edit mode discards changes', () => {
+    const initialVisibleCount = TEST_CONFIG.INITIAL_VISIBLE_COUNT
 
-      // Enter edit mode
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
 
-      // Verify warning icons exist for suspicious safes
-      nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
 
-      // Exit edit mode
-      nsafes.clickOnCancelManageBtn()
-    })
+    nsafes.clickFirstValidSafeCheckbox()
+    nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT + 1)
 
-    it('Verify warning icons not shown in normal view', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
-
-      // In normal view, no warning icons should be visible
-      // (suspicious safes are hidden, so their warnings aren't visible)
-      nsafes.verifyWarningIconCount(0)
-    })
+    nsafes.clickOnCancelManageBtn()
+    nsafes.verifySaveAndCancelBtnsNotExist()
+    nsafes.verifyVisibleNestedSafesCount(initialVisibleCount)
   })
 
-  describe('Persistence tests', () => {
-    it('Verify hidden safes remain hidden after page reload', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+  it('Verify that hiding a valid safe removes it from the default view', () => {
+    const initialHiddenCount = TEST_CONFIG.SUSPICIOUS_SAFES_COUNT
+    const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT - 1
+    const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
 
-      // After hiding 1 valid safe, calculate expected visible count
-      const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT - 1
-      const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
 
-      // Enter edit mode and hide a valid safe
-      nsafes.clickOnManageNestedSafesBtn()
-      cy.wait(500)
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
 
-      cy.get('[data-testid="nested-safe-list"]')
-        .find('[data-testid="safe-list-item"]')
-        .filter(':not(:has([data-testid="suspicious-safe-warning"]))')
-        .first()
-        .find('input[type="checkbox"]')
-        .click()
+    nsafes.clickFirstValidSafeCheckbox()
+    nsafes.verifySelectedToHideCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT + 1)
 
-      nsafes.clickOnSaveManageBtn()
-      cy.wait(500)
+    nsafes.clickOnSaveManageBtn()
+    nsafes.verifySaveAndCancelBtnsNotExist()
 
-      // Verify change took effect
-      nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
+    nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
+    nsafes.verifyHiddenSafesCount(initialHiddenCount + 1)
+  })
 
-      // Reload page
-      cy.reload()
-      cy.wait(2000)
+  it('Verify that unhiding a suspicious safe adds it to the default view', () => {
+    const initialHiddenCount = TEST_CONFIG.SUSPICIOUS_SAFES_COUNT
+    const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT + 1
+    const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
 
-      // Open nested safes list again
-      sideBar.clickOnOpenNestedSafeListBtn()
-      cy.wait(1000)
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
 
-      // Verify the safe is still hidden after reload
-      nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
-    })
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
+
+    nsafes.clickFirstSuspiciousSafeCheckbox()
+
+    nsafes.clickOnSaveManageBtn()
+    nsafes.verifySaveAndCancelBtnsNotExist()
+
+    nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
+    nsafes.verifyHiddenSafesCount(initialHiddenCount - 1)
+  })
+
+  it('Verify that suspicious safes show warning icon in edit mode', () => {
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
+
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
+
+    nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
+
+    nsafes.clickOnCancelManageBtn()
+  })
+
+  it('Verify that warning icons are not shown in normal view', () => {
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
+
+    nsafes.verifyWarningIconCount(0)
+  })
+
+  it('Verify that hidden safes remain hidden after page reload', () => {
+    const newValidCount = TEST_CONFIG.VALID_SAFES_COUNT - 1
+    const expectedVisibleAfter = Math.min(newValidCount, TEST_CONFIG.MAX_DISPLAY_COUNT)
+
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
+
+    nsafes.clickOnManageNestedSafesBtn()
+    nsafes.waitForEditModeToLoad()
+
+    nsafes.clickFirstValidSafeCheckbox()
+
+    nsafes.clickOnSaveManageBtn()
+    nsafes.verifySaveAndCancelBtnsNotExist()
+
+    nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
+
+    cy.reload()
+
+    sideBar.clickOnOpenNestedSafeListBtn()
+    nsafes.waitForNestedSafeListToLoad()
+
+    nsafes.verifyVisibleNestedSafesCount(expectedVisibleAfter)
   })
 })

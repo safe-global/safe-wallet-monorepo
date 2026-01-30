@@ -220,3 +220,31 @@ export function verifyShowAllNestedSafesVisible() {
 export function verifyShowAllNestedSafesNotVisible() {
   cy.contains(showAllNestedSafesStr).should('not.exist')
 }
+
+export function clickFirstValidSafeCheckbox() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:not(:has(${suspiciousWarningIcon}))`)
+    .first()
+    .find('input[type="checkbox"]')
+    .click()
+}
+
+export function clickFirstSuspiciousSafeCheckbox() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:has(${suspiciousWarningIcon})`)
+    .first()
+    .find('input[type="checkbox"]')
+    .click()
+}
+
+export function waitForNestedSafeListToLoad() {
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(safeListItem).should('exist')
+}
+
+export function waitForEditModeToLoad() {
+  cy.get(cancelManageBtn).should('be.visible')
+  cy.get(saveManageBtn).should('be.visible')
+}
