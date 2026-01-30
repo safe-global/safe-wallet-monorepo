@@ -48,6 +48,7 @@ function NestedSafeItem({
         inheritViewBox
         fontSize="small"
         sx={{ color: 'warning.main', ml: 1, flexShrink: 0 }}
+        data-testid="suspicious-safe-warning"
       />
     </Tooltip>
   ) : null
