@@ -55,7 +55,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
   // 2. Recipient Analyse
   // ========================================
-
+  //Only 4A - Incompatible Safe version is not covered
   // Helper function for common recipient analysis test setup
   const setupRecipientAnalysisTest = (transactionId, addressBookData = null, safeAddress = null) => {
     if (addressBookData) {
