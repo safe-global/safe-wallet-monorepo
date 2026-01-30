@@ -2,6 +2,7 @@ import { SvgIcon, Popover, Button, Box, Stack, IconButton, Typography, Tooltip, 
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
+import css from './styles.module.css'
 import AddIcon from '@/public/images/common/add.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
@@ -127,31 +128,7 @@ export function NestedSafesPopover({
         ) : safesToShow.length === 0 && !isManageMode ? (
           <NestedSafeInfo />
         ) : (
-          <Box
-            sx={{
-              overflowX: 'hidden',
-              overflowY: 'auto',
-              flex: 1,
-              pr: 1.5,
-              mr: -1.5,
-              // Custom scrollbar styling
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--color-border-light) transparent',
-              '&::-webkit-scrollbar': {
-                width: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: 'var(--color-border-light)',
-                borderRadius: '3px',
-                '&:hover': {
-                  backgroundColor: 'var(--color-border-main)',
-                },
-              },
-            }}
-          >
+          <Box className={css.scrollContainer}>
             <NestedSafesList
               onClose={onClose}
               safesWithStatus={safesToShow}
