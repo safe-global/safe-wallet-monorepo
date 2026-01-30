@@ -7,11 +7,19 @@ export interface AccountItemIconProps {
   threshold?: number
   owners?: number
   isMultiChainItem?: boolean
+  'data-testid'?: string
 }
 
-function AccountItemIcon({ address, chainId, threshold, owners, isMultiChainItem }: AccountItemIconProps) {
+function AccountItemIcon({
+  address,
+  chainId,
+  threshold,
+  owners,
+  isMultiChainItem,
+  'data-testid': testId,
+}: AccountItemIconProps) {
   return (
-    <div className={css.accountItemIcon}>
+    <div className={css.accountItemIcon} data-testid={testId}>
       <SafeIcon
         address={address}
         owners={owners && owners > 0 ? owners : undefined}

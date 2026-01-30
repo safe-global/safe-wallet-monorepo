@@ -24,13 +24,7 @@ describe('Limit order queue tests', { defaultCommandTimeout: 30000 }, () => {
 
       create_tx.verifySummaryByName(swapsHistory.limitorder_title)
       main.verifyElementsExist([create_tx.altImgCow, create_tx.altImgDai], create_tx.altImgLimitOrder)
-      create_tx.verifyExpandedDetails([
-        swapsHistory.sellOrder,
-        swapsHistory.sell,
-        dai,
-        eq,
-        swapsHistory.executionNeeded,
-      ])
+      create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, dai, eq, swapsHistory.expired])
       create_tx.clickOnAdvancedDetails()
       create_tx.verifyAdvancedDetails([swapsHistory.gGpV2, swapsHistory.actionPreSignatureG])
     },

@@ -12,6 +12,7 @@ export interface AccountItemInfoProps {
   children?: ReactNode // For chips or other content below the address
   showPrefix?: boolean
   addressBookNameSource?: ContactSource
+  'data-testid'?: string
 }
 
 /**
@@ -26,9 +27,10 @@ function AccountItemInfo({
   children,
   showPrefix = true,
   addressBookNameSource,
+  'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
-    <div className={css.accountItemInfo}>
+    <div className={css.accountItemInfo} data-testid={testId}>
       <Typography variant="body2" component="div" className={css.safeAddress}>
         {chainName ? (
           <Typography
