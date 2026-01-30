@@ -34,6 +34,7 @@
     "serve": "sh -c 'npx -y serve out -p ${REVERSE_PROXY_UI_PORT:=8080}'",
     "static-serve": "yarn build && yarn serve",
     "storybook": "storybook dev -p 6006",
+    "storybook:full": "cross-env STORYBOOK_LAZY=false storybook dev -p 6006",
     "build-storybook": "storybook build --quiet",
     "test:storybook": "cross-env NODE_ENV=test TZ=UTC jest --testMatch '**/*.stories.test.tsx' --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
     "test:storybook:ci": "cross-env NODE_ENV=test TZ=UTC yarn test:storybook --ci --silent --coverage=false --watchAll=false",

@@ -7,7 +7,8 @@ import { fileURLToPath } from 'url'
 
 const require = createRequire(import.meta.url)
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const packageJsonPath = path.join(__dirname, '../package.json')
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 
@@ -26,6 +27,10 @@ const config: StorybookConfig = {
     '@storybook/addon-docs',
   ],
 
+  core: {
+    disableTelemetry: true,
+  },
+
   /**
    * In our monorepo setup, if we just specify the name,
    * we end up with the wrong path to webpack5 preset. We need to
@@ -38,6 +43,23 @@ const config: StorybookConfig = {
   webpackFinal: async (config) => {
     config.module = config.module || {}
     config.module.rules = config.module.rules || []
+
+    config.cache = {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [__filename],
+      },
+    }
+
+    if (process.env.NODE_ENV !== 'production' && process.env.STORYBOOK_LAZY !== 'false') {
+      config.experiments = {
+        ...config.experiments,
+        lazyCompilation: {
+          imports: true,
+          entries: false,
+        },
+      }
+    }
 
     // This modifies the existing image rule to exclude .svg files
     // since you want to handle those files with @svgr/webpack
@@ -84,20 +106,7 @@ const config: StorybookConfig = {
   }),
 
   typescript: {
-    reactDocgen: 'react-docgen-typescript',
-    reactDocgenTypescriptOptions: {
-      // Speeds up Storybook build time
-      compilerOptions: {
-        allowSyntheticDefaultImports: false,
-        esModuleInterop: false,
-      },
-      // Makes union prop types like variant and size appear as select controls
-      shouldExtractLiteralValuesFromEnum: true,
-      // Makes string and boolean types that can be undefined appear as inputs and switches
-      shouldRemoveUndefinedFromOptional: true,
-      // Filter out third-party props from node_modules except @mui packages
-      propFilter: (prop) => (prop.parent ? !/node_modules\/(?!@mui)/.test(prop.parent.fileName) : true),
-    },
+    reactDocgen: 'react-docgen',
   },
 }
 export default config
