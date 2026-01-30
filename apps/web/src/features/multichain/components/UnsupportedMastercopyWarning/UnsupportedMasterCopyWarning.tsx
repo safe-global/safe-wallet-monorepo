@@ -41,9 +41,9 @@ export const UnsupportedMastercopyWarning = () => {
       content="and may miss security fixes and improvements."
       action={
         canMigrate
-          ? { label: 'Migrate', onClick: openUpgradeModal }
+          ? { label: 'Update version', onClick: openUpgradeModal }
           : {
-              label: 'Get CLI',
+              label: 'Use CLI',
               href: CLI_LINK,
               target: '_blank',
               rel: 'noopener noreferrer',
