@@ -93,6 +93,8 @@ describe('AssetsTable', () => {
           env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })
@@ -182,6 +184,8 @@ describe('AssetsTable', () => {
           env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })
@@ -267,6 +271,8 @@ describe('AssetsTable', () => {
           env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })
@@ -353,6 +359,8 @@ describe('AssetsTable', () => {
           env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })
@@ -452,6 +460,8 @@ describe('AssetsTable', () => {
           env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
           signing: { onChainSigning: false, blindSigning: false },
           transactionExecution: true,
+          manuallyHiddenSafes: {},
+          overriddenAutoHideSafes: {},
         },
       },
     })
