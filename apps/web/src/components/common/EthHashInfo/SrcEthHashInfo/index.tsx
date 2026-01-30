@@ -13,7 +13,8 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
-import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
 export type EthHashInfoProps = {
@@ -62,6 +63,7 @@ const SrcEthHashInfo = ({
   highlight4bytes = false,
   showShieldIcon = false,
 }: EthHashInfoProps): ReactElement => {
+  const hn = useLoadFeature(HypernativeFeature)
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -136,9 +138,9 @@ const SrcEthHashInfo = ({
             </Box>
 
             {showShieldIcon ? (
-              <HypernativeTooltip placement="right">
+              <hn.HypernativeTooltip placement="right">
                 <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </HypernativeTooltip>
+              </hn.HypernativeTooltip>
             ) : (
               !!addressBookNameSource && (
                 <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
@@ -158,9 +160,9 @@ const SrcEthHashInfo = ({
           /* Show shield icon even when there's no name */
           showShieldIcon && (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <HypernativeTooltip placement="right">
+              <hn.HypernativeTooltip placement="right">
                 <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </HypernativeTooltip>
+              </hn.HypernativeTooltip>
             </Box>
           )
         )}

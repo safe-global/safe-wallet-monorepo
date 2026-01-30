@@ -10,8 +10,8 @@ jest.mock('next/router', () => ({
 }))
 
 // Mock PKCE utilities
-jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
-  const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')
+jest.mock('@/features/hypernative', () => {
+  const actual = jest.requireActual('@/features/hypernative')
   return {
     ...actual,
     readPkce: jest.fn(),
@@ -33,7 +33,7 @@ jest.mock('@/features/hypernative/config/oauth', () => {
   }
 })
 
-import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { readPkce, clearPkce } from '@/features/hypernative'
 import { getRedirectUri } from '@/features/hypernative/config/oauth'
 
 describe('HypernativeOAuthCallback', () => {

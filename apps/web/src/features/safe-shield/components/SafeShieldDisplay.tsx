@@ -16,7 +16,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 
 const shieldLogoOnHover = {
   width: 78,
