@@ -8,19 +8,29 @@ import * as useBannerStorageHook from '@/features/hypernative/hooks/useBannerSto
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
+import * as featureCore from '@/features/__core__'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
-// Mock the base banner components to check if they render
-// We mock the base components so the HOCs can run and control visibility
-jest.mock('@/features/hypernative/components/HnBanner/HnBanner', () => ({
-  HnBanner: () => <div data-testid="hn-banner-for-settings">HnBannerForSettings</div>,
+// Mock HnBannerForSettings from the public API with simulated HOC behavior
+jest.mock('@/features/hypernative', () => {
+  const actual = jest.requireActual('@/features/hypernative')
+  return {
+    ...actual,
+    HnBannerForSettings: () => {
+      const { showBanner, loading } = actual.useBannerVisibility(actual.BannerType.Settings)
+      if (loading || !showBanner) return null
+      return <div data-testid="hn-banner-for-settings">HnBannerForSettings</div>
+    },
+  }
+})
+
+// Mock useLoadFeature to return HnActivatedSettingsBanner with simulated HOC behavior
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: jest.fn(),
 }))
 
-jest.mock('@/features/hypernative/components/HnActivatedSettingsBanner/HnActivatedSettingsBanner', () => ({
-  HnActivatedSettingsBanner: () => (
-    <div data-testid="hn-activated-banner-for-settings">HnActivatedBannerForSettings</div>
-  ),
-}))
+const mockUseLoadFeature = featureCore.useLoadFeature as jest.Mock
 
 // Mock SecuritySettings to avoid rendering the full component
 jest.mock('../SecuritySettings', () => ({
@@ -28,11 +38,32 @@ jest.mock('../SecuritySettings', () => ({
   default: () => <div data-testid="security-settings">SecuritySettings</div>,
 }))
 
+// Component that simulates HOC behavior (withHnFeature -> withGuardCheck -> withOwnerCheck)
+const MockHnActivatedSettingsBanner = () => {
+  const isEnabled = useIsHypernativeFeatureHook.useIsHypernativeFeature()
+  const { isHypernativeGuard, loading } = useIsHypernativeGuardHook.useIsHypernativeGuard()
+  const isOwner = useIsSafeOwnerHook.default()
+
+  if (!isEnabled || loading || !isHypernativeGuard || !isOwner) {
+    return null
+  }
+
+  return <div data-testid="hn-activated-banner-for-settings">HnActivatedBannerForSettings</div>
+}
+
 describe('SecurityLogin', () => {
   const mockWallet = connectedWalletBuilder().build()
 
   beforeEach(() => {
     jest.clearAllMocks()
+
+    // Setup useLoadFeature mock to return our mock component
+    mockUseLoadFeature.mockReturnValue({
+      $isLoading: false,
+      $isDisabled: false,
+      $isReady: true,
+      HnActivatedSettingsBanner: MockHnActivatedSettingsBanner,
+    })
 
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted
     jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(false)

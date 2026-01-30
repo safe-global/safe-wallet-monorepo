@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAppDispatch } from '@/store'
-import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
+import { setFormCompleted } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import HnModal from './HnModal'

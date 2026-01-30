@@ -45,10 +45,12 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
-import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
-import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import {
+  useHnQueueAssessment,
+  useShowHypernativeAssessment,
+  useHypernativeOAuth,
+  HypernativeFeature,
+} from '@/features/hypernative'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -59,6 +61,7 @@ type TxDetailsProps = {
 
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
   const txNotes = useLoadFeature(TxNotesFeature)
+  const hn = useLoadFeature(HypernativeFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
@@ -111,7 +114,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Hypernative assessment for banner
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
-  const assessment = useQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessmentBanner = useShowHypernativeAssessment({
     isQueue,
@@ -210,7 +213,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {showAssessmentBanner && safeTxHash && chainId && (
-            <HnQueueAssessmentBanner
+            <hn.HnQueueAssessmentBanner
               safeTxHash={safeTxHash}
               assessment={assessment}
               isAuthenticated={isAuthenticated}

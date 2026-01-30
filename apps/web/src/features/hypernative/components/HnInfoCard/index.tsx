@@ -3,24 +3,21 @@ import { Box, Button, SvgIcon, Stack, Typography } from '@mui/material'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
 import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { HypernativeTooltip } from '../HypernativeTooltip'
+import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
 
-export const HypernativeInfo = ({
-  hypernativeAuth,
-  showActiveStatus = true,
-}: {
+export interface HnInfoCardProps {
   hypernativeAuth?: HypernativeAuthStatus
   showActiveStatus?: boolean
-}): ReactElement | null => {
-  // If hypernativeAuth is not provided, don't show the HypernativeInfo
+}
+
+export const HnInfoCard = ({ hypernativeAuth, showActiveStatus = true }: HnInfoCardProps): ReactElement | null => {
   if (!hypernativeAuth) {
     return null
   }
 
   const { isAuthenticated, isTokenExpired, initiateLogin } = hypernativeAuth
 
-  // Show login card if user is not authenticated or token is expired
   const showLoginCard = !isAuthenticated || isTokenExpired
 
   if (!showActiveStatus && !showLoginCard) {
@@ -53,7 +50,6 @@ export const HypernativeInfo = ({
         </Stack>
       )}
 
-      {/* Show login card if user is not authenticated or token is expired */}
       {showLoginCard && (
         <Box p={2} sx={{ backgroundColor: 'background.main', borderRadius: '4px' }}>
           <Stack gap={2} direction="column">

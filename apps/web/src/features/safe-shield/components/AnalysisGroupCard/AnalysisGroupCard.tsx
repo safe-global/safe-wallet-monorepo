@@ -1,7 +1,6 @@
-import { type ReactElement, useMemo, useState, useEffect, useRef } from 'react'
+import { type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import HypernativeLogo from '@/features/hypernative/components/HypernativeLogo'
 import {
   ContractStatus,
   type GroupedAnalysisResults,
@@ -16,7 +15,7 @@ import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
 
-interface AnalysisGroupCardProps {
+export interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
   showImage?: boolean
   highlightedSeverity?: Severity
@@ -24,7 +23,7 @@ interface AnalysisGroupCardProps {
   analyticsEvent?: AnalyticsEvent
   'data-testid'?: string
   requestId?: string
-  isByHypernative?: boolean
+  footer?: ReactNode
 }
 
 export const AnalysisGroupCard = ({
@@ -35,7 +34,7 @@ export const AnalysisGroupCard = ({
   analyticsEvent,
   'data-testid': dataTestId,
   requestId,
-  isByHypernative = false,
+  footer,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -141,20 +140,7 @@ export const AnalysisGroupCard = ({
               )
             })}
 
-            {isByHypernative && (
-              <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
-                <Typography variant="caption" color="text.secondary">
-                  by
-                </Typography>
-                <HypernativeLogo
-                  sx={{
-                    width: 78,
-                    height: 15,
-                    '& > rect': { fill: (theme) => theme.palette.text.secondary },
-                  }}
-                />
-              </Stack>
-            )}
+            {footer}
           </Stack>
         </Box>
       </Collapse>

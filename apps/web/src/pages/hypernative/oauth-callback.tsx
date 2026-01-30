@@ -4,13 +4,11 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Box, Typography, Card, SvgIcon } from '@mui/material'
 import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
-import { readPkce, clearPkce } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative/config/oauth'
+import { readPkce, clearPkce, useAuthToken, HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAuthToken } from '@/features/hypernative/hooks'
 
 /**
  * OAuth callback page for Hypernative authentication

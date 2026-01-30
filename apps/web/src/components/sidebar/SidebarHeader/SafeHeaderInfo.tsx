@@ -13,7 +13,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
 
 import css from './styles.module.css'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks'
+import { useIsHypernativeGuard } from '@/features/hypernative'
 
 const SafeHeaderInfo = (): ReactElement => {
   const { balances } = useVisibleBalances()
