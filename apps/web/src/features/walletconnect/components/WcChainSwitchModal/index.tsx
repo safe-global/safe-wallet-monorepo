@@ -3,7 +3,8 @@ import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
@@ -11,6 +12,23 @@ type WcChainSwitchModalProps = {
   safes: SafeItem[]
   onSelectSafe: (safe: SafeItem) => Promise<void>
   onCancel: () => void
+}
+
+function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
+  const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
+
+  return (
+    <AccountItem.Button onClick={onSelect} elementRef={elementRef}>
+      <AccountItem.Icon
+        address={safeItem.address}
+        chainId={safeItem.chainId}
+        threshold={threshold}
+        owners={owners.length}
+      />
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={name} />
+      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+    </AccountItem.Button>
+  )
 }
 
 const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: WcChainSwitchModalProps) => {
@@ -41,12 +59,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
       {hasSafes ? (
         <Box sx={{ maxHeight: 440, overflowY: 'auto' }}>
           {safes.map((safe) => (
-            <SingleAccountItem
-              key={`${safe.chainId}-${safe.address}`}
-              safeItem={safe}
-              onSelectSafe={() => onSelectSafe(safe)}
-              showActions={false}
-            />
+            <WcSafeItem key={`${safe.chainId}-${safe.address}`} safeItem={safe} onSelect={() => onSelectSafe(safe)} />
           ))}
         </Box>
       ) : (

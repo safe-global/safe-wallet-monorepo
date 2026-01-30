@@ -78,6 +78,8 @@ const SafeListContextMenu = ({
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    e.stopPropagation()
+    e.preventDefault()
     setAnchorEl(e.currentTarget)
   }
 
@@ -85,17 +87,20 @@ const SafeListContextMenu = ({
     setAnchorEl(null)
   }
 
-  const handleOpenModal = (type: keyof typeof open, event: AnalyticsEvent) => () => {
-    if (type !== ModalType.NESTED_SAFES) {
-      handleCloseContextMenu()
-    }
-    if (type === ModalType.NESTED_SAFES) {
-      startFiltering()
-    }
-    setOpen((prev) => ({ ...prev, [type]: true }))
+  const handleOpenModal =
+    (type: keyof typeof open, event: AnalyticsEvent) => (e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>) => {
+      e.stopPropagation()
+      e.preventDefault()
+      if (type !== ModalType.NESTED_SAFES) {
+        handleCloseContextMenu()
+      }
+      if (type === ModalType.NESTED_SAFES) {
+        startFiltering()
+      }
+      setOpen((prev) => ({ ...prev, [type]: true }))
 
-    trackEvent({ ...event, label: trackingLabel })
-  }
+      trackEvent({ ...event, label: trackingLabel })
+    }
 
   const handleCloseModal = () => {
     setOpen(defaultOpen)
@@ -106,7 +111,14 @@ const SafeListContextMenu = ({
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
+      <ContextMenu
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={handleCloseContextMenu}
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
+      >
         {isNestedSafesEnabled && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
           <MenuItem
             onClick={handleOpenModal(ModalType.NESTED_SAFES, {

@@ -1,4 +1,3 @@
-import classnames from 'classnames'
 import { useRouter } from 'next/router'
 import { type ReactNode, useCallback, type MouseEvent } from 'react'
 import { Chip, Typography, SvgIcon } from '@mui/material'
@@ -8,6 +7,13 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { AppRoutes } from '@/config/routes'
 import css from './styles.module.css'
+
+export interface AccountItemQueueActionsProps {
+  safeAddress: string
+  chainShortName: string
+  queued: number
+  awaitingConfirmation: number
+}
 
 const ChipLink = ({ children, color }: { children: ReactNode; color?: string }) => (
   <Chip
@@ -28,19 +34,17 @@ const ChipLink = ({ children, color }: { children: ReactNode; color?: string }) 
   />
 )
 
-const QueueActions = ({
+/**
+ * Interactive queue action buttons with navigation to the queue page.
+ * Renders pending transactions and confirmation chips.
+ * For passive status display, use AccountItem.StatusChip instead.
+ */
+function AccountItemQueueActions({
   safeAddress,
   chainShortName,
   queued,
   awaitingConfirmation,
-  isMobile = false,
-}: {
-  safeAddress: string
-  chainShortName: string
-  queued: number
-  awaitingConfirmation: number
-  isMobile?: boolean
-}) => {
+}: AccountItemQueueActionsProps) {
   const router = useRouter()
 
   const onQueueClick = useCallback(
@@ -60,7 +64,7 @@ const QueueActions = ({
 
   return (
     <Track {...OVERVIEW_EVENTS.OPEN_MISSING_SIGNATURES}>
-      <button onClick={onQueueClick} className={classnames(css.queueButton, { [css.isMobile]: isMobile })}>
+      <button onClick={onQueueClick} className={css.queueButton}>
         {queued > 0 && (
           <ChipLink>
             <SvgIcon component={TransactionsIcon} inheritViewBox sx={{ fontSize: 'small' }} />
@@ -79,4 +83,4 @@ const QueueActions = ({
   )
 }
 
-export default QueueActions
+export default AccountItemQueueActions
