@@ -105,3 +105,146 @@ export function typeName(name) {
 export function nameInputHasPlaceholder() {
   cy.get(`${nestedSafeNameInput} input`).should('have.attr', 'placeholder').and('not.be.empty')
 }
+
+// Nested safes curation (hide/show) functions
+const manageNestedSafesBtn = '[data-testid="manage-nested-safes-button"]'
+const nestedSafeList = '[data-testid="nested-safe-list"]'
+const cancelManageBtn = '[data-testid="cancel-manage-nested-safes"]'
+const saveManageBtn = '[data-testid="save-manage-nested-safes"]'
+const safeListItem = '[data-testid="safe-list-item"]'
+
+export const hiddenSafesText = (count) => `${count} ${count === 1 ? 'safe' : 'safes'} hidden`
+export const selectedToHideText = (count) => `${count} ${count === 1 ? 'safe' : 'safes'} selected to hide`
+export const suspiciousSafeWarning = 'This Safe was not created by the parent Safe or its signers'
+export const showAllNestedSafesStr = 'Show all Nested Safes'
+
+export function clickOnManageNestedSafesBtn() {
+  cy.get(manageNestedSafesBtn).click()
+}
+
+export function verifyManageBtnExists() {
+  cy.get(manageNestedSafesBtn).should('exist')
+}
+
+export function verifyManageBtnNotExists() {
+  cy.get(manageNestedSafesBtn).should('not.exist')
+}
+
+export function clickOnCancelManageBtn() {
+  cy.get(cancelManageBtn).click()
+}
+
+export function clickOnSaveManageBtn() {
+  cy.get(saveManageBtn).click()
+}
+
+export function verifySaveAndCancelBtnsExist() {
+  cy.get(cancelManageBtn).should('exist')
+  cy.get(saveManageBtn).should('exist')
+}
+
+export function verifySaveAndCancelBtnsNotExist() {
+  cy.get(cancelManageBtn).should('not.exist')
+  cy.get(saveManageBtn).should('not.exist')
+}
+
+export function verifyHiddenSafesCount(count) {
+  cy.get(nestedSafeList).contains(hiddenSafesText(count)).should('exist')
+}
+
+export function verifyNoHiddenSafesMessage() {
+  cy.get(nestedSafeList).should('not.contain', 'hidden')
+}
+
+export function verifySelectedToHideCount(count) {
+  cy.contains(selectedToHideText(count)).should('exist')
+}
+
+export function verifyVisibleNestedSafesCount(count) {
+  cy.get(nestedSafeList).find(safeListItem).should('have.length', count)
+}
+
+export function clickOnSafeCheckbox(address) {
+  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).click()
+}
+
+export function verifySafeCheckboxState(address, checked) {
+  cy.get(`[data-testid="safe-item-checkbox-${address}"]`).should(checked ? 'be.checked' : 'not.be.checked')
+}
+
+// Warning icon selector for suspicious safes
+const suspiciousWarningIcon = '[data-testid="suspicious-safe-warning"]'
+
+export function verifySafeHasWarningIcon(address) {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .contains(address.substring(0, 6))
+    .parents(safeListItem)
+    .find(suspiciousWarningIcon)
+    .should('exist')
+}
+
+export function verifySafeDoesNotHaveWarningIcon(address) {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .contains(address.substring(0, 6))
+    .parents(safeListItem)
+    .find(suspiciousWarningIcon)
+    .should('not.exist')
+}
+
+export function verifyWarningIconCount(count) {
+  if (count === 0) {
+    cy.get(nestedSafeList).find(suspiciousWarningIcon).should('not.exist')
+  } else {
+    cy.get(nestedSafeList).find(suspiciousWarningIcon).should('have.length', count)
+  }
+}
+
+export function verifySafeAddressInList(addressShort) {
+  cy.get(nestedSafeList).should('contain', addressShort)
+}
+
+export function verifySafeAddressNotInList(addressShort) {
+  cy.get(nestedSafeList).should('not.contain', addressShort)
+}
+
+export function clickShowAllNestedSafes() {
+  cy.contains(showAllNestedSafesStr).scrollIntoView().click()
+}
+
+export function verifyShowAllNestedSafesVisible() {
+  cy.contains(showAllNestedSafesStr).scrollIntoView().should('be.visible')
+}
+
+export function verifyShowAllNestedSafesNotVisible() {
+  cy.contains(showAllNestedSafesStr).should('not.exist')
+}
+
+export function clickFirstValidSafeCheckbox() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:not(:has(${suspiciousWarningIcon}))`)
+    .first()
+    .find('input[type="checkbox"]')
+    .click()
+}
+
+export function clickFirstSuspiciousSafeCheckbox() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:has(${suspiciousWarningIcon})`)
+    .first()
+    .find('input[type="checkbox"]')
+    .click()
+}
+
+export function waitForNestedSafeListToLoad() {
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(safeListItem).should('exist')
+}
+
+export function waitForEditModeToLoad() {
+  cy.get(cancelManageBtn).should('be.visible')
+  cy.get(saveManageBtn).should('be.visible')
+}
