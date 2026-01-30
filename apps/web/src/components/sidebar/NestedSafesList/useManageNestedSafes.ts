@@ -5,12 +5,14 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppDispatch } from '@/store'
 import { setManuallyHiddenSafes, setOverriddenAutoHideSafes } from '@/store/settingsSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 type PendingAction = 'hide' | 'show'
 
-const addIfMissing = (arr: string[], value: string): string[] => (arr.includes(value) ? arr : [...arr, value])
+const addIfMissing = (arr: string[], value: string): string[] =>
+  arr.some((item) => sameAddress(item, value)) ? arr : [...arr, value]
 
-const removeFromArray = (arr: string[], value: string): string[] => arr.filter((a) => a !== value)
+const removeFromArray = (arr: string[], value: string): string[] => arr.filter((a) => !sameAddress(a, value))
 
 const applyValidSafeAction = (action: PendingAction, address: string, arr: string[]): string[] =>
   action === 'hide' ? addIfMissing(arr, address) : removeFromArray(arr, address)
@@ -37,10 +39,10 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
       if (!safeStatus) return false
 
       if (safeStatus.isValid) {
-        return manuallyHiddenSafes.includes(address)
+        return manuallyHiddenSafes.some((hidden) => sameAddress(hidden, address))
       }
       // Invalid safes are hidden unless user overrode
-      return !overriddenAutoHideSafes.includes(address)
+      return !overriddenAutoHideSafes.some((overridden) => sameAddress(overridden, address))
     },
     [allSafesWithStatus, manuallyHiddenSafes, overriddenAutoHideSafes],
   )

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import useManuallyHiddenSafes from './useManuallyHiddenSafes'
 import useOverriddenAutoHideSafes from './useOverriddenAutoHideSafes'
 import { useFilteredNestedSafes, type NestedSafeValidation } from './useFilteredNestedSafes'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export type NestedSafeWithStatus = {
   address: string
@@ -51,14 +52,14 @@ export function useNestedSafesVisibility(rawNestedSafes: string[], chainId: stri
         address,
         isValid: true, // Assume valid until checked
         isAutoHidden: false,
-        isManuallyHidden: manuallyHiddenSafes.includes(address),
+        isManuallyHidden: manuallyHiddenSafes.some((hidden) => sameAddress(hidden, address)),
         isUserUnhidden: false,
       }))
     }
 
     return validatedSafes.map((validated: NestedSafeValidation) => {
-      const isManuallyHidden = manuallyHiddenSafes.includes(validated.address)
-      const isUserUnhidden = overriddenAutoHideSafes.includes(validated.address)
+      const isManuallyHidden = manuallyHiddenSafes.some((hidden) => sameAddress(hidden, validated.address))
+      const isUserUnhidden = overriddenAutoHideSafes.some((overridden) => sameAddress(overridden, validated.address))
       // Auto-hidden = invalid AND not overridden by user
       const isAutoHidden = !validated.isValid && !isUserUnhidden
 
