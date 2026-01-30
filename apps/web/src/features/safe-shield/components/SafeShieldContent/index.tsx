@@ -10,8 +10,6 @@ import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
-import { HypernativeInfo } from '../HypernativeInfo'
-import { HypernativeCustomChecks } from '@/features/safe-shield/components/HypernativeCustomChecks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -21,7 +19,8 @@ import {
   useDelayedLoading,
 } from '@/features/safe-shield/hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
 
 export const SafeShieldContent = ({
@@ -43,6 +42,7 @@ export const SafeShieldContent = ({
   showHypernativeInfo?: boolean
   showHypernativeActiveStatus?: boolean
 }): ReactElement => {
+  const hn = useLoadFeature(HypernativeFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
@@ -73,7 +73,7 @@ export const SafeShieldContent = ({
         }}
       >
         {showHypernativeInfo && (
-          <HypernativeInfo hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+          <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
 
         {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
@@ -105,7 +105,7 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          <HypernativeCustomChecks
+          <hn.HnCustomChecksCard
             threat={threat}
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}

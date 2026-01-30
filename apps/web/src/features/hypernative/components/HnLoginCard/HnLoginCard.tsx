@@ -1,6 +1,6 @@
 import { Alert, Stack, SvgIcon, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'

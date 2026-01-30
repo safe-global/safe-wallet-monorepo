@@ -25,10 +25,14 @@ import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
 import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
 import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForCarousel, hnBannerID } from '@/features/hypernative/components/HnBanner'
-import HnPendingBanner from '@/features/hypernative/components/HnPendingBanner'
+import {
+  useBannerVisibility,
+  BannerType,
+  HnBannerForCarousel,
+  hnBannerID,
+  HypernativeFeature,
+} from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 import { EurcvBoostBanner, eurcvBoostBannerID } from '@/components/dashboard/NewsCarousel/banners/EurcvBoostBanner'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
@@ -36,6 +40,7 @@ const PositionsWidget = dynamic(() => import('@/features/positions/components/Po
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
+  const hn = useLoadFeature(HypernativeFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
@@ -124,7 +129,7 @@ const Dashboard = (): ReactElement => {
         <div className={css.rightCol}>
           {safe.deployed && <PendingTxsList />}
 
-          <HnPendingBanner />
+          <hn.HnPendingBanner />
         </div>
       </div>
     </>

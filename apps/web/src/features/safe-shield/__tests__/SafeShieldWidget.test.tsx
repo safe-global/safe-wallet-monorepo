@@ -7,15 +7,42 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { useSafeShield } from '../SafeShieldContext'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import { useHypernativeOAuth, useIsHypernativeEligible, type HypernativeEligibility } from '@/features/hypernative'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
-import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 
 jest.mock('../SafeShieldContext')
-jest.mock('@/features/hypernative/hooks/useHypernativeOAuth')
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible')
+jest.mock('@/features/hypernative', () => ({
+  ...jest.requireActual('@/features/hypernative'),
+  useHypernativeOAuth: jest.fn(),
+  useIsHypernativeEligible: jest.fn(),
+}))
 jest.mock('../hooks/useCheckSimulation')
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: jest.fn(() => ({
+    $isReady: true,
+    $isLoading: false,
+    $isDisabled: false,
+    HnInfoCard: ({
+      hypernativeAuth,
+      showActiveStatus = true,
+    }: {
+      hypernativeAuth?: { isAuthenticated: boolean; isTokenExpired: boolean; initiateLogin: () => void }
+      showActiveStatus?: boolean
+    }) => {
+      if (!hypernativeAuth) return null
+      const showLoginCard = !hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired
+      if (!showActiveStatus && !showLoginCard) return null
+      return (
+        <div>
+          {showActiveStatus && <span>Hypernative Guardian is active</span>}
+          {showLoginCard && <span>Log in to Hypernative to view the full analysis.</span>}
+        </div>
+      )
+    },
+    HnCustomChecksCard: () => null,
+  })),
+}))
 
 const mockUseSafeShield = useSafeShield as jest.MockedFunction<typeof useSafeShield>
 const mockUseHypernativeOAuth = useHypernativeOAuth as jest.MockedFunction<typeof useHypernativeOAuth>

@@ -19,7 +19,7 @@ import {
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
-import { useAuthToken } from '@/features/hypernative/hooks'
+import { useAuthToken } from '@/features/hypernative'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
