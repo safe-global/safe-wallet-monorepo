@@ -143,13 +143,13 @@ By Category:
 
 **Why first**: Sidebar components are required for page-level stories (US4). Must complete before Phase 6.
 
-- [ ] T042 [US3] Create SafeHeaderInfo.stories.tsx in apps/web/src/components/sidebar/SidebarHeader/SafeHeaderInfo.stories.tsx
+- [x] T042 [US3] Create SafeHeaderInfo.stories.tsx in apps/web/src/components/sidebar/SidebarHeader/SafeHeaderInfo.stories.tsx
   - Dependencies: useAddressResolver, useVisibleBalances, useIsHypernativeGuard
   - States: Default, Loading, Multichain, Long address
-- [ ] T043 [P] [US3] Create MultiAccountContextMenu.stories.tsx in apps/web/src/components/sidebar/SafeListContextMenu/MultiAccountContextMenu.stories.tsx
+- [x] T043 [P] [US3] Create MultiAccountContextMenu.stories.tsx in apps/web/src/components/sidebar/SafeListContextMenu/MultiAccountContextMenu.stories.tsx
   - Dependencies: Next router
   - States: Default, Open menu, Hover states
-- [ ] T044 [P] [US3] Create QrModal.stories.tsx in apps/web/src/components/sidebar/QrCodeButton/QrModal.stories.tsx
+- [x] T044 [P] [US3] Create QrModal.stories.tsx in apps/web/src/components/sidebar/QrCodeButton/QrModal.stories.tsx
   - Dependencies: Redux (selectSettings), useCurrentChain
   - States: Default, With prefix toggle, Mobile viewport
 
