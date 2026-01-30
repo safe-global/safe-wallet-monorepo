@@ -51,14 +51,6 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
       ? 'The pending recovery proposal has expired and needs to be cancelled before a new one can be created.'
       : 'The recovery process has started. This Account will be ready to recover in:'
 
-  const link = (
-    <Track {...RECOVERY_EVENTS.LEARN_MORE} label="in-progress-card">
-      <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-        Learn more
-      </ExternalLink>
-    </Track>
-  )
-
   if (orientation === 'horizontal') {
     return (
       <ActionCard
@@ -66,7 +58,7 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
         title={title}
         content={
           <>
-            {desc} {link}
+            {desc}
             {!isExecutable && !isExpired && (
               <>
                 {' '}
@@ -75,6 +67,11 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
             )}
           </>
         }
+        learnMore={{
+          href: HelpCenterArticle.RECOVERY,
+          trackingEvent: RECOVERY_EVENTS.LEARN_MORE,
+          label: 'in-progress-card',
+        }}
         action={{ label: 'Go to queue', onClick }}
         trackingEvent={ATTENTION_PANEL_EVENTS.CHECK_RECOVERY_PROPOSAL}
         testId="recovery-in-progress-card"
@@ -102,7 +99,11 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
         >
           {icon}
 
-          {link}
+          <Track {...RECOVERY_EVENTS.LEARN_MORE} label="in-progress-card">
+            <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+              Learn more
+            </ExternalLink>
+          </Track>
         </Grid>
 
         <Grid item xs={12}>

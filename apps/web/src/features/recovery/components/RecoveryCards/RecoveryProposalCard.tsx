@@ -50,14 +50,6 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const title = 'Recover this account. '
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
-  const link = (
-    <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
-      <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-        Learn more
-      </ExternalLink>
-    </Track>
-  )
-
   const recoveryButton = (
     <Button data-testid="start-recovery-btn" variant="contained" onClick={onRecover} className={css.button}>
       Start recovery
@@ -70,6 +62,11 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
         severity="info"
         title={title}
         content={desc}
+        learnMore={{
+          href: HelpCenterArticle.RECOVERY,
+          trackingEvent: RECOVERY_EVENTS.LEARN_MORE,
+          label: 'proposal-card',
+        }}
         action={{ label: 'Start recovery', onClick: onRecover }}
         trackingEvent={ATTENTION_PANEL_EVENTS.START_RECOVERY}
         testId="recovery-proposal-card"
@@ -97,7 +94,11 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
         >
           {icon}
 
-          {link}
+          <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
+            <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+              Learn more
+            </ExternalLink>
+          </Track>
         </Grid>
 
         <Grid item xs={12}>

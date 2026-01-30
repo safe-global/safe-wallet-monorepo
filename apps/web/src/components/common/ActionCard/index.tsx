@@ -6,6 +6,8 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
+import Track from '@/components/common/Track'
+import ExternalLink from '@/components/common/ExternalLink'
 
 export type ActionCardSeverity = 'info' | 'warning' | 'critical'
 
@@ -17,11 +19,18 @@ export interface ActionCardButton {
   rel?: string
 }
 
+export interface LearnMoreLink {
+  href: string
+  label?: string
+  trackingEvent?: AnalyticsEvent
+}
+
 export interface ActionCardProps {
   severity: ActionCardSeverity
   title: string
   content?: ReactNode
   action?: ActionCardButton
+  learnMore?: LearnMoreLink
   trackingEvent?: AnalyticsEvent
   testId?: string
 }
@@ -61,11 +70,17 @@ const severityConfig = {
   },
 } as const
 
+const DEFAULT_LEARN_MORE_EVENT: AnalyticsEvent = {
+  action: 'Learn more click',
+  category: 'action_card',
+}
+
 export const ActionCard = ({
   severity,
   title,
   content,
   action,
+  learnMore,
   trackingEvent,
   testId = 'action-card',
 }: ActionCardProps): ReactElement => {
@@ -96,9 +111,25 @@ export const ActionCard = ({
           <Box component="span" sx={{ fontWeight: 700 }}>
             {title}
           </Box>
-          {content && (
+          {content && <>{typeof content === 'string' ? content : content}</>}
+          {learnMore && (
             <>
-              {typeof content === 'string' ? content : content}
+              {' '}
+              <Track {...(learnMore.trackingEvent || DEFAULT_LEARN_MORE_EVENT)} label={learnMore.label || 'learn-more'}>
+                <ExternalLink
+                  href={learnMore.href}
+                  noIcon
+                  sx={{
+                    fontWeight: 400,
+                    textDecoration: 'underline',
+                    '& span': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Learn more
+                </ExternalLink>
+              </Track>
             </>
           )}
         </Typography>
