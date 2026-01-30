@@ -10,36 +10,26 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@/components/common/ExternalLink'
 import { ActionCard } from '@/components/common/ActionCard'
 import { RecoverAccountFlow } from '@/components/tx-flow/flows'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
 import { TxModalContext } from '@/components/tx-flow'
 import type { TxModalContextType } from '@/components/tx-flow'
-import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import css from './styles.module.css'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 type Props =
   | {
       orientation?: 'vertical'
       onClose: () => void
-      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
   | {
       orientation: 'horizontal'
       onClose?: never
-      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
 
-export function InternalRecoveryProposalCard({
-  orientation = 'vertical',
-  onClose,
-  safe,
-  setTxFlow,
-}: Props): ReactElement {
+export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose, setTxFlow }: Props): ReactElement {
   const isDarkMode = useDarkMode()
 
   const onRecover = async () => {
@@ -158,10 +148,8 @@ export function InternalRecoveryProposalCard({
 }
 
 // Appease TypeScript
-const InternalUseSafe = () => useSafeInfo().safe
 const InternalUseSetTxFlow = () => useContext(TxModalContext).setTxFlow
 
 export const RecoveryProposalCard = madProps(InternalRecoveryProposalCard, {
-  safe: InternalUseSafe,
   setTxFlow: InternalUseSetTxFlow,
 })

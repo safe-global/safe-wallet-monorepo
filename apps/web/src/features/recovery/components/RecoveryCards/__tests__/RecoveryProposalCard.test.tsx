@@ -1,6 +1,3 @@
-import { faker } from '@faker-js/faker'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-
 import { fireEvent, render } from '@/tests/test-utils'
 import { InternalRecoveryProposalCard } from '../RecoveryProposalCard'
 
@@ -11,20 +8,11 @@ describe('RecoveryProposalCard', () => {
       const mockSetTxFlow = jest.fn()
 
       const { queryByText } = render(
-        <InternalRecoveryProposalCard
-          orientation="vertical"
-          onClose={mockClose}
-          safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeState}
-          setTxFlow={mockSetTxFlow}
-        />,
+        <InternalRecoveryProposalCard orientation="vertical" onClose={mockClose} setTxFlow={mockSetTxFlow} />,
       )
 
       expect(queryByText(/Recover this account\./)).toBeTruthy()
-      expect(
-        queryByText(
-          'Your connected wallet can help you regain access by adding a new signer.',
-        ),
-      ).toBeTruthy()
+      expect(queryByText('Your connected wallet can help you regain access by adding a new signer.')).toBeTruthy()
       expect(queryByText('Learn more')).toBeTruthy()
 
       const recoveryButton = queryByText('Start recovery')
@@ -41,19 +29,11 @@ describe('RecoveryProposalCard', () => {
       const mockSetTxFlow = jest.fn()
 
       const { queryByText } = render(
-        <InternalRecoveryProposalCard
-          orientation="horizontal"
-          safe={{ owners: [{ value: faker.finance.ethereumAddress() }] } as SafeState}
-          setTxFlow={mockSetTxFlow}
-        />,
+        <InternalRecoveryProposalCard orientation="horizontal" setTxFlow={mockSetTxFlow} />,
       )
 
       expect(queryByText(/Recover this account\./)).toBeTruthy()
-      expect(
-        queryByText(
-          'Your connected wallet can help you regain access by adding a new signer.',
-        ),
-      ).toBeTruthy()
+      expect(queryByText('Your connected wallet can help you regain access by adding a new signer.')).toBeTruthy()
 
       const recoveryButton = queryByText('Start recovery')
       expect(recoveryButton).toBeTruthy()
