@@ -9,16 +9,17 @@
 **Rationale**: The codebase already has functional MSW-Storybook integration without needing the explicit `msw-storybook-addon`. Storybook 10.1.10 has built-in support for `parameters.msw.handlers` pattern.
 
 **Alternatives Considered**:
+
 - `msw-storybook-addon` explicit installation: Not needed, already works transitively via `@chromatic-com/storybook`
 - Custom decorator approach: More complex, less integrated with Storybook ecosystem
 
 ### Current State
 
-| Component | Version | Status |
-|-----------|---------|--------|
-| MSW | 2.7.3 | Installed at root |
-| @chromatic-com/storybook | 4.1.2 | Includes msw-storybook-addon transitively |
-| Storybook | 10.1.10 | Native `parameters.msw.handlers` support |
+| Component                | Version | Status                                    |
+| ------------------------ | ------- | ----------------------------------------- |
+| MSW                      | 2.7.3   | Installed at root                         |
+| @chromatic-com/storybook | 4.1.2   | Includes msw-storybook-addon transitively |
+| Storybook                | 10.1.10 | Native `parameters.msw.handlers` support  |
 
 ### Working Pattern (from existing stories)
 
@@ -57,6 +58,7 @@ export const ErrorCase: Story = {
 Located at: `config/test/msw/handlers.ts` (463 lines)
 
 **Endpoints currently mocked (18+)**:
+
 - Authentication (nonce)
 - Balances & collectibles
 - Safe info & relay limits
@@ -84,18 +86,19 @@ Located at: `config/test/msw/handlers.ts` (463 lines)
 **Rationale**: The `@chromatic-com/storybook` addon is already installed. Chromatic provides designer-friendly review workflow that integrates with GitHub PRs, matching the spec requirement for designer sign-off.
 
 **Alternatives Considered**:
+
 - Custom screenshot solution (currently in place): Uses Playwright + S3 + PR comments. Works but lacks structured approval workflow and visual diff comparison.
 - jest-image-snapshot only: Local visual testing, no cloud review capability.
 
 ### Current State
 
-| Component | Status |
-|-----------|--------|
-| `@chromatic-com/storybook` addon | ✅ Installed (v4.1.2) |
-| jest-image-snapshot | ✅ Installed (v6.5.1) |
-| Chromatic project token | ❌ Not configured |
-| Chromatic GitHub workflow | ❌ Not present |
-| Custom screenshot workflow | ✅ Active (web-storybook-screenshots.yml) |
+| Component                        | Status                                    |
+| -------------------------------- | ----------------------------------------- |
+| `@chromatic-com/storybook` addon | ✅ Installed (v4.1.2)                     |
+| jest-image-snapshot              | ✅ Installed (v6.5.1)                     |
+| Chromatic project token          | ❌ Not configured                         |
+| Chromatic GitHub workflow        | ❌ Not present                            |
+| Custom screenshot workflow       | ✅ Active (web-storybook-screenshots.yml) |
 
 ### Required Setup
 
@@ -103,6 +106,7 @@ Located at: `config/test/msw/handlers.ts` (463 lines)
    - `CHROMATIC_PROJECT_TOKEN` - From Chromatic project settings
 
 2. **New Workflow**: `.github/workflows/chromatic.yml`
+
 ```yaml
 name: Chromatic
 
@@ -130,11 +134,12 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: apps/web
           buildScriptName: build-storybook
-          exitZeroOnChanges: false  # Fail PR if unapproved changes
-          exitOnceUploaded: true    # Don't wait for verification
+          exitZeroOnChanges: false # Fail PR if unapproved changes
+          exitOnceUploaded: true # Don't wait for verification
 ```
 
 3. **Package.json scripts** (apps/web):
+
 ```json
 {
   "chromatic": "chromatic --build-script-name build-storybook",
@@ -145,6 +150,7 @@ jobs:
 ### Existing Visual Testing Setup
 
 **test-runner.mjs configuration**:
+
 - Threshold: 5% (configurable via `VISUAL_REGRESSION_THRESHOLD`)
 - Snapshots: `__visual_snapshots__/`
 - Per-story opt-out: `parameters.visualTest.disable: true`
@@ -398,6 +404,7 @@ export const Tablet: Story = {
 ### Approach
 
 Use `@typescript-eslint/parser` to:
+
 1. Find all `.tsx` files in target directories
 2. Detect exported React components (function components, class components)
 3. Extract hook/API dependencies from imports and function bodies
@@ -436,6 +443,7 @@ interface ComponentInventory {
 ### Approach
 
 1. **Mock Provider Decorator**
+
 ```typescript
 // .storybook/decorators/MockWeb3Decorator.tsx
 export const MockWeb3Decorator = ({
@@ -454,6 +462,7 @@ export const MockWeb3Decorator = ({
 ```
 
 2. **RPC Handlers** (for ethers.js calls)
+
 ```typescript
 // config/test/msw/handlers/web3.ts
 export const web3Handlers = [
@@ -478,14 +487,290 @@ export const web3Handlers = [
 
 ---
 
+---
+
+## 6. Context Provider Patterns for Complex Stories
+
+### Decision: Stack multiple context providers for components with complex dependencies
+
+**Rationale**: Many Safe{Wallet} components require multiple contexts beyond just Redux state. The patterns below were discovered through implementation of Phase 5 stories.
+
+### Available Decorators/Helpers
+
+| Helper            | Location                    | Purpose                                 |
+| ----------------- | --------------------------- | --------------------------------------- |
+| `StoreDecorator`  | `@/stories/storeDecorator`  | Wraps story with Redux Provider         |
+| `RouterDecorator` | `@/stories/routerDecorator` | Wraps story with Next.js Router context |
+
+### Context Providers for Complex Components
+
+#### 1. MockSDKProvider (Safe SDK)
+
+Components using `useSafeSDK()` or Safe SDK methods need this:
+
+```typescript
+import { useEffect } from 'react'
+import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+
+const MockSDKProvider = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    setSafeSDK({} as never)
+    return () => setSafeSDK(undefined)
+  }, [])
+  return <>{children}</>
+}
+```
+
+#### 2. WalletContext.Provider
+
+Components using `useWallet()`, `useWalletContext()`, or `CheckWallet`:
+
+```typescript
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+
+const MOCK_WALLET_ADDRESS = '0x1234567890123456789012345678901234567890'
+
+const mockConnectedWallet: WalletContextType = {
+  connectedWallet: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    label: 'MetaMask',
+    provider: null as never,
+  },
+  signer: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    provider: null,
+  },
+  setSignerAddress: () => {},
+}
+```
+
+#### 3. TxModalContext.Provider
+
+Components using `TxModalContext` (transaction flows, change threshold, etc.):
+
+```typescript
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+
+const mockTxModalContext: TxModalContextType = {
+  txFlow: undefined,
+  setTxFlow: () => {},
+  setFullWidth: () => {},
+}
+```
+
+### Template 4: Complex Component (with full context stack)
+
+For components that need wallet, SDK, and Redux context:
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react'
+import React, { useEffect } from 'react'
+import { Paper } from '@mui/material'
+import { StoreDecorator } from '@/stories/storeDecorator'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import { ComponentName } from './ComponentName'
+
+const MOCK_WALLET_ADDRESS = '0x1234567890123456789012345678901234567890'
+
+const mockConnectedWallet: WalletContextType = {
+  connectedWallet: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    label: 'MetaMask',
+    provider: null as never,
+  },
+  signer: {
+    address: MOCK_WALLET_ADDRESS,
+    chainId: '1',
+    provider: null,
+  },
+  setSignerAddress: () => {},
+}
+
+const mockTxModalContext: TxModalContextType = {
+  txFlow: undefined,
+  setTxFlow: () => {},
+  setFullWidth: () => {},
+}
+
+const MockSDKProvider = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    setSafeSDK({} as never)
+    return () => setSafeSDK(undefined)
+  }, [])
+  return <>{children}</>
+}
+
+const meta: Meta<typeof ComponentName> = {
+  title: 'Components/Category/ComponentName',
+  component: ComponentName,
+  parameters: { layout: 'padded' },
+  decorators: [
+    (Story) => (
+      <MockSDKProvider>
+        <WalletContext.Provider value={mockConnectedWallet}>
+          <TxModalContext.Provider value={mockTxModalContext}>
+            <StoreDecorator
+              initialState={{
+                chains: {
+                  data: [{ chainId: '1' }],
+                },
+                safeInfo: {
+                  data: {
+                    address: { value: MOCK_WALLET_ADDRESS },
+                    chainId: '1',
+                    owners: [
+                      { value: MOCK_WALLET_ADDRESS },
+                      { value: '0xabcdef1234567890abcdef1234567890abcdef12' },
+                    ],
+                    threshold: 2,
+                    deployed: true,
+                  },
+                  loading: false,
+                  loaded: true,
+                },
+              }}
+            >
+              <Paper sx={{ padding: 3, maxWidth: 800 }}>
+                <Story />
+              </Paper>
+            </StoreDecorator>
+          </TxModalContext.Provider>
+        </WalletContext.Provider>
+      </MockSDKProvider>
+    ),
+  ],
+  tags: ['autodocs'],
+}
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Default: Story = {
+  args: { /* component props */ },
+}
+```
+
+### Common Redux State Shapes
+
+#### safeInfo slice
+
+```typescript
+safeInfo: {
+  data: {
+    address: { value: '0x...' },
+    chainId: '1',
+    owners: [{ value: '0x...' }, { value: '0x...' }],
+    threshold: 2,
+    deployed: true,
+    nonce: 42,                    // optional
+    implementation: { value: '0x...' },  // optional
+    modules: [],                  // optional
+    guard: null,                  // optional
+    fallbackHandler: { value: '0x...' }, // optional
+    version: '1.3.0',             // optional
+  },
+  loading: false,
+  loaded: true,
+}
+```
+
+#### chains slice
+
+```typescript
+chains: {
+  data: [
+    {
+      chainId: '1',
+      chainName: 'Ethereum',      // optional
+      shortName: 'eth',           // optional
+      // ... other chain config
+    },
+  ],
+}
+```
+
+#### balances slice
+
+```typescript
+balances: {
+  data: {
+    fiatTotal: '12345.67',
+    items: [
+      {
+        tokenInfo: {
+          type: 'NATIVE_TOKEN',   // or 'ERC20'
+          address: '0x0000000000000000000000000000000000000000',
+          decimals: 18,
+          symbol: 'ETH',
+          name: 'Ethereum',
+          logoUri: 'https://...',
+        },
+        balance: '1000000000000000000',
+        fiatBalance: '3000.00',
+        fiatConversion: '3000.00',
+        fiatBalance24hChange: '-5.08%',  // optional
+      },
+    ],
+  },
+  loading: false,
+  loaded: true,
+  error: undefined,
+}
+```
+
+#### settings slice
+
+```typescript
+settings: {
+  currency: 'usd',
+  hiddenTokens: {},              // { '1': ['0x...'] }
+  tokenList: 'ALL',              // from TOKEN_LISTS enum
+  shortName: { copy: true, qr: true },
+  theme: { darkMode: false },
+  env: {
+    tenderly: { url: '', accessToken: '' },
+    rpc: {},
+  },
+  signing: { onChainSigning: false, blindSigning: false },
+  transactionExecution: true,
+}
+```
+
+### Identifying Required Contexts
+
+When a component fails in Storybook with context errors:
+
+| Error Pattern                              | Required Context          |
+| ------------------------------------------ | ------------------------- |
+| `could not find react-redux context`       | `StoreDecorator`          |
+| `useWallet` / `useWalletContext` undefined | `WalletContext.Provider`  |
+| `useSafeSDK` undefined                     | `MockSDKProvider`         |
+| `TxModalContext` / `setTxFlow` undefined   | `TxModalContext.Provider` |
+| `RouterContext` / `useRouter` undefined    | `RouterDecorator`         |
+
+### Example Files
+
+Reference implementations for complex stories:
+
+- `apps/web/src/components/balances/AssetsTable/index.stories.tsx` - Full context stack with balances
+- `apps/web/src/components/settings/RequiredConfirmations/RequiredConfirmations.stories.tsx` - Wallet + TxModal contexts
+
+---
+
 ## Summary
 
-| Research Area | Decision | Key Action |
-|---------------|----------|------------|
-| MSW-Storybook | Use existing `parameters.msw.handlers` | Extend handlers, add factories |
-| Chromatic CI | Adopt Chromatic cloud | Create workflow, set token |
-| Story Templates | 3-tier template system | Create template files |
-| Component Inventory | TypeScript AST script | Build inventory tool |
-| Web3 Mocking | Decorator + handlers | Create MockWeb3Provider |
+| Research Area       | Decision                               | Key Action                     |
+| ------------------- | -------------------------------------- | ------------------------------ |
+| MSW-Storybook       | Use existing `parameters.msw.handlers` | Extend handlers, add factories |
+| Chromatic CI        | Adopt Chromatic cloud                  | Create workflow, set token     |
+| Story Templates     | 3-tier template system                 | Create template files          |
+| Component Inventory | TypeScript AST script                  | Build inventory tool           |
+| Web3 Mocking        | Decorator + handlers                   | Create MockWeb3Provider        |
+| Context Providers   | Stack providers for complex components | Use Template 4 pattern         |
 
 All research tasks complete. Ready for Phase 1 design artifacts.

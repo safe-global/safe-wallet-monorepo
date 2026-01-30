@@ -171,6 +171,7 @@
     "knip": "^5.0.0",
     "mockdate": "^3.0.5",
     "msw": "^2.7.3",
+    "msw-storybook-addon": "^2.0.6",
     "next-rspack": "^16.0.1",
     "prettier": "^3.6.2",
     "remark-frontmatter": "^5.0.0",

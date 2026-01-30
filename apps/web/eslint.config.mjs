@@ -24,6 +24,7 @@ export default [
       '**/cypress/',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
+      '**/public/mockServiceWorker.js',
     ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
