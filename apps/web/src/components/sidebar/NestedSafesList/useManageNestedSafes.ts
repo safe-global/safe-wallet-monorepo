@@ -8,6 +8,16 @@ import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 
 type PendingAction = 'hide' | 'show'
 
+const addIfMissing = (arr: string[], value: string): string[] => (arr.includes(value) ? arr : [...arr, value])
+
+const removeFromArray = (arr: string[], value: string): string[] => arr.filter((a) => a !== value)
+
+const applyValidSafeAction = (action: PendingAction, address: string, arr: string[]): string[] =>
+  action === 'hide' ? addIfMissing(arr, address) : removeFromArray(arr, address)
+
+const applyInvalidSafeAction = (action: PendingAction, address: string, arr: string[]): string[] =>
+  action === 'show' ? addIfMissing(arr, address) : removeFromArray(arr, address)
+
 /**
  * Manages the toggle/save/cancel logic for nested safes in manage mode.
  * Uses a single map to track pending changes instead of multiple arrays.
@@ -75,23 +85,9 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
       if (!safeStatus) return
 
       if (safeStatus.isValid) {
-        // Valid safe: manage manuallyHiddenSafes
-        if (action === 'hide') {
-          if (!newManuallyHidden.includes(address)) {
-            newManuallyHidden.push(address)
-          }
-        } else {
-          newManuallyHidden = newManuallyHidden.filter((a) => a !== address)
-        }
+        newManuallyHidden = applyValidSafeAction(action, address, newManuallyHidden)
       } else {
-        // Invalid safe: manage overriddenAutoHideSafes
-        if (action === 'show') {
-          if (!newOverridden.includes(address)) {
-            newOverridden.push(address)
-          }
-        } else {
-          newOverridden = newOverridden.filter((a) => a !== address)
-        }
+        newOverridden = applyInvalidSafeAction(action, address, newOverridden)
       }
     })
 
