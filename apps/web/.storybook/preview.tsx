@@ -20,19 +20,60 @@ export { withLayout, withMockProvider } from './decorators'
 const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
 
 // Syncs data-theme attribute and background color with the theme switcher
-const ThemeSyncDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
+const ThemeSyncDecorator = (
+  Story: React.ComponentType,
+  context: { globals?: { theme?: string }; parameters?: { layout?: string } },
+) => {
   const themeMode = context.globals?.theme || 'light'
   const backgroundColor = BACKGROUND_COLORS[themeMode] || BACKGROUND_COLORS.light
+  // Skip padding for fullscreen layouts (page-level stories)
+  const isFullscreen = context.parameters?.layout === 'fullscreen'
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', themeMode)
   }, [themeMode])
 
   return (
-    <div style={{ backgroundColor, padding: '1rem' }}>
+    <div style={{ backgroundColor, padding: isFullscreen ? 0 : '1rem' }}>
       <Story />
     </div>
   )
+}
+
+/** Safe{Wallet} viewport presets for responsive testing */
+const SAFE_VIEWPORTS = {
+  mobile: {
+    name: 'Mobile',
+    styles: {
+      width: '375px',
+      height: '667px',
+    },
+    type: 'mobile' as const,
+  },
+  tablet: {
+    name: 'Tablet',
+    styles: {
+      width: '768px',
+      height: '1024px',
+    },
+    type: 'tablet' as const,
+  },
+  desktop: {
+    name: 'Desktop',
+    styles: {
+      width: '1280px',
+      height: '800px',
+    },
+    type: 'desktop' as const,
+  },
+  desktopWide: {
+    name: 'Desktop Wide',
+    styles: {
+      width: '1920px',
+      height: '1080px',
+    },
+    type: 'desktop' as const,
+  },
 }
 
 const preview: Preview = {
@@ -44,6 +85,10 @@ const preview: Preview = {
       },
     },
     backgrounds: { disable: true },
+    viewport: {
+      viewports: SAFE_VIEWPORTS,
+      defaultViewport: 'desktop',
+    },
   },
 
   // MSW loader for API mocking

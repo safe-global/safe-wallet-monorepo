@@ -774,3 +774,118 @@ Reference implementations for complex stories:
 | Context Providers   | Stack providers for complex components | Use Template 4 pattern         |
 
 All research tasks complete. Ready for Phase 1 design artifacts.
+
+---
+
+## 7. Real Component Stories (Page-Level)
+
+### Decision: Render real components, mock data dependencies via MSW + chain config
+
+**Rationale**: Mock components don't provide real visual testing value. Real components with mocked data dependencies give accurate visual representation.
+
+### Key Learnings from Dashboard Implementation
+
+#### 1. Feature Flag Control via Chain Config
+
+Disable complex features that require extra mocking by filtering `chainData.features`:
+
+```typescript
+const createChainData = () => {
+  const chainData = { ...chainFixtures.mainnet }
+  chainData.features = chainData.features.filter(
+    (f: string) => ![
+      'PORTFOLIO_ENDPOINT',  // Uses portfolio API instead of balances
+      'POSITIONS',          // DeFi positions widget
+      'RECOVERY',           // Recovery feature
+      'HYPERNATIVE',        // Security alerts
+      'NATIVE_SWAPS',       // Swap feature
+      'EARN',               // Staking/earn features
+      'SPACES',             // Spaces feature
+      'EURCV_BOOST',        // Promotional banners
+      'NO_FEE_CAMPAIGN',    // Campaign banners
+    ].includes(f),
+  )
+  return chainData
+}
+```
+
+#### 2. Required Context Provider Stack
+
+Most dashboard components need this provider stack:
+
+```typescript
+<MockSDKProvider>
+  <WalletContext.Provider value={mockConnectedWallet}>
+    <TxModalContext.Provider value={mockTxModalContext}>
+      <StoreDecorator initialState={{...}}>
+        <Story />
+      </StoreDecorator>
+    </TxModalContext.Provider>
+  </WalletContext.Provider>
+</MockSDKProvider>
+```
+
+#### 3. Essential Redux State Structure
+
+```typescript
+initialState: {
+  safeInfo: {
+    data: { ...safeFixtures.efSafe, deployed: true }, // deployed: true is CRITICAL
+    loading: false,
+    loaded: true,  // Must be true for RTK Query
+  },
+  chains: {
+    data: [chainData],
+    loading: false,
+  },
+  settings: {
+    currency: 'usd',
+    hiddenTokens: {},
+    tokenList: TOKEN_LISTS.ALL,
+    // ... other settings
+  },
+  safeApps: {
+    pinned: [],
+  },
+}
+```
+
+#### 4. MSW Handler Coverage for Dashboard
+
+Minimum handlers needed:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/v1/chains/:chainId` | Chain config |
+| `/v1/chains` | Chain list |
+| `/v1/chains/:chainId/safes/:address` | Safe info |
+| `/v1/chains/:chainId/safes/:address/balances/:currency` | Token balances |
+| `/v1/chains/:chainId/safe-apps` | Safe Apps list |
+| `/v1/chains/:chainId/safes/:address/transactions/queued` | Pending txs |
+| `/v1/chains/:chainId/about/master-copies` | Version checks |
+| `/v1/targeted-messaging/safes/:address/outreaches` | Hypernative (empty) |
+
+### Widget-Level Stories
+
+Created bottom-up stories for individual widgets before composing page:
+
+| Widget | File | Key Dependencies |
+|--------|------|------------------|
+| Overview | `Overview/Overview.stories.tsx` | `useSafeInfo`, `useVisibleBalances`, `TxModalContext` |
+| AssetsWidget | `Assets/Assets.stories.tsx` | `useBalances`, `useVisibleAssets` |
+| PendingTxsList | `PendingTxs/PendingTxsList.stories.tsx` | `useTxQueue`, `useRecoveryQueue` (disabled) |
+| SafeAppList | `SafeAppList/SafeAppList.stories.tsx` | `useSafeApps`, props-based |
+| OwnerList | `OwnerList/OwnerList.stories.tsx` | `useSafeInfo`, `useAddressBook`, `TxModalContext` |
+
+### Best Practice: Bottom-Up Story Development
+
+1. **Start with widgets** - Isolated, fewer dependencies
+2. **Identify common patterns** - Reusable provider stacks, handlers
+3. **Compose to pages** - Combine tested widgets with full context
+4. **Disable non-essential features** - Reduce mocking complexity
+
+### Reference Files
+
+- Knowledge base: `apps/web/CLAUDE.storybook.md`
+- Example real Dashboard: `apps/web/src/components/dashboard/Dashboard.stories.tsx`
+- Fixture infrastructure: `config/test/msw/fixtures/`

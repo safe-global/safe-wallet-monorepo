@@ -317,60 +317,97 @@ export const Error: Story = {
 
 For full-page stories with sidebar and header:
 
-### Step 1: Use fullscreen layout
+### Step 1: Use fullscreen layout and withLayout decorator
 
 ```typescript
+import { withLayout } from '../../../.storybook/decorators'
+
 const meta = {
   title: 'Pages/Dashboard',
-  component: DashboardPage,
+  component: MockDashboardPage,
   parameters: {
     layout: 'fullscreen', // Important!
   },
+  decorators: [
+    // Add store decorator for Redux state
+    (Story, context) => (
+      <StoreDecorator initialState={{...}}>
+        <Story />
+      </StoreDecorator>
+    ),
+    // Add layout decorator for sidebar + header
+    withLayout({
+      activeNav: 'home',
+      safeAddress: '0x9fC3...213e',
+      safeBalance: '$4,500,000',
+      chainName: 'Ethereum',
+    }),
+  ],
 }
 ```
 
-### Step 2: Add layout decorator
+### Step 2: withLayout options
+
+The `withLayout` decorator provides a mock sidebar and header:
 
 ```typescript
-decorators: [
-  (Story) => (
-    <StoreDecorator initialState={fullSafeState}>
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <Sidebar />
-        <main style={{ flex: 1 }}>
-          <Header />
-          <Story />
-        </main>
-      </div>
-    </StoreDecorator>
-  ),
-],
+withLayout({
+  showSidebar?: boolean,     // Show/hide sidebar (default: true)
+  showHeader?: boolean,      // Show/hide header (default: true)
+  activeNav?: string,        // Highlight nav item: 'home' | 'assets' | 'transactions' | 'apps' | 'settings'
+  safeAddress?: string,      // Display address in sidebar
+  safeBalance?: string,      // Display balance in sidebar
+  chainName?: string,        // Display chain name
+})
 ```
 
 ### Step 3: Add viewport stories
 
+Use the pre-configured Safe{Wallet} viewports:
+
 ```typescript
 export const Desktop: Story = {
-  parameters: {
-    viewport: { defaultViewport: 'responsive' },
-    chromatic: { viewports: [1440] },
-  },
+  // Default viewport (1280x800)
 }
 
 export const Tablet: Story = {
   parameters: {
-    viewport: { defaultViewport: 'tablet' },
-    chromatic: { viewports: [768] },
+    viewport: { defaultViewport: 'tablet' }, // 768x1024
   },
 }
 
 export const Mobile: Story = {
   parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-    chromatic: { viewports: [375] },
+    viewport: { defaultViewport: 'mobile' }, // 375x667
   },
+  decorators: [
+    // Often hide sidebar on mobile
+    withLayout({
+      activeNav: 'home',
+      showSidebar: false,
+    }),
+  ],
 }
 ```
+
+### Available Viewports
+
+The following viewports are pre-configured in Storybook:
+
+| Viewport | Dimensions | Use Case |
+|----------|------------|----------|
+| `mobile` | 375x667 | iPhone SE/small phones |
+| `tablet` | 768x1024 | iPad/tablets |
+| `desktop` | 1280x800 | Standard desktop |
+| `desktopWide` | 1920x1080 | Wide desktop monitors |
+
+### Example: Complete Page Story
+
+See `src/components/dashboard/Dashboard.stories.tsx` for a full example with:
+- MSW handlers for realistic data
+- StoreDecorator for Redux state
+- withLayout for sidebar/header
+- Mobile and tablet viewport variants
 
 ---
 

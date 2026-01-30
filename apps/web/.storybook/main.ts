@@ -103,6 +103,8 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_HUBSPOT_CONFIG: process.env.NEXT_PUBLIC_HUBSPOT_CONFIG ?? '',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version,
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
+    // Enable official host features (logo, branding) in Storybook
+    NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
   }),
 
   typescript: {
