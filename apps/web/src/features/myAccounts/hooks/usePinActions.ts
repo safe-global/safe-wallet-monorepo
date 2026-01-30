@@ -28,13 +28,10 @@ export function usePinActions(
   )
 
   const addToPinnedList = useCallback(() => {
-    const isGroupAdded = safes.every((safe) => allAddedSafes[safe.chainId]?.[safe.address])
-    if (isGroupAdded) {
-      for (const safe of safes) {
-        dispatch(pinSafe({ chainId: safe.chainId, address: safe.address }))
-      }
-    } else {
-      for (const safe of safes) {
+    for (const safe of safes) {
+      const isAlreadyAdded = allAddedSafes[safe.chainId]?.[safe.address]
+
+      if (!isAlreadyAdded) {
         const overview = findOverview(safe)
         dispatch(
           addOrUpdateSafe({
@@ -42,13 +39,14 @@ export function usePinActions(
               ...defaultSafeInfo,
               chainId: safe.chainId,
               address: { value: address },
-              owners: overview ? overview.owners : defaultSafeInfo.owners,
-              threshold: overview ? overview.threshold : defaultSafeInfo.threshold,
+              owners: overview?.owners ?? defaultSafeInfo.owners,
+              threshold: overview?.threshold ?? defaultSafeInfo.threshold,
             },
           }),
         )
-        dispatch(pinSafe({ chainId: safe.chainId, address: safe.address }))
       }
+
+      dispatch(pinSafe({ chainId: safe.chainId, address: safe.address }))
     }
 
     dispatch(
