@@ -335,14 +335,23 @@ export function navigateToTransactionAndSetupCopilot(
   addressBookData = null,
   safeAddress = null,
 ) {
-  // Set up localStorage before navigation if address book data is provided
-  if (addressBookData) {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, addressBookData)
-  }
+  // Clear localStorage to ensure clean state
+  cy.clearLocalStorage()
 
   // Use provided safeAddress or default to MATIC_STATIC_SAFE_30
   const safe = safeAddress || safes.MATIC_STATIC_SAFE_30
-  cy.visit(constants.transactionUrl + safe + transactionId)
+
+  // Set up localStorage before navigation if address book data is provided
+  if (addressBookData) {
+    cy.visit(constants.transactionUrl + safe + transactionId, {
+      onBeforeLoad: (win) => {
+        win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(addressBookData))
+      },
+    })
+  } else {
+    cy.visit(constants.transactionUrl + safe + transactionId)
+  }
+
   walletUtils.connectSigner(signer)
 
   clickOnConfirmTransactionBtn()
