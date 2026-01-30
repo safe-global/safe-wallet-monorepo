@@ -163,6 +163,8 @@ Serve the static files:
 yarn workspace @safe-global/web serve
 ```
 
+**Interactive mode:**
+
 Launch the Cypress UI:
 
 ```
@@ -170,6 +172,27 @@ yarn workspace @safe-global/web cypress:open
 ```
 
 You can then choose which e2e tests to run.
+
+**Headless mode:**
+
+Run all tests in headless mode:
+
+```
+yarn workspace @safe-global/web cypress:run
+```
+
+Run a specific test file in headless mode with Chrome:
+
+```
+npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/example.cy.js"
+```
+
+Run multiple test files:
+
+```
+npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/*.cy.js"
+```
+
 Some tests will require signer private keys, please include them in your .env file
 
 ## Component template

@@ -120,7 +120,7 @@ export function cancelWalletCreation() {
 }
 
 export function clickOnBackBtn() {
-  cy.get(backBtn).should('be.enabled').click()
+  main.clickOnBackBtn(backBtn)
 }
 
 export function clickOnReviewStepNextBtn() {
@@ -212,7 +212,7 @@ export function clickOnNetwrokRemoveIcon() {
 }
 
 export function clickOnNextBtn() {
-  cy.get(nextBtn).should('be.enabled').click()
+  main.clickOnNextBtn(nextBtn)
 }
 
 export function clickOnYourSafeAccountPreview() {
