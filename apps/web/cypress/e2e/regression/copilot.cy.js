@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants.js'
-import * as shield from '../pages/copilot.js'
+import * as copilot from '../pages/copilot.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -14,6 +14,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
+
   // ========================================
   // 1. Widget General
   // ========================================
@@ -23,31 +24,23 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
     wallet.connectSigner(signer)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.verifyEmptyState()
-    shield.verifySecuredByFooter()
+    copilot.verifySafeShieldDisplayed()
+    copilot.verifyEmptyState()
+    copilot.verifySecuredByFooter()
   })
 
   it('[Widget General] Verify that Risk detected requires Risk Confirmation checkbox to continue', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousApproval,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousApproval, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-    shield.verifyRiskDetected()
+    copilot.verifyRiskDetected()
 
     // Verify risk confirmation checkbox is unchecked and continue button is disabled
-    shield.verifyRiskConfirmationCheckboxUnchecked()
-    shield.verifyContinueButtonDisabled()
+    copilot.verifyRiskConfirmationCheckboxUnchecked()
+    copilot.verifyContinueButtonDisabled()
 
     // Check the risk confirmation checkbox and continue
-    shield.checkRiskConfirmationCheckbox()
-    shield.verifyContinueButtonEnabled()
+    copilot.checkRiskConfirmationCheckbox()
+    copilot.verifyContinueButtonEnabled()
     createtx.clickOnContinueSignTransactionBtn()
     cy.contains(createtx.txDetailsStr).should('be.visible')
   })
@@ -56,76 +49,63 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // 2. Recipient Analyse
   // ========================================
   //Only 4A - Incompatible Safe version is not covered
-  // Helper function for common recipient analysis test setup
-  const setupRecipientAnalysisTest = (transactionId, addressBookData = null, safeAddress = null) => {
-    if (addressBookData) {
-      main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, addressBookData)
-    }
-
-    const safe = safeAddress || staticSafes.MATIC_STATIC_SAFE_30
-    cy.visit(constants.transactionUrl + safe + transactionId)
-    wallet.connectSigner(signer)
-
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-    shield.verifyRecipientAnalysisGroupCard()
-    shield.expandRecipientAnalysisCard()
-  }
 
   it('[Recipient Analyse] Verify that Known recipient is shown when address is in address book - 1A', () => {
-    setupRecipientAnalysisTest(
-      shield.testTransactions.recipientAnalysisKnownUnknown,
+    copilot.setupRecipientAnalysis(
+      copilot.testTransactions.recipientAnalysisKnownUnknown,
+      signer,
       ls.addressBookData.safeSchiledAddressBook,
     )
-    main.verifyTextVisibility([shield.addressInAddressBookStr])
+    main.verifyTextVisibility([copilot.addressInAddressBookStr])
   })
 
   it('[Recipient Analyse] Verify that Known recipient is shown when recipient is a Safe you own - 1A', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
-    main.verifyTextVisibility([shield.addressIsSafeYouOwnStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisSafeYouOwn, signer)
+    main.verifyTextVisibility([copilot.addressIsSafeYouOwnStr])
   })
 
   it('[Recipient Analyse] Verify that Unknown recipient is shown when address is not in address book - 1B', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisKnownUnknown)
-    main.verifyTextVisibility([shield.unknownRecipientStr, shield.addressNotInAddressBookStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisKnownUnknown, signer)
+    main.verifyTextVisibility([copilot.unknownRecipientStr, copilot.addressNotInAddressBookStr])
   })
 
   it('[Recipient Analyse] Verify that New recipient is shown for first time interaction - 3A', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisSafeYouOwn)
-    main.verifyTextVisibility([shield.firstTimeInteractionStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisSafeYouOwn, signer)
+    main.verifyTextVisibility([copilot.firstTimeInteractionStr])
   })
 
   it('[Recipient Analyse] Verify that Recurring recipient is shown with interaction count - 3B', () => {
-    setupRecipientAnalysisTest(
-      shield.testTransactions.recipientAnalysisKnownUnknown,
+    copilot.setupRecipientAnalysis(
+      copilot.testTransactions.recipientAnalysisKnownUnknown,
+      signer,
       ls.addressBookData.safeSchiledAddressBook,
     )
-    main.verifyTextVisibility([shield.recurringRecipientStr, shield.interactedTwoTimesStr])
+    main.verifyTextVisibility([copilot.recurringRecipientStr, copilot.interactedTwoTimesStr])
   })
 
   it('[Recipient Analyse] Verify that Low activity recipient warning is shown for address with few transactions - 2', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisLowActivity)
-    main.verifyTextVisibility([shield.lowActivityRecipientStr, shield.fewTransactionsStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisLowActivity, signer)
+    main.verifyTextVisibility([copilot.lowActivityRecipientStr, copilot.fewTransactionsStr])
   })
 
   it('[Recipient Analyse] Verify that Missing ownership warning is shown - 4B', () => {
-    setupRecipientAnalysisTest(
-      shield.testTransactions.recipientAnalysisMissingOwnership,
+    copilot.setupRecipientAnalysis(
+      copilot.testTransactions.recipientAnalysisMissingOwnership,
+      signer,
       null,
       staticSafes.MATIC_STATIC_SAFE_28,
     )
-    main.verifyTextVisibility([shield.missingOwnershipStr, shield.missingOwnershipMessageStr])
+    main.verifyTextVisibility([copilot.missingOwnershipStr, copilot.missingOwnershipMessageStr])
   })
 
   it('[Recipient Analyse] Verify that Unsupported network warning is shown - 4C', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisUnsupportedNetwork)
-    main.verifyTextVisibility([shield.unsupportedNetworkStr, shield.unsupportedNetworkMessageStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisUnsupportedNetwork, signer)
+    main.verifyTextVisibility([copilot.unsupportedNetworkStr, copilot.unsupportedNetworkMessageStr])
   })
 
   it('[Recipient Analyse] Verify that Different setup warning is shown - 4D', () => {
-    setupRecipientAnalysisTest(shield.testTransactions.recipientAnalysisDifferentSetup)
-    main.verifyTextVisibility([shield.differentSetupMessageStr])
+    copilot.setupRecipientAnalysis(copilot.testTransactions.recipientAnalysisDifferentSetup, signer)
+    main.verifyTextVisibility([copilot.differentSetupMessageStr])
   })
 
   // ========================================
@@ -133,130 +113,73 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
 
   it('[Threat Analyse] Verify that Safe Shield shows warning details for reverted txs-9B', () => {
-    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.threatAnalysisFailed)
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisFailed, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyIssuesFoundWarningHeader()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisWarningState()
-    shield.expandThreatAnalysisCard()
-    shield.verifyThreatAnalysisFailedDetails()
+    copilot.verifyIssuesFoundWarningHeader()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisWarningState()
+    copilot.expandThreatAnalysisCard()
+    copilot.verifyThreatAnalysisFailedDetails()
   })
 
   it('[Threat Analyse] Verify that Safe Shield shows no threat detected-9C', () => {
-    cy.visit(
-      constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.threatAnalysisNoThreat,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisNoThreat, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisNoThreatState()
-    shield.expandThreatAnalysisCard()
-    shield.verifyThreatAnalysisFoundNoIssues()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisNoThreatState()
+    copilot.expandThreatAnalysisCard()
+    copilot.verifyThreatAnalysisFoundNoIssues()
     main.verifyTextNotVisible(['Malicious threat detected', 'Threat analysis failed'])
   })
 
   it('[Threat Analyse] Verify Malicious Approval detection - 9A', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousApproval,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousApproval, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyRiskDetected()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisMaliciousState()
-    shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.drainerApprovalMessageStr, shield.drainerActivityStr])
+    copilot.verifyRiskDetected()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisMaliciousState()
+    copilot.expandThreatAnalysisCard()
+    main.verifyTextVisibility([copilot.drainerApprovalMessageStr, copilot.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious Transfer detection - 9A', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousTransfer,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousTransfer, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyRiskDetected()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisMaliciousState()
-    shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.drainerTransferMessageStr, shield.drainerActivityStr])
+    copilot.verifyRiskDetected()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisMaliciousState()
+    copilot.expandThreatAnalysisCard()
+    main.verifyTextVisibility([copilot.drainerTransferMessageStr, copilot.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious Native Transfer detection - 9A', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousNativeTransfer,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousNativeTransfer, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyRiskDetected()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisMaliciousState()
-    shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.drainerNativeTransferMessageStr, shield.drainerActivityStr])
+    copilot.verifyRiskDetected()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisMaliciousState()
+    copilot.expandThreatAnalysisCard()
+    main.verifyTextVisibility([copilot.drainerNativeTransferMessageStr, copilot.drainerActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls detection - 9A', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousAddress,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousAddress, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyRiskDetected()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisMaliciousState()
-    shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.maliciousAddressMessageStr, shield.maliciousActivityStr])
+    copilot.verifyRiskDetected()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisMaliciousState()
+    copilot.expandThreatAnalysisCard()
+    main.verifyTextVisibility([copilot.maliciousAddressMessageStr, copilot.maliciousActivityStr])
   })
 
   it('[Threat Analyse] Verify Malicious wallet_sendCalls(Eth) detection - 9A', () => {
-    cy.visit(
-      constants.transactionUrl +
-        staticSafes.MATIC_STATIC_SAFE_30 +
-        shield.testTransactions.threatAnalysisMaliciousAddressEth,
-    )
-    wallet.connectSigner(signer)
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisMaliciousAddressEth, signer)
 
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-
-    shield.verifyRiskDetected()
-    shield.verifyThreatAnalysisGroupCard()
-    shield.verifyThreatAnalysisMaliciousState()
-    shield.expandThreatAnalysisCard()
-    main.verifyTextVisibility([shield.maliciousAddressMessageStr, shield.maliciousActivityStr])
+    copilot.verifyRiskDetected()
+    copilot.verifyThreatAnalysisGroupCard()
+    copilot.verifyThreatAnalysisMaliciousState()
+    copilot.expandThreatAnalysisCard()
+    main.verifyTextVisibility([copilot.maliciousAddressMessageStr, copilot.maliciousActivityStr])
   })
   //TODO: Add tests for offchain messages when implemented
   // ========================================
@@ -270,47 +193,38 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
 
   it('[Tenderly Simulation] Verify that tenderly section is presented in the safe shield', () => {
-    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.tenderlySimulation)
-    wallet.connectSigner(signer)
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulation()
-    cy.get(shield.tenderlySimulation).should('contain.text', 'Transaction simulation')
-    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('be.visible')
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
+
+    copilot.verifyTenderlySimulation()
+    cy.get(copilot.tenderlySimulation).should('contain.text', 'Transaction simulation')
+    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('be.visible')
     cy.contains('Run').should('be.visible')
   })
 
   it('[Tenderly Simulation] Verify success simulation state', () => {
-    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.tenderlySimulation)
-    wallet.connectSigner(signer)
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulation()
-    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
-    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.tenderlySimulation, signer)
+
+    copilot.verifyTenderlySimulation()
+    cy.get(copilot.tenderlySimulation, { timeout: 15000 }).find(copilot.runSimulationBtn).click()
+    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation successful', { timeout: 10000 }).should('be.visible')
-    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation successful')
+    cy.get(copilot.tenderlySimulation).should('contain.text', 'Simulation successful')
     cy.contains('View').should('be.visible')
-    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
-    main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
+    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('not.exist')
+    main.verifyLinkContainsUrl('View', copilot.tenderlySimulationUrl)
   })
 
   it('[Tenderly Simulation] Verify failed simulation state', () => {
-    cy.visit(constants.transactionUrl + staticSafes.MATIC_STATIC_SAFE_30 + shield.testTransactions.threatAnalysisFailed)
-    wallet.connectSigner(signer)
-    createtx.clickOnConfirmTransactionBtn()
-    shield.verifySafeShieldDisplayed()
-    shield.waitForAnalysisComplete()
-    shield.verifyTenderlySimulation()
-    cy.get(shield.tenderlySimulation, { timeout: 15000 }).find(shield.runSimulationBtn).click()
-    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('contain.text', 'Running...')
+    copilot.navigateToTransactionAndSetupCopilot(copilot.testTransactions.threatAnalysisFailed, signer)
+
+    copilot.verifyTenderlySimulation()
+    cy.get(copilot.tenderlySimulation, { timeout: 15000 }).find(copilot.runSimulationBtn).click()
+    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('contain.text', 'Running...')
     cy.contains('Simulation failed', { timeout: 10000 }).should('be.visible')
-    cy.get(shield.tenderlySimulation).should('contain.text', 'Simulation failed')
+    cy.get(copilot.tenderlySimulation).should('contain.text', 'Simulation failed')
     cy.contains('View').should('be.visible')
-    cy.get(shield.tenderlySimulation).find(shield.runSimulationBtn).should('not.exist')
-    main.verifyLinkContainsUrl('View', shield.tenderlySimulationUrl)
+    cy.get(copilot.tenderlySimulation).find(copilot.runSimulationBtn).should('not.exist')
+    main.verifyLinkContainsUrl('View', copilot.tenderlySimulationUrl)
   })
 
   //it('[Tenderly Simulation] Verify original and nested txs simulations in Tenderly card'

@@ -1,6 +1,8 @@
 import * as constants from '../../support/constants'
-import { continueSignBtn } from './create_tx.pages'
+import { continueSignBtn, clickOnConfirmTransactionBtn } from './create_tx.pages'
 import * as main from './main.page'
+import * as walletUtils from '../../support/utils/wallet.js'
+import safes from '../../fixtures/safes/static.js'
 
 // Safe Shield Page Object
 
@@ -318,4 +320,49 @@ export function verifyContinueButtonEnabled() {
 // Expand recipient analysis card
 export function expandRecipientAnalysisCard() {
   cy.get(recipientAnalysisGroupCard).click()
+}
+
+// ========================================
+// Navigation and Setup Functions
+// ========================================
+
+/**
+ * Navigate to a transaction and set up the Copilot flow
+ * @param {string} transactionId - Transaction ID (e.g., '&id=multisig_0x...')
+ * @param {string} signer - Private key for wallet connection
+ * @param {object} addressBookData - Optional address book data to set in localStorage before navigation
+ * @param {string} safeAddress - Optional Safe address (defaults to MATIC_STATIC_SAFE_30)
+ */
+export function navigateToTransactionAndSetupCopilot(
+  transactionId,
+  signer,
+  addressBookData = null,
+  safeAddress = null,
+) {
+  // Set up localStorage before navigation if address book data is provided
+  if (addressBookData) {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, addressBookData)
+  }
+
+  // Use provided safeAddress or default to MATIC_STATIC_SAFE_30
+  const safe = safeAddress || safes.MATIC_STATIC_SAFE_30
+  cy.visit(constants.transactionUrl + safe + transactionId)
+  walletUtils.connectSigner(signer)
+
+  clickOnConfirmTransactionBtn()
+  verifySafeShieldDisplayed()
+  waitForAnalysisComplete()
+}
+
+/**
+ * Set up recipient analysis test flow (extends navigateToTransactionAndSetupCopilot)
+ * @param {string} transactionId - Transaction ID
+ * @param {string} signer - Private key for wallet connection
+ * @param {object} addressBookData - Optional address book data
+ * @param {string} safeAddress - Optional Safe address
+ */
+export function setupRecipientAnalysis(transactionId, signer, addressBookData = null, safeAddress = null) {
+  navigateToTransactionAndSetupCopilot(transactionId, signer, addressBookData, safeAddress)
+  verifyRecipientAnalysisGroupCard()
+  expandRecipientAnalysisCard()
 }
