@@ -1,4 +1,4 @@
-# Tasks: Design System Migration to shadcn with Storybook Coverage
+# Tasks: Storybook Coverage Expansion
 
 **Input**: Design documents from `/specs/001-shadcn-storybook-migration/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
@@ -20,6 +20,23 @@
 - **Web app**: `apps/web/` (monorepo structure)
 - **MSW handlers**: `config/test/msw/`
 - **Scripts**: `scripts/storybook/`
+
+## Current Coverage Status
+
+```
+Total Components: 330
+With Stories: 14 (4%)
+
+By Category:
+- sidebar:     3 components,  0 stories (0%)   ← Critical for page stories
+- common:     16 components,  4 stories (25%)
+- balance:    10 components,  0 stories (0%)
+- settings:   14 components,  0 stories (0%)
+- dashboard:  18 components,  1 story  (6%)
+- transaction: 38 components,  0 stories (0%)
+- feature:     4 components,  0 stories (0%)
+- other:     227 components,  9 stories (4%)
+```
 
 ---
 
@@ -107,8 +124,6 @@
 - [x] T039 [US2] Update fromFixtures.ts to include Safe Apps handlers
 - [x] T040 [US2] Web3 RPC handlers exist in config/test/msw/handlers/web3.ts
 - [x] T041 [US2] Web3 handlers exported from config/test/msw/handlers/index.ts
-- [ ] T042 [US2] Create sample story demonstrating MSW fixture usage (deferred to Phase 5)
-- [ ] T043 [US2] Verify sample story renders correctly in Storybook with fixtureHandlers (deferred to Phase 5)
 
 **Checkpoint**: MSW fixture infrastructure complete ✅
 
@@ -124,70 +139,89 @@
 
 **Independent Test**: Navigate Storybook UI and verify each component category has stories with Default, Loading, Error, Empty, and Disabled states as applicable
 
-### Phase 5.1: shadcn/ui Component Stories (Tier 1 - Most Used)
+### Phase 5.1: Sidebar Components (3 components, 0 stories - CRITICAL)
 
-- [ ] T044 [P] [US3] Create input.stories.tsx in apps/web/src/components/ui/input.stories.tsx
-- [ ] T045 [P] [US3] Create select.stories.tsx in apps/web/src/components/ui/select.stories.tsx
-- [ ] T046 [P] [US3] Create checkbox.stories.tsx in apps/web/src/components/ui/checkbox.stories.tsx
-- [ ] T047 [P] [US3] Create switch.stories.tsx in apps/web/src/components/ui/switch.stories.tsx
-- [ ] T048 [P] [US3] Create tabs.stories.tsx in apps/web/src/components/ui/tabs.stories.tsx
-- [ ] T049 [P] [US3] Create dropdown-menu.stories.tsx in apps/web/src/components/ui/dropdown-menu.stories.tsx
-- [ ] T050 [P] [US3] Create dialog.stories.tsx in apps/web/src/components/ui/dialog.stories.tsx
-- [ ] T051 [P] [US3] Create alert-dialog.stories.tsx in apps/web/src/components/ui/alert-dialog.stories.tsx
+**Why first**: Sidebar components are required for page-level stories (US4). Must complete before Phase 6.
 
-### Phase 5.2: shadcn/ui Component Stories (Tier 2 - Common)
+- [ ] T042 [US3] Create SafeHeaderInfo.stories.tsx in apps/web/src/components/sidebar/SidebarHeader/SafeHeaderInfo.stories.tsx
+  - Dependencies: useAddressResolver, useVisibleBalances, useIsHypernativeGuard
+  - States: Default, Loading, Multichain, Long address
+- [ ] T043 [P] [US3] Create MultiAccountContextMenu.stories.tsx in apps/web/src/components/sidebar/SafeListContextMenu/MultiAccountContextMenu.stories.tsx
+  - Dependencies: Next router
+  - States: Default, Open menu, Hover states
+- [ ] T044 [P] [US3] Create QrModal.stories.tsx in apps/web/src/components/sidebar/QrCodeButton/QrModal.stories.tsx
+  - Dependencies: Redux (selectSettings), useCurrentChain
+  - States: Default, With prefix toggle, Mobile viewport
 
-- [ ] T052 [P] [US3] Create badge.stories.tsx in apps/web/src/components/ui/badge.stories.tsx
-- [ ] T053 [P] [US3] Create tooltip.stories.tsx in apps/web/src/components/ui/tooltip.stories.tsx
-- [ ] T054 [P] [US3] Create popover.stories.tsx in apps/web/src/components/ui/popover.stories.tsx
-- [ ] T055 [P] [US3] Create sheet.stories.tsx in apps/web/src/components/ui/sheet.stories.tsx
-- [ ] T056 [P] [US3] Create accordion.stories.tsx in apps/web/src/components/ui/accordion.stories.tsx
-- [ ] T057 [P] [US3] Create table.stories.tsx in apps/web/src/components/ui/table.stories.tsx
+**Checkpoint**: Sidebar stories complete - page-level stories can now include sidebar
 
-### Phase 5.3: shadcn/ui Component Stories (Tier 3 - Specialized)
+### Phase 5.2: Balance Components (10 components, 0 stories)
 
-- [ ] T058 [P] [US3] Create slider.stories.tsx in apps/web/src/components/ui/slider.stories.tsx
-- [ ] T059 [P] [US3] Create progress.stories.tsx in apps/web/src/components/ui/progress.stories.tsx
-- [ ] T060 [P] [US3] Create navigation-menu.stories.tsx in apps/web/src/components/ui/navigation-menu.stories.tsx
-- [ ] T061 [P] [US3] Create pagination.stories.tsx in apps/web/src/components/ui/pagination.stories.tsx
-- [ ] T062 [P] [US3] Create scroll-area.stories.tsx in apps/web/src/components/ui/scroll-area.stories.tsx
-- [ ] T063 [P] [US3] Create separator.stories.tsx in apps/web/src/components/ui/separator.stories.tsx
-- [ ] T064 [P] [US3] Create skeleton.stories.tsx in apps/web/src/components/ui/skeleton.stories.tsx
-- [ ] T065 [P] [US3] Create textarea.stories.tsx in apps/web/src/components/ui/textarea.stories.tsx
-- [ ] T066 [P] [US3] Create toggle.stories.tsx in apps/web/src/components/ui/toggle.stories.tsx
-- [ ] T067 [P] [US3] Create radio-group.stories.tsx in apps/web/src/components/ui/radio-group.stories.tsx
-- [ ] T068 [P] [US3] Create label.stories.tsx in apps/web/src/components/ui/label.stories.tsx
-- [ ] T069 [P] [US3] Create hover-card.stories.tsx in apps/web/src/components/ui/hover-card.stories.tsx
-- [ ] T070 [P] [US3] Create context-menu.stories.tsx in apps/web/src/components/ui/context-menu.stories.tsx
-- [ ] T071 [P] [US3] Create collapsible.stories.tsx in apps/web/src/components/ui/collapsible.stories.tsx
-- [ ] T072 [P] [US3] Create alert.stories.tsx in apps/web/src/components/ui/alert.stories.tsx
-- [ ] T073 [P] [US3] Create aspect-ratio.stories.tsx in apps/web/src/components/ui/aspect-ratio.stories.tsx
-- [ ] T074 [P] [US3] Create breadcrumb.stories.tsx in apps/web/src/components/ui/breadcrumb.stories.tsx
-- [ ] T075 [P] [US3] Create drawer.stories.tsx in apps/web/src/components/ui/drawer.stories.tsx
-- [ ] T076 [P] [US3] Create input-otp.stories.tsx in apps/web/src/components/ui/input-otp.stories.tsx
-- [ ] T077 [P] [US3] Create resizable.stories.tsx in apps/web/src/components/ui/resizable.stories.tsx
+- [ ] T045 [US3] Identify all balance components using `yarn storybook:inventory --category balance`
+- [ ] T046 [P] [US3] Create TokenAmount.stories.tsx - show token amounts with different precisions
+- [ ] T047 [P] [US3] Create FiatValue.stories.tsx - fiat currency formatting
+- [ ] T048 [P] [US3] Create TokenIcon.stories.tsx - token icons with fallbacks
+- [ ] T049 [P] [US3] Create BalanceList.stories.tsx - list of balances with sorting
+- [ ] T050 [P] [US3] Create remaining balance component stories (5 components)
+  - Use MSW fixture handlers: `fixtureHandlers.efSafe()` for realistic data
 
-### Phase 5.4: Sidebar Component Stories (17 components, 0 stories - critical for page stories)
+### Phase 5.3: Common Components (16 components, 4 stories - expand coverage)
 
-- [ ] T078 [US3] Identify all sidebar components using inventory tool
-- [ ] T079 [P] [US3] Create SidebarNavigation.stories.tsx in apps/web/src/components/sidebar/SidebarNavigation/SidebarNavigation.stories.tsx
-- [ ] T080 [P] [US3] Create SafeListItem.stories.tsx in apps/web/src/components/sidebar/SafeListItem/SafeListItem.stories.tsx
-- [ ] T081 [P] [US3] Create ChainIndicator.stories.tsx in apps/web/src/components/sidebar/ChainIndicator/ChainIndicator.stories.tsx
-- [ ] T082 [P] [US3] Create remaining sidebar component stories (based on inventory)
+- [ ] T051 [US3] Audit existing common stories, identify gaps
+- [ ] T052 [P] [US3] Create AddressDisplay.stories.tsx - address formatting, ENS, copy
+- [ ] T053 [P] [US3] Create NetworkIndicator.stories.tsx - chain badges, network switching
+- [ ] T054 [P] [US3] Create CopyButton.stories.tsx - copy to clipboard states
+- [ ] T055 [P] [US3] Create TxButton.stories.tsx - transaction action buttons
+- [ ] T056 [P] [US3] Create remaining common component stories (8 components)
 
-### Phase 5.5: Common Component Stories (fill coverage gaps)
+### Phase 5.4: Settings Components (14 components, 0 stories)
 
-- [ ] T083 [US3] Generate list of uncovered common components using inventory tool
-- [ ] T084 [P] [US3] Create stories for Tier 1 common components (address display, balance display, token amounts)
-- [ ] T085 [P] [US3] Create stories for Tier 2 common components (tables, lists, pagination, search)
-- [ ] T086 [P] [US3] Create stories for Tier 3 common components (modals, toasts, errors, loading states)
+- [ ] T057 [US3] Identify all settings components using inventory tool
+- [ ] T058 [P] [US3] Create SettingsHeader.stories.tsx
+- [ ] T059 [P] [US3] Create OwnerList.stories.tsx - list of Safe owners
+- [ ] T060 [P] [US3] Create ThresholdSelector.stories.tsx - threshold configuration
+- [ ] T061 [P] [US3] Create SpendingLimits.stories.tsx - spending limit management
+- [ ] T062 [P] [US3] Create remaining settings component stories (10 components)
 
-### Phase 5.6: Feature Component Stories (expand existing coverage)
+### Phase 5.5: Dashboard Components (18 components, 1 story)
 
-- [ ] T087 [US3] Generate list of feature components needing stories using inventory tool
-- [ ] T088 [P] [US3] Create/expand stories for Tier 1 features (Transactions, Balances, Dashboard)
-- [ ] T089 [P] [US3] Create/expand stories for Tier 2 features (Settings, Address Book, Safe Apps)
-- [ ] T090 [P] [US3] Create/expand stories for Tier 3 features (Staking, Swaps, Bridge)
+- [ ] T063 [US3] Audit existing dashboard story, identify gaps
+- [ ] T064 [P] [US3] Create Overview.stories.tsx - main dashboard overview
+- [ ] T065 [P] [US3] Create PendingTxs.stories.tsx - pending transactions widget
+- [ ] T066 [P] [US3] Create RecentActivity.stories.tsx - recent activity feed
+- [ ] T067 [P] [US3] Create SafeAppsList.stories.tsx - Safe Apps grid
+- [ ] T068 [P] [US3] Create remaining dashboard component stories (13 components)
+
+### Phase 5.6: Transaction Components (38 components, 0 stories)
+
+**Note**: Largest category, highest user visibility. Use MSW transaction handlers.
+
+- [ ] T069 [US3] Identify all transaction components using inventory tool
+- [ ] T070 [P] [US3] Create TxList.stories.tsx - transaction list with pagination
+  - States: Default, Loading, Empty, Error, With queue
+- [ ] T071 [P] [US3] Create TxDetails.stories.tsx - transaction detail view
+  - States: Pending, Executed, Failed, Cancellation
+- [ ] T072 [P] [US3] Create TxSigners.stories.tsx - signer list and status
+- [ ] T073 [P] [US3] Create TxActions.stories.tsx - execute/reject/sign buttons
+- [ ] T074 [P] [US3] Create TxSummary.stories.tsx - transaction summary card
+- [ ] T075 [P] [US3] Create TxData.stories.tsx - decoded transaction data
+- [ ] T076 [P] [US3] Create TxTimeline.stories.tsx - transaction status timeline
+- [ ] T077 [P] [US3] Create remaining transaction component stories (31 components)
+
+### Phase 5.7: Feature Components (4 components, 0 stories)
+
+- [ ] T078 [US3] Identify all feature components using inventory tool
+- [ ] T079 [P] [US3] Create feature component stories (4 components)
+
+### Phase 5.8: Other Components (227 components, 9 stories)
+
+**Strategy**: Prioritize by usage frequency and user visibility. Use inventory priority scores.
+
+- [ ] T080 [US3] Generate prioritized list using `yarn storybook:inventory --json`
+- [ ] T081 [US3] Create stories for top 20 priority "other" components
+- [ ] T082 [US3] Create stories for next 30 priority "other" components
+- [ ] T083 [US3] Create stories for remaining visually-rendered "other" components
+  - Skip: providers, HOCs, utility wrappers, internal-only components
 
 **Checkpoint**: All individual components have Storybook stories with documented states
 
@@ -199,18 +233,20 @@
 
 **Independent Test**: View page story in Storybook showing complete layout with sidebar, header, and content; resize viewport to verify responsive behavior
 
+**Prerequisite**: Phase 5.1 (Sidebar stories) must be complete
+
 ### Implementation for User Story 4
 
-- [ ] T091 [US4] Create LayoutDecorator component for full-page layouts in apps/web/.storybook/decorators/LayoutDecorator.tsx
-- [ ] T092 [US4] Configure viewport addon for responsive testing in apps/web/.storybook/preview.tsx
-- [ ] T093 [P] [US4] Create Dashboard page story in apps/web/src/pages/Dashboard/Dashboard.stories.tsx
-- [ ] T094 [P] [US4] Create Transactions list page story in apps/web/src/pages/Transactions/Transactions.stories.tsx
-- [ ] T095 [P] [US4] Create Transaction details page story in apps/web/src/pages/TransactionDetails/TransactionDetails.stories.tsx
-- [ ] T096 [P] [US4] Create Settings page story in apps/web/src/pages/Settings/Settings.stories.tsx
-- [ ] T097 [P] [US4] Create Safe Apps page story in apps/web/src/pages/SafeApps/SafeApps.stories.tsx
-- [ ] T098 [US4] Add Mobile viewport variant to all page stories
-- [ ] T099 [US4] Add Tablet viewport variant to all page stories
-- [ ] T100 [US4] Verify all page stories render correctly with realistic data
+- [ ] T084 [US4] Enhance LayoutDecorator component for full-page layouts in apps/web/.storybook/decorators/LayoutDecorator.tsx
+- [ ] T085 [US4] Configure viewport addon for responsive testing in apps/web/.storybook/preview.tsx
+- [ ] T086 [P] [US4] Create Dashboard page story in apps/web/src/pages/Dashboard/Dashboard.stories.tsx
+- [ ] T087 [P] [US4] Create Transactions list page story in apps/web/src/pages/Transactions/Transactions.stories.tsx
+- [ ] T088 [P] [US4] Create Transaction details page story in apps/web/src/pages/TransactionDetails/TransactionDetails.stories.tsx
+- [ ] T089 [P] [US4] Create Settings page story in apps/web/src/pages/Settings/Settings.stories.tsx
+- [ ] T090 [P] [US4] Create Safe Apps page story in apps/web/src/pages/SafeApps/SafeApps.stories.tsx
+- [ ] T091 [US4] Add Mobile viewport variant to all page stories
+- [ ] T092 [US4] Add Tablet viewport variant to all page stories
+- [ ] T093 [US4] Verify all page stories render correctly with realistic data
 
 **Checkpoint**: Page-level stories complete - designers can review full layouts
 
@@ -226,19 +262,19 @@
 
 ### Prerequisites (External - Requires Approval)
 
-- [ ] T101 [US5] Request approval for Chromatic account setup
-- [ ] T102 [US5] Create Chromatic project and obtain project token
-- [ ] T103 [US5] Add CHROMATIC_PROJECT_TOKEN to GitHub repository secrets
+- [ ] T094 [US5] Request approval for Chromatic account setup
+- [ ] T095 [US5] Create Chromatic project and obtain project token
+- [ ] T096 [US5] Add CHROMATIC_PROJECT_TOKEN to GitHub repository secrets
 
 ### Implementation for User Story 5 (After Approval)
 
-- [ ] T104 [US5] Add chromatic npm scripts to apps/web/package.json
-- [ ] T105 [US5] Create Chromatic GitHub Actions workflow in .github/workflows/chromatic.yml
-- [ ] T106 [US5] Configure workflow to block PRs on unapproved visual changes
-- [ ] T107 [US5] Run initial Chromatic build to capture baselines
-- [ ] T108 [US5] Test PR workflow with intentional visual change
-- [ ] T109 [US5] Document Chromatic review process for designers in specs/001-shadcn-storybook-migration/chromatic-guide.md
-- [ ] T110 [US5] Train team on Chromatic review workflow
+- [ ] T097 [US5] Add chromatic npm scripts to apps/web/package.json
+- [ ] T098 [US5] Create Chromatic GitHub Actions workflow in .github/workflows/chromatic.yml
+- [ ] T099 [US5] Configure workflow to block PRs on unapproved visual changes
+- [ ] T100 [US5] Run initial Chromatic build to capture baselines
+- [ ] T101 [US5] Test PR workflow with intentional visual change
+- [ ] T102 [US5] Document Chromatic review process for designers in specs/001-shadcn-storybook-migration/chromatic-guide.md
+- [ ] T103 [US5] Train team on Chromatic review workflow
 
 **Checkpoint**: Visual regression pipeline active - changes are caught before merge
 
@@ -248,13 +284,13 @@
 
 **Purpose**: Documentation, cleanup, and validation
 
-- [ ] T111 [P] Update quickstart.md with final patterns and examples
-- [ ] T112 [P] Update AGENTS.md with Storybook story requirements
-- [ ] T113 Run final coverage report and document results
-- [ ] T114 Verify Storybook builds successfully with all stories
-- [ ] T115 Run yarn workspace @safe-global/web type-check
-- [ ] T116 Run yarn workspace @safe-global/web lint
-- [ ] T117 Create PR with all changes
+- [ ] T104 [P] Update quickstart.md with final patterns and examples
+- [ ] T105 [P] Update AGENTS.md with Storybook story requirements
+- [ ] T106 Run final coverage report and document results
+- [ ] T107 Verify Storybook builds successfully with all stories
+- [ ] T108 Run yarn workspace @safe-global/web type-check
+- [ ] T109 Run yarn workspace @safe-global/web lint
+- [ ] T110 Create PR with all changes
 
 ---
 
@@ -267,81 +303,53 @@
 - **User Story 1 (Phase 3)**: Can start after Setup; provides inventory for later phases
 - **User Story 2 (Phase 4)**: Depends on Phase 2 (MSW infrastructure)
 - **User Story 3 (Phase 5)**: Depends on Phase 2 (MSW) and benefits from Phase 3 (inventory) and Phase 4 (mock data)
-- **User Story 4 (Phase 6)**: Depends on Phase 5 (component stories) for sidebar components
+- **User Story 4 (Phase 6)**: Depends on Phase 5.1 (sidebar component stories)
 - **User Story 5 (Phase 7)**: Deferred - requires external approval; depends on all prior story phases
 - **Polish (Phase 8)**: Depends on all desired phases being complete
 
-### User Story Dependencies
-
-- **User Story 1 (P1)**: Independent - can start after Setup
-- **User Story 2 (P2)**: Depends on Phase 2 foundational work
-- **User Story 3 (P3)**: Benefits from US1 (inventory) and US2 (mock data) but can start core UI stories immediately
-- **User Story 4 (P4)**: Depends on US3 for sidebar component stories
-- **User Story 5 (P5)**: DEFERRED - requires approval; depends on story coverage being substantial
-
 ### Parallel Opportunities
 
-Within Phase 2:
+Within Phase 5 (component stories):
 
-- T007, T008, T009, T010 can run in parallel (different handler files)
-- T013, T014, T015 can run in parallel (different factory files)
-- T018, T019, T020 can run in parallel (different scenario files)
-
-Within Phase 5 (shadcn/ui stories):
-
-- All T044-T077 can run in parallel (different component story files)
+- All story tasks within a phase can run in parallel (different component files)
+- T042, T043, T044 can run in parallel (sidebar components)
+- T046-T050 can run in parallel (balance components)
+- T052-T056 can run in parallel (common components)
+- T070-T077 can run in parallel (transaction components)
 
 Within Phase 6 (page stories):
 
-- T093, T094, T095, T096, T097 can run in parallel (different page story files)
+- T086, T087, T088, T089, T090 can run in parallel (different page story files)
 
 ---
 
-## Parallel Example: Phase 5.1 shadcn/ui Tier 1
+## Suggested Execution Strategy
 
-```bash
-# Launch all Tier 1 UI component stories together:
-Task: "Create input.stories.tsx in apps/web/src/components/ui/input.stories.tsx"
-Task: "Create select.stories.tsx in apps/web/src/components/ui/select.stories.tsx"
-Task: "Create checkbox.stories.tsx in apps/web/src/components/ui/checkbox.stories.tsx"
-Task: "Create switch.stories.tsx in apps/web/src/components/ui/switch.stories.tsx"
-Task: "Create tabs.stories.tsx in apps/web/src/components/ui/tabs.stories.tsx"
-Task: "Create dropdown-menu.stories.tsx in apps/web/src/components/ui/dropdown-menu.stories.tsx"
-Task: "Create dialog.stories.tsx in apps/web/src/components/ui/dialog.stories.tsx"
-Task: "Create alert-dialog.stories.tsx in apps/web/src/components/ui/alert-dialog.stories.tsx"
-```
+### Batch 1: Foundation (Complete ✅)
 
----
+- Phase 1: Setup
+- Phase 2: MSW Infrastructure
+- Phase 3: Inventory Tools
+- Phase 4: Fixture Expansion
 
-## Implementation Strategy
+### Batch 2: Critical Path Stories
 
-### MVP First (User Story 1 + shadcn/ui stories)
+1. **Sidebar first** (T042-T044) - Unblocks page stories
+2. **Balance components** (T045-T050) - High visibility
+3. **Common components** (T051-T056) - Reused everywhere
 
-1. Complete Phase 1: Setup
-2. Complete Phase 2: Foundational MSW infrastructure
-3. Complete Phase 3: Inventory tool (US1)
-4. Complete Phase 5.1-5.3: shadcn/ui component stories
-5. **STOP and VALIDATE**: Run Storybook, verify UI components render
-6. Demo to designer for feedback
+### Batch 3: Feature Area Stories
 
-### Incremental Delivery
+4. **Dashboard** (T063-T068) - Main user entry point
+5. **Transactions** (T069-T077) - Core functionality
+6. **Settings** (T057-T062) - Account management
 
-1. Setup + Foundational → Infrastructure ready
-2. Add US1 (Inventory) → Coverage tracking available
-3. Add US2 (MSW extension) → Mock data complete
-4. Add US3 (Component stories) → Designer can review components
-5. Add US4 (Page stories) → Designer can review full layouts
-6. Add US5 (Chromatic) → Visual regression protection (after approval)
+### Batch 4: Page Stories & Polish
 
-### Suggested MVP Scope
-
-**Phase 1 + 2 + 3 + 5.1-5.3** (Setup, MSW, Inventory, shadcn/ui stories)
-
-This delivers:
-
-- Inventory tool for tracking progress
-- Complete story coverage for all 45 shadcn/ui components
-- Foundation for continued story development
+7. **Page-level stories** (T084-T093)
+8. **Other components** (T080-T083) - By priority score
+9. **Chromatic** (T094-T103) - After approval
+10. **Final polish** (T104-T110)
 
 ---
 
@@ -354,3 +362,4 @@ This delivers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate and demo
 - Use template files from contracts/ when creating stories
+- Run `yarn storybook:inventory` to get current coverage status

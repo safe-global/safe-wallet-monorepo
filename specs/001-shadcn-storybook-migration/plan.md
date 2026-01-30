@@ -1,11 +1,11 @@
-# Implementation Plan: Design System Migration to shadcn with Storybook Coverage
+# Implementation Plan: Storybook Coverage Expansion
 
 **Branch**: `001-shadcn-storybook-migration` | **Date**: 2026-01-29 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-shadcn-storybook-migration/spec.md`
 
 ## Summary
 
-Establish comprehensive Storybook story coverage for the Safe{Wallet} web application to enable designer collaboration on the shadcn design system migration. This includes:
+Establish comprehensive Storybook story coverage for the Safe{Wallet} web application to enable designer collaboration and future design system improvements. This includes:
 
 1. Automated component inventory and dependency analysis
 2. Enhanced MSW mocking infrastructure for realistic story rendering
@@ -16,14 +16,14 @@ Establish comprehensive Storybook story coverage for the Safe{Wallet} web applic
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (Next.js 14.x)
-**Primary Dependencies**: Storybook 8.x, MSW 2.x, Chromatic, @storybook/nextjs, shadcn/ui
+**Primary Dependencies**: Storybook 10.x, MSW 2.x, Chromatic, @storybook/nextjs, MUI
 **Storage**: N/A (tooling/documentation feature)
 **Testing**: Jest (snapshot tests), Chromatic (visual regression), jest-image-snapshot (local visual)
 **Target Platform**: Web browser (Storybook UI), CI/CD (Chromatic)
 **Project Type**: web (monorepo - apps/web)
 **Performance Goals**: Storybook build <5 min, Chromatic capture <10 min for full suite
 **Constraints**: Must integrate with existing Storybook setup, MSW handlers, and CI workflow
-**Scale/Scope**: ~752 total components, target 100% coverage for ui/ and common/, 80% for features
+**Scale/Scope**: 330 total components, target 100% coverage for sidebar and common, 80% for features
 
 ## Constitution Check
 
@@ -68,11 +68,17 @@ apps/web/
 │       └── index.ts
 ├── src/
 │   ├── components/
-│   │   ├── ui/                    # shadcn components (45 total, 3 have stories)
-│   │   │   └── *.stories.tsx      # NEW stories for each component
-│   │   ├── common/                # ~87 components, partial coverage
+│   │   ├── common/                # 16 components, 4 stories
 │   │   │   └── *.stories.tsx      # NEW/EXPANDED stories
-│   │   └── sidebar/               # 17 components, 0 stories
+│   │   ├── sidebar/               # 3 components, 0 stories (critical)
+│   │   │   └── *.stories.tsx      # NEW stories
+│   │   ├── dashboard/             # 18 components, 1 story
+│   │   │   └── *.stories.tsx      # NEW stories
+│   │   ├── transactions/          # 38 components, 0 stories
+│   │   │   └── *.stories.tsx      # NEW stories
+│   │   ├── settings/              # 14 components, 0 stories
+│   │   │   └── *.stories.tsx      # NEW stories
+│   │   └── balances/              # 10 components, 0 stories
 │   │       └── *.stories.tsx      # NEW stories
 │   └── features/
 │       └── */
@@ -168,7 +174,7 @@ See [quickstart.md](./quickstart.md) for developer guide.
    - Priority scoring model
 
 2. **Story Templates** (`contracts/`)
-   - `ui-component.stories.template.tsx` - For shadcn primitives
+   - `ui-component.stories.template.tsx` - For simple UI components
    - `common-component.stories.template.tsx` - For data-dependent components
    - `page.stories.template.tsx` - For full-page layouts
 

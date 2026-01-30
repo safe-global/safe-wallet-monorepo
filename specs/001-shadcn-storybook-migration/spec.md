@@ -1,9 +1,9 @@
-# Feature Specification: Design System Migration to shadcn with Storybook Coverage
+# Feature Specification: Storybook Coverage Expansion
 
 **Feature Branch**: `001-shadcn-storybook-migration`
 **Created**: 2026-01-29
 **Status**: Draft
-**Input**: User description: "Design system migration to shadcn component system with comprehensive Storybook coverage, MSW mocking infrastructure, and visual regression testing via Chromatic"
+**Input**: User description: "Comprehensive Storybook coverage for existing MUI components, MSW mocking infrastructure, and visual regression testing via Chromatic to enable designer collaboration"
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -41,7 +41,7 @@ As a developer creating Storybook stories, I need a comprehensive mock database 
 
 ### User Story 3 - Individual Component Stories (Priority: P3)
 
-As a designer reviewing the design system, I need Storybook stories for every component showing all their visual states, so that I can verify the current implementation and plan the shadcn migration.
+As a designer reviewing the design system, I need Storybook stories for every component showing all their visual states, so that I can verify the current implementation and plan future design system improvements.
 
 **Why this priority**: Stories are the deliverable that enables designer collaboration. Once we have inventory (P1) and mocking (P2), we can systematically create stories.
 
@@ -49,7 +49,7 @@ As a designer reviewing the design system, I need Storybook stories for every co
 
 **Acceptance Scenarios**:
 
-1. **Given** a UI component from /components/ui/, **When** a story is created, **Then** it shows default, hover, active, disabled, loading, and error states as applicable
+1. **Given** a UI component, **When** a story is created, **Then** it shows default, hover, active, disabled, loading, and error states as applicable
 2. **Given** a feature component, **When** a story is created, **Then** it renders with mocked data and shows primary user flows
 3. **Given** any component story, **When** viewed in Storybook, **Then** it includes documentation of props, usage examples, and design notes
 
@@ -149,7 +149,7 @@ As a developer making design changes, I need automated visual regression tests t
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% of visually-rendered components in /components/ui/ have Storybook stories showing all relevant states (excludes providers, HOCs, utility wrappers)
+- **SC-001**: 100% of visually-rendered sidebar components have Storybook stories (critical for page-level stories)
 - **SC-002**: 100% of visually-rendered components in /components/common/ have Storybook stories (excludes providers, HOCs, utility wrappers)
 - **SC-003**: At least 80% of feature components have Storybook stories
 - **SC-004**: At least 5 page-level stories exist demonstrating full layouts (Dashboard, Settings, Transactions, etc.)
@@ -166,50 +166,55 @@ As a developer making design changes, I need automated visual regression tests t
 
 1. **Component Audit**
    - Run automated inventory of all components
-   - Cross-reference with existing 58 stories
-   - Identify coverage gaps (currently ~752 components, 58 stories = ~8% coverage)
+   - Cross-reference with existing stories
+   - Identify coverage gaps (currently 330 components, 14 stories = 4% coverage)
    - Categorize components by priority based on:
      - User-facing visibility
      - Complexity of data dependencies
-     - Planned shadcn migration order
+     - Importance for page-level stories
 
 2. **MSW Enhancement**
-   - Audit existing handlers (18 endpoints) against actual API usage
-   - Add missing endpoints
-   - Create mock data factories for common entities (Safe, Transaction, Token, etc.)
+   - Audit existing handlers against actual API usage
+   - Add missing endpoints using fixture-based handlers
+   - Create mock data fixtures from staging CGW for realistic test scenarios
    - Document mocking patterns for team
 
-### Phase 2: UI Primitives (shadcn/ui Components)
+### Phase 2: Sidebar & Critical Components
 
-**Objective**: Complete story coverage for shadcn/ui components
+**Objective**: Complete story coverage for sidebar components (required for page stories)
 
-1. **Current state**: 45 shadcn components, only 3 have stories (button, card, avatar)
-2. **Priority order for remaining 42 components**:
-   - Tier 1 (most used): input, select, checkbox, switch, tabs, dropdown-menu, dialog/alert-dialog
-   - Tier 2 (common): badge, tooltip, popover, sheet, accordion, table
-   - Tier 3 (specialized): slider, progress, navigation-menu, pagination, others
+1. **Current state**: 3 sidebar components, 0 have stories
+2. **Priority**: These are critical for page-level stories
+3. **Components**:
+   - SafeHeaderInfo
+   - MultiAccountContextMenu
+   - QrModal
 
-3. **Deliverable**: Each story includes all states and integrates with existing theme system
+4. **Deliverable**: Each story includes all states and integrates with existing theme system
 
-### Phase 3: Common Components
+### Phase 3: Common & Balance Components
 
-**Objective**: Story coverage for /components/common/ (~87 components)
+**Objective**: Story coverage for common and balance components
 
-1. **Priority order**:
-   - Tier 1: Address display, balance display, token amounts, copy buttons, network indicators
-   - Tier 2: Tables, lists, pagination, search, filters
+1. **Common components** (16 components, 4 stories - 25% coverage):
+   - Tier 1: Address display, balance display, token amounts, copy buttons
+   - Tier 2: Tables, lists, network indicators
    - Tier 3: Modals, toasts, errors, loading states
 
-2. **Data mocking**: Leverage enhanced MSW infrastructure from Phase 1
+2. **Balance components** (10 components, 0 stories):
+   - TokenAmount, FiatValue, TokenIcon, BalanceList
+   - Use fixture handlers for realistic data
 
-### Phase 4: Feature Components
+3. **Data mocking**: Leverage enhanced MSW infrastructure from Phase 1
+
+### Phase 4: Feature Area Components
 
 **Objective**: Story coverage for feature-specific components
 
 1. **Priority by feature importance**:
-   - Tier 1: Transactions, balances, dashboard
-   - Tier 2: Settings, address book, Safe Apps
-   - Tier 3: Staking, swaps, bridge, other DeFi features
+   - Tier 1: Transactions (38 components), Dashboard (18 components)
+   - Tier 2: Settings (14 components), Balance components
+   - Tier 3: Feature components (4 components)
 
 2. **Approach**: Work with feature teams to identify critical paths and states
 
@@ -236,24 +241,23 @@ Based on analysis of the current codebase, here is the recommended order for cre
 
 ### Immediate Priority (Start Here)
 
-1. **shadcn/ui components without stories** (42 components)
-   - These are foundational and used throughout the app
-   - Start with: `input`, `select`, `checkbox`, `switch`, `tabs`
-   - Low data dependencies, can be done without complex mocking
-
-2. **Sidebar components** (17 components, 0 stories)
+1. **Sidebar components** (3 components, 0 stories)
    - Critical for page-level stories later
-   - Includes navigation, account selector, network indicator
+   - Includes SafeHeaderInfo, MultiAccountContextMenu, QrModal
 
-3. **Common components with partial coverage**
+2. **Balance components** (10 components, 0 stories)
+   - High user visibility
+   - Core to the wallet experience
+
+3. **Common components** (16 components, 4 stories)
    - Fill gaps in existing coverage
    - Focus on high-visibility components first
 
 ### Secondary Priority
 
-4. **Transaction components** (13 existing stories, expand coverage)
-5. **Feature components** (22 existing stories across 20 features)
-6. **Dashboard components** (critical user-facing area)
+4. **Dashboard components** (18 components, 1 story)
+5. **Transaction components** (38 components, 0 stories)
+6. **Settings components** (14 components, 0 stories)
 
 ## Clarifications
 
@@ -265,10 +269,10 @@ Based on analysis of the current codebase, here is the recommended order for cre
 ## Assumptions
 
 - The existing Storybook configuration (Next.js framework, theme system, addons) is stable and suitable
-- The shadcn/ui components follow consistent patterns that allow templated story generation
+- MUI components follow consistent patterns that allow templated story generation
 - Designer collaboration will use Storybook's published URL for reviews
 - Chromatic's free tier or existing plan provides sufficient snapshots for the project
-- Component refactoring to shadcn will happen incrementally after story coverage is complete
+- Future design system changes will happen incrementally after story coverage is complete
 
 ## Dependencies
 
