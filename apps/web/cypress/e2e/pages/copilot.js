@@ -75,7 +75,7 @@ export const testTransactions = {
     '&id=multisig_0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B_0xa6974dc1f453da73dd5f090b637c91cc1a0bcb17307edb502fb8d8f552b52a4e',
   // Recipient analysis test - transaction with unsupported network warning
   recipientAnalysisUnsupportedNetwork:
-    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xPLACEHOLDER_TRANSACTION_ID',
+    '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x1d9fcb929ce160b4c51f658b9b849d6428c7acbbf5762f0635ee9831b21cad43',
   // Recipient analysis test - transaction with different setup warning
   recipientAnalysisDifferentSetup:
     '&id=multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0x2eb17f9f0d196d389f3130e7b9dca0de8d1f7ed60e1d9300aac21f13e9cf691b',
@@ -122,15 +122,12 @@ export const drainerNativeTransferMessageStr = 'The transaction transfers native
 // Recipient analysis messages
 export const lowActivityRecipientStr = 'Low activity recipient'
 export const recurringRecipientStr = 'Recurring recipient'
-export const newRecipientStr = 'New recipient'
-export const knownRecipientStr = 'Known recipient'
 export const unknownRecipientStr = 'Unknown recipient'
 export const addressInAddressBookStr = 'This address is in your address book'
 export const addressNotInAddressBookStr = 'This address is not in your address book or a Safe you own'
 export const addressIsSafeYouOwnStr = 'This address is a Safe you own'
 export const fewTransactionsStr = 'This address has few transactions'
 export const firstTimeInteractionStr = 'You are interacting with this address for the first time'
-export const interactedMultipleTimesStr = 'You have interacted with this address'
 export const interactedTwoTimesStr = 'You have interacted with this address 2 times'
 export const missingOwnershipStr = 'Missing ownership'
 export const missingOwnershipMessageStr =
