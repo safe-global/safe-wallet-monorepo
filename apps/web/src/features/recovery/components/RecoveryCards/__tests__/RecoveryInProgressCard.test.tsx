@@ -70,11 +70,7 @@ describe('RecoveryInProgressCard', () => {
       })
 
       expect(queryByText(/Account recovery expired/)).toBeTruthy()
-      expect(
-        queryByText(
-          /The pending recovery proposal has expired/,
-        ),
-      ).toBeTruthy()
+      expect(queryByText(/The pending recovery proposal has expired/)).toBeTruthy()
       expect(queryByText('Learn more')).toBeTruthy()
 
       const queueButton = queryByText('Go to queue')
@@ -156,11 +152,7 @@ describe('RecoveryInProgressCard', () => {
       })
 
       expect(queryByText(/Account recovery expired/)).toBeTruthy()
-      expect(
-        queryByText(
-          /The pending recovery proposal has expired/,
-        ),
-      ).toBeTruthy()
+      expect(queryByText(/The pending recovery proposal has expired/)).toBeTruthy()
       expect(queryByText('Learn more')).toBeTruthy()
       expect(queryByText('Go to queue')).toBeTruthy()
     })
