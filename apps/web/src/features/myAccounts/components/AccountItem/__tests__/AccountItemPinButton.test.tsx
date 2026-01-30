@@ -74,6 +74,20 @@ describe('AccountItemPinButton', () => {
       expect(screen.getByTestId('bookmark-icon')).toBeInTheDocument()
     })
 
+    it('should show as pinned when some (but not all) chains are pinned', () => {
+      const safeItems = [
+        createMockSafeItem({ chainId: '1', isPinned: true }),
+        createMockSafeItem({ chainId: '137', isPinned: false }),
+        createMockSafeItem({ chainId: '10', isPinned: false }),
+      ]
+
+      render(<AccountItemPinButton safeItems={safeItems} />)
+
+      const iconButton = screen.getByTestId('bookmark-icon')
+      const svgIcon = iconButton.querySelector('.MuiSvgIcon-colorPrimary')
+      expect(svgIcon).toBeInTheDocument()
+    })
+
     it('should stop event propagation when clicked', () => {
       const safeItems = [createMockSafeItem({ chainId: '1' }), createMockSafeItem({ chainId: '137' })]
 

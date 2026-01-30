@@ -43,8 +43,8 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
   const address = isSingleChain ? singleSafe!.address : (multiSafes[0]?.address ?? '')
   const name = props.name ?? (isSingleChain ? singleSafe!.name : undefined)
 
-  // Derive isPinned
-  const isPinned = isSingleChain ? singleSafe!.isPinned : multiSafes.every((s) => s.isPinned)
+  // Derive isPinned - use .some() to match _buildMultiChainSafeItem in useAllSafesGrouped.ts
+  const isPinned = isSingleChain ? singleSafe!.isPinned : multiSafes.some((s) => s.isPinned)
 
   // Call both hooks (hooks must be called unconditionally)
   const singleChainActions = useSingleChainPinActions({
