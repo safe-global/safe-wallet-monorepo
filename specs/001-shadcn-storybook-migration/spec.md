@@ -87,6 +87,22 @@ As a developer making design changes, I need automated visual regression tests t
 
 ---
 
+### User Story 6 - Family-Based Coverage Strategy (Priority: P6)
+
+As a developer, I need the inventory tool to group components by family so I can track coverage at the family level instead of individual components, enabling a cleaner Storybook sidebar with ~50 entries instead of 330+ flat entries.
+
+**Why this priority**: Component families (components in the same directory) are typically covered by a single story file with multiple exports. This approach keeps Storybook organized while still achieving comprehensive visual regression testing.
+
+**Independent Test**: Can be fully tested by running `yarn workspace @safe-global/web storybook:inventory --family` and verifying it produces a grouped report showing family coverage instead of individual component coverage.
+
+**Acceptance Scenarios**:
+
+1. **Given** the apps/web/src directory, **When** the inventory runs with --family flag, **Then** components are grouped by their parent directory as families
+2. **Given** a family with a story file, **When** story exports are counted, **Then** the family shows the correct number of exports
+3. **Given** the family report, **When** coverage is calculated, **Then** families with stories covering multiple states are marked as "complete"
+
+---
+
 ### Edge Cases
 
 - What happens when a component has circular dependencies with other components?
@@ -138,6 +154,13 @@ As a developer making design changes, I need automated visual regression tests t
 - **FR-020**: System MUST provide clear documentation for reviewing and approving visual changes
 - **FR-021**: Intentional visual changes MUST be approved by a designer via Chromatic's in-PR review workflow before merge
 
+**Family-Based Coverage**
+
+- **FR-022**: Inventory tool MUST support a `--family` flag to group components by directory
+- **FR-023**: Family grouping MUST count story exports (not just story files) to accurately measure coverage
+- **FR-024**: Family coverage status MUST be reported as "complete", "partial", or "none"
+- **FR-025**: Family report MUST include category breakdown with story export counts per category
+
 ### Key Entities
 
 - **Component**: A React component with a file path, type (UI/common/feature/page), and list of data dependencies
@@ -157,6 +180,7 @@ As a developer making design changes, I need automated visual regression tests t
 - **SC-006**: Chromatic visual regression runs on every PR with less than 2% flaky test rate
 - **SC-007**: New component PRs include Storybook stories as part of the definition of done
 - **SC-008**: Designer can review any component's visual states in Storybook without developer assistance
+- **SC-009**: Family-based coverage reports at least 50% of families as "complete" (have stories with multiple exports covering key states)
 
 ## Migration Strategy _(mandatory)_
 

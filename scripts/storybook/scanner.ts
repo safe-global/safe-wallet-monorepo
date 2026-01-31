@@ -92,15 +92,16 @@ function extractComponentName(sourceFile: ts.SourceFile, relativePath: string): 
       }
     }
 
-    // Check for export default function/const
-    if (ts.isFunctionDeclaration(node) || ts.isVariableStatement(node)) {
+    // Check for exported function declarations (both default and named)
+    if (ts.isFunctionDeclaration(node)) {
       const modifiers = ts.getModifiers(node)
       const hasExport = modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
-      const hasDefault = modifiers?.some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)
 
-      if (hasExport && hasDefault) {
-        if (ts.isFunctionDeclaration(node) && node.name) {
-          componentName = node.name.text
+      if (hasExport && node.name) {
+        const name = node.name.text
+        // Accept PascalCase function names as components
+        if (isPascalCase(name)) {
+          componentName = name
         }
       }
     }

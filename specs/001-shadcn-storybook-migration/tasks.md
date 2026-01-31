@@ -12,8 +12,17 @@
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3, US4, US5, US6)
 - Include exact file paths in descriptions
+
+**User Stories:**
+
+- **US1**: Component Inventory & Story Coverage
+- **US2**: MSW Mock Database Infrastructure
+- **US3**: Individual Component Stories
+- **US4**: Page-Level Stories with Layout
+- **US5**: Visual Regression Testing with Chromatic
+- **US6**: Family-Based Coverage Strategy
 
 ## Path Conventions
 
@@ -21,21 +30,33 @@
 - **MSW handlers**: `config/test/msw/`
 - **Scripts**: `scripts/storybook/`
 
-## Current Coverage Status
+## Current Coverage Status (Top-Level Groups)
 
 ```
-Total Components: 330
-With Stories: 14 (4%)
+Total Groups: 41
+Covered Groups: 17 (41%)
+Coverage: 41%
+Total Story Exports: 287
 
 By Category:
-- sidebar:     3 components,  0 stories (0%)   ← Critical for page stories
-- common:     16 components,  4 stories (25%)
-- balance:    10 components,  0 stories (0%)
-- settings:   14 components,  0 stories (0%)
-- dashboard:  18 components,  1 story  (6%)
-- transaction: 38 components,  0 stories (0%)
-- feature:     4 components,  0 stories (0%)
-- other:     227 components,  9 stories (4%)
+- balance:      1/1 groups (100%)    ✅
+- common:       1/1 groups (100%)    ✅
+- dashboard:    1/1 groups (100%)    ✅
+- settings:     1/1 groups (100%)    ✅
+- sidebar:      1/1 groups (100%)    ✅
+- transaction:  2/2 groups (100%)    ✅
+- other:       10/34 groups (29%)    ❌ 24 uncovered
+
+Uncovered groups needing ONE story each:
+- Address-book, Batch, Bridge, Counterfactual, MyAccounts
+- New-safe, Nfts, No-fee-campaign, Notification-center, Pages*
+- Proposers, Recovery, Safe-messages, Safe-shield, Speedup
+- Stories*, TargetedOutreach, Terms*, Theme*, Tx-flow
+- Tx-notes, Walletconnect, Welcome, Wrappers*
+
+* = Can skip (pages, providers, test utilities)
+
+Run: yarn workspace @safe-global/web storybook:inventory --toplevel
 ```
 
 ---
@@ -311,6 +332,7 @@ By Category:
 - **User Story 4 (Phase 6)**: Depends on Phase 5.1 (sidebar component stories)
 - **User Story 5 (Phase 7)**: Deferred - requires external approval; depends on all prior story phases
 - **Polish (Phase 8)**: Depends on all desired phases being complete
+- **User Story 6 (Phase 9)**: Can run independently; enhances Phase 3 inventory tooling
 
 ### Parallel Opportunities
 
@@ -356,6 +378,149 @@ Within Phase 6 (page stories):
 9. **Chromatic** (T094-T103) - After approval
 10. **Final polish** (T104-T110)
 
+### Batch 5: Family Coverage Tooling (Complete ✅)
+
+11. **Family inventory tooling** (T111-T116) - Track coverage at family level
+12. **Documentation updates** (T117-T120) - Family strategy docs
+
+### Batch 6: 100% Top-Level Coverage (19 stories)
+
+13. **High-impact features** (T121-T124) - Tx-flow, Recovery, MyAccounts, New-safe
+14. **Integration & messaging** (T125-T127) - WalletConnect, Safe-messages, Safe-shield
+15. **Smaller features** (T128-T133) - Counterfactual, Notifications, NFTs, Address-book, etc.
+16. **Simple components** (T134-T139) - Batch, Bridge, Welcome, Proposers, Speedup, TargetedOutreach
+
+---
+
+---
+
+## Phase 9: Family-Based Coverage Strategy (US6)
+
+**Purpose**: Implement family-based story coverage tracking for cleaner Storybook organization
+
+**Goal**: Track coverage at family level (~50 sidebar groups) instead of individual component level (330+ entries)
+
+### Phase 9.1: Inventory Tool Updates
+
+- [x] T111 [US6] Add ComponentFamily interface to scripts/storybook/types.ts
+- [x] T112 [US6] Create family.ts module with family grouping logic in scripts/storybook/family.ts
+- [x] T113 [US6] Update inventory.ts to support --family flag for grouped output
+- [x] T114 [US6] Implement story export counting per family (not just file existence)
+- [x] T115 [US6] Add family coverage reporting functions: calculateFamilyCoverage, getFamilyCoverageByCategory
+- [x] T116 [US6] Test updated inventory tool: yarn workspace @safe-global/web storybook:inventory --family
+
+### Phase 9.2: Documentation Updates
+
+- [x] T117 [US6] Update spec.md with User Story 6 and FR-022 through FR-025
+- [x] T118 [US6] Add SC-009 for family coverage success criteria
+- [x] T119 [US6] Add Phase 9 tasks to tasks.md
+- [x] T120 [US6] Update quickstart.md with family inventory documentation
+
+**Checkpoint**: Family-based coverage tracking operational ✅
+
+---
+
+## Phase 10: 100% Top-Level Coverage (US6)
+
+**Purpose**: Achieve 100% coverage through ONE story per top-level group
+
+**Strategy**: Create a single comprehensive story for each uncovered top-level group.
+Each story should render the main component with realistic mock data, covering primary use cases.
+
+**Current Status** (41 groups):
+
+- ✅ Covered: 17 groups (41%)
+- ❌ Uncovered: 24 groups (need ONE story each)
+- 🚫 Skip: 5 groups (pages, providers, test utilities)
+
+**Net tasks**: ~19 stories to achieve 100% coverage
+
+### Phase 10.1: High-Impact Feature Groups
+
+- [ ] T121 [US6] Create Tx-flow.stories.tsx - covers 57 families, 116 components
+  - Path: components/tx-flow
+  - Show TokenTransfer, Execute, SignMessage flows
+  - States: Default, Loading, Error, Success
+- [ ] T122 [P] [US6] Create Recovery.stories.tsx - covers 21 families, 25 components
+  - Path: features/recovery
+  - Show RecoverySettings, RecoveryCards, RecoveryList
+  - States: NoRecovery, ActiveRecovery, RecoveryInProgress
+- [ ] T123 [P] [US6] Create MyAccounts.stories.tsx - covers 16 families, 17 components
+  - Path: features/myAccounts
+  - Show AccountsList, SafesList, PinnedSafes
+  - States: Default, Empty, Loading
+- [ ] T124 [P] [US6] Create New-safe.stories.tsx - covers 19 families, 22 components
+  - Path: components/new-safe
+  - Show Create flow, Load flow steps
+  - States: Step1, Step2, Review, Loading
+
+### Phase 10.2: Integration & Messaging Groups
+
+- [ ] T125 [P] [US6] Create Walletconnect.stories.tsx - covers 13 families, 17 components
+  - Path: features/walletconnect
+  - Show WcProposalForm, WcSessionList, WcConnectionState
+  - States: Connected, Disconnected, Pending
+- [x] T126 [P] [US6] Create Safe-messages.stories.tsx - covers 13 families, 14 components
+  - Path: components/safe-messages
+  - Show MsgList, MsgDetails, SignMsgButton
+  - States: Default, Empty, Signed, Pending
+- [ ] T127 [P] [US6] Create Safe-shield.stories.tsx - covers 13 families, 24 components
+  - Path: features/safe-shield
+  - Show ThreatAnalysis, AnalysisGroupCard
+  - States: Safe, Warning, Critical
+
+### Phase 10.3: Smaller Feature Groups
+
+- [ ] T128 [P] [US6] Create Counterfactual.stories.tsx - covers 10 families, 10 components
+  - Path: features/counterfactual
+  - Show ActivateAccountFlow, CheckBalance
+- [x] T129 [P] [US6] Create Notification-center.stories.tsx - covers 4 families, 4 components
+  - Path: components/notification-center
+  - Show NotificationCenter, NotificationCenterList
+- [x] T130 [P] [US6] Create Nfts.stories.tsx - covers 4 families, 4 components
+  - Path: components/nfts
+  - Show NftGrid, NftCollections, NftPreviewModal
+- [x] T131 [P] [US6] Create Address-book.stories.tsx - covers 3 families, 3 components
+  - Path: components/address-book
+  - Show EntryDialog, ImportDialog, RemoveDialog
+- [x] T132 [P] [US6] Create No-fee-campaign.stories.tsx - covers 3 families, 3 components
+  - Path: features/no-fee-campaign
+  - Show NoFeeCampaignBanner, GasTooHighBanner
+- [x] T133 [P] [US6] Create Tx-notes.stories.tsx - covers 3 families, 3 components
+  - Path: features/tx-notes
+  - Show TxNoteForm, TxNoteInput
+
+### Phase 10.4: Simple Component Groups
+
+- [x] T134 [P] [US6] Create Batch.stories.tsx - covers 2 families, 6 components
+  - Path: components/batch
+  - Show BatchIndicator, BatchSidebar
+- [x] T135 [P] [US6] Create Bridge.stories.tsx - covers 2 families, 2 components
+  - Path: features/bridge
+  - Show Bridge, BridgeWidget
+- [x] T136 [P] [US6] Create Welcome.stories.tsx - covers 2 families, 3 components
+  - Path: components/welcome
+  - Show Welcome, WelcomeLogin
+- [x] T137 [P] [US6] Create Proposers.stories.tsx - covers 1 family, 4 components
+  - Path: features/proposers
+- [x] T138 [P] [US6] Create Speedup.stories.tsx - covers 1 family, 2 components
+  - Path: features/speedup
+- [x] T139 [P] [US6] Create TargetedOutreach.stories.tsx - covers 1 family, 2 components
+  - Path: features/targetedOutreach
+  - Show OutreachPopup
+
+### Phase 10.5: Skip Groups (No visual output)
+
+**These groups are skipped - no stories needed:**
+
+- 🚫 Pages (30 families) - Page routes, not components
+- 🚫 Stories (1 family) - Test decorator utilities
+- 🚫 Theme (1 family) - Theme provider
+- 🚫 Wrappers (3 families) - HOC wrappers (Disclaimer, Feature, Sanction)
+- 🚫 Terms (1 family) - Simple static content
+
+**Checkpoint**: Run `yarn storybook:inventory --toplevel` - target 100% top-level coverage (36/41 groups, 5 skipped)
+
 ---
 
 ## Notes
@@ -367,4 +532,9 @@ Within Phase 6 (page stories):
 - Commit after each task or logical group
 - Stop at any checkpoint to validate and demo
 - Use template files from contracts/ when creating stories
-- Run `yarn storybook:inventory` to get current coverage status
+
+**Inventory Tool Commands:**
+
+- `yarn storybook:inventory` - Family-level coverage (default)
+- `yarn storybook:inventory --toplevel` - Top-level group coverage (recommended for tracking)
+- `yarn storybook:inventory --components` - Legacy per-component view

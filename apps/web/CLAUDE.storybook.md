@@ -19,9 +19,7 @@ import { http, HttpResponse } from 'msw'
 http.get('*/v1/chains/:chainId/safes/:address/balances/:currency', handler)
 
 // ✅ Use regex patterns - works for any origin
-http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, () =>
-  HttpResponse.json(balancesFixtures.efSafe)
-)
+http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, () => HttpResponse.json(balancesFixtures.efSafe))
 ```
 
 ### 2. Redux State Pattern (RTK Query Requirements)
@@ -69,8 +67,8 @@ Remove complex feature flags to use simpler data paths:
 const createChainData = () => {
   const chainData = { ...chainFixtures.mainnet }
   // Remove features that require extra mocking
-  chainData.features = chainData.features.filter((f: string) =>
-    !['PORTFOLIO_ENDPOINT', 'POSITIONS', 'RECOVERY', 'HYPERNATIVE'].includes(f)
+  chainData.features = chainData.features.filter(
+    (f: string) => !['PORTFOLIO_ENDPOINT', 'POSITIONS', 'RECOVERY', 'HYPERNATIVE'].includes(f),
   )
   return chainData
 }
@@ -159,13 +157,13 @@ decorators: [
 
 Use fixtures from `config/test/msw/fixtures/`:
 
-| Scenario | Tokens | Positions | Use Case |
-|----------|--------|-----------|----------|
-| `efSafe` | 32 | $142M (8 protocols) | DeFi heavy, default |
-| `vitalik` | 1551 | $19M | Whale, performance |
-| `spamTokens` | 26 | $1.7M | Spam filtering |
-| `safeTokenHolder` | 25 | $707 (15 protocols) | Protocol diversity |
-| `empty` | 0 | $0 | Empty states |
+| Scenario          | Tokens | Positions           | Use Case            |
+| ----------------- | ------ | ------------------- | ------------------- |
+| `efSafe`          | 32     | $142M (8 protocols) | DeFi heavy, default |
+| `vitalik`         | 1551   | $19M                | Whale, performance  |
+| `spamTokens`      | 26     | $1.7M               | Spam filtering      |
+| `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
+| `empty`           | 0      | $0                  | Empty states        |
 
 ```typescript
 import {
@@ -181,13 +179,13 @@ import {
 
 ## Context Error Reference
 
-| Error Pattern | Required Context |
-|---------------|------------------|
-| `could not find react-redux context` | `StoreDecorator` |
-| `useWallet` / `useWalletContext` undefined | `WalletContext.Provider` |
-| `useSafeSDK` undefined | `MockSDKProvider` |
-| `TxModalContext` / `setTxFlow` undefined | `TxModalContext.Provider` |
-| `RouterContext` / `useRouter` undefined | Next.js handles automatically |
+| Error Pattern                              | Required Context              |
+| ------------------------------------------ | ----------------------------- |
+| `could not find react-redux context`       | `StoreDecorator`              |
+| `useWallet` / `useWalletContext` undefined | `WalletContext.Provider`      |
+| `useSafeSDK` undefined                     | `MockSDKProvider`             |
+| `TxModalContext` / `setTxFlow` undefined   | `TxModalContext.Provider`     |
+| `RouterContext` / `useRouter` undefined    | Next.js handles automatically |
 
 ## Critical Reminders
 

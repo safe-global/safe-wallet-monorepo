@@ -27,7 +27,8 @@ const createMockQueuedTransaction = (nonce: number, confirmations: number, thres
         tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         tokenName: 'USD Coin',
         tokenSymbol: 'USDC',
-        logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+        logoUri:
+          'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
         decimals: 6,
         value: '1000000000', // 1000 USDC
       },
@@ -240,9 +241,7 @@ export const Loading: Story = {
     msw: {
       handlers: [
         http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(createChainData())),
-        http.get(/\/v1\/chains$/, () =>
-          HttpResponse.json({ ...chainFixtures.all, results: [createChainData()] }),
-        ),
+        http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [createChainData()] })),
         http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(safeFixtures.efSafe)),
         // Delay forever to show loading state
         http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/transactions\/queued/, async () => {

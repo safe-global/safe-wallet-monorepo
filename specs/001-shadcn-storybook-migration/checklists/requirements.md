@@ -37,15 +37,15 @@ All checklist items pass. The specification is ready for `/speckit.clarify` or `
 
 The specification was informed by analysis of the current codebase state:
 
-| Metric | Current State | Target |
-| ------ | ------------- | ------ |
-| Total components | ~752 | - |
-| Existing stories | 58 | All components |
-| Current coverage | ~8% | 80-100% |
-| shadcn/ui components | 45 | - |
-| shadcn stories | 3 | 45 |
-| MSW endpoints | 18 | All used endpoints |
-| Feature modules | 20 | - |
+| Metric               | Current State | Target             |
+| -------------------- | ------------- | ------------------ |
+| Total components     | ~752          | -                  |
+| Existing stories     | 58            | All components     |
+| Current coverage     | ~8%           | 80-100%            |
+| shadcn/ui components | 45            | -                  |
+| shadcn stories       | 3             | 45                 |
+| MSW endpoints        | 18            | All used endpoints |
+| Feature modules      | 20            | -                  |
 
 ### Validation Summary
 

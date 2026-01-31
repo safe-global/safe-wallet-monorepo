@@ -793,17 +793,18 @@ Disable complex features that require extra mocking by filtering `chainData.feat
 const createChainData = () => {
   const chainData = { ...chainFixtures.mainnet }
   chainData.features = chainData.features.filter(
-    (f: string) => ![
-      'PORTFOLIO_ENDPOINT',  // Uses portfolio API instead of balances
-      'POSITIONS',          // DeFi positions widget
-      'RECOVERY',           // Recovery feature
-      'HYPERNATIVE',        // Security alerts
-      'NATIVE_SWAPS',       // Swap feature
-      'EARN',               // Staking/earn features
-      'SPACES',             // Spaces feature
-      'EURCV_BOOST',        // Promotional banners
-      'NO_FEE_CAMPAIGN',    // Campaign banners
-    ].includes(f),
+    (f: string) =>
+      ![
+        'PORTFOLIO_ENDPOINT', // Uses portfolio API instead of balances
+        'POSITIONS', // DeFi positions widget
+        'RECOVERY', // Recovery feature
+        'HYPERNATIVE', // Security alerts
+        'NATIVE_SWAPS', // Swap feature
+        'EARN', // Staking/earn features
+        'SPACES', // Spaces feature
+        'EURCV_BOOST', // Promotional banners
+        'NO_FEE_CAMPAIGN', // Campaign banners
+      ].includes(f),
   )
   return chainData
 }
@@ -854,28 +855,28 @@ initialState: {
 
 Minimum handlers needed:
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/v1/chains/:chainId` | Chain config |
-| `/v1/chains` | Chain list |
-| `/v1/chains/:chainId/safes/:address` | Safe info |
-| `/v1/chains/:chainId/safes/:address/balances/:currency` | Token balances |
-| `/v1/chains/:chainId/safe-apps` | Safe Apps list |
-| `/v1/chains/:chainId/safes/:address/transactions/queued` | Pending txs |
-| `/v1/chains/:chainId/about/master-copies` | Version checks |
-| `/v1/targeted-messaging/safes/:address/outreaches` | Hypernative (empty) |
+| Endpoint                                                 | Purpose             |
+| -------------------------------------------------------- | ------------------- |
+| `/v1/chains/:chainId`                                    | Chain config        |
+| `/v1/chains`                                             | Chain list          |
+| `/v1/chains/:chainId/safes/:address`                     | Safe info           |
+| `/v1/chains/:chainId/safes/:address/balances/:currency`  | Token balances      |
+| `/v1/chains/:chainId/safe-apps`                          | Safe Apps list      |
+| `/v1/chains/:chainId/safes/:address/transactions/queued` | Pending txs         |
+| `/v1/chains/:chainId/about/master-copies`                | Version checks      |
+| `/v1/targeted-messaging/safes/:address/outreaches`       | Hypernative (empty) |
 
 ### Widget-Level Stories
 
 Created bottom-up stories for individual widgets before composing page:
 
-| Widget | File | Key Dependencies |
-|--------|------|------------------|
-| Overview | `Overview/Overview.stories.tsx` | `useSafeInfo`, `useVisibleBalances`, `TxModalContext` |
-| AssetsWidget | `Assets/Assets.stories.tsx` | `useBalances`, `useVisibleAssets` |
-| PendingTxsList | `PendingTxs/PendingTxsList.stories.tsx` | `useTxQueue`, `useRecoveryQueue` (disabled) |
-| SafeAppList | `SafeAppList/SafeAppList.stories.tsx` | `useSafeApps`, props-based |
-| OwnerList | `OwnerList/OwnerList.stories.tsx` | `useSafeInfo`, `useAddressBook`, `TxModalContext` |
+| Widget         | File                                    | Key Dependencies                                      |
+| -------------- | --------------------------------------- | ----------------------------------------------------- |
+| Overview       | `Overview/Overview.stories.tsx`         | `useSafeInfo`, `useVisibleBalances`, `TxModalContext` |
+| AssetsWidget   | `Assets/Assets.stories.tsx`             | `useBalances`, `useVisibleAssets`                     |
+| PendingTxsList | `PendingTxs/PendingTxsList.stories.tsx` | `useTxQueue`, `useRecoveryQueue` (disabled)           |
+| SafeAppList    | `SafeAppList/SafeAppList.stories.tsx`   | `useSafeApps`, props-based                            |
+| OwnerList      | `OwnerList/OwnerList.stories.tsx`       | `useSafeInfo`, `useAddressBook`, `TxModalContext`     |
 
 ### Best Practice: Bottom-Up Story Development
 

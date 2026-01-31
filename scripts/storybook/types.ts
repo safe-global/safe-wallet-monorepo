@@ -3,6 +3,113 @@
  */
 
 /**
+ * Represents a component family - a group of related components in the same directory
+ * that are covered by a single story file with multiple exports
+ */
+export interface ComponentFamily {
+  /** Family name (typically the directory name) */
+  name: string
+  /** Path to the family directory relative to apps/web/src */
+  path: string
+  /** Components belonging to this family */
+  components: string[]
+  /** Component entries in this family */
+  componentEntries: ComponentEntry[]
+  /** Story file path if exists */
+  storyFile?: string
+  /** Number of story exports in the story file */
+  storyExports: number
+  /** Story export names */
+  storyExportNames: string[]
+  /** Coverage status: complete (has stories), partial (some coverage), none */
+  coverage: 'complete' | 'partial' | 'none'
+  /** Category of the family */
+  category: ComponentCategory
+}
+
+/**
+ * Family coverage report summary
+ */
+export interface FamilyCoverageReport {
+  /** Report generation timestamp */
+  timestamp: string
+  /** Total number of families */
+  totalFamilies: number
+  /** Number of families with at least one story */
+  coveredFamilies: number
+  /** Families with complete coverage */
+  completeFamilies: number
+  /** Family coverage percentage */
+  familyCoveragePercent: number
+  /** Total story exports across all families */
+  totalStoryExports: number
+  /** Breakdown by category */
+  byCategory: FamilyCategoryCoverage[]
+  /** All families sorted by coverage status */
+  families: ComponentFamily[]
+}
+
+/**
+ * Top-level component group that covers multiple families with one story
+ */
+export interface TopLevelGroup {
+  /** Group name (e.g., "Sidebar", "Dashboard") */
+  name: string
+  /** Root path for this group */
+  rootPath: string
+  /** Category */
+  category: ComponentCategory
+  /** All families contained in this group */
+  families: ComponentFamily[]
+  /** Total components across all families */
+  totalComponents: number
+  /** Whether this group has a top-level story */
+  hasStory: boolean
+  /** Path to top-level story if exists */
+  storyPath?: string
+  /** Number of story exports */
+  storyExports: number
+  /** Coverage status */
+  coverage: 'complete' | 'partial' | 'none'
+}
+
+/**
+ * Top-level coverage report
+ */
+export interface TopLevelCoverageReport {
+  /** Report generation timestamp */
+  timestamp: string
+  /** Total number of top-level groups */
+  totalGroups: number
+  /** Groups with stories */
+  coveredGroups: number
+  /** Coverage percentage */
+  coveragePercent: number
+  /** Total story exports */
+  totalStoryExports: number
+  /** Breakdown by category */
+  byCategory: { category: ComponentCategory; total: number; covered: number; percentage: number }[]
+  /** All groups */
+  groups: TopLevelGroup[]
+}
+
+/**
+ * Family coverage breakdown for a category
+ */
+export interface FamilyCategoryCoverage {
+  /** Category name */
+  category: ComponentCategory
+  /** Total families in category */
+  totalFamilies: number
+  /** Families with stories */
+  coveredFamilies: number
+  /** Coverage percentage for category */
+  percentage: number
+  /** Total story exports in category */
+  storyExports: number
+}
+
+/**
  * Represents a single component in the codebase
  */
 export interface ComponentEntry {
@@ -167,6 +274,10 @@ export const DEFAULT_PRIORITY_WEIGHTS: PriorityWeights = {
 
 /**
  * Patterns to exclude from scanning
+ *
+ * Note: index.tsx files are NOT excluded because many components use index.tsx
+ * as their main component file. The scanner's component detection filters out
+ * barrel exports by checking for PascalCase component definitions.
  */
 export const DEFAULT_EXCLUDE_PATTERNS = [
   '**/*.test.tsx',
@@ -175,8 +286,7 @@ export const DEFAULT_EXCLUDE_PATTERNS = [
   '**/*.spec.ts',
   '**/*.stories.tsx',
   '**/*.stories.ts',
-  '**/index.ts',
-  '**/index.tsx',
+  '**/index.ts', // Exclude .ts barrel exports, keep .tsx component files
   '**/__tests__/**',
   '**/__mocks__/**',
   '**/types.ts',

@@ -94,19 +94,19 @@ interface ComponentDependencies {
 
 interface HookDependency {
   name: string
-  source: string  // Import path
+  source: string // Import path
   type: 'custom' | 'react' | 'external'
 }
 
 interface ApiCallDependency {
-  endpoint: string | null  // Extracted if determinable
+  endpoint: string | null // Extracted if determinable
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'UNKNOWN'
   source: 'fetch' | 'rtk-query' | 'swr' | 'axios'
 }
 
 interface Web3Dependency {
   type: 'wallet-connection' | 'chain-state' | 'transaction' | 'signing' | 'provider'
-  source: string  // Import or hook name
+  source: string // Import or hook name
 }
 ```
 
@@ -137,7 +137,7 @@ interface CoverageReport {
 
 interface CoverageStats {
   totalComponents: number
-  visualComponents: number  // Excludes providers/HOCs
+  visualComponents: number // Excludes providers/HOCs
   componentsWithStories: number
   storiesCount: number
   coveragePercent: number
@@ -177,10 +177,10 @@ interface MockScenario {
 
 interface MswHandler {
   method: 'get' | 'post' | 'put' | 'delete'
-  path: string  // URL pattern with wildcards
+  path: string // URL pattern with wildcards
   response: unknown | ((req: Request) => unknown)
   status?: number
-  delay?: number  // For loading state simulation
+  delay?: number // For loading state simulation
 }
 
 interface MockWeb3Config {
@@ -254,20 +254,18 @@ function calculatePriority(component: ComponentEntry): number {
 
   // Base score by type
   const typeScores: Record<ComponentType, number> = {
-    ui: 100,        // Foundation components
-    common: 80,     // Shared across features
-    sidebar: 70,    // Critical for page stories
-    page: 60,       // Full page layouts
-    transaction: 50,// Transaction-specific
-    feature: 40,    // Feature-specific
+    ui: 100, // Foundation components
+    common: 80, // Shared across features
+    sidebar: 70, // Critical for page stories
+    page: 60, // Full page layouts
+    transaction: 50, // Transaction-specific
+    feature: 40, // Feature-specific
   }
   score += typeScores[component.type]
 
   // Boost for fewer dependencies (easier to mock)
   const depCount =
-    component.dependencies.hooks.length +
-    component.dependencies.apiCalls.length +
-    component.dependencies.web3.length
+    component.dependencies.hooks.length + component.dependencies.apiCalls.length + component.dependencies.web3.length
   score += Math.max(0, 30 - depCount * 5)
 
   // Boost for visual components

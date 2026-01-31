@@ -228,9 +228,7 @@ export const Loading: Story = {
       handlers: [
         // Chain config
         http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(createChainData())),
-        http.get(/\/v1\/chains$/, () =>
-          HttpResponse.json({ ...chainFixtures.all, results: [createChainData()] }),
-        ),
+        http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [createChainData()] })),
         // Balances - delay forever to show loading state
         http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, async () => {
           await new Promise(() => {})
