@@ -34,9 +34,9 @@
 
 ```
 Total Groups: 41
-Covered Groups: 17 (41%)
-Coverage: 41%
-Total Story Exports: 287
+Covered Groups: 36 (88%)
+Coverage: 88%
+Total Story Exports: 428
 
 By Category:
 - balance:      1/1 groups (100%)    ✅
@@ -45,16 +45,18 @@ By Category:
 - settings:     1/1 groups (100%)    ✅
 - sidebar:      1/1 groups (100%)    ✅
 - transaction:  2/2 groups (100%)    ✅
-- other:       10/34 groups (29%)    ❌ 24 uncovered
+- other:       29/34 groups (85%)    ✅ (5 skipped)
 
-Uncovered groups needing ONE story each:
-- Address-book, Batch, Bridge, Counterfactual, MyAccounts
-- New-safe, Nfts, No-fee-campaign, Notification-center, Pages*
-- Proposers, Recovery, Safe-messages, Safe-shield, Speedup
-- Stories*, TargetedOutreach, Terms*, Theme*, Tx-flow
-- Tx-notes, Walletconnect, Welcome, Wrappers*
+Remaining uncovered groups (SKIPPED - no stories needed):
+- Pages* (30 families) - Page routes, not components
+- Stories* (1 family) - Test decorator utilities
+- Terms* (1 family) - Simple static content
+- Theme* (1 family) - Theme provider
+- Wrappers* (3 families) - HOC wrappers
 
-* = Can skip (pages, providers, test utilities)
+* = Intentionally skipped (pages, providers, test utilities)
+
+✅ 100% COVERAGE of non-skipped groups achieved!
 
 Run: yarn workspace @safe-global/web storybook:inventory --toplevel
 ```
@@ -420,43 +422,43 @@ Within Phase 6 (page stories):
 
 ---
 
-## Phase 10: 100% Top-Level Coverage (US6)
+## Phase 10: 100% Top-Level Coverage (US6) ✅ COMPLETE
 
 **Purpose**: Achieve 100% coverage through ONE story per top-level group
 
 **Strategy**: Create a single comprehensive story for each uncovered top-level group.
 Each story should render the main component with realistic mock data, covering primary use cases.
 
-**Current Status** (41 groups):
+**Final Status** (41 groups):
 
-- ✅ Covered: 17 groups (41%)
-- ❌ Uncovered: 24 groups (need ONE story each)
-- 🚫 Skip: 5 groups (pages, providers, test utilities)
+- ✅ Covered: 36 groups (88%)
+- 🚫 Skipped: 5 groups (pages, providers, test utilities)
+- ✅ **100% coverage of non-skipped groups achieved!**
 
-**Net tasks**: ~19 stories to achieve 100% coverage
+**Completed**: 19 stories created in Phase 10
 
 ### Phase 10.1: High-Impact Feature Groups
 
-- [ ] T121 [US6] Create Tx-flow.stories.tsx - covers 57 families, 116 components
+- [x] T121 [US6] Create Tx-flow.stories.tsx - covers 57 families, 116 components
   - Path: components/tx-flow
   - Show TokenTransfer, Execute, SignMessage flows
   - States: Default, Loading, Error, Success
-- [ ] T122 [P] [US6] Create Recovery.stories.tsx - covers 21 families, 25 components
+- [x] T122 [P] [US6] Create Recovery.stories.tsx - covers 21 families, 25 components
   - Path: features/recovery
   - Show RecoverySettings, RecoveryCards, RecoveryList
   - States: NoRecovery, ActiveRecovery, RecoveryInProgress
-- [ ] T123 [P] [US6] Create MyAccounts.stories.tsx - covers 16 families, 17 components
+- [x] T123 [P] [US6] Create MyAccounts.stories.tsx - covers 16 families, 17 components
   - Path: features/myAccounts
   - Show AccountsList, SafesList, PinnedSafes
   - States: Default, Empty, Loading
-- [ ] T124 [P] [US6] Create New-safe.stories.tsx - covers 19 families, 22 components
+- [x] T124 [P] [US6] Create New-safe.stories.tsx - covers 19 families, 22 components
   - Path: components/new-safe
   - Show Create flow, Load flow steps
   - States: Step1, Step2, Review, Loading
 
 ### Phase 10.2: Integration & Messaging Groups
 
-- [ ] T125 [P] [US6] Create Walletconnect.stories.tsx - covers 13 families, 17 components
+- [x] T125 [P] [US6] Create Walletconnect.stories.tsx - covers 13 families, 17 components
   - Path: features/walletconnect
   - Show WcProposalForm, WcSessionList, WcConnectionState
   - States: Connected, Disconnected, Pending
@@ -464,14 +466,14 @@ Each story should render the main component with realistic mock data, covering p
   - Path: components/safe-messages
   - Show MsgList, MsgDetails, SignMsgButton
   - States: Default, Empty, Signed, Pending
-- [ ] T127 [P] [US6] Create Safe-shield.stories.tsx - covers 13 families, 24 components
+- [x] T127 [P] [US6] Create Safe-shield.stories.tsx - covers 13 families, 24 components
   - Path: features/safe-shield
   - Show ThreatAnalysis, AnalysisGroupCard
   - States: Safe, Warning, Critical
 
 ### Phase 10.3: Smaller Feature Groups
 
-- [ ] T128 [P] [US6] Create Counterfactual.stories.tsx - covers 10 families, 10 components
+- [x] T128 [P] [US6] Create Counterfactual.stories.tsx - covers 10 families, 10 components
   - Path: features/counterfactual
   - Show ActivateAccountFlow, CheckBalance
 - [x] T129 [P] [US6] Create Notification-center.stories.tsx - covers 4 families, 4 components
@@ -519,7 +521,7 @@ Each story should render the main component with realistic mock data, covering p
 - 🚫 Wrappers (3 families) - HOC wrappers (Disclaimer, Feature, Sanction)
 - 🚫 Terms (1 family) - Simple static content
 
-**Checkpoint**: Run `yarn storybook:inventory --toplevel` - target 100% top-level coverage (36/41 groups, 5 skipped)
+**Checkpoint**: Run `yarn storybook:inventory --toplevel` - ✅ 100% top-level coverage achieved (36/41 groups, 5 skipped)
 
 ---
 
