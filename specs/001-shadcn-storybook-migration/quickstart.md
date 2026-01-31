@@ -55,10 +55,10 @@ The inventory tool helps you find components that need stories and prioritizes t
 ### Running the Inventory
 
 ```bash
-# Basic inventory scan
+# Family-based inventory (default)
 yarn workspace @safe-global/web storybook:inventory
 
-# Verbose output with priority explanations
+# Verbose output with details
 yarn workspace @safe-global/web storybook:inventory --verbose
 
 # JSON output for processing
@@ -66,6 +66,10 @@ yarn workspace @safe-global/web storybook:inventory --json
 
 # Save to file
 yarn workspace @safe-global/web storybook:inventory --json --output inventory.json
+
+# Legacy per-component view (opt-in)
+yarn workspace @safe-global/web storybook:inventory --components
+yarn workspace @safe-global/web storybook:inventory --components --verbose
 ```
 
 ### Example Output
@@ -125,6 +129,119 @@ The tool suggests a phased approach:
 4. **Phase 4**: Redux-dependent components
 5. **Phase 5**: MSW-dependent components
 6. **Phase 6**: Complex components (Web3, multiple decorators)
+
+---
+
+## Family-Based Story Strategy
+
+The family-based approach groups related components by directory and covers them with a single story file containing multiple exports.
+
+### Why Family-Based Coverage?
+
+- **Cleaner Sidebar**: ~50 organized groups instead of 330+ flat entries
+- **Better Chromatic Coverage**: Each story export = 1 Chromatic snapshot
+- **Contextual Testing**: Mini-components (skeletons, empty states) are tested in their parent's context
+- **Maintainable**: One story file per family, easier to keep updated
+
+### Family Coverage Report
+
+```bash
+# Default mode - shows family-based coverage
+yarn workspace @safe-global/web storybook:inventory
+```
+
+Example output:
+
+```
+📊 Family Coverage Summary
+--------------------------
+Total Families: 178
+Covered Families: 22
+Complete Families: 17
+Family Coverage: 12%
+Total Story Exports: 62
+
+📁 Family Coverage by Category
+-------------------------------
+sidebar      [████████████████████] 3/3 families (19 exports)
+dashboard    [███████████░░░░░░░░░] 4/7 families (15 exports)
+common       [█████░░░░░░░░░░░░░░░] 3/11 families (8 exports)
+```
+
+### Coverage Status Definitions
+
+| Status       | Meaning                                                   |
+| ------------ | --------------------------------------------------------- |
+| **complete** | Has stories with enough exports to cover main states      |
+| **partial**  | Has some stories but needs more exports for full coverage |
+| **none**     | No story file exists for this family                      |
+
+### Creating Family Stories
+
+A family story file should cover multiple related components and states:
+
+```typescript
+// PendingTxsList.stories.tsx - covers entire PendingTxs family
+// Family components: PendingTxsList, PendingTxListItem, PendingRecoveryListItem, PendingTxsSkeleton
+
+const meta = {
+  title: 'Dashboard/PendingTxsList', // ONE sidebar entry
+  component: PendingTxsList,
+}
+
+// Multiple exports = multiple Chromatic snapshots
+export const EmptyQueue: Story = {} // Tests EmptyState child
+export const SingleTransaction: Story = {} // Tests PendingTxListItem
+export const MultipleTransactions: Story = {} // Tests list rendering
+export const ReadyToExecute: Story = {} // Tests confirmation state
+export const Loading: Story = {} // Tests PendingTxsSkeleton
+export const NonOwnerView: Story = {} // Tests non-owner context
+```
+
+### Story Export Order (Sidebar Ordering)
+
+**IMPORTANT:** The order of story exports determines their order in the Storybook sidebar. Always export comprehensive/full-page stories FIRST, followed by granular component stories.
+
+**Why?** Users browsing Storybook should see the most complete view of a feature at the top, then can drill down into individual component states below.
+
+**Pattern:**
+
+```typescript
+// ✅ CORRECT: Full page first, then granular stories
+export const FullPage: Story = {} // 1st - Complete view with all components
+export const Table: Story = {} // 2nd - Main data display
+export const EmptyState: Story = {} // 3rd - Empty data state
+export const AddDialog: Story = {} // 4th - Individual dialog
+export const EditDialog: Story = {} // 5th - Individual dialog
+export const DeleteDialog: Story = {} // 6th - Individual dialog
+
+// ❌ WRONG: Granular stories before full page
+export const AddDialog: Story = {} // Dialog shown first - confusing
+export const Table: Story = {}
+export const FullPage: Story = {} // Full page buried at bottom
+```
+
+**Naming conventions for top-level stories:**
+
+- `FullPage` - Complete page with all sections
+- `Overview` - Summary view with multiple widgets
+- `Default` - Standard view (use when there is no clear "full page" variant)
+
+This ensures that when someone opens a component family in Storybook, they immediately see the most comprehensive representation first.
+
+### When to Create Separate Story Files vs Add Exports
+
+**Add exports to existing family story when:**
+
+- Component is only used within the family
+- Component renders inline (skeleton, empty state)
+- Adding a new state variant
+
+**Create new story file when:**
+
+- Component is reused across multiple families
+- Component has its own complex state logic
+- Component is a standalone UI primitive
 
 ---
 
@@ -394,16 +511,17 @@ export const Mobile: Story = {
 
 The following viewports are pre-configured in Storybook:
 
-| Viewport | Dimensions | Use Case |
-|----------|------------|----------|
-| `mobile` | 375x667 | iPhone SE/small phones |
-| `tablet` | 768x1024 | iPad/tablets |
-| `desktop` | 1280x800 | Standard desktop |
-| `desktopWide` | 1920x1080 | Wide desktop monitors |
+| Viewport      | Dimensions | Use Case               |
+| ------------- | ---------- | ---------------------- |
+| `mobile`      | 375x667    | iPhone SE/small phones |
+| `tablet`      | 768x1024   | iPad/tablets           |
+| `desktop`     | 1280x800   | Standard desktop       |
+| `desktopWide` | 1920x1080  | Wide desktop monitors  |
 
 ### Example: Complete Page Story
 
 See `src/components/dashboard/Dashboard.stories.tsx` for a full example with:
+
 - MSW handlers for realistic data
 - StoreDecorator for Redux state
 - withLayout for sidebar/header
