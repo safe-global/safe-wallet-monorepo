@@ -61,6 +61,26 @@ export function createSafeAppsState() {
 }
 
 /**
+ * Creates auth state for authenticated stories (needed for spaces)
+ *
+ * @param isAuthenticated - Whether the user should be authenticated
+ * @returns Auth slice initial state
+ */
+export function createAuthState(isAuthenticated: boolean) {
+  if (!isAuthenticated) {
+    return {
+      sessionExpiresAt: null,
+      lastUsedSpaceId: null,
+    }
+  }
+  // Set session to expire 1 hour from now
+  return {
+    sessionExpiresAt: Date.now() + 60 * 60 * 1000,
+    lastUsedSpaceId: null,
+  }
+}
+
+/**
  * Creates complete initial Redux store state for stories
  *
  * @param options - Configuration options
@@ -86,8 +106,9 @@ export function createInitialState(options: {
   chainData: Chain
   isDarkMode: boolean
   overrides?: StoreOverrides
+  isAuthenticated?: boolean
 }) {
-  const { safeData, chainData, isDarkMode, overrides = {} } = options
+  const { safeData, chainData, isDarkMode, overrides = {}, isAuthenticated = false } = options
 
   // Build base state
   const baseState = {
@@ -95,6 +116,7 @@ export function createInitialState(options: {
     chains: createChainsState(chainData),
     safeInfo: createSafeInfoState(safeData),
     safeApps: createSafeAppsState(),
+    auth: createAuthState(isAuthenticated),
   }
 
   // Merge overrides
@@ -106,5 +128,6 @@ export function createInitialState(options: {
     chains: overrides.chains ? { ...baseState.chains, ...overrides.chains } : baseState.chains,
     safeInfo: overrides.safeInfo ? { ...baseState.safeInfo, ...overrides.safeInfo } : baseState.safeInfo,
     safeApps: overrides.safeApps ? { ...baseState.safeApps, ...overrides.safeApps } : baseState.safeApps,
+    auth: overrides.auth ? { ...baseState.auth, ...overrides.auth } : baseState.auth,
   }
 }

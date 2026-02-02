@@ -98,6 +98,62 @@ export function targetedMessagingHandlers(): RequestHandler[] {
 }
 
 /**
+ * Mock user data for spaces authentication
+ */
+export const mockUser = {
+  id: 1,
+  status: 1 as const,
+  wallets: [{ id: 1, address: '0x1234567890123456789012345678901234567890' }],
+}
+
+/**
+ * Mock space data for spaces feature
+ */
+export function createMockSpace(spaceId: number = 1) {
+  return {
+    id: spaceId,
+    name: 'Test Space',
+    status: 'ACTIVE' as const,
+    members: [
+      {
+        id: 1,
+        role: 'ADMIN' as const,
+        name: 'Admin User',
+        invitedBy: 'system',
+        status: 'ACTIVE' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        user: {
+          id: mockUser.id,
+          status: 'ACTIVE' as const,
+        },
+      },
+    ],
+  }
+}
+
+/**
+ * Spaces feature handlers - users and spaces API
+ */
+export function spacesHandlers(): RequestHandler[] {
+  return [
+    // User with wallets endpoint
+    http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
+    // Get space by ID
+    http.get(/\/v1\/spaces\/\d+$/, ({ params }) => {
+      const url = new URL(params[0] as string, 'https://example.com')
+      const pathParts = url.pathname.split('/')
+      const spaceId = parseInt(pathParts[pathParts.length - 1], 10) || 1
+      return HttpResponse.json(createMockSpace(spaceId))
+    }),
+    // List all spaces for user
+    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(1)])),
+    // Get space safes
+    http.get(/\/v1\/spaces\/\d+\/safes$/, () => HttpResponse.json({ safes: {} })),
+  ]
+}
+
+/**
  * Empty transaction queue data
  */
 export const emptyTxQueue = {
@@ -305,6 +361,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
   // Add positions handlers if feature enabled
   if (mergedFeatures.positions) {
     allHandlers.push(...positionsHandlers(positionsData))
+  }
+
+  // Add spaces handlers if feature enabled
+  if (mergedFeatures.spaces) {
+    allHandlers.push(...spacesHandlers())
   }
 
   // Add custom handlers last (can override defaults)

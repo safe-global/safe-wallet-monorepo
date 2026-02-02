@@ -47,6 +47,7 @@ export interface StoreOverrides {
   safeInfo?: object
   settings?: object
   chains?: object
+  auth?: object
   [key: string]: object | undefined
 }
 
@@ -94,6 +95,12 @@ export interface MockStoryConfig {
    * @default '/home'
    */
   pathname?: string
+
+  /**
+   * Additional query parameters for router mock
+   * Will be merged with the default safe query param
+   */
+  query?: Record<string, string>
 }
 
 /**

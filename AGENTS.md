@@ -425,6 +425,55 @@ import {
 - **For simple components**: Use basic story format without mocking utilities
 - **Do not override feature flags** unless testing a specific disabled feature state (e.g., `features: { swaps: false }` to test no-swap UI). The defaults (`portfolio: true`, `positions: true`, `swaps: true`) should be used for most stories.
 
+#### Decorator Stacking Warning
+
+**IMPORTANT**: Storybook decorators stack - story-level decorators are added to meta-level decorators, they don't replace them. If you define a decorator at the meta level AND override it at the story level, both will run, which can cause duplicate layouts or elements.
+
+**Problem example** (causes two layouts to render):
+
+```typescript
+const defaultSetup = createMockStory({ scenario: 'efSafe', layout: 'fullPage' })
+
+const meta = {
+  decorators: [defaultSetup.decorator], // Meta-level decorator
+} satisfies Meta<typeof MyPage>
+
+export const Empty: Story = (() => {
+  const setup = createMockStory({ scenario: 'empty', layout: 'fullPage' })
+  return {
+    decorators: [setup.decorator], // ❌ This ADDS to meta decorator, doesn't replace!
+  }
+})()
+```
+
+**Solution**: If you need different configurations per story, don't define decorators at the meta level:
+
+```typescript
+const meta = {
+  title: 'Pages/MyPage',
+  component: MyPage,
+  loaders: [mswLoader],
+  parameters: { layout: 'fullscreen' },
+  // No decorators here!
+} satisfies Meta<typeof MyPage>
+
+export const Default: Story = (() => {
+  const setup = createMockStory({ scenario: 'efSafe', layout: 'fullPage' })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator], // ✅ Only decorator, no stacking
+  }
+})()
+
+export const Empty: Story = (() => {
+  const setup = createMockStory({ scenario: 'empty', layout: 'fullPage' })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator], // ✅ Only decorator, no stacking
+  }
+})()
+```
+
 ## Security & Safe Wallet Patterns
 
 Safe (formerly Gnosis Safe) is a multi-signature smart contract wallet that requires multiple signatures to execute transactions.

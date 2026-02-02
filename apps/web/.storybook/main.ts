@@ -43,6 +43,15 @@ const config: StorybookConfig = {
   webpackFinal: async (config) => {
     config.module = config.module || {}
     config.module.rules = config.module.rules || []
+    config.resolve = config.resolve || {}
+    config.resolve.alias = (config.resolve.alias || {}) as Record<string, string>
+
+    // Mock useIsOfficialHost to always return true in Storybook
+    // This ensures legal pages (terms, privacy, cookie) render their content
+    ;(config.resolve.alias as Record<string, string>)['@/hooks/useIsOfficialHost'] = path.resolve(
+      __dirname,
+      'mocks/useIsOfficialHost.ts',
+    )
 
     config.cache = {
       type: 'filesystem',
@@ -63,9 +72,12 @@ const config: StorybookConfig = {
 
     // This modifies the existing image rule to exclude .svg files
     // since you want to handle those files with @svgr/webpack
-    const imageRule = config.module.rules.find((rule) => rule?.['test']?.test('.svg'))
-    if (imageRule) {
-      imageRule['exclude'] = /\.svg$/
+    const imageRule = config.module.rules.find(
+      (rule): rule is { test: RegExp; exclude?: RegExp } =>
+        typeof rule === 'object' && rule !== null && 'test' in rule && rule.test instanceof RegExp,
+    )
+    if (imageRule && imageRule.test.test('.svg')) {
+      imageRule.exclude = /\.svg$/
     }
 
     config.module.rules.push({

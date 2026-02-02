@@ -52,18 +52,38 @@ interface MockContextProviderProps {
 
 /**
  * Layout wrapper component based on layout type
+ * Uses storyId as key to force complete remount between stories,
+ * ensuring MUI Drawer and router state are properly reset.
  */
-function LayoutWrapper({ layout, pathname, children }: { layout: LayoutType; pathname: string; children: ReactNode }) {
+function LayoutWrapper({
+  layout,
+  pathname,
+  children,
+  storyId,
+}: {
+  layout: LayoutType
+  pathname: string
+  children: ReactNode
+  storyId?: string
+}) {
   switch (layout) {
     case 'paper':
       return <Paper sx={{ p: 2 }}>{children}</Paper>
 
     case 'fullPage':
-      return <PageLayout pathname={pathname}>{children as ReactElement}</PageLayout>
+      return (
+        <PageLayout key={storyId} pathname={pathname}>
+          {children as ReactElement}
+        </PageLayout>
+      )
 
     case 'withSidebar':
       // Same as fullPage but could be customized in the future
-      return <PageLayout pathname={pathname}>{children as ReactElement}</PageLayout>
+      return (
+        <PageLayout key={storyId} pathname={pathname}>
+          {children as ReactElement}
+        </PageLayout>
+      )
 
     case 'none':
     default:
@@ -114,7 +134,7 @@ export function MockContextProvider({
       <WalletContext.Provider value={wallet}>
         <TxModalContext.Provider value={mockTxModalContext}>
           <StoreDecorator initialState={initialState} context={context}>
-            <LayoutWrapper layout={layout} pathname={pathname}>
+            <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id}>
               {children}
             </LayoutWrapper>
           </StoreDecorator>

@@ -67,6 +67,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     store: storeOverrides = {},
     handlers: customHandlers = [],
     pathname = '/home',
+    query: customQuery = {},
   } = config
 
   // Get fixture data for scenario
@@ -78,6 +79,9 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
   // Get safe address info for router
   const safeAddressInfo = scenario === 'empty' ? SAFE_ADDRESSES.efSafe : SAFE_ADDRESSES[scenario]
   const safeAddress = safeAddressInfo.address
+
+  // Determine if user should be authenticated (required for spaces)
+  const isAuthenticated = features.spaces === true
 
   // Create all MSW handlers
   const handlers = createHandlers({
@@ -99,6 +103,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
       chainData,
       isDarkMode,
       overrides: storeOverrides,
+      isAuthenticated,
     })
 
     return (
@@ -120,6 +125,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     chainData,
     isDarkMode: false,
     overrides: storeOverrides,
+    isAuthenticated,
   })
 
   // Create parameters object for Storybook
@@ -127,7 +133,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     nextjs: {
       router: {
         pathname,
-        query: { safe: `eth:${safeAddress}` },
+        query: { safe: `eth:${safeAddress}`, ...customQuery },
       },
     },
     msw: {

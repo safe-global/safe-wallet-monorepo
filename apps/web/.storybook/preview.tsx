@@ -6,7 +6,6 @@ import { CacheProvider } from '@emotion/react'
 import createSafeTheme from '../src/components/theme/safeTheme'
 import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
-import type { Decorator } from '@storybook/react'
 
 import '../src/styles/globals.css'
 
@@ -84,6 +83,26 @@ const SAFE_VIEWPORTS = {
 
 const preview: Preview = {
   parameters: {
+    options: {
+      storySort: {
+        order: [
+          'Pages',
+          [
+            'Core',
+            ['Home', 'Balances', 'Transactions', 'AddressBook', 'Settings'],
+            'Features',
+            ['Apps', 'Swap', 'Stake', 'Earn', 'Bridge'],
+            'Onboarding',
+            ['Welcome', 'NewSafe', 'MyAccounts', 'UserSettings', 'SpacesList'],
+            'Spaces',
+            'Static',
+            ['Error', 'Legal', 'Handlers'],
+          ],
+          'Components',
+          'Features',
+        ],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
