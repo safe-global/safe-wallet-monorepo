@@ -46,7 +46,8 @@
     "storybook:inventory": "npx tsx ../../scripts/storybook/inventory.ts",
     "storybook:coverage": "npx tsx ../../scripts/storybook/coverage-report.ts",
     "storybook:dependencies": "npx tsx ../../scripts/storybook/dependency-audit.ts",
-    "storybook:generate-coverage": "npx tsx ../../scripts/storybook/generate-storybook-coverage.ts && prettier -w .storybook/COVERAGE.md"
+    "storybook:generate-coverage": "npx tsx ../../scripts/storybook/generate-storybook-coverage.ts && prettier -w .storybook/COVERAGE.md",
+    "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
   },
   "engines": {
     "node": ">=18"
@@ -154,6 +155,7 @@
     "@typescript-eslint/eslint-plugin": "^7.6.0",
     "@typescript-eslint/parser": "^8.18.1",
     "cheerio": "^1.0.0",
+    "chromatic": "^13.3.5",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
     "cypress-visual-regression": "^5.3.0",

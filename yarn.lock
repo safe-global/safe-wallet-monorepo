@@ -12360,6 +12360,7 @@ __metadata:
     "@web3-onboard/walletconnect": "npm:2.6.2"
     blo: "npm:^1.1.1"
     cheerio: "npm:^1.0.0"
+    chromatic: "npm:^13.3.5"
     classnames: "npm:^2.5.1"
     cross-env: "npm:^7.0.3"
     cypress: "npm:^15.9.0"
@@ -20490,6 +20491,25 @@ __metadata:
     chromatic: dist/bin.js
     chromatic-cli: dist/bin.js
   checksum: 10/e5d8787b72f1f6bcc6133848eab8ae850d247b8ae4804112e402e7294701b8291cbd6e45b29c477ac4fe41250dd2a607958e5031c207b69b6c07881dd34dc171
+  languageName: node
+  linkType: hard
+
+"chromatic@npm:^13.3.5":
+  version: 13.3.5
+  resolution: "chromatic@npm:13.3.5"
+  peerDependencies:
+    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
+    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+  peerDependenciesMeta:
+    "@chromatic-com/cypress":
+      optional: true
+    "@chromatic-com/playwright":
+      optional: true
+  bin:
+    chroma: dist/bin.js
+    chromatic: dist/bin.js
+    chromatic-cli: dist/bin.js
+  checksum: 10/d660e926e2763158eb216c12fd443ac909235b62e0855d6485c5ec270cbde8ce6d5467fc9792a988f2cd4c32722efb9899982b26d4bd8265381846c7d7006c21
   languageName: node
   linkType: hard
 
