@@ -76,21 +76,23 @@ function getFamilyPath(componentPath: string): string {
  * Creates a ComponentFamily from a group of components.
  */
 function createFamily(familyPath: string, componentEntries: ComponentEntry[]): ComponentFamily {
+  // Sort entries for deterministic output
+  const sortedEntries = [...componentEntries].sort((a, b) => a.path.localeCompare(b.path))
   const familyName = getFamilyName(familyPath)
-  const category = componentEntries[0]?.category || 'other'
-  const componentNames = componentEntries.map((c) => c.name)
+  const category = sortedEntries[0]?.category || 'other'
+  const componentNames = sortedEntries.map((c) => c.name)
 
   // Find story file and analyze exports
-  const { storyFile, storyExports, storyExportNames } = findFamilyStory(familyPath, componentEntries)
+  const { storyFile, storyExports, storyExportNames } = findFamilyStory(familyPath, sortedEntries)
 
   // Determine coverage status
-  const coverage = determineCoverageStatus(componentEntries, storyExports)
+  const coverage = determineCoverageStatus(sortedEntries, storyExports)
 
   return {
     name: familyName,
     path: familyPath,
     components: componentNames,
-    componentEntries,
+    componentEntries: sortedEntries,
     storyFile,
     storyExports,
     storyExportNames,
@@ -229,7 +231,8 @@ function analyzeStoryExports(storyPath: string): string[] {
     // Ignore errors, return empty exports
   }
 
-  return exports
+  // Sort for deterministic output
+  return exports.sort()
 }
 
 /**
@@ -312,7 +315,11 @@ export function getFamilyCoverageByCategory(families: ComponentFamily[]): Family
       percentage: stats.totalFamilies > 0 ? Math.round((stats.coveredFamilies / stats.totalFamilies) * 100) : 0,
       storyExports: stats.storyExports,
     }))
-    .sort((a, b) => b.totalFamilies - a.totalFamilies)
+    .sort((a, b) => {
+      const diff = b.totalFamilies - a.totalFamilies
+      // Secondary sort by category name for stable ordering
+      return diff !== 0 ? diff : a.category.localeCompare(b.category)
+    })
 }
 
 /**
@@ -386,17 +393,19 @@ function getTopLevelPath(familyPath: string): string {
  * Creates a TopLevelGroup from a list of families.
  */
 function createTopLevelGroup(rootPath: string, families: ComponentFamily[]): TopLevelGroup {
+  // Sort families for deterministic output
+  const sortedFamilies = [...families].sort((a, b) => a.path.localeCompare(b.path))
   const name = getTopLevelName(rootPath)
-  const category = families[0]?.category || 'other'
-  const totalComponents = families.reduce((sum, f) => sum + f.components.length, 0)
+  const category = sortedFamilies[0]?.category || 'other'
+  const totalComponents = sortedFamilies.reduce((sum, f) => sum + f.components.length, 0)
 
   // Check for a top-level story (e.g., Sidebar.stories.tsx or index.stories.tsx)
-  const { storyPath, storyExports } = findTopLevelStory(rootPath, families)
+  const { storyPath, storyExports } = findTopLevelStory(rootPath, sortedFamilies)
 
   // Coverage is complete if there's a top-level story OR all families have stories
   const hasTopLevelStory = storyExports > 0
-  const allFamiliesCovered = families.every((f) => f.coverage !== 'none')
-  const someFamiliesCovered = families.some((f) => f.coverage !== 'none')
+  const allFamiliesCovered = sortedFamilies.every((f) => f.coverage !== 'none')
+  const someFamiliesCovered = sortedFamilies.some((f) => f.coverage !== 'none')
 
   let coverage: 'complete' | 'partial' | 'none'
   if (hasTopLevelStory || allFamiliesCovered) {
@@ -411,7 +420,7 @@ function createTopLevelGroup(rootPath: string, families: ComponentFamily[]): Top
     name,
     rootPath,
     category,
-    families,
+    families: sortedFamilies,
     totalComponents,
     hasStory: hasTopLevelStory,
     storyPath,
@@ -503,7 +512,8 @@ function analyzeStoryExportsFromFile(storyPath: string): string[] {
     // Ignore errors
   }
 
-  return exports
+  // Sort for deterministic output
+  return exports.sort()
 }
 
 /**
@@ -533,7 +543,11 @@ export function calculateTopLevelCoverage(groups: TopLevelGroup[]): TopLevelCove
       covered: stats.covered,
       percentage: stats.total > 0 ? Math.round((stats.covered / stats.total) * 100) : 0,
     }))
-    .sort((a, b) => b.total - a.total)
+    .sort((a, b) => {
+      const diff = b.total - a.total
+      // Secondary sort by category name for stable ordering
+      return diff !== 0 ? diff : a.category.localeCompare(b.category)
+    })
 
   return {
     timestamp: new Date().toISOString(),
@@ -544,7 +558,9 @@ export function calculateTopLevelCoverage(groups: TopLevelGroup[]): TopLevelCove
     byCategory,
     groups: groups.sort((a, b) => {
       const statusOrder = { none: 0, partial: 1, complete: 2 }
-      return statusOrder[a.coverage] - statusOrder[b.coverage]
+      const statusDiff = statusOrder[a.coverage] - statusOrder[b.coverage]
+      // Secondary sort by name for stable ordering
+      return statusDiff !== 0 ? statusDiff : a.name.localeCompare(b.name)
     }),
   }
 }

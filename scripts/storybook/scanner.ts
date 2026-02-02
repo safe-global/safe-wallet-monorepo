@@ -25,11 +25,13 @@ export async function scanComponents(options: ScannerOptions = {}): Promise<Comp
   const defaultRootDir = cwd.endsWith('apps/web') ? 'src' : 'apps/web/src'
   const { rootDir = defaultRootDir, excludePatterns = DEFAULT_EXCLUDE_PATTERNS, verbose = false } = options
 
-  const componentFiles = await glob('**/*.tsx', {
-    cwd: rootDir,
-    ignore: excludePatterns,
-    absolute: false,
-  })
+  const componentFiles = (
+    await glob('**/*.tsx', {
+      cwd: rootDir,
+      ignore: excludePatterns,
+      absolute: false,
+    })
+  ).sort()
 
   if (verbose) {
     console.log(`Found ${componentFiles.length} potential component files`)
