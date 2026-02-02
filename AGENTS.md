@@ -474,6 +474,21 @@ export const Empty: Story = (() => {
 })()
 ```
 
+### Chromatic Visual Regression Testing
+
+Chromatic is integrated for visual regression testing. It automatically captures snapshots of all stories in both light and dark themes.
+
+- **Workflow**: Runs automatically on PRs affecting `apps/web/**` or `packages/**`
+- **TurboSnap**: Only stories affected by code changes are re-snapshotted
+- **Theme modes**: Both light and dark themes are captured automatically
+- **PR checks**: Chromatic posts status checks with links to visual diffs
+
+To run locally (set `CHROMATIC_PROJECT_TOKEN` in `.env.local`):
+
+```bash
+yarn workspace @safe-global/web chromatic
+```
+
 ## Security & Safe Wallet Patterns
 
 Safe (formerly Gnosis Safe) is a multi-signature smart contract wallet that requires multiple signatures to execute transactions.
