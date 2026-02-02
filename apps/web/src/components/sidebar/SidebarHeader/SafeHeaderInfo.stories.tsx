@@ -1,131 +1,31 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { createMockStory } from '@/stories/mocks'
 import SafeHeaderInfo from './SafeHeaderInfo'
-import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { TokenType } from '@safe-global/store/gateway/types'
-
-type StoryArgs = {
-  stateOverrides?: Record<string, unknown>
-}
 
 const MOCK_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const MOCK_OWNER_1 = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const MOCK_OWNER_2 = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 
-// Mock balance data
-const defaultMockBalances = {
-  fiatTotal: '142567.89',
-  items: [
-    {
-      tokenInfo: {
-        type: TokenType.NATIVE_TOKEN,
-        address: '0x0000000000000000000000000000000000000000',
-        decimals: 18,
-        symbol: 'ETH',
-        name: 'Ether',
-        logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
-      },
-      balance: '50000000000000000000',
-      fiatBalance: '125000.00',
-      fiatConversion: '2500.00',
-    },
-    {
-      tokenInfo: {
-        type: TokenType.ERC20,
-        address: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe',
-        decimals: 18,
-        symbol: 'SAFE',
-        name: 'Safe Token',
-        logoUri:
-          'https://safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.png',
-      },
-      balance: '100000000000000000000000',
-      fiatBalance: '17567.89',
-      fiatConversion: '0.175679',
-    },
-  ],
-}
-
-const createInitialState = (overrides: Record<string, unknown> = {}) => ({
-  balances: {
-    data: defaultMockBalances,
-    loading: false,
-    loaded: true,
-    error: undefined,
-  },
-  settings: {
-    currency: 'usd',
-    hiddenTokens: {},
-    tokenList: TOKEN_LISTS.ALL,
-    shortName: {
-      copy: true,
-      qr: true,
-    },
-    theme: {
-      darkMode: false,
-    },
-    env: {
-      tenderly: {
-        url: '',
-        accessToken: '',
-      },
-      rpc: {},
-    },
-    signing: {
-      onChainSigning: false,
-      blindSigning: false,
-    },
-    transactionExecution: true,
-  },
-  chains: {
-    data: [
-      {
-        chainId: '1',
-        chainName: 'Ethereum',
-        shortName: 'eth',
-        nativeCurrency: { symbol: 'ETH', decimals: 18, name: 'Ether' },
-      },
-    ],
-  },
-  safeInfo: {
-    data: {
-      address: { value: MOCK_SAFE_ADDRESS },
-      chainId: '1',
-      owners: [{ value: MOCK_OWNER_1 }, { value: MOCK_OWNER_2 }],
-      threshold: 2,
-      deployed: true,
-      nonce: 42,
-    },
-    loading: false,
-    loaded: true,
-  },
-  ...overrides,
+const defaultSetup = createMockStory({
+  scenario: 'efSafe',
+  layout: 'paper',
+  features: { portfolio: false, positions: false },
 })
 
-const meta: Meta<StoryArgs> = {
+const meta: Meta<typeof SafeHeaderInfo> = {
   title: 'Components/Sidebar/SafeHeaderInfo',
   component: SafeHeaderInfo,
   parameters: {
     layout: 'centered',
+    ...defaultSetup.parameters,
   },
-  decorators: [
-    (Story, context) => {
-      const stateOverrides = (context.args as StoryArgs)?.stateOverrides || {}
-      return (
-        <StoreDecorator initialState={createInitialState(stateOverrides)} context={context}>
-          <Paper sx={{ padding: 2, minWidth: 280 }}>
-            <Story />
-          </Paper>
-        </StoreDecorator>
-      )
-    },
-  ],
+  decorators: [defaultSetup.decorator],
   tags: ['autodocs'],
 }
 
 export default meta
-type Story = StoryObj<StoryArgs>
+type Story = StoryObj<typeof meta>
 
 /**
  * Default SafeHeaderInfo showing a deployed Safe with balance.
@@ -135,9 +35,12 @@ export const Default: Story = {}
 /**
  * Loading state with skeleton placeholders.
  */
-export const Loading: Story = {
-  args: {
-    stateOverrides: {
+export const Loading: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       safeInfo: {
         data: undefined,
         loading: true,
@@ -149,33 +52,61 @@ export const Loading: Story = {
         loaded: false,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Safe with a large total balance (whale account).
  */
-export const LargeBalance: Story = {
-  args: {
-    stateOverrides: {
+export const LargeBalance: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       balances: {
         data: {
           fiatTotal: '142567891.23',
-          items: defaultMockBalances.items,
+          items: [
+            {
+              tokenInfo: {
+                type: TokenType.NATIVE_TOKEN,
+                address: '0x0000000000000000000000000000000000000000',
+                decimals: 18,
+                symbol: 'ETH',
+                name: 'Ether',
+                logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+              },
+              balance: '50000000000000000000',
+              fiatBalance: '125000.00',
+              fiatConversion: '2500.00',
+            },
+          ],
         },
         loading: false,
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Safe with zero balance (empty state).
  */
-export const ZeroBalance: Story = {
-  args: {
-    stateOverrides: {
+export const ZeroBalance: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       balances: {
         data: {
           fiatTotal: '0',
@@ -199,15 +130,22 @@ export const ZeroBalance: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Safe with multiple owners (3-of-5 multisig).
  */
-export const MultipleOwners: Story = {
-  args: {
-    stateOverrides: {
+export const MultipleOwners: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       safeInfo: {
         data: {
           address: { value: MOCK_SAFE_ADDRESS },
@@ -227,15 +165,22 @@ export const MultipleOwners: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Counterfactual (not yet deployed) Safe showing native token balance.
  */
-export const Counterfactual: Story = {
-  args: {
-    stateOverrides: {
+export const Counterfactual: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       safeInfo: {
         data: {
           address: { value: MOCK_SAFE_ADDRESS },
@@ -271,15 +216,22 @@ export const Counterfactual: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Safe on a different chain (Polygon).
  */
-export const PolygonChain: Story = {
-  args: {
-    stateOverrides: {
+export const PolygonChain: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    layout: 'paper',
+    features: { portfolio: false, positions: false },
+    store: {
       chains: {
         data: [
           {
@@ -325,5 +277,9 @@ export const PolygonChain: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()

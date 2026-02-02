@@ -1,35 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { createMockStory } from '@/stories/mocks'
 import CurrencySelect from './index'
-import { TOKEN_LISTS } from '@/store/settingsSlice'
 
-const createInitialState = () => ({
-  settings: {
-    currency: 'usd',
-    hiddenTokens: {},
-    tokenList: TOKEN_LISTS.ALL,
-    shortName: { copy: true, qr: true },
-    theme: { darkMode: false },
-    env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-    signing: { onChainSigning: false, blindSigning: false },
-    transactionExecution: true,
-  },
+const defaultSetup = createMockStory({
+  scenario: 'efSafe',
+  layout: 'paper',
+  features: { portfolio: false, positions: false },
 })
 
 const meta: Meta<typeof CurrencySelect> = {
   title: 'Components/Base/CurrencySelect',
   component: CurrencySelect,
-  parameters: { layout: 'centered' },
-  decorators: [
-    (Story, context) => (
-      <StoreDecorator initialState={createInitialState()} context={context}>
-        <Paper sx={{ padding: 2 }}>
-          <Story />
-        </Paper>
-      </StoreDecorator>
-    ),
-  ],
+  parameters: { layout: 'centered', ...defaultSetup.parameters },
+  decorators: [defaultSetup.decorator],
   tags: ['autodocs'],
 }
 

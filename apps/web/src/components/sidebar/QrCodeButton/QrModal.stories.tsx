@@ -1,87 +1,29 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from '@storybook/test'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { createMockStory } from '@/stories/mocks'
 import QrModal from './QrModal'
-import { TOKEN_LISTS } from '@/store/settingsSlice'
-
-type StoryArgs = {
-  onClose: () => void
-  stateOverrides?: Record<string, unknown>
-}
 
 const MOCK_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const MOCK_OWNER = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
-const createInitialState = (overrides: Record<string, unknown> = {}) => ({
-  settings: {
-    currency: 'usd',
-    hiddenTokens: {},
-    tokenList: TOKEN_LISTS.ALL,
-    shortName: {
-      copy: true,
-      qr: false,
+const defaultSetup = createMockStory({
+  scenario: 'efSafe',
+  features: { portfolio: false, positions: false },
+  store: {
+    settings: {
+      shortName: { copy: true, qr: false },
     },
-    theme: {
-      darkMode: false,
-    },
-    env: {
-      tenderly: {
-        url: '',
-        accessToken: '',
-      },
-      rpc: {},
-    },
-    signing: {
-      onChainSigning: false,
-      blindSigning: false,
-    },
-    transactionExecution: true,
-    ...((overrides.settings as Record<string, unknown>) || {}),
   },
-  chains: {
-    data: [
-      {
-        chainId: '1',
-        chainName: 'Ethereum',
-        shortName: 'eth',
-        nativeCurrency: { symbol: 'ETH', decimals: 18, name: 'Ether' },
-        theme: {
-          backgroundColor: '#E8E7E6',
-          textColor: '#001428',
-        },
-      },
-    ],
-  },
-  safeInfo: {
-    data: {
-      address: { value: MOCK_SAFE_ADDRESS },
-      chainId: '1',
-      owners: [{ value: MOCK_OWNER }],
-      threshold: 1,
-      deployed: true,
-    },
-    loading: false,
-    loaded: true,
-  },
-  ...overrides,
 })
 
-const meta: Meta<StoryArgs> = {
+const meta: Meta<typeof QrModal> = {
   title: 'Components/Sidebar/QrModal',
   component: QrModal,
   parameters: {
     layout: 'centered',
+    ...defaultSetup.parameters,
   },
-  decorators: [
-    (Story, context) => {
-      const stateOverrides = (context.args as StoryArgs)?.stateOverrides || {}
-      return (
-        <StoreDecorator initialState={createInitialState(stateOverrides)} context={context}>
-          <Story />
-        </StoreDecorator>
-      )
-    },
-  ],
+  decorators: [defaultSetup.decorator],
   tags: ['autodocs'],
   argTypes: {
     onClose: {
@@ -92,7 +34,7 @@ const meta: Meta<StoryArgs> = {
 }
 
 export default meta
-type Story = StoryObj<StoryArgs>
+type Story = StoryObj<typeof meta>
 
 /**
  * Default QR modal without chain prefix in QR code.
@@ -106,27 +48,34 @@ export const Default: Story = {
 /**
  * QR modal with chain prefix enabled (eth:0x...).
  */
-export const WithChainPrefix: Story = {
-  args: {
-    onClose: fn(),
-    stateOverrides: {
+export const WithChainPrefix: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    features: { portfolio: false, positions: false },
+    store: {
       settings: {
-        shortName: {
-          copy: true,
-          qr: true,
-        },
+        shortName: { copy: true, qr: true },
       },
     },
-  },
-}
+  })
+  return {
+    args: { onClose: fn() },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * QR modal for Polygon network.
  */
-export const PolygonNetwork: Story = {
-  args: {
-    onClose: fn(),
-    stateOverrides: {
+export const PolygonNetwork: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    features: { portfolio: false, positions: false },
+    store: {
+      settings: {
+        shortName: { copy: true, qr: false },
+      },
       chains: {
         data: [
           {
@@ -153,16 +102,25 @@ export const PolygonNetwork: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    args: { onClose: fn() },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * QR modal for Arbitrum network.
  */
-export const ArbitrumNetwork: Story = {
-  args: {
-    onClose: fn(),
-    stateOverrides: {
+export const ArbitrumNetwork: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    features: { portfolio: false, positions: false },
+    store: {
+      settings: {
+        shortName: { copy: true, qr: false },
+      },
       chains: {
         data: [
           {
@@ -189,21 +147,24 @@ export const ArbitrumNetwork: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    args: { onClose: fn() },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * QR modal for Optimism network with chain prefix enabled.
  */
-export const OptimismWithPrefix: Story = {
-  args: {
-    onClose: fn(),
-    stateOverrides: {
+export const OptimismWithPrefix: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    features: { portfolio: false, positions: false },
+    store: {
       settings: {
-        shortName: {
-          copy: true,
-          qr: true,
-        },
+        shortName: { copy: true, qr: true },
       },
       chains: {
         data: [
@@ -231,16 +192,25 @@ export const OptimismWithPrefix: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    args: { onClose: fn() },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * QR modal for Base network.
  */
-export const BaseNetwork: Story = {
-  args: {
-    onClose: fn(),
-    stateOverrides: {
+export const BaseNetwork: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    features: { portfolio: false, positions: false },
+    store: {
+      settings: {
+        shortName: { copy: true, qr: false },
+      },
       chains: {
         data: [
           {
@@ -267,5 +237,10 @@ export const BaseNetwork: Story = {
         loaded: true,
       },
     },
-  },
-}
+  })
+  return {
+    args: { onClose: fn() },
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
