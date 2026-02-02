@@ -16,15 +16,13 @@ import Dashboard from './index'
  * - Explore Safe Apps widget
  *
  * Uses the createMockStory factory for consistent mocking across all stories.
- * Features like PORTFOLIO_ENDPOINT and POSITIONS are disabled by default to
- * simplify mocking requirements (can be enabled per-story).
+ * All features (PORTFOLIO_ENDPOINT, POSITIONS, NATIVE_SWAPS) are enabled by default.
  */
 
-// Default story setup - minimal features (no portfolio/positions)
+// Default story setup - all features enabled by default
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
-  features: { portfolio: false, positions: false },
 })
 
 const meta = {
@@ -50,15 +48,14 @@ export const Default: Story = {}
 
 /**
  * Dashboard with full app layout (Header + Sidebar + Footer).
- * Shows complete page with PORTFOLIO_ENDPOINT and POSITIONS features enabled,
- * including DeFi positions widget with real fixture data. Wallet is connected.
+ * Shows complete page including DeFi positions widget with real fixture data.
+ * Wallet is connected.
  */
 export const WithLayout: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     wallet: 'connected',
     layout: 'fullPage',
-    features: { portfolio: true, positions: true },
   })
   return {
     parameters: {
@@ -76,7 +73,6 @@ export const WhalePortfolio: Story = (() => {
   const setup = createMockStory({
     scenario: 'vitalik',
     wallet: 'disconnected',
-    features: { portfolio: false, positions: false },
   })
   return {
     parameters: {
@@ -94,7 +90,6 @@ export const EmptyDashboard: Story = (() => {
   const setup = createMockStory({
     scenario: 'empty',
     wallet: 'disconnected',
-    features: { portfolio: false, positions: false },
   })
   return {
     parameters: {
@@ -109,7 +104,7 @@ export const EmptyDashboard: Story = (() => {
  */
 export const MobileViewport: Story = (() => {
   const { safeData } = getFixtureData('efSafe')
-  const chainData = createChainData({ portfolio: false, positions: false })
+  const chainData = createChainData()
 
   return {
     parameters: {
@@ -130,7 +125,7 @@ export const MobileViewport: Story = (() => {
 
         return (
           <MockContextProvider wallet={wallet} initialState={initialState} context={context} layout="none">
-            <Box sx={{ maxWidth: 375, p: 2, backgroundColor: 'background.default', minHeight: '100vh' }}>
+            <Box sx={{ maxWidth: 375 }}>
               <Story />
             </Box>
           </MockContextProvider>
@@ -145,7 +140,7 @@ export const MobileViewport: Story = (() => {
  */
 export const TabletViewport: Story = (() => {
   const { safeData } = getFixtureData('efSafe')
-  const chainData = createChainData({ portfolio: false, positions: false })
+  const chainData = createChainData()
 
   return {
     parameters: {
@@ -166,7 +161,7 @@ export const TabletViewport: Story = (() => {
 
         return (
           <MockContextProvider wallet={wallet} initialState={initialState} context={context} layout="none">
-            <Box sx={{ maxWidth: 768, p: 2, backgroundColor: 'background.default', minHeight: '100vh' }}>
+            <Box sx={{ maxWidth: 768 }}>
               <Story />
             </Box>
           </MockContextProvider>

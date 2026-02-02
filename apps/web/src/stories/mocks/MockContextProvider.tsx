@@ -67,7 +67,18 @@ function LayoutWrapper({ layout, pathname, children }: { layout: LayoutType; pat
 
     case 'none':
     default:
-      return <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>{children}</Box>
+      // Mimic PageLayout's .content main { padding: var(--space-3) } rule
+      return (
+        <Box
+          sx={{
+            backgroundColor: 'background.default',
+            minHeight: '100vh',
+            '& > main': { p: 3 },
+          }}
+        >
+          <main>{children}</main>
+        </Box>
+      )
   }
 }
 
