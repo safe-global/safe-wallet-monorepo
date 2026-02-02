@@ -86,6 +86,8 @@ export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADO
 
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
+export const TREZOR_APP_URL = 'app.safe.global'
+export const TREZOR_EMAIL = 'support@safe.global'
 
 // Safe Token
 export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
