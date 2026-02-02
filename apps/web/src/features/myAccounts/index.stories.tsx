@@ -46,6 +46,27 @@ const meta: Meta = {
 
 export default meta
 
+// Docs-style wrapper for each state
+const StateWrapper = ({
+  stateName,
+  description,
+  children,
+}: {
+  stateName: string
+  description: string
+  children: React.ReactNode
+}) => (
+  <Box sx={{ mb: 8 }}>
+    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Typography variant="h5">{stateName}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
+  </Box>
+)
+
 // Mock safe data
 const mockSafes = [
   {
@@ -169,7 +190,190 @@ const MockMultiChainSafeItem = ({ safe }: { safe: typeof mockMultiChainSafe }) =
   </Accordion>
 )
 
-// Full page first - My Accounts Page
+// All States - Scrollable view of all My Accounts states
+export const MyAccountsAllStates: StoryObj = {
+  render: () => {
+    const pinnedSafes = mockSafes.filter((s) => s.isPinned)
+    const otherSafes = mockSafes.filter((s) => !s.isPinned)
+
+    return (
+      <Box sx={{ maxWidth: 700 }}>
+        <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
+          <Typography variant="h4">My Accounts Feature States</Typography>
+          <Typography variant="body1" color="text.secondary">
+            All possible states of the accounts list. Scroll to view each state.
+          </Typography>
+        </Box>
+
+        {/* State 1: Empty */}
+        <StateWrapper stateName="Empty State" description="No Safe accounts added yet. User sees onboarding prompt.">
+          <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
+            <AccountBalanceWalletIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              No Safe accounts yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Create a new Safe or add an existing one to get started.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button variant="outlined">Add existing Safe</Button>
+              <Button variant="contained">Create new Safe</Button>
+            </Box>
+          </Paper>
+        </StateWrapper>
+
+        {/* State 2: Loading */}
+        <StateWrapper stateName="Loading State" description="Fetching Safe accounts from the network.">
+          <Paper sx={{ p: 2, maxWidth: 500 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+              My Safes
+            </Typography>
+            {[1, 2, 3].map((i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
+                <Skeleton variant="circular" width={40} height={40} />
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton width="60%" height={24} />
+                  <Skeleton width="40%" height={20} />
+                </Box>
+                <Skeleton width={80} height={24} />
+              </Box>
+            ))}
+          </Paper>
+        </StateWrapper>
+
+        {/* State 3: With Pinned Safes */}
+        <StateWrapper
+          stateName="With Pinned & All Safes"
+          description="User has both pinned favorites and regular Safe accounts."
+        >
+          <Box sx={{ maxWidth: 600 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h4">My Accounts</Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button variant="outlined" startIcon={<AddIcon />}>
+                  Add Safe
+                </Button>
+                <Button variant="contained" startIcon={<AddIcon />}>
+                  Create Safe
+                </Button>
+              </Box>
+            </Box>
+
+            <TextField
+              fullWidth
+              placeholder="Search by name or address"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <Paper sx={{ p: 2, mb: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Pinned
+              </Typography>
+              <List>
+                {pinnedSafes.map((safe) => (
+                  <MockSafeItem key={safe.address} safe={safe} />
+                ))}
+              </List>
+            </Paper>
+
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                All Safes
+              </Typography>
+              <List>
+                {otherSafes.map((safe) => (
+                  <MockSafeItem key={safe.address} safe={safe} />
+                ))}
+              </List>
+            </Paper>
+          </Box>
+        </StateWrapper>
+
+        {/* State 4: Search Results */}
+        <StateWrapper stateName="Search Results" description="Filtered list based on search query.">
+          <Box sx={{ maxWidth: 500 }}>
+            <TextField
+              fullWidth
+              placeholder="Search by name or address"
+              defaultValue="treasury"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                1 result
+              </Typography>
+              <List>
+                <MockSafeItem safe={mockSafes[0]} />
+              </List>
+            </Paper>
+          </Box>
+        </StateWrapper>
+
+        {/* State 5: Multi-Chain Account */}
+        <StateWrapper
+          stateName="Multi-Chain Account"
+          description="Same Safe address deployed across multiple networks."
+        >
+          <Paper sx={{ maxWidth: 500 }}>
+            <MockMultiChainSafeItem safe={mockMultiChainSafe} />
+          </Paper>
+        </StateWrapper>
+
+        {/* State 6: Account Info Chips */}
+        <StateWrapper stateName="Account Status Indicators" description="Various status chips shown on account items.">
+          <Paper sx={{ p: 3, maxWidth: 400 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Account Status Chips
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Chip label="Read only" size="small" variant="outlined" />
+                <Typography variant="body2" color="text.secondary">
+                  Cannot sign transactions
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Chip label="3 pending" size="small" color="warning" />
+                <Typography variant="body2" color="text.secondary">
+                  Transactions awaiting signatures
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Chip label="Not deployed" size="small" color="info" />
+                <Typography variant="body2" color="text.secondary">
+                  Counterfactual safe
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </StateWrapper>
+      </Box>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'All states of the My Accounts feature displayed vertically for easy review.',
+      },
+    },
+  },
+}
+
+// Individual state: My Accounts Page with data
 export const FullMyAccountsPage: StoryObj = {
   render: () => {
     const [searchQuery, setSearchQuery] = useState('')

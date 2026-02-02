@@ -91,7 +91,275 @@ const MockRecoveryStatus = ({ status }: { status: 'pending' | 'processing' | 're
   return <Chip label={config.label} color={config.color} size="small" />
 }
 
-// Full page first - Recovery Settings Page
+// Docs-style wrapper for each state
+const StateWrapper = ({
+  stateName,
+  description,
+  children,
+}: {
+  stateName: string
+  description: string
+  children: React.ReactNode
+}) => (
+  <Box sx={{ mb: 8 }}>
+    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Typography variant="h5">{stateName}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
+  </Box>
+)
+
+// All States - Scrollable view of all Recovery states
+export const RecoveryAllStates: StoryObj = {
+  render: () => (
+    <Box sx={{ maxWidth: 900 }}>
+      <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
+        <Typography variant="h4">Recovery Feature States</Typography>
+        <Typography variant="body1" color="text.secondary">
+          All possible states of the account recovery feature. Scroll to view each state.
+        </Typography>
+      </Box>
+
+      {/* State 1: No Recovery Configured */}
+      <StateWrapper
+        stateName="No Recovery Configured"
+        description="Initial state when no recovery mechanism is set up for the Safe."
+      >
+        <Box sx={{ maxWidth: 700 }}>
+          <Typography variant="h4" gutterBottom>
+            Account Recovery
+          </Typography>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2" fontWeight="bold">
+              No recovery setup
+            </Typography>
+            <Typography variant="body2">
+              Set up account recovery to allow trusted addresses to recover your Safe if you lose access.
+            </Typography>
+          </Alert>
+
+          <Paper sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <SecurityIcon color="primary" sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography variant="h6">Set up account recovery</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Add trusted addresses that can help recover your Safe
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CheckCircleIcon color="success" fontSize="small" />
+                <Typography variant="body2">Recoverers can initiate account recovery after a delay</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CheckCircleIcon color="success" fontSize="small" />
+                <Typography variant="body2">Owners can cancel malicious recovery attempts</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <CheckCircleIcon color="success" fontSize="small" />
+                <Typography variant="body2">Configurable delay period for added security</Typography>
+              </Box>
+            </Box>
+
+            <Button variant="contained">Set up recovery</Button>
+          </Paper>
+        </Box>
+      </StateWrapper>
+
+      {/* State 2: Recovery Configured */}
+      <StateWrapper
+        stateName="Recovery Configured"
+        description="Recovery is set up with trusted recoverers and delay period."
+      >
+        <Box sx={{ maxWidth: 700 }}>
+          <Typography variant="h4" gutterBottom>
+            Account Recovery
+          </Typography>
+
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Recovery Settings
+            </Typography>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Delay period
+              </Typography>
+              <Typography variant="body2" fontWeight="bold">
+                7 days
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                Expiration period
+              </Typography>
+              <Typography variant="body2" fontWeight="bold">
+                14 days
+              </Typography>
+            </Box>
+
+            <Typography variant="subtitle2" gutterBottom>
+              Recoverers
+            </Typography>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Address</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {mockRecoverers.map((recoverer) => (
+                    <TableRow key={recoverer.address}>
+                      <TableCell>{recoverer.name}</TableCell>
+                      <TableCell sx={{ fontFamily: 'monospace' }}>
+                        {recoverer.address.slice(0, 10)}...{recoverer.address.slice(-8)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+
+          <Button variant="outlined">Edit recovery settings</Button>
+        </Box>
+      </StateWrapper>
+
+      {/* State 3: Recovery In Progress */}
+      <StateWrapper
+        stateName="Recovery In Progress"
+        description="A recovery transaction has been initiated and is waiting for the delay period."
+      >
+        <Box sx={{ maxWidth: 700 }}>
+          <Typography variant="h4" gutterBottom>
+            Account Recovery
+          </Typography>
+
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="body2" fontWeight="bold">
+              Recovery in progress
+            </Typography>
+            <Typography variant="body2">
+              A recovery transaction has been initiated. If this was not you, cancel it immediately.
+            </Typography>
+          </Alert>
+
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Pending Recovery
+            </Typography>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <AccessTimeIcon color="warning" />
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Can be executed in
+                </Typography>
+                <Typography variant="h6">2 days, 4 hours</Typography>
+              </Box>
+            </Box>
+
+            <LinearProgress variant="determinate" value={30} sx={{ mb: 3 }} />
+
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" color="error">
+                Cancel recovery
+              </Button>
+              <Button variant="outlined">View details</Button>
+            </Box>
+          </Paper>
+        </Box>
+      </StateWrapper>
+
+      {/* State 4: Recovery Queue */}
+      <StateWrapper stateName="Recovery Queue" description="List of all recovery transactions with their statuses.">
+        <Box sx={{ maxWidth: 700 }}>
+          <Typography variant="h6" gutterBottom>
+            Recovery Queue
+          </Typography>
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                <MockRecoveryType isMalicious={false} />
+                <Box sx={{ flex: 1 }} />
+                <MockRecoveryStatus status="pending" />
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Initiated by
+                  </Typography>
+                  <Typography variant="body2" fontFamily="monospace">
+                    0x1234...5678
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Valid from
+                  </Typography>
+                  <Typography variant="body2">In 2 days</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Expires
+                  </Typography>
+                  <Typography variant="body2">In 7 days</Typography>
+                </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        </Box>
+      </StateWrapper>
+
+      {/* State 5: Status Variants */}
+      <StateWrapper stateName="Status Variants" description="All possible status indicators for recovery transactions.">
+        <Paper sx={{ p: 3, maxWidth: 400 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            Recovery Status Indicators
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Waiting for delay period</Typography>
+              <MockRecoveryStatus status="pending" />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Being processed</Typography>
+              <MockRecoveryStatus status="processing" />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Can be executed</Typography>
+              <MockRecoveryStatus status="ready" />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2">Expired</Typography>
+              <MockRecoveryStatus status="expired" />
+            </Box>
+          </Box>
+        </Paper>
+      </StateWrapper>
+    </Box>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'All states of the Recovery feature displayed vertically for easy review.',
+      },
+    },
+  },
+}
+
+// Individual state: Full Recovery Settings Page
 export const FullRecoveryPage: StoryObj = {
   render: () => (
     <Box sx={{ maxWidth: 900 }}>

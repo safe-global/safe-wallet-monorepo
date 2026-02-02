@@ -111,8 +111,230 @@ const MockReviewRow = ({ name, value }: { name: string; value: React.ReactNode }
   </Box>
 )
 
-// Full page first - Create Safe Flow
-export const FullCreateSafeFlow: StoryObj = {
+// Docs-style wrapper for each step
+const StepWrapper = ({
+  stepNumber,
+  stepName,
+  description,
+  children,
+}: {
+  stepNumber: number
+  stepName: string
+  description: string
+  children: React.ReactNode
+}) => (
+  <Box sx={{ mb: 8 }}>
+    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Typography variant="overline" color="text.secondary">
+        Step {stepNumber}
+      </Typography>
+      <Typography variant="h5">{stepName}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
+  </Box>
+)
+
+// All Steps - Scrollable view of entire Create Safe flow with full UI at each step
+export const CreateSafeAllSteps: StoryObj = {
+  render: () => {
+    const steps = ['Name', 'Owners', 'Review']
+
+    return (
+      <Box sx={{ maxWidth: 700 }}>
+        <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
+          <Typography variant="h4">Create Safe Flow</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Complete walkthrough of the Safe creation process. Scroll to view each step.
+          </Typography>
+        </Box>
+
+        {/* Step 1: Name */}
+        <StepWrapper
+          stepNumber={1}
+          stepName="Name & Network"
+          description="User enters a name for their Safe and selects the network to deploy on."
+        >
+          <Box sx={{ maxWidth: 600 }}>
+            <Typography variant="h4" gutterBottom>
+              Create new Safe
+            </Typography>
+            <Stepper activeStep={0} sx={{ mb: 4 }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Name your Safe
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Choose a name for your Safe. This is stored locally.
+              </Typography>
+              <TextField
+                fullWidth
+                label="Safe name"
+                placeholder="My Safe"
+                defaultValue="Team Treasury"
+                sx={{ mb: 3 }}
+              />
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel>Network</InputLabel>
+                <Select defaultValue="1" label="Network">
+                  <MenuItem value="1">Ethereum</MenuItem>
+                  <MenuItem value="137">Polygon</MenuItem>
+                  <MenuItem value="42161">Arbitrum</MenuItem>
+                  <MenuItem value="10">Optimism</MenuItem>
+                </Select>
+              </FormControl>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Your Safe will be created on the selected network. Make sure you have funds for deployment.
+              </Alert>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="contained">Next</Button>
+              </Box>
+            </Paper>
+          </Box>
+        </StepWrapper>
+
+        {/* Step 2: Owners */}
+        <StepWrapper
+          stepNumber={2}
+          stepName="Owners & Threshold"
+          description="User configures the Safe owners and sets the required number of confirmations."
+        >
+          <Box sx={{ maxWidth: 600 }}>
+            <Typography variant="h4" gutterBottom>
+              Create new Safe
+            </Typography>
+            <Stepper activeStep={1} sx={{ mb: 4 }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Owners and confirmations
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Add the addresses that will own this Safe and set the number of required confirmations.
+              </Typography>
+              {mockOwners.map((owner, index) => (
+                <MockOwnerRow key={index} owner={owner} index={index} onRemove={() => {}} />
+              ))}
+              <Button startIcon={<AddIcon />} sx={{ mb: 3 }}>
+                Add owner
+              </Button>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle2" gutterBottom>
+                Required confirmations
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Select defaultValue={2} size="small">
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                </Select>
+                <Typography variant="body2">out of 2 owner(s)</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Button>Back</Button>
+                <Button variant="contained">Next</Button>
+              </Box>
+            </Paper>
+          </Box>
+        </StepWrapper>
+
+        {/* Step 3: Review */}
+        <StepWrapper stepNumber={3} stepName="Review" description="User reviews all settings before creating the Safe.">
+          <Box sx={{ maxWidth: 600 }}>
+            <Typography variant="h4" gutterBottom>
+              Create new Safe
+            </Typography>
+            <Stepper activeStep={2} sx={{ mb: 4 }}>
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Review
+              </Typography>
+              <MockReviewRow name="Safe name" value={<Typography variant="body2">Team Treasury</Typography>} />
+              <MockReviewRow name="Network" value={<Chip label="Ethereum" size="small" />} />
+              <MockReviewRow
+                name="Owners"
+                value={
+                  <Box>
+                    {mockOwners.map((owner, i) => (
+                      <Box key={i} sx={{ mb: 1 }}>
+                        <Typography variant="body2">{owner.name}</Typography>
+                        <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+                          {owner.address}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                }
+              />
+              <MockReviewRow name="Threshold" value={<Typography variant="body2">2 out of 2</Typography>} />
+              <Alert severity="warning" sx={{ mt: 3, mb: 3 }}>
+                You will need to pay network fees to deploy this Safe.
+              </Alert>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Button>Back</Button>
+                <Button variant="contained">Create Safe</Button>
+              </Box>
+            </Paper>
+          </Box>
+        </StepWrapper>
+
+        {/* Step 4: Success */}
+        <StepWrapper stepNumber={4} stepName="Success" description="Confirmation screen shown after Safe is created.">
+          <Box sx={{ maxWidth: 600 }}>
+            <Paper sx={{ p: 4, textAlign: 'center' }}>
+              <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+              <Typography variant="h5" gutterBottom>
+                Safe created successfully!
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Your new Safe is ready to use.
+              </Typography>
+              <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Safe address
+                </Typography>
+                <Typography variant="body2" fontFamily="monospace">
+                  0x1234567890123456789012345678901234567890
+                </Typography>
+              </Box>
+              <Button variant="contained" startIcon={<AccountBalanceWalletIcon />}>
+                Open Safe
+              </Button>
+            </Paper>
+          </Box>
+        </StepWrapper>
+      </Box>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'All steps of the Create Safe flow displayed vertically with full UI state at each step.',
+      },
+    },
+  },
+}
+
+// Interactive version - Create Safe Flow
+export const CreateSafeInteractive: StoryObj = {
   render: () => {
     const [step, setStep] = useState(0)
     const [owners, setOwners] = useState(mockOwners)
@@ -260,7 +482,7 @@ export const FullCreateSafeFlow: StoryObj = {
   parameters: {
     docs: {
       description: {
-        story: 'Complete Safe creation flow with name, owners, and review steps.',
+        story: 'Interactive Safe creation flow - click through to see each step.',
       },
     },
   },
