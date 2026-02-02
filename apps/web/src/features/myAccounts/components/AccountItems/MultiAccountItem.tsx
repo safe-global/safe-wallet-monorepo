@@ -25,9 +25,10 @@ function MultiChainSubItem({
   safeOverview?: SafeOverview
   onLinkClick?: () => void
 }) {
-  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe } = useSafeItemData(safeItem, {
-    safeOverview,
-  })
+  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
+    useSafeItemData(safeItem, {
+      safeOverview,
+    })
 
   return (
     <AccountItem.Link
@@ -44,8 +45,14 @@ function MultiChainSubItem({
         owners={owners.length}
         isMultiChainItem
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName}>
+        <AccountItem.StatusChip
+          undeployedSafe={!!undeployedSafe}
+          isActivating={isActivating}
+          isReadOnly={safeItem.isReadOnly}
+        />
+      </AccountItem.Info>
+      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
     </AccountItem.Link>
   )
 }
