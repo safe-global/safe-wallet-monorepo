@@ -110,6 +110,27 @@ yarn workspace @safe-global/web storybook:coverage --format html --output covera
 yarn workspace @safe-global/web storybook:coverage --format json --output coverage.json
 ```
 
+### Coverage Documentation (Version-Controlled)
+
+The repository maintains a persistent `apps/web/.storybook/COVERAGE.md` file that tracks coverage over time:
+
+```bash
+# Regenerate after adding stories
+yarn workspace @safe-global/web storybook:generate-coverage
+```
+
+The COVERAGE.md file contains three views:
+
+1. **Top-Level Groups** (41 groups): High-level overview where each group can be covered by ONE story file
+2. **Family Coverage** (560 families): Mid-level view with components grouped by directory
+3. **Component Coverage** (810 components): Detailed view of every component with story status
+
+This file is checked into the repository, enabling:
+
+- Historical tracking of coverage changes via git history
+- Quick browsing on GitHub without running tools
+- PR reviews to verify new stories were added
+
 ### Priority Scoring
 
 Components are scored based on:

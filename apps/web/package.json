@@ -45,7 +45,8 @@
     "integrity": "node scripts/integrity-hashes.cjs",
     "storybook:inventory": "npx tsx ../../scripts/storybook/inventory.ts",
     "storybook:coverage": "npx tsx ../../scripts/storybook/coverage-report.ts",
-    "storybook:dependencies": "npx tsx ../../scripts/storybook/dependency-audit.ts"
+    "storybook:dependencies": "npx tsx ../../scripts/storybook/dependency-audit.ts",
+    "storybook:generate-coverage": "npx tsx ../../scripts/storybook/generate-storybook-coverage.ts"
   },
   "engines": {
     "node": ">=18"
