@@ -2,5 +2,6 @@
   "buildScriptName": "build-storybook",
   "onlyChanged": true,
   "externals": ["public/**"],
-  "skip": "dependabot/**"
+  "skip": "dependabot/**",
+  "junitReport": true
 }
