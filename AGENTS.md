@@ -348,10 +348,10 @@ import { createMockStory } from '@/stories/mocks'
 import Dashboard from './index'
 
 // Create mock setup with configuration
+// Note: portfolio, positions, and swaps are enabled by default - only specify features to disable them
 const defaultSetup = createMockStory({
   scenario: 'efSafe', // Data scenario: 'efSafe' | 'vitalik' | 'empty' | 'spamTokens' | 'safeTokenHolder'
   wallet: 'disconnected', // Wallet state: 'disconnected' | 'connected' | 'owner' | 'nonOwner'
-  features: { portfolio: true, positions: true }, // Feature flags
   layout: 'none', // Layout: 'none' | 'paper' | 'fullPage'
 })
 
@@ -378,7 +378,6 @@ export const WithLayout: Story = (() => {
     scenario: 'efSafe',
     wallet: 'connected',
     layout: 'fullPage',
-    features: { portfolio: true, positions: true },
   })
   return {
     parameters: { ...setup.parameters },
@@ -389,15 +388,15 @@ export const WithLayout: Story = (() => {
 
 #### createMockStory Configuration Options
 
-| Option     | Type                                                                          | Default                                             | Description             |
-| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------- |
-| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`       | `'efSafe'`                                          | Data fixture scenario   |
-| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                      | `'disconnected'`                                    | Wallet connection state |
-| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags     |
-| `layout`   | `'none' \| 'paper' \| 'fullPage'`                                             | `'none'`                                            | Layout wrapper          |
-| `store`    | `object`                                                                      | `{}`                                                | Redux store overrides   |
-| `handlers` | `RequestHandler[]`                                                            | `[]`                                                | Additional MSW handlers |
-| `pathname` | `string`                                                                      | `'/home'`                                           | Router pathname         |
+| Option     | Type                                                                          | Default                                             | Description                                   |
+| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`       | `'efSafe'`                                          | Data fixture scenario                         |
+| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                      | `'disconnected'`                                    | Wallet connection state                       |
+| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
+| `layout`   | `'none' \| 'paper' \| 'fullPage'`                                             | `'none'`                                            | Layout wrapper                                |
+| `store`    | `object`                                                                      | `{}`                                                | Redux store overrides                         |
+| `handlers` | `RequestHandler[]`                                                            | `[]`                                                | Additional MSW handlers                       |
+| `pathname` | `string`                                                                      | `'/home'`                                           | Router pathname                               |
 
 #### Escape Hatch for Custom Composition
 
@@ -424,6 +423,7 @@ import {
 - Story files are located throughout `apps/web/src/` alongside components
 - **For pages/widgets**: Use `createMockStory` to avoid duplicating mock setup code
 - **For simple components**: Use basic story format without mocking utilities
+- **Do not override feature flags** unless testing a specific disabled feature state (e.g., `features: { swaps: false }` to test no-swap UI). The defaults (`portfolio: true`, `positions: true`, `swaps: true`) should be used for most stories.
 
 ## Security & Safe Wallet Patterns
 

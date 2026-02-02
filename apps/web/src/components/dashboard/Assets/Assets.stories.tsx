@@ -9,7 +9,6 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   layout: 'none',
-  features: { portfolio: false, positions: false, swaps: true },
 })
 
 const meta = {
@@ -44,7 +43,6 @@ export const WhalePortfolio: Story = (() => {
     scenario: 'vitalik',
     wallet: 'owner',
     layout: 'none',
-    features: { portfolio: false, positions: false, swaps: true },
   })
   return {
     parameters: { ...setup.parameters },
@@ -61,7 +59,6 @@ export const NoAssets: Story = (() => {
     scenario: 'empty',
     wallet: 'owner',
     layout: 'none',
-    features: { portfolio: false, positions: false, swaps: true },
   })
   return {
     parameters: { ...setup.parameters },
@@ -73,12 +70,11 @@ export const NoAssets: Story = (() => {
  * Loading state showing skeleton placeholder.
  */
 export const Loading: Story = (() => {
-  const chainData = createChainData({ portfolio: false, positions: false, swaps: true })
+  const chainData = createChainData()
   const setup = createMockStory({
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'none',
-    features: { portfolio: false, positions: false, swaps: true },
     handlers: [
       http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
       http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
@@ -105,7 +101,6 @@ export const DiversePortfolio: Story = (() => {
     scenario: 'safeTokenHolder',
     wallet: 'owner',
     layout: 'none',
-    features: { portfolio: false, positions: false, swaps: true },
   })
   return {
     parameters: { ...setup.parameters },
@@ -125,7 +120,7 @@ export const WithoutSwapFeature: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'none',
-    features: { portfolio: false, positions: false, swaps: false },
+    features: { swaps: false },
   })
   return {
     parameters: { ...setup.parameters },

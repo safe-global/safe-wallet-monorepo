@@ -73,7 +73,7 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
+
   store: {
     addressBook: createAddressBook(defaultSafeData.owners),
   },
@@ -116,7 +116,7 @@ export const TwoOwners: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: { ...safeData, deployed: true },
@@ -149,7 +149,7 @@ export const SingleOwner: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: { ...safeData, deployed: true },
@@ -182,7 +182,7 @@ export const ManyOwners: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: { ...safeData, deployed: true },
@@ -214,7 +214,7 @@ export const NonOwnerView: Story = (() => {
     scenario: 'efSafe',
     wallet: 'nonOwner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       addressBook: createAddressBook(defaultSafeData.owners),
     },
@@ -242,7 +242,7 @@ export const WithEnsNames: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: { ...safeData, deployed: true },
@@ -275,7 +275,7 @@ export const MixedAddressBook: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: { ...safeData, deployed: true },

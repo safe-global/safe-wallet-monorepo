@@ -17,17 +17,21 @@ import type { MockStoryConfig, MockStoryResult } from './types'
  * This is the main entry point for creating stories with mocked data.
  * It provides a single configuration object that handles:
  * - Wallet state (disconnected/connected/owner/custom)
- * - Feature flags (portfolio, positions, swaps, etc.)
+ * - Feature flags (portfolio, positions, swaps, etc.) - DO NOT OVERRIDE unless testing disabled state
  * - Data scenarios (efSafe, vitalik, empty, etc.)
  * - Layout wrappers (none, paper, fullPage)
  * - Redux store state
  * - MSW request handlers
+ *
+ * IMPORTANT: Do not override feature flags unless testing a specific disabled feature.
+ * The defaults (portfolio: true, positions: true, swaps: true) should be used for most stories.
  *
  * @param config - Story configuration options
  * @returns Object with decorator, handlers, initialState, and parameters
  *
  * @example
  * // Basic usage - default efSafe scenario with disconnected wallet
+ * // Features are enabled by default, no need to specify them
  * const { decorator, handlers } = createMockStory()
  *
  * @example
@@ -39,10 +43,10 @@ import type { MockStoryConfig, MockStoryResult } from './types'
  * })
  *
  * @example
- * // Whale portfolio with positions enabled
+ * // Only disable features when testing specific disabled state
  * const { decorator, handlers } = createMockStory({
- *   scenario: 'vitalik',
- *   features: { portfolio: true, positions: true },
+ *   scenario: 'efSafe',
+ *   features: { swaps: false }, // Test UI without swap feature
  * })
  *
  * @example

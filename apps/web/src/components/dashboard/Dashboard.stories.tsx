@@ -22,7 +22,7 @@ import Dashboard from './index'
 // Default story setup - all features enabled by default
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
-  wallet: 'disconnected',
+  wallet: 'owner',
 })
 
 const meta = {
@@ -72,7 +72,7 @@ export const WithLayout: Story = (() => {
 export const WhalePortfolio: Story = (() => {
   const setup = createMockStory({
     scenario: 'vitalik',
-    wallet: 'disconnected',
+    wallet: 'owner',
   })
   return {
     parameters: {
@@ -89,7 +89,7 @@ export const WhalePortfolio: Story = (() => {
 export const EmptyDashboard: Story = (() => {
   const setup = createMockStory({
     scenario: 'empty',
-    wallet: 'disconnected',
+    wallet: 'owner',
   })
   return {
     parameters: {
@@ -116,7 +116,7 @@ export const MobileViewport: Story = (() => {
     decorators: [
       (Story, context) => {
         const isDarkMode = context.globals?.theme === 'dark'
-        const wallet = resolveWallet('disconnected', safeData)
+        const wallet = resolveWallet('owner', safeData)
         const initialState = createInitialState({
           safeData,
           chainData,
@@ -152,7 +152,7 @@ export const TabletViewport: Story = (() => {
     decorators: [
       (Story, context) => {
         const isDarkMode = context.globals?.theme === 'dark'
-        const wallet = resolveWallet('disconnected', safeData)
+        const wallet = resolveWallet('owner', safeData)
         const initialState = createInitialState({
           safeData,
           chainData,

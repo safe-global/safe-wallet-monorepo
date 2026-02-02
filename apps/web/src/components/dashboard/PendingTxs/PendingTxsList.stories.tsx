@@ -53,7 +53,7 @@ const createMockQueueResponse = (txCount: number, confirmations: number = 1, thr
 
 // Create handlers for tx queue
 const createTxQueueHandlers = (txCount: number, confirmations: number = 1, threshold: number = 2) => {
-  const chainData = createChainData({ portfolio: false, positions: false })
+  const chainData = createChainData()
   return [
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
     http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
@@ -68,7 +68,6 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
   store: {
     txQueue: {
       data: createMockQueueResponse(3, 1, 2),
@@ -107,7 +106,6 @@ export const SingleTransaction: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       txQueue: {
         data: createMockQueueResponse(1, 1, 2),
@@ -132,7 +130,6 @@ export const MultipleTransactions: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       txQueue: {
         data: createMockQueueResponse(4, 1, 2),
@@ -157,7 +154,6 @@ export const EmptyQueue: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       txQueue: {
         data: createMockQueueResponse(0),
@@ -181,7 +177,6 @@ export const ReadyToExecute: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       txQueue: {
         data: createMockQueueResponse(2, 2, 2),
@@ -201,12 +196,11 @@ export const ReadyToExecute: Story = (() => {
  * Loading state showing skeleton placeholder.
  */
 export const Loading: Story = (() => {
-  const chainData = createChainData({ portfolio: false, positions: false })
+  const chainData = createChainData()
   const setup = createMockStory({
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       safeInfo: {
         data: undefined,
@@ -244,7 +238,6 @@ export const NonOwnerView: Story = (() => {
     scenario: 'efSafe',
     wallet: 'nonOwner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       txQueue: {
         data: createMockQueueResponse(3, 1, 2),

@@ -8,7 +8,6 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta = {
@@ -40,7 +39,6 @@ export const WalletConnected: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
   })
   return {
     parameters: { ...setup.parameters },
@@ -57,7 +55,6 @@ export const WhalePortfolio: Story = (() => {
     scenario: 'vitalik',
     wallet: 'disconnected',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
   })
   return {
     parameters: { ...setup.parameters },
@@ -74,7 +71,6 @@ export const EmptyBalance: Story = (() => {
     scenario: 'empty',
     wallet: 'disconnected',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
   })
   return {
     parameters: { ...setup.parameters },
@@ -90,7 +86,6 @@ export const Loading: Story = (() => {
     scenario: 'efSafe',
     wallet: 'disconnected',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       safeInfo: {
         data: undefined,
@@ -120,7 +115,6 @@ export const UndeployedSafe: Story = (() => {
     scenario: 'efSafe',
     wallet: 'disconnected',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
     store: {
       safeInfo: {
         data: { deployed: false },

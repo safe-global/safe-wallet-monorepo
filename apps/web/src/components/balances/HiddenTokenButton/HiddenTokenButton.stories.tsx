@@ -11,7 +11,6 @@ type StoryArgs = {
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta: Meta<StoryArgs> = {
@@ -33,7 +32,7 @@ export const WithHiddenTokens: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       settings: {
         hiddenTokens: {

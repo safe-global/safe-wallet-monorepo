@@ -5,7 +5,6 @@ import CurrencySelect from './index'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta: Meta<typeof CurrencySelect> = {

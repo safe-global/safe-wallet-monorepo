@@ -15,15 +15,18 @@ export type WalletPreset = 'disconnected' | 'connected' | 'owner' | 'nonOwner'
 export type LayoutType = 'none' | 'paper' | 'withSidebar' | 'fullPage'
 
 /**
- * Feature flags that can be toggled in story configuration
- * Defaults: portfolio=true, positions=true, swaps=true, others=false
+ * Feature flags that can be toggled in story configuration.
+ *
+ * IMPORTANT: Do not override these unless testing a specific disabled feature state.
+ * The defaults (portfolio=true, positions=true, swaps=true) should be used for most stories.
+ * Only specify a feature to disable it (e.g., `features: { swaps: false }`).
  */
 export interface FeatureFlags {
-  /** PORTFOLIO_ENDPOINT - aggregated portfolio data (default: true) */
+  /** PORTFOLIO_ENDPOINT - aggregated portfolio data (default: true, don't override) */
   portfolio?: boolean
-  /** POSITIONS - DeFi positions display (default: true) */
+  /** POSITIONS - DeFi positions display (default: true, don't override) */
   positions?: boolean
-  /** NATIVE_SWAPS - swap functionality (default: true) */
+  /** NATIVE_SWAPS - swap functionality (default: true, don't override) */
   swaps?: boolean
   /** RECOVERY - recovery module features (default: false) */
   recovery?: boolean

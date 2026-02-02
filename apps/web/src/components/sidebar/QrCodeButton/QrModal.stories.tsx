@@ -8,7 +8,6 @@ const MOCK_OWNER = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
-  features: { portfolio: false, positions: false },
   store: {
     settings: {
       shortName: { copy: true, qr: false },
@@ -51,7 +50,6 @@ export const Default: Story = {
 export const WithChainPrefix: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
-    features: { portfolio: false, positions: false },
     store: {
       settings: {
         shortName: { copy: true, qr: true },
@@ -71,7 +69,6 @@ export const WithChainPrefix: Story = (() => {
 export const PolygonNetwork: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
-    features: { portfolio: false, positions: false },
     store: {
       settings: {
         shortName: { copy: true, qr: false },
@@ -116,7 +113,6 @@ export const PolygonNetwork: Story = (() => {
 export const ArbitrumNetwork: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
-    features: { portfolio: false, positions: false },
     store: {
       settings: {
         shortName: { copy: true, qr: false },
@@ -161,7 +157,6 @@ export const ArbitrumNetwork: Story = (() => {
 export const OptimismWithPrefix: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
-    features: { portfolio: false, positions: false },
     store: {
       settings: {
         shortName: { copy: true, qr: true },
@@ -206,7 +201,6 @@ export const OptimismWithPrefix: Story = (() => {
 export const BaseNetwork: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
-    features: { portfolio: false, positions: false },
     store: {
       settings: {
         shortName: { copy: true, qr: false },

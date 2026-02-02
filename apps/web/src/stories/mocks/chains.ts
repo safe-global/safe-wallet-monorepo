@@ -3,8 +3,9 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { FeatureFlags } from './types'
 
 /**
- * Default feature flags for stories
- * Realistic defaults that match typical production usage
+ * Default feature flags for stories.
+ * These match typical production usage and should NOT be overridden in most stories.
+ * Only override a feature to test a specific disabled state (e.g., `features: { swaps: false }`).
  */
 export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   portfolio: true,

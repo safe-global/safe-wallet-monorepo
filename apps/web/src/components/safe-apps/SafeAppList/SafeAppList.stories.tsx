@@ -16,7 +16,6 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta = {

@@ -19,7 +19,6 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta = {
@@ -62,7 +61,6 @@ export const WhalePortfolio: Story = (() => {
     scenario: 'vitalik',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
   })
   return {
     args: {
@@ -82,7 +80,6 @@ export const EmptyBalance: Story = (() => {
     scenario: 'empty',
     wallet: 'owner',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
   })
   return {
     args: {

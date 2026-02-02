@@ -10,7 +10,6 @@ const MOCK_OWNER_2 = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   layout: 'paper',
-  features: { portfolio: false, positions: false },
 })
 
 const meta: Meta<typeof SafeHeaderInfo> = {
@@ -39,7 +38,7 @@ export const Loading: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: undefined,
@@ -66,7 +65,7 @@ export const LargeBalance: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       balances: {
         data: {
@@ -105,7 +104,7 @@ export const ZeroBalance: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       balances: {
         data: {
@@ -144,7 +143,7 @@ export const MultipleOwners: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: {
@@ -179,7 +178,7 @@ export const Counterfactual: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       safeInfo: {
         data: {
@@ -230,7 +229,7 @@ export const PolygonChain: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     layout: 'paper',
-    features: { portfolio: false, positions: false },
+
     store: {
       chains: {
         data: [
