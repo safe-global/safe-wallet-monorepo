@@ -194,7 +194,7 @@ const OwnerPolicyStep = ({
             <Button
               data-testid="back-btn"
               variant="outlined"
-              size="small"
+              size="large"
               onClick={handleBack}
               startIcon={<ArrowBackIcon fontSize="small" />}
             >

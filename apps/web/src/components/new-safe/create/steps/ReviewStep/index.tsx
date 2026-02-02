@@ -524,7 +524,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Button
             data-testid="back-btn"
             variant="outlined"
-            size="small"
+            size="large"
             onClick={handleBack}
             startIcon={<ArrowBackIcon fontSize="small" />}
           >
