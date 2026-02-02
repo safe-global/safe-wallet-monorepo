@@ -2,11 +2,17 @@ import type { Preview } from '@storybook/nextjs'
 import React, { useEffect } from 'react'
 
 import { ThemeProvider, CssBaseline } from '@mui/material'
-import { withThemeFromJSXProvider } from '@storybook/addon-themes'
+import { CacheProvider } from '@emotion/react'
 import createSafeTheme from '../src/components/theme/safeTheme'
+import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
+import type { Decorator } from '@storybook/react'
 
 import '../src/styles/globals.css'
+
+// Create emotion cache once for Storybook (same as real app)
+// This ensures MUI styles are injected first, allowing CSS modules to override them
+const emotionCache = createEmotionCache()
 
 // Initialize MSW for API mocking in Storybook
 initialize({
@@ -95,15 +101,21 @@ const preview: Preview = {
   loaders: [mswLoader],
 
   decorators: [
-    withThemeFromJSXProvider({
-      GlobalStyles: CssBaseline,
-      Provider: ThemeProvider,
-      themes: {
-        light: createSafeTheme('light'),
-        dark: createSafeTheme('dark'),
-      },
-      defaultTheme: 'light',
-    }),
+    // Custom MUI theme decorator with emotion cache (same as real app)
+    // This ensures CSS modules can override MUI styles
+    (Story, context) => {
+      const themeMode = (context.globals?.theme as 'light' | 'dark') || 'light'
+      const theme = themeMode === 'dark' ? createSafeTheme('dark') : createSafeTheme('light')
+
+      return (
+        <CacheProvider value={emotionCache}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Story />
+          </ThemeProvider>
+        </CacheProvider>
+      )
+    },
     ThemeSyncDecorator,
   ],
 }
