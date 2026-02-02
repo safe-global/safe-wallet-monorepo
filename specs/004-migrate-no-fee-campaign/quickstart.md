@@ -91,10 +91,11 @@ import { NoFeeCampaignFeature, useNoFeeCampaignEligibility } from '@/features/no
 import { useLoadFeature } from '@/features/__core__'
 
 function MyComponent() {
-  const noFeeFeature = useLoadFeature(NoFeeCampaignFeature)
-  const noFeeEligibility = useNoFeeCampaignEligibility()
+  // Prefer destructuring for cleaner component usage
+  const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
+  const eligibility = useNoFeeCampaignEligibility()
 
-  return <noFeeFeature.NoFeeCampaignBanner />
+  return <NoFeeCampaignBanner />
 }
 ```
 
@@ -140,9 +141,10 @@ ls -la apps/web/.next/static/chunks/ | grep -i no-fee
 ### Component Usage
 
 ```typescript
+// Prefer destructuring for cleaner component usage
 // Components render null when not ready (no check needed)
-const noFeeFeature = useLoadFeature(NoFeeCampaignFeature)
-return <noFeeFeature.NoFeeCampaignBanner onDismiss={handleDismiss} />
+const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
+return <NoFeeCampaignBanner onDismiss={handleDismiss} />
 ```
 
 ### Hook Usage
@@ -162,7 +164,9 @@ const noFeeFeature = useLoadFeature(NoFeeCampaignFeature)
 if (noFeeFeature.$isLoading) return <Skeleton />
 if (noFeeFeature.$isDisabled) return null
 
-return <noFeeFeature.NoFeeCampaignBanner />
+// Destructure after state checks
+const { NoFeeCampaignBanner } = noFeeFeature
+return <NoFeeCampaignBanner />
 ```
 
 ## Common Pitfalls
