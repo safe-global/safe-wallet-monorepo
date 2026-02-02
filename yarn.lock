@@ -3352,24 +3352,48 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/browser-core@npm:6.6.3":
-  version: 6.6.3
-  resolution: "@datadog/browser-core@npm:6.6.3"
-  checksum: 10/2b0ccf614bd0c1e99dbd916ae7308fccddc4d1330f4e9dc28c66a11481db5222f7ffc8ca7eff985dc7359810d295adacb535ccf4c095ba02ec1e03472855d907
+"@datadog/browser-core@npm:6.26.0":
+  version: 6.26.0
+  resolution: "@datadog/browser-core@npm:6.26.0"
+  checksum: 10/c5a84b637d40d2d0a50c63871d49f2cbdb328f932f123e6936c5e5cb2c07b0fdf739f80c2762366dd22364d1eb9356c5c39f80831b36fa5f8ae8d0fcc75eafcd
   languageName: node
   linkType: hard
 
-"@datadog/browser-logs@npm:^6.6.3":
-  version: 6.6.3
-  resolution: "@datadog/browser-logs@npm:6.6.3"
+"@datadog/browser-logs@npm:^6.24.1":
+  version: 6.26.0
+  resolution: "@datadog/browser-logs@npm:6.26.0"
   dependencies:
-    "@datadog/browser-core": "npm:6.6.3"
+    "@datadog/browser-core": "npm:6.26.0"
   peerDependencies:
-    "@datadog/browser-rum": 6.6.3
+    "@datadog/browser-rum": 6.26.0
   peerDependenciesMeta:
     "@datadog/browser-rum":
       optional: true
-  checksum: 10/2a347917afd3739d672daac3cd5113cae4e8b94d87542775a6e81ff86661837e39bda3457b8d0b32784ef76f4ad2191b0912ea184620dbe0a0eadf76528691bf
+  checksum: 10/a8302d16bb9e0f0b6cc88e4cd38185873c438b10c390514ce55308623cbe0a073df0dd3d01203e4e453ae265bd59e92a9b183a9fb14d35538db2def624825f03
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum-core@npm:6.26.0":
+  version: 6.26.0
+  resolution: "@datadog/browser-rum-core@npm:6.26.0"
+  dependencies:
+    "@datadog/browser-core": "npm:6.26.0"
+  checksum: 10/2d3423c324f7e0e462b3a2ba6af1a88829f763bc9c6d4d721334a1c97f4e6999556369a4ab9b7cdabedba2466fa7ec0204ad185b77e01400d443ef7a85c52728
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum@npm:^6.24.1":
+  version: 6.26.0
+  resolution: "@datadog/browser-rum@npm:6.26.0"
+  dependencies:
+    "@datadog/browser-core": "npm:6.26.0"
+    "@datadog/browser-rum-core": "npm:6.26.0"
+  peerDependencies:
+    "@datadog/browser-logs": 6.26.0
+  peerDependenciesMeta:
+    "@datadog/browser-logs":
+      optional: true
+  checksum: 10/53b9309ea5e5d825cdee06933beca87a6b631f63ecdd8a0cd68c43c3e23f4891be3dcf394e8ae658c558fc185f022b5d678a984ba5011c8f17d94cf4f9701b06
   languageName: node
   linkType: hard
 
@@ -12260,7 +12284,8 @@ __metadata:
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
     "@cowprotocol/widget-react": "npm:0.14.6"
-    "@datadog/browser-logs": "npm:^6.6.3"
+    "@datadog/browser-logs": "npm:^6.24.1"
+    "@datadog/browser-rum": "npm:^6.24.1"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
     "@emotion/react": "npm:^11.13.5"

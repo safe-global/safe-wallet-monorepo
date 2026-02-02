@@ -1,5 +1,4 @@
 import Analytics from '@/services/analytics/Analytics'
-import { SentryErrorBoundary } from '@/services/sentry'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -31,7 +30,6 @@ import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
 import useBeamer from '@/hooks/Beamer/useBeamer'
-import ErrorBoundary from '@/components/common/ErrorBoundary'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -69,10 +67,17 @@ import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
-import { useDatadog } from '@/services/datadog'
+import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+
+// Initialize observability before React rendering starts
+// This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
+if (typeof window !== 'undefined') {
+  initObservability()
+}
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
@@ -80,7 +85,6 @@ setStoreInstance(reduxStore)
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
   useAdjustUrl()
-  useDatadog()
   useGtm()
   useMixpanel()
   useNotificationTracking()
@@ -112,19 +116,25 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
+  const handleError = (error: Error, componentStack?: string) => {
+    captureException(error, { componentStack })
+  }
+
+  const content = (
+    <WalletProvider>
+      <GeoblockingProvider>
+        <TxModalProvider>
+          <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+        </TxModalProvider>
+      </GeoblockingProvider>
+    </WalletProvider>
+  )
+
   return (
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
-          <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-            <WalletProvider>
-              <GeoblockingProvider>
-                <TxModalProvider>
-                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
-                </TxModalProvider>
-              </GeoblockingProvider>
-            </WalletProvider>
-          </SentryErrorBoundary>
+          <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
         </ThemeProvider>
       )}
     </SafeThemeProvider>

@@ -34,6 +34,56 @@ export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
 export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
 
+// Datadog RUM
+export const DATADOG_RUM_APPLICATION_ID = process.env.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID || ''
+export const DATADOG_RUM_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN || ''
+export const DATADOG_RUM_SITE = process.env.NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu'
+export const DATADOG_RUM_SERVICE = process.env.NEXT_PUBLIC_DATADOG_RUM_SERVICE || 'safe-wallet-web'
+export const DATADOG_RUM_ENV = process.env.NEXT_PUBLIC_DATADOG_RUM_ENV || 'development'
+const parsedSessionSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE)
+export const DATADOG_RUM_SESSION_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE !== undefined && !Number.isNaN(parsedSessionSampleRate)
+    ? parsedSessionSampleRate
+    : 10
+
+const parsedTraceSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE)
+export const DATADOG_RUM_TRACE_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE !== undefined && !Number.isNaN(parsedTraceSampleRate)
+    ? parsedTraceSampleRate
+    : 20
+
+const parsedLogsSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE)
+export const DATADOG_LOGS_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE !== undefined && !Number.isNaN(parsedLogsSampleRate)
+    ? parsedLogsSampleRate
+    : 100
+
+const parsedSessionReplaySampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE)
+export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE !== undefined &&
+  !Number.isNaN(parsedSessionReplaySampleRate)
+    ? parsedSessionReplaySampleRate
+    : 0
+
+export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
+export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
+
+const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+  if (value === undefined) return defaultValue
+  return value === 'true'
+}
+
+export const DATADOG_RUM_TRACK_USER_INTERACTIONS = parseBoolean(
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_USER_INTERACTIONS,
+  true,
+)
+export const DATADOG_RUM_TRACK_RESOURCES = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_RESOURCES, true)
+export const DATADOG_RUM_TRACK_LONG_TASKS = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_LONG_TASKS, true)
+
+type DatadogPrivacyLevel = 'mask' | 'mask-user-input' | 'allow'
+export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADOG_RUM_DEFAULT_PRIVACY_LEVEL ||
+  'mask') as DatadogPrivacyLevel
+
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
 
