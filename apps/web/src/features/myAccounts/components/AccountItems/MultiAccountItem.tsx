@@ -30,6 +30,11 @@ function MultiChainSubItem({
       safeOverview,
     })
 
+  const hasQueuedItems =
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+
   return (
     <AccountItem.Link
       href={href}
@@ -51,6 +56,14 @@ function MultiChainSubItem({
           isActivating={isActivating}
           isReadOnly={safeItem.isReadOnly}
         />
+        {hasQueuedItems && (
+          <AccountItem.QueueActions
+            safeAddress={safeOverview.address.value}
+            chainShortName={chain?.shortName || ''}
+            queued={safeOverview.queued ?? 0}
+            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+          />
+        )}
       </AccountItem.Info>
       <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
     </AccountItem.Link>
