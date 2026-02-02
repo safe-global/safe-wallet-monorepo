@@ -1,84 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import React, { useEffect } from 'react'
-import { Box } from '@mui/material'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { StoreDecorator } from '@/stories/storeDecorator'
-import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
-import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import {
-  SAFE_ADDRESSES,
-  safeFixtures,
-  chainFixtures,
-  balancesFixtures,
-} from '../../../../../../config/test/msw/fixtures'
+import { createMockStory, createChainData } from '@/stories/mocks'
+import { chainFixtures } from '../../../../../../config/test/msw/fixtures'
 import AssetsWidget from './index'
 
-// Create chain data without complex features
-const createChainData = (options?: { disableSwap?: boolean }) => {
-  const chainData = { ...chainFixtures.mainnet }
-  // Remove features that require extra mocking
-  // Note: NATIVE_SWAPS is kept enabled by default to show swap button (affects asset row layout)
-  const disabledFeatures = ['PORTFOLIO_ENDPOINT', 'POSITIONS', 'RECOVERY', 'HYPERNATIVE']
-  if (options?.disableSwap) {
-    disabledFeatures.push('NATIVE_SWAPS')
-  }
-  chainData.features = chainData.features.filter((f: string) => !disabledFeatures.includes(f))
-  return chainData
-}
-
-// Create MSW handlers for Assets widget dependencies
-const createHandlers = (scenario: 'efSafe' | 'vitalik' | 'empty' | 'spamTokens' | 'safeTokenHolder') => {
-  const balancesData = balancesFixtures[scenario]
-  const safeData = scenario === 'empty' ? safeFixtures.efSafe : safeFixtures[scenario]
-  const chainData = createChainData()
-
-  return [
-    // Chain config
-    http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
-    http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
-    // Safe info
-    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(safeData)),
-    // Balances - the main data dependency
-    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, () => HttpResponse.json(balancesData)),
-  ]
-}
-
-const { address: MOCK_SAFE_ADDRESS, chainId: MOCK_CHAIN_ID } = SAFE_ADDRESSES.efSafe
-
-// Mock wallet context
-const mockConnectedWallet: WalletContextType = {
-  connectedWallet: {
-    address: MOCK_SAFE_ADDRESS,
-    chainId: MOCK_CHAIN_ID,
-    label: 'MetaMask',
-    provider: null as never,
-  },
-  signer: {
-    address: MOCK_SAFE_ADDRESS,
-    chainId: MOCK_CHAIN_ID,
-    provider: null,
-  },
-  setSignerAddress: () => {},
-}
-
-// Mock TxModal context
-const mockTxModalContext: TxModalContextType = {
-  txFlow: undefined,
-  setTxFlow: () => {},
-  setFullWidth: () => {},
-}
-
-// Mock SDK Provider
-const MockSDKProvider = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    setSafeSDK({} as never)
-    return () => setSafeSDK(undefined)
-  }, [])
-  return <>{children}</>
-}
+const defaultSetup = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'owner',
+  layout: 'none',
+  features: { portfolio: false, positions: false, swaps: true },
+})
 
 const meta = {
   title: 'Dashboard/AssetsWidget',
@@ -86,53 +18,9 @@ const meta = {
   loaders: [mswLoader],
   parameters: {
     layout: 'fullscreen',
-    msw: {
-      handlers: createHandlers('efSafe'),
-    },
+    ...defaultSetup.parameters,
   },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.efSafe, deployed: true }
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <TxModalContext.Provider value={mockTxModalContext}>
-              <StoreDecorator
-                initialState={{
-                  safeInfo: {
-                    data: safeData,
-                    loading: false,
-                    loaded: true,
-                  },
-                  chains: {
-                    data: [chainData],
-                    loading: false,
-                  },
-                  settings: {
-                    currency: 'usd',
-                    hiddenTokens: {},
-                    tokenList: TOKEN_LISTS.ALL,
-                    shortName: { copy: true, qr: true },
-                    theme: { darkMode: isDarkMode },
-                    env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                    signing: { onChainSigning: false, blindSigning: false },
-                    transactionExecution: true,
-                  },
-                }}
-              >
-                <Box sx={{ p: 3 }}>
-                  <Story />
-                </Box>
-              </StoreDecorator>
-            </TxModalContext.Provider>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
+  decorators: [defaultSetup.decorator],
 } satisfies Meta<typeof AssetsWidget>
 
 export default meta
@@ -145,99 +33,66 @@ type Story = StoryObj<typeof meta>
  * Note: Values are translated 80px right and reveal action buttons on hover.
  * Hover over a row to see the full values and action buttons.
  */
-export const Default: Story = {
-  loaders: [mswLoader],
-}
+export const Default: Story = {}
 
 /**
  * AssetsWidget with whale portfolio data.
  * Tests large balance rendering.
  */
-export const WhalePortfolio: Story = {
-  loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: createHandlers('vitalik'),
-    },
-  },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.vitalik, deployed: true }
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <TxModalContext.Provider value={mockTxModalContext}>
-              <StoreDecorator
-                initialState={{
-                  safeInfo: {
-                    data: safeData,
-                    loading: false,
-                    loaded: true,
-                  },
-                  chains: {
-                    data: [chainData],
-                    loading: false,
-                  },
-                  settings: {
-                    currency: 'usd',
-                    hiddenTokens: {},
-                    tokenList: TOKEN_LISTS.ALL,
-                    shortName: { copy: true, qr: true },
-                    theme: { darkMode: isDarkMode },
-                    env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                    signing: { onChainSigning: false, blindSigning: false },
-                    transactionExecution: true,
-                  },
-                }}
-              >
-                <Box sx={{ p: 3 }}>
-                  <Story />
-                </Box>
-              </StoreDecorator>
-            </TxModalContext.Provider>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
-}
+export const WhalePortfolio: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'vitalik',
+    wallet: 'owner',
+    layout: 'none',
+    features: { portfolio: false, positions: false, swaps: true },
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Empty state when Safe has no assets.
  * Shows placeholder message to deposit funds.
  */
-export const NoAssets: Story = {
-  loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: createHandlers('empty'),
-    },
-  },
-}
+export const NoAssets: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'empty',
+    wallet: 'owner',
+    layout: 'none',
+    features: { portfolio: false, positions: false, swaps: true },
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Loading state showing skeleton placeholder.
  */
-export const Loading: Story = {
-  loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: [
-        // Chain config
-        http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(createChainData())),
-        http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [createChainData()] })),
-        // Balances - delay forever to show loading state
-        http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, async () => {
-          await new Promise(() => {})
-          return HttpResponse.json({})
-        }),
-      ],
-    },
-  },
-}
+export const Loading: Story = (() => {
+  const chainData = createChainData({ portfolio: false, positions: false, swaps: true })
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    wallet: 'owner',
+    layout: 'none',
+    features: { portfolio: false, positions: false, swaps: true },
+    handlers: [
+      http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
+      http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
+      http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, async () => {
+        await new Promise(() => {})
+        return HttpResponse.json({})
+      }),
+    ],
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * Safe Token holder with diverse portfolio (25 tokens).
@@ -245,71 +100,18 @@ export const Loading: Story = {
  * Note: Values are translated 80px right and reveal action buttons on hover.
  * Hover over a row to see the full values and action buttons.
  */
-export const DiversePortfolio: Story = {
-  loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: createHandlers('safeTokenHolder'),
-    },
-  },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.safeTokenHolder, deployed: true }
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <TxModalContext.Provider value={mockTxModalContext}>
-              <StoreDecorator
-                initialState={{
-                  safeInfo: {
-                    data: safeData,
-                    loading: false,
-                    loaded: true,
-                  },
-                  chains: {
-                    data: [chainData],
-                    loading: false,
-                  },
-                  settings: {
-                    currency: 'usd',
-                    hiddenTokens: {},
-                    tokenList: TOKEN_LISTS.ALL,
-                    shortName: { copy: true, qr: true },
-                    theme: { darkMode: isDarkMode },
-                    env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                    signing: { onChainSigning: false, blindSigning: false },
-                    transactionExecution: true,
-                  },
-                }}
-              >
-                <Box sx={{ p: 3 }}>
-                  <Story />
-                </Box>
-              </StoreDecorator>
-            </TxModalContext.Provider>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
-}
-
-// Create handlers with swap disabled
-const createHandlersNoSwap = (scenario: 'efSafe' | 'vitalik' | 'empty' | 'spamTokens' | 'safeTokenHolder') => {
-  const balancesData = balancesFixtures[scenario]
-  const safeData = scenario === 'empty' ? safeFixtures.efSafe : safeFixtures[scenario]
-  const chainData = createChainData({ disableSwap: true })
-
-  return [
-    http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
-    http.get(/\/v1\/chains$/, () => HttpResponse.json({ ...chainFixtures.all, results: [chainData] })),
-    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(safeData)),
-    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/balances\/[a-z]+/, () => HttpResponse.json(balancesData)),
-  ]
-}
+export const DiversePortfolio: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'safeTokenHolder',
+    wallet: 'owner',
+    layout: 'none',
+    features: { portfolio: false, positions: false, swaps: true },
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
 
 /**
  * AssetsWidget without swap feature enabled.
@@ -318,54 +120,15 @@ const createHandlersNoSwap = (scenario: 'efSafe' | 'vitalik' | 'empty' | 'spamTo
  * Note: Without the swap button, values may appear clipped on hover due to
  * the translateX animation having fewer buttons to offset.
  */
-export const WithoutSwapFeature: Story = {
-  loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: createHandlersNoSwap('efSafe'),
-    },
-  },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.efSafe, deployed: true }
-      const chainData = createChainData({ disableSwap: true })
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <TxModalContext.Provider value={mockTxModalContext}>
-              <StoreDecorator
-                initialState={{
-                  safeInfo: {
-                    data: safeData,
-                    loading: false,
-                    loaded: true,
-                  },
-                  chains: {
-                    data: [chainData],
-                    loading: false,
-                  },
-                  settings: {
-                    currency: 'usd',
-                    hiddenTokens: {},
-                    tokenList: TOKEN_LISTS.ALL,
-                    shortName: { copy: true, qr: true },
-                    theme: { darkMode: isDarkMode },
-                    env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                    signing: { onChainSigning: false, blindSigning: false },
-                    transactionExecution: true,
-                  },
-                }}
-              >
-                <Box sx={{ p: 3 }}>
-                  <Story />
-                </Box>
-              </StoreDecorator>
-            </TxModalContext.Provider>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
-}
+export const WithoutSwapFeature: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    wallet: 'owner',
+    layout: 'none',
+    features: { portfolio: false, positions: false, swaps: false },
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
