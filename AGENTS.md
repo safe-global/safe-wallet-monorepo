@@ -311,7 +311,9 @@ yarn workspace @safe-global/web storybook
 
 ### Creating Stories
 
-When creating a new component, always create a corresponding `.stories.tsx` file:
+#### Simple Component Stories
+
+For simple components that don't need API mocking, create a basic `.stories.tsx` file:
 
 ```typescript
 // Example: MyComponent.stories.tsx
@@ -334,6 +336,85 @@ export const Default: Story = {
 }
 ```
 
+#### Page/Widget Stories with API Mocking
+
+For pages, widgets, or components that need Redux state and API mocking, use the `createMockStory` factory from `@/stories/mocks`:
+
+```typescript
+// Example: Dashboard.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react'
+import { mswLoader } from 'msw-storybook-addon'
+import { createMockStory } from '@/stories/mocks'
+import Dashboard from './index'
+
+// Create mock setup with configuration
+const defaultSetup = createMockStory({
+  scenario: 'efSafe', // Data scenario: 'efSafe' | 'vitalik' | 'empty' | 'spamTokens' | 'safeTokenHolder'
+  wallet: 'disconnected', // Wallet state: 'disconnected' | 'connected' | 'owner' | 'nonOwner'
+  features: { portfolio: true, positions: true }, // Feature flags
+  layout: 'none', // Layout: 'none' | 'paper' | 'fullPage'
+})
+
+const meta = {
+  title: 'Pages/Dashboard',
+  component: Dashboard,
+  loaders: [mswLoader],
+  parameters: {
+    layout: 'fullscreen',
+    ...defaultSetup.parameters, // Includes MSW handlers and Next.js router mock
+  },
+  decorators: [defaultSetup.decorator], // Provides Redux, Wallet, SDK, TxModal contexts
+  tags: ['autodocs'],
+} satisfies Meta<typeof Dashboard>
+
+export default meta
+type Story = StoryObj<typeof meta>
+
+export const Default: Story = {}
+
+// Override configuration per story
+export const WithLayout: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    wallet: 'connected',
+    layout: 'fullPage',
+    features: { portfolio: true, positions: true },
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [setup.decorator],
+  }
+})()
+```
+
+#### createMockStory Configuration Options
+
+| Option     | Type                                                                          | Default                                             | Description             |
+| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------- |
+| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`       | `'efSafe'`                                          | Data fixture scenario   |
+| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                      | `'disconnected'`                                    | Wallet connection state |
+| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags     |
+| `layout`   | `'none' \| 'paper' \| 'fullPage'`                                             | `'none'`                                            | Layout wrapper          |
+| `store`    | `object`                                                                      | `{}`                                                | Redux store overrides   |
+| `handlers` | `RequestHandler[]`                                                            | `[]`                                                | Additional MSW handlers |
+| `pathname` | `string`                                                                      | `'/home'`                                           | Router pathname         |
+
+#### Escape Hatch for Custom Composition
+
+For advanced cases, import individual utilities:
+
+```typescript
+import {
+  MockContextProvider,
+  createChainData,
+  createInitialState,
+  getFixtureData,
+  resolveWallet,
+  coreHandlers,
+  balanceHandlers,
+} from '@/stories/mocks'
+```
+
 ### Story Guidelines
 
 - Place story files next to the component they document
@@ -341,6 +422,8 @@ export const Default: Story = {
 - Include all important component states and variations
 - Use the `autodocs` tag for automatic documentation generation
 - Story files are located throughout `apps/web/src/` alongside components
+- **For pages/widgets**: Use `createMockStory` to avoid duplicating mock setup code
+- **For simple components**: Use basic story format without mocking utilities
 
 ## Security & Safe Wallet Patterns
 
