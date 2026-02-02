@@ -38,7 +38,14 @@ const config: StorybookConfig = {
    *
    * https://github.com/storybookjs/storybook/issues/21216#issuecomment-2187481646
    */
-  framework: path.resolve(require.resolve('@storybook/nextjs/preset'), '..'),
+  framework: {
+    name: path.resolve(require.resolve('@storybook/nextjs/preset'), '..'),
+    options: {
+      image: {
+        loading: 'eager',
+      },
+    },
+  },
 
   webpackFinal: async (config) => {
     config.module = config.module || {}
@@ -52,6 +59,37 @@ const config: StorybookConfig = {
       __dirname,
       'mocks/useIsOfficialHost.ts',
     )
+
+    // Mock next/image to bypass the image loader stub that fails on static imports
+    // This resolves the "unsupported file type: undefined" error when building Storybook
+    ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
+
+    // Remove the next-image-loader-stub that causes "unsupported file type" errors
+    // when processing static image imports in Storybook builds
+    config.module.rules = config.module.rules.map((rule) => {
+      if (
+        typeof rule === 'object' &&
+        rule !== null &&
+        'use' in rule &&
+        Array.isArray(rule.use) &&
+        rule.use.some(
+          (u) =>
+            typeof u === 'object' &&
+            u !== null &&
+            'loader' in u &&
+            typeof u.loader === 'string' &&
+            u.loader.includes('next-image-loader-stub'),
+        )
+      ) {
+        // Replace the problematic loader with a simple asset loader
+        return {
+          ...rule,
+          type: 'asset/resource',
+          use: undefined,
+        }
+      }
+      return rule
+    })
 
     config.cache = {
       type: 'filesystem',

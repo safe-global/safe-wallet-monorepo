@@ -24,6 +24,7 @@ export default [
       '**/cypress/',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
+      '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
     ],
   },

@@ -114,6 +114,12 @@ const preview: Preview = {
       viewports: SAFE_VIEWPORTS,
       defaultViewport: 'desktop',
     },
+    chromatic: {
+      modes: {
+        light: { theme: 'light' },
+        dark: { theme: 'dark' },
+      },
+    },
   },
 
   // MSW loader for API mocking
