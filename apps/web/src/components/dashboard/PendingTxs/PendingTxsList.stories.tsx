@@ -125,6 +125,62 @@ const MockSDKProvider = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
+// Helper to create decorator with specific txQueue data
+const createDecorator = (
+  wallet: WalletContextType,
+  txCount: number,
+  confirmations: number = 1,
+  threshold: number = 2,
+  options?: { loading?: boolean },
+) => {
+  const PendingTxsDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
+    const isDarkMode = context.globals?.theme === 'dark'
+    const safeData = { ...safeFixtures.efSafe, deployed: true }
+    const chainData = createChainData()
+
+    return (
+      <MockSDKProvider>
+        <WalletContext.Provider value={wallet}>
+          <StoreDecorator
+            initialState={{
+              safeInfo: {
+                data: options?.loading ? undefined : safeData,
+                loading: options?.loading ?? false,
+                loaded: !options?.loading,
+              },
+              chains: {
+                data: [chainData],
+                loading: false,
+              },
+              settings: {
+                currency: 'usd',
+                hiddenTokens: {},
+                tokenList: TOKEN_LISTS.ALL,
+                shortName: { copy: true, qr: true },
+                theme: { darkMode: isDarkMode },
+                env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+                signing: { onChainSigning: false, blindSigning: false },
+                transactionExecution: true,
+              },
+              txQueue: {
+                data: options?.loading ? undefined : createMockQueueResponse(txCount, confirmations, threshold),
+                loading: options?.loading ?? false,
+                error: undefined,
+              },
+            }}
+          >
+            <Paper sx={{ p: 2, maxWidth: 500 }}>
+              <Story />
+            </Paper>
+          </StoreDecorator>
+        </WalletContext.Provider>
+      </MockSDKProvider>
+    )
+  }
+  PendingTxsDecorator.displayName = 'PendingTxsDecorator'
+  return PendingTxsDecorator
+}
+
 const meta = {
   title: 'Dashboard/PendingTxsList',
   component: PendingTxsList,
@@ -132,50 +188,10 @@ const meta = {
   parameters: {
     layout: 'padded',
     msw: {
-      handlers: createHandlers(0),
+      handlers: createHandlers(3, 1, 2), // Default: 3 transactions
     },
   },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.efSafe, deployed: true }
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <StoreDecorator
-              initialState={{
-                safeInfo: {
-                  data: safeData,
-                  loading: false,
-                  loaded: true,
-                },
-                chains: {
-                  data: [chainData],
-                  loading: false,
-                },
-                settings: {
-                  currency: 'usd',
-                  hiddenTokens: {},
-                  tokenList: TOKEN_LISTS.ALL,
-                  shortName: { copy: true, qr: true },
-                  theme: { darkMode: isDarkMode },
-                  env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                  signing: { onChainSigning: false, blindSigning: false },
-                  transactionExecution: true,
-                },
-              }}
-            >
-              <Paper sx={{ p: 2, maxWidth: 500 }}>
-                <Story />
-              </Paper>
-            </StoreDecorator>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
+  decorators: [createDecorator(mockConnectedWallet, 3, 1, 2)],
   tags: ['autodocs'],
 } satisfies Meta<typeof PendingTxsList>
 
@@ -183,16 +199,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Empty state when there are no pending transactions.
- * Shows "No transactions to sign" message.
+ * Default view with multiple pending transactions awaiting signatures.
  */
-export const EmptyQueue: Story = {
+export const Default: Story = {
   loaders: [mswLoader],
-  parameters: {
-    msw: {
-      handlers: createHandlers(0),
-    },
-  },
 }
 
 /**
@@ -205,6 +215,7 @@ export const SingleTransaction: Story = {
       handlers: createHandlers(1, 1, 2), // 1 tx, 1 confirmation, 2 required
     },
   },
+  decorators: [createDecorator(mockConnectedWallet, 1, 1, 2)],
 }
 
 /**
@@ -218,6 +229,21 @@ export const MultipleTransactions: Story = {
       handlers: createHandlers(4, 1, 2), // 4 txs
     },
   },
+  decorators: [createDecorator(mockConnectedWallet, 4, 1, 2)],
+}
+
+/**
+ * Empty state when there are no pending transactions.
+ * Shows "No transactions to sign" message.
+ */
+export const EmptyQueue: Story = {
+  loaders: [mswLoader],
+  parameters: {
+    msw: {
+      handlers: createHandlers(0),
+    },
+  },
+  decorators: [createDecorator(mockConnectedWallet, 0)],
 }
 
 /**
@@ -230,6 +256,7 @@ export const ReadyToExecute: Story = {
       handlers: createHandlers(2, 2, 2), // 2 txs, fully confirmed
     },
   },
+  decorators: [createDecorator(mockConnectedWallet, 2, 2, 2)],
 }
 
 /**
@@ -251,46 +278,7 @@ export const Loading: Story = {
       ],
     },
   },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockConnectedWallet}>
-            <StoreDecorator
-              initialState={{
-                safeInfo: {
-                  data: undefined,
-                  loading: true,
-                  loaded: false,
-                },
-                chains: {
-                  data: [chainData],
-                  loading: false,
-                },
-                settings: {
-                  currency: 'usd',
-                  hiddenTokens: {},
-                  tokenList: TOKEN_LISTS.ALL,
-                  shortName: { copy: true, qr: true },
-                  theme: { darkMode: isDarkMode },
-                  env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                  signing: { onChainSigning: false, blindSigning: false },
-                  transactionExecution: true,
-                },
-              }}
-            >
-              <Paper sx={{ p: 2, maxWidth: 500 }}>
-                <Story />
-              </Paper>
-            </StoreDecorator>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
+  decorators: [createDecorator(mockConnectedWallet, 0, 1, 2, { loading: true })],
 }
 
 /**
@@ -304,45 +292,5 @@ export const NonOwnerView: Story = {
       handlers: createHandlers(3, 1, 2),
     },
   },
-  decorators: [
-    (Story, context) => {
-      const isDarkMode = context.globals?.theme === 'dark'
-      const safeData = { ...safeFixtures.efSafe, deployed: true }
-      const chainData = createChainData()
-
-      return (
-        <MockSDKProvider>
-          <WalletContext.Provider value={mockNonOwnerWallet}>
-            <StoreDecorator
-              initialState={{
-                safeInfo: {
-                  data: safeData,
-                  loading: false,
-                  loaded: true,
-                },
-                chains: {
-                  data: [chainData],
-                  loading: false,
-                },
-                settings: {
-                  currency: 'usd',
-                  hiddenTokens: {},
-                  tokenList: TOKEN_LISTS.ALL,
-                  shortName: { copy: true, qr: true },
-                  theme: { darkMode: isDarkMode },
-                  env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
-                  signing: { onChainSigning: false, blindSigning: false },
-                  transactionExecution: true,
-                },
-              }}
-            >
-              <Paper sx={{ p: 2, maxWidth: 500 }}>
-                <Story />
-              </Paper>
-            </StoreDecorator>
-          </WalletContext.Provider>
-        </MockSDKProvider>
-      )
-    },
-  ],
+  decorators: [createDecorator(mockNonOwnerWallet, 3, 1, 2)],
 }
