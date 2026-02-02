@@ -19,11 +19,11 @@
 
 **Purpose**: Prepare for migration by backing up, documenting current state, and verifying baseline
 
-- [ ] T001 Create a backup of the current no-fee-campaign feature state (git commit or branch checkpoint)
-- [ ] T002 Run and document current type-check status: `yarn workspace @safe-global/web type-check | grep -i "no-fee-campaign\|noFeeCampaign" || echo "No type errors"`
-- [ ] T003 [P] Run and document current lint status: `yarn workspace @safe-global/web lint | grep -i "no-fee-campaign\|noFeeCampaign" || echo "No lint warnings"`
-- [ ] T004 [P] Document all current external imports (search codebase for `@/features/no-fee-campaign`): `grep -r "@/features/no-fee-campaign" apps/web/src/ --exclude-dir=node_modules`
-- [ ] T005 [P] Verify semantic mapping exists: Check that `apps/web/src/features/__core__/createFeatureHandle.ts` contains `'no-fee-campaign': FEATURES.NO_FEE_NOVEMBER` mapping
+- [x] T001 Create a backup of the current no-fee-campaign feature state (git commit or branch checkpoint)
+- [x] T002 Run and document current type-check status: `yarn workspace @safe-global/web type-check | grep -i "no-fee-campaign\|noFeeCampaign" || echo "No type errors"`
+- [x] T003 [P] Run and document current lint status: `yarn workspace @safe-global/web lint | grep -i "no-fee-campaign\|noFeeCampaign" || echo "No lint warnings"`
+- [x] T004 [P] Document all current external imports (search codebase for `@/features/no-fee-campaign`): `grep -r "@/features/no-fee-campaign" apps/web/src/ --exclude-dir=node_modules`
+- [x] T005 [P] Verify semantic mapping exists: Check that `apps/web/src/features/__core__/createFeatureHandle.ts` contains `'no-fee-campaign': FEATURES.NO_FEE_NOVEMBER` mapping
 
 **Checkpoint**: Baseline documented and verified - ready to begin migration
 
@@ -35,7 +35,7 @@
 
 **⚠️ CRITICAL**: No consumer updates can begin until these core files exist
 
-- [ ] T006 Create `apps/web/src/features/no-fee-campaign/contract.ts` with flat structure from `contracts/NoFeeCampaignContract.ts`:
+- [x] T006 Create `apps/web/src/features/no-fee-campaign/contract.ts` with flat structure from `contracts/NoFeeCampaignContract.ts`:
 
   ```typescript
   import type NoFeeCampaignBanner from './components/NoFeeCampaignBanner'
@@ -49,7 +49,7 @@
   }
   ```
 
-- [ ] T007 Create `apps/web/src/features/no-fee-campaign/feature.ts` with direct imports:
+- [x] T007 Create `apps/web/src/features/no-fee-campaign/feature.ts` with direct imports:
 
   ```typescript
   import type { NoFeeCampaignContract } from './contract'
@@ -77,21 +77,21 @@
 
 ### 3.1: Update Hook Exports to Named Exports
 
-- [ ] T009 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled.ts`:
+- [x] T009 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled.ts`:
   - Change from: `export default useIsNoFeeCampaignEnabled`
   - To: `export function useIsNoFeeCampaignEnabled() { ... }` (named export)
 
-- [ ] T010 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility.ts`:
+- [x] T010 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility.ts`:
   - Change from: `export default useNoFeeCampaignEligibility`
   - To: `export function useNoFeeCampaignEligibility() { ... }` (named export)
 
-- [ ] T011 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useGasTooHigh.ts`:
+- [x] T011 [US1] Update `apps/web/src/features/no-fee-campaign/hooks/useGasTooHigh.ts`:
   - Change from: `export default useGasTooHigh`
   - To: `export function useGasTooHigh(safeTx?: SafeTransaction): boolean | undefined { ... }` (named export)
 
 ### 3.2: Create Public API (index.ts)
 
-- [ ] T012 [US1] Create new `apps/web/src/features/no-fee-campaign/index.ts` with feature handle and hook exports:
+- [x] T012 [US1] Create new `apps/web/src/features/no-fee-campaign/index.ts` with feature handle and hook exports:
 
   ```typescript
   import { createFeatureHandle } from '@/features/__core__'
@@ -108,7 +108,7 @@
 
 ### 3.3: Verify Type Safety
 
-- [ ] T013 [US1] Run type-check: `yarn workspace @safe-global/web type-check` (must pass with zero errors related to no-fee-campaign)
+- [x] T013 [US1] Run type-check: `yarn workspace @safe-global/web type-check` (must pass with zero errors related to no-fee-campaign)
 
 **Checkpoint**: Core architecture files created - hooks use named exports, public API exists, type-check passes
 
@@ -149,7 +149,7 @@
 
 ### 5.1: Update Consumer Code - Dashboard
 
-- [ ] T022 [US3] Update `apps/web/src/components/dashboard/index.tsx`:
+- [x] T022 [US3] Update `apps/web/src/components/dashboard/index.tsx`:
   - Remove: `import NoFeeCampaignBanner, { noFeeCampaignBannerID } from '@/features/no-fee-campaign/components/NoFeeCampaignBanner'`
   - Remove: `import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'`
   - Remove: `import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'`
@@ -160,7 +160,7 @@
 
 ### 5.2: Update Consumer Code - Execute Form
 
-- [ ] T023 [US3] Update `apps/web/src/components/tx-flow/actions/Execute/ExecuteForm.tsx`:
+- [x] T023 [US3] Update `apps/web/src/components/tx-flow/actions/Execute/ExecuteForm.tsx`:
   - Remove: `import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'`
   - Remove: `import useGasTooHigh from '@/features/no-fee-campaign/hooks/useGasTooHigh'`
   - Remove: `import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'`
@@ -171,7 +171,7 @@
 
 ### 5.3: Update Consumer Code - Execution Method Selector
 
-- [ ] T024 [US3] Update `apps/web/src/components/tx/ExecutionMethodSelector/index.tsx`:
+- [x] T024 [US3] Update `apps/web/src/components/tx/ExecutionMethodSelector/index.tsx`:
   - Remove: `import GasTooHighBanner from '@/features/no-fee-campaign/components/GasTooHighBanner'`
   - Add: `import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'`
   - Add: `import { useLoadFeature } from '@/features/__core__'`
@@ -179,7 +179,7 @@
 
 ### 5.4: Update Consumer Code - Token Transfer
 
-- [ ] T025 [US3] Update `apps/web/src/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer.tsx`:
+- [x] T025 [US3] Update `apps/web/src/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer.tsx`:
   - Remove: `import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/components/NoFeeCampaignTransactionCard'`
   - Remove: `import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'`
   - Remove: `import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'`
@@ -189,7 +189,7 @@
 
 ### 5.5: Update Consumer Code - Balances Page
 
-- [ ] T026 [US3] Update `apps/web/src/pages/balances/index.tsx`:
+- [x] T026 [US3] Update `apps/web/src/pages/balances/index.tsx`:
   - Remove: `import NoFeeCampaignBanner from '@/features/no-fee-campaign/components/NoFeeCampaignBanner'`
   - Remove: `import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'`
   - Add: `import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'`
@@ -198,26 +198,26 @@
 
 ### 5.6: Verify No Deep Imports Remain
 
-- [ ] T027 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/components" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
-- [ ] T028 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/hooks" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
-- [ ] T029 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/services" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
+- [x] T027 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/components" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
+- [x] T028 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/hooks" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
+- [x] T029 [US3] Search codebase for remaining deep imports: `grep -r "@/features/no-fee-campaign/services" apps/web/src/ --exclude-dir=node_modules` (should return nothing)
 
 ### 5.7: ESLint Verification
 
-- [ ] T030 [US3] Run lint: `yarn workspace @safe-global/web lint` (must pass with zero restricted import warnings for no-fee-campaign)
-- [ ] T031 [US3] Verify no ESLint warnings about importing from `@/features/no-fee-campaign/components`, `@/features/no-fee-campaign/hooks`, or `@/features/no-fee-campaign/services`
+- [x] T030 [US3] Run lint: `yarn workspace @safe-global/web lint` (must pass with zero restricted import warnings for no-fee-campaign)
+- [x] T031 [US3] Verify no ESLint warnings about importing from `@/features/no-fee-campaign/components`, `@/features/no-fee-campaign/hooks`, or `@/features/no-fee-campaign/services`
 
 ### 5.8: Architecture Compliance Check
 
-- [ ] T032 [US3] Verify all required files exist:
+- [x] T032 [US3] Verify all required files exist:
   - `apps/web/src/features/no-fee-campaign/index.ts` ✅
   - `apps/web/src/features/no-fee-campaign/contract.ts` ✅
   - `apps/web/src/features/no-fee-campaign/feature.ts` ✅
   - `apps/web/src/features/no-fee-campaign/constants.ts` ✅ (unchanged)
-- [ ] T033 [US3] Verify folder structure matches standard pattern from `apps/web/docs/feature-architecture.md`
-- [ ] T034 [US3] Verify contract uses flat structure (no nested categories)
-- [ ] T035 [US3] Verify feature.ts uses direct imports (no `lazy()` calls)
-- [ ] T036 [US3] Verify hooks are exported directly from index.ts (not in contract or feature.ts)
+- [x] T033 [US3] Verify folder structure matches standard pattern from `apps/web/docs/feature-architecture.md`
+- [x] T034 [US3] Verify contract uses flat structure (no nested categories)
+- [x] T035 [US3] Verify feature.ts uses direct imports (no `lazy()` calls)
+- [x] T036 [US3] Verify hooks are exported directly from index.ts (not in contract or feature.ts)
 
 **Checkpoint**: All consumers updated - architecture standards followed, ESLint passes, no deep imports remain
 
@@ -229,9 +229,9 @@
 
 ### 6.1: Code Quality
 
-- [ ] T037 [P] Run prettier auto-fix: `yarn prettier:fix`
-- [ ] T038 [P] Final type-check: `yarn workspace @safe-global/web type-check` (must pass)
-- [ ] T039 [P] Final lint check: `yarn workspace @safe-global/web lint` (must pass)
+- [x] T037 [P] Run prettier auto-fix: `yarn prettier:fix`
+- [x] T038 [P] Final type-check: `yarn workspace @safe-global/web type-check` (must pass)
+- [x] T039 [P] Final lint check: `yarn workspace @safe-global/web lint` (must pass)
 
 ### 6.2: Functional Testing
 
