@@ -2,7 +2,7 @@
 
 exports[`./HnSignupIntro.stories Default 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
     class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row container css-1jxwjqx-MuiGrid2-root"
