@@ -32,7 +32,9 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
   } = useSafeItemData(safeItem, { isSpaceSafe })
 
   const hasQueuedItems =
-    safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
   const statusChips = (
     <>
