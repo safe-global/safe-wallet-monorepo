@@ -1,6 +1,68 @@
+/**
+ * Priority Scoring
+ *
+ * Calculates priority scores for components to guide story creation order.
+ * Higher scores indicate components that should be prioritized for stories.
+ *
+ * Scoring factors:
+ * - Sidebar components: +15 (critical for page stories)
+ * - UI primitives: +10 (high reuse)
+ * - Common components: +8 (shared across features)
+ * - High dependents: +5 per dependent
+ *
+ * Key function: calculatePriorityScores(components) → components with priorityScore
+ *
+ * Used by: generate-storybook-coverage.ts
+ */
+
 import type { ComponentEntry, PriorityWeights } from './types'
 import { DEFAULT_PRIORITY_WEIGHTS } from './types'
-import { calculateDependentCounts } from './dependencies'
+
+/**
+ * Builds a dependency graph for components
+ */
+function buildDependencyGraph(components: ComponentEntry[]): Map<string, Set<string>> {
+  const graph = new Map<string, Set<string>>()
+  const componentNames = new Set(components.map((c) => c.name))
+
+  for (const component of components) {
+    const deps = new Set<string>()
+
+    // Add component dependencies that are in our component list
+    for (const dep of component.dependencies.components) {
+      if (componentNames.has(dep)) {
+        deps.add(dep)
+      }
+    }
+
+    graph.set(component.name, deps)
+  }
+
+  return graph
+}
+
+/**
+ * Calculates how many other components depend on each component
+ */
+function calculateDependentCounts(components: ComponentEntry[]): Map<string, number> {
+  const graph = buildDependencyGraph(components)
+  const dependentCounts = new Map<string, number>()
+
+  // Initialize all components with 0 dependents
+  for (const component of components) {
+    dependentCounts.set(component.name, 0)
+  }
+
+  // Count how many components depend on each component
+  for (const [, deps] of graph) {
+    for (const dep of deps) {
+      const current = dependentCounts.get(dep) || 0
+      dependentCounts.set(dep, current + 1)
+    }
+  }
+
+  return dependentCounts
+}
 
 /**
  * Calculates priority scores for all components

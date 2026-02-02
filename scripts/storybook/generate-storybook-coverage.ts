@@ -1,16 +1,17 @@
 #!/usr/bin/env npx ts-node
 
 /**
- * Storybook Coverage Documentation Generator
+ * Storybook Coverage Report Generator
  *
- * Generates a persistent, version-controlled COVERAGE.md file that documents
- * component-to-story mapping across three views:
- * - Top-level groups (41 groups, high-level overview)
- * - Family coverage (component families grouped by directory)
- * - Component coverage (individual component detail)
+ * Generates COVERAGE.md documenting story coverage across three levels:
+ * - Top-level groups (e.g., "Sidebar", "Dashboard")
+ * - Families (component directories)
+ * - Individual components
  *
- * Usage: npx tsx scripts/storybook/generate-storybook-coverage.ts
- *        yarn workspace @safe-global/web storybook:generate-coverage
+ * Coverage cascades: group story → covers all families → covers all components
+ *
+ * Usage: yarn workspace @safe-global/web storybook:generate-coverage
+ * Output: apps/web/.storybook/COVERAGE.md
  */
 
 import * as fs from 'fs'

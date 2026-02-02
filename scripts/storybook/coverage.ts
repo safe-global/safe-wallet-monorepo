@@ -1,3 +1,16 @@
+/**
+ * Coverage Analysis
+ *
+ * Analyzes story files to determine coverage status for components.
+ * Matches components to their corresponding .stories.tsx files.
+ *
+ * Key functions:
+ * - analyzeStoryCoverage(components) → components with hasStory flag
+ * - calculateCoverageStats(components) → { total, withStories, percentage }
+ *
+ * Used by: generate-storybook-coverage.ts
+ */
+
 import * as fs from 'fs'
 import * as path from 'path'
 import * as ts from 'typescript'

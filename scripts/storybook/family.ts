@@ -1,3 +1,17 @@
+/**
+ * Family & Group Hierarchies
+ *
+ * Groups components into families (by directory) and top-level groups.
+ * Enables hierarchical coverage tracking where one story can cover many components.
+ *
+ * Key functions:
+ * - groupComponentsIntoFamilies(components) → ComponentFamily[]
+ * - groupFamiliesIntoTopLevel(families) → TopLevelGroup[]
+ * - calculateFamilyCoverage/calculateTopLevelCoverage → coverage stats
+ *
+ * Used by: generate-storybook-coverage.ts
+ */
+
 import * as fs from 'fs'
 import * as path from 'path'
 import * as ts from 'typescript'

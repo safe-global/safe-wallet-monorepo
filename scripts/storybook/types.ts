@@ -1,5 +1,15 @@
 /**
- * Type definitions for the Storybook component inventory system
+ * Type Definitions
+ *
+ * Centralized TypeScript types for the storybook coverage system.
+ *
+ * Key types:
+ * - ComponentEntry: Individual component with path, name, category, hasStory
+ * - ComponentFamily: Group of components in same directory
+ * - TopLevelGroup: High-level grouping (e.g., "Sidebar", "Dashboard")
+ * - CoverageReport: Summary statistics
+ *
+ * Used by: All scripts in this directory
  */
 
 /**

@@ -1,3 +1,14 @@
+/**
+ * Component Scanner
+ *
+ * Scans the codebase using TypeScript AST to find React components.
+ * Extracts component names, file paths, and dependency information.
+ *
+ * Key function: scanComponents(options) → ComponentEntry[]
+ *
+ * Used by: generate-storybook-coverage.ts
+ */
+
 import * as fs from 'fs'
 import * as path from 'path'
 import { glob } from 'glob'
