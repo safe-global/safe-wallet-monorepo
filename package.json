@@ -12,6 +12,7 @@
   "scripts": {
     "lint": "yarn workspaces foreach --all -pt run lint",
     "test": "yarn workspaces foreach --all -pt run test",
+    "test:scripts": "yarn workspace @safe-global/web jest --config ../../scripts/jest.config.cjs",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
     "prettier": "prettier --check . --config ./.prettierrc --ignore-path ./.prettierignore",
     "prettier:fix": "prettier --write . --config ./.prettierrc --ignore-path ./.prettierignore",
