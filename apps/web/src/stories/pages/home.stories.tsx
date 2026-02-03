@@ -14,6 +14,12 @@ const meta = {
   loaders: [mswLoader],
   parameters: {
     layout: 'fullscreen',
+    chromatic: {
+      modes: {
+        'light-desktop': { theme: 'light', viewport: { width: 1280, height: 800 } },
+        'dark-desktop': { theme: 'dark', viewport: { width: 1280, height: 800 } },
+      },
+    },
   },
 } satisfies Meta<typeof Home>
 
@@ -22,7 +28,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = (() => {
   const setup = createMockStory({
-    scenario: 'efSafe',
+    scenario: 'safeTokenHolder',
     wallet: 'owner',
     layout: 'fullPage',
     pathname: '/home',
