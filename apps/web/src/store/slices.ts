@@ -23,7 +23,7 @@ export {
   selectUndeployedSafe,
   selectIsUndeployedSafe,
 } from '@/features/counterfactual/store'
-export * from '@/features/swap/store/swapParamsSlice'
+export { swapParamsSlice, setSwapParams, selectSwapParams } from '@/features/swap'
 export * from './swapOrderSlice'
 export * from './api/gateway'
 export * from './api/gateway/safeOverviews'

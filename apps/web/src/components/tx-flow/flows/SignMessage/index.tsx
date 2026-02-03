@@ -1,7 +1,6 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import SignMessage, { type SignMessageProps } from '@/components/tx-flow/flows/SignMessage/SignMessage'
-import { getSwapTitle } from '@/features/swap'
-import { selectSwapParams } from '@/features/swap/store/swapParamsSlice'
+import { getSwapTitle, selectSwapParams } from '@/features/swap'
 import { useAppSelector } from '@/store'
 import { Box, SvgIcon, Typography } from '@mui/material'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
