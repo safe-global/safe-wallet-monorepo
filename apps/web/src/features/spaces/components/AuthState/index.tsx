@@ -1,16 +1,16 @@
 import { type ReactNode, useEffect } from 'react'
-import SignedOutState from '@/features/spaces/components/SignedOutState'
+import SignedOutState from '../SignedOutState'
 import { isUnauthorized } from '@/features/spaces/utils'
-import UnauthorizedState from '@/features/spaces/components/UnauthorizedState'
-import LoadingState from '@/features/spaces/components/LoadingState'
+import UnauthorizedState from '../UnauthorizedState'
+import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import useFeatureFlagRedirect from '@/features/spaces/hooks/useFeatureFlagRedirect'
+import { useFeatureFlagRedirect } from '@/features/spaces'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const dispatch = useAppDispatch()

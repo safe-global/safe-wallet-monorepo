@@ -1,6 +1,6 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
-import type { ContactItem } from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
-import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
+import type { ContactItem } from './Import/ContactsList'
+import type { ImportContactsFormValues } from './Import/ImportAddressBookDialog'
 import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export const flattenAddressBook = (allAddressBooks: AddressBookState): ContactItem[] => {

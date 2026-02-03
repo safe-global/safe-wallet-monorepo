@@ -1,6 +1,6 @@
 import { usePathname } from 'next/navigation'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 const SPACES_ROUTES = [
   AppRoutes.spaces.index,

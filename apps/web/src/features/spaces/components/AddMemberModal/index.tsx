@@ -24,7 +24,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import MemberInfoForm from '@/features/spaces/components/AddMemberModal/MemberInfoForm'
+import MemberInfoForm from './MemberInfoForm'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import useAddressBook from '@/hooks/useAddressBook'
 

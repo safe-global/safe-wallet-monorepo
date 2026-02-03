@@ -10,8 +10,8 @@ import {
 } from '@/hooks/safes'
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
-import css from '@/features/spaces/components/AddAccounts/styles.module.css'
+import type { AddAccountsFormValues } from './index'
+import css from './styles.module.css'
 import { useChain } from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -29,7 +29,7 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Controller, useFormContext } from 'react-hook-form'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '@/features/spaces'
 import isEqual from 'lodash/isEqual'
 
 const ChainItem = ({ chainId }: { chainId: string }) => {

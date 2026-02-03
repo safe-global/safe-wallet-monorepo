@@ -31,7 +31,7 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'

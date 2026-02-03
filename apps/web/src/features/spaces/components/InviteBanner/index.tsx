@@ -12,7 +12,7 @@ import Track from '@/components/common/Track'
 import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 

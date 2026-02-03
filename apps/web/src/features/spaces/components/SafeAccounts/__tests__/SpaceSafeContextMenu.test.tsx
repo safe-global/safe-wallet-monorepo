@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
 import { useAppSelector } from '@/store'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 

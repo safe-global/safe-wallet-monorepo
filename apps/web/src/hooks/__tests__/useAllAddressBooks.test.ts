@@ -6,7 +6,7 @@ import {
   type ExtendedContact,
 } from '@/hooks/useAllAddressBooks'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import * as currentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
+import * as currentSpaceIdHook from '@/features/spaces'
 
 let signedIn = false
 let chainId = '1'
