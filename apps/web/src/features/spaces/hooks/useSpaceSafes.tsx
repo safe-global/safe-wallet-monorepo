@@ -1,12 +1,11 @@
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
-import { useCurrentSpaceId, useGetSpaceAddressBook } from 'src/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook, mapSpaceContactsToAddressBookState } from '@/features/spaces'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { useMemo } from 'react'
 import { isAuthenticated } from '@/store/authSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import { mapSpaceContactsToAddressBookState } from '@/features/spaces/utils'
 
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
