@@ -22,6 +22,11 @@ import type SpaceSettings from './components/SpaceSettings'
 import type UserSettings from './components/UserSettings'
 import type SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import type SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
+import type SpaceDashboardPage from './components/Dashboard/Page'
+import type SpaceMembersPage from './components/Members/Page'
+import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
+import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
+import type SpaceSettingsPage from './components/SpaceSettings/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -45,6 +50,13 @@ export interface SpacesContract {
   UserSettings: typeof UserSettings
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
+
+  // Page components (PascalCase) - stub renders null
+  SpaceDashboardPage: typeof SpaceDashboardPage
+  SpaceMembersPage: typeof SpaceMembersPage
+  SpaceSafeAccountsPage: typeof SpaceSafeAccountsPage
+  SpaceAddressBookPage: typeof SpaceAddressBookPage
+  SpaceSettingsPage: typeof SpaceSettingsPage
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized

@@ -26,6 +26,11 @@ import SpaceSettings from './components/SpaceSettings'
 import UserSettings from './components/UserSettings'
 import SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
+import SpaceDashboardPage from './components/Dashboard/Page'
+import SpaceMembersPage from './components/Members/Page'
+import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
+import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
+import SpaceSettingsPage from './components/SpaceSettings/Page'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -48,6 +53,13 @@ const feature: SpacesContract = {
   UserSettings,
   SpaceSafeContextMenu,
   SendTransactionButton,
+
+  // Page components
+  SpaceDashboardPage,
+  SpaceMembersPage,
+  SpaceSafeAccountsPage,
+  SpaceAddressBookPage,
+  SpaceSettingsPage,
 
   // Services
   isUnauthorized,
