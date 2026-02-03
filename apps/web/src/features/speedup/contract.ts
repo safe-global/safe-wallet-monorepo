@@ -13,9 +13,6 @@
 import type SpeedUpModal from './components/SpeedUpModal'
 import type SpeedUpMonitor from './components/SpeedUpMonitor'
 
-// Service imports
-import type { isSpeedableTx } from './services/isSpeedableTx'
-
 /**
  * Speedup Feature Implementation - flat structure (NO hooks)
  * This is what gets loaded when handle.load() is called.
@@ -25,7 +22,4 @@ export interface SpeedupContract {
   // Components (PascalCase) - stub renders null
   SpeedUpModal: typeof SpeedUpModal
   SpeedUpMonitor: typeof SpeedUpMonitor
-
-  // Services (camelCase) - undefined when not ready
-  isSpeedableTx: typeof isSpeedableTx
 }

@@ -17,9 +17,6 @@ import type { SpeedupContract } from './contract'
 import SpeedUpModal from './components/SpeedUpModal'
 import SpeedUpMonitor from './components/SpeedUpMonitor'
 
-// Service imports
-import { isSpeedableTx } from './services/isSpeedableTx'
-
 // Flat structure - naming conventions determine stub behavior:
 // - PascalCase → component (stub renders null)
 // - camelCase → service (undefined when not ready)
@@ -28,9 +25,6 @@ const feature: SpeedupContract = {
   // Components
   SpeedUpModal,
   SpeedUpMonitor,
-
-  // Services
-  isSpeedableTx,
 }
 
 export default feature

@@ -4,7 +4,7 @@
   "publicAPI": {
     "components": ["SpeedUpModal", "SpeedUpMonitor"],
     "hooks": [],
-    "services": ["isSpeedableTx"],
+    "services": [],
     "types": [],
     "constants": []
   },
