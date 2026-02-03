@@ -1,13 +1,14 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import SpaceMembers from '@/features/spaces/components/Members'
-import AuthState from '@/features/spaces/components/AuthState'
+import { SpacesFeature } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 
 export default function SpaceMembersPage() {
   const router = useRouter()
   const { spaceId } = router.query
+  const spaces = useLoadFeature(SpacesFeature)
 
   if (!router.isReady || !spaceId || typeof spaceId !== 'string') return null
 
@@ -18,11 +19,11 @@ export default function SpaceMembersPage() {
       </Head>
 
       <main>
-        <AuthState spaceId={spaceId}>
+        <spaces.AuthState spaceId={spaceId}>
           <AddressBookSourceProvider source="spaceOnly">
-            <SpaceMembers />
+            <spaces.SpaceMembers />
           </AddressBookSourceProvider>
-        </AuthState>
+        </spaces.AuthState>
       </main>
     </>
   )
