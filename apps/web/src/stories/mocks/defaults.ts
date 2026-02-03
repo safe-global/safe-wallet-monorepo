@@ -126,7 +126,16 @@ export function createInitialState(options: {
     // Deep merge specific slices if provided in overrides
     settings: overrides.settings ? { ...baseState.settings, ...overrides.settings } : baseState.settings,
     chains: overrides.chains ? { ...baseState.chains, ...overrides.chains } : baseState.chains,
-    safeInfo: overrides.safeInfo ? { ...baseState.safeInfo, ...overrides.safeInfo } : baseState.safeInfo,
+    safeInfo: overrides.safeInfo
+      ? {
+          ...baseState.safeInfo,
+          ...overrides.safeInfo,
+          // Deep merge data to allow partial overrides like { deployed: false }
+          data: overrides.safeInfo.data
+            ? { ...baseState.safeInfo.data, ...overrides.safeInfo.data }
+            : baseState.safeInfo.data,
+        }
+      : baseState.safeInfo,
     safeApps: overrides.safeApps ? { ...baseState.safeApps, ...overrides.safeApps } : baseState.safeApps,
     auth: overrides.auth ? { ...baseState.auth, ...overrides.auth } : baseState.auth,
   }
