@@ -44,7 +44,11 @@ export interface FeatureFlags {
 export interface StoreOverrides {
   txQueue?: object
   safeApps?: object
-  safeInfo?: object
+  safeInfo?: {
+    data?: object
+    loading?: boolean
+    loaded?: boolean
+  }
   settings?: object
   chains?: object
   auth?: object

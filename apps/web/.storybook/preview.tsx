@@ -115,7 +115,6 @@ const preview: Preview = {
       defaultViewport: 'desktop',
     },
     chromatic: {
-      viewports: [1280], // Desktop width for full-page layouts
       modes: {
         light: { theme: 'light' },
         dark: { theme: 'dark' },
