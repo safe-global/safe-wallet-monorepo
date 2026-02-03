@@ -5,3 +5,4 @@
   "externals": ["public/**"],
   "skip": "dependabot/**"
 }
+
