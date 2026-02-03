@@ -40,16 +40,7 @@ type Props = {
   signerNonce: number
   gasLimit: string | number | undefined
 }
-export const SpeedUpModal = ({
-  open,
-  handleClose,
-  pendingTx,
-  txId,
-  txHash,
-  signerAddress,
-  signerNonce,
-  gasLimit,
-}: Props) => {
+const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddress, signerNonce, gasLimit }: Props) => {
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
@@ -237,3 +228,5 @@ export const SpeedUpModal = ({
     </ModalDialog>
   )
 }
+
+export default SpeedUpModal

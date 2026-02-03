@@ -1,5 +1,5 @@
 import { Alert, AlertTitle, Box, Button, SvgIcon, Typography } from '@mui/material'
-import { SpeedUpModal } from '@/features/speedup/components/SpeedUpModal'
+import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
 import { useCounter } from '@/components/common/Notifications/useCounter'
 import type { MouseEventHandler } from 'react'
@@ -9,10 +9,9 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { isSmartContract } from '@/utils/wallets'
 import useWallet from '@/hooks/wallets/useWallet'
-import { isSpeedableTx } from '@/features/speedup/utils/IsSpeedableTx'
+import { isSpeedableTx } from '../../services/isSpeedableTx'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useHasFeature } from '@/hooks/useChains'
-
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type SpeedUpMonitorProps = {
@@ -23,7 +22,7 @@ type SpeedUpMonitorProps = {
 
 const SPEED_UP_THRESHOLD_IN_SECONDS = 15
 
-export const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpMonitorProps) => {
+const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpMonitorProps) => {
   const [openSpeedUpModal, setOpenSpeedUpModal] = useState(false)
   const wallet = useWallet()
   const counter = useCounter(pendingTx.submittedAt)
@@ -88,3 +87,5 @@ export const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: S
     </>
   )
 }
+
+export default SpeedUpMonitor

@@ -1,6 +1,6 @@
 import { PendingStatus, PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
-import { isSpeedableTx } from '../IsSpeedableTx'
+import { isSpeedableTx } from '../isSpeedableTx'
 
 describe('isSpeedableTx', () => {
   it('returns true when all conditions are met', () => {
