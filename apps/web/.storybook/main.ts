@@ -66,6 +66,7 @@ const config: StorybookConfig = {
 
     // Remove the next-image-loader-stub that causes "unsupported file type" errors
     // when processing static image imports in Storybook builds
+    // Exclude SVGs so they're handled by SVGR instead
     config.module.rules = config.module.rules.map((rule) => {
       if (
         typeof rule === 'object' &&
@@ -82,8 +83,10 @@ const config: StorybookConfig = {
         )
       ) {
         // Replace the problematic loader with a simple asset loader
+        // Exclude SVGs so they go through SVGR
         return {
           ...rule,
+          exclude: /\.svg$/,
           type: 'asset/resource',
           use: undefined,
         }
