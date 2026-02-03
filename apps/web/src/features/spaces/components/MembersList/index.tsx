@@ -7,12 +7,10 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import { useState } from 'react'
-import { useIsAdmin } from '@/features/spaces'
+import { useIsAdmin, isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus, useAdminCount } from '@/features/spaces'
 import EditMemberDialog from './EditMemberDialog'
-import { isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useAdminCount } from '@/features/spaces'
 
 const headCells = [
   {

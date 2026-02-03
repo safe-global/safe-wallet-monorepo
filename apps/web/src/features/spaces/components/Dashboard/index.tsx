@@ -6,21 +6,24 @@ import Grid from '@mui/material/Grid2'
 import { useLoadFeature } from '@/features/__core__'
 import { flattenSafeItems } from '@/hooks/safes'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { useSpaceSafes } from '@/features/spaces'
+import {
+  useSpaceSafes,
+  useCurrentSpaceId,
+  useSpaceMembersByStatus,
+  useIsInvited,
+  useTrackSpace,
+} from '@/features/spaces'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentSpaceId } from '@/features/spaces'
 import type { LinkProps } from 'next/link'
 import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from './DashboardMembersList'
-import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from './AggregatedBalances'
-import { useTrackSpace } from '@/features/spaces'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (

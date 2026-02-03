@@ -6,9 +6,9 @@ import css from './styles.module.css'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { useSpaceSafeCount, MemberStatus, useIsAdmin } from '@/features/spaces'
 import InitialsAvatar from '../InitialsAvatar'
 import SpaceContextMenu from './SpaceContextMenu'
-import { MemberStatus } from '@/features/spaces'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SpaceSummary = ({

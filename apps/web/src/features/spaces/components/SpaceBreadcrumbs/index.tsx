@@ -9,11 +9,10 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import InitialsAvatar from '../InitialsAvatar'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import { useParentSafe } from '@/hooks/useParentSafe'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useIsQualifiedSafe } from '@/features/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import { useIsQualifiedSafe } from '@/features/spaces'
 
 const SpaceBreadcrumbs = () => {
   const isQualifiedSafe = useIsQualifiedSafe()
