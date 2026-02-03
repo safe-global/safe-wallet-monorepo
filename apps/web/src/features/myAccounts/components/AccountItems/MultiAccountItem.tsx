@@ -25,9 +25,15 @@ function MultiChainSubItem({
   safeOverview?: SafeOverview
   onLinkClick?: () => void
 }) {
-  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe } = useSafeItemData(safeItem, {
-    safeOverview,
-  })
+  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
+    useSafeItemData(safeItem, {
+      safeOverview,
+    })
+
+  const hasQueuedItems =
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
   return (
     <AccountItem.Link
@@ -44,8 +50,22 @@ function MultiChainSubItem({
         owners={owners.length}
         isMultiChainItem
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName}>
+        <AccountItem.StatusChip
+          undeployedSafe={!!undeployedSafe}
+          isActivating={isActivating}
+          isReadOnly={safeItem.isReadOnly}
+        />
+        {hasQueuedItems && (
+          <AccountItem.QueueActions
+            safeAddress={safeOverview.address.value}
+            chainShortName={chain?.shortName || ''}
+            queued={safeOverview.queued ?? 0}
+            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+          />
+        )}
+      </AccountItem.Info>
+      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
     </AccountItem.Link>
   )
 }

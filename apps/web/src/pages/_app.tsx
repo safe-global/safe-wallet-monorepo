@@ -42,6 +42,7 @@ import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
+import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
@@ -61,11 +62,19 @@ const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
   return <CounterfactualHooks />
 }
+
+/**
+ * Wrapper that lazy-loads OutreachPopup via the feature system.
+ * This ensures the entire targeted-outreach feature loads as a single chunk.
+ */
+const TargetedOutreachPopupLoader = () => {
+  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
+  return <OutreachPopup />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
@@ -185,7 +194,7 @@ const SafeWalletApp = ({
 
             <CookieAndTermBanner />
 
-            <OutreachPopup />
+            <TargetedOutreachPopupLoader />
 
             <Notifications />
 

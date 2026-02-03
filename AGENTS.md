@@ -274,6 +274,7 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 ### E2E Tests (Web only)
 
 - Located in `apps/web/cypress/e2e/`
+- **IMPORTANT**: Follow the Cypress E2E automation rules in `.cursor/rules/cypress-e2e.mdc` when writing or modifying tests
 - Run with `yarn workspace @safe-global/web cypress:open` for interactive mode
 - Run with `yarn workspace @safe-global/web cypress:run` for headless mode
 - Smoke tests in `cypress/e2e/smoke/` are run in CI

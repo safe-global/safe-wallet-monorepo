@@ -1,5 +1,5 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { ACTIVE_OUTREACH, MAX_ASK_AGAIN_DELAY } from '@/features/targetedOutreach/constants'
+import { ACTIVE_OUTREACH, MAX_ASK_AGAIN_DELAY } from '@/features/targeted-outreach/constants'
 import { useAppSelector } from '@/store'
 import { selectCookieBanner } from '@/store/popupSlice'
 import type { Submission } from '@safe-global/store/gateway/AUTO_GENERATED/targeted-messages'
