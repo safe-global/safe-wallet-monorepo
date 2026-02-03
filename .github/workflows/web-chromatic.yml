@@ -43,5 +43,5 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: storybook-static
           onlyChanged: true
-          autoAcceptChanges: main
+          autoAcceptChanges: 'dev | main'
           exitOnceUploaded: true
