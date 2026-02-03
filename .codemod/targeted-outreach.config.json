@@ -3,7 +3,7 @@
   "featureFlag": "TARGETED_SURVEY",
   "publicAPI": {
     "components": ["OutreachPopup"],
-    "hooks": ["useShowOutreachPopup"],
+    "hooks": [],
     "services": [],
     "types": [],
     "constants": []
@@ -21,7 +21,7 @@
   },
   "consumers": [
     {
-      "filePath": "/Users/daria/safe.global/safe-wallet-monorepo/apps/web/src/pages/_app.tsx",
+      "filePath": "apps/web/src/pages/_app.tsx",
       "imports": [
         {
           "name": "OutreachPopup",

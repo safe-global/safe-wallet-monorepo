@@ -45,7 +45,3 @@ export const TargetedOutreachFeature = createFeatureHandle<TargetedOutreachContr
 
 // Contract type (for type annotations if needed)
 export type { TargetedOutreachContract } from './contract'
-
-// Hooks exported directly (always loaded, not in contract)
-// Keep hooks lightweight - minimal imports, heavy logic in services if needed
-export { default as useShowOutreachPopup } from './hooks/useShowOutreachPopup'
