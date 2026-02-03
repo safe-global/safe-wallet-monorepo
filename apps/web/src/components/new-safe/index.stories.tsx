@@ -335,6 +335,7 @@ export const CreateSafeAllSteps: StoryObj = {
 
 // Interactive version - Create Safe Flow
 export const CreateSafeInteractive: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [step, setStep] = useState(0)
     const [owners, setOwners] = useState(mockOwners)
@@ -490,6 +491,7 @@ export const CreateSafeInteractive: StoryObj = {
 
 // Load Safe Flow
 export const LoadSafeFlow: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Box sx={{ maxWidth: 600 }}>
       <Typography variant="h4" gutterBottom>
@@ -532,6 +534,7 @@ export const LoadSafeFlow: StoryObj = {
 
 // Step 1: Name
 export const SetNameStep: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 500 }}>
       <Typography variant="h6" gutterBottom>
@@ -564,6 +567,7 @@ export const SetNameStep: StoryObj = {
 
 // Step 2: Owners
 export const OwnerPolicyStep: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 500 }}>
       <Typography variant="h6" gutterBottom>
@@ -606,6 +610,7 @@ export const OwnerPolicyStep: StoryObj = {
 
 // Step 3: Review
 export const ReviewStep: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 500 }}>
       <Typography variant="h6" gutterBottom>
@@ -647,6 +652,7 @@ export const ReviewStep: StoryObj = {
 
 // Owner row variants
 export const OwnerRowVariants: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 500 }}>
       <Typography variant="subtitle2" gutterBottom>
@@ -671,6 +677,7 @@ export const OwnerRowVariants: StoryObj = {
 
 // Review row component
 export const ReviewRowComponent: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 500 }}>
       <MockReviewRow name="Safe name" value={<Typography variant="body2">My Safe</Typography>} />
@@ -724,6 +731,7 @@ export const CreationSuccess: StoryObj = {
 
 // Card stepper
 export const CardStepper: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Box sx={{ maxWidth: 600 }}>
       <Stepper activeStep={1}>

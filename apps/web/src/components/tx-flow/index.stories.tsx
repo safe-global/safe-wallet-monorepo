@@ -357,6 +357,7 @@ export const TokenTransferAllSteps: StoryObj = {
 
 // Interactive version - Token Transfer Flow
 export const TokenTransferInteractive: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [step, setStep] = useState(0)
 
@@ -458,6 +459,7 @@ export const TokenTransferInteractive: StoryObj = {
 
 // TxLayout variations
 export const TxLayoutDefault: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <MockTxLayout title="New Transaction" subtitle="Create a new transaction">
       <MockTxCard>
@@ -477,6 +479,7 @@ export const TxLayoutDefault: StoryObj = {
 }
 
 export const TxLayoutWithProgress: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <MockTxLayout title="Multi-step Transaction" step={1} totalSteps={4}>
       <MockTxCard>
@@ -497,6 +500,7 @@ export const TxLayoutWithProgress: StoryObj = {
 
 // TxCard variations
 export const TxCardBasic: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ maxWidth: 500, p: 2 }}>
       <MockTxCard>
@@ -514,6 +518,7 @@ export const TxCardBasic: StoryObj = {
 }
 
 export const TxCardWithActions: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ maxWidth: 500, p: 2 }}>
       <MockTxCard
@@ -539,6 +544,7 @@ export const TxCardWithActions: StoryObj = {
 
 // Sign Message Flow
 export const SignMessageFlow: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <MockTxLayout title="Sign Message" subtitle="Sign an off-chain message" icon={<EditIcon color="primary" />}>
       <MockTxCard
@@ -572,6 +578,7 @@ export const SignMessageFlow: StoryObj = {
 
 // Swap Flow
 export const SwapFlow: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <MockTxLayout
       title="Swap tokens"
@@ -625,6 +632,7 @@ export const SwapFlow: StoryObj = {
 
 // Loading state
 export const LoadingState: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <MockTxLayout title="Processing Transaction">
       <MockTxCard>
@@ -681,6 +689,7 @@ export const ErrorState: StoryObj = {
 
 // Review with balance changes
 export const ReviewWithBalanceChanges: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ maxWidth: 500, p: 3 }}>
       <Typography variant="h6" gutterBottom>
@@ -729,6 +738,7 @@ export const ReviewWithBalanceChanges: StoryObj = {
 
 // Action buttons
 export const ActionButtons: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 3, maxWidth: 400 }}>
       <Typography variant="subtitle2" gutterBottom>

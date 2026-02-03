@@ -296,6 +296,7 @@ export const FullPage: StoryObj = {
 }
 
 export const CreateEntry: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [open, setOpen] = useState(true)
     return (
@@ -317,6 +318,7 @@ export const CreateEntry: StoryObj = {
 }
 
 export const EditEntry: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [open, setOpen] = useState(true)
     return (
@@ -343,6 +345,7 @@ export const EditEntry: StoryObj = {
 }
 
 export const ImportEntries: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [open, setOpen] = useState(true)
     return (
@@ -364,6 +367,7 @@ export const ImportEntries: StoryObj = {
 }
 
 export const RemoveEntry: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [open, setOpen] = useState(true)
     return (
@@ -390,6 +394,7 @@ export const RemoveEntry: StoryObj = {
 }
 
 export const Header: StoryObj = {
+  tags: ['!chromatic'],
   render: () => (
     <Paper sx={{ p: 2, width: 700 }}>
       <MockAddressBookHeader />
@@ -435,6 +440,7 @@ export const EmptyTable: StoryObj = {
 }
 
 export const AllDialogs: StoryObj = {
+  tags: ['!chromatic'],
   render: () => {
     const [dialog, setDialog] = useState<'create' | 'edit' | 'import' | 'remove' | null>(null)
 

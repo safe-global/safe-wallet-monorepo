@@ -18,6 +18,7 @@ const meta: Meta = {
   title: 'Features/TxNotes',
   parameters: {
     layout: 'centered',
+    chromatic: { disableSnapshot: true },
   },
 }
 

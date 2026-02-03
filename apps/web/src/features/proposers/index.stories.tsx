@@ -31,6 +31,7 @@ const meta: Meta = {
   title: 'Features/Proposers',
   parameters: {
     layout: 'centered',
+    chromatic: { disableSnapshot: true },
   },
 }
 

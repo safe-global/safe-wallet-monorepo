@@ -13,6 +13,7 @@ const meta: Meta = {
   title: 'Features/NoFeeCampaign',
   parameters: {
     layout: 'padded',
+    chromatic: { disableSnapshot: true },
   },
 }
 

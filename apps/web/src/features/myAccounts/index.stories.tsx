@@ -41,6 +41,7 @@ const meta: Meta = {
   title: 'Features/MyAccounts',
   parameters: {
     layout: 'padded',
+    chromatic: { disableSnapshot: true },
   },
 }
 

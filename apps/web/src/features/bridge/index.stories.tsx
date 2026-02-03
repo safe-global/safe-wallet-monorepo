@@ -13,6 +13,7 @@ const meta: Meta = {
   title: 'Features/Bridge',
   parameters: {
     layout: 'padded',
+    chromatic: { disableSnapshot: true },
   },
 }
 

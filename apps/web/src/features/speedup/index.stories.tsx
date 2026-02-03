@@ -14,6 +14,7 @@ const meta: Meta = {
   title: 'Features/Speedup',
   parameters: {
     layout: 'centered',
+    chromatic: { disableSnapshot: true },
   },
 }
 

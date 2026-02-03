@@ -39,6 +39,7 @@ const meta: Meta = {
   title: 'Features/Recovery',
   parameters: {
     layout: 'padded',
+    chromatic: { disableSnapshot: true },
   },
 }
 

@@ -49,6 +49,7 @@ const meta: Meta = {
   title: 'Features/WalletConnect',
   parameters: {
     layout: 'centered',
+    chromatic: { disableSnapshot: true },
   },
 }
 

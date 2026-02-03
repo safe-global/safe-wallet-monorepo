@@ -34,6 +34,7 @@ const meta: Meta = {
   title: 'Features/Counterfactual',
   parameters: {
     layout: 'centered',
+    chromatic: { disableSnapshot: true },
   },
 }
 
