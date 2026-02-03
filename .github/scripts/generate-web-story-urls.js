@@ -32,7 +32,8 @@ function extractTitleFromFile(filePath) {
 
     const content = fs.readFileSync(fullPath, 'utf-8')
     // Match title with proper quote handling (separate patterns for single/double quotes)
-    const titleMatch = content.match(/title:\s*(?:"([^"]+)"|'([^']+)')/)
+    // Use word boundary \b to ensure we match 'title:' and not 'Subtitle:' or other fields
+    const titleMatch = content.match(/\btitle:\s*(?:"([^"]+)"|'([^']+)')/)
     if (titleMatch) {
       return titleMatch[1] || titleMatch[2]
     }
