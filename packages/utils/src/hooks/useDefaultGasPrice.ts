@@ -10,6 +10,7 @@ import {
   GasPriceFixedEip1559,
   GasPriceOracle,
 } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { useIntervalCounter } from './useIntervalCounter'
 
 type EstimatedGasPrice =
@@ -63,15 +64,21 @@ const parseEtherscanOracleResult = (result: EtherscanResult, gweiFactor: string)
 // Loop over the oracles and return the first one that works.
 // Or return a fixed value if specified.
 // If none of them work, throw an error.
-const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<EstimatedGasPrice> => {
-  const { uri, gasParameter, gweiFactor } = gasPriceOracle
-  const response = await fetch(uri)
+const fetchGasOracle = async (gasPriceOracle: GasPriceOracle, chainId: string): Promise<EstimatedGasPrice> => {
+  const { gasParameter, gweiFactor } = gasPriceOracle
+  const cgwBaseUrl = getBaseUrl()
+
+  if (!cgwBaseUrl) {
+    throw new Error('CGW base URL not configured')
+  }
+
+  const response = await fetch(`${cgwBaseUrl}/v1/chains/${chainId}/gas-price`)
   if (!response.ok) {
-    throw new Error(`Error fetching gas price from oracle ${uri}`)
+    throw new Error(`Error fetching gas price for chain ${chainId}`)
   }
 
   const json = await response.json()
-  const data = json.data || json.result || json
+  const data = json.result
 
   if (isEtherscanResult(data)) {
     return parseEtherscanOracleResult(data, gweiFactor)
@@ -94,6 +101,7 @@ const isGasPriceOracle = (gasPriceConfig: Chain['gasPrice'][number]): gasPriceCo
 
 const getGasPrice = async (
   gasPriceConfigs: Chain['gasPrice'],
+  chainId: string,
   { logError }: { logError?: (err: string) => void },
 ): Promise<EstimatedGasPrice | undefined> => {
   let error: Error | undefined
@@ -113,7 +121,7 @@ const getGasPrice = async (
 
     if (isGasPriceOracle(config)) {
       try {
-        return await fetchGasOracle(config)
+        return await fetchGasOracle(config, chainId)
       } catch (_err) {
         error = asError(_err)
         //  TODO: use log Error here
@@ -208,7 +216,7 @@ export const useDefaultGasPrice = (
     async () => {
       const [gasEstimation, feeData] = await Promise.all([
         // Fetch gas price from oracles or get a fixed value
-        gasPriceConfigs ? getGasPrice(gasPriceConfigs, { logError }) : undefined,
+        gasPriceConfigs && chain ? getGasPrice(gasPriceConfigs, chain.chainId, { logError }) : undefined,
 
         // Fetch the gas fees from the blockchain itself
         provider?.getFeeData(),

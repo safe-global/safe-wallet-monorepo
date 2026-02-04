@@ -2,6 +2,9 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '../useChains'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+
+const CGW_BASE_URL = 'https://safe-client.staging.5afe.dev'
 
 // mock useWeb3Readonly
 jest.mock('../wallets/web3', () => {
@@ -52,10 +55,11 @@ describe('useGasPrice', () => {
     jest.useFakeTimers()
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
+    setBaseUrl(CGW_BASE_URL)
   })
 
   it('should return the fetched gas price from the first oracle', async () => {
-    // Mock fetch
+    // Mock fetch - CGW returns result wrapped with gasParameter and gweiFactor
     Object.defineProperty(window, 'fetch', {
       writable: true,
       value: jest.fn(() =>
@@ -63,10 +67,12 @@ describe('useGasPrice', () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              data: {
+              result: {
                 FastGasPrice: '47',
                 suggestBaseFee: '44',
               },
+              gasParameter: 'FastGasPrice',
+              gweiFactor: '1000000000.000000000',
             }),
         }),
       ),
@@ -83,7 +89,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith(`${CGW_BASE_URL}/v1/chains/4/gas-price`)
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -96,7 +102,7 @@ describe('useGasPrice', () => {
   })
 
   it('should speed up the gas price', async () => {
-    // Mock fetch
+    // Mock fetch - CGW returns result wrapped with gasParameter and gweiFactor
     Object.defineProperty(window, 'fetch', {
       writable: true,
       value: jest.fn(() =>
@@ -104,10 +110,12 @@ describe('useGasPrice', () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              data: {
+              result: {
                 FastGasPrice: '30',
                 suggestBaseFee: '10',
               },
+              gasParameter: 'FastGasPrice',
+              gweiFactor: '1000000000.000000000',
             }),
         }),
       ),
@@ -124,7 +132,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith(`${CGW_BASE_URL}/v1/chains/4/gas-price`)
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -136,24 +144,11 @@ describe('useGasPrice', () => {
     expect(result.current[0]?.maxPriorityFeePerGas?.toString()).toEqual('40000000000')
   })
 
-  it('should return the fetched gas price from the second oracle if the first one fails', async () => {
-    // Mock fetch
-    jest.spyOn(window, 'fetch').mockImplementation(
-      jest
-        .fn()
-        .mockImplementationOnce(() => Promise.reject(new Error('Failed to fetch')))
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                result: {
-                  fast: 300,
-                },
-              }),
-          }),
-        ),
-    )
+  it('should fallback to fixed gas price if CGW fails', async () => {
+    // Mock fetch - CGW returns error, should fallback to fixed gas price in config
+    jest
+      .spyOn(window, 'fetch')
+      .mockImplementation(jest.fn().mockImplementation(() => Promise.reject(new Error('Failed to fetch'))))
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())
@@ -165,25 +160,21 @@ describe('useGasPrice', () => {
       // assert the hook is not loading
       expect(result.current[2]).toBe(false)
 
-      expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
-      expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
+      expect(fetch).toHaveBeenCalledWith(`${CGW_BASE_URL}/v1/chains/4/gas-price`)
     })
 
-    // assert the gas price is correct
-    expect(result.current[0]?.maxFeePerGas?.toString()).toBe('60000000000')
+    // assert the gas price falls back to fixed value from config (24000000000)
+    expect(result.current[0]?.maxFeePerGas?.toString()).toBe('24000000000')
 
-    // assert the priority fee is correct
+    // assert the priority fee comes from provider
     expect(result.current[0]?.maxPriorityFeePerGas?.toString()).toEqual('4975')
   })
 
-  it('should fallback to a fixed gas price if the oracles fail', async () => {
-    // Mock fetch
-    jest.spyOn(window, 'fetch').mockImplementation(
-      jest
-        .fn()
-        .mockImplementationOnce(() => Promise.reject(new Error('Failed to fetch')))
-        .mockImplementationOnce(() => Promise.reject(new Error('Failed to fetch'))),
-    )
+  it('should fallback to a fixed gas price if all CGW oracle calls fail', async () => {
+    // Mock fetch - all CGW calls fail, should fallback to fixed gas price
+    jest
+      .spyOn(window, 'fetch')
+      .mockImplementation(jest.fn().mockImplementation(() => Promise.reject(new Error('Failed to fetch'))))
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())
@@ -196,13 +187,13 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
-    expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
+    // CGW endpoint is called for each oracle config
+    expect(fetch).toHaveBeenCalledWith(`${CGW_BASE_URL}/v1/chains/4/gas-price`)
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
 
-    // assert the gas price is correct
+    // assert the gas price is correct (fallback to fixed)
     expect(result.current[0]?.maxFeePerGas?.toString()).toBe('24000000000')
 
     // assert the priority fee is correct
@@ -260,7 +251,7 @@ describe('useGasPrice', () => {
   })
 
   it('should keep the previous gas price if the hook re-renders', async () => {
-    // Mock fetch
+    // Mock fetch - CGW returns result wrapped with gasParameter and gweiFactor
     Object.defineProperty(window, 'fetch', {
       writable: true,
       value: jest
@@ -270,10 +261,12 @@ describe('useGasPrice', () => {
             ok: true,
             json: () =>
               Promise.resolve({
-                data: {
+                result: {
                   FastGasPrice: '21',
                   suggestBaseFee: '19',
                 },
+                gasParameter: 'FastGasPrice',
+                gweiFactor: '1000000000.000000000',
               }),
           }),
         )
@@ -282,10 +275,12 @@ describe('useGasPrice', () => {
             ok: true,
             json: () =>
               Promise.resolve({
-                data: {
+                result: {
                   FastGasPrice: '22',
                   suggestBaseFee: '19',
                 },
+                gasParameter: 'FastGasPrice',
+                gweiFactor: '1000000000.000000000',
               }),
           }),
         ),
