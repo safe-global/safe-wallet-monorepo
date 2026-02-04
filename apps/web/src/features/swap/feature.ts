@@ -19,9 +19,6 @@ import SwapOrderConfirmation from './components/SwapOrderConfirmationView'
 import StatusLabel from './components/StatusLabel'
 import SwapTokens from './components/SwapTokens'
 
-// Service imports
-import { getSwapTitle } from './helpers/utils'
-
 // Flat structure - naming determines stub behavior
 const feature: SwapContract = {
   // Main Widgets

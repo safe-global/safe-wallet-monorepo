@@ -20,8 +20,11 @@ const adjustEthAddress = (address: string) => {
 const SwapPage: NextPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
+  const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
-  const { SwapWidget, FallbackSwapWidget, $isDisabled } = useLoadFeature(SwapFeature)
+
+  // Access swap widgets via feature architecture (renders null during SSR via proxy stub)
+  const { SwapWidget, FallbackSwapWidget } = useLoadFeature(SwapFeature)
 
   let sell = undefined
   if (token && amount) {
@@ -38,15 +41,15 @@ const SwapPage: NextPage = () => {
       </Head>
 
       <main style={{ height: 'calc(100vh - 52px)' }}>
-        {$isDisabled ? (
+        {isFeatureEnabled === true && isCowEnabled === true ? (
+          <SwapWidget sell={sell} />
+        ) : isFeatureEnabled === true && isCowEnabled === false ? (
+          <FallbackSwapWidget fromToken={sell?.asset} />
+        ) : isFeatureEnabled === false ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
           </Typography>
-        ) : isCowEnabled ? (
-          <SwapWidget sell={sell} />
-        ) : (
-          <FallbackSwapWidget fromToken={sell?.asset} />
-        )}
+        ) : null}
       </main>
     </>
   )
