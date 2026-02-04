@@ -51,6 +51,7 @@ export function useThreatAnalysisHypernativeMessage({
   const origin = useParsedOrigin(originProp)
 
   //TODO: Remove this after testing
+  console.log('typedData', typedData)
   console.log('[useThreatAnalysisHypernativeMessage] inputs:', {
     safeAddress,
     messageHash,

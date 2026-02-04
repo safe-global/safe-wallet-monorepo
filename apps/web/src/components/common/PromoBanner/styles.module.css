@@ -5,6 +5,7 @@
   border: 0;
   border-radius: 12px !important;
   min-height: 131px;
+  cursor: default;
 }
 
 .bannerStack {
@@ -100,6 +101,10 @@
 .bannerText {
   pointer-events: none;
   user-select: none;
+}
+
+.bannerText :global(a) {
+  pointer-events: auto;
 }
 
 @media (max-width: 599.95px) {

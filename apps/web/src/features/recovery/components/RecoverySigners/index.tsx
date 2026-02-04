@@ -5,15 +5,15 @@ import CircleIcon from '@/public/images/common/circle.svg'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Countdown } from '@/components/common/Countdown'
-import { ExecuteRecoveryButton } from '../ExecuteRecoveryButton'
-import { CancelRecoveryButton } from '../CancelRecoveryButton'
+import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
+import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 import txSignersCss from '@/components/transactions/TxSigners/styles.module.css'
 
-export function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { isExecutable, isExpired, isNext, remainingSeconds } = useRecoveryTxState(item)
 
   const desc = isExecutable ? (

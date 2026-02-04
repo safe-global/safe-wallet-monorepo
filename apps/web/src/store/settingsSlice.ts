@@ -18,6 +18,14 @@ export type SettingsState = {
     [chainId: string]: string[]
   }
 
+  manuallyHiddenSafes: {
+    [safeAddress: string]: string[]
+  }
+
+  overriddenAutoHideSafes: {
+    [safeAddress: string]: string[]
+  }
+
   tokenList: TOKEN_LISTS
 
   hideDust?: boolean
@@ -45,6 +53,10 @@ export const initialState: SettingsState = {
   tokenList: TOKEN_LISTS.TRUSTED,
 
   hiddenTokens: {},
+
+  manuallyHiddenSafes: {},
+
+  overriddenAutoHideSafes: {},
 
   hideDust: true,
 
@@ -96,6 +108,14 @@ export const settingsSlice = createSlice({
       const { chainId, assets } = payload
       state.hiddenTokens[chainId] = assets
     },
+    setManuallyHiddenSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+      const { safeAddress, nestedSafes } = payload
+      state.manuallyHiddenSafes[safeAddress] = nestedSafes
+    },
+    setOverriddenAutoHideSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
+      const { safeAddress, nestedSafes } = payload
+      state.overriddenAutoHideSafes[safeAddress] = nestedSafes
+    },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
     },
@@ -136,6 +156,8 @@ export const {
   setQrShortName,
   setDarkMode,
   setHiddenTokensForChain,
+  setManuallyHiddenSafes,
+  setOverriddenAutoHideSafes,
   setTokenList,
   setHideDust,
   hideSuspiciousTransactions,
@@ -174,3 +196,17 @@ export const isEnvInitialState = createSelector([selectSettings, (_, chainId) =>
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
 export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)
+
+export const selectManuallyHiddenSafes = createSelector(
+  [selectSettings, (_, safeAddress: string) => safeAddress],
+  (settings, safeAddress) => {
+    return settings.manuallyHiddenSafes?.[safeAddress] || []
+  },
+)
+
+export const selectOverriddenAutoHideSafes = createSelector(
+  [selectSettings, (_, safeAddress: string) => safeAddress],
+  (settings, safeAddress) => {
+    return settings.overriddenAutoHideSafes?.[safeAddress] || []
+  },
+)

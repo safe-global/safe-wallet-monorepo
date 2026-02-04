@@ -18,7 +18,7 @@ const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' 
   hasExplorer: true,
 }
 
-export const SettingsChangeTxInfo = ({
+const SettingsChangeTxInfo = ({
   settingsInfo,
   isTxExecuted = false,
 }: SettingsChangeTxInfoProps): ReactElement | null => {

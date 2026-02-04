@@ -20,7 +20,7 @@ const onBtnClick = () => {
   }, 300)
 }
 
-export const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
+const HnSecurityReportBtn = ({ chainId, safe, tx }: HnSecurityReportBtnProps): ReactElement => {
   const { text, baseUrl } = hnSecurityReportBtnConfig
 
   const href = buildSecurityReportUrl(baseUrl, chainId, safe, tx)

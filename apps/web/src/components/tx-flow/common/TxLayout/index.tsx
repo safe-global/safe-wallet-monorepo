@@ -61,8 +61,6 @@ export const TxLayoutHeader = ({
   )
 }
 
-export type TxStep = { txLayoutProps: Omit<TxLayoutProps, 'children'>; content: ReactElement }
-
 type TxLayoutProps = {
   title: ReactNode
   children: ReactNode

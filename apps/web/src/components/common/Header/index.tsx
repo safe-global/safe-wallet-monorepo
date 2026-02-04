@@ -1,7 +1,7 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import type { Dispatch, SetStateAction } from 'react'
-import { type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
 import { Box, IconButton, Paper } from '@mui/material'
@@ -18,14 +18,13 @@ import SafeLogoMobile from '@/public/images/logo-no-text.svg'
 import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import BatchIndicator from '@/components/batch/BatchIndicator'
-import WalletConnect from '@/features/walletconnect'
-import { useHasFeature } from '@/hooks/useChains'
+import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -46,7 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
-  const enableWc = useHasFeature(FEATURES.NATIVE_WALLETCONNECT)
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
@@ -107,11 +106,9 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           </div>
         )}
 
-        {enableWc && (
-          <div className={classnames(css.element, css.hideMobile)}>
-            <WalletConnect />
-          </div>
-        )}
+        <div className={classnames(css.element, css.hideMobile)}>
+          <WalletConnectWidget />
+        </div>
       </Box>
 
       <div className={classnames(css.element, css.connectWallet)}>

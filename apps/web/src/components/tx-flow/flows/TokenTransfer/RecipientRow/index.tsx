@@ -31,7 +31,7 @@ type RecipientRowProps = {
   remove?: (index: number) => void
 }
 
-export const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
+const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
   const balancesItems = useVisibleTokens()
   const spendingLimits = useSelector(selectSpendingLimits)
 

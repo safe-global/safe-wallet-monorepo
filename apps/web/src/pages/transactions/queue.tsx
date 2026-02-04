@@ -7,20 +7,25 @@ import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 import { Box, Skeleton } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
-import RecoveryList from '@/features/recovery/components/RecoveryList'
+import { RecoveryFeature } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
-import { HnLoginCard } from '@/features/hypernative/components/HnLoginCard'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
-import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/useIsHypernativeQueueScanFeature'
-import { useBannerVisibility } from '@/features/hypernative/hooks'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForQueue } from '@/features/hypernative/components/HnBanner'
-import { QueueAssessmentProvider } from '@/features/hypernative/components/QueueAssessmentProvider'
+import {
+  useIsHypernativeEligible,
+  useIsHypernativeQueueScanFeature,
+  useBannerVisibility,
+  BannerType,
+  HnBannerForQueue,
+  QueueAssessmentProvider,
+  HypernativeFeature,
+} from '@/features/hypernative'
 import { useState, useCallback, useMemo } from 'react'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const Queue: NextPage = () => {
+  const { RecoveryList } = useLoadFeature(RecoveryFeature)
   const showPending = useShowUnsignedQueue()
+  const hn = useLoadFeature(HypernativeFeature)
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
@@ -51,7 +56,7 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {showHnLoginCard && <HnLoginCard />}
+          {showHnLoginCard && <hn.HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 

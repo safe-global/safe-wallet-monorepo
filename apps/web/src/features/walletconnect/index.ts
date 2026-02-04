@@ -1,25 +1,52 @@
-import dynamic from 'next/dynamic'
+/**
+ * WalletConnect Feature - Public API
+ *
+ * This feature provides WalletConnect v2 integration for Safe wallets.
+ *
+ * ## Usage
+ *
+ * ```typescript
+ * import { WalletConnectFeature } from '@/features/walletconnect'
+ * import { useLoadFeature } from '@/features/__core__'
+ *
+ * function MyComponent() {
+ *   const wc = useLoadFeature(WalletConnectFeature)
+ *
+ *   // No null check needed - always returns an object
+ *   // Components render null when not ready (proxy stub)
+ *   return <wc.WalletConnectWidget />
+ * }
+ *
+ * // For explicit loading/disabled states:
+ * function MyComponentWithStates() {
+ *   const wc = useLoadFeature(WalletConnectFeature)
+ *
+ *   if (wc.$isLoading) return <Skeleton />
+ *   if (wc.$isDisabled) return null
+ *
+ *   return <wc.WalletConnectWidget />
+ * }
+ * ```
+ *
+ * All feature functionality is accessed via flat structure from useLoadFeature().
+ * Naming conventions determine stub behavior:
+ * - PascalCase → component (stub renders null)
+ * - camelCase → service (undefined when not ready)
+ *
+ * NOTE: This feature's hooks (useWcUri, useWalletConnectSearchParamUri) are only
+ * used internally and not exported. If hooks need to be public, export them from
+ * this file (always loaded, not lazy) to avoid Rules of Hooks violations.
+ */
 
+import { createFeatureHandle } from '@/features/__core__'
+import type { WalletConnectImplementation } from './contract'
+
+// Feature handle - uses semantic mapping (walletconnect → FEATURES.NATIVE_WALLETCONNECT)
+export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementation>('walletconnect')
+
+// Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'
 export { WCLoadingState } from './types'
-export { useIsWalletConnectEnabled } from './hooks'
-export { useWcUri, useWalletConnectSearchParamUri, WC_URI_SEARCH_PARAM } from './hooks'
-export { wcPopupStore, openWalletConnect, wcChainSwitchStore } from './store'
-export { walletConnectInstance, isSafePassApp } from './services'
-export { WalletConnectContext, WalletConnectProvider } from './components/WalletConnectContext'
-export {
-  SAFE_COMPATIBLE_METHODS,
-  SAFE_COMPATIBLE_EVENTS,
-  SAFE_WALLET_METADATA,
-  EIP155,
-  BlockedBridges,
-  WarnedBridges,
-  WarnedBridgeNames,
-} from './constants'
 
-const WalletConnectWidget = dynamic(
-  () => import('./components/WalletConnectUi').then((mod) => ({ default: mod.default })),
-  { ssr: false },
-)
-
-export default WalletConnectWidget
+// Lightweight constant for wc.tsx page (no heavy imports)
+export { WC_URI_SEARCH_PARAM } from './constants'

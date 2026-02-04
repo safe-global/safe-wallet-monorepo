@@ -13,7 +13,6 @@ const warningSection = '[data-testid="warning-section"]'
 const termsCheckbox = 'input[type="checkbox"]'
 export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
 export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
-const removeRecovererSection = '[data-testid="remove-recoverer-section"]'
 const startRecoveryBtn = '[data-testid="start-recovery-btn"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
 const recoveryExpirySelect = '[data-testid="recovery-expiry-select"]'
@@ -111,7 +110,7 @@ export function clickOnSetupRecoveryBtn() {
 }
 
 export function clickOnNextBtn() {
-  cy.get(recoveryNextBtn).click()
+  main.clickOnNextBtn(recoveryNextBtn)
 }
 
 export function clickOnGoToQueueBtn() {
@@ -171,13 +170,6 @@ export function postponeRecovery() {
 export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).click()
   cy.get(postponeRecoveryBtn).should('not.exist')
-}
-
-export function verifyNonceState(state) {
-  if (state === constants.elementExistanceStates.exist) {
-    cy.get(nonceFld).should(constants.elementExistanceStates.exist)
-  }
-  cy.get(nonceFld).should(constants.elementExistanceStates.not_exist)
 }
 
 export function verifyRecoveryProposalModalState(option, horizontal = false) {

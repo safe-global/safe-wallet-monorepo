@@ -366,7 +366,3 @@ export function uncheckAllPermissions(element) {
 export function checkAllPermissions(element) {
   cy.wrap(element).findByText(allowAllPermissions).click()
 }
-
-export function verifyPinnedApp(name) {
-  cy.get(`[aria-label="${name}"]`)
-}

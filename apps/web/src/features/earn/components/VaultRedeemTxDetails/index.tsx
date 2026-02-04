@@ -2,7 +2,7 @@ import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO
 import { Box } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import TokenAmount from '@/components/common/TokenAmount'
-import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
+import VaultRedeemConfirmation from '../VaultRedeemConfirmation'
 
 const VaultRedeemTxDetails = ({ info }: { info: VaultRedeemTransactionInfo }) => {
   return (

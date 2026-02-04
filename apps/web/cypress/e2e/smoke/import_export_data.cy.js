@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as file from '../pages/import_export.pages'
 import * as main from '../pages/main.page'
 import * as constants from '../../support/constants'

@@ -6,8 +6,8 @@ import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSli
 import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual'
-import usePortfolioBalances from '@/features/portfolio/hooks/usePortfolioBalances'
+import { useCounterfactualBalances } from '@/features/counterfactual/hooks'
+import { usePortfolioBalances } from '@/features/portfolio'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 

@@ -1,4 +1,4 @@
 export { wcChainSwitchStore } from './wcChainSwitchSlice'
 export type { WcChainSwitchRequest } from '../types'
 
-export { wcPopupStore, openWalletConnect } from './wcPopupStore'
+export { wcPopupStore } from './wcPopupStore'

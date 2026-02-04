@@ -1,13 +1,12 @@
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { ImplementationVersionState, TokenType } from '@safe-global/store/gateway/types'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { safeCreationDispatch, SafeCreationEvent } from './safeCreationEvents'
+import { extractCounterfactualSafeSetup } from './typeGuards'
 import { addUndeployedSafe } from '../store/undeployedSafesSlice'
-import type { UndeployedSafe, UndeployedSafeProps, ReplayedSafeProps, PayMethod } from '../types'
+import type { UndeployedSafe, ReplayedSafeProps, PayMethod } from '../types'
 import { PendingSafeStatus } from '../types'
 import { CF_TX_GROUP_KEY } from '../constants'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
@@ -15,9 +14,7 @@ import type { AppDispatch } from '@/store'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { assertProvider, assertTx, assertWallet } from '@/utils/helpers'
-import { type PredictedSafeProps } from '@safe-global/protocol-kit'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import type { SafeTransaction, SafeVersion, TransactionOptions } from '@safe-global/types-kit'
+import type { SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { BrowserProvider, Eip1193Provider, Provider, TransactionResponse } from 'ethers'
 
@@ -91,35 +88,8 @@ export const deploySafeAndExecuteTx = async (
   return dispatchTxExecutionAndDeploySafe(safeTx, txOptions, provider, safeAddress)
 }
 
-export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: Chain) => {
-  let balance: bigint | undefined
-
-  if (!chain) return undefined
-
-  // Fetch balance via the connected wallet.
-  // If there is no wallet connected we fetch and cache the balance instead
-  if (provider) {
-    balance = await provider.getBalance(safeAddress)
-  } else {
-    balance = (await getWeb3ReadOnly()?.getBalance(safeAddress)) ?? 0n
-  }
-
-  return <Balances>{
-    fiatTotal: '0',
-    items: [
-      {
-        tokenInfo: {
-          type: TokenType.NATIVE_TOKEN,
-          address: ZERO_ADDRESS,
-          ...chain?.nativeCurrency,
-        },
-        balance: balance?.toString(),
-        fiatBalance: '0',
-        fiatConversion: '0',
-      },
-    ],
-  }
-}
+// Re-export lightweight balance getter (extracted to separate file to reduce bundle size)
+export { getCounterfactualBalance } from './getCounterfactualBalance'
 
 export const replayCounterfactualSafeDeployment = (
   chainId: string,
@@ -289,40 +259,8 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
   }, TIMEOUT_TIME)
 }
 
-export const isReplayedSafeProps = (props: UndeployedSafeProps): props is ReplayedSafeProps =>
-  'safeAccountConfig' in props && 'masterCopy' in props && 'factoryAddress' in props && 'saltNonce' in props
-
-export const isPredictedSafeProps = (props: UndeployedSafeProps): props is PredictedSafeProps =>
-  'safeAccountConfig' in props && !('masterCopy' in props)
-
-export const extractCounterfactualSafeSetup = (
-  undeployedSafe: UndeployedSafe | undefined,
-  chainId: string | undefined,
-):
-  | {
-      owners: string[]
-      threshold: number
-      fallbackHandler: string | undefined
-      safeVersion: SafeVersion | undefined
-      saltNonce: string | undefined
-    }
-  | undefined => {
-  if (!undeployedSafe || !chainId || !undeployedSafe.props.safeAccountConfig) {
-    return undefined
-  }
-  const { owners, threshold, fallbackHandler } = undeployedSafe.props.safeAccountConfig
-  const { safeVersion, saltNonce } = isPredictedSafeProps(undeployedSafe.props)
-    ? (undeployedSafe.props.safeDeploymentConfig ?? {})
-    : undeployedSafe.props
-
-  return {
-    owners,
-    threshold: Number(threshold),
-    fallbackHandler,
-    safeVersion,
-    saltNonce,
-  }
-}
+// Re-export lightweight utilities for backwards compatibility within the feature
+export { isReplayedSafeProps, isPredictedSafeProps, extractCounterfactualSafeSetup } from './typeGuards'
 
 export const activateReplayedSafe = async (
   chain: Chain,

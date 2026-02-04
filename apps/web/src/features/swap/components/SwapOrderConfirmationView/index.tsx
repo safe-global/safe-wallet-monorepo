@@ -33,7 +33,7 @@ type SwapOrderProps = {
   decodedData?: DataDecoded | null
 }
 
-export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
+const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
   const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, receiver } = order
 
   const isTwapOrder = order.type === TransactionInfoType.TWAP_ORDER

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": ["src/pages/**/*.tsx", "src/pages/**/*.ts", "src/app/**/*.tsx", "src/app/**/*.ts"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "**/*.test.{ts,tsx}",
+    "**/*.stories.{ts,tsx}",
+    "**/__tests__/**",
+    "src/types/contracts/**",
+    "src/components/common/Mui/index.tsx",
+    "src/services/contracts/ContractErrorCodes.ts",
+    "src/service-workers/firebase-messaging/webhook-types.ts",
+    "src/features/counterfactual/contract.ts",
+    "src/features/ledger/types.ts",
+    "src/features/multichain/types.ts",
+    "src/store/**/*Slice.ts"
+  ],
+  "ignoreDependencies": [
+    "@storybook/*",
+    "storybook",
+    "cypress",
+    "jest",
+    "@testing-library/*",
+    "msw",
+    "@faker-js/faker"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "warn",
+    "types": "off",
+    "duplicates": "off",
+    "unlisted": "off",
+    "binaries": "off",
+    "dependencies": "off",
+    "devDependencies": "off"
+  }
+}

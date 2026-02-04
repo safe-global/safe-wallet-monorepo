@@ -1,4 +1,4 @@
-import { PromoBanner } from '@/components/common/PromoBanner'
+import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import type { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'

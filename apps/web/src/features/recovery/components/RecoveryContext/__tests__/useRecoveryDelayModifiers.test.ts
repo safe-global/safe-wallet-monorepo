@@ -1,6 +1,6 @@
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
@@ -11,7 +11,7 @@ jest.mock('@/features/recovery/services/delay-modifier')
 const mockGetRecoveryDelayModifiers = getRecoveryDelayModifiers as jest.MockedFunction<typeof getRecoveryDelayModifiers>
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/hooks/wallets/web3')
+jest.mock('@/hooks/wallets/web3ReadOnly')
 jest.mock('@/hooks/useChains')
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>

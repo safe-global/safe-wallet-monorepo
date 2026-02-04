@@ -56,7 +56,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.visit(constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
-    owner.typeOwnerAddressManage(1, constants.SEPOLIA_OWNER_2)
+    owner.typeOwnerAddressManage(4, constants.SEPOLIA_OWNER_2)
     owner.clickOnNextBtnManage()
     sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
   })

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 import { useCurrentChain } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { createWeb3, createWeb3ReadOnly, setWeb3, setWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { setWeb3, setWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 
@@ -15,8 +15,11 @@ export const useInitWeb3 = () => {
 
   useEffect(() => {
     if (wallet && wallet.chainId === chainId) {
-      const web3 = createWeb3(wallet.provider)
-      setWeb3(web3)
+      // Dynamic import to keep ethers out of the main bundle
+      import('@/hooks/wallets/web3').then(({ createWeb3 }) => {
+        const web3 = createWeb3(wallet.provider)
+        setWeb3(web3)
+      })
     } else {
       setWeb3(undefined)
     }
@@ -27,7 +30,10 @@ export const useInitWeb3 = () => {
       setWeb3ReadOnly(undefined)
       return
     }
-    const web3ReadOnly = createWeb3ReadOnly(chain, customRpcUrl)
-    setWeb3ReadOnly(web3ReadOnly)
+    // Dynamic import to keep ethers out of the main bundle
+    import('@/hooks/wallets/web3').then(({ createWeb3ReadOnly }) => {
+      const web3ReadOnly = createWeb3ReadOnly(chain, customRpcUrl)
+      setWeb3ReadOnly(web3ReadOnly)
+    })
   }, [chain, customRpcUrl])
 }

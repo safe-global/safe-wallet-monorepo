@@ -8,7 +8,11 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { safeCreationDispatch, SafeCreationEvent } from '../../services/safeCreationEvents'
 import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
-import { extractCounterfactualSafeSetup, isPredictedSafeProps } from '../../services/safeDeployment'
+import {
+  extractCounterfactualSafeSetup,
+  isPredictedSafeProps,
+  activateReplayedSafe,
+} from '../../services/safeDeployment'
 import { CF_TX_GROUP_KEY } from '../../constants'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -138,6 +142,7 @@ const ActivateAccountFlow = () => {
           options,
           onSubmit,
           isMultichainSafe ? true : undefined,
+          activateReplayedSafe,
         )
       }
     } catch (_err) {

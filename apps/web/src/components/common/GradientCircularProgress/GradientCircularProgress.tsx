@@ -72,5 +72,3 @@ export const GradientCircularProgress = ({
     </>
   )
 }
-
-export default GradientCircularProgress

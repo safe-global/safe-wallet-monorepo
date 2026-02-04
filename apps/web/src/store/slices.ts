@@ -17,12 +17,10 @@ export * from './batchSlice'
 export {
   undeployedSafesSlice,
   addUndeployedSafe,
-  addUndeployedSafes,
   updateUndeployedSafeStatus,
   removeUndeployedSafe,
   selectUndeployedSafes,
   selectUndeployedSafe,
-  selectUndeployedSafesByAddress,
   selectIsUndeployedSafe,
 } from '@/features/counterfactual/store'
 export * from '@/features/swap/store/swapParamsSlice'

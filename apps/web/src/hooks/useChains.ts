@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useGetChainsConfigQuery } from '@safe-global/store/gateway'
-import { useChainId } from './useChainId'
+import useChainId from './useChainId'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'

@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/store'
-import { setPendingBannerDismissed } from '@/features/hypernative/store/hnStateSlice'
+import { setPendingBannerDismissed } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'

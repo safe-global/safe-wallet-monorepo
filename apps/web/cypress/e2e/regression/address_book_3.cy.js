@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as addressBook from '../pages/address_book.page.js'
 import * as main from '../pages/main.page.js'

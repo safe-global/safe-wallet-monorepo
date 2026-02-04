@@ -13,7 +13,6 @@ import type {
 import { Builder } from '@/tests/Builder'
 import { generateRandomArray } from './utils'
 import type { IBuilder } from '@/tests/Builder'
-import type useChains from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const rpcUriBuilder = (): IBuilder<RpcUri> => {
@@ -97,12 +96,5 @@ export const chainBuilder = (): IBuilder<Chain> => {
     disabledWallets: generateRandomArray(() => faker.word.sample(), { min: 1, max: 10 }),
     features: generateRandomArray(() => faker.helpers.enumValue(FEATURES), { min: 1, max: 10 }),
     recommendedMasterCopyVersion: faker.system.semver(),
-  })
-}
-
-export const useChainsBuilder = (): IBuilder<ReturnType<typeof useChains>> => {
-  return Builder.new<ReturnType<typeof useChains>>().with({
-    configs: generateRandomArray(() => chainBuilder().build(), { min: 1, max: 25 }),
-    loading: false,
   })
 }

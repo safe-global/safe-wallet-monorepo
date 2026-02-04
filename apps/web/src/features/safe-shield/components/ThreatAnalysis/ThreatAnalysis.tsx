@@ -8,7 +8,8 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 import { AnalysisGroupCardDisabled } from './AnalysisGroupCardDisabled'
 
 interface ThreatAnalysisProps {
@@ -32,6 +33,7 @@ export const ThreatAnalysis = ({
   highlightedSeverity,
   hypernativeAuth,
 }: ThreatAnalysisProps): ReactElement | null => {
+  const hn = useLoadFeature(HypernativeFeature)
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
 
@@ -53,15 +55,16 @@ export const ThreatAnalysis = ({
     return null
   }
 
+  const CardComponent = hypernativeAuth && hn.$isReady ? hn.HnAnalysisGroupCard : AnalysisGroupCard
+
   return (
-    <AnalysisGroupCard
+    <CardComponent
       data-testid="threat-analysis-group-card"
       data={threatData}
       delay={delay}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.THREAT_ANALYZED}
       requestId={threatResults?.request_id}
-      isByHypernative={!!hypernativeAuth}
     />
   )
 }

@@ -8,8 +8,8 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'
 import LockIcon from '@/public/images/common/lock-small.svg'
 import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
-import { useAssessmentUrl } from '@/features/hypernative/hooks/useAssessmentUrl'
-import { useHnAssessmentSeverity } from '@/features/hypernative/hooks/useHnAssessmentSeverity'
+import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
+import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 
 interface HnQueueAssessmentProps {
   safeTxHash: string

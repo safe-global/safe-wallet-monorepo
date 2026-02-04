@@ -106,12 +106,7 @@ type TxSignersProps = {
   proposer?: string
 }
 
-export const TxSigners = ({
-  txDetails,
-  txSummary,
-  isTxFromProposer,
-  proposer,
-}: TxSignersProps): ReactElement | null => {
+const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSignersProps): ReactElement | null => {
   const { detailedExecutionInfo, txInfo, txId } = txDetails
   const [hideConfirmations, setHideConfirmations] = useState<boolean>(shouldHideConfirmations(detailedExecutionInfo))
   const isPending = useIsPending(txId)

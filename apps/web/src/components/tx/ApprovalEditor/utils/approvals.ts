@@ -1,7 +1,5 @@
-import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/data-decoded'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { parseUnits } from 'ethers'
-import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { type ApprovalInfo } from '../hooks/useApprovalInfos'
 import { UNLIMITED_APPROVAL_AMOUNT } from '@safe-global/utils/utils/tokens'
 import {
@@ -9,15 +7,6 @@ import {
   ERC20_INTERFACE,
   INCREASE_ALLOWANCE_SIGNATURE_HASH,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-
-const MULTISEND_METHOD = 'multiSend'
-
-const APPROVE_METHOD = 'approve'
-
-const TRANSACTIONS_PARAM = 'transactions'
-
-const ADDRESS_TYPE = 'address'
-const UINT256_TYPE = 'uint256'
 
 export enum PSEUDO_APPROVAL_VALUES {
   UNLIMITED = 'Unlimited amount',
@@ -29,60 +18,6 @@ const parseApprovalAmount = (amount: string, decimals: number) => {
   }
 
   return parseUnits(amount, decimals)
-}
-
-function hasMultiSendParameters(
-  txs: DataDecoded & { to: string },
-): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
-  return txs.method === MULTISEND_METHOD && txs.parameters?.length === 1
-}
-
-function hasApproveCallParameters(
-  txs: DataDecoded & { to: string },
-): txs is DataDecoded & { to: string; parameters: DataDecodedParameter[] } {
-  return txs.method === APPROVE_METHOD && txs.parameters?.length === 2
-}
-
-export const extractTxs: (txs: BaseTransaction[] | (DataDecoded & { to: string })) => BaseTransaction[] = (txs) => {
-  if (Array.isArray(txs)) {
-    return txs
-  }
-
-  // Our multisend contract takes 1 param called transactions
-  if (hasMultiSendParameters(txs)) {
-    const txParam = txs.parameters[0]
-    if (txParam.name === TRANSACTIONS_PARAM) {
-      return txParam.valueDecoded && Array.isArray(txParam.valueDecoded)
-        ? txParam.valueDecoded.map((innerTx) => ({
-            to: innerTx.to,
-            data: innerTx.data || EMPTY_DATA,
-            value: innerTx.value,
-          }))
-        : []
-    }
-  }
-
-  if (hasApproveCallParameters(txs)) {
-    const spenderParam = txs.parameters[0]
-    const amountParam = txs.parameters[1]
-
-    // We only check the types here instead of the names may vary in ERC20 implementations
-    if (
-      spenderParam.type == ADDRESS_TYPE &&
-      typeof spenderParam.value === 'string' &&
-      amountParam.type === UINT256_TYPE &&
-      typeof amountParam.value === 'string'
-    ) {
-      return [
-        {
-          to: txs.to,
-          value: '0x',
-          data: ERC20_INTERFACE.encodeFunctionData(APPROVE_METHOD, [spenderParam.value, amountParam.value]),
-        },
-      ]
-    }
-  }
-  return []
 }
 
 export const updateApprovalTxs = (
