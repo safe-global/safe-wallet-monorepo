@@ -51,3 +51,9 @@ export { useGetStakeWidgetUrl } from './hooks/useGetStakeWidgetUrl'
 // ─────────────────────────────────────────────────────────────────
 
 export * from './constants'
+
+// ─────────────────────────────────────────────────────────────────
+// HELPER UTILITIES (direct exports for consumers)
+// ─────────────────────────────────────────────────────────────────
+
+export { getStakeTitle } from './helpers/utils'
