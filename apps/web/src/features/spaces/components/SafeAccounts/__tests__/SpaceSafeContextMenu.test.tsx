@@ -7,7 +7,9 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 jest.mock('@/store')
-jest.mock('@/features/spaces/hooks/useSpaceMembers')
+jest.mock('@/features/spaces', () => ({
+  useIsAdmin: jest.fn(),
+}))
 jest.mock('@/services/analytics')
 jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(),

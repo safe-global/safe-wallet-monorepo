@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react'
 import useIsQualifiedSafe from '../useIsQualifiedSafe'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 jest.mock('@/store', () => ({
@@ -38,7 +38,7 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'

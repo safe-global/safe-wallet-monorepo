@@ -1,11 +1,12 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces'
+import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 
 const UserSettingsPage: NextPage = () => {
   const spaces = useLoadFeature(SpacesFeature)
+  useFeatureFlagRedirect()
 
   return (
     <>
