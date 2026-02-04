@@ -157,4 +157,6 @@ export const dispatchSpendingLimitTxExecution = async (
     .catch((err) => {
       txDispatch(TxEvent.FAILED, { groupKey: id, chainId, safeAddress, error: asError(err) })
     })
+
+  return result?.hash
 }
