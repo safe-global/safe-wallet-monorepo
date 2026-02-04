@@ -18,7 +18,6 @@ import type SwapOrderConfirmation from './components/SwapOrderConfirmationView'
 import type StatusLabel from './components/StatusLabel'
 import type SwapTokens from './components/SwapTokens'
 import type FallbackSwapWidget from './components/FallbackSwapWidget'
-import type { getSwapTitle } from './helpers/utils'
 
 export interface SwapContract {
   // Main Widgets (PascalCase → stub renders null)
@@ -31,7 +30,4 @@ export interface SwapContract {
   SwapOrderConfirmation: typeof SwapOrderConfirmation
   StatusLabel: typeof StatusLabel
   SwapTokens: typeof SwapTokens
-
-  // Services (camelCase → undefined when not ready)
-  getSwapTitle: typeof getSwapTitle
 }

@@ -34,9 +34,6 @@ const feature: SwapContract = {
   SwapOrderConfirmation,
   StatusLabel,
   SwapTokens,
-
-  // Services
-  getSwapTitle,
 }
 
 export default feature satisfies SwapContract
