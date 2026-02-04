@@ -324,7 +324,6 @@ import { MyComponent } from './MyComponent'
 const meta = {
   title: 'Components/MyComponent',
   component: MyComponent,
-  tags: ['autodocs'],
 } satisfies Meta<typeof MyComponent>
 
 export default meta
@@ -365,7 +364,6 @@ const meta = {
     ...defaultSetup.parameters, // Includes MSW handlers and Next.js router mock
   },
   decorators: [defaultSetup.decorator], // Provides Redux, Wallet, SDK, TxModal contexts
-  tags: ['autodocs'],
 } satisfies Meta<typeof Dashboard>
 
 export default meta
@@ -420,7 +418,6 @@ import {
 - Place story files next to the component they document
 - Use descriptive story names (Default, WithError, Loading, etc.)
 - Include all important component states and variations
-- Use the `autodocs` tag for automatic documentation generation
 - Story files are located throughout `apps/web/src/` alongside components
 - **For pages/widgets**: Use `createMockStory` to avoid duplicating mock setup code
 - **For simple components**: Use basic story format without mocking utilities
