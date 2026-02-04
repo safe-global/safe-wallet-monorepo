@@ -17,7 +17,6 @@ import SwapButton from './components/SwapButton'
 import SwapOrder from './components/SwapOrder'
 import SwapOrderConfirmation from './components/SwapOrderConfirmationView'
 import StatusLabel from './components/StatusLabel'
-import { SwapTx } from './components/SwapTxInfo/SwapTx'
 import SwapTokens from './components/SwapTokens'
 
 // Service imports
@@ -34,7 +33,6 @@ const feature: SwapContract = {
   SwapOrder,
   SwapOrderConfirmation,
   StatusLabel,
-  SwapTx,
   SwapTokens,
 
   // Services
