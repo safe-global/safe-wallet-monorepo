@@ -479,7 +479,7 @@ describe('useImportLedgerAddress', () => {
       }
 
       server.use(
-        http.get(`${GATEWAY_URL}/v2/owners/${mockAddress}/safes`, () => {
+        http.get(`${GATEWAY_URL}/v3/owners/${mockAddress}/safes`, () => {
           return HttpResponse.json(mockOwnedSafesResponse)
         }),
       )

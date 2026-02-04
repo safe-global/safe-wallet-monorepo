@@ -22,519 +22,6 @@
         "tags": ["about"]
       }
     },
-    "/v1/accounts": {
-      "post": {
-        "description": "Creates a new account for the authenticated user. The account is associated with the signer address from the authentication payload.",
-        "operationId": "accountsCreateAccountV1",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "description": "Account creation data including name and other optional settings",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAccountDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Account created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          },
-          "403": {
-            "description": "Access forbidden - insufficient permissions"
-          }
-        },
-        "summary": "Create account",
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/data-types": {
-      "get": {
-        "description": "Retrieves all available account data types that can be used when configuring account data settings.",
-        "operationId": "accountsGetDataTypesV1",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "List of available account data types",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccountDataType"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get account data types",
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}/data-settings": {
-      "get": {
-        "description": "Retrieves data settings for a specific account address. Returns the configured data types and their settings for the authenticated user.",
-        "operationId": "accountsGetAccountDataSettingsV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "description": "The account address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of account data settings for the specified address",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccountDataSetting"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          }
-        },
-        "summary": "Get account data settings",
-        "tags": ["accounts"]
-      },
-      "put": {
-        "description": "Creates or updates data settings for a specific account address. This endpoint allows configuring which data types are enabled for the account.",
-        "operationId": "accountsUpsertAccountDataSettingsV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "description": "The account address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Data settings to create or update for the account",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpsertAccountDataSettingsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Updated account data settings",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccountDataSetting"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          }
-        },
-        "summary": "Update account data settings",
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}": {
-      "get": {
-        "description": "Retrieves account information for a specific address. The account must belong to the authenticated user.",
-        "operationId": "accountsGetAccountV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "description": "The account address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account information retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          }
-        },
-        "summary": "Get account by address",
-        "tags": ["accounts"]
-      },
-      "delete": {
-        "description": "Deletes an account and all its associated data for the specified address. The account must belong to the authenticated user.",
-        "operationId": "accountsDeleteAccountV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "description": "The account address to delete (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Account deleted successfully"
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          }
-        },
-        "summary": "Delete account",
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}/address-books/{chainId}": {
-      "get": {
-        "operationId": "addressBooksGetAddressBookV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddressBook"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["accounts"]
-      },
-      "post": {
-        "operationId": "addressBooksCreateAddressBookItemV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAddressBookItemDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddressBookItem"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["accounts"]
-      },
-      "delete": {
-        "operationId": "addressBooksDeleteAddressBookV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}/address-books/{chainId}/{addressBookItemId}": {
-      "delete": {
-        "operationId": "addressBooksDeleteAddressBookItemV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "addressBookItemId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}/counterfactual-safes/{chainId}/{predictedAddress}": {
-      "get": {
-        "operationId": "counterfactualSafesGetCounterfactualSafeV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "predictedAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CounterfactualSafe"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["accounts"]
-      },
-      "delete": {
-        "operationId": "counterfactualSafesDeleteCounterfactualSafeV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "predictedAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["accounts"]
-      }
-    },
-    "/v1/accounts/{address}/counterfactual-safes": {
-      "get": {
-        "operationId": "counterfactualSafesGetCounterfactualSafesV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/CounterfactualSafe"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": ["accounts"]
-      },
-      "put": {
-        "operationId": "counterfactualSafesCreateCounterfactualSafeV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCounterfactualSafeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CounterfactualSafe"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["accounts"]
-      },
-      "delete": {
-        "operationId": "counterfactualSafesDeleteCounterfactualSafesV1",
-        "parameters": [
-          {
-            "name": "address",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["accounts"]
-      }
-    },
     "/v1/auth/nonce": {
       "get": {
         "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
@@ -733,6 +220,16 @@
               "example": true,
               "type": "boolean"
             }
+          },
+          {
+            "name": "sync",
+            "required": false,
+            "in": "query",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -807,6 +304,17 @@
             "schema": {
               "default": true,
               "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sync",
+            "required": false,
+            "in": "query",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
+            "schema": {
+              "default": false,
+              "example": false,
               "type": "boolean"
             }
           }
@@ -1430,91 +938,6 @@
         "tags": ["contracts"]
       }
     },
-    "/v1/export/chains/{chainId}/{safeAddress}": {
-      "post": {
-        "operationId": "csvExportLaunchExportV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "description": "Transaction export request",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TransactionExportDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobStatusDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["export"]
-      }
-    },
-    "/v1/export/{jobId}/status": {
-      "get": {
-        "operationId": "csvExportGetExportStatusV1",
-        "parameters": [
-          {
-            "name": "jobId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "CSV export status retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobStatusDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "CSV export not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JobStatusErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": ["export"]
-      }
-    },
     "/v1/chains/{chainId}/data-decoder": {
       "post": {
         "description": "Decodes raw transaction data into human-readable format using contract ABIs. This helps understand what functions are being called and with what parameters.",
@@ -1556,391 +979,6 @@
         },
         "summary": "Decode transaction data",
         "tags": ["data-decoded"]
-      }
-    },
-    "/v1/chains/{chainId}/delegates": {
-      "get": {
-        "deprecated": true,
-        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "delegatesGetDelegatesV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where delegates are registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safe",
-            "required": false,
-            "in": "query",
-            "description": "Filter by Safe address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "label",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate label",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated list of delegates retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DelegatePage"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get delegates (deprecated)",
-        "tags": ["delegates"]
-      },
-      "post": {
-        "deprecated": true,
-        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "delegatesPostDelegateV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the delegate will be registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Delegate creation data including Safe address, delegate address, and signature",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDelegateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Delegate created successfully"
-          },
-          "400": {
-            "description": "Invalid delegate data or signature"
-          }
-        },
-        "summary": "Create delegate (deprecated)",
-        "tags": ["delegates"]
-      }
-    },
-    "/v1/chains/{chainId}/delegates/{delegateAddress}": {
-      "delete": {
-        "deprecated": true,
-        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "delegatesDeleteDelegateV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the delegate is registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegateAddress",
-            "required": true,
-            "in": "path",
-            "description": "Delegate address to delete (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Signature proving authorization to delete the delegate",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteDelegateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Delegate deleted successfully"
-          },
-          "400": {
-            "description": "Invalid signature or unauthorized deletion attempt"
-          }
-        },
-        "summary": "Delete delegate (deprecated)",
-        "tags": ["delegates"]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
-      "delete": {
-        "deprecated": true,
-        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "delegatesDeleteSafeDelegateV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the Safe is deployed",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegateAddress",
-            "required": true,
-            "in": "path",
-            "description": "Delegate address to remove (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "description": "Safe contract address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Signature proving authorization to remove the delegate",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteSafeDelegateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Safe delegate removed successfully"
-          },
-          "400": {
-            "description": "Invalid signature or unauthorized removal attempt"
-          }
-        },
-        "summary": "Delete Safe delegate (deprecated)",
-        "tags": ["delegates"]
-      }
-    },
-    "/v2/chains/{chainId}/delegates": {
-      "get": {
-        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
-        "operationId": "delegatesGetDelegatesV2",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where delegates are registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safe",
-            "required": false,
-            "in": "query",
-            "description": "Filter by Safe address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "label",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate label or name",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated list of delegates retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DelegatePage"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Get delegates",
-        "tags": ["delegates"]
-      },
-      "post": {
-        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
-        "operationId": "delegatesPostDelegateV2",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the delegate will be registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Delegate creation data including Safe address, delegate address, label, and authorization signature",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDelegateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Delegate created successfully"
-          },
-          "400": {
-            "description": "Invalid delegate data, signature, or unauthorized creation attempt"
-          }
-        },
-        "summary": "Create delegate",
-        "tags": ["delegates"]
-      }
-    },
-    "/v2/chains/{chainId}/delegates/{delegateAddress}": {
-      "delete": {
-        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
-        "operationId": "delegatesDeleteDelegateV2",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the delegate is registered",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegateAddress",
-            "required": true,
-            "in": "path",
-            "description": "Delegate address to remove (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "Signature and data proving authorization to delete the delegate",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteDelegateV2Dto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Delegate deleted successfully"
-          },
-          "400": {
-            "description": "Invalid signature or unauthorized deletion attempt"
-          }
-        },
-        "summary": "Delete delegate",
-        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
@@ -2072,218 +1110,6 @@
         },
         "summary": "Estimate multisig transaction gas",
         "tags": ["estimations"]
-      }
-    },
-    "/v2/register/notifications": {
-      "post": {
-        "description": "Registers or updates a device to receive push notifications for Safe events. Creates subscriptions for specified Safes and notification types.",
-        "operationId": "notificationsUpsertSubscriptionsV2",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "description": "Device and subscription data including device token, Safe addresses, and notification preferences",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpsertSubscriptionsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Device registered successfully with returned device UUID",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "deviceUuid": {
-                      "type": "string",
-                      "format": "uuid",
-                      "description": "Generated UUID for the registered device"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid device data or subscription configuration"
-          }
-        },
-        "summary": "Register device for notifications",
-        "tags": ["notifications"]
-      }
-    },
-    "/v2/chains/{chainId}/notifications/devices/{deviceUuid}/safes/{safeAddress}": {
-      "get": {
-        "description": "Retrieves the notification types that a device is subscribed to for a specific Safe.",
-        "operationId": "notificationsGetSafeSubscriptionV2",
-        "parameters": [
-          {
-            "name": "deviceUuid",
-            "required": true,
-            "in": "path",
-            "description": "Device UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the Safe is deployed",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "description": "Safe contract address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of notification types the device is subscribed to for this Safe",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationTypeResponseDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          },
-          "404": {
-            "description": "Device, Safe, or subscription not found"
-          }
-        },
-        "summary": "Get Safe subscription",
-        "tags": ["notifications"]
-      },
-      "delete": {
-        "description": "Removes all notification subscriptions for a specific Safe on a device.",
-        "operationId": "notificationsDeleteSubscriptionV2",
-        "parameters": [
-          {
-            "name": "deviceUuid",
-            "required": true,
-            "in": "path",
-            "description": "Device UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the Safe is deployed",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "description": "Safe contract address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Safe subscription deleted successfully"
-          },
-          "404": {
-            "description": "Device, Safe, or subscription not found"
-          }
-        },
-        "summary": "Delete Safe subscription",
-        "tags": ["notifications"]
-      }
-    },
-    "/v2/notifications/subscriptions": {
-      "delete": {
-        "description": "Delete all subscriptions of a Safe on a device. This will delete all subscriptions of a Safe on a device for all chains passed in the request body.",
-        "operationId": "notificationsDeleteAllSubscriptionsV2",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteAllSubscriptionsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "404": {
-            "description": "No subscription was found"
-          },
-          "422": {
-            "description": "The request body is invalid"
-          }
-        },
-        "summary": "Delete all subscriptions of a device",
-        "tags": ["notifications"]
-      }
-    },
-    "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
-      "delete": {
-        "description": "Removes a device and all its notification subscriptions from the system.",
-        "operationId": "notificationsDeleteDeviceV2",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID (kept for backward compatibility)",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "deviceUuid",
-            "required": true,
-            "in": "path",
-            "description": "Device UUID to delete",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Device deleted successfully"
-          },
-          "404": {
-            "description": "Device not found"
-          }
-        },
-        "summary": "Delete device",
-        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}": {
@@ -2478,116 +1304,6 @@
         },
         "summary": "Add message signature",
         "tags": ["messages"]
-      }
-    },
-    "/v1/register/notifications": {
-      "post": {
-        "deprecated": true,
-        "description": "Registers a device to receive push notifications for Safe events. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "notificationsRegisterDeviceV1",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "description": "Device registration data including device token, UUID, and Safe registrations with signatures",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterDeviceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Device registered successfully for notifications"
-          },
-          "400": {
-            "description": "Invalid device data, expired timestamp, or invalid signature"
-          }
-        },
-        "summary": "Register device for notifications (deprecated)",
-        "tags": ["notifications"]
-      }
-    },
-    "/v1/chains/{chainId}/notifications/devices/{uuid}": {
-      "delete": {
-        "deprecated": true,
-        "description": "Removes a device from receiving notifications. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "notificationsUnregisterDeviceV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID (kept for backward compatibility)",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "uuid",
-            "required": true,
-            "in": "path",
-            "description": "Device UUID to unregister",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Device unregistered successfully"
-          }
-        },
-        "summary": "Unregister device (deprecated)",
-        "tags": ["notifications"]
-      }
-    },
-    "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
-      "delete": {
-        "deprecated": true,
-        "description": "Removes a specific Safe from receiving notifications on a device. This endpoint is deprecated, please use the v2 version instead.",
-        "operationId": "notificationsUnregisterSafeV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "description": "Chain ID where the Safe is deployed",
-            "schema": {
-              "example": "1",
-              "type": "string"
-            }
-          },
-          {
-            "name": "uuid",
-            "required": true,
-            "in": "path",
-            "description": "Device UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "description": "Safe contract address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Safe unregistered from device notifications successfully"
-          }
-        },
-        "summary": "Unregister Safe from device (deprecated)",
-        "tags": ["notifications"]
       }
     },
     "/v1/users": {
@@ -3620,11 +2336,10 @@
         "tags": ["owners"]
       }
     },
-    "/v1/owners/{ownerAddress}/safes": {
+    "/v2/owners/{ownerAddress}/safes": {
       "get": {
-        "deprecated": true,
-        "description": "Retrieves Safes owned by an address across all chains. This endpoint is deprecated, please use the chain-specific version instead.",
-        "operationId": "ownersGetAllSafesByOwnerV1",
+        "description": "Retrieves all Safes owned by the specified address across all supported chains. Returns a map of chain IDs to arrays of Safe addresses.",
+        "operationId": "ownersGetAllSafesByOwnerV2",
         "parameters": [
           {
             "name": "ownerAddress",
@@ -3638,24 +2353,34 @@
         ],
         "responses": {
           "200": {
-            "description": "Map of chain IDs to arrays of Safe addresses",
+            "description": "Map of chain IDs to arrays of Safe addresses owned by the address",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SafeList"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "1": ["0x1234567890123456789012345678901234567890"],
+                    "5": ["0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"]
+                  }
                 }
               }
             }
           }
         },
-        "summary": "Get all Safes by owner (deprecated)",
+        "summary": "Get all Safes by owner",
         "tags": ["owners"]
       }
     },
-    "/v2/owners/{ownerAddress}/safes": {
+    "/v3/owners/{ownerAddress}/safes": {
       "get": {
         "description": "Retrieves all Safes owned by the specified address across all supported chains. Returns a map of chain IDs to arrays of Safe addresses.",
-        "operationId": "ownersGetAllSafesByOwnerV2",
+        "operationId": "ownersGetAllSafesByOwnerV3",
         "parameters": [
           {
             "name": "ownerAddress",
@@ -3995,6 +2720,70 @@
           }
         },
         "summary": "Get Safe overview",
+        "tags": ["safes"]
+      }
+    },
+    "/v2/safes": {
+      "get": {
+        "description": "Retrieves an overview of multiple Safes. Supports cross-chain queries using chainId:address format.",
+        "operationId": "safesGetSafeOverviewV2",
+        "parameters": [
+          {
+            "name": "currency",
+            "required": true,
+            "in": "query",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safes",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated list of Safe addresses in chainId:address format",
+            "schema": {
+              "example": "1:0x1234567890123456789012345678901234567890,5:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only includes trusted tokens in balance calculations.",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "wallet_address",
+            "required": false,
+            "in": "query",
+            "description": "Optional wallet address to filter Safes where this address is an owner",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of Safe overviews with balances and metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SafeOverview"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get Safe overview (v2)",
         "tags": ["safes"]
       }
     },
@@ -5425,6 +4214,798 @@
         "summary": "Deprecated",
         "tags": ["transactions"]
       }
+    },
+    "/v1/export/chains/{chainId}/{safeAddress}": {
+      "post": {
+        "operationId": "csvExportLaunchExportV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "description": "Transaction export request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionExportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["export"]
+      }
+    },
+    "/v1/export/{jobId}/status": {
+      "get": {
+        "operationId": "csvExportGetExportStatusV1",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV export status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CSV export not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobStatusErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["export"]
+      }
+    },
+    "/v1/chains/{chainId}/delegates": {
+      "get": {
+        "deprecated": true,
+        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "delegatesGetDelegatesV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where delegates are registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegator",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegator address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "label",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate label",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of delegates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegatePage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get delegates (deprecated)",
+        "tags": ["delegates"]
+      },
+      "post": {
+        "deprecated": true,
+        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "delegatesPostDelegateV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate will be registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, and signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data or signature"
+          }
+        },
+        "summary": "Create delegate (deprecated)",
+        "tags": ["delegates"]
+      }
+    },
+    "/v1/chains/{chainId}/delegates/{delegateAddress}": {
+      "delete": {
+        "deprecated": true,
+        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "delegatesDeleteDelegateV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to delete (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Signature proving authorization to delete the delegate",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
+          }
+        },
+        "summary": "Delete delegate (deprecated)",
+        "tags": ["delegates"]
+      }
+    },
+    "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
+      "delete": {
+        "deprecated": true,
+        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "delegatesDeleteSafeDelegateV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Signature proving authorization to remove the delegate",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteSafeDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Safe delegate removed successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized removal attempt"
+          }
+        },
+        "summary": "Delete Safe delegate (deprecated)",
+        "tags": ["delegates"]
+      }
+    },
+    "/v2/chains/{chainId}/delegates": {
+      "get": {
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
+        "operationId": "delegatesGetDelegatesV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where delegates are registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegator",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "label",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate label or name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of delegates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegatePage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get delegates",
+        "tags": ["delegates"]
+      },
+      "post": {
+        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
+        "operationId": "delegatesPostDelegateV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate will be registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, label, and authorization signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized creation attempt"
+          }
+        },
+        "summary": "Create delegate",
+        "tags": ["delegates"]
+      }
+    },
+    "/v2/chains/{chainId}/delegates/{delegateAddress}": {
+      "delete": {
+        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
+        "operationId": "delegatesDeleteDelegateV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Signature and data proving authorization to delete the delegate",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDelegateV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
+          }
+        },
+        "summary": "Delete delegate",
+        "tags": ["delegates"]
+      }
+    },
+    "/v1/register/notifications": {
+      "post": {
+        "deprecated": true,
+        "description": "Registers a device to receive push notifications for Safe events. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "notificationsRegisterDeviceV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Device registration data including device token, UUID, and Safe registrations with signatures",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device registered successfully for notifications"
+          },
+          "400": {
+            "description": "Invalid device data, expired timestamp, or invalid signature"
+          }
+        },
+        "summary": "Register device for notifications (deprecated)",
+        "tags": ["notifications"]
+      }
+    },
+    "/v1/chains/{chainId}/notifications/devices/{uuid}": {
+      "delete": {
+        "deprecated": true,
+        "description": "Removes a device from receiving notifications. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "notificationsUnregisterDeviceV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID (kept for backward compatibility)",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "required": true,
+            "in": "path",
+            "description": "Device UUID to unregister",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Device unregistered successfully"
+          }
+        },
+        "summary": "Unregister device (deprecated)",
+        "tags": ["notifications"]
+      }
+    },
+    "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
+      "delete": {
+        "deprecated": true,
+        "description": "Removes a specific Safe from receiving notifications on a device. This endpoint is deprecated, please use the v2 version instead.",
+        "operationId": "notificationsUnregisterSafeV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "required": true,
+            "in": "path",
+            "description": "Device UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Safe unregistered from device notifications successfully"
+          }
+        },
+        "summary": "Unregister Safe from device (deprecated)",
+        "tags": ["notifications"]
+      }
+    },
+    "/v2/register/notifications": {
+      "post": {
+        "description": "Registers or updates a device to receive push notifications for Safe events. Creates subscriptions for specified Safes and notification types.",
+        "operationId": "notificationsUpsertSubscriptionsV2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Device and subscription data including device token, Safe addresses, and notification preferences",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertSubscriptionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Device registered successfully with returned device UUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deviceUuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Generated UUID for the registered device"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid device data or subscription configuration"
+          }
+        },
+        "summary": "Register device for notifications",
+        "tags": ["notifications"]
+      }
+    },
+    "/v2/chains/{chainId}/notifications/devices/{deviceUuid}/safes/{safeAddress}": {
+      "get": {
+        "description": "Retrieves the notification types that a device is subscribed to for a specific Safe.",
+        "operationId": "notificationsGetSafeSubscriptionV2",
+        "parameters": [
+          {
+            "name": "deviceUuid",
+            "required": true,
+            "in": "path",
+            "description": "Device UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of notification types the device is subscribed to for this Safe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationTypeResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "404": {
+            "description": "Device, Safe, or subscription not found"
+          }
+        },
+        "summary": "Get Safe subscription",
+        "tags": ["notifications"]
+      },
+      "delete": {
+        "description": "Removes all notification subscriptions for a specific Safe on a device.",
+        "operationId": "notificationsDeleteSubscriptionV2",
+        "parameters": [
+          {
+            "name": "deviceUuid",
+            "required": true,
+            "in": "path",
+            "description": "Device UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Safe subscription deleted successfully"
+          },
+          "404": {
+            "description": "Device, Safe, or subscription not found"
+          }
+        },
+        "summary": "Delete Safe subscription",
+        "tags": ["notifications"]
+      }
+    },
+    "/v2/notifications/subscriptions": {
+      "delete": {
+        "description": "Delete all subscriptions of a Safe on a device. This will delete all subscriptions of a Safe on a device for all chains passed in the request body.",
+        "operationId": "notificationsDeleteAllSubscriptionsV2",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAllSubscriptionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "No subscription was found"
+          },
+          "422": {
+            "description": "The request body is invalid"
+          }
+        },
+        "summary": "Delete all subscriptions of a device",
+        "tags": ["notifications"]
+      }
+    },
+    "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
+      "delete": {
+        "description": "Removes a device and all its notification subscriptions from the system.",
+        "operationId": "notificationsDeleteDeviceV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID (kept for backward compatibility)",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceUuid",
+            "required": true,
+            "in": "path",
+            "description": "Device UUID to delete",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Device deleted successfully"
+          },
+          "404": {
+            "description": "Device not found"
+          }
+        },
+        "summary": "Delete device",
+        "tags": ["notifications"]
+      }
     }
   },
   "info": {
@@ -5453,227 +5034,6 @@
           }
         },
         "required": ["name"]
-      },
-      "CreateAccountDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": ["address", "name"]
-      },
-      "Account": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "groupId": {
-            "type": "string",
-            "nullable": true
-          },
-          "address": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": ["id", "address", "name"]
-      },
-      "AccountDataType": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          }
-        },
-        "required": ["id", "name", "isActive"]
-      },
-      "AccountDataSetting": {
-        "type": "object",
-        "properties": {
-          "dataTypeId": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "required": ["dataTypeId", "enabled"]
-      },
-      "UpsertAccountDataSettingDto": {
-        "type": "object",
-        "properties": {
-          "dataTypeId": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          }
-        },
-        "required": ["dataTypeId", "enabled"]
-      },
-      "UpsertAccountDataSettingsDto": {
-        "type": "object",
-        "properties": {
-          "accountDataSettings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpsertAccountDataSettingDto"
-            }
-          }
-        },
-        "required": ["accountDataSettings"]
-      },
-      "AddressBookItem": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "chainIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": ["name", "address", "chainIds"]
-      },
-      "AddressBook": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "accountId": {
-            "type": "string"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressBookItem"
-            }
-          }
-        },
-        "required": ["id", "accountId", "chainId", "data"]
-      },
-      "CreateAddressBookItemDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
-          },
-          "address": {
-            "type": "string"
-          }
-        },
-        "required": ["name", "address"]
-      },
-      "CounterfactualSafe": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "creator": {
-            "type": "string"
-          },
-          "fallbackHandler": {
-            "type": "string"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "predictedAddress": {
-            "type": "string"
-          },
-          "saltNonce": {
-            "type": "string"
-          },
-          "singletonAddress": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "chainId",
-          "creator",
-          "fallbackHandler",
-          "owners",
-          "predictedAddress",
-          "saltNonce",
-          "singletonAddress",
-          "threshold"
-        ]
-      },
-      "CreateCounterfactualSafeDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "fallbackHandler": {
-            "type": "string"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "predictedAddress": {
-            "type": "string"
-          },
-          "saltNonce": {
-            "type": "string"
-          },
-          "singletonAddress": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "chainId",
-          "fallbackHandler",
-          "owners",
-          "predictedAddress",
-          "saltNonce",
-          "singletonAddress",
-          "threshold"
-        ]
       },
       "AuthNonce": {
         "type": "object",
@@ -6594,14 +5954,52 @@
       "IndexingStatus": {
         "type": "object",
         "properties": {
-          "lastSync": {
+          "currentBlockNumber": {
             "type": "number"
+          },
+          "currentBlockTimestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "erc20BlockNumber": {
+            "type": "number"
+          },
+          "erc20BlockTimestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "erc20Synced": {
+            "type": "boolean"
+          },
+          "masterCopiesBlockNumber": {
+            "type": "number"
+          },
+          "masterCopiesBlockTimestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "masterCopiesSynced": {
+            "type": "boolean"
           },
           "synced": {
             "type": "boolean"
+          },
+          "lastSync": {
+            "type": "number"
           }
         },
-        "required": ["lastSync", "synced"]
+        "required": [
+          "currentBlockNumber",
+          "currentBlockTimestamp",
+          "erc20BlockNumber",
+          "erc20BlockTimestamp",
+          "erc20Synced",
+          "masterCopiesBlockNumber",
+          "masterCopiesBlockTimestamp",
+          "masterCopiesSynced",
+          "synced",
+          "lastSync"
+        ]
       },
       "Collectible": {
         "type": "object",
@@ -7019,109 +6417,6 @@
         },
         "required": ["address", "name", "displayName", "logoUri", "trustedForDelegateCall"]
       },
-      "TransactionExportDto": {
-        "type": "object",
-        "properties": {
-          "executionDateGte": {
-            "type": "string",
-            "description": "Execution date greater than or equal to (ISO date string)"
-          },
-          "executionDateLte": {
-            "type": "string",
-            "description": "Execution date less than or equal to (ISO date string)"
-          },
-          "limit": {
-            "type": "number",
-            "description": "Maximum number of transactions to export"
-          },
-          "offset": {
-            "type": "number",
-            "description": "Number of transactions to start from"
-          }
-        }
-      },
-      "JobStatusDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Job ID"
-          },
-          "name": {
-            "type": "string",
-            "description": "Job name"
-          },
-          "data": {
-            "type": "object",
-            "description": "Job data payload"
-          },
-          "timestamp": {
-            "type": "number",
-            "description": "Timestamp when the job was created"
-          },
-          "progress": {
-            "description": "Job progress",
-            "oneOf": [
-              {
-                "type": "number",
-                "example": 50
-              },
-              {
-                "type": "string",
-                "example": "50%"
-              },
-              {
-                "type": "boolean",
-                "example": false
-              },
-              {
-                "type": "object",
-                "example": {
-                  "current": 5,
-                  "total": 10
-                }
-              }
-            ]
-          },
-          "processedOn": {
-            "type": "number",
-            "description": "Timestamp when job processing started"
-          },
-          "finishedOn": {
-            "type": "number",
-            "description": "Timestamp when job finished"
-          },
-          "failedReason": {
-            "type": "string",
-            "description": "Reason for job failure"
-          },
-          "returnValue": {
-            "type": "object",
-            "description": "Job return value"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "data",
-          "timestamp",
-          "progress",
-          "processedOn",
-          "finishedOn",
-          "failedReason",
-          "returnValue"
-        ]
-      },
-      "JobStatusErrorDto": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string",
-            "description": "Error message"
-          }
-        },
-        "required": ["error"]
-      },
       "TransactionDataDto": {
         "type": "object",
         "properties": {
@@ -7248,118 +6543,6 @@
         },
         "required": ["method"]
       },
-      "Delegate": {
-        "type": "object",
-        "properties": {
-          "safe": {
-            "type": "string",
-            "nullable": true
-          },
-          "delegate": {
-            "type": "string"
-          },
-          "delegator": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        },
-        "required": ["delegate", "delegator", "label"]
-      },
-      "DelegatePage": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "number",
-            "nullable": true
-          },
-          "next": {
-            "type": "string",
-            "nullable": true
-          },
-          "previous": {
-            "type": "string",
-            "nullable": true
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Delegate"
-            }
-          }
-        },
-        "required": ["results"]
-      },
-      "CreateDelegateDto": {
-        "type": "object",
-        "properties": {
-          "safe": {
-            "type": "string",
-            "nullable": true
-          },
-          "delegate": {
-            "type": "string"
-          },
-          "delegator": {
-            "type": "string"
-          },
-          "signature": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        },
-        "required": ["delegate", "delegator", "signature", "label"]
-      },
-      "DeleteDelegateDto": {
-        "type": "object",
-        "properties": {
-          "delegate": {
-            "type": "string"
-          },
-          "delegator": {
-            "type": "string"
-          },
-          "signature": {
-            "type": "string"
-          }
-        },
-        "required": ["delegate", "delegator", "signature"]
-      },
-      "DeleteSafeDelegateDto": {
-        "type": "object",
-        "properties": {
-          "delegate": {
-            "type": "string"
-          },
-          "safe": {
-            "type": "string"
-          },
-          "signature": {
-            "type": "string"
-          }
-        },
-        "required": ["delegate", "safe", "signature"]
-      },
-      "DeleteDelegateV2Dto": {
-        "type": "object",
-        "properties": {
-          "delegator": {
-            "type": "string",
-            "nullable": true
-          },
-          "safe": {
-            "type": "string",
-            "nullable": true
-          },
-          "signature": {
-            "type": "string"
-          }
-        },
-        "required": ["signature"]
-      },
       "AddRecoveryModuleDto": {
         "type": "object",
         "properties": {
@@ -7407,114 +6590,6 @@
           }
         },
         "required": ["currentNonce", "recommendedNonce", "safeTxGas"]
-      },
-      "NotificationTypeEnum": {
-        "type": "string",
-        "enum": [
-          "CONFIRMATION_REQUEST",
-          "DELETED_MULTISIG_TRANSACTION",
-          "EXECUTED_MULTISIG_TRANSACTION",
-          "INCOMING_ETHER",
-          "INCOMING_TOKEN",
-          "MESSAGE_CONFIRMATION_REQUEST",
-          "MODULE_TRANSACTION"
-        ]
-      },
-      "UpsertSubscriptionsSafesDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "notificationTypes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NotificationTypeEnum"
-            }
-          }
-        },
-        "required": ["chainId", "address", "notificationTypes"]
-      },
-      "DeviceType": {
-        "type": "string",
-        "enum": ["ANDROID", "IOS", "WEB"]
-      },
-      "UpsertSubscriptionsDto": {
-        "type": "object",
-        "properties": {
-          "cloudMessagingToken": {
-            "type": "string"
-          },
-          "safes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpsertSubscriptionsSafesDto"
-            }
-          },
-          "deviceType": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DeviceType"
-              }
-            ]
-          },
-          "deviceUuid": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": ["cloudMessagingToken", "safes", "deviceType"]
-      },
-      "NotificationTypeResponseDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The notification type name",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/NotificationTypeEnum"
-              }
-            ]
-          }
-        },
-        "required": ["name"]
-      },
-      "DeleteAllSubscriptionItemDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "deviceUuid": {
-            "type": "string"
-          },
-          "safeAddress": {
-            "type": "string"
-          },
-          "signerAddress": {
-            "type": "string",
-            "nullable": true,
-            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
-          }
-        },
-        "required": ["chainId", "deviceUuid", "safeAddress"]
-      },
-      "DeleteAllSubscriptionsDto": {
-        "type": "object",
-        "properties": {
-          "subscriptions": {
-            "minItems": 1,
-            "description": "At least one subscription is required",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DeleteAllSubscriptionItemDto"
-            }
-          }
-        },
-        "required": ["subscriptions"]
       },
       "TypedDataParameter": {
         "type": "object",
@@ -7828,62 +6903,6 @@
         },
         "required": ["signature"]
       },
-      "SafeRegistration": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "safes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "signatures": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": ["chainId", "safes", "signatures"]
-      },
-      "RegisterDeviceDto": {
-        "type": "object",
-        "properties": {
-          "uuid": {
-            "type": "string",
-            "nullable": true
-          },
-          "cloudMessagingToken": {
-            "type": "string"
-          },
-          "buildNumber": {
-            "type": "string"
-          },
-          "bundle": {
-            "type": "string"
-          },
-          "deviceType": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          },
-          "timestamp": {
-            "type": "string",
-            "nullable": true
-          },
-          "safeRegistrations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SafeRegistration"
-            }
-          }
-        },
-        "required": ["cloudMessagingToken", "buildNumber", "bundle", "deviceType", "version", "safeRegistrations"]
-      },
       "UserWallet": {
         "type": "object",
         "properties": {
@@ -7971,6 +6990,24 @@
           }
         },
         "required": ["spaceId", "data"]
+      },
+      "AddressBookItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["name", "address", "chainIds"]
       },
       "UpsertAddressBookItemsDto": {
         "type": "object",
@@ -8628,6 +7665,10 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8727,6 +7768,10 @@
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
           },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
           "targetChainId": {
             "type": "string",
             "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
@@ -8822,6 +7867,10 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -8855,7 +7904,8 @@
           "type": {
             "type": "string",
             "description": "Status code for unofficial fallback handler",
-            "enum": ["UNOFFICIAL_FALLBACK_HANDLER"]
+            "enum": ["UNOFFICIAL_FALLBACK_HANDLER"],
+            "example": "VERIFIED"
           },
           "title": {
             "type": "string",
@@ -8864,6 +7914,10 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           },
           "fallbackHandler": {
             "description": "Information about the fallback handler",
@@ -8881,11 +7935,13 @@
         "properties": {
           "logoUrl": {
             "type": "string",
-            "description": "Logo URL for the contract"
+            "description": "Logo URL for the contract",
+            "example": "https://example.com/logo.png"
           },
           "name": {
             "type": "string",
-            "description": "Name of the contract"
+            "description": "Name of the contract",
+            "example": "Uniswap V3 Router"
           },
           "CONTRACT_VERIFICATION": {
             "description": "Analysis results for contract verification status. Shows whether contracts are verified and source code is available.",
@@ -9032,7 +8088,7 @@
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "enum": ["NO_THREAT", "OWNERSHIP_CHANGE", "MODULE_CHANGE", "FAILED"]
+            "enum": ["NO_THREAT", "OWNERSHIP_CHANGE", "MODULE_CHANGE"]
           },
           "title": {
             "type": "string",
@@ -9041,6 +8097,10 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -9065,6 +8125,10 @@
           "description": {
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           },
           "before": {
             "type": "string",
@@ -9112,6 +8176,10 @@
             "type": "string",
             "description": "Detailed description explaining the finding and its implications"
           },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
           "issues": {
             "type": "object",
             "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL)",
@@ -9134,6 +8202,34 @@
                 }
               ]
             }
+          }
+        },
+        "required": ["severity", "type", "title", "description"]
+      },
+      "FailedThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": ["FAILED"]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
           }
         },
         "required": ["severity", "type", "title", "description"]
@@ -9282,6 +8378,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/MaliciousOrModerateThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FailedThreatAnalysisResultDto"
                 }
               ]
             }
@@ -11925,6 +11024,385 @@
           }
         },
         "required": ["created", "creator", "transactionHash", "factoryAddress", "masterCopy", "setupData", "saltNonce"]
+      },
+      "TransactionExportDto": {
+        "type": "object",
+        "properties": {
+          "executionDateGte": {
+            "type": "string",
+            "description": "Execution date greater than or equal to (ISO date string)"
+          },
+          "executionDateLte": {
+            "type": "string",
+            "description": "Execution date less than or equal to (ISO date string)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Maximum number of transactions to export"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Number of transactions to start from"
+          }
+        }
+      },
+      "JobStatusDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Job ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Job name"
+          },
+          "data": {
+            "type": "object",
+            "description": "Job data payload"
+          },
+          "timestamp": {
+            "type": "number",
+            "description": "Timestamp when the job was created"
+          },
+          "progress": {
+            "description": "Job progress",
+            "oneOf": [
+              {
+                "type": "number",
+                "example": 50
+              },
+              {
+                "type": "string",
+                "example": "50%"
+              },
+              {
+                "type": "boolean",
+                "example": false
+              },
+              {
+                "type": "object",
+                "example": {
+                  "current": 5,
+                  "total": 10
+                }
+              }
+            ]
+          },
+          "processedOn": {
+            "type": "number",
+            "description": "Timestamp when job processing started"
+          },
+          "finishedOn": {
+            "type": "number",
+            "description": "Timestamp when job finished"
+          },
+          "failedReason": {
+            "type": "string",
+            "description": "Reason for job failure"
+          },
+          "returnValue": {
+            "type": "object",
+            "description": "Job return value"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "data",
+          "timestamp",
+          "progress",
+          "processedOn",
+          "finishedOn",
+          "failedReason",
+          "returnValue"
+        ]
+      },
+      "JobStatusErrorDto": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      },
+      "Delegate": {
+        "type": "object",
+        "properties": {
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": ["delegate", "delegator", "label"]
+      },
+      "DelegatePage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Delegate"
+            }
+          }
+        },
+        "required": ["results"]
+      },
+      "CreateDelegateDto": {
+        "type": "object",
+        "properties": {
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": ["delegate", "delegator", "signature", "label"]
+      },
+      "DeleteDelegateDto": {
+        "type": "object",
+        "properties": {
+          "delegate": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["delegate", "delegator", "signature"]
+      },
+      "DeleteSafeDelegateDto": {
+        "type": "object",
+        "properties": {
+          "delegate": {
+            "type": "string"
+          },
+          "safe": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["delegate", "safe", "signature"]
+      },
+      "DeleteDelegateV2Dto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "nullable": true
+          },
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": ["signature"]
+      },
+      "SafeRegistration": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["chainId", "safes", "signatures"]
+      },
+      "RegisterDeviceDto": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "nullable": true
+          },
+          "cloudMessagingToken": {
+            "type": "string"
+          },
+          "buildNumber": {
+            "type": "string"
+          },
+          "bundle": {
+            "type": "string"
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "nullable": true
+          },
+          "safeRegistrations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafeRegistration"
+            }
+          }
+        },
+        "required": ["cloudMessagingToken", "buildNumber", "bundle", "deviceType", "version", "safeRegistrations"]
+      },
+      "NotificationTypeEnum": {
+        "type": "string",
+        "enum": [
+          "CONFIRMATION_REQUEST",
+          "DELETED_MULTISIG_TRANSACTION",
+          "EXECUTED_MULTISIG_TRANSACTION",
+          "INCOMING_ETHER",
+          "INCOMING_TOKEN",
+          "MESSAGE_CONFIRMATION_REQUEST",
+          "MODULE_TRANSACTION"
+        ]
+      },
+      "UpsertSubscriptionsSafesDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "notificationTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationTypeEnum"
+            }
+          }
+        },
+        "required": ["chainId", "address", "notificationTypes"]
+      },
+      "DeviceType": {
+        "type": "string",
+        "enum": ["ANDROID", "IOS", "WEB"]
+      },
+      "UpsertSubscriptionsDto": {
+        "type": "object",
+        "properties": {
+          "cloudMessagingToken": {
+            "type": "string"
+          },
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpsertSubscriptionsSafesDto"
+            }
+          },
+          "deviceType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeviceType"
+              }
+            ]
+          },
+          "deviceUuid": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": ["cloudMessagingToken", "safes", "deviceType"]
+      },
+      "NotificationTypeResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The notification type name",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationTypeEnum"
+              }
+            ]
+          }
+        },
+        "required": ["name"]
+      },
+      "DeleteAllSubscriptionItemDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "deviceUuid": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          },
+          "signerAddress": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
+          }
+        },
+        "required": ["chainId", "deviceUuid", "safeAddress"]
+      },
+      "DeleteAllSubscriptionsDto": {
+        "type": "object",
+        "properties": {
+          "subscriptions": {
+            "minItems": 1,
+            "description": "At least one subscription is required",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteAllSubscriptionItemDto"
+            }
+          }
+        },
+        "required": ["subscriptions"]
       }
     }
   }

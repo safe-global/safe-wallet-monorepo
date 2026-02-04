@@ -1,10 +1,10 @@
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { OwnersGetAllSafesByOwnerV2ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import type { OwnersGetAllSafesByOwnerV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV3Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-const useAllOwnedSafes = (address: string): AsyncResult<OwnersGetAllSafesByOwnerV2ApiResponse> => {
-  const { currentData, error, isLoading } = useOwnersGetAllSafesByOwnerV2Query(
+const useAllOwnedSafes = (address: string): AsyncResult<OwnersGetAllSafesByOwnerV3ApiResponse> => {
+  const { currentData, error, isLoading } = useOwnersGetAllSafesByOwnerV3Query(
     { ownerAddress: address },
     { skip: address === '' },
   )

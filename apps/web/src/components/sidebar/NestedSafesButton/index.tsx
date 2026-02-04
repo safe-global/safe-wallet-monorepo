@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV3Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
@@ -23,7 +23,7 @@ export function NestedSafesButton({
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { safe } = useSafeInfo()
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV3Query(
     { ownerAddress: safeAddress },
     { skip: !isEnabled || !safeAddress },
   )

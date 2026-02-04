@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useLazyOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useLazyOwnersGetAllSafesByOwnerV3Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
 import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
@@ -23,7 +23,7 @@ export const useAddressOwnershipValidation = () => {
   const pendingSafe = useAppSelector(selectPendingSafe)
 
   const [singleSafeTrigger] = useLazySafesGetSafeV1Query({})
-  const [ownerSafesTrigger] = useLazyOwnersGetAllSafesByOwnerV2Query()
+  const [ownerSafesTrigger] = useLazyOwnersGetAllSafesByOwnerV3Query()
 
   const validateAddressOwnership = useCallback(
     async (address: string): Promise<AddressValidationResult> => {

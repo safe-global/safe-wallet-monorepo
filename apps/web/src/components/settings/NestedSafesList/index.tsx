@@ -11,7 +11,7 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetAllSafesByOwnerV3Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
 import { useHasFeature } from '@/hooks/useChains'
@@ -25,7 +25,7 @@ export function NestedSafesList(): ReactElement | null {
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV3Query(
     { ownerAddress: safeAddress },
     { skip: !isEnabled || !safeLoaded },
   )
