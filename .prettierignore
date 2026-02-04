@@ -32,3 +32,5 @@ packages/utils/src/types/contracts/**/*
 # Expo plugins
 expo-plugins/notification-service-ios/dist
 
+# Spec templates (contain placeholders that aren't valid syntax)
+specs/**/contracts/*.template.*

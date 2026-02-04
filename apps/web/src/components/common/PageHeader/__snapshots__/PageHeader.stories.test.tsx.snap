@@ -5,10 +5,10 @@ exports[`./PageHeader.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container MuiBox-root css-0"
+    class="container MuiBox-root mui-style-0"
   >
     <h3
-      class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-h3 title mui-style-mnekkx-MuiTypography-root"
     >
       Transactions
     </h3>
@@ -21,15 +21,15 @@ exports[`./PageHeader.stories LongTitle 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container MuiBox-root css-0"
+    class="container MuiBox-root mui-style-0"
   >
     <h3
-      class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-h3 title mui-style-mnekkx-MuiTypography-root"
     >
       Transaction queue and history overview
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1bi6f53-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1bi6f53-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >
@@ -44,10 +44,10 @@ exports[`./PageHeader.stories NoBorder 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container border MuiBox-root css-0"
+    class="container border MuiBox-root mui-style-0"
   >
     <h3
-      class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-h3 title mui-style-mnekkx-MuiTypography-root"
     >
       My Assets
     </h3>
@@ -60,24 +60,24 @@ exports[`./PageHeader.stories WithButton 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container MuiBox-root css-0"
+    class="container MuiBox-root mui-style-0"
   >
     <h3
-      class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-h3 title mui-style-mnekkx-MuiTypography-root"
     >
       Address book
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1gsxpsb-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary mui-style-1gsxpsb-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >
       <span
-        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-dm569u-MuiButton-startIcon"
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium mui-style-dm569u-MuiButton-startIcon"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
           data-testid="AddIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -98,21 +98,21 @@ exports[`./PageHeader.stories WithIconButton 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="container MuiBox-root css-0"
+    class="container MuiBox-root mui-style-0"
   >
     <h3
-      class="MuiTypography-root MuiTypography-h3 title css-mnekkx-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-h3 title mui-style-mnekkx-MuiTypography-root"
     >
       Settings
     </h3>
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="SettingsIcon"
         focusable="false"
         viewBox="0 0 24 24"

@@ -5,60 +5,60 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-15fxbpu-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15fxbpu-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiBox-root css-1qm1lh"
+      class="MuiBox-root mui-style-1qm1lh"
     >
       <div
-        class="MuiBox-root css-dzaqf9"
+        class="MuiBox-root mui-style-dzaqf9"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root css-15l0b46-MuiPaper-root-MuiTableContainer-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
           data-testid="table-container"
           style="--Paper-shadow: none;"
         >
           <table
             aria-labelledby="tableTitle"
-            class="MuiTable-root compactTable css-14ipoqq-MuiTable-root"
+            class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
           >
             <thead
-              class="MuiTableHead-root css-1bxxo5-MuiTableHead-root"
+              class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
             >
               <tr
-                class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
               >
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-16mkdhd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiBox-root css-1kuy7z7"
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
                     <p
-                      class="MuiTypography-root MuiTypography-body2 css-df2485-MuiTypography-root"
+                      class="MuiTypography-root MuiTypography-body2 mui-style-df2485-MuiTypography-root"
                     >
                       Supply
                     </p>
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-14qoodj-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiBox-root css-1kuy7z7"
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
                     Balance
                   </span>
                 </th>
                 <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1lpfb9u-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
                   scope="col"
                 >
                   <span
-                    class="MuiBox-root css-1kuy7z7"
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
                     Value
                   </span>
@@ -66,32 +66,32 @@ exports[`./index.stories Default 1`] = `
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
+              class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                 data-testid="table-row"
                 tabindex="-1"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-name"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                         >
                           <div
-                            class="MuiBox-root css-olq4e8"
+                            class="MuiBox-root mui-style-olq4e8"
                           >
                             <iframe
                               height="32"
@@ -116,15 +116,15 @@ exports[`./index.stories Default 1`] = `
                             />
                           </div>
                           <div
-                            class="MuiBox-root css-0"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
                               Wrapped Ether
                             </p>
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
                               WETH
                                •  
@@ -137,21 +137,21 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-balance"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                         >
                           1.5
                            
@@ -162,24 +162,24 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-value"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiBox-root css-s2uf1z"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                           >
                             <span
                               aria-label="$ 5,475.00"
@@ -191,20 +191,20 @@ exports[`./index.stories Default 1`] = `
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
                                 aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess css-12cxu6e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
                                 focusable="false"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
                               >
                                 2.50%
                               </span>
@@ -217,29 +217,29 @@ exports[`./index.stories Default 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                 data-testid="table-row"
                 tabindex="-1"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-name"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                         >
                           <div
-                            class="MuiBox-root css-olq4e8"
+                            class="MuiBox-root mui-style-olq4e8"
                           >
                             <iframe
                               height="32"
@@ -264,15 +264,15 @@ exports[`./index.stories Default 1`] = `
                             />
                           </div>
                           <div
-                            class="MuiBox-root css-0"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
                               USD Coin
                             </p>
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
                               USDC
                                •  
@@ -285,21 +285,21 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-balance"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                         >
                           10,000
                            
@@ -310,24 +310,24 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-value"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiBox-root css-s2uf1z"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                           >
                             <span
                               aria-label="$ 10,000.00"
@@ -339,20 +339,20 @@ exports[`./index.stories Default 1`] = `
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
                                 aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess css-12cxu6e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
                                 focusable="false"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
                               >
                                 0.01%
                               </span>
@@ -365,29 +365,29 @@ exports[`./index.stories Default 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                 data-testid="table-row"
                 tabindex="-1"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-name"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                         >
                           <div
-                            class="MuiBox-root css-olq4e8"
+                            class="MuiBox-root mui-style-olq4e8"
                           >
                             <iframe
                               height="32"
@@ -412,15 +412,15 @@ exports[`./index.stories Default 1`] = `
                             />
                           </div>
                           <div
-                            class="MuiBox-root css-0"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
                               Dai Stablecoin
                             </p>
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
                               DAI
                                •  
@@ -433,21 +433,21 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-balance"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                         >
                           5,000
                            
@@ -458,24 +458,24 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-value"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiBox-root css-s2uf1z"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                           >
                             <span
                               aria-label="$ 5,000.00"
@@ -487,20 +487,20 @@ exports[`./index.stories Default 1`] = `
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1v5d94b-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1v5d94b-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
                                 aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorError MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorError css-19da0qu-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-colorError MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorError mui-style-19da0qu-MuiSvgIcon-root"
                                 focusable="false"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
                               >
                                 0.02%
                               </span>
@@ -513,29 +513,29 @@ exports[`./index.stories Default 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                 data-testid="table-row"
                 tabindex="-1"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-name"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                         >
                           <div
-                            class="MuiBox-root css-olq4e8"
+                            class="MuiBox-root mui-style-olq4e8"
                           >
                             <iframe
                               height="32"
@@ -560,15 +560,15 @@ exports[`./index.stories Default 1`] = `
                             />
                           </div>
                           <div
-                            class="MuiBox-root css-0"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
                               Unknown Token
                             </p>
                             <p
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
                               UNK
                                •  
@@ -581,21 +581,21 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-balance"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <p
-                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                         >
                           1,000
                            
@@ -606,24 +606,24 @@ exports[`./index.stories Default 1`] = `
                   </div>
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                   data-testid="table-cell-value"
                 >
                   <div
-                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                     style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiBox-root css-s2uf1z"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
                           <p
-                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                           >
                             <span
                               aria-label="$ 2,500.00"
@@ -635,20 +635,20 @@ exports[`./index.stories Default 1`] = `
                             </span>
                           </p>
                           <span
-                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
                               aria-label="24h change"
-                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-w1uylf-MuiChip-root"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
                               data-mui-internal-clone-element="true"
                             >
                               <mock-icon
                                 aria-hidden=""
-                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess css-12cxu6e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
                                 focusable="false"
                               />
                               <span
-                                class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
                               >
                                 1.23%
                               </span>

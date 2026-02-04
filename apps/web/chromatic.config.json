@@ -1,0 +1,6 @@
+{
+  "$schema": "https://www.chromatic.com/config-file.schema.json",
+  "buildScriptName": "build-storybook",
+  "skip": "dependabot/**",
+  "onlyStoryNames": ["Pages/Core/Home/Default", "Pages/Core/Balances/Default", "Pages/Core/Transactions/Queue/Default"]
+}

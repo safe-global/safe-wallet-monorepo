@@ -5,15 +5,15 @@ exports[`./SpendingLimitLabel.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-171onha"
+    class="MuiBox-root mui-style-171onha"
   >
     <mock-icon
       aria-hidden=""
-      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
       focusable="false"
     />
     <p
-      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
     >
       100 ETH per day
     </p>
@@ -26,10 +26,10 @@ exports[`./SpendingLimitLabel.stories OneTime 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-171onha"
+    class="MuiBox-root mui-style-171onha"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
     >
       50 ETH
     </p>
@@ -42,15 +42,15 @@ exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-171onha"
+    class="MuiBox-root mui-style-171onha"
   >
     <mock-icon
       aria-hidden=""
-      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-16hj0i2-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
       focusable="false"
     />
     <p
-      class="MuiTypography-root MuiTypography-body1 css-10qi7i0-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 mui-style-10qi7i0-MuiTypography-root"
     >
       Custom spending limit
     </p>
