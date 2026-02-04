@@ -6,9 +6,9 @@ import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/eve
 import { useState, useMemo, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useCurrentChain } from '@/hooks/useChains'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { useLoadFeature } from '@/features/__core__'
+import { type SafeItem } from '@/hooks/safes'
+import { MyAccountsFeature, useSafeItemData } from '@/features/myAccounts'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -39,6 +39,7 @@ function NestedSafeItem({
   onToggle: () => void
   showWarning: boolean
 }) {
+  const { AccountItem } = useLoadFeature(MyAccountsFeature)
   const { href, name, threshold, owners, elementRef, trackingLabel } = useSafeItemData(safeItem, { safeOverview })
 
   const warningIcon = showWarning ? (

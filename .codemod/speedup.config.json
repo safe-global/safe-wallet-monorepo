@@ -1,0 +1,48 @@
+{
+  "featureName": "speedup",
+  "featureFlag": "SPEED_UP_TX",
+  "publicAPI": {
+    "components": ["SpeedUpModal", "SpeedUpMonitor"],
+    "hooks": [],
+    "services": [],
+    "types": [],
+    "constants": []
+  },
+  "structure": {
+    "hasComponentsFolder": true,
+    "hasHooksFolder": false,
+    "hasServicesFolder": false,
+    "hasStoreFolder": false,
+    "hasUtilsFolder": true,
+    "hasContextsFolder": false,
+    "hasTypesFile": false,
+    "hasConstantsFile": false,
+    "hasReadme": false
+  },
+  "consumers": [
+    {
+      "filePath": "/apps/web/src/components/transactions/TxSummary/QueueActions.tsx",
+      "imports": [
+        {
+          "name": "SpeedUpMonitor",
+          "type": "component",
+          "importPath": "@/features/speedup/components/SpeedUpMonitor",
+          "isDefault": false,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/apps/web/src/components/tx-flow/flows/SuccessScreen/statuses/ProcessingStatus.tsx",
+      "imports": [
+        {
+          "name": "SpeedUpMonitor",
+          "type": "component",
+          "importPath": "@/features/speedup/components/SpeedUpMonitor",
+          "isDefault": false,
+          "isTypeOnly": false
+        }
+      ]
+    }
+  ]
+}

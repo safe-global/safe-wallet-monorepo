@@ -7,7 +7,7 @@ import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsHypernativeGuardHook from '../useIsHypernativeGuard'
 import * as useIsHypernativeFeatureHook from '../useIsHypernativeFeature'
-import * as useIsOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import * as useIsOutreachSafeHook from '@/features/targeted-features'
 import { HYPERNATIVE_OUTREACH_ID, HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '../../constants'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 

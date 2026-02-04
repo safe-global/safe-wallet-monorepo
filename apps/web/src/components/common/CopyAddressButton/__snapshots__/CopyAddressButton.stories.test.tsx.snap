@@ -5,7 +5,7 @@ exports[`./CopyAddressButton.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -16,13 +16,13 @@ exports[`./CopyAddressButton.stories Default 1`] = `
     >
       <button
         aria-label="Copy to clipboard"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
         <mock-icon
           aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
           data-testid="copy-btn-icon"
           focusable="false"
         />
@@ -37,7 +37,7 @@ exports[`./CopyAddressButton.stories Untrusted 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -47,7 +47,7 @@ exports[`./CopyAddressButton.stories Untrusted 1`] = `
       style="cursor: pointer;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
       >
         Click to copy (untrusted)
       </p>
@@ -61,7 +61,7 @@ exports[`./CopyAddressButton.stories WithChildren 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -71,7 +71,7 @@ exports[`./CopyAddressButton.stories WithChildren 1`] = `
       style="cursor: pointer;"
     >
       <span
-        class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
       >
         0xd9Db...9552
       </span>
@@ -85,7 +85,7 @@ exports[`./CopyAddressButton.stories WithPrefix 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -96,13 +96,13 @@ exports[`./CopyAddressButton.stories WithPrefix 1`] = `
     >
       <button
         aria-label="Copy to clipboard"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
         <mock-icon
           aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
           data-testid="copy-btn-icon"
           focusable="false"
         />

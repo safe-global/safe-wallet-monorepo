@@ -5,19 +5,19 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-zpxm0u-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container mui-style-zpxm0u-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 mui-style-1950vt0-MuiTypography-root"
       >
         <mock-icon
           aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
           focusable="false"
         />
         Add owner
@@ -35,14 +35,14 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
           />
         </div>
         <div
-          class="MuiBox-root css-1lchl8k"
+          class="MuiBox-root mui-style-1lchl8k"
         >
           <div
-            class="ethHashInfo-name MuiBox-root css-171onha"
+            class="ethHashInfo-name MuiBox-root mui-style-171onha"
             title="Nevinha"
           >
             <div
-              class="MuiBox-root css-1o4wo1x"
+              class="MuiBox-root mui-style-1o4wo1x"
             >
               Nevinha
             </div>
@@ -51,7 +51,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             class="addressContainer"
           >
             <div
-              class="MuiBox-root css-b5p5gz"
+              class="MuiBox-root mui-style-b5p5gz"
             >
               <span
                 aria-label="Copy to clipboard"
@@ -72,38 +72,38 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             >
               <button
                 aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
                 tabindex="0"
                 type="button"
               >
                 <mock-icon
                   aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
                   data-testid="copy-btn-icon"
                   focusable="false"
                 />
               </button>
             </span>
             <div
-              class="MuiBox-root css-yjghm1"
+              class="MuiBox-root mui-style-yjghm1"
             />
           </div>
         </div>
       </div>
     </div>
     <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
     />
     <div
-      class="MuiBox-root css-0"
+      class="MuiBox-root mui-style-0"
     >
       <p
-        class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
       >
         Any transaction requires the confirmation of:
       </p>
       <p
-        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
       >
         <b>
           1
@@ -117,7 +117,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
       </p>
     </div>
     <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
     />
   </div>
 </div>
@@ -128,19 +128,19 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1nt2i3f-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1nt2i3f-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-qzqzle-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 mui-style-qzqzle-MuiTypography-root"
       >
         <mock-icon
           aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
           focusable="false"
         />
         Previous signer
@@ -153,19 +153,19 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
           style="width: 40px; height: 40px;"
         >
           <span
-            class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+            class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
             style="width: 40px; height: 40px;"
           />
         </div>
         <div
-          class="MuiBox-root css-1lchl8k"
+          class="MuiBox-root mui-style-1lchl8k"
         >
           <div
-            class="ethHashInfo-name MuiBox-root css-171onha"
+            class="ethHashInfo-name MuiBox-root mui-style-171onha"
             title="Bob"
           >
             <div
-              class="MuiBox-root css-1o4wo1x"
+              class="MuiBox-root mui-style-1o4wo1x"
             >
               Bob
             </div>
@@ -174,7 +174,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             class="addressContainer"
           >
             <div
-              class="MuiBox-root css-b5p5gz"
+              class="MuiBox-root mui-style-b5p5gz"
             >
               <span
                 aria-label="Copy to clipboard"
@@ -195,27 +195,27 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             >
               <button
                 aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
                 tabindex="0"
                 type="button"
               >
                 <mock-icon
                   aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
                   data-testid="copy-btn-icon"
                   focusable="false"
                 />
               </button>
             </span>
             <div
-              class="MuiBox-root css-yjghm1"
+              class="MuiBox-root mui-style-yjghm1"
             />
           </div>
         </div>
       </div>
     </div>
     <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
     />
   </div>
 </div>

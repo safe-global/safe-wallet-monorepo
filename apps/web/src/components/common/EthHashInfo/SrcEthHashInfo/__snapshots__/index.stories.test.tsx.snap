@@ -5,7 +5,7 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -20,13 +20,13 @@ exports[`./index.stories Default 1`] = `
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="MuiBox-root mui-style-1lchl8k"
       >
         <div
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="MuiBox-root mui-style-b5p5gz"
           >
             <span
               aria-label="Copy to clipboard"
@@ -51,7 +51,7 @@ exports[`./index.stories WithAvatar 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -67,14 +67,14 @@ exports[`./index.stories WithAvatar 1`] = `
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="MuiBox-root mui-style-1lchl8k"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root mui-style-171onha"
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="MuiBox-root mui-style-1o4wo1x"
           >
             Real OG
           </div>
@@ -83,7 +83,7 @@ exports[`./index.stories WithAvatar 1`] = `
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="MuiBox-root mui-style-b5p5gz"
           >
             <span
               aria-label="Copy to clipboard"
@@ -108,7 +108,7 @@ exports[`./index.stories WithName 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -123,14 +123,14 @@ exports[`./index.stories WithName 1`] = `
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="MuiBox-root mui-style-1lchl8k"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root mui-style-171onha"
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="MuiBox-root mui-style-1o4wo1x"
           >
             Real OG
           </div>
@@ -139,7 +139,7 @@ exports[`./index.stories WithName 1`] = `
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="MuiBox-root mui-style-b5p5gz"
           >
             <span
               aria-label="Copy to clipboard"
@@ -164,7 +164,7 @@ exports[`./index.stories WithOnlyName 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -179,14 +179,14 @@ exports[`./index.stories WithOnlyName 1`] = `
         />
       </div>
       <div
-        class="inline MuiBox-root css-1lchl8k"
+        class="inline MuiBox-root mui-style-1lchl8k"
       >
         <div
-          class="ethHashInfo-name MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root mui-style-171onha"
           title="Real OG"
         >
           <div
-            class="MuiBox-root css-1o4wo1x"
+            class="MuiBox-root mui-style-1o4wo1x"
           >
             Real OG
           </div>

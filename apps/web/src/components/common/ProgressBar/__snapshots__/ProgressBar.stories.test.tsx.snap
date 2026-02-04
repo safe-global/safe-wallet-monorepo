@@ -5,17 +5,17 @@ exports[`./ProgressBar.stories AlmostComplete 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <span
       aria-valuemax="100"
       aria-valuemin="0"
       aria-valuenow="85"
-      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar css-1iizkxc-MuiLinearProgress-root"
+      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar mui-style-1iizkxc-MuiLinearProgress-root"
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate css-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
         style="transform: translateX(-15%);"
       />
     </span>
@@ -28,17 +28,17 @@ exports[`./ProgressBar.stories Complete 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <span
       aria-valuemax="100"
       aria-valuemin="0"
       aria-valuenow="100"
-      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar css-1iizkxc-MuiLinearProgress-root"
+      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar mui-style-1iizkxc-MuiLinearProgress-root"
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate css-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
         style="transform: translateX(0%);"
       />
     </span>
@@ -51,17 +51,17 @@ exports[`./ProgressBar.stories Empty 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <span
       aria-valuemax="100"
       aria-valuemin="0"
       aria-valuenow="0"
-      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar css-1iizkxc-MuiLinearProgress-root"
+      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar mui-style-1iizkxc-MuiLinearProgress-root"
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate css-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
         style="transform: translateX(-100%);"
       />
     </span>
@@ -74,17 +74,17 @@ exports[`./ProgressBar.stories Partial 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <span
       aria-valuemax="100"
       aria-valuemin="0"
       aria-valuenow="45"
-      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar css-1iizkxc-MuiLinearProgress-root"
+      class="MuiLinearProgress-root MuiLinearProgress-colorSecondary MuiLinearProgress-determinate progressBar mui-style-1iizkxc-MuiLinearProgress-root"
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate css-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
         style="transform: translateX(-55%);"
       />
     </span>

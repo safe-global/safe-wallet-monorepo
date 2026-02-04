@@ -2,13 +2,13 @@
 
 exports[`./HnSignupIntro.stories Default 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row container css-1jxwjqx-MuiGrid2-root"
+    class="MuiGrid2-root MuiGrid2-container MuiGrid2-direction-xs-row container mui-style-1jxwjqx-MuiGrid2-root"
   >
     <div
-      class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-grow introColumn css-2edihr-MuiGrid2-root"
+      class="MuiGrid2-root MuiGrid2-direction-xs-row MuiGrid2-grid-xs-grow introColumn mui-style-2edihr-MuiGrid2-root"
     >
       <div
         class="contentWrapper"
@@ -17,7 +17,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
           class="header"
         >
           <h1
-            class="MuiTypography-root MuiTypography-h1 title css-1t5ogpx-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-h1 title mui-style-1t5ogpx-MuiTypography-root"
           >
             Guardian
           </h1>
@@ -25,7 +25,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             class="poweredBy"
           >
             <p
-              class="MuiTypography-root MuiTypography-body2 poweredByText css-17vdyq3-MuiTypography-root"
+              class="MuiTypography-root MuiTypography-body2 poweredByText mui-style-17vdyq3-MuiTypography-root"
             >
               powered by
             </p>
@@ -36,7 +36,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             />
           </div>
           <p
-            class="MuiTypography-root MuiTypography-body2 subtitle css-17vdyq3-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 subtitle mui-style-17vdyq3-MuiTypography-root"
           >
             Enterprise-level protection for teams and organizations.
           </p>
@@ -49,7 +49,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon css-1dhtbeh-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
               data-testid="CheckCircleIcon"
               focusable="false"
               viewBox="0 0 24 24"
@@ -60,12 +60,12 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             </svg>
             <div>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle css-1r7djff-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
               >
                 Automatic blocking
               </p>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
               >
                 Automatically prevents malicious or non-compliant transactions before they're executed
               </p>
@@ -76,7 +76,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon css-1dhtbeh-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
               data-testid="CheckCircleIcon"
               focusable="false"
               viewBox="0 0 24 24"
@@ -87,12 +87,12 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             </svg>
             <div>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle css-1r7djff-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
               >
                 Custom security rules
               </p>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
               >
                 Create tailored policies using granular parameters to stop unwanted transactions.
               </p>
@@ -103,7 +103,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon css-1dhtbeh-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium featureIcon mui-style-1dhtbeh-MuiSvgIcon-root"
               data-testid="CheckCircleIcon"
               focusable="false"
               viewBox="0 0 24 24"
@@ -114,12 +114,12 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             </svg>
             <div>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureTitle css-1r7djff-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureTitle mui-style-1r7djff-MuiTypography-root"
               >
                 Seamless integration
               </p>
               <p
-                class="MuiTypography-root MuiTypography-body2 featureDescription css-17vdyq3-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 featureDescription mui-style-17vdyq3-MuiTypography-root"
               >
                 Works natively within your Safe workflow. No extra steps required.
               </p>
@@ -133,7 +133,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             data-track="hypernative: Guardian Form Started"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth primaryButton css-18pnskn-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-fullWidth primaryButton mui-style-18pnskn-MuiButtonBase-root-MuiButton-root"
               tabindex="0"
               type="button"
             >
@@ -141,7 +141,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             </button>
           </span>
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth secondaryButton css-24caxx-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary MuiButton-fullWidth secondaryButton mui-style-24caxx-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -151,7 +151,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
       </div>
     </div>
     <div
-      class="MuiGrid2-root MuiGrid2-direction-xs-row backgroundColumn css-1fzlhpv-MuiGrid2-root"
+      class="MuiGrid2-root MuiGrid2-direction-xs-row backgroundColumn mui-style-1fzlhpv-MuiGrid2-root"
     />
   </div>
 </div>

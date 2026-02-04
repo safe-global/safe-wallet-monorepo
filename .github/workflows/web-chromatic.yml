@@ -1,0 +1,47 @@
+name: 'Web: Chromatic Visual Tests'
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - '.github/workflows/web-chromatic.yml'
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic:
+    name: Chromatic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Required for TurboSnap
+
+      - uses: ./.github/actions/yarn
+
+      - name: Build Storybook
+        working-directory: apps/web
+        run: yarn build-storybook
+        env:
+          NODE_OPTIONS: '--max_old_space_size=6144'
+
+      - name: Publish to Chromatic
+        uses: chromaui/action@latest
+        with:
+          workingDir: apps/web
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          storybookBuildDir: storybook-static
+          # onlyStoryNames is set in chromatic.config.json (mutually exclusive with onlyChanged)
+          autoAcceptChanges: 'dev | main'
+          exitOnceUploaded: true

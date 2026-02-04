@@ -34,7 +34,7 @@ jest.mock('@/hooks/useOnceVisible', () => ({
   default: jest.fn(() => true),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useGetHref', () => ({
+jest.mock('@/hooks/safes', () => ({
   useGetHref: jest.fn(() => (chain: Chain, address: string) => `/${chain.shortName}:${address}`),
 }))
 

@@ -6,7 +6,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 export function usePinActions(

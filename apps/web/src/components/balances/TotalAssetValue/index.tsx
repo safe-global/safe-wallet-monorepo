@@ -4,7 +4,7 @@ import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
+import { InfoTooltip } from '@/components/common/InfoTooltip'
 
 const TotalAssetValue = ({
   fiatTotal,
