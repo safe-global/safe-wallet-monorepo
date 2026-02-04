@@ -1,11 +1,12 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import dynamic from 'next/dynamic'
 import { Typography } from '@mui/material'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
 const adjustEthAddress = (address: string) => {
@@ -16,15 +17,11 @@ const adjustEthAddress = (address: string) => {
   return address
 }
 
-// SSR-disabled dynamic imports for swap widgets (requires browser APIs)
-const SwapWidgetNoSSR = dynamic(() => import('@/features/swap/components/SwapWidget'), { ssr: false })
-const FallbackSwapWidgetNoSSR = dynamic(() => import('@/features/swap/components/FallbackSwapWidget'), { ssr: false })
-
 const SwapPage: NextPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
-  const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
+  const { SwapWidget, FallbackSwapWidget, $isDisabled } = useLoadFeature(SwapFeature)
 
   let sell = undefined
   if (token && amount) {
@@ -41,15 +38,15 @@ const SwapPage: NextPage = () => {
       </Head>
 
       <main style={{ height: 'calc(100vh - 52px)' }}>
-        {isFeatureEnabled === true && isCowEnabled === true ? (
-          <SwapWidgetNoSSR sell={sell} />
-        ) : isFeatureEnabled === true && isCowEnabled === false ? (
-          <FallbackSwapWidgetNoSSR fromToken={sell?.asset} />
-        ) : isFeatureEnabled === false ? (
+        {$isDisabled ? (
           <Typography textAlign="center" my={3}>
             Swaps are not supported on this network.
           </Typography>
-        ) : null}
+        ) : isCowEnabled ? (
+          <SwapWidget sell={sell} />
+        ) : (
+          <FallbackSwapWidget fromToken={sell?.asset} />
+        )}
       </main>
     </>
   )
