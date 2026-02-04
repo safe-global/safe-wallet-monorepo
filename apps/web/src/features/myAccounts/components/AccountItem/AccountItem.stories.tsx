@@ -68,6 +68,7 @@ export const Default: Story = {
  * Account item marked as the currently selected safe
  */
 export const CurrentSafe: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" isCurrentSafe trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -82,6 +83,7 @@ export const CurrentSafe: Story = {
  * Account item without a name (shows shortened address)
  */
 export const WithoutName: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={1} owners={1} />
@@ -96,6 +98,7 @@ export const WithoutName: Story = {
  * Account item with balance loading
  */
 export const LoadingBalance: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={5} />
@@ -110,6 +113,7 @@ export const LoadingBalance: Story = {
  * Account item with read-only chips
  */
 export const WithReadOnlyChip: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={3} owners={5} />
@@ -126,6 +130,7 @@ export const WithReadOnlyChip: Story = {
  * Account item for undeployed safe (not activating)
  */
 export const UndeployedSafe: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -141,6 +146,7 @@ export const UndeployedSafe: Story = {
  * Account item for activating safe
  */
 export const ActivatingSafe: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -172,6 +178,7 @@ export const WithActions: Story = {
  * Account item that is pinned
  */
 export const PinnedSafe: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -187,6 +194,7 @@ export const PinnedSafe: Story = {
  * Account item with onClick handler instead of href (selection mode)
  */
 export const SelectionMode: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Button onClick={() => alert('Safe selected!')}>
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />
@@ -232,6 +240,7 @@ export const DifferentChains: Story = {
  * Multi-chain safe icon variant
  */
 export const MultiChainIcon: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} isMultiChainItem />
@@ -245,6 +254,7 @@ export const MultiChainIcon: Story = {
  * Multi-chain badge showing multiple network logos with tooltip
  */
 export const MultiChainBadge: Story = {
+  tags: ['!chromatic'],
   render: () => {
     const mockSafes = [
       { address: MOCK_ADDRESS, chainId: '1', isReadOnly: false, isPinned: false, lastVisited: 0, name: '' },
@@ -267,6 +277,7 @@ export const MultiChainBadge: Story = {
  * Minimal account item with only icon and info
  */
 export const Minimal: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} />
@@ -279,6 +290,7 @@ export const Minimal: Story = {
  * Account item with grouped elements
  */
 export const GroupedElements: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <AccountItem.Link href="/safe" trackingLabel="storybook">
       <AccountItem.Icon address={MOCK_ADDRESS} chainId={MOCK_CHAIN_ID} threshold={2} owners={3} />

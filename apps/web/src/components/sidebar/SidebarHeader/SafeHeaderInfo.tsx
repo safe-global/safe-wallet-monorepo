@@ -10,7 +10,7 @@ import FiatValue from '@/components/common/FiatValue'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
+import { InfoTooltip } from '@/components/common/InfoTooltip'
 
 import css from './styles.module.css'
 import { useIsHypernativeGuard } from '@/features/hypernative'

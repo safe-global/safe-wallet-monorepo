@@ -5,16 +5,16 @@ exports[`./UnreadBadge.stories Dot 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+    class="MuiBadge-root mui-style-63ezxx-MuiBadge-root"
   >
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="NotificationsIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -25,7 +25,7 @@ exports[`./UnreadBadge.stories Dot 1`] = `
       </svg>
     </button>
     <span
-      class="MuiBadge-badge MuiBadge-dot MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-1goy9x8-MuiBadge-badge"
+      class="MuiBadge-badge MuiBadge-dot MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess mui-style-1goy9x8-MuiBadge-badge"
     />
   </span>
 </div>
@@ -36,16 +36,16 @@ exports[`./UnreadBadge.stories HighCount 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+    class="MuiBadge-root mui-style-63ezxx-MuiBadge-root"
   >
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="NotificationsIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -56,7 +56,7 @@ exports[`./UnreadBadge.stories HighCount 1`] = `
       </svg>
     </button>
     <span
-      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary mui-style-109xops-MuiBadge-badge"
     >
       99
     </span>
@@ -69,16 +69,16 @@ exports[`./UnreadBadge.stories Invisible 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+    class="MuiBadge-root mui-style-63ezxx-MuiBadge-root"
   >
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="NotificationsIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -89,7 +89,7 @@ exports[`./UnreadBadge.stories Invisible 1`] = `
       </svg>
     </button>
     <span
-      class="MuiBadge-badge MuiBadge-dot MuiBadge-invisible MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess css-b720om-MuiBadge-badge"
+      class="MuiBadge-badge MuiBadge-dot MuiBadge-invisible MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSuccess mui-style-b720om-MuiBadge-badge"
     />
   </span>
 </div>
@@ -100,16 +100,16 @@ exports[`./UnreadBadge.stories WithCount 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiBadge-root css-63ezxx-MuiBadge-root"
+    class="MuiBadge-root mui-style-63ezxx-MuiBadge-root"
   >
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="NotificationsIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -120,7 +120,7 @@ exports[`./UnreadBadge.stories WithCount 1`] = `
       </svg>
     </button>
     <span
-      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary css-109xops-MuiBadge-badge"
+      class="MuiBadge-badge MuiBadge-standard MuiBadge-anchorOriginTopRight MuiBadge-anchorOriginTopRightRectangular MuiBadge-overlapRectangular MuiBadge-colorSecondary mui-style-109xops-MuiBadge-badge"
     >
       5
     </span>
