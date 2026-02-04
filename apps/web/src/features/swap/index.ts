@@ -45,7 +45,6 @@ export { default as useIsSwapFeatureEnabled } from './hooks/useIsSwapFeatureEnab
 // Swap state hooks
 export { default as useIsExpiredSwap } from './hooks/useIsExpiredSwap'
 export { useIsTWAPFallbackHandler, useTWAPFallbackHandlerAddress } from './hooks/useIsTWAPFallbackHandler'
-export { default as useSwapConsent } from './useSwapConsent'
 
 // ─────────────────────────────────────────────────────────────────
 // STORE (direct imports, not lazy-loaded)
