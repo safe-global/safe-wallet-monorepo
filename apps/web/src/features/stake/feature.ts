@@ -14,7 +14,6 @@ import type { StakeContract } from './contract'
 import StakingWidget from './components/StakingWidget'
 import StakePage from './components/StakePage'
 import StakeButton from './components/StakeButton'
-import StakingStatus from './components/StakingStatus'
 import StakingConfirmationTx from './components/StakingConfirmationTx'
 
 // Service imports
@@ -28,7 +27,6 @@ const feature: StakeContract = {
 
   // UI Components
   StakeButton,
-  StakingStatus,
   StakingConfirmationTx,
 
   // Services

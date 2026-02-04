@@ -2,7 +2,7 @@ import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/st
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import { Box, Link } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
-import StakingStatus from '@/features/stake/components/StakingStatus'
+import StakingStatus from './StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { getBeaconChainLink } from '@safe-global/utils/features/stake/utils/beaconChain'
 import useChainId from '@/hooks/useChainId'

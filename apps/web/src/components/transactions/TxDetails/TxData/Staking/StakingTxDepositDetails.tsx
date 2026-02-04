@@ -5,7 +5,7 @@ import type {
 import { Box } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
-import StakingConfirmationTxDeposit from '@/features/stake/components/StakingConfirmationTx/Deposit'
+import StakingConfirmationTxDeposit from './StakingConfirmationTxDeposit'
 
 const StakingTxDepositDetails = ({
   info,

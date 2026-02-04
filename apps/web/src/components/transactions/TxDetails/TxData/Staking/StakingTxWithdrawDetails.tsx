@@ -1,6 +1,6 @@
 import type { NativeStakingWithdrawTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Box } from '@mui/material'
-import StakingConfirmationTxWithdraw from '@/features/stake/components/StakingConfirmationTx/Withdraw'
+import StakingConfirmationTxWithdraw from './StakingConfirmationTxWithdraw'
 
 const StakingTxWithdrawDetails = ({ info }: { info: NativeStakingWithdrawTransactionInfo }) => {
   return (

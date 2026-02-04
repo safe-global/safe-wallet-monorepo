@@ -1,7 +1,7 @@
 import type { StakingTxInfo } from '@safe-global/store/gateway/types'
-import StakingConfirmationTxDeposit from './Deposit'
+import StakingConfirmationTxDeposit from '@/components/transactions/TxDetails/TxData/Staking/StakingConfirmationTxDeposit'
 import StakingConfirmationTxExit from './Exit'
-import StakingConfirmationTxWithdraw from './Withdraw'
+import StakingConfirmationTxWithdraw from '@/components/transactions/TxDetails/TxData/Staking/StakingConfirmationTxWithdraw'
 import { isStakingTxDepositInfo, isStakingTxExitInfo, isStakingTxWithdrawInfo } from '@/utils/transaction-guards'
 
 type StakingOrderConfirmationViewProps = {
