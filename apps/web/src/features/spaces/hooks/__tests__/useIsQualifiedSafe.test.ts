@@ -26,6 +26,13 @@ jest.mock('next/router', () => ({
 }))
 jest.mock('@/config/routes', () => ({
   AppRoutes: {
+    apps: { index: '/apps' },
+    swap: '/swap',
+    stake: '/stake',
+    balances: { nfts: '/balances/nfts', positions: '/balances/positions' },
+    settings: { notifications: '/settings/notifications' },
+    bridge: '/bridge',
+    earn: '/earn',
     spaces: { index: '/spaces' },
     welcome: { spaces: '/welcome/spaces' },
   },

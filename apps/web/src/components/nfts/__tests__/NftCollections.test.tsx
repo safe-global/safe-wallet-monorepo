@@ -17,6 +17,19 @@ jest.mock('@/services/observability', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+  EventType: {
+    PAGEVIEW: 'pageview',
+    CLICK: 'customClick',
+    META: 'metadata',
+    SAFE_APP: 'safeApp',
+    SAFE_CREATED: 'safe_created',
+    SAFE_ACTIVATED: 'safe_activated',
+    SAFE_OPENED: 'safe_opened',
+    WALLET_CONNECTED: 'wallet_connected',
+    TX_CREATED: 'tx_created',
+    TX_CONFIRMED: 'tx_confirmed',
+    TX_EXECUTED: 'tx_executed',
+  },
 }))
 
 jest.mock('@/components/common/CheckWallet', () => ({
