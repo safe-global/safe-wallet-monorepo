@@ -1,7 +1,5 @@
 export {
-  isChangingSignerSetup,
   isMultiChainSafeItem,
-  isSafeItem,
   getSafeSetups,
   getSharedSetup,
   getDeviatingSetups,

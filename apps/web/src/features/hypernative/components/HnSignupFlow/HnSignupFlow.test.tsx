@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { userEvent } from '@testing-library/user-event'
 import HnSignupFlow from './HnSignupFlow'
-import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
+import { setFormCompleted } from '../../store/hnStateSlice'
 import * as storeHooks from '@/store'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -15,7 +15,7 @@ jest.mock('@/services/analytics', () => ({
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
-jest.mock('@/features/hypernative/components/HnSignupFlow/HnModal', () => ({
+jest.mock('./HnModal', () => ({
   __esModule: true,
   default: ({ children, open, onClose }: { children: React.ReactNode; open: boolean; onClose: () => void }) =>
     open ? (
@@ -28,7 +28,7 @@ jest.mock('@/features/hypernative/components/HnSignupFlow/HnModal', () => ({
     ) : null,
 }))
 
-jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupIntro', () => ({
+jest.mock('./HnSignupIntro', () => ({
   __esModule: true,
   default: ({ onGetStarted, onClose }: { onGetStarted: () => void; onClose: () => void }) => (
     <div data-testid="hn-signup-intro">
@@ -38,7 +38,7 @@ jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupIntro', () => 
   ),
 }))
 
-jest.mock('@/features/hypernative/components/HnSignupFlow/HnCalendlyStep', () => ({
+jest.mock('./HnCalendlyStep', () => ({
   __esModule: true,
   default: ({ calendlyUrl, onBookingScheduled }: { calendlyUrl: string; onBookingScheduled?: () => void }) => (
     <div data-testid="hn-calendly-step">

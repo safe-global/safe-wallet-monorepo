@@ -38,7 +38,7 @@ const useWalletChainId = (): string | undefined => {
   return walletChainId
 }
 
-export const useChainId = (): string => {
+const useChainId = (): string => {
   const urlChainId = useUrlChainId()
   const walletChainId = useWalletChainId()
 

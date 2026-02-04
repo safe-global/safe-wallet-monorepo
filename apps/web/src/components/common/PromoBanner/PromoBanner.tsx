@@ -48,7 +48,7 @@ export interface PromoBannerProps {
   onBannerClick?: () => void
 }
 
-export const PromoBanner = ({
+const PromoBanner = ({
   title,
   description,
   ctaLabel,

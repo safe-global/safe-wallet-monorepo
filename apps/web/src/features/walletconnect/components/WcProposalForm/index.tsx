@@ -1,6 +1,7 @@
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { WCLoadingState } from '../../types'
-import { getPeerName, getSupportedChainIds, isBlockedBridge, isSafePassApp, isWarnedBridge } from '../../services/utils'
+import { getPeerName, getSupportedChainIds, isBlockedBridge, isWarnedBridge } from '../../services/utils'
+import { isSafePassApp } from '@/services/safe-apps/utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

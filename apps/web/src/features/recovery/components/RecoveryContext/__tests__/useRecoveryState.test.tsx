@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRecoveryState } from '@/features/recovery/services/recovery-state'
 import { chainBuilder } from '@/tests/builders/chains'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
@@ -23,7 +23,7 @@ const mockGetRecoveryDelayModifiers = getRecoveryDelayModifiers as jest.MockedFu
 const mockGetRecoveryState = getRecoveryState as jest.MockedFunction<typeof getRecoveryState>
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/hooks/wallets/web3')
+jest.mock('@/hooks/wallets/web3ReadOnly')
 jest.mock('@/hooks/useChains')
 jest.mock('@/hooks/useTxHistory')
 

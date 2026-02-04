@@ -5,7 +5,6 @@ import type { AlertColor } from '@mui/material'
 import InfoOutlinedIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { UntrustedFallbackHandlerTxText } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -79,10 +78,6 @@ export const UntrustedFallbackHandlerWarning = ({
     severity="warning"
     text="Unofficial fallback handler"
   />
-)
-
-export const ApprovalWarning = ({ approvalTxCount }: { approvalTxCount: number }): ReactElement => (
-  <Warning title="" severity="warning" text={`${approvalTxCount} ERC20 approval${maybePlural(approvalTxCount)}`} />
 )
 
 export const ThresholdWarning = (): ReactElement => (

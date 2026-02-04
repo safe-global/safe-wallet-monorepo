@@ -7,7 +7,7 @@ import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 

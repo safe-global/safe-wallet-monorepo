@@ -14,7 +14,7 @@ import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
 
-export const OwnerRow = ({
+const OwnerRow = ({
   index,
   groupName,
   removable = true,

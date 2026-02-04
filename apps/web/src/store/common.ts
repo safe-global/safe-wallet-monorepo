@@ -42,9 +42,3 @@ export const selectChainIdAndSafeAddress = createSelector(
   [(_: RootState, chainId: string) => chainId, (_: RootState, _chainId: string, safeAddress: string) => safeAddress],
   (chainId, safeAddress) => [chainId, safeAddress] as const,
 )
-
-// Memoized selector for safeAddress
-export const selectSafeAddress = createSelector(
-  [(_: RootState, safeAddress: string) => safeAddress],
-  (safeAddress) => [safeAddress] as const,
-)

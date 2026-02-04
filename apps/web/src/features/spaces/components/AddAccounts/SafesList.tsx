@@ -2,7 +2,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
 import { isMultiChainSafeItem } from '@/features/multichain'
-import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import {
   type AllSafeItems,
@@ -122,7 +122,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 <Box className={css.safeRow} pr={4}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
                   <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
-                    <MultichainIndicator safes={safe.safes} />
+                    <AccountItem.ChainBadge safes={safe.safes} />
                   </Box>
                 </Box>
               </AccordionSummary>

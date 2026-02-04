@@ -21,6 +21,7 @@ const mockChain = chainBuilder()
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
   useChain: jest.fn(() => mockChain),
+  useHasFeature: jest.fn(() => false),
 }))
 
 // mock useNameResolver

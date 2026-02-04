@@ -7,6 +7,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
 import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
@@ -121,8 +122,11 @@ export const mockWeb3Provider = (
   chainId?: string,
 ) => {
   const web3Provider = createMockWeb3Provider(callImplementations, resolveName, chainId)
+  // Mock both the re-exports from web3.ts and direct imports from web3ReadOnly.ts
   jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(web3Provider)
   jest.spyOn(web3, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
+  jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(web3Provider)
+  jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue(web3Provider)
   return web3Provider
 }
 // re-export everything

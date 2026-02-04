@@ -9,7 +9,6 @@ const addProposerBtn = '[data-testid="add-proposer-btn"]'
 const deleteProposerBtn = '[data-testid="delete-proposer-btn"]'
 const editProposerBtn = '[data-testid="edit-proposer-btn"]'
 const confrimDeleteProposerBtn = '[data-testid="confirm-delete-proposer-btn"]'
-const rejectDeleteProposerBtn = '[data-testid="reject-delete-proposer-btn"]'
 const submitProposerBtn = '[data-testid="submit-proposer-btn"]'
 
 const safeAsProposerMessage = 'Cannot add Safe Account itself as proposer'

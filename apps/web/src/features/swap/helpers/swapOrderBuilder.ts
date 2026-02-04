@@ -1,10 +1,5 @@
 import type { TransactionInfoType, OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import type {
-  TokenInfo,
-  SwapOrderTransactionInfo,
-  TwapOrderTransactionInfo,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { DurationType, StartTimeValue } from '@safe-global/store/gateway/types'
+import type { TokenInfo, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
@@ -45,66 +40,6 @@ export function orderTokenBuilder(): IBuilder<TokenInfo> {
     name: faker.finance.currencyName(),
     symbol: faker.finance.currencyCode(),
     trusted: faker.datatype.boolean(),
-  })
-}
-
-export function swapOrderBuilder(): IBuilder<SwapOrderTransactionInfo> {
-  const sellToken = orderTokenBuilder().build()
-  const executedFee = faker.string.numeric()
-  return Builder.new<SwapOrderTransactionInfo>().with({
-    type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
-    uid: faker.string.uuid(),
-    status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
-    kind: faker.helpers.arrayElement(['buy', 'sell']),
-    orderClass: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: 1735000000000, // Fixed timestamp for deterministic tests
-    sellAmount: faker.string.numeric(),
-    buyAmount: faker.string.numeric(),
-    executedSellAmount: faker.string.numeric(),
-    executedBuyAmount: faker.string.numeric(),
-    sellToken,
-    buyToken: orderTokenBuilder().build(),
-    explorerUrl:
-      'https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88',
-    executedFee,
-    executedFeeToken: sellToken,
-    fullAppData: appDataBuilder().build(),
-  })
-}
-
-export function twapOrderBuilder(): IBuilder<TwapOrderTransactionInfo> {
-  const sellToken = orderTokenBuilder().build()
-  const executedFee = faker.string.numeric()
-  return Builder.new<TwapOrderTransactionInfo>().with({
-    type: 'TwapOrder' as TransactionInfoType.TWAP_ORDER,
-    status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
-    kind: faker.helpers.arrayElement(['buy', 'sell']),
-    class: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: 1735000000000, // Fixed timestamp for deterministic tests
-    sellAmount: faker.string.numeric(),
-    buyAmount: faker.string.numeric(),
-    executedSellAmount: faker.string.numeric(),
-    executedBuyAmount: faker.string.numeric(),
-    sellToken: orderTokenBuilder().build(),
-    buyToken: orderTokenBuilder().build(),
-    executedFee,
-    executedFeeToken: sellToken,
-    fullAppData: appDataBuilder().build(),
-    numberOfParts: faker.number.int({ min: 1, max: 10 }).toString(),
-    /** @description The amount of sellToken to sell in each part */
-    partSellAmount: faker.string.numeric(),
-    /** @description The amount of buyToken that must be bought in each part */
-    minPartLimit: faker.string.numeric(),
-    /** @description The duration of the TWAP interval */
-    timeBetweenParts: faker.number.int({ min: 1, max: 10000000 }),
-    /** @description Whether the TWAP is valid for the entire interval or not */
-    durationOfPart: {
-      durationType: DurationType.AUTO,
-    },
-    /** @description The start time of the TWAP */
-    startTime: {
-      startType: StartTimeValue.AT_MINING_TIME,
-    },
   })
 }
 

@@ -97,7 +97,7 @@ describe('useLoadBalances', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
-    jest.spyOn(useChainId, 'useChainId').mockReturnValue('5')
+    jest.spyOn(useChainId, 'default').mockReturnValue('5')
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
   })
 

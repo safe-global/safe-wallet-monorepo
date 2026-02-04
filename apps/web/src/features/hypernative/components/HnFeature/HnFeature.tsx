@@ -27,7 +27,7 @@ const HnConditional = ({ children, bannerType }: HnFeatureProps): ReactElement |
  * First checks if Hypernative features are enabled globally, then checks if banner should be shown.
  * Only renders children if both conditions are met.
  */
-export const HnFeature = ({ children, bannerType }: HnFeatureProps): ReactElement | null => {
+const HnFeature = ({ children, bannerType }: HnFeatureProps): ReactElement | null => {
   const isEnabled = useIsHypernativeFeature()
 
   if (!isEnabled) {

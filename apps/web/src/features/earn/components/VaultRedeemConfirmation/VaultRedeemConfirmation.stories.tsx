@@ -17,6 +17,9 @@ const meta = {
       )
     },
   ],
+  parameters: {
+    visualTest: { disable: true },
+  },
   tags: ['autodocs'],
 } satisfies Meta<typeof VaultRedeemConfirmation>
 

@@ -7,13 +7,15 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
-import HnMiniTxBanner from '@/features/hypernative/components/HnMiniTxBanner'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 
 const NewTxFlow = () => {
   const txBuilder = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
+  const hn = useLoadFeature(HypernativeFeature)
 
   const onTokensClick = useCallback(() => {
     setTxFlow(<TokenTransferFlow />)
@@ -76,7 +78,7 @@ const NewTxFlow = () => {
                 Manage assets
               </Typography>
 
-              <HnMiniTxBanner />
+              <hn.HnMiniTxBanner />
 
               <SendTokensButton onClick={onTokensClick} />
               <MakeASwapButton />

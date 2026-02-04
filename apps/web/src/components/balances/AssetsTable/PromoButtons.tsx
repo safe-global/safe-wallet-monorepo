@@ -2,10 +2,9 @@ import React, { type ReactElement } from 'react'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import StakeButton from '@/features/stake/components/StakeButton'
-import EarnButton from '@/features/earn/components/EarnButton'
+import { EarnButton, isEligibleEarnToken } from '@/features/earn'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import { isEligibleEarnToken } from '@/features/earn/utils'
 
 interface PromoButtonsProps {
   tokenInfo: Balance['tokenInfo']

@@ -5,7 +5,8 @@ import { getRpcServiceUrl } from '@/hooks/wallets/web3'
 import pkPopupStore from './pk-popup-store'
 import { numberToHex } from '@/utils/hex'
 
-export const PRIVATE_KEY_MODULE_LABEL = 'Private key'
+import { PRIVATE_KEY_MODULE_LABEL } from './constants'
+export { PRIVATE_KEY_MODULE_LABEL }
 
 async function getPrivateKey() {
   const savedKey = pkPopupStore.getStore()?.privateKey

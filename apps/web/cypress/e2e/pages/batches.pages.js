@@ -2,13 +2,8 @@ import * as constants from '../../support/constants'
 import * as main from './main.page'
 import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
-const tokenSelectorText = 'G(ö|oe)rli Ether'
-const noLaterString = 'No, later'
-const yesExecuteString = 'Yes, execute'
 export const newTransactionBtnStr = 'New transaction'
 const sendTokensButn = 'Send tokens'
-const nextBtn = 'Next'
-const executeBtn = 'Execute'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
 export const batchedTxs = 'Batched transactions'
@@ -26,7 +21,6 @@ export const allActionsSection = '[data-testid="all-actions"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
-const tokenAddressInput = 'input[name="tokenAddress"]'
 const listBox = 'ul[role="listbox"]'
 const amountInput = 'input[name^="recipients."][name$=".amount"]'
 const nonceInput = 'input[name="nonce"]'
@@ -51,12 +45,12 @@ function fillTransactionData(EOA, amount) {
   cy.get(tokenSelector).click()
   cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
   cy.get(amountInput).type(amount)
-  cy.contains(nextBtn).click()
+  cy.contains(main.nextBtnStr).click()
 }
 
 function setNonceAndProceed(currentNonce) {
   cy.get(nonceInput).clear().type(currentNonce, { force: true }).blur()
-  cy.contains(executeBtn).scrollIntoView()
+  cy.contains(main.executeBtnStr).scrollIntoView()
 }
 
 function executeTransaction() {
@@ -70,10 +64,6 @@ function executeTransaction() {
 
 function addToBatchButton() {
   cy.get('button').contains(addToBatchBtn).click()
-}
-
-export function checkAddToBatchBtnDisabled() {
-  cy.get('button').contains(addToBatchBtn).should('be.disabled')
 }
 
 export function openBatchtransactionsModal() {
@@ -110,9 +100,6 @@ export function verifyBatchTransactionsCount(count) {
 
 export function clickOnBatchCounter() {
   cy.get(batchTxCounter).click()
-}
-export function verifyTransactionAdded() {
-  cy.contains(transactionAddedToBatchStr).should('be.visible')
 }
 
 export function verifyBatchIconCount(count) {

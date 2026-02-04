@@ -57,7 +57,6 @@ export enum TxFlowType {
   REMOVE_RECOVERY = 'remove-recovery',
   REMOVE_SPENDING_LIMIT = 'remove-spending-limit',
   REPLACE_OWNER = 'replace-owner',
-  SAFE_APPS_TX = 'safe-apps-tx',
   SETUP_RECOVERY = 'setup-recovery',
   SETUP_SPENDING_LIMIT = 'setup-spending-limit',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',

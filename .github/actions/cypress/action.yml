@@ -41,6 +41,8 @@ runs:
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
+      env:
+        NODE_ENV: cypress
 
     - uses: cypress-io/github-action@v6
       with:

@@ -4,9 +4,7 @@ import { format } from 'date-fns'
 const path = require('path')
 
 const pinnedAppsStr = 'My pinned apps'
-const enablePushNotificationsStr = 'Enable push notifications'
 const addressBookBtnStr = 'Address book'
-const dataImportModalStr = 'Data import'
 const appsBtnStr = 'Apps'
 const bookmarkedAppsBtnStr = 'Bookmarked apps'
 const settingsBtnStr = 'Settings'
@@ -89,10 +87,6 @@ export function clickOnCancelBtn() {
 
 export function clickOnImportBtnDataImportModal() {
   cy.contains('button', 'Import').click()
-}
-
-export function uploadFile(filePath) {
-  cy.get('[type="file"]').attachFile(filePath)
 }
 
 export function verifyImportModalData() {

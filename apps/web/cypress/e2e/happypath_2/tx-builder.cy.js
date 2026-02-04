@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'

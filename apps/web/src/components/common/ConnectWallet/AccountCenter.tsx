@@ -8,7 +8,7 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import WalletOverview from '../WalletOverview'
 import WalletInfo from '@/components/common/WalletInfo'
 
-export const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
+const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const { balance } = wallet
 

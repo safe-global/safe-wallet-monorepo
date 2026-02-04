@@ -1,6 +1,6 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
 import { backOff } from 'exponential-backoff'

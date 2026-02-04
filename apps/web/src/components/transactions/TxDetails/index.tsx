@@ -38,16 +38,19 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { TxNote } from '@/features/tx-notes'
+import { TxNotesFeature } from '@/features/tx-notes'
+import { useLoadFeature } from '@/features/__core__'
 import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { HnQueueAssessmentBanner } from '@/features/hypernative/components/HnQueueAssessmentBanner'
-import { useQueueAssessment } from '@/features/hypernative/hooks/useQueueAssessment'
-import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import {
+  useHnQueueAssessment,
+  useShowHypernativeAssessment,
+  useHypernativeOAuth,
+  HypernativeFeature,
+} from '@/features/hypernative'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -57,6 +60,8 @@ type TxDetailsProps = {
 }
 
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
+  const txNotes = useLoadFeature(TxNotesFeature)
+  const hn = useLoadFeature(HypernativeFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
@@ -109,7 +114,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   // Hypernative assessment for banner
   const { safe } = useSafeInfo()
   const chainId = safe.chainId
-  const assessment = useQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessment(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessmentBanner = useShowHypernativeAssessment({
     isQueue,
@@ -121,7 +126,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* /Details */}
       <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
         <div className={css.txNote}>
-          <TxNote txDetails={txDetails} />
+          <txNotes.TxNote txDetails={txDetails} />
         </div>
 
         <div className={css.detailsWrapper}>
@@ -208,7 +213,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {showAssessmentBanner && safeTxHash && chainId && (
-            <HnQueueAssessmentBanner
+            <hn.HnQueueAssessmentBanner
               safeTxHash={safeTxHash}
               assessment={assessment}
               isAuthenticated={isAuthenticated}

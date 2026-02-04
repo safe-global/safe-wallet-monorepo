@@ -34,8 +34,7 @@ import StakingTxWithdrawInfo from '@/features/stake/components/StakingTxWithdraw
 import { Box } from '@mui/material'
 import css from './styles.module.css'
 import StakingTxDepositInfo from '@/features/stake/components/StakingTxDepositInfo'
-import VaultDepositTxInfo from '@/features/earn/components/VaultDepositTxInfo'
-import VaultRedeemTxInfo from '@/features/earn/components/VaultRedeemTxInfo'
+import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
 
 export const TransferTx = ({
   info,

@@ -10,7 +10,7 @@ import { useHasFeature } from '../useChains'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-export const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
+const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId, txHistoryTag } = safe
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)

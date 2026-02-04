@@ -1,9 +1,8 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
-import { createStore as createIndexedDb, update as updateIndexedDb } from 'idb-keyval'
-import type { MessagePayload } from 'firebase/messaging/sw'
+import { createStore as createIndexedDb } from 'idb-keyval'
 
-import { isWebhookEvent, WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
+import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
 
 export type NotificationTrackingKey = `${string}:${WebhookType}`
 
@@ -12,10 +11,6 @@ export type NotificationTracking = {
     shown: number
     opened: number
   }
-}
-
-export const getNotificationTrackingKey = (chainId: string, type: WebhookType): NotificationTrackingKey => {
-  return `${chainId}:${type}`
 }
 
 export const parseNotificationTrackingKey = (key: string): { chainId: string; type: WebhookType } => {
@@ -41,31 +36,4 @@ export const createNotificationTrackingIndexedDb = () => {
 export const DEFAULT_WEBHOOK_TRACKING: NotificationTracking[NotificationTrackingKey] = {
   shown: 0,
   opened: 0,
-}
-
-export const cacheServiceWorkerPushNotificationTrackingEvent = (
-  property: keyof NotificationTracking[NotificationTrackingKey],
-  data: MessagePayload['data'],
-) => {
-  if (!isWebhookEvent(data)) {
-    return
-  }
-
-  const key = getNotificationTrackingKey(data.chainId, data.type)
-  const store = createNotificationTrackingIndexedDb()
-
-  updateIndexedDb<NotificationTracking[NotificationTrackingKey] | undefined>(
-    key,
-    (notificationCount) => {
-      if (notificationCount) {
-        return {
-          ...notificationCount,
-          [property]: (notificationCount[property] ?? 0) + 1,
-        }
-      }
-
-      return DEFAULT_WEBHOOK_TRACKING
-    },
-    store,
-  ).catch(() => null)
 }
