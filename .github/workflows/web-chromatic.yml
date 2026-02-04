@@ -2,6 +2,7 @@ name: 'Web: Chromatic Visual Tests'
 
 permissions:
   contents: read
+  pull-requests: write # Allow Chromatic to post PR comments
 
 on:
   push:
@@ -45,7 +46,5 @@ jobs:
           # onlyStoryNames is set in chromatic.config.json (mutually exclusive with onlyChanged)
           # Only auto-accept changes on main (baseline) - require review on feature branches
           autoAcceptChanges: 'main'
-          # Enable PR blocking until visual changes are approved
+          # Block PR on detected visual changes (enables Chromatic's GitHub App integration for comments)
           exitZeroOnChanges: false
-          # Require explicit approval of visual changes before merge
-          requireChangesApproval: true
