@@ -46,5 +46,7 @@ jobs:
           # onlyStoryNames is set in chromatic.config.json (mutually exclusive with onlyChanged)
           # Only auto-accept changes on main (baseline) - require review on feature branches
           autoAcceptChanges: 'main'
-          # Block PR on detected visual changes (enables Chromatic's GitHub App integration for comments)
+          # Enable PR blocking until visual changes are approved
           exitZeroOnChanges: false
+          # Require explicit approval of visual changes before merge
+          requireChangesApproval: true
