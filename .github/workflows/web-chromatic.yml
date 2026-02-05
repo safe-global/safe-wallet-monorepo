@@ -5,16 +5,12 @@ permissions:
   pull-requests: write # Allow Chromatic to post PR comments
 
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - '.github/workflows/web-chromatic.yml'
-  pull_request:
-    paths:
-      - 'apps/web/**'
-      - 'packages/**'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to test (optional, uses current branch if not specified)'
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
