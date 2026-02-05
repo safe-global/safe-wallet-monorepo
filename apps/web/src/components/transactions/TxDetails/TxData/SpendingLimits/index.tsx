@@ -85,5 +85,3 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
     </Stack>
   )
 }
-
-// getResetTimeOptions is now exported from @/features/spending-limits

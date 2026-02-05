@@ -5,7 +5,7 @@ import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-mo
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 

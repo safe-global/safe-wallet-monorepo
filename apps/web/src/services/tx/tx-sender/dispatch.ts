@@ -449,8 +449,6 @@ export const dispatchModuleTxExecution = async (
   return result?.hash
 }
 
-// dispatchSpendingLimitTxExecution moved to @/features/spending-limits/services/spendingLimitExecution
-
 export async function dispatchSafeAppsTx(
   args: { safeAppRequestId: RequestId; txId?: string } & (
     | { safeTx: SafeTransaction; provider: Eip1193Provider }
