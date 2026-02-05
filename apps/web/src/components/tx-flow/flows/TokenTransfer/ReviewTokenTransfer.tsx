@@ -13,15 +13,18 @@ import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 const ReviewTokenTransfer = ({
   params,
   onSubmit,
-  txNonce,
+  txNonce: txNonceProp,
   children,
 }: PropsWithChildren<{
   params?: MultiTokenTransferParams
   onSubmit: () => void
   txNonce?: number
 }>) => {
-  const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, setNonce, nonce } = useContext(SafeTxContext)
   const { balances } = useBalances()
+
+  // Priority to external nonce, then to the recommended one
+  const txNonce = txNonceProp ?? nonce
 
   const recipients = useMemo(() => params?.recipients || [], [params?.recipients])
 
@@ -45,7 +48,7 @@ const ReviewTokenTransfer = ({
       })
       .filter((transfer): transfer is MetaTransactionData => !!transfer)
 
-    createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
+    createMultiSendCallOnlyTx(calls, { nonce: txNonce }).then(setSafeTx).catch(setSafeTxError)
   }, [recipients, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
 
   return (

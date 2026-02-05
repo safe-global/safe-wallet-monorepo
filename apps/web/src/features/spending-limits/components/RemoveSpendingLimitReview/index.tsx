@@ -16,7 +16,7 @@ const RemoveSpendingLimitReview = ({
   params: SpendingLimitState
   onSubmit: () => void
 }>) => {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const chainId = useChainId()
   const { safe } = useSafeInfo()
 
@@ -38,8 +38,8 @@ const RemoveSpendingLimitReview = ({
       data: txData,
     }
 
-    createTx(txParams).then(setSafeTx).catch(setSafeTxError)
-  }, [chainId, params.beneficiary, params.token, setSafeTx, setSafeTxError, safe.modules])
+    createTx(txParams, nonce).then(setSafeTx).catch(setSafeTxError)
+  }, [chainId, params.beneficiary, params.token, setSafeTx, setSafeTxError, safe.modules, nonce])
 
   const onFormSubmit = useCallback(() => {
     trackEvent(SETTINGS_EVENTS.SPENDING_LIMIT.LIMIT_REMOVED)

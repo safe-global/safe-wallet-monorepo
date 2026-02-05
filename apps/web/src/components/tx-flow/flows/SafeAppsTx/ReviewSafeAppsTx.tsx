@@ -22,14 +22,14 @@ const ReviewSafeAppsTx = ({
   children,
   ...props
 }: ReviewSafeAppsTxProps): ReactElement => {
-  const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin, nonce } = useContext(SafeTxContext)
 
   useHighlightHiddenTab()
 
   useEffect(() => {
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txs.length > 1
-      const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
+      const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs, { nonce }) : await createTx(txs[0], nonce)
 
       if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas)) {
         tx.data.safeTxGas = String(params.safeTxGas)
@@ -44,7 +44,7 @@ const ReviewSafeAppsTx = ({
         setTxOrigin(getTxOrigin(app))
       })
       .catch(setSafeTxError)
-  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
+  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas, nonce])
 
   const error = !isTxValid(txs)
 

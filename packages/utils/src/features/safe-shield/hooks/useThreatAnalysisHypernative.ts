@@ -52,10 +52,8 @@ export function useThreatAnalysisHypernative({
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
 
   useEffect(() => {
-    if (isSafeTransaction(dataProp) && isSafeTransaction(data)) {
-      const { nonce: _nonce, ...dataWithoutNonce } = dataProp.data
-      const { nonce: _prevNonce, ...prevDataWithoutNonce } = data.data
-      if (isEqual(dataWithoutNonce, prevDataWithoutNonce)) return
+    if (isSafeTransaction(dataProp) && isSafeTransaction(data) && isEqual(dataProp.data, data.data)) {
+      return
     }
 
     setData(dataProp)

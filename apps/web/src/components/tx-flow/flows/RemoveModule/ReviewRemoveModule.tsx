@@ -13,11 +13,11 @@ export const ReviewRemoveModule = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveModuleFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useEffect(() => {
-    createRemoveModuleTx(params.address).then(setSafeTx).catch(setSafeTxError)
-  }, [params.address, setSafeTx, setSafeTxError])
+    createRemoveModuleTx(params.address, { nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [params.address, setSafeTx, setSafeTxError, nonce])
 
   useEffect(() => {
     if (safeTxError) {

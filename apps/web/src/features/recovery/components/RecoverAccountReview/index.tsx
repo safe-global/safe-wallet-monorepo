@@ -49,7 +49,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
   // Hooks
   const { setTxFlow } = useContext(TxModalContext)
-  const { safeTx, safeTxError, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { safeTx, safeTxError, setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -72,10 +72,11 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
       newOwners,
     })
 
-    const promise = transactions.length > 1 ? createMultiSendCallOnlyTx(transactions) : createTx(transactions[0])
+    const promise =
+      transactions.length > 1 ? createMultiSendCallOnlyTx(transactions, { nonce }) : createTx(transactions[0], nonce)
 
     promise.then(setSafeTx).catch(setSafeTxError)
-  }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError])
+  }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError, nonce])
 
   // On modal submit
   const onSubmit = async () => {

@@ -23,7 +23,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, nonce } = useContext(SafeTxContext)
   const periods = useRecoveryPeriods()
 
   const { data } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
@@ -40,11 +40,13 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
       safeAddress,
     })
       .then((transactions) => {
-        return transactions.length > 1 ? createMultiSendCallOnlyTx(transactions) : createTx(transactions[0])
+        return transactions.length > 1
+          ? createMultiSendCallOnlyTx(transactions, { nonce })
+          : createTx(transactions[0], nonce)
       })
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
+  }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly, nonce])
 
   useEffect(() => {
     if (safeTxError) {

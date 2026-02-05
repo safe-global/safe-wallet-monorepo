@@ -10,15 +10,15 @@ import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionProps) => {
   const chain = useCurrentChain()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const safeSDK = useSafeSDK()
 
   useEffect(() => {
     if (!chain || !safeSDK) return
 
     const txData = createMigrateToL2(chain)
-    createTx(txData).then(setSafeTx).catch(setSafeTxError)
-  }, [chain, setSafeTx, setSafeTxError, safeSDK])
+    createTx(txData, nonce).then(setSafeTx).catch(setSafeTxError)
+  }, [chain, setSafeTx, setSafeTxError, safeSDK, nonce])
 
   return (
     <Box>

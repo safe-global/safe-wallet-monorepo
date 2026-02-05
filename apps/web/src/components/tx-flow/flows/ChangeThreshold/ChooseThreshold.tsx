@@ -26,7 +26,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 export const ChooseThreshold = () => {
   const { onNext, data } = useContext(TxFlowContext)
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
 
   const formMethods = useForm<ChangeThresholdFlowProps>({
@@ -37,8 +37,9 @@ export const ChooseThreshold = () => {
   const newThreshold = formMethods.watch(ChangeThresholdFlowFieldNames.threshold)
 
   useEffect(() => {
-    createUpdateThresholdTx(newThreshold).then(setSafeTx).catch(setSafeTxError)
-  }, [newThreshold, setSafeTx, setSafeTxError])
+    if (!nonce) return
+    createUpdateThresholdTx(newThreshold, { nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [newThreshold, setSafeTx, setSafeTxError, nonce])
 
   return (
     <TxCard>

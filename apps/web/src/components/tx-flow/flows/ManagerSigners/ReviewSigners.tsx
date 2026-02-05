@@ -16,7 +16,7 @@ import { useAppDispatch } from '@/store'
 
 export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentProps): ReactElement {
   const { data } = useContext<TxFlowContextType<ManageSignersForm>>(TxFlowContext)
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
 
@@ -35,11 +35,11 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
 
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = transactions.length > 1
-      return isMultiSend ? createMultiSendCallOnlyTx(transactions) : createTx(transactions[0])
+      return isMultiSend ? createMultiSendCallOnlyTx(transactions, { nonce }) : createTx(transactions[0], nonce)
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [data, safe, setSafeTx, setSafeTxError])
+  }, [data, safe, setSafeTx, setSafeTxError, nonce])
 
   const addAddressBookEntry = () => {
     if (!data) return

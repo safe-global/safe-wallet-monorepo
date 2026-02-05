@@ -39,7 +39,7 @@ const ApprovalEditor = ({
   safeTransaction?: SafeTransaction
   safeMessage?: TypedData
 }) => {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const [readableApprovals, error, loading] = useApprovalInfos({ safeTransaction, safeMessage })
 
   const nonZeroApprovals = readableApprovals?.filter((approval) => !(0n === approval.amount))
@@ -57,7 +57,7 @@ const ApprovalEditor = ({
 
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = updatedTxs.length > 1
-      return isMultiSend ? createMultiSendCallOnlyTx(updatedTxs) : createTx(updatedTxs[0])
+      return isMultiSend ? createMultiSendCallOnlyTx(updatedTxs, { nonce }) : createTx(updatedTxs[0], nonce)
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)

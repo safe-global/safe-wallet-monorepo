@@ -17,11 +17,12 @@ const ReviewChangeThreshold = ({
   const { safe } = useSafeInfo()
   const newThreshold = params[ChangeThresholdFlowFieldNames.threshold]
 
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useEffect(() => {
-    createUpdateThresholdTx(newThreshold).then(setSafeTx).catch(setSafeTxError)
-  }, [newThreshold, setSafeTx, setSafeTxError])
+    if (!nonce) return
+    createUpdateThresholdTx(newThreshold, { nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [newThreshold, setSafeTx, setSafeTxError, nonce])
 
   const trackEvents = () => {
     trackEvent({ ...SETTINGS_EVENTS.SETUP.OWNERS, label: safe.owners.length })

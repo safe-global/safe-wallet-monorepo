@@ -16,13 +16,15 @@ export const ReviewRemoveOwner = ({
   params: RemoveOwnerFlowProps
   onSubmit: () => void
 }>): ReactElement => {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const { removedOwner, threshold } = params
 
   useEffect(() => {
-    createRemoveOwnerTx({ ownerAddress: removedOwner.address, threshold }).then(setSafeTx).catch(setSafeTxError)
-  }, [removedOwner.address, setSafeTx, setSafeTxError, threshold])
+    createRemoveOwnerTx({ ownerAddress: removedOwner.address, threshold }, { nonce })
+      .then(setSafeTx)
+      .catch(setSafeTxError)
+  }, [removedOwner.address, setSafeTx, setSafeTxError, threshold, nonce])
 
   const onFormSubmit = useCallback(() => {
     trackEvent({ ...SETTINGS_EVENTS.SETUP.THRESHOLD, label: safe.threshold })

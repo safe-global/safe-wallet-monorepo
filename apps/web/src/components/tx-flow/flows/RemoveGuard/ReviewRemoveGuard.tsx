@@ -13,11 +13,11 @@ export const ReviewRemoveGuard = ({
   onSubmit,
   children,
 }: PropsWithChildren<{ params: RemoveGuardFlowProps; onSubmit: () => void }>) => {
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, safeTxError, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useEffect(() => {
-    createRemoveGuardTx().then(setSafeTx).catch(setSafeTxError)
-  }, [setSafeTx, setSafeTxError])
+    createRemoveGuardTx({ nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [setSafeTx, setSafeTxError, nonce])
 
   useEffect(() => {
     if (safeTxError) {

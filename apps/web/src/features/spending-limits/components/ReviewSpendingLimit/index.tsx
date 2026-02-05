@@ -27,7 +27,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   const chainId = useChainId()
   const chain = useCurrentChain()
   const { balances } = useBalances()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
   const { decimals } = token?.tokenInfo || {}
 
@@ -55,6 +55,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
       safe.deployed,
       decimals,
       existingSpendingLimit,
+      nonce,
     )
       .then(setSafeTx)
       .catch(setSafeTxError)
@@ -69,6 +70,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
     setSafeTx,
     setSafeTxError,
     spendingLimits,
+    nonce,
   ])
 
   const isOneTime = data?.resetTime === '0'

@@ -28,7 +28,8 @@ export function ReviewNestedSafe({
 }>): ReactElement {
   const { safeAddress, safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
+
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
   const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
@@ -98,11 +99,13 @@ export function ReviewNestedSafe({
 
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = fundingTxs.length > 0
-      return isMultiSend ? createMultiSendCallOnlyTx([deploymentTx, ...fundingTxs]) : createTx(deploymentTx)
+      return isMultiSend
+        ? createMultiSendCallOnlyTx([deploymentTx, ...fundingTxs], { nonce })
+        : createTx(deploymentTx, nonce)
     }
 
     createSafeTx().then(setSafeTx).catch(setSafeTxError)
-  }, [chain, params.assets, safeAccountConfig, predictedSafeAddress, balances.items, setSafeTx, setSafeTxError])
+  }, [chain, params.assets, safeAccountConfig, predictedSafeAddress, balances.items, setSafeTx, setSafeTxError, nonce])
 
   const handleSubmit = useCallback(() => {
     onSubmit(predictedSafeAddress)

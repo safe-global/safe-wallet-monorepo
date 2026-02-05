@@ -10,16 +10,16 @@ import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/
 export const UpdateSafeReview = (props: ReviewTransactionProps) => {
   const { safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useAsync(async () => {
     if (!chain || !safeLoaded) return
 
     const txs = await createUpdateSafeTxs(safe, chain)
-    const safeTxPromise = txs.length > 1 ? createMultiSendCallOnlyTx(txs) : createTx(txs[0])
+    const safeTxPromise = txs.length > 1 ? createMultiSendCallOnlyTx(txs, { nonce }) : createTx(txs[0], nonce)
 
     safeTxPromise.then(setSafeTx).catch(setSafeTxError)
-  }, [safe, safeLoaded, chain, setSafeTx, setSafeTxError])
+  }, [safe, safeLoaded, chain, setSafeTx, setSafeTxError, nonce])
 
   return <ReviewTransaction {...props} />
 }

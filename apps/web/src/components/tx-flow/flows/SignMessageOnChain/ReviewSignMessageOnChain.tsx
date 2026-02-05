@@ -36,7 +36,7 @@ export type SignMessageOnChainProps = {
 
 const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignMessageOnChainProps): ReactElement => {
   const { safe } = useSafeInfo()
-  const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { safeTx, setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   useHighlightHiddenTab()
 
   const isTextMessage = method === Methods.signMessage && typeof message === 'string'
@@ -93,7 +93,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
       data: txData ?? '0x',
       operation: OperationType.DelegateCall,
     }
-    createTx(params).then(setSafeTx).catch(setSafeTxError)
+    createTx(params, nonce).then(setSafeTx).catch(setSafeTxError)
   }, [
     isTextMessage,
     isTypedMessage,
@@ -102,6 +102,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
     setSafeTx,
     setSafeTxError,
     signMessageAddress,
+    nonce,
   ])
 
   return (

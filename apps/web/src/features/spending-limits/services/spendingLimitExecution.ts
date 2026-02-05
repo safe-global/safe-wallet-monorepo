@@ -32,6 +32,7 @@ export const createNewSpendingLimitTx = async (
   deployed: boolean,
   tokenDecimals?: number | null,
   existingSpendingLimit?: SpendingLimitState,
+  nonce?: number,
 ) => {
   const sdk = getSafeSDK()
   if (!sdk) return
@@ -62,7 +63,7 @@ export const createNewSpendingLimitTx = async (
     txs.push(tx)
   } else {
     if (!isModuleEnabled) {
-      const enableModuleTx = await sdk.createEnableModuleTx(spendingLimitAddress)
+      const enableModuleTx = await sdk.createEnableModuleTx(spendingLimitAddress, { nonce })
 
       const tx = {
         to: enableModuleTx.data.to,

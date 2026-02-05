@@ -22,15 +22,15 @@ function CancelRecoveryReview({
   onSubmit: () => void
 }>): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useAsync(async () => {
     if (!web3ReadOnly) {
       return
     }
     const transaction = await getRecoverySkipTransaction(recovery, web3ReadOnly)
-    createTx(transaction).then(setSafeTx).catch(setSafeTxError)
-  }, [setSafeTx, setSafeTxError, recovery, web3ReadOnly])
+    createTx(transaction, nonce).then(setSafeTx).catch(setSafeTxError)
+  }, [setSafeTx, setSafeTxError, recovery, web3ReadOnly, nonce])
 
   const handleSubmit = () => {
     trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_CANCEL })

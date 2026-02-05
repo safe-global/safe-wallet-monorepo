@@ -3,7 +3,12 @@ import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContract
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@/utils/transactions'
-import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
+import type {
+  AddOwnerTxParams,
+  RemoveOwnerTxParams,
+  SafeTransactionOptionalProps,
+  SwapOwnerTxParams,
+} from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
@@ -22,23 +27,30 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
  * Create a multiSendCallOnly transaction from an array of MetaTransactionData and options
  * If only one tx is passed it will be created without multiSend and without onlyCalls.
  */
-export const createMultiSendCallOnlyTx = async (txParams: MetaTransactionData[]): Promise<SafeTransaction> => {
+export const createMultiSendCallOnlyTx = async (
+  txParams: MetaTransactionData[],
+  options?: SafeTransactionOptionalProps,
+): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createTransaction({ transactions: txParams, onlyCalls: true })
+  return safeSDK.createTransaction({ transactions: txParams, onlyCalls: true, options })
 }
 
-export const createRemoveOwnerTx = async (txParams: RemoveOwnerTxParams): Promise<SafeTransaction> => {
+export const createRemoveOwnerTx = async (
+  txParams: RemoveOwnerTxParams,
+  options?: SafeTransactionOptionalProps,
+): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createRemoveOwnerTx(txParams)
+  return safeSDK.createRemoveOwnerTx(txParams, options)
 }
 
 export const createAddOwnerTx = async (
   chain: Chain,
   isDeployed: boolean,
   txParams: AddOwnerTxParams,
+  options?: SafeTransactionOptionalProps,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createAddOwnerTx(txParams)
+  if (isDeployed) return safeSDK.createAddOwnerTx(txParams, options)
 
   const safeVersion = safeSDK.getContractVersion()
 
@@ -54,6 +66,7 @@ export const createAddOwnerTx = async (
 
   return safeSDK.createTransaction({
     transactions: [tx],
+    options,
   })
 }
 
@@ -61,9 +74,10 @@ export const createSwapOwnerTx = async (
   chain: Chain,
   isDeployed: boolean,
   txParams: SwapOwnerTxParams,
+  options?: SafeTransactionOptionalProps,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createSwapOwnerTx(txParams)
+  if (isDeployed) return safeSDK.createSwapOwnerTx(txParams, options)
 
   const safeVersion = safeSDK.getContractVersion()
 
@@ -79,22 +93,29 @@ export const createSwapOwnerTx = async (
 
   return safeSDK.createTransaction({
     transactions: [tx],
+    options,
   })
 }
 
-export const createUpdateThresholdTx = async (threshold: number): Promise<SafeTransaction> => {
+export const createUpdateThresholdTx = async (
+  threshold: number,
+  options?: SafeTransactionOptionalProps,
+): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createChangeThresholdTx(threshold)
+  return safeSDK.createChangeThresholdTx(threshold, options)
 }
 
-export const createRemoveModuleTx = async (moduleAddress: string): Promise<SafeTransaction> => {
+export const createRemoveModuleTx = async (
+  moduleAddress: string,
+  options?: SafeTransactionOptionalProps,
+): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createDisableModuleTx(moduleAddress)
+  return safeSDK.createDisableModuleTx(moduleAddress, options)
 }
 
-export const createRemoveGuardTx = async (): Promise<SafeTransaction> => {
+export const createRemoveGuardTx = async (options?: SafeTransactionOptionalProps): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  return safeSDK.createDisableGuardTx()
+  return safeSDK.createDisableGuardTx(options)
 }
 
 /**

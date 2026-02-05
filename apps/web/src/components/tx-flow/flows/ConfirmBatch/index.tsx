@@ -12,14 +12,15 @@ type ConfirmBatchProps = {
   onSubmit: () => void
 }
 
-const ConfirmBatch = (props: ReviewTransactionProps) => {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+const ConfirmBatch = (props: ReviewTransactionProps & { txNonce?: number }) => {
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
+
   const batchTxs = useDraftBatch()
 
   useEffect(() => {
     const calls = batchTxs.map((tx) => tx.txData)
-    createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
-  }, [batchTxs, setSafeTx, setSafeTxError])
+    createMultiSendCallOnlyTx(calls, { nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [batchTxs, setSafeTx, setSafeTxError, nonce])
 
   return <ReviewTransaction {...props} title="Confirm batch" />
 }

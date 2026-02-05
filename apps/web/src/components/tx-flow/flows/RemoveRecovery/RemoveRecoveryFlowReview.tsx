@@ -15,11 +15,11 @@ export function RemoveRecoveryFlowReview({
   onSubmit,
   children,
 }: PropsWithChildren<RecoveryFlowProps & { onSubmit: () => void }>): ReactElement {
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useEffect(() => {
-    createRemoveModuleTx(delayModifier.address).then(setSafeTx).catch(setSafeTxError)
-  }, [delayModifier.address, setSafeTx, setSafeTxError])
+    createRemoveModuleTx(delayModifier.address, { nonce }).then(setSafeTx).catch(setSafeTxError)
+  }, [delayModifier.address, setSafeTx, setSafeTxError, nonce])
 
   const onFormSubmit = useCallback(() => {
     trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_REMOVE })

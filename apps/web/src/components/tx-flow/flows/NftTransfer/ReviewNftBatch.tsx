@@ -13,7 +13,7 @@ import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 const ReviewNftBatch = ({ onSubmit, children }: ReviewTransactionProps): ReactElement => {
   const { data } = useContext<TxFlowContextType<NftTransferParams>>(TxFlowContext)
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const safeAddress = useSafeAddress()
   const { tokens = [] } = data || {}
 
@@ -24,10 +24,10 @@ const ReviewNftBatch = ({ onSubmit, children }: ReviewTransactionProps): ReactEl
       return createNftTransferParams(safeAddress, data.recipient, token.id, token.address)
     })
 
-    const promise = calls.length > 1 ? createMultiSendCallOnlyTx(calls) : createTx(calls[0])
+    const promise = calls.length > 1 ? createMultiSendCallOnlyTx(calls, { nonce }) : createTx(calls[0], nonce)
 
     promise.then(setSafeTx).catch(setSafeTxError)
-  }, [safeAddress, tokens, data, setSafeTx, setSafeTxError])
+  }, [safeAddress, tokens, data, setSafeTx, setSafeTxError, nonce])
 
   return (
     <ReviewTransaction onSubmit={onSubmit} withDecodedData={false}>

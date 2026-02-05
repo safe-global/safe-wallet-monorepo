@@ -21,7 +21,7 @@ export const ReviewOwner = ({
   onSubmit?: () => void
 }>) => {
   const dispatch = useAppDispatch()
-  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError, nonce } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const { chainId } = safe
   const chain = useCurrentChain()
@@ -31,17 +31,27 @@ export const ReviewOwner = ({
     if (!chain) return
 
     const promise = removedOwner
-      ? createSwapOwnerTx(chain, safe.deployed, {
-          newOwnerAddress: newOwner.address,
-          oldOwnerAddress: removedOwner.address,
-        })
-      : createAddOwnerTx(chain, safe.deployed, {
-          ownerAddress: newOwner.address,
-          threshold,
-        })
+      ? createSwapOwnerTx(
+          chain,
+          safe.deployed,
+          {
+            newOwnerAddress: newOwner.address,
+            oldOwnerAddress: removedOwner.address,
+          },
+          { nonce },
+        )
+      : createAddOwnerTx(
+          chain,
+          safe.deployed,
+          {
+            ownerAddress: newOwner.address,
+            threshold,
+          },
+          { nonce },
+        )
 
     promise.then(setSafeTx).catch(setSafeTxError)
-  }, [removedOwner, newOwner, threshold, setSafeTx, setSafeTxError, chain, safe.deployed])
+  }, [removedOwner, newOwner, threshold, setSafeTx, setSafeTxError, chain, safe.deployed, nonce])
 
   const addAddressBookEntry = () => {
     if (typeof newOwner.name !== 'undefined') {

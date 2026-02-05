@@ -25,6 +25,7 @@ const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
 describe('ApprovalEditor', () => {
   beforeEach(() => {
     jest.restoreAllMocks()
+    faker.seed(123) // Seed faker for consistent test results
   })
 
   it('returns null if there is no safe transaction', () => {
@@ -120,7 +121,7 @@ describe('ApprovalEditor', () => {
 
     const amountInput1 = result.container.querySelector('input[name="approvals.0"]') as HTMLInputElement
 
-    expect(amountInput1).toBeInTheDocument
+    expect(amountInput1).toBeInTheDocument()
 
     expect(amountInput1).toHaveValue('987645635420.0')
     expect(result.getByText('TST', { exact: false }))
@@ -213,6 +214,9 @@ describe('ApprovalEditor', () => {
     const mockSafe = getAndValidateSafeSDK()
     expect(mockSafe.createTransaction).toHaveBeenCalledWith({
       onlyCalls: true,
+      options: {
+        nonce: undefined,
+      },
       transactions: [
         {
           to: tokenAddress,
@@ -320,6 +324,9 @@ describe('ApprovalEditor', () => {
     const mockSafe = getAndValidateSafeSDK()
     expect(mockSafe.createTransaction).toHaveBeenCalledWith({
       onlyCalls: true,
+      options: {
+        nonce: undefined,
+      },
       transactions: [
         {
           to: tokenAddress,
