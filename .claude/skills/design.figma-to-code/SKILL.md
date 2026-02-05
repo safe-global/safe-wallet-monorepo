@@ -106,6 +106,7 @@ DO:
 
 - Use shadcn variants (`variant="outline"`, `size="sm"`)
 - Use Tailwind for layout: `flex`, `grid`, `gap-*`, `p-*`
+- Match layout ratios from Figma exactly (e.g., `grid-cols-2` for 50/50 split, or specific column ratios)
 - Prefer using wrapper classes for layout, to use pure shadcn components without added tailwing classes
 - Use CSS variables from shadcn for colors
 
@@ -114,6 +115,7 @@ DON'T:
 - Add custom colors (`bg-blue-500`)
 - Override shadcn styles
 - Hardcode pixel values
+- Wrap icons in divs inside buttons (icons should be direct children)
 
 ## Step 6: Create Storybook Stories
 
@@ -146,6 +148,7 @@ export const Default: Story = {
 
 - Use descriptive story names (Default, WithError, Loading, etc.)
 - Include all important component states and variations
+- Extract and apply the Figma frame's background color to the story wrapper for visual consistency, ideally using tailwind classes
 - **For screens with subcomponents**, create stories for each:
   ```
   MyScreen/
