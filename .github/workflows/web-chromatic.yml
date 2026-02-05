@@ -48,5 +48,3 @@ jobs:
           autoAcceptChanges: 'main'
           # Enable PR blocking until visual changes are approved
           exitZeroOnChanges: false
-          # Require explicit approval of visual changes before merge
-          requireChangesApproval: true
