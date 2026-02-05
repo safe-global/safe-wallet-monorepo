@@ -11,7 +11,11 @@ export interface AccountItemInfoProps {
   chainName?: string // For multi-chain items, show chain name instead of address
   children?: ReactNode // For chips or other content below the address
   showPrefix?: boolean
+  fullAddress?: boolean // Show full address instead of truncated
   addressBookNameSource?: ContactSource
+  showCopyButton?: boolean // Show copy button next to address
+  hasExplorer?: boolean // Show explorer link next to address
+  highlight4bytes?: boolean // Highlight first 4 and last 4 chars (for similar addresses)
   'data-testid'?: string
 }
 
@@ -26,7 +30,11 @@ function AccountItemInfo({
   chainName,
   children,
   showPrefix = true,
+  fullAddress = false,
   addressBookNameSource,
+  showCopyButton = false,
+  hasExplorer = false,
+  highlight4bytes = false,
   'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
@@ -47,13 +55,16 @@ function AccountItemInfo({
             address={address}
             name={name}
             showName={addressBookNameSource ? !!name : true}
-            shortAddress
+            shortAddress={!fullAddress}
             chainId={chainId}
             showAvatar={false}
             copyAddress={false}
             showPrefix={showPrefix}
             copyPrefix={false}
             addressBookNameSource={addressBookNameSource}
+            showCopyButton={showCopyButton}
+            hasExplorer={hasExplorer}
+            highlight4bytes={highlight4bytes}
           />
         )}
       </Typography>

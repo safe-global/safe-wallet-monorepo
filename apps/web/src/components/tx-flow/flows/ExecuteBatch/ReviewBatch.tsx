@@ -5,7 +5,7 @@ import { getReadOnlyMultiSendCallOnlyContract } from '@/services/contracts/safeC
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
-import { useState, useMemo, useContext } from 'react'
+import { useState, useMemo, useContext, useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
@@ -38,6 +38,23 @@ import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/u
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+
+/**
+ * Build gas overrides for batch execution based on chain EIP-1559 support
+ */
+const buildGasOverrides = (
+  isEIP1559: boolean,
+  maxFeePerGas: bigint | null | undefined,
+  maxPriorityFeePerGas: bigint | null | undefined,
+  userNonce: number,
+): Overrides & { nonce: number } => {
+  const gasOverrides: Overrides = isEIP1559
+    ? { maxFeePerGas: maxFeePerGas?.toString(), maxPriorityFeePerGas: maxPriorityFeePerGas?.toString() }
+    : { gasPrice: maxFeePerGas?.toString() }
+
+  return { ...gasOverrides, nonce: userNonce }
+}
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -49,21 +66,21 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [relays] = useRelaysBySafe()
   const { setTxFlow } = useContext(TxModalContext)
   const [gasPrice] = useGasPrice()
-
   const userNonce = useUserNonce()
-
   const latestSafeVersion = getLatestSafeVersion(chain)
-
-  const maxFeePerGas = gasPrice?.maxFeePerGas
-  const maxPriorityFeePerGas = gasPrice?.maxPriorityFeePerGas
-
-  const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
+  const onboard = useOnboard()
+  const wallet = useWallet()
 
   // Chain has relaying feature and available relays
   const canRelay = hasRemainingRelays(relays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
-  const onboard = useOnboard()
-  const wallet = useWallet()
+
+  // EIP-1559 gas pricing support
+  const isEIP1559 = Boolean(chain && hasFeature(chain, FEATURES.EIP1559))
+
+  // Safe Shield - check if risk confirmation is needed (includes untrusted Safe)
+  const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
+  const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
 
   const {
     data: txsWithDetails,
@@ -99,15 +116,11 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     return encodeMultiSendData(multiSendTxs) as `0x${string}`
   }, [txsWithDetails, multiSendTxs])
 
-  const onExecute = async () => {
+  const onExecute = useCallback(async () => {
     if (!userNonce || !onboard || !wallet || !multiSendTxData || !multiSendContract || !txsWithDetails || !gasPrice)
       return
 
-    const overrides: Overrides = isEIP1559
-      ? { maxFeePerGas: maxFeePerGas?.toString(), maxPriorityFeePerGas: maxPriorityFeePerGas?.toString() }
-      : { gasPrice: maxFeePerGas?.toString() }
-
-    overrides.nonce = userNonce
+    const overrides = buildGasOverrides(isEIP1559, gasPrice.maxFeePerGas, gasPrice.maxPriorityFeePerGas, userNonce)
 
     await dispatchBatchExecution(
       txsWithDetails,
@@ -117,10 +130,10 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       safe.chainId,
       wallet.address,
       safe.address.value,
-      overrides as Overrides & { nonce: number },
+      overrides,
       safe.nonce,
     )
-  }
+  }, [userNonce, onboard, wallet, multiSendTxData, multiSendContract, txsWithDetails, gasPrice, isEIP1559, safe])
 
   const [safeTx] = useAsync<SafeTransaction | undefined>(async () => {
     const safeTx = multiSendTxs ? await createMultiSendCallOnlyTx(multiSendTxs) : undefined
@@ -180,7 +193,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     )
   }
 
-  const submitDisabled = loading || !isSubmittable || !gasPrice
+  const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked
 
   return (
     <>

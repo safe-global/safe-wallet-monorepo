@@ -1,0 +1,57 @@
+import { useMemo } from 'react'
+import { useAppSelector } from '@/store'
+import { selectAllAddedSafes } from '@/store/addedSafesSlice'
+import useAllSafes from '@/hooks/safes/useAllSafes'
+
+export interface UseMigrationPromptReturn {
+  /** Whether to show the prompt (user has safes but none pinned) */
+  shouldShowPrompt: boolean
+  /** Number of safes available to pin */
+  availableSafeCount: number
+  /** Whether the user has any pinned safes */
+  hasPinnedSafes: boolean
+  /** Whether the user has any associated safes */
+  hasAssociatedSafes: boolean
+  /** Whether data is still loading */
+  isLoading: boolean
+}
+
+/**
+ * Hook to detect if prompt should be shown
+ *
+ * The prompt shows when:
+ * 1. User has associated safes (from API - requires connected wallet)
+ * 2. User has no pinned safes (from addedSafesSlice)
+ */
+const useMigrationPrompt = (): UseMigrationPromptReturn => {
+  const allSafes = useAllSafes()
+  const addedSafes = useAppSelector(selectAllAddedSafes)
+
+  // Check if user has any pinned safes
+  const hasPinnedSafes = useMemo(() => {
+    return Object.values(addedSafes).some((chainSafes) => Object.keys(chainSafes).length > 0)
+  }, [addedSafes])
+
+  // Count unique safes by address (safes can exist on multiple chains)
+  const availableSafeCount = useMemo(() => {
+    if (!allSafes) return 0
+    const uniqueAddresses = new Set(allSafes.map((safe) => safe.address.toLowerCase()))
+    return uniqueAddresses.size
+  }, [allSafes])
+
+  const hasAssociatedSafes = availableSafeCount > 0
+  const isLoading = !allSafes
+
+  // Show prompt if user has safes but none pinned
+  const shouldShowPrompt = !isLoading && hasAssociatedSafes && !hasPinnedSafes
+
+  return {
+    shouldShowPrompt,
+    availableSafeCount,
+    hasPinnedSafes,
+    hasAssociatedSafes,
+    isLoading,
+  }
+}
+
+export default useMigrationPrompt
