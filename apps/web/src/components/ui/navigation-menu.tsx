@@ -4,6 +4,30 @@ import { cva } from 'class-variance-authority'
 import { cn } from '@/utils/cn'
 import { ChevronDownIcon } from 'lucide-react'
 
+/**
+ * Navigation Menu Component
+ *
+ * A collection of links for navigating the site (horizontal nav with optional dropdowns).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/navigation-menu
+ *
+ * @example
+ * ```tsx
+ * <NavigationMenu>
+ *   <NavigationMenuList>
+ *     <NavigationMenuItem>
+ *       <NavigationMenuTrigger>Item</NavigationMenuTrigger>
+ *       <NavigationMenuContent>...</NavigationMenuContent>
+ *     </NavigationMenuItem>
+ *   </NavigationMenuList>
+ * </NavigationMenu>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Root / List / Item / Trigger / Content / Link: see Base UI navigation-menu
+ */
+
 function NavigationMenu({ className, children, ...props }: NavigationMenuPrimitive.Root.Props) {
   return (
     <NavigationMenuPrimitive.Root

@@ -5,6 +5,27 @@ import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Popover Component
+ *
+ * Displays rich content in a popover triggered by a button or element.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/popover
+ *
+ * @example
+ * ```tsx
+ * <Popover>
+ *   <PopoverTrigger render={<Button variant="outline" />}>Open</PopoverTrigger>
+ *   <PopoverContent>Popover content here.</PopoverContent>
+ * </Popover>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - PopoverContent: `align`, `alignOffset`, `side`, `sideOffset`
+ * - Root / Trigger: see Base UI popover
+ */
+
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }

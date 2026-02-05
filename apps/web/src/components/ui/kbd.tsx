@@ -1,4 +1,24 @@
+import * as React from 'react'
+
 import { cn } from '@/utils/cn'
+
+/**
+ * Kbd Component
+ *
+ * Displays a keyboard shortcut or key hint.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/kbd
+ *
+ * @example
+ * ```tsx
+ * <Kbd>⌘</Kbd><Kbd>K</Kbd> or <KbdGroup><Kbd>Ctrl</Kbd><Kbd>S</Kbd></KbdGroup>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `className`
+ * - KbdGroup: for grouping keys — see Base UI
+ */
 
 function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
   return (

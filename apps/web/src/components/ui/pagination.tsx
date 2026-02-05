@@ -4,6 +4,37 @@ import { cn } from '@/utils/cn'
 import { Button } from '@/components/ui/button'
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react'
 
+/**
+ * Pagination Component
+ *
+ * Displays navigation for paged content (prev/next, page numbers).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/pagination
+ *
+ * @example
+ * ```tsx
+ * <Pagination>
+ *   <PaginationContent>
+ *     <PaginationItem>
+ *       <PaginationPrevious href="#" />
+ *     </PaginationItem>
+ *     <PaginationItem>
+ *       <PaginationLink href="#">1</PaginationLink>
+ *     </PaginationItem>
+ *     <PaginationItem>
+ *       <PaginationNext href="#" />
+ *     </PaginationItem>
+ *   </PaginationContent>
+ * </Pagination>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - PaginationLink: `isActive`, `size`
+ * - PaginationPrevious / PaginationNext: `href`
+ * - All components: `className`
+ */
+
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   return (
     <nav

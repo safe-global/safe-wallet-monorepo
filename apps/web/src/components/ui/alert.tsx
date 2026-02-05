@@ -3,6 +3,31 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Alert Component
+ *
+ * Displays a callout for user attention.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/alert
+ *
+ * @example
+ * ```tsx
+ * <Alert variant="default">
+ *   <InfoIcon />
+ *   <AlertTitle>Heads up!</AlertTitle>
+ *   <AlertDescription>You can add components using the cli.</AlertDescription>
+ *   <AlertAction>
+ *     <Button variant="outline">Enable</Button>
+ *   </AlertAction>
+ * </Alert>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Alert: `variant` ('default' | 'destructive')
+ * - AlertAction: for action buttons (positioned top-right)
+ */
+
 const alertVariants = cva(
   "grid gap-0.5 rounded-lg border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert",
   {

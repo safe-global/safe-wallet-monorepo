@@ -5,6 +5,27 @@ import { cn } from '@/utils/cn'
 /**
  * Card Component
  *
+ * Displays a card with header, content, and footer.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/card
+ *
+ * @example
+ * ```tsx
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Title</CardTitle>
+ *     <CardDescription>Description</CardDescription>
+ *   </CardHeader>
+ *   <CardContent><p>Content</p></CardContent>
+ *   <CardFooter><p>Footer</p></CardFooter>
+ * </Card>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Card: `size` ('default' | 'sm'), `className`
+ * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
+ *
  * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=179:29234
  *
  * Intentional differences from Figma:

@@ -5,6 +5,35 @@ import { useRender } from '@base-ui/react/use-render'
 import { cn } from '@/utils/cn'
 import { ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react'
 
+/**
+ * Breadcrumb Component
+ *
+ * Displays the path to the current resource using a hierarchy of links.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/breadcrumb
+ *
+ * @example
+ * ```tsx
+ * <Breadcrumb>
+ *   <BreadcrumbList>
+ *     <BreadcrumbItem>
+ *       <BreadcrumbLink render={<a href="/" />}>Home</BreadcrumbLink>
+ *     </BreadcrumbItem>
+ *     <BreadcrumbSeparator />
+ *     <BreadcrumbItem>
+ *       <BreadcrumbPage>Current</BreadcrumbPage>
+ *     </BreadcrumbItem>
+ *   </BreadcrumbList>
+ * </Breadcrumb>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - BreadcrumbLink: `render`
+ * - BreadcrumbSeparator: `children`
+ * - All components: `className`
+ */
+
 function Breadcrumb({ className, ...props }: React.ComponentProps<'nav'>) {
   return <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />
 }

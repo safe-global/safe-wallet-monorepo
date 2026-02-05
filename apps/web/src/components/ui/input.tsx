@@ -3,6 +3,23 @@ import { Input as InputPrimitive } from '@base-ui/react/input'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Input Component
+ *
+ * Displays a form input field.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/input
+ *
+ * @example
+ * ```tsx
+ * <Input type="email" placeholder="Email" />
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `type`, `placeholder`, `disabled`, `className` — extends native input props, see Base UI
+ */
+
 function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
   return (
     <InputPrimitive

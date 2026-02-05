@@ -4,6 +4,33 @@ import { OTPInput, OTPInputContext } from 'input-otp'
 import { cn } from '@/utils/cn'
 import { MinusIcon } from 'lucide-react'
 
+/**
+ * Input OTP Component
+ *
+ * One-time password input (OTP) with separate slots.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/input-otp
+ *
+ * @example
+ * ```tsx
+ * <InputOTP maxLength={6}>
+ *   <InputOTPGroup>
+ *     <InputOTPSlot index={0} />
+ *     <InputOTPSlot index={1} />
+ *     <InputOTPSlot index={2} />
+ *     <InputOTPSlot index={3} />
+ *     <InputOTPSlot index={4} />
+ *     <InputOTPSlot index={5} />
+ *   </InputOTPGroup>
+ * </InputOTP>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - InputOTP: `maxLength`, `value`, `onChange`, `containerClassName`
+ * - InputOTPSlot: `index` — see Base UI / input-otp
+ */
+
 function InputOTP({
   className,
   containerClassName,

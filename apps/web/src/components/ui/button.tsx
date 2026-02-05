@@ -3,6 +3,26 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Button Component
+ *
+ * Displays a button or a component that looks like a button.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/button
+ *
+ * @example
+ * ```tsx
+ * <Button variant="outline">Button</Button>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link')
+ * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg')
+ * - `render`
+ * - `className`
+ */
+
 const buttonVariants = cva(
   "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
   {

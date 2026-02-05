@@ -6,6 +6,32 @@ import { Button } from '@/components/ui/button'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react'
 
+/**
+ * Combobox Component
+ *
+ * Autocomplete input with a list of suggestions.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/combobox
+ *
+ * @example
+ * ```tsx
+ * <Combobox items={items}>
+ *   <ComboboxInput placeholder="Select..." />
+ *   <ComboboxContent>
+ *     <ComboboxEmpty>No items found.</ComboboxEmpty>
+ *     <ComboboxList>
+ *       {(item) => <ComboboxItem key={item} value={item}>{item}</ComboboxItem>}
+ *     </ComboboxList>
+ *   </ComboboxContent>
+ * </Combobox>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Root: `items`, `value`, `onValueChange`, `multiple`, `itemToStringValue`
+ * - Input: `showTrigger`, `showClear` — see Base UI
+ */
+
 const Combobox = ComboboxPrimitive.Root
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {

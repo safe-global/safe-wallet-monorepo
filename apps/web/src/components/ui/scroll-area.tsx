@@ -5,6 +5,26 @@ import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Scroll Area Component
+ *
+ * Custom-styled scrollable area with optional scrollbar.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/scroll-area
+ *
+ * @example
+ * ```tsx
+ * <ScrollArea className="h-72">
+ *   <div>Long content...</div>
+ * </ScrollArea>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - ScrollArea (Root): `className`
+ * - ScrollBar: `orientation` ('vertical' | 'horizontal') — see Base UI
+ */
+
 function ScrollArea({ className, children, ...props }: ScrollAreaPrimitive.Root.Props) {
   return (
     <ScrollAreaPrimitive.Root data-slot="scroll-area" className={cn('relative', className)} {...props}>
