@@ -43,7 +43,8 @@ jobs:
           workingDir: apps/web
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           storybookBuildDir: storybook-static
-          # onlyStoryNames is set in chromatic.config.json (mutually exclusive with onlyChanged)
+          # Only snapshot stories that have changed (TurboSnap)
+          onlyChanged: true
           # Only auto-accept changes on main (baseline) - require review on feature branches
           autoAcceptChanges: 'main'
           # Enable PR blocking until visual changes are approved
