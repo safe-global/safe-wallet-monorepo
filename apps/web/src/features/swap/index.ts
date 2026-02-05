@@ -47,12 +47,6 @@ export { default as useIsExpiredSwap } from './hooks/useIsExpiredSwap'
 export { useIsTWAPFallbackHandler, useTWAPFallbackHandlerAddress } from './hooks/useIsTWAPFallbackHandler'
 
 // ─────────────────────────────────────────────────────────────────
-// STORE (direct imports, not lazy-loaded)
-// ─────────────────────────────────────────────────────────────────
-
-export * from './store/swapParamsSlice'
-
-// ─────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
