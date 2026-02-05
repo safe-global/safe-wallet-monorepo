@@ -19,7 +19,7 @@ const TotalAssetValue = ({
   size?: 'md' | 'lg'
   action?: ReactNode
 }) => {
-  const fontSizeValue = size === 'lg' ? '44px' : '24px'
+  const fontSizeValue = size === 'lg' ? '48px' : '24px'
   const { safe } = useSafeInfo()
   const { balances } = useVisibleBalances()
 
