@@ -12837,7 +12837,7 @@ __metadata:
     jest-image-snapshot: "npm:^6.5.1"
     js-cookie: "npm:^3.0.1"
     knip: "npm:^5.0.0"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.17.23"
     lucide-react: "npm:^0.563.0"
     mixpanel-browser: "npm:^2.66.0"
     mockdate: "npm:^3.0.5"
