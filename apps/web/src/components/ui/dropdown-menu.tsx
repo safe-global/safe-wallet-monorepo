@@ -6,6 +6,32 @@ import { Menu as MenuPrimitive } from '@base-ui/react/menu'
 import { cn } from '@/utils/cn'
 import { ChevronRightIcon, CheckIcon } from 'lucide-react'
 
+/**
+ * Dropdown Menu Component
+ *
+ * Displays a menu triggered by a button (actions or functions).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/dropdown-menu
+ *
+ * @example
+ * ```tsx
+ * <DropdownMenu>
+ *   <DropdownMenuTrigger render={<Button variant="outline" />}>Open</DropdownMenuTrigger>
+ *   <DropdownMenuContent>
+ *     <DropdownMenuLabel>My Account</DropdownMenuLabel>
+ *     <DropdownMenuItem>Profile</DropdownMenuItem>
+ *     <DropdownMenuItem>Billing</DropdownMenuItem>
+ *   </DropdownMenuContent>
+ * </DropdownMenu>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - DropdownMenuContent: `align`, `alignOffset`, `side`, `sideOffset`
+ * - Trigger: `render`
+ * - Root / Portal / Popup: see Base UI menu
+ */
+
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }

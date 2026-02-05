@@ -5,6 +5,26 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Toggle Component
+ *
+ * Toggle button (pressed/unpressed state).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/toggle
+ *
+ * @example
+ * ```tsx
+ * <Toggle pressed={pressed} onPressedChange={setPressed}>Toggle</Toggle>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `pressed`, `onPressedChange`
+ * - `variant` ('default' | 'outline')
+ * - `size` ('default' | 'sm' | 'lg')
+ * - `disabled` — see Base UI
+ */
+
 const toggleVariants = cva(
   "hover:text-foreground aria-pressed:bg-muted focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive gap-1 rounded-md text-sm font-medium transition-[color,box-shadow] [&_svg:not([class*='size-'])]:size-4 group/toggle hover:bg-muted inline-flex items-center justify-center whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {

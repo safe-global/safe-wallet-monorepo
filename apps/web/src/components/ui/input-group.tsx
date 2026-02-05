@@ -6,6 +6,30 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
+/**
+ * Input Group Component
+ *
+ * Groups an input with addons (prefix/suffix) or buttons.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/input-group
+ *
+ * @example
+ * ```tsx
+ * <InputGroup>
+ *   <InputGroupAddon align="inline-start">$</InputGroupAddon>
+ *   <InputGroupInput placeholder="0.00" />
+ *   <InputGroupButton>
+ *     <Button type="button">Submit</Button>
+ *   </InputGroupButton>
+ * </InputGroup>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - InputGroupAddon: `align` ('inline-start' | 'inline-end' | 'block-start' | 'block-end')
+ * - InputGroupInput / InputGroupButton: see docs
+ */
+
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div

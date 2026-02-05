@@ -6,6 +6,30 @@ import { ContextMenu as ContextMenuPrimitive } from '@base-ui/react/context-menu
 import { cn } from '@/utils/cn'
 import { ChevronRightIcon, CheckIcon } from 'lucide-react'
 
+/**
+ * Context Menu Component
+ *
+ * Displays a menu of actions triggered by a right click.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/context-menu
+ *
+ * @example
+ * ```tsx
+ * <ContextMenu>
+ *   <ContextMenuTrigger>Right click here</ContextMenuTrigger>
+ *   <ContextMenuContent>
+ *     <ContextMenuItem>Profile</ContextMenuItem>
+ *     <ContextMenuItem>Billing</ContextMenuItem>
+ *   </ContextMenuContent>
+ * </ContextMenu>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - ContextMenuContent: `align`, `alignOffset`, `side`, `sideOffset`
+ * - Root / Trigger / Portal / Popup: see Base UI
+ */
+
 function ContextMenu({ ...props }: ContextMenuPrimitive.Root.Props) {
   return <ContextMenuPrimitive.Root data-slot="context-menu" {...props} />
 }

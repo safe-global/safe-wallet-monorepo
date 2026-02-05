@@ -4,6 +4,36 @@ import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { cn } from '@/utils/cn'
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react'
 
+/**
+ * Select Component
+ *
+ * Select dropdown for choosing one option from a list.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/select
+ *
+ * @example
+ * ```tsx
+ * <Select defaultValue="light">
+ *   <SelectTrigger className="w-[180px]">
+ *     <SelectValue placeholder="Theme" />
+ *   </SelectTrigger>
+ *   <SelectContent>
+ *     <SelectGroup>
+ *       <SelectItem value="light">Light</SelectItem>
+ *       <SelectItem value="dark">Dark</SelectItem>
+ *       <SelectItem value="system">System</SelectItem>
+ *     </SelectGroup>
+ *   </SelectContent>
+ * </Select>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Select (Root): `defaultValue`, `value`, `onValueChange`
+ * - SelectTrigger: `size` ('sm' | 'default')
+ * - SelectContent: `side`, `align`, `alignItemWithTrigger`
+ */
+
 const Select = SelectPrimitive.Root
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {

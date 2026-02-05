@@ -2,6 +2,28 @@ import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Tooltip Component
+ *
+ * Displays a short hint on hover or focus.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/tooltip
+ *
+ * @example
+ * ```tsx
+ * <Tooltip>
+ *   <TooltipTrigger>Hover me</TooltipTrigger>
+ *   <TooltipContent>Tooltip text</TooltipContent>
+ * </Tooltip>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - TooltipProvider: `delay`
+ * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`
+ * - Root / Trigger: see Base UI
+ */
+
 function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
   return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay} {...props} />
 }

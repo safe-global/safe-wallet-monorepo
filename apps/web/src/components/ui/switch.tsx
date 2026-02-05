@@ -2,6 +2,29 @@ import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Switch Component
+ *
+ * Toggle switch (on/off control).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/switch
+ *
+ * @example
+ * ```tsx
+ * <Field orientation="horizontal">
+ *   <Switch id="airplane" />
+ *   <FieldLabel htmlFor="airplane">Airplane Mode</FieldLabel>
+ * </Field>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `defaultChecked`: uncontrolled initial state
+ * - `checked`, `onCheckedChange`: controlled state
+ * - `size`: 'sm' | 'default'
+ * - `disabled`: disables interaction
+ */
+
 function Switch({
   className,
   size = 'default',

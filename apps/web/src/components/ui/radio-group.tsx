@@ -6,6 +6,33 @@ import { RadioGroup as RadioGroupPrimitive } from '@base-ui/react/radio-group'
 import { cn } from '@/utils/cn'
 import { CircleIcon } from 'lucide-react'
 
+/**
+ * Radio Group Component
+ *
+ * A set of checkable options where only one can be selected (single choice).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/radio-group
+ *
+ * @example
+ * ```tsx
+ * <RadioGroup defaultValue="option-one">
+ *   <Field orientation="horizontal">
+ *     <RadioGroupItem value="option-one" id="option-one" />
+ *     <FieldLabel htmlFor="option-one">Option One</FieldLabel>
+ *   </Field>
+ *   <Field orientation="horizontal">
+ *     <RadioGroupItem value="option-two" id="option-two" />
+ *     <FieldLabel htmlFor="option-two">Option Two</FieldLabel>
+ *   </Field>
+ * </RadioGroup>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - RadioGroup: `defaultValue`, `value`, `onValueChange`
+ * - RadioGroupItem: `value` (unique identifier), `disabled`
+ */
+
 function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
   return <RadioGroupPrimitive data-slot="radio-group" className={cn('grid gap-3 w-full', className)} {...props} />
 }

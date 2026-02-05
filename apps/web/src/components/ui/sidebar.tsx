@@ -15,6 +15,101 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useIsMobile } from '@/hooks/use-mobile'
 import { PanelLeftIcon } from 'lucide-react'
 
+/**
+ * Sidebar Component
+ *
+ * A composable, themeable and customizable sidebar component built on Base UI.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/sidebar
+ *
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <SidebarProvider>
+ *   <Sidebar>
+ *     <SidebarHeader>
+ *       <SidebarMenu>
+ *         <SidebarMenuItem>
+ *           <SidebarMenuButton size="lg">
+ *             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+ *               <Home className="size-4" />
+ *             </div>
+ *             <span className="font-semibold">App Name</span>
+ *           </SidebarMenuButton>
+ *         </SidebarMenuItem>
+ *       </SidebarMenu>
+ *     </SidebarHeader>
+ *     <SidebarContent>
+ *       <SidebarGroup>
+ *         <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+ *         <SidebarGroupContent>
+ *           <SidebarMenu>
+ *             <SidebarMenuItem>
+ *               <SidebarMenuButton isActive>
+ *                 <Home />
+ *                 <span>Home</span>
+ *               </SidebarMenuButton>
+ *             </SidebarMenuItem>
+ *           </SidebarMenu>
+ *         </SidebarGroupContent>
+ *       </SidebarGroup>
+ *     </SidebarContent>
+ *     <SidebarFooter>
+ *       <SidebarMenu>
+ *         <SidebarMenuItem>
+ *           <SidebarMenuButton>
+ *             <User2 />
+ *             <span>Username</span>
+ *           </SidebarMenuButton>
+ *         </SidebarMenuItem>
+ *       </SidebarMenu>
+ *     </SidebarFooter>
+ *     <SidebarRail />
+ *   </Sidebar>
+ *   <SidebarInset>
+ *     <header className="flex h-14 items-center gap-2 border-b px-4">
+ *       <SidebarTrigger />
+ *       <span>Content</span>
+ *     </header>
+ *     <main>{children}</main>
+ *   </SidebarInset>
+ * </SidebarProvider>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Controlled sidebar
+ * const [open, setOpen] = React.useState(false)
+ *
+ * <SidebarProvider open={open} onOpenChange={setOpen}>
+ *   <Sidebar />
+ * </SidebarProvider>
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Variants
+ * <Sidebar variant="floating" /> // Rounded corners with padding
+ * <Sidebar variant="inset" /> // Requires SidebarInset wrapper
+ * <Sidebar collapsible="icon" /> // Collapses to icons
+ * <Sidebar collapsible="none" /> // Non-collapsible
+ * <Sidebar side="right" /> // Right side positioning
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Using useSidebar hook
+ * const { state, open, setOpen, toggleSidebar, isMobile } = useSidebar()
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - SidebarProvider: defaultOpen, open, onOpenChange
+ * - Sidebar: side ('left' | 'right'), variant ('sidebar' | 'floating' | 'inset'), collapsible ('offcanvas' | 'icon' | 'none')
+ * - SidebarMenuButton: isActive, size ('default' | 'sm' | 'lg'), tooltip
+ * - Keyboard shortcut: Cmd/Ctrl + B to toggle
+ */
+
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'

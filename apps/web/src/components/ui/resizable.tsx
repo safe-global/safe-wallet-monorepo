@@ -7,6 +7,29 @@ import {
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Resizable Component
+ *
+ * Resizable panel layout (split panes with draggable dividers). Built on react-resizable-panels.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/resizable
+ *
+ * @example
+ * ```tsx
+ * <ResizablePanelGroup direction="horizontal">
+ *   <ResizablePanel defaultSize={25}>Panel 1</ResizablePanel>
+ *   <ResizableHandle />
+ *   <ResizablePanel defaultSize={75}>Panel 2</ResizablePanel>
+ * </ResizablePanelGroup>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - ResizablePanelGroup: `direction` ('horizontal' | 'vertical'), `autoSaveId`
+ * - ResizablePanel: `defaultSize`, `minSize`
+ * - ResizableHandle: `withHandle` — see Base UI / react-resizable-panels
+ */
+
 function ResizablePanelGroupComp({ className, ...props }: React.ComponentProps<typeof ResizablePanelGroup>) {
   return (
     <ResizablePanelGroup

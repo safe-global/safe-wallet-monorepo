@@ -5,6 +5,36 @@ import { cn } from '@/utils/cn'
 import { Button } from '@/components/ui/button'
 import { XIcon } from 'lucide-react'
 
+/**
+ * Sheet Component
+ *
+ * Slide-over panel (dialog that slides in from an edge).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/sheet
+ *
+ * @example
+ * ```tsx
+ * <Sheet>
+ *   <SheetTrigger render={<Button />}>Open</SheetTrigger>
+ *   <SheetContent side="right">
+ *     <SheetHeader>
+ *       <SheetTitle>Title</SheetTitle>
+ *       <SheetDescription>Description</SheetDescription>
+ *     </SheetHeader>
+ *     Content
+ *     <SheetFooter>
+ *       <SheetClose render={<Button variant="outline" />}>Close</SheetClose>
+ *     </SheetFooter>
+ *   </SheetContent>
+ * </Sheet>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - SheetContent: `side` ('top' | 'right' | 'bottom' | 'left'), `showCloseButton`
+ * - Root / Trigger / Close: see Base UI dialog
+ */
+
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }

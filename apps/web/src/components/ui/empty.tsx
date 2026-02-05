@@ -2,6 +2,30 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Empty Component
+ *
+ * Displays an empty state with optional media, title, description, and action.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/empty
+ *
+ * @example
+ * ```tsx
+ * <Empty>
+ *   <EmptyHeader>
+ *     <EmptyTitle>No results</EmptyTitle>
+ *     <EmptyDescription>Try a different search.</EmptyDescription>
+ *   </EmptyHeader>
+ *   <EmptyAction><Button>Action</Button></EmptyAction>
+ * </Empty>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - EmptyMedia: `variant` ('default' | 'icon')
+ * - All components: `className` — see Base UI
+ */
+
 function Empty({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
