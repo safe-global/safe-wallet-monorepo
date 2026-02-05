@@ -60,7 +60,7 @@ mcp__figma-remote-mcp__get_screenshot(fileKey, nodeId)
 - [ ] Typography (font size, weight, line height)
 - [ ] Border radius
 - [ ] Shadows and elevation
-- [ ] Icons (size, color, alignment)
+- [ ] Icons (size, color, alignment) - verify button icons are direct children, not wrapped in divs, ignore visual description and stick to data for icons
 
 ### Phase 3: Attribute-by-Attribute Verification
 
@@ -68,12 +68,15 @@ mcp__figma-remote-mcp__get_screenshot(fileKey, nodeId)
 
 #### Layout & Spacing
 
-| Attribute | Figma | Implementation | Match? |
-| --------- | ----- | -------------- | ------ |
-| width     |       |                |        |
-| height    |       |                |        |
-| padding   |       |                |        |
-| gap       |       |                |        |
+| Attribute     | Figma | Implementation | Match? |
+| ------------- | ----- | -------------- | ------ |
+| width         |       |                |        |
+| height        |       |                |        |
+| padding       |       |                |        |
+| gap           |       |                |        |
+| layout ratios |       |                |        |
+
+**Important:** Verify layout ratios match Figma (e.g., 2-column grid with 50/50 split, or specific width ratios). Custom Tailwind classes are only allowed for layout, not for styling shadcn components.
 
 #### Typography
 
@@ -153,3 +156,9 @@ yarn workspace @safe-global/web type-check
 - **Components Path**: `apps/web/src/components/ui/`
 - **Utility Path**: `apps/web/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
+
+**Component Usage Rules:**
+
+- Must use existing shadcn components from `/ui/` - do not alter or override them
+- Custom styling/Tailwind is only allowed for layout (flex, grid, gap, padding, width/height ratios)
+- Verify layout ratios match Figma exactly (e.g., grid column ratios, flex proportions)
