@@ -17,6 +17,7 @@ import {
   REGISTER,
 } from 'redux-persist'
 import { reduxStorage } from './storage'
+import txSimulation from './txSimulationSlice'
 import txHistory from './txHistorySlice'
 import activeSafe from './activeSafeSlice'
 import activeSigner from './activeSignerSlice'
@@ -96,6 +97,7 @@ export const persistBlacklist = [
   'signingState',
   'signerImportFlow',
   'executingState',
+  'txSimulation',
 ]
 
 export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
@@ -109,6 +111,7 @@ const persistConfig = {
 }
 
 export const rootReducer = combineReducers({
+  txSimulation,
   txHistory,
   safes,
   activeSigner,
