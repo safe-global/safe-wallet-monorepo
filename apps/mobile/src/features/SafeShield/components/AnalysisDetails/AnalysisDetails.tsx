@@ -17,8 +17,9 @@ interface SafeShieldWidgetProps {
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  txId?: string
 }
-export const AnalysisDetails = ({ recipient, contract, threat, safeTx }: SafeShieldWidgetProps) => {
+export const AnalysisDetails = ({ recipient, contract, threat, safeTx, txId }: SafeShieldWidgetProps) => {
   // Extract data, error, and loading from each AsyncResult
   const [recipientData, recipientError] = recipient || []
   const [contractData, contractError] = contract || []
@@ -32,7 +33,7 @@ export const AnalysisDetails = ({ recipient, contract, threat, safeTx }: SafeShi
     <View backgroundColor="$backgroundPaper" width="100%" borderRadius={12} padding="$1">
       <AnalysisDetailsHeader severity={severity} />
 
-      <AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} />
+      <AnalysisDetailsContent recipient={recipient} contract={contract} threat={threat} safeTx={safeTx} txId={txId} />
     </View>
   )
 }

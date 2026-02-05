@@ -11,7 +11,7 @@ interface TransactionSimulationProps {
   severity?: Severity
   highlighted?: boolean
   simulationStatus: SimulationStatus
-  simulationLink: string
+  simulationLink?: string
   requestError?: string
   canSimulate: boolean
   onRunSimulation?: () => void
@@ -45,9 +45,8 @@ export function TransactionSimulation({
     if (!isFinished) {
       return 'Transaction simulation'
     }
-    {
-      return severity === Severity.OK ? 'Simulation successful' : 'Simulation failed'
-    }
+
+    return severity === Severity.OK ? 'Simulation successful' : 'Simulation failed'
   }
 
   return (

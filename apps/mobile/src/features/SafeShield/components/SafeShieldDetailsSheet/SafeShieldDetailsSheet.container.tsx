@@ -53,7 +53,13 @@ export const SafeShieldDetailsSheetContainer = () => {
     <SafeBottomSheet snapPoints={[]} loading={false}>
       {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
 
-      <AnalysisDetails recipient={recipientData} contract={contractData} threat={threatData} safeTx={safeTx} />
+      <AnalysisDetails
+        recipient={recipientData}
+        contract={contractData}
+        threat={threatData}
+        safeTx={safeTx}
+        txId={txId}
+      />
 
       <View flexDirection="row" width="100%" gap="$1" marginTop={-4} justifyContent="center" alignItems="center">
         <Text fontSize="$2" color="$colorSecondary">
