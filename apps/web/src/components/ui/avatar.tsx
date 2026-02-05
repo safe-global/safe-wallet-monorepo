@@ -3,6 +3,24 @@
 /**
  * Avatar Component
  *
+ * Image element with a fallback for representing the user.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/avatar
+ *
+ * @example
+ * ```tsx
+ * <Avatar>
+ *   <AvatarImage src="https://github.com/shadcn.png" />
+ *   <AvatarFallback>CN</AvatarFallback>
+ * </Avatar>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Avatar: `size` ('default' | 'sm' | 'xs'), `className`
+ * - AvatarImage: `src`, `alt`
+ * - AvatarFallback: `className`
+ *
  * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=18:1398
  *
  * Intentional differences from Figma:

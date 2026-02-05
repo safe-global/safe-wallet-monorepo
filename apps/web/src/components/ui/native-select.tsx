@@ -3,6 +3,27 @@ import * as React from 'react'
 import { cn } from '@/utils/cn'
 import { ChevronDownIcon } from 'lucide-react'
 
+/**
+ * Native Select Component
+ *
+ * Native HTML select with styled wrapper and optional size.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/native-select
+ *
+ * @example
+ * ```tsx
+ * <NativeSelect>
+ *   <NativeSelectOption value="a">Option A</NativeSelectOption>
+ *   <NativeSelectOption value="b">Option B</NativeSelectOption>
+ * </NativeSelect>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - NativeSelect: `size` ('sm' | 'default'), `className`
+ * - NativeSelectOption / NativeSelectOptGroup: native option/optgroup props
+ */
+
 type NativeSelectProps = Omit<React.ComponentProps<'select'>, 'size'> & {
   size?: 'sm' | 'default'
 }

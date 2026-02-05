@@ -3,6 +3,29 @@ import { Slider as SliderPrimitive } from '@base-ui/react/slider'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Slider Component
+ *
+ * Select a value or range from a min–max range (slider control).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/slider
+ *
+ * @example
+ * ```tsx
+ * <Slider defaultValue={[33]} max={100} step={1} />
+ * // or controlled:
+ * <Slider value={[50]} onValueChange={setValue} min={0} max={100} />
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `defaultValue`: uncontrolled initial value (array)
+ * - `value`, `onValueChange`: controlled state
+ * - `min`, `max`, `step`: range and step size
+ * - `orientation`: 'horizontal' | 'vertical'
+ * - `disabled`: disables interaction
+ */
+
 function Slider({ className, defaultValue, value, min = 0, max = 100, ...props }: SliderPrimitive.Root.Props) {
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),

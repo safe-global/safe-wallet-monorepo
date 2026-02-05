@@ -3,6 +3,38 @@ import { Drawer as DrawerPrimitive } from 'vaul'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Drawer Component
+ *
+ * A drawer component that slides in from an edge (built on Vaul).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/drawer
+ *
+ * @example
+ * ```tsx
+ * <Drawer>
+ *   <DrawerTrigger>Open</DrawerTrigger>
+ *   <DrawerContent>
+ *     <DrawerHeader>
+ *       <DrawerTitle>Title</DrawerTitle>
+ *       <DrawerDescription>Description</DrawerDescription>
+ *     </DrawerHeader>
+ *     <DrawerFooter>
+ *       <Button>Submit</Button>
+ *       <DrawerClose>
+ *         <Button variant="outline">Cancel</Button>
+ *       </DrawerClose>
+ *     </DrawerFooter>
+ *   </DrawerContent>
+ * </Drawer>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Root: `open`, `onOpenChange`, `direction` ('top' | 'right' | 'bottom' | 'left')
+ * - Trigger / Portal / Close / Overlay / Content: see Vaul docs
+ */
+
 function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />
 }
