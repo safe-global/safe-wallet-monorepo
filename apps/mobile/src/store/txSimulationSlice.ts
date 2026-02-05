@@ -10,7 +10,7 @@ type simulationState = {
   callTrace: TenderlySimulation['transaction']['call_trace']
 }
 
-export type txSimulationState = Record<string, simulationState>;
+export type txSimulationState = Record<string, simulationState>
 
 const settingsSlice: Slice<txSimulationState> = createSlice({
   name: 'txSimulation',

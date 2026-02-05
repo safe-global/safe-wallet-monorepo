@@ -58,7 +58,7 @@ export const useSimulation = (txId?: string): UseSimulationReturn => {
         )
       }
     },
-    [tenderly],
+    [dispatch, tenderly, txId],
   )
 
   return {
