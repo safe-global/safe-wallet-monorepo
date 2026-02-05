@@ -108,7 +108,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
       {showAssessment && safeTxHash && (
         <Box gridArea="assessment" className={css.assessment}>
-          <HnQueueAssessment safeTxHash={safeTxHash!} assessment={assessment} isAuthenticated={isAuthenticated} />
+          <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
         </Box>
       )}
 
