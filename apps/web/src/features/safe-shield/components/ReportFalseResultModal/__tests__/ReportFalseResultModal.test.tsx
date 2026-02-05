@@ -10,9 +10,11 @@ jest.mock('@/features/safe-shield/hooks/useReportFalseResult', () => ({
   }),
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 describe('ReportFalseResultModal', () => {
   const mockRequestId = faker.string.uuid()

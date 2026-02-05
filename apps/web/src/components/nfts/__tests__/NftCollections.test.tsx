@@ -15,22 +15,11 @@ jest.mock('@/services/observability', () => ({
   captureException: jest.fn(),
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-  EventType: {
-    PAGEVIEW: 'pageview',
-    CLICK: 'customClick',
-    META: 'metadata',
-    SAFE_APP: 'safeApp',
-    SAFE_CREATED: 'safe_created',
-    SAFE_ACTIVATED: 'safe_activated',
-    SAFE_OPENED: 'safe_opened',
-    WALLET_CONNECTED: 'wallet_connected',
-    TX_CREATED: 'tx_created',
-    TX_CONFIRMED: 'tx_confirmed',
-    TX_EXECUTED: 'tx_executed',
-  },
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,

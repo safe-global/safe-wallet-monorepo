@@ -9,6 +9,16 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
+// Mock @/features/__core__ to prevent circular dependency issues
+jest.mock('@/features/__core__', () => ({
+  createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
+  useLoadFeature: jest.fn(() => ({
+    $isReady: true,
+    $isLoading: false,
+    $isDisabled: false,
+  })),
+}))
+
 // Mock PKCE utilities
 jest.mock('@/features/hypernative', () => {
   const actual = jest.requireActual('@/features/hypernative')
