@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Storybook
         working-directory: apps/web
-        run: yarn build-storybook
+        run: yarn build-storybook:vite
         env:
           NODE_OPTIONS: '--max_old_space_size=6144'
 
