@@ -7,6 +7,29 @@ import { cn } from '@/utils/cn'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
+/**
+ * Field Component
+ *
+ * Composable form field layout (label, description, error, control).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/field
+ *
+ * @example
+ * ```tsx
+ * <Field>
+ *   <FieldLabel>Email</FieldLabel>
+ *   <FieldDescription>We will never share your email.</FieldDescription>
+ *   <Input />
+ *   <FieldError>Invalid email</FieldError>
+ * </Field>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Field: `orientation` ('vertical' | 'horizontal'), `invalid`
+ * - FieldLegend: `variant` ('legend' | 'label') — see Base UI
+ */
+
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
     <fieldset

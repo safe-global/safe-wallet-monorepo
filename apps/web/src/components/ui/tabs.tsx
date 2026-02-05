@@ -3,6 +3,33 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Tabs Component
+ *
+ * Tabbed interface (list of triggers and content panels).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/tabs
+ *
+ * @example
+ * ```tsx
+ * <Tabs defaultValue="account" className="w-[400px]">
+ *   <TabsList>
+ *     <TabsTrigger value="account">Account</TabsTrigger>
+ *     <TabsTrigger value="password">Password</TabsTrigger>
+ *   </TabsList>
+ *   <TabsContent value="account">Make changes to your account here.</TabsContent>
+ *   <TabsContent value="password">Change your password here.</TabsContent>
+ * </Tabs>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Tabs (Root): `defaultValue`, `value`, `onValueChange`
+ * - Tabs (Root): `orientation` ('horizontal' | 'vertical')
+ * - TabsList: `variant` ('default' | 'line')
+ * - TabsTrigger: `value`, `disabled`
+ */
+
 function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive.Root.Props) {
   return (
     <TabsPrimitive.Root

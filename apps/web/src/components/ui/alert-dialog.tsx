@@ -6,6 +6,36 @@ import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog
 import { cn } from '@/utils/cn'
 import { Button } from '@/components/ui/button'
 
+/**
+ * Alert Dialog Component
+ *
+ * Modal dialog that interrupts the user with important content and expects a response.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/alert-dialog
+ *
+ * @example
+ * ```tsx
+ * <AlertDialog>
+ *   <AlertDialogTrigger render={<Button variant="outline" />}>Show Dialog</AlertDialogTrigger>
+ *   <AlertDialogContent>
+ *     <AlertDialogHeader>
+ *       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+ *       <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+ *     </AlertDialogHeader>
+ *     <AlertDialogFooter>
+ *       <AlertDialogCancel>Cancel</AlertDialogCancel>
+ *       <AlertDialogAction>Continue</AlertDialogAction>
+ *     </AlertDialogFooter>
+ *   </AlertDialogContent>
+ * </AlertDialog>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - AlertDialogContent: `size` ('default' | 'sm')
+ * - Root / Trigger / Portal / Backdrop / Popup: see Base UI
+ */
+
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }

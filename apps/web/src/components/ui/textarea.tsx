@@ -2,6 +2,23 @@ import * as React from 'react'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Textarea Component
+ *
+ * Multi-line text input (textarea).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/textarea
+ *
+ * @example
+ * ```tsx
+ * <Textarea placeholder="Enter text..." />
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `placeholder`, `disabled`, `value`, `onChange`, `className` — extends native textarea props, see Base UI
+ */
+
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (
     <textarea

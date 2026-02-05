@@ -3,6 +3,30 @@ import { Accordion as AccordionPrimitive } from '@base-ui/react/accordion'
 import { cn } from '@/utils/cn'
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 
+/**
+ * Accordion Component
+ *
+ * Vertically stacked interactive headings that each reveal a section of content.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/accordion
+ *
+ * @example
+ * ```tsx
+ * <Accordion defaultValue={["item-1"]}>
+ *   <AccordionItem value="item-1">
+ *     <AccordionTrigger>Is it accessible?</AccordionTrigger>
+ *     <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
+ *   </AccordionItem>
+ * </Accordion>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Root: `defaultValue` (array of open items), `value`, `onValueChange`
+ * - Root: `multiple` (allow multiple items open)
+ * - Item: `value` (unique identifier), `disabled`
+ */
+
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return <AccordionPrimitive.Root data-slot="accordion" className={cn('flex w-full flex-col', className)} {...props} />
 }

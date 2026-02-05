@@ -5,6 +5,28 @@ import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
 import { cn } from '@/utils/cn'
 import { CheckIcon } from 'lucide-react'
 
+/**
+ * Checkbox Component
+ *
+ * A control that allows the user to toggle between checked and not checked.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/checkbox
+ *
+ * @example
+ * ```tsx
+ * <Field orientation="horizontal">
+ *   <Checkbox id="terms" />
+ *   <FieldLabel htmlFor="terms">Accept terms and conditions</FieldLabel>
+ * </Field>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `defaultChecked`: uncontrolled initial state
+ * - `checked`, `onCheckedChange`: controlled state
+ * - `disabled`: disables interaction
+ */
+
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root
