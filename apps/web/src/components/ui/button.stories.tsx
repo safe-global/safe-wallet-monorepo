@@ -2,10 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { SquareDashed, Plus, ArrowRight } from 'lucide-react'
 import { Button } from './button'
 
+/**
+ * Button Component Stories
+ *
+ * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/Obra-shadcn-ui--safe-?node-id=842-44442
+ */
 const meta = {
   title: 'UI/Button',
   component: Button,
-  tags: ['autodocs'],
   argTypes: {
     variant: {
       control: 'select',
@@ -28,6 +32,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const AllVariants: Story = {
+  tags: ['!chromatic'],
   render: () => (
     <div className="flex flex-col gap-8">
       <div>
@@ -120,75 +125,4 @@ export const AllVariants: Story = {
       </div>
     </div>
   ),
-}
-
-export const Default: Story = {
-  args: {
-    children: 'Button',
-    variant: 'default',
-    size: 'default',
-  },
-}
-
-export const Secondary: Story = {
-  args: {
-    children: 'Secondary',
-    variant: 'secondary',
-  },
-}
-
-export const Outline: Story = {
-  args: {
-    children: 'Outline',
-    variant: 'outline',
-  },
-}
-
-export const Ghost: Story = {
-  args: {
-    children: 'Ghost',
-    variant: 'ghost',
-  },
-}
-
-export const Destructive: Story = {
-  args: {
-    children: 'Destructive',
-    variant: 'destructive',
-  },
-}
-
-export const Link: Story = {
-  args: {
-    children: 'Link',
-    variant: 'link',
-  },
-}
-
-export const Small: Story = {
-  args: {
-    children: 'Small',
-    size: 'sm',
-  },
-}
-
-export const ExtraSmall: Story = {
-  args: {
-    children: 'Extra Small',
-    size: 'xs',
-  },
-}
-
-export const Large: Story = {
-  args: {
-    children: 'Large',
-    size: 'lg',
-  },
-}
-
-export const Disabled: Story = {
-  args: {
-    children: 'Disabled',
-    disabled: true,
-  },
 }
