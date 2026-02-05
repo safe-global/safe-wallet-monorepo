@@ -5,92 +5,92 @@ exports[`./DataTable.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root css-1qh2y1i-MuiStack-root"
+      class="MuiStack-root mui-style-1qh2y1i-MuiStack-root"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
       >
         <b>
           Simple Data Table
         </b>
       </p>
       <div
-        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
         data-testid=""
       >
         <div
-          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
           >
             Transaction Hash
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
           >
             0x536e...94f9
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
         data-testid=""
       >
         <div
-          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
           >
             Block Number
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
           >
             123456
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
         data-testid=""
       >
         <div
-          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
           >
             Gas Used
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
           >
             21000
           </div>

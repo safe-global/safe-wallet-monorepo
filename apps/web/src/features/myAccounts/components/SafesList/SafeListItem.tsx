@@ -1,8 +1,8 @@
 import { useMediaQuery, useTheme } from '@mui/material'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
-import css from '@/features/myAccounts/components/AccountItems/styles.module.css'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { AccountItem } from '../AccountItem'
+import { useSafeItemData } from '../../hooks/useSafeItemData'
+import css from '../AccountItems/styles.module.css'
+import type { SafeItem } from '@/hooks/safes'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
 
@@ -32,7 +32,9 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
   } = useSafeItemData(safeItem, { isSpaceSafe })
 
   const hasQueuedItems =
-    safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
   const statusChips = (
     <>

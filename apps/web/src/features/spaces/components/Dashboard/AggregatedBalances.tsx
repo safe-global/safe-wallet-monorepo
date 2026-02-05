@@ -6,7 +6,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { SafeItem } from '@/hooks/safes'
 import ChainIndicator from '@/components/common/ChainIndicator'
 
 type FiatTotalByChain = {

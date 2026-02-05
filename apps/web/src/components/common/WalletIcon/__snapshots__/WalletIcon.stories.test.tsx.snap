@@ -44,7 +44,7 @@ exports[`./WalletIcon.stories NoIcon 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+    class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
     style="width: 30px; height: 30px;"
   />
 </div>

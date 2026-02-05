@@ -1,6 +1,5 @@
-import SafesList from '@/features/myAccounts/components/SafesList'
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
+import SafesList from '../SafesList'
+import { type AllSafeItems, useSafesSearch } from '@/hooks/safes'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { trackEvent } from '@/services/analytics'

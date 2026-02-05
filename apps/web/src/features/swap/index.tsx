@@ -1,9 +1,8 @@
-import { CowSwapWidget } from '@cowprotocol/widget-react'
-import { type CowSwapWidgetParams, TradeType } from '@cowprotocol/widget-lib'
-import type { OnTradeParamsPayload } from '@cowprotocol/events'
-import { type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
+import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
+import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
@@ -108,6 +107,7 @@ const SwapWidget = ({ sell }: Params) => {
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,
+    disableCrossChainSwap: true,
     hideLogo: true,
     hideNetworkSelector: true,
     sounds: {

@@ -1,14 +1,15 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem } from '@/features/multichain'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import {
+  isMultiChainSafeItem,
+  type SafeItem,
   type AllSafeItems,
   flattenSafeItems,
   type MultiChainSafeItem,
-} from '@/features/myAccounts/hooks/useAllSafesGrouped'
+} from '@/hooks/safes'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import css from '@/features/spaces/components/AddAccounts/styles.module.css'
 import { useChain } from '@/hooks/useChains'
@@ -61,6 +62,7 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 }
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
+  const { AccountItem } = useLoadFeature(MyAccountsFeature)
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const flatSafeItems = flattenSafeItems(spaceSafes)

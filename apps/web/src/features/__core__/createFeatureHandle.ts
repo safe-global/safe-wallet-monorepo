@@ -13,7 +13,8 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   'no-fee-campaign': FEATURES.NO_FEE_NOVEMBER,
   speedup: FEATURES.SPEED_UP_TX,
   portfolio: FEATURES.PORTFOLIO_ENDPOINT,
-  targetedOutreach: FEATURES.TARGETED_SURVEY,
+  'targeted-outreach': FEATURES.TARGETED_SURVEY,
+  myAccounts: FEATURES.MY_ACCOUNTS,
 }
 
 /**

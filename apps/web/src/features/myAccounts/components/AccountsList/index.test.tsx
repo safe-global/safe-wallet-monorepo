@@ -4,15 +4,15 @@ import { render } from '@/tests/test-utils'
 import React from 'react'
 import { screen } from '@testing-library/react'
 import AccountsList from './index'
-import FilteredSafes from '@/features/myAccounts/components/FilteredSafes'
-import PinnedSafes from '@/features/myAccounts/components/PinnedSafes'
-import AllSafes from '@/features/myAccounts/components/AllSafes'
-import type { AllSafeItemsGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import FilteredSafes from '../FilteredSafes'
+import PinnedSafes from '../PinnedSafes'
+import AllSafes from '../AllSafes'
+import type { AllSafeItemsGrouped } from '@/hooks/safes'
 
 // Mock child components to simplify tests, we just need to verify their rendering and props.
-jest.mock('@/features/myAccounts/components/FilteredSafes', () => jest.fn(() => <div>FilteredSafes Component</div>))
-jest.mock('@/features/myAccounts/components/PinnedSafes', () => jest.fn(() => <div>PinnedSafes Component</div>))
-jest.mock('@/features/myAccounts/components/AllSafes', () => jest.fn(() => <div>AllSafes Component</div>))
+jest.mock('../FilteredSafes', () => jest.fn(() => <div>FilteredSafes Component</div>))
+jest.mock('../PinnedSafes', () => jest.fn(() => <div>PinnedSafes Component</div>))
+jest.mock('../AllSafes', () => jest.fn(() => <div>AllSafes Component</div>))
 
 describe('AccountsList', () => {
   const baseSafes: AllSafeItemsGrouped = {

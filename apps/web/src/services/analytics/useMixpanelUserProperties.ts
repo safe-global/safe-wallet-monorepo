@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import { MixpanelUserProperty } from '@/services/analytics/mixpanel-events'
-import { useNetworksOfSafe } from '@/features/myAccounts/hooks/useNetworksOfSafe'
+import { useNetworksOfSafe } from '@/features/myAccounts'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 
 export interface MixpanelUserProperties {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Stack } from '@mui/material'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import StakingStatus from './index'
+import StakingStatus from '@/components/transactions/TxDetails/TxData/Staking/StakingStatus'
 
 const meta: Meta<typeof StakingStatus> = {
   component: StakingStatus,
@@ -21,12 +21,14 @@ export const NotStaked: Story = {
 }
 
 export const Activating: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.ACTIVATING,
   },
 }
 
 export const DepositInProgress: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.DEPOSIT_IN_PROGRESS,
   },
@@ -39,24 +41,28 @@ export const Active: Story = {
 }
 
 export const ExitRequested: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.EXIT_REQUESTED,
   },
 }
 
 export const Exiting: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.EXITING,
   },
 }
 
 export const Exited: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.EXITED,
   },
 }
 
 export const Slashed: Story = {
+  tags: ['!chromatic'],
   args: {
     status: NativeStakingStatus.SLASHED,
   },

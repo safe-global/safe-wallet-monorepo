@@ -6,7 +6,7 @@ import * as useIsHypernativeGuardHook from '@/features/hypernative/hooks/useIsHy
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useBannerStorageHook from '@/features/hypernative/hooks/useBannerStorage'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
-import * as useIsOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
+import * as useIsOutreachSafeHook from '@/features/targeted-features'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as featureCore from '@/features/__core__'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'

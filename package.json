@@ -12,6 +12,7 @@
   "scripts": {
     "lint": "yarn workspaces foreach --all -pt run lint",
     "test": "yarn workspaces foreach --all -pt run test",
+    "test:scripts": "yarn workspace @safe-global/web jest --config ../../scripts/jest.config.cjs",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
     "prettier": "prettier --check . --config ./.prettierrc --ignore-path ./.prettierignore",
     "prettier:fix": "prettier --write . --config ./.prettierrc --ignore-path ./.prettierignore",
@@ -33,7 +34,7 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.6.2",
-    "storybook": "^10.2.1"
+    "storybook": "^10.2.2"
   },
   "dependenciesMeta": {
     "cypress": {
@@ -46,5 +47,10 @@
   "packageManager": "yarn@4.12.0",
   "dependencies": {
     "@yarnpkg/types": "^4.0.1"
+  },
+  "msw": {
+    "workerDirectory": [
+      "apps/web/public"
+    ]
   }
 }

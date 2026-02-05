@@ -1,6 +1,5 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import type { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import type { useSafeCreationData } from './hooks/useSafeCreationData'
 

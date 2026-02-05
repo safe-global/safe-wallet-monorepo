@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useAllSafesGrouped } from './useAllSafesGrouped'
+import { useAllSafesGrouped } from '@/hooks/safes'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'

@@ -1,7 +1,7 @@
 import { Box, Tooltip, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { SafeItem } from '@/hooks/safes'
 import css from '../AccountItems/styles.module.css'
 
 export interface AccountItemChainBadgeProps {
