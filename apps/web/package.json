@@ -202,7 +202,7 @@
     "remark-heading-id": "^1.0.1",
     "remark-mdx-frontmatter": "^5.2.0",
     "shadcn": "^3.7.0",
-    "storybook": "^10.2.2",
+    "storybook": "^10.2.5",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",
