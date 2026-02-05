@@ -4,6 +4,27 @@ import { PreviewCard as PreviewCardPrimitive } from '@base-ui/react/preview-card
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Hover Card Component
+ *
+ * Displays a rich content card on hover (Preview Card / Hover Card).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/hover-card
+ *
+ * @example
+ * ```tsx
+ * <HoverCard>
+ *   <HoverCardTrigger>Hover me</HoverCardTrigger>
+ *   <HoverCardContent>Card content here.</HoverCardContent>
+ * </HoverCard>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - HoverCardContent: `side`, `sideOffset`, `align`, `alignOffset`
+ * - Root / Trigger: see Base UI preview-card
+ */
+
 function HoverCard({ ...props }: PreviewCardPrimitive.Root.Props) {
   return <PreviewCardPrimitive.Root data-slot="hover-card" {...props} />
 }

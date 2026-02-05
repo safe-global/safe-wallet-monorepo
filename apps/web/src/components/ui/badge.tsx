@@ -4,6 +4,25 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Badge Component
+ *
+ * Displays a badge or a component that looks like a badge.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/badge
+ *
+ * @example
+ * ```tsx
+ * <Badge variant="secondary">Badge</Badge>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link')
+ * - `render`
+ * - `className`
+ */
+
 const badgeVariants = cva(
   'h-5 gap-1 rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge',
   {

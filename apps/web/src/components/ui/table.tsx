@@ -4,6 +4,36 @@ import * as React from 'react'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Table Component
+ *
+ * Semantic table layout (Table, TableHeader, TableBody, TableRow, TableHead, TableCell, etc.).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/table
+ *
+ * @example
+ * ```tsx
+ * <Table>
+ *   <TableHeader>
+ *     <TableRow>
+ *       <TableHead>Name</TableHead>
+ *     </TableRow>
+ *   </TableHeader>
+ *   <TableBody>
+ *     <TableRow>
+ *       <TableCell>Value</TableCell>
+ *     </TableRow>
+ *   </TableBody>
+ * </Table>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Table: wraps in scroll container
+ * - TableRow: `data-state` (e.g. selected)
+ * - All components: `className` — see Base UI
+ */
+
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
     <div data-slot="table-container" className="relative w-full overflow-x-auto">

@@ -2,6 +2,30 @@ import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
 import { cn } from '@/utils/cn'
 
+/**
+ * Progress Component
+ *
+ * Displays a progress bar (determinate or indeterminate).
+ *
+ * @see https://ui.shadcn.com/docs/components/base/progress
+ *
+ * @example
+ * ```tsx
+ * <Progress value={33} />
+ * // or with label:
+ * <Progress value={56}>
+ *   <ProgressLabel>Upload progress</ProgressLabel>
+ *   <ProgressValue />
+ * </Progress>
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - Progress (Root): `value` (0–100), `min`, `max`
+ * - ProgressLabel: accessible label text
+ * - ProgressValue: displays percentage
+ */
+
 function Progress({ className, children, value, ...props }: ProgressPrimitive.Root.Props) {
   return (
     <ProgressPrimitive.Root

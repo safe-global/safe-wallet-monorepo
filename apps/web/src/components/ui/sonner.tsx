@@ -4,6 +4,23 @@ import { useTheme } from 'next-themes'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from 'lucide-react'
 
+/**
+ * Sonner Component
+ *
+ * Toast notifications (Toaster). Use with toast() from sonner. Built on Sonner.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/sonner
+ *
+ * @example
+ * ```tsx
+ * <Toaster /> then toast('Message') or toast.success('Done')
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `position`, `expand`, `theme`, `icons`, `toastOptions` — see Sonner / Base UI sonner docs
+ */
+
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme()
 
