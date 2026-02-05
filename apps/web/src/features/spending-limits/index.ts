@@ -15,8 +15,8 @@ export type { NewSpendingLimitFlowProps, NewSpendingLimitData, SpendingLimitTxPa
 // NOTE: SpendingLimitFields is NOT exported - it has heavy deps via TokenAmountFields.
 // Components that need it should import directly from './types' (they're lazy-loaded anyway).
 export { getResetTimeOptions } from './constants'
-// Lightweight deployment utilities (safe to import anywhere - minimal bundle impact)
-export { getDeployedSpendingLimitModuleAddress } from './services/spendingLimitDeployments'
+// NOTE: getDeployedSpendingLimitModuleAddress is NOT exported from barrel to avoid circular deps.
+// Files that need it should import directly from './services/spendingLimitDeployments'
 
 // Lightweight hooks exported directly (always loaded, minimal bundle impact)
 // These hooks only read from Redux store - no heavy logic

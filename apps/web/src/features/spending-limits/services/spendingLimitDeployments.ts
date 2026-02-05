@@ -16,7 +16,7 @@ enum ALLOWANCE_MODULE_VERSIONS {
 
 const ALL_VERSIONS = [ALLOWANCE_MODULE_VERSIONS['0.1.0'], ALLOWANCE_MODULE_VERSIONS['0.1.1']]
 
-const getDeployment = (chainId: string, modules: SafeState['modules']) => {
+export const getDeployment = (chainId: string, modules: SafeState['modules']) => {
   if (!modules?.length) return
   for (const version of ALL_VERSIONS) {
     const deployment = getAllowanceModuleDeployment({ network: chainId, version })
