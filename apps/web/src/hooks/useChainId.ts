@@ -7,7 +7,7 @@ import useWallet from './wallets/useWallet'
 import useChains from './useChains'
 
 // Use the location object directly because Next.js's router.query is available only on mount
-const getLocationQuery = (): ParsedUrlQuery => {
+export const getLocationQuery = (): ParsedUrlQuery => {
   if (typeof location === 'undefined') return {}
   const query = parse(location.search.slice(1))
   return query
@@ -23,19 +23,23 @@ const useUrlShortName = (): string => {
   return prefix || chain
 }
 
-// Static-only chainId from URL (no API wait)
-// Enables optimistic early API calls before chains config loads
-export const useRawUrlChainId = (): string => {
-  const shortName = useUrlShortName()
-  if (!shortName) return String(DEFAULT_CHAIN_ID)
-  return chains[shortName] || String(DEFAULT_CHAIN_ID)
-}
-
 export const useUrlChainId = (): string | undefined => {
   const shortName = useUrlShortName()
   const { configs } = useChains()
   if (!shortName) return undefined
   return chains[shortName] || configs.find((item) => item.shortName === shortName)?.chainId
+}
+
+// Optimistic chainId: returns static lookup immediately, resolves to real value once chains config loads
+export const useOptimisticChainId = (): string => {
+  const shortName = useUrlShortName()
+  const resolvedChainId = useUrlChainId()
+
+  if (resolvedChainId) return resolvedChainId
+
+  // Optimistic fallback while chains config is loading
+  if (!shortName) return String(DEFAULT_CHAIN_ID)
+  return chains[shortName] || String(DEFAULT_CHAIN_ID)
 }
 
 const useWalletChainId = (): string | undefined => {

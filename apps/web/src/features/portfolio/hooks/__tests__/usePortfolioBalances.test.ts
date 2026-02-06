@@ -3,7 +3,7 @@ import usePortfolioBalances from '@/features/portfolio/hooks/usePortfolioBalance
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
 import * as useChainId from '@/hooks/useChainId'
-import * as useSafeAddressFromUrl from '@/hooks/useSafeAddressFromUrl'
+import * as useOptimisticSafeAddress from '@/hooks/useOptimisticSafeAddress'
 import * as store from '@/store'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
@@ -88,8 +88,8 @@ describe('usePortfolioBalances', () => {
     })
 
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChain)
-    jest.spyOn(useChainId, 'useRawUrlChainId').mockReturnValue(CHAIN_ID)
-    jest.spyOn(useSafeAddressFromUrl, 'useSafeAddressFromUrl').mockReturnValue(SAFE_ADDRESS)
+    jest.spyOn(useChainId, 'useOptimisticChainId').mockReturnValue(CHAIN_ID)
+    jest.spyOn(useOptimisticSafeAddress, 'useOptimisticSafeAddress').mockReturnValue(SAFE_ADDRESS)
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -167,7 +167,7 @@ describe('usePortfolioBalances', () => {
         refetch: jest.fn(),
       } as any)
 
-      jest.spyOn(useChainId, 'useRawUrlChainId').mockReturnValue(CHAIN_ID)
+      jest.spyOn(useChainId, 'useOptimisticChainId').mockReturnValue(CHAIN_ID)
       renderHook(() => usePortfolioBalances(false))
 
       expect(portfolioQuerySpy).toHaveBeenCalledWith(

@@ -4,8 +4,8 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useTxServiceBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
-import { useRawUrlChainId } from '@/hooks/useChainId'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useOptimisticChainId } from '@/hooks/useChainId'
+import { useOptimisticSafeAddress } from '@/hooks/useOptimisticSafeAddress'
 
 const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
   if (!portfolio) return undefined
@@ -36,8 +36,8 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
  */
 const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
-  const safeAddress = useSafeAddressFromUrl() // From URL directly, no API wait
-  const earlyChainId = useRawUrlChainId()
+  const safeAddress = useOptimisticSafeAddress()
+  const earlyChainId = useOptimisticChainId()
   const isTrustedTokenList = useTokenListSetting() ?? true // Optimistic: assume trusted before chain config loads
 
   const isReadyPortfolio = safeAddress && earlyChainId
