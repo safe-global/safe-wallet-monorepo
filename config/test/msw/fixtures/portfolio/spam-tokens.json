@@ -1,0 +1,558 @@
+{
+  "totalBalanceFiat": "85412445.36473647",
+  "totalTokenBalanceFiat": "83641758.63568594",
+  "totalPositionsBalanceFiat": "1770686.7290505276",
+  "tokenBalances": [
+    {
+      "tokenInfo": {
+        "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "decimals": 18,
+        "symbol": "stETH",
+        "name": "Lido Staked ETH",
+        "logoUri": "https://cdn.zerion.io/0xae7ab96520de3a18e5e111b5eaab095312d7fe84.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "14129295652539030594001",
+      "balanceFiat": "39752837.33844084",
+      "price": "2813.504531013",
+      "priceChangePercentage1d": "-6.4812887456634165"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "decimals": 18,
+        "symbol": "wstETH",
+        "name": "Lido Wrapped Staked ETH",
+        "logoUri": "https://cdn.zerion.io/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "6222000000000000000000",
+      "balanceFiat": "21480469.882561803",
+      "price": "3452.3416719",
+      "priceChangePercentage1d": "-6.414067811282365"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+        "decimals": 18,
+        "symbol": "GNO",
+        "name": "Gnosis Token",
+        "logoUri": "https://cdn.zerion.io/0x6810e776880c02933d47db1b9fc05908e5386b96.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "154381057108782645449576",
+      "balanceFiat": "20733147.973944206",
+      "price": "134.29852316229997",
+      "priceChangePercentage1d": "-5.275857102696236"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+        "decimals": 18,
+        "symbol": "COW",
+        "name": "CoW Protocol",
+        "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "5094723562452327307059033",
+      "balanceFiat": "907318.6187126453",
+      "price": "0.17808986250000003",
+      "priceChangePercentage1d": "-8.656298450468537"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32",
+        "decimals": 18,
+        "symbol": "LDO",
+        "name": "Lido DAO Token",
+        "logoUri": "https://cdn.zerion.io/0x5a98fcbea516cf06857215779fd812ca3bef1b32.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "728085559418036149806534",
+      "balanceFiat": "348063.6475714646",
+      "price": "0.478053222",
+      "priceChangePercentage1d": "-8.379899776300814"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+        "decimals": 18,
+        "symbol": "SAFE",
+        "name": "Safe Token",
+        "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2041370498413453871452698",
+      "balanceFiat": "281557.9777480091",
+      "price": "0.13792595609999997",
+      "priceChangePercentage1d": "-7.283598555458049"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x93ED3FBe21207Ec2E8f2d3c3de6e058Cb73Bc04d",
+        "decimals": 18,
+        "symbol": "PNK",
+        "name": "Pinakion on xDai",
+        "logoUri": "https://cdn.zerion.io/0x93ed3fbe21207ec2e8f2d3c3de6e058cb73bc04d.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "7697953909159227079999015",
+      "balanceFiat": "111191.43633178303",
+      "price": "0.0144442845",
+      "priceChangePercentage1d": "-4.02915146803805"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD",
+        "decimals": 18,
+        "symbol": "sUSDS",
+        "name": "Savings USDS",
+        "logoUri": "https://cdn.zerion.io/7911e0d5-869c-414a-8a62-6f41f62675a8.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "18245260355038121984362",
+      "balanceFiat": "19770.103354914307",
+      "price": "1.083574746",
+      "priceChangePercentage1d": "0.2994892587656617"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x1A5F9352Af8aF974bFC03399e3767DF6370d82e4",
+        "decimals": 18,
+        "symbol": "OWL",
+        "name": "OWL Token",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "722650120650684931506846",
+      "balanceFiat": "6222.819187676972",
+      "price": "0.008611109318121821",
+      "priceChangePercentage1d": "-7.596597511149561"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x255Aa6DF07540Cb5d3d297f0D0D4D84cb52bc8e6",
+        "decimals": 18,
+        "symbol": "RDNN",
+        "name": "Raiden Token",
+        "logoUri": "https://cdn.zerion.io/0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "741764259043046184070265",
+      "balanceFiat": "1070.9077518158188",
+      "price": "0.0014437305906291607",
+      "priceChangePercentage1d": "-6.461161274890859"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x543Ff227F64Aa17eA132Bf9886cAb5DB55DCAddf",
+        "decimals": 18,
+        "symbol": "GEN",
+        "name": "DAOstack",
+        "logoUri": "https://cdn.zerion.io/0x543ff227f64aa17ea132bf9886cab5db55dcaddf.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "356970434886646493729979",
+      "balanceFiat": "106.969383001462",
+      "price": "0.00029965894244275275",
+      "priceChangePercentage1d": "-6.471550756786948"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+        "decimals": 8,
+        "symbol": "HEX",
+        "name": "HEX",
+        "logoUri": "https://cdn.zerion.io/0x2b591e99afe9f32eaa6214f7b7629768c40eeb39.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "100000000000",
+      "balanceFiat": "0.7299320883499999",
+      "price": "0.0007299320883499999",
+      "priceChangePercentage1d": "-5.553621702494982"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x6226e00bCAc68b0Fe55583B90A1d727C14fAB77f",
+        "decimals": 18,
+        "symbol": "MTV",
+        "name": "MultiVAC",
+        "logoUri": "https://cdn.zerion.io/0x6226e00bcac68b0fe55583b90a1d727c14fab77f.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1000000000000000000000",
+      "balanceFiat": "0.22486877342999997",
+      "price": "0.00022486877342999998",
+      "priceChangePercentage1d": "-0.9049968107769257"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x07d15798a67253D76cea61F0eA6F57AeDC59DffB",
+        "decimals": 18,
+        "symbol": "BASED",
+        "name": "Based Coin",
+        "logoUri": "https://cdn.zerion.io/7339c931-5e2b-4d51-9111-c03991a4baff.png",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "375000000000000000000",
+      "balanceFiat": "0.0037310955975",
+      "price": "0.00000994958826",
+      "priceChangePercentage1d": "-7.619974502949178"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x9783B81438C24848f85848f8df31845097341771",
+        "decimals": 18,
+        "symbol": "COLLAR",
+        "name": "DOG COLLAR",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "10000000000000000000000000",
+      "balanceFiat": "0.0021658261364999997",
+      "price": "0.00000000021658261365",
+      "priceChangePercentage1d": "-6.46116127489087"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xdFF3177dEC5de40661FB4f2c63Bc777B3aAc94b8",
+        "decimals": 18,
+        "symbol": "EVM",
+        "name": "MEVM",
+        "logoUri": "",
+        "chainId": "137",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "533000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x3A4A0D5b8dfAcd651EE28ed4fFEBf91500345489",
+        "decimals": 18,
+        "symbol": "BRX",
+        "name": "BerryXToken",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "8000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xA0Cb3eDC5097EEad87f9af47329Be85B35be0f80",
+        "decimals": 18,
+        "symbol": "1SOL",
+        "name": "1SOL",
+        "logoUri": "",
+        "chainId": "137",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "100000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xD057B63f5E69CF1B929b356b579Cba08D7688048",
+        "decimals": 18,
+        "symbol": "vCOW",
+        "name": "CoW Protocol Virtual Token",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "9934880071000326987866136",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x6cA127042d3EB13ecB76c7bb44FD393b72d57547",
+        "decimals": 18,
+        "symbol": "ZDD",
+        "name": "ZD Digital",
+        "logoUri": "",
+        "chainId": "56",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2000000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x2b0c6B5622cDE003403a66016d53Fb9857752925",
+        "decimals": 18,
+        "symbol": "OHBABY",
+        "name": "OhBabyGames",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "297005030233563204177751673",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xeF1344bDf80BEf3Ff4428d8bECEC3eea4A2cF574",
+        "decimals": 18,
+        "symbol": "ES",
+        "name": "Era Swap",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "25000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x9d49a4F005d471668E1DCd2eF070C4D61ae02574",
+        "decimals": 18,
+        "symbol": "cst",
+        "name": "cst",
+        "logoUri": "",
+        "chainId": "137",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x57b9d10157f66D8C00a815B5E289a152DeDBE7ed",
+        "decimals": 6,
+        "symbol": "HQG",
+        "name": "环球股",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x242032D7c4f80c3AD52F73b71D75e1D5F940A522",
+        "decimals": 18,
+        "symbol": "RWAW",
+        "name": "RWA World",
+        "logoUri": "",
+        "chainId": "56",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "100000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xc6b0cD5440b86b2F4C9701c478ab47d685f068B9",
+        "decimals": 6,
+        "symbol": "BDOT",
+        "name": "BITDOTCOIN",
+        "logoUri": "",
+        "chainId": "137",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1248000000",
+      "price": "0"
+    }
+  ],
+  "positionBalances": [
+    {
+      "appInfo": {
+        "name": "CoW Swap",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/cow-swap.jpg",
+        "url": "https://cow.fi"
+      },
+      "balanceFiat": "1769301.4257984387",
+      "groups": [
+        {
+          "name": "CoW Swap Vesting",
+          "items": [
+            {
+              "key": "0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab-ethereum-cow swap vesting-reward",
+              "type": "reward",
+              "name": "CoW Swap Vesting",
+              "groupId": "80fa69a441d28cf30af58ec169bc34bc0e1fc5cea18fdca7e69b8eae68a9b8c2",
+              "tokenInfo": {
+                "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+                "decimals": 18,
+                "symbol": "COW",
+                "name": "CoW Protocol",
+                "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xD057B63f5E69CF1B929b356b579Cba08D7688048",
+              "balance": "9889456964168240710287360",
+              "balanceFiat": "1761212.0309483898",
+              "priceChangePercentage1d": "-8.656298450468537"
+            },
+            {
+              "key": "0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab-ethereum-cow swap vesting-locked",
+              "type": "locked",
+              "name": "CoW Swap Vesting",
+              "groupId": "80fa69a441d28cf30af58ec169bc34bc0e1fc5cea18fdca7e69b8eae68a9b8c2",
+              "tokenInfo": {
+                "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+                "decimals": 18,
+                "symbol": "COW",
+                "name": "CoW Protocol",
+                "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xD057B63f5E69CF1B929b356b579Cba08D7688048",
+              "balance": "45423106832085289712640",
+              "balanceFiat": "8089.3948500488805",
+              "priceChangePercentage1d": "-8.656298450468537"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Safe Factory",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg",
+        "url": "https://gnosis.io/"
+      },
+      "balanceFiat": "1385.3032520887389",
+      "groups": [
+        {
+          "name": "Gnosis Safe Vesting",
+          "items": [
+            {
+              "key": "0x5afe3855358e112b5647b952709e6165e1c1eeee-ethereum-gnosis safe vesting-reward",
+              "type": "reward",
+              "name": "Gnosis Safe Vesting",
+              "groupId": "a0313296549eef5b542dbeda52b15d1fd3028e17886f3f54d27d4fe20bb84294",
+              "tokenInfo": {
+                "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+                "decimals": 18,
+                "symbol": "SAFE",
+                "name": "Safe Token",
+                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xC0fde70A65C7569Fe919bE57492228DEE8cDb585",
+              "balance": "5170126051567719153664",
+              "balanceFiat": "713.0945788199955",
+              "priceChangePercentage1d": "-7.283598555458049"
+            },
+            {
+              "key": "0x5afe3855358e112b5647b952709e6165e1c1eeee-ethereum-gnosis safe vesting-locked",
+              "type": "locked",
+              "name": "Gnosis Safe Vesting",
+              "groupId": "a0313296549eef5b542dbeda52b15d1fd3028e17886f3f54d27d4fe20bb84294",
+              "tokenInfo": {
+                "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+                "decimals": 18,
+                "symbol": "SAFE",
+                "name": "Safe Token",
+                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xC0fde70A65C7569Fe919bE57492228DEE8cDb585",
+              "balance": "1253480031778953846336",
+              "balanceFiat": "172.88743183537056",
+              "priceChangePercentage1d": "-7.283598555458049"
+            }
+          ]
+        },
+        {
+          "name": "Gnosis Safe Vesting",
+          "items": [
+            {
+              "key": "0x5afe3855358e112b5647b952709e6165e1c1eeee-ethereum-gnosis safe vesting-reward",
+              "type": "reward",
+              "name": "Gnosis Safe Vesting",
+              "groupId": "99e212f7d6bd27510a310aecf247c94b4b418a910cba2d02f07aa8fecd573e22",
+              "tokenInfo": {
+                "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+                "decimals": 18,
+                "symbol": "SAFE",
+                "name": "Safe Token",
+                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xA0b937D5c8E32a80E3a8ed4227CD020221544ee6",
+              "balance": "2857990768787701891072",
+              "balanceFiat": "394.19110931001774",
+              "priceChangePercentage1d": "-7.283598555458049"
+            },
+            {
+              "key": "0x5afe3855358e112b5647b952709e6165e1c1eeee-ethereum-gnosis safe vesting-locked",
+              "type": "locked",
+              "name": "Gnosis Safe Vesting",
+              "groupId": "99e212f7d6bd27510a310aecf247c94b4b418a910cba2d02f07aa8fecd573e22",
+              "tokenInfo": {
+                "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+                "decimals": 18,
+                "symbol": "SAFE",
+                "name": "Safe Token",
+                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xA0b937D5c8E32a80E3a8ed4227CD020221544ee6",
+              "balance": "762221521575918608928",
+              "balanceFiat": "105.13013212335532",
+              "priceChangePercentage1d": "-7.283598555458049"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

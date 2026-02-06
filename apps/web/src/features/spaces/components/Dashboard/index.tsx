@@ -4,7 +4,9 @@ import AddressBookCard from '@/features/spaces/components/Dashboard/ImportAddres
 import { Card, Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import SafesList from '@/features/myAccounts/components/SafesList'
+import { useLoadFeature } from '@/features/__core__'
+import { flattenSafeItems } from '@/hooks/safes'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
@@ -19,7 +21,6 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
 import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
-import { flattenSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -43,6 +44,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 
 const SpaceDashboard = () => {
+  const { SafesList } = useLoadFeature(MyAccountsFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()

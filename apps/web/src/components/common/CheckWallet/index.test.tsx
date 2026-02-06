@@ -1,7 +1,7 @@
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { render } from '@/tests/test-utils'
 import CheckWallet from '.'
-import useIsOnlySpendingLimitBeneficiary from '@/hooks/useIsOnlySpendingLimitBeneficiary'
+import { useIsOnlySpendingLimitBeneficiary } from '@/features/spending-limits'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -29,9 +29,9 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
 }))
 
 // mock useIsOnlySpendingLimitBeneficiary
-jest.mock('@/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
-  __esModule: true,
-  default: jest.fn(() => false),
+jest.mock('@/features/spending-limits', () => ({
+  ...jest.requireActual('@/features/spending-limits'),
+  useIsOnlySpendingLimitBeneficiary: jest.fn(() => false),
 }))
 
 // mock useCurrentChain

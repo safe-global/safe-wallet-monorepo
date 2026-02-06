@@ -41,11 +41,12 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
+import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
- * This ensures the entire recovery feature loads as a single chunk.
  */
 const RecoveryLoader = () => {
   const { Recovery } = useLoadFeature(RecoveryFeature)
@@ -61,11 +62,27 @@ const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
   return <CounterfactualHooks />
 }
+
+/**
+ * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
+ */
+const SpendingLimitsLoaderWrapper = () => {
+  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
+  return <SpendingLimitsLoader />
+}
+
+/**
+ * Wrapper that lazy-loads OutreachPopup via the feature system.
+ * This ensures the entire targeted-outreach feature loads as a single chunk.
+ */
+const TargetedOutreachPopupLoader = () => {
+  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
+  return <OutreachPopup />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
@@ -188,13 +205,15 @@ const SafeWalletApp = ({
 
             <CookieAndTermBanner />
 
-            <OutreachPopup />
+            <TargetedOutreachPopupLoader />
 
             <Notifications />
 
             <RecoveryLoader />
 
             <CounterfactualHooksLoader />
+
+            <SpendingLimitsLoaderWrapper />
 
             <Analytics />
 

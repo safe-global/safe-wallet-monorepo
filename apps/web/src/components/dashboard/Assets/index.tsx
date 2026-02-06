@@ -16,11 +16,12 @@ import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
 import { isEligibleEarnToken, useIsEarnPromoEnabled, EarnButton } from '@/features/earn'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import { useIsStakingBannerEnabled as useIsStakingPromoEnabled } from '@/features/stake'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import { TokenType } from '@safe-global/store/gateway/types'
-import StakeButton from '@/features/stake/components/StakeButton'
+import { StakeFeature } from '@/features/stake'
+import { useLoadFeature } from '@/features/__core__'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
@@ -57,6 +58,8 @@ const AssetRow = ({
   showEarn?: boolean
   showStake?: boolean
 }) => {
+  const stake = useLoadFeature(StakeFeature)
+
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
@@ -87,7 +90,7 @@ const AssetRow = ({
           )}
 
           {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
+            <stake.StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
           )}
         </Box>
       </Box>

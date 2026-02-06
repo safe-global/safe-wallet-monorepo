@@ -1,4 +1,4 @@
-import { _validateSpendingLimit } from '../CreateSpendingLimit'
+import { _validateSpendingLimit } from '@/features/spending-limits/components/CreateSpendingLimit'
 
 describe('CreateSpendingLimit', () => {
   describe('validateSpendingLimit', () => {

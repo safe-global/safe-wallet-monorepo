@@ -5,7 +5,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { selectCurrency } from '../../settingsSlice'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { type SafeItem } from '@/hooks/safes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag } from '.'
 import { additionalSafesRtkApi, additionalSafesRtkApiV2 } from '@safe-global/store/gateway/safes'

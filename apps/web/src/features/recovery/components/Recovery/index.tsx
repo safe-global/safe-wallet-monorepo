@@ -1,25 +1,13 @@
-import RecoveryModal from '@/features/recovery/components/RecoveryModal'
-import { useRecoveryTxNotifications } from '@/features/recovery/hooks/useRecoveryTxNotification'
-import RecoveryContextHooks from '../RecoveryContext/RecoveryContextHooks'
+import dynamic from 'next/dynamic'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 
-function RecoveryContent() {
-  useRecoveryTxNotifications()
-
-  return (
-    <>
-      <RecoveryContextHooks />
-      <RecoveryModal />
-    </>
-  )
-}
+// Lazy load the heavy recovery components to keep them out of the main bundle
+// This includes RecoveryContextHooks which imports @gnosis.pm/zodiac
+const LazyRecoveryContent = dynamic(() => import('./RecoveryContent'))
 
 function Recovery() {
   const isSupported = useIsRecoverySupported()
-
-  if (!isSupported) return null
-
-  return <RecoveryContent />
+  return isSupported ? <LazyRecoveryContent /> : null
 }
 
 export default Recovery

@@ -8,12 +8,14 @@ import { RequiredConfirmation } from '@/components/settings/RequiredConfirmation
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import ProposersList from 'src/components/settings/ProposersList'
-import SpendingLimits from '@/components/settings/SpendingLimits'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
+import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
+  const { SpendingLimitsSettings } = useLoadFeature(SpendingLimitsFeature)
   const nonce = safe.nonce
   const ownerLength = safe.owners.length
   const threshold = safe.threshold
@@ -79,7 +81,7 @@ const Setup: NextPage = () => {
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
         </Paper>
 
-        <SpendingLimits />
+        <SpendingLimitsSettings />
 
         <NestedSafesList />
       </main>

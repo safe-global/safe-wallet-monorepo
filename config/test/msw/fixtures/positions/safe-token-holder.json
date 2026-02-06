@@ -1,0 +1,844 @@
+[
+  {
+    "protocol": "Gnosis Safe",
+    "protocol_metadata": {
+      "name": "Safe Factory",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg"
+      },
+      "url": "https://gnosis.io/"
+    },
+    "fiatTotal": "651.888206114658",
+    "items": [
+      {
+        "name": "Gnosis Safe Vesting",
+        "items": [
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "2034160974499438657536",
+            "fiatBalance": "280.5895071911394",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "1237784404310331228160",
+            "fiatBalance": "170.73836356524285",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "514950925272454042464",
+            "fiatBalance": "71.03165784869843",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "416000000000000000000",
+            "fiatBalance": "57.382496495999995",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "313030769561242271840",
+            "fiatBalance": "43.17905537857733",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "20000000000000000000",
+            "fiatBalance": "2.7587738699999997",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          }
+        ]
+      },
+      {
+        "name": "Gnosis Safe SAFE Pool",
+        "items": [
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "190000000000000000000",
+            "fiatBalance": "26.208351764999996",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Compound V2",
+    "protocol_metadata": {
+      "name": "Compound V2",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/compound-v2.jpg"
+      },
+      "url": "https://app.compound.finance"
+    },
+    "fiatTotal": "13.892039532296032",
+    "items": [
+      {
+        "name": "Compound Lending",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "8229100571563343000",
+            "fiatBalance": "8.22359117227248",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "NATIVE_TOKEN",
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimals": 18,
+              "symbol": "ETH",
+              "name": "Ether",
+              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+            },
+            "balance": "2009365657245872",
+            "fiatBalance": "5.65767041282434",
+            "fiatBalance24hChange": "-6.461161274890859",
+            "fiatConversion": "2815.65"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "decimals": 6,
+              "symbol": "USDC",
+              "name": "USDC",
+              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+            },
+            "balance": "10781",
+            "fiatBalance": "0.0107779471992131",
+            "fiatBalance24hChange": "0.28880046793851033",
+            "fiatConversion": "0.9997168351"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "StakeWise",
+    "protocol_metadata": {
+      "name": "StakeWise",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/stakewise.jpg"
+      },
+      "url": "https://app.stakewise.io/"
+    },
+    "fiatTotal": "4.24014133450775",
+    "items": [
+      {
+        "name": "StakeWise Lending",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "NATIVE_TOKEN",
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimals": 18,
+              "symbol": "ETH",
+              "name": "Ether",
+              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+            },
+            "balance": "2571851529594016",
+            "fiatBalance": "7.241433759301392",
+            "fiatBalance24hChange": "-6.461161274890859",
+            "fiatConversion": "2815.65"
+          },
+          {
+            "position_type": "loan",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xf1C9acDc66974dFB6dEcB12aA385b9cD01190E38",
+              "decimals": 18,
+              "symbol": "osETH",
+              "name": "Staked ETH",
+              "logoUri": "https://cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.png"
+            },
+            "balance": "1001592079261204",
+            "fiatBalance": "-3.0012924247936423",
+            "fiatBalance24hChange": "-6.439007047900369",
+            "fiatConversion": "2996.5217247"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Yearn V2",
+    "protocol_metadata": {
+      "name": "Yearn V2",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/yearn-v2.jpg"
+      },
+      "url": "https://yearn.fi/"
+    },
+    "fiatTotal": "5.49810558777546",
+    "items": [
+      {
+        "name": "Yearn V2 Yield: USDT Pool (USDT yVault)",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "decimals": 6,
+              "symbol": "USDT",
+              "name": "Tether USD",
+              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+            },
+            "balance": "5506754",
+            "fiatBalance": "5.49810558777546",
+            "fiatBalance24hChange": "-0.027511568136417974",
+            "fiatConversion": "0.99842949"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Maple",
+    "protocol_metadata": {
+      "name": "Maple",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/maple.jpg"
+      },
+      "url": "https://app.maple.finance"
+    },
+    "fiatTotal": "4.89362043106782",
+    "items": [
+      {
+        "name": "Maple Yield: USDT Pool (Syrup USDT)",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "decimals": 6,
+              "symbol": "USDT",
+              "name": "Tether USD",
+              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+            },
+            "balance": "4901318",
+            "fiatBalance": "4.89362043106782",
+            "fiatBalance24hChange": "-0.027511568136417974",
+            "fiatConversion": "0.99842949"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Aave V3",
+    "protocol_metadata": {
+      "name": "AAVE V3",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-pool-v3.jpg"
+      },
+      "url": "https://app.aave.com"
+    },
+    "fiatTotal": "7.934406339573686",
+    "items": [
+      {
+        "name": "Aave V3 Lending",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+              "decimals": 18,
+              "symbol": "UNI",
+              "name": "Uniswap",
+              "logoUri": "https://cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.png"
+            },
+            "balance": "1000842063112026500",
+            "fiatBalance": "4.3842666396729255",
+            "fiatBalance24hChange": "-8.968578902358203",
+            "fiatConversion": "4.380577916599999"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "decimals": 6,
+              "symbol": "USDT",
+              "name": "Tether USD",
+              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+            },
+            "balance": "3555724",
+            "fiatBalance": "3.55013969990076",
+            "fiatBalance24hChange": "-0.027511568136417974",
+            "fiatConversion": "0.99842949"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Swell",
+    "protocol_metadata": {
+      "name": "Swell",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/swell.jpg"
+      },
+      "url": "https://app.swellnetwork.io/"
+    },
+    "fiatTotal": "5.83703892344781",
+    "items": [
+      {
+        "name": "Swell Yield: ETH Pool (rswETH)",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "NATIVE_TOKEN",
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimals": 18,
+              "symbol": "ETH",
+              "name": "Ether",
+              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+            },
+            "balance": "1542537279073326",
+            "fiatBalance": "4.34324508982281",
+            "fiatBalance24hChange": "-6.461161274890859",
+            "fiatConversion": "2815.65"
+          }
+        ]
+      },
+      {
+        "name": "Swell rswETH Pool",
+        "items": [
+          {
+            "position_type": "staked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xFAe103DC9cf190eD75350761e95403b7b8aFa6c0",
+              "decimals": 18,
+              "symbol": "rswETH",
+              "name": "rswETH",
+              "logoUri": ""
+            },
+            "balance": "500000000000000",
+            "fiatBalance": "1.493793833625",
+            "fiatBalance24hChange": "-6.538673931457928",
+            "fiatConversion": "2987.58766725"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Gearbox",
+    "protocol_metadata": {
+      "name": "Gearbox",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/gearbox.jpg"
+      },
+      "url": "https://app.gearbox.finance/"
+    },
+    "fiatTotal": "4.152578802380801",
+    "items": [
+      {
+        "name": "Gearbox Farming: USDC Pool",
+        "items": [
+          {
+            "position_type": "staked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "decimals": 6,
+              "symbol": "USDC",
+              "name": "USDC",
+              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+            },
+            "balance": "4153755",
+            "fiatBalance": "4.152578802380801",
+            "fiatBalance24hChange": "0.28880046793851033",
+            "fiatConversion": "0.9997168351"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Kiln",
+    "protocol_metadata": {
+      "name": "Kiln",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/kiln.jpg"
+      },
+      "url": "https://www.kiln.fi/"
+    },
+    "fiatTotal": "4.11628719314979",
+    "items": [
+      {
+        "name": "Kiln Yield: USDT Pool (Safe Smokehouse USDT)",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "decimals": 6,
+              "symbol": "USDT",
+              "name": "Tether USD",
+              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+            },
+            "balance": "2533913",
+            "fiatBalance": "2.5299334642943703",
+            "fiatBalance24hChange": "-0.027511568136417974",
+            "fiatConversion": "0.99842949"
+          }
+        ]
+      },
+      {
+        "name": "Kiln Yield: WBTC Pool (Safe Smokehouse WBTC)",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+              "decimals": 8,
+              "symbol": "WBTC",
+              "name": "Wrapped BTC",
+              "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png"
+            },
+            "balance": "1884",
+            "fiatBalance": "1.58635372885542",
+            "fiatBalance24hChange": "-5.194579007047107",
+            "fiatConversion": "84201.3656505"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Balancer",
+    "protocol_metadata": {
+      "name": "Balancer",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/balancer.jpg"
+      },
+      "url": "https://balancer.fi/"
+    },
+    "fiatTotal": "3.8778551037934497",
+    "items": [
+      {
+        "name": "Balancer WETH/WBTC Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+              "decimals": 8,
+              "symbol": "WBTC",
+              "name": "Wrapped BTC",
+              "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png"
+            },
+            "balance": "1919",
+            "fiatBalance": "1.615824206833095",
+            "fiatBalance24hChange": "-5.194579007047107",
+            "fiatConversion": "84201.3656505"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "decimals": 18,
+              "symbol": "WETH",
+              "name": "Wrapped Ether",
+              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+            },
+            "balance": "569331040818327",
+            "fiatBalance": "1.6026102719971291",
+            "fiatBalance24hChange": "-6.499989585478094",
+            "fiatConversion": "2814.9005711925"
+          }
+        ]
+      },
+      {
+        "name": "Balancer MKR/WETH Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
+              "decimals": 18,
+              "symbol": "MKR",
+              "name": "Maker",
+              "logoUri": "https://cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.png"
+            },
+            "balance": "170808987057640",
+            "fiatBalance": "0.26169267703800564",
+            "fiatBalance24hChange": "-2.243093267777563",
+            "fiatConversion": "1532.0779166595999"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "decimals": 18,
+              "symbol": "WETH",
+              "name": "Wrapped Ether",
+              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+            },
+            "balance": "51992828725847",
+            "fiatBalance": "0.14635464327830056",
+            "fiatBalance24hChange": "-6.499989585478094",
+            "fiatConversion": "2814.9005711925"
+          }
+        ]
+      },
+      {
+        "name": "Balancer DAI/WETH Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+              "decimals": 18,
+              "symbol": "WETH",
+              "name": "Wrapped Ether",
+              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+            },
+            "balance": "56574150236362",
+            "fiatBalance": "0.1592506078150657",
+            "fiatBalance24hChange": "-6.499989585478094",
+            "fiatConversion": "2814.9005711925"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "41847782593966430",
+            "fiatBalance": "0.041819765419824205",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          }
+        ]
+      },
+      {
+        "name": "Balancer mUSD/USDC Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xe2f2a5C287993345a840Db3B0845fbC70f5935a5",
+              "decimals": 18,
+              "symbol": "mUSD",
+              "name": "mStable USD",
+              "logoUri": "https://cdn.zerion.io/0xe2f2a5c287993345a840db3b0845fbc70f5935a5.png"
+            },
+            "balance": "25373995230740503",
+            "fiatBalance": "0.02533700288907753",
+            "fiatBalance24hChange": "1.4980686150986688",
+            "fiatConversion": "0.998542116"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "decimals": 6,
+              "symbol": "USDC",
+              "name": "USDC",
+              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+            },
+            "balance": "24973",
+            "fiatBalance": "0.024965928522952298",
+            "fiatBalance24hChange": "0.28880046793851033",
+            "fiatConversion": "0.9997168351"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Balancer V2",
+    "protocol_metadata": {
+      "name": "Balancer V2",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/balancer-v2.jpg"
+      },
+      "url": "https://balancer.fi/"
+    },
+    "fiatTotal": "0.8547229855433052",
+    "items": [
+      {
+        "name": "Balancer V2 USDC/STG Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xAf5191B0De278C7286d6C7CC6ab6BB8A73bA2Cd6",
+              "decimals": 18,
+              "symbol": "STG",
+              "name": "StargateToken",
+              "logoUri": "https://cdn.zerion.io/0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6.png"
+            },
+            "balance": "2447537381801323000",
+            "fiatBalance": "0.44208386355476964",
+            "fiatBalance24hChange": "3.995086728175923",
+            "fiatConversion": "0.1806239475"
+          },
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+              "decimals": 6,
+              "symbol": "USDC",
+              "name": "USDC",
+              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+            },
+            "balance": "412756",
+            "fiatBalance": "0.4126391219885356",
+            "fiatBalance24hChange": "0.28880046793851033",
+            "fiatConversion": "0.9997168351"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Yearn",
+    "protocol_metadata": {
+      "name": "YEarn",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/yearn.jpg"
+      },
+      "url": "https://yearn.fi/"
+    },
+    "fiatTotal": "0.1576385047409806",
+    "items": [
+      {
+        "name": "Yearn Yield: DAI Pool",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "157744114741288130",
+            "fiatBalance": "0.1576385047409806",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Aave V2",
+    "protocol_metadata": {
+      "name": "Aave V2",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-v2.jpg"
+      },
+      "url": "https://app.aave.com/?marketName=proto_mainnet"
+    },
+    "fiatTotal": "0.30594962901896017",
+    "items": [
+      {
+        "name": "Aave V2 AAVE Pool",
+        "items": [
+          {
+            "position_type": "staked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+              "decimals": 18,
+              "symbol": "AAVE",
+              "name": "Aave",
+              "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png"
+            },
+            "balance": "1000000000000000",
+            "fiatBalance": "0.1466370824529",
+            "fiatBalance24hChange": "-8.08161434295318",
+            "fiatConversion": "146.6370824529"
+          },
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+              "decimals": 18,
+              "symbol": "AAVE",
+              "name": "Aave",
+              "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png"
+            },
+            "balance": "300204032325536",
+            "fiatBalance": "0.044021043440812674",
+            "fiatBalance24hChange": "-8.08161434295318",
+            "fiatConversion": "146.6370824529"
+          }
+        ]
+      },
+      {
+        "name": "Aave V2 Lending",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "115368742729242200",
+            "fiatBalance": "0.11529150312524748",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Aave V1",
+    "protocol_metadata": {
+      "name": "Aave V1",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-v1.jpg"
+      },
+      "url": "https://app.aave.com"
+    },
+    "fiatTotal": "0.11015391718361021",
+    "items": [
+      {
+        "name": "Aave V1 Lending",
+        "items": [
+          {
+            "position_type": "deposit",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "122854113301521030",
+            "fiatBalance": "0.12277186222695742",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          },
+          {
+            "position_type": "loan",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+              "decimals": 18,
+              "symbol": "DAI",
+              "name": "Dai Stablecoin",
+              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+            },
+            "balance": "12626398442357157",
+            "fiatBalance": "-0.012617945043347201",
+            "fiatBalance24hChange": "0.3075947678512714",
+            "fiatConversion": "0.999330498"
+          }
+        ]
+      }
+    ]
+  }
+]
