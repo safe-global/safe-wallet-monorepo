@@ -15,9 +15,9 @@ jest.mock('../hooks', () => ({
 }))
 
 // Mock new dependencies for untrusted Safe check
-jest.mock('@/hooks/useIsPinnedSafe', () => ({
+jest.mock('@/hooks/useIsTrustedSafe', () => ({
   __esModule: true,
-  default: jest.fn(() => true), // Pinned by default to avoid triggering untrusted warning in existing tests
+  default: jest.fn(() => true), // Trusted by default to avoid triggering untrusted warning in existing tests
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({
