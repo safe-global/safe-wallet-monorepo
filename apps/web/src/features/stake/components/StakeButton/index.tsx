@@ -72,7 +72,7 @@ const StakeButton = ({
               aria-label="Stake"
               variant={compact ? 'text' : 'contained'}
               color={compact ? 'info' : 'background.paper'}
-              size={compact ? 'small' : 'compact'}
+              size="small"
               disableElevation
               startIcon={<StakeIcon />}
               onClick={handleClick}

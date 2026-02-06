@@ -62,7 +62,7 @@ const EarnButton = (props: EarnButtonProps): ReactElement => {
               aria-label="Earn"
               variant={compact ? 'text' : 'contained'}
               color={compact ? 'info' : 'background.paper'}
-              size={compact ? 'small' : 'compact'}
+              size="small"
               disableElevation
               startIcon={<EarnIcon />}
               onClick={onEarnClick}
