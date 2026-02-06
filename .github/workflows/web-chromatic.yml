@@ -1,0 +1,53 @@
+name: Web Chromatic
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_turbosnap:
+        description: 'Skip TurboSnap — test all stories'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for TurboSnap git history analysis
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Read version from package.json
+        id: version
+        working-directory: apps/web
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          workingDir: apps/web
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          branchName: release/v${{ steps.version.outputs.version }}
+          autoAcceptChanges: main # Only auto-accept on main branch
+          onlyChanged: ${{ inputs.skip_turbosnap != true }} # TurboSnap enabled by default
+          exitZeroOnChanges: true # Don't fail on visual diffs
+          exitOnceUploaded: true # Don't wait for Chromatic processing
+          zip: true # Faster uploads
+
+      - name: Summary
+        run: |
+          echo "## Chromatic Visual Regression Test" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: release/v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Auto-accept**: Only on main branch" >> $GITHUB_STEP_SUMMARY
+          echo "- **TurboSnap**: ${{ inputs.skip_turbosnap != true && 'enabled (only changed stories)' || 'disabled (all stories)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Chromatic UI for visual diff results." >> $GITHUB_STEP_SUMMARY
