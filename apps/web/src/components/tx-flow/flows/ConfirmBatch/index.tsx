@@ -18,6 +18,7 @@ const ConfirmBatch = (props: ReviewTransactionProps & { txNonce?: number }) => {
   const batchTxs = useDraftBatch()
 
   useEffect(() => {
+    if (!nonce) return
     const calls = batchTxs.map((tx) => tx.txData)
     createMultiSendCallOnlyTx(calls, { nonce }).then(setSafeTx).catch(setSafeTxError)
   }, [batchTxs, setSafeTx, setSafeTxError, nonce])

@@ -16,6 +16,7 @@ export const ReviewRemoveGuard = ({
   const { setSafeTx, safeTxError, setSafeTxError, nonce } = useContext(SafeTxContext)
 
   useEffect(() => {
+    if (!nonce) return
     createRemoveGuardTx({ nonce }).then(setSafeTx).catch(setSafeTxError)
   }, [setSafeTx, setSafeTxError, nonce])
 

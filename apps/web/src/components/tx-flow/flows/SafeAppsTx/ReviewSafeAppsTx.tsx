@@ -27,7 +27,8 @@ const ReviewSafeAppsTx = ({
   useHighlightHiddenTab()
 
   useEffect(() => {
-    const createSafeTx = async (): Promise<SafeTransaction> => {
+    const createSafeTx = async (): Promise<SafeTransaction | undefined> => {
+      if (!nonce) return
       const isMultiSend = txs.length > 1
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs, { nonce }) : await createTx(txs[0], nonce)
 

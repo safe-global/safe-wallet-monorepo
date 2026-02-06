@@ -44,7 +44,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   }, [spendingLimits, data])
 
   useEffect(() => {
-    if (!chain || !data) return
+    if (!chain || !data || !nonce) return
 
     createNewSpendingLimitTx(
       data,
