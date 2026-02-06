@@ -198,6 +198,7 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
     if (pendingConfirmation) {
       setSelectedAddresses((prev) => new Set([...prev, pendingConfirmation]))
       setPendingConfirmation(null)
+      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_SIMILAR_ADDRESS_CONFIRM)
     }
   }, [pendingConfirmation])
 
@@ -243,6 +244,7 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
     }
     setSelectedAddresses(allAddresses)
     setPendingSelectAllConfirmation(false)
+    trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_SIMILAR_ADDRESS_CONFIRM, label: 'select_all' })
   }, [allSafes])
 
   // Cancel selecting similar addresses (keeps only non-similar selected)
@@ -325,6 +327,13 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
       trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
     }
 
+    if (pinnedCount > 0) {
+      trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED, label: pinnedCount })
+    }
+    if (unpinnedCount > 0) {
+      trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_REMOVED, label: unpinnedCount })
+    }
+
     setIsOpen(false)
     setSelectedAddresses(new Set())
     setSearchQuery('')
@@ -341,6 +350,7 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
     }
     setSelectedAddresses(pinnedAddresses)
     setIsOpen(true)
+    trackEvent(OVERVIEW_EVENTS.OPEN_TRUSTED_SAFES_MODAL)
   }, [addedSafes])
 
   // Close modal and reset state

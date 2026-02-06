@@ -51,6 +51,7 @@ export function useTrustSafe() {
       )
 
       trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
+      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED)
     },
     [dispatch],
   )

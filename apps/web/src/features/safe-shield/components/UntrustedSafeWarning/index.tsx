@@ -7,6 +7,7 @@ import { useSimilarAddressDetection } from '@/features/myAccounts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
+import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
 
 type UntrustedSafeWarningProps = {
   safeAnalysis: SafeAnalysisResult
@@ -26,7 +27,10 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
   const safeName = safeAddress ? addressBook?.[safeAddress] : undefined
   const { hasSimilarAddress, similarAddresses } = useSimilarAddressDetection(safeAddress)
 
-  const handleOpenConfirmDialog = () => setIsConfirmDialogOpen(true)
+  const handleOpenConfirmDialog = () => {
+    setIsConfirmDialogOpen(true)
+    trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE, label: TRUSTED_SAFE_LABELS.safe_shield })
+  }
   const handleCloseConfirmDialog = () => setIsConfirmDialogOpen(false)
   const handleConfirmAddToTrustedList = () => {
     onAddToTrustedList()

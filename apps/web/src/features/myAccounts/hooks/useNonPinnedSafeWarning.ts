@@ -1,10 +1,11 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useIsPinnedSafe from '@/hooks/useIsPinnedSafe'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
+import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useTrustSafe } from './useTrustSafe'
 import useSimilarAddressDetection from './useSimilarAddressDetection'
 import type { SafeUserRole, NonPinnedWarningState } from './useNonPinnedSafeWarning.types'
@@ -38,9 +39,19 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   // Show warning if user is owner or proposer but safe is not pinned
   const shouldShowWarning = !isDismissed && !isPinnedSafe && (userRole === 'owner' || userRole === 'proposer')
 
+  // Track when warning is first shown
+  const hasTrackedWarning = useRef(false)
+  useEffect(() => {
+    if (shouldShowWarning && !hasTrackedWarning.current) {
+      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW)
+      hasTrackedWarning.current = true
+    }
+  }, [shouldShowWarning])
+
   // Open confirmation dialog
   const openConfirmDialog = useCallback(() => {
     setIsConfirmDialogOpen(true)
+    trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE, label: TRUSTED_SAFE_LABELS.non_pinned_warning })
   }, [])
 
   // Close confirmation dialog
@@ -59,13 +70,19 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
       threshold: safe?.threshold,
     })
 
+    trackEvent({
+      ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE_CONFIRM,
+      label: hasSimilarAddress ? TRUSTED_SAFE_LABELS.with_similarity : TRUSTED_SAFE_LABELS.without_similarity,
+    })
+
     // Close the dialog after adding
     setIsConfirmDialogOpen(false)
-  }, [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe])
+  }, [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress])
 
   // Dismiss warning for this session
   const dismiss = useCallback(() => {
     setIsDismissed(true)
+    trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_DISMISS)
   }, [])
 
   return {

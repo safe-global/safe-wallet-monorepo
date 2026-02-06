@@ -66,6 +66,8 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [TX_EVENTS.CREATE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
   [TX_EVENTS.CREATE_VIA_SPENDING_LIMTI.action]: MixpanelEvent.TRANSACTION_SUBMITTED,
   [TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT.action]: MixpanelEvent.TRANSACTION_EXECUTED,
+  [OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED.action]: MixpanelEvent.TRUSTED_SAFE_ADDED,
+  [OVERVIEW_EVENTS.TRUSTED_SAFES_REMOVED.action]: MixpanelEvent.TRUSTED_SAFE_REMOVED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)
