@@ -24,7 +24,7 @@ describe('NonPinnedWarning', () => {
 
     expect(screen.getByTestId('non-pinned-warning')).toBeInTheDocument()
     expect(screen.getByText('Untrusted Safe')).toBeInTheDocument()
-    expect(screen.getByText(/haven't added it to your trusted list/i)).toBeInTheDocument()
+    expect(screen.getByText(/not yet included in your trusted list/i)).toBeInTheDocument()
   })
 
   it('should call onOpenConfirmDialog when add button is clicked', () => {
@@ -46,7 +46,7 @@ describe('NonPinnedWarning', () => {
   it('should show same message for all users', () => {
     render(<NonPinnedWarning {...defaultProps} />)
 
-    expect(screen.getByText(/haven't added it to your trusted list/i)).toBeInTheDocument()
+    expect(screen.getByText(/not yet included in your trusted list/i)).toBeInTheDocument()
   })
 
   it('should show confirmation dialog when isConfirmDialogOpen is true', () => {
