@@ -231,7 +231,8 @@ body.beamerAnnouncementBarTopActive {
 /*---break---*/
 /* shadcn → Tailwind color mapping */
 @theme inline {
-  --font-sans: var(--font-sans);
+  /* Override Tailwind's default font-sans to preserve the legacy DM Sans font */
+  --font-sans: 'DM Sans', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
