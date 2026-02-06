@@ -1,6 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
-import { makeLoadableSlice } from './common'
+import { makeLoadableSlice } from '@/store/common'
 
+// Type defined here to avoid circular dependencies with types.ts
+// which imports from components that would pull heavy deps into main bundle
 export type SpendingLimitState = {
   beneficiary: string
   token: {
@@ -24,3 +26,4 @@ export const spendingLimitSlice = slice
 
 export const selectSpendingLimits = createSelector(selector, (spendingLimits) => spendingLimits.data)
 export const selectSpendingLimitsLoading = createSelector(selector, (spendingLimits) => spendingLimits.loading)
+export const selectSpendingLimitsLoaded = createSelector(selector, (spendingLimits) => spendingLimits.loaded)

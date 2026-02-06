@@ -1,28 +1,28 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { useSelector } from 'react-redux'
 import { Typography, Alert, Box } from '@mui/material'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
-import { getResetTimeOptions } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
+import { getResetTimeOptions } from '../../constants'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { createNewSpendingLimitTx } from '@/services/tx/tx-sender'
-import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
+import { selectSpendingLimits } from '../../store/spendingLimitsSlice'
 import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/formatters'
-import type { NewSpendingLimitFlowProps } from '.'
+import type { NewSpendingLimitFlowProps } from '../../types'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { SafeTxContext } from '../../SafeTxProvider'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
-import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
+import { createNewSpendingLimitTx } from '../../services/spendingLimitExecution'
+import { useAppSelector } from '@/store'
 
-export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
+const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
   const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
-  const spendingLimits = useSelector(selectSpendingLimits)
+  const spendingLimits = useAppSelector(selectSpendingLimits)
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
@@ -175,3 +175,5 @@ export const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionPro
     </ReviewTransaction>
   )
 }
+
+export default ReviewSpendingLimit

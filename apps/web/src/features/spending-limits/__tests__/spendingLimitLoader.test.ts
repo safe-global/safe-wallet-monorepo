@@ -1,8 +1,8 @@
-import * as spendingLimit from '@/services/contracts/spendingLimitContracts'
+import * as spendingLimit from '../services/spendingLimitContracts'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { AllowanceModule } from '@safe-global/utils/types/contracts'
 import { AllowanceModule__factory } from '@safe-global/utils/types/contracts'
-import { getSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../loadables/useLoadSpendingLimits'
+import { loadSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../services/spendingLimitLoader'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { mockWeb3Provider } from '@/tests/test-utils'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
@@ -14,7 +14,7 @@ const mockModule = {
   value: '0x1',
 }
 
-describe('getSpendingLimits', () => {
+describe('loadSpendingLimits', () => {
   beforeEach(() => {
     jest.resetModules()
     jest.resetAllMocks()
@@ -23,7 +23,7 @@ describe('getSpendingLimits', () => {
   it('should return undefined if no spending limit module address was found', async () => {
     jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue(undefined)
 
-    const result = await getSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
 
     expect(result).toBeUndefined()
   })
@@ -31,7 +31,7 @@ describe('getSpendingLimits', () => {
   it('should return undefined if the safe has no spending limit module', async () => {
     jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
 
-    const result = await getSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
 
     expect(result).toBeUndefined()
   })
@@ -52,7 +52,7 @@ describe('getSpendingLimits', () => {
       value: '0x1',
     }
 
-    await getSpendingLimits(mockProvider, [mockModule], ZERO_ADDRESS, '4', [])
+    await loadSpendingLimits(mockProvider, [mockModule], ZERO_ADDRESS, '4', [])
 
     expect(getDelegatesMock).toHaveBeenCalledWith(ZERO_ADDRESS, 0, 100)
   })
@@ -93,7 +93,7 @@ describe('getSpendingLimits', () => {
       }),
     )
 
-    const result = await getSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
 
     expect(result?.length).toBe(4)
 
@@ -137,7 +137,7 @@ describe('getSpendingLimits', () => {
       }),
     )
 
-    const result = await getSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
 
     expect(result?.length).toBe(0)
   })

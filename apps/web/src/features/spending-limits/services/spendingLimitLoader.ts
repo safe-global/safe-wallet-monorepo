@@ -1,21 +1,12 @@
-import { useEffect, useMemo } from 'react'
-import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import useSafeInfo from '../useSafeInfo'
-import { Errors, logError } from '@/services/exceptions'
-import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
-import useChainId from '@/hooks/useChainId'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import type { JsonRpcProvider } from 'ethers'
-import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
+import type { SpendingLimitState } from '../types'
+import { getSpendingLimitContract } from './spendingLimitContracts'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
-
-import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import useBalances from '../useBalances'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -23,7 +14,7 @@ const DEFAULT_TOKEN_INFO = {
 }
 
 const discardZeroAllowance = (spendingLimit: SpendingLimitState): boolean =>
-  !(sameString(spendingLimit.amount, '0') && sameString(spendingLimit.resetTimeMin, '0'))
+  !(spendingLimit.amount === '0' && spendingLimit.resetTimeMin === '0')
 
 const getTokenInfoFromBalances = (
   tokenInfoFromBalances: Balance['tokenInfo'][],
@@ -102,7 +93,7 @@ export const getTokensForDelegates = async (
   return getTokenAllowances(contract, provider, safeAddress, spendingLimitRequests, tokenInfoFromBalances)
 }
 
-export const getSpendingLimits = async (
+export const loadSpendingLimits = async (
   provider: JsonRpcProvider,
   safeModules: AddressInfo[],
   safeAddress: string,
@@ -127,36 +118,3 @@ export const getSpendingLimits = async (
 
   return spendingLimits.flat().filter(discardZeroAllowance)
 }
-
-const useLoadSpendingLimits = (): AsyncResult<SpendingLimitState[]> => {
-  const { safeAddress, safe, safeLoaded } = useSafeInfo()
-  const chainId = useChainId()
-  const provider = useWeb3ReadOnly()
-  const { balances } = useBalances()
-  const tokenInfoFromBalances = useMemo(
-    () => balances?.items.map(({ tokenInfo }) => tokenInfo) ?? [],
-    [balances?.items],
-  )
-
-  const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(
-    () => {
-      if (!provider || !safeLoaded || !safe.modules || tokenInfoFromBalances.length === 0) return
-
-      return getSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances)
-    },
-    // Need to check length of modules array to prevent new request every time Safe info polls
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [provider, safeLoaded, safe.modules?.length, tokenInfoFromBalances, safeAddress, chainId, safe.txHistoryTag],
-    false,
-  )
-
-  useEffect(() => {
-    if (error) {
-      logError(Errors._609, error.message)
-    }
-  }, [error])
-
-  return [data, error, loading]
-}
-
-export default useLoadSpendingLimits

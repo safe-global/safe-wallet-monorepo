@@ -4,6 +4,7 @@ import {
   safeCreationDispatch,
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
+  activateReplayedSafe,
 } from '@/features/counterfactual/services'
 import { PayNowPayLater } from '@/features/counterfactual/components'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
@@ -364,6 +365,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             onSubmitCallback(undefined, txHash)
           },
           true,
+          activateReplayedSafe,
         )
       }
     } catch (_err) {

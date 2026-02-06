@@ -52,11 +52,14 @@ export type AnyResults = (TransactionItemPage['results'] | QueuedItemPage['resul
 
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Operation } from '@safe-global/store/gateway/types'
-import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+// NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
+// transaction-guards.ts is imported by store slices, and the barrel imports createFeatureHandle
+// which has dependencies that create a circular import chain
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { ethers } from 'ethers'
+import { id } from 'ethers'
 import {
   getSafeToL2MigrationDeployment,
   getSafeMigrationDeployment,
@@ -281,7 +284,7 @@ export const isTransactionQueuedItem = (value: AnyResults): value is Transaction
 
 export function isRecoveryQueueItem(value: TransactionListItem | RecoveryQueueItem): value is RecoveryQueueItem {
   const EVENT_SIGNATURE = 'TransactionAdded(uint256,bytes32,address,uint256,bytes,uint8)'
-  return 'fragment' in value && ethers.id(EVENT_SIGNATURE) === value.fragment.topicHash
+  return 'fragment' in value && id(EVENT_SIGNATURE) === value.fragment.topicHash
 }
 
 // Narrows `Transaction`

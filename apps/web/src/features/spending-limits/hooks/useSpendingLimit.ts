@@ -1,13 +1,13 @@
-import { useSelector } from 'react-redux'
+import { useAppSelector } from '@/store'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
-import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
+import type { SpendingLimitState } from '../types'
+import { selectSpendingLimits } from '../store/spendingLimitsSlice'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const useSpendingLimit = (selectedToken?: Balance['tokenInfo']): SpendingLimitState | undefined => {
   const wallet = useWallet()
-  const spendingLimits = useSelector(selectSpendingLimits)
+  const spendingLimits = useAppSelector(selectSpendingLimits)
 
   return spendingLimits.find(
     (spendingLimit) =>
