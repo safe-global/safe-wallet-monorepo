@@ -5,6 +5,7 @@ import { Button, type ButtonProps } from '@mui/material'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -42,21 +43,13 @@ export const TxBuilderButton = () => {
   const router = useRouter()
   const { setTxFlow } = useContext(TxModalContext)
 
-  if (!txBuilder?.app) return null
-
   const isTxBuilder = typeof txBuilder.link.query === 'object' && router.query.appUrl === txBuilder.link.query?.appUrl
   const onClick = isTxBuilder ? () => setTxFlow(undefined) : undefined
 
   return (
     <Track {...MODALS_EVENTS.CONTRACT_INTERACTION}>
       <Link href={txBuilder.link} passHref style={{ width: '100%' }}>
-        <Button
-          variant="outlined"
-          sx={buttonSx}
-          fullWidth
-          onClick={onClick}
-          startIcon={<img src={txBuilder.app.iconUrl || ''} height={24} width="auto" alt={txBuilder.app.name} />}
-        >
+        <Button variant="outlined" sx={buttonSx} fullWidth onClick={onClick} startIcon={<HandymanOutlinedIcon />}>
           Transaction Builder
         </Button>
       </Link>

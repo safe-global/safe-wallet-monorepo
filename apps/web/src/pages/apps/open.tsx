@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Box, CircularProgress } from '@mui/material'
 
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
@@ -52,6 +52,13 @@ const SafeApps: NextPage = () => {
       query: { safe: router.query.safe },
     })
   }, [router])
+
+  // Redirect to the apps list if the current chain is not supported by this Safe App
+  useEffect(() => {
+    if (safeAppData && !safeAppData.chainIds.includes(chainId)) {
+      goToList()
+    }
+  }, [safeAppData, chainId, goToList])
 
   // appUrl is required to be present
   if (!isSafeAppsEnabled || !appUrl || !router.isReady) return null
