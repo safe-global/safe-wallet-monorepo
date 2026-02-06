@@ -1,6 +1,6 @@
 @import 'tailwindcss';
-@import url(./vars.css);
-@import url(./onboard.css);
+@import './vars.css';
+@import './onboard.css';
 @import url(/fonts/fonts.css);
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
