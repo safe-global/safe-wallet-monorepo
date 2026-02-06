@@ -1,13 +1,11 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes'
 import PinnedSafes from './index'
-import SafesList from '@/features/myAccounts/components/SafesList'
+import SafesList from '../SafesList'
 
 // Mock the SafesList component to ensure we can test the props passed to it
-jest.mock('@/features/myAccounts/components/SafesList', () =>
-  jest.fn(() => <div data-testid="safes-list">SafesList Component</div>),
-)
+jest.mock('../SafesList', () => jest.fn(() => <div data-testid="safes-list">SafesList Component</div>))
 
 describe('PinnedSafes', () => {
   afterEach(() => {

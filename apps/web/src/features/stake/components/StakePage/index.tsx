@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import useConsent from '@/hooks/useConsent'
-import { STAKE_CONSENT_STORAGE_KEY } from '@/features/stake/constants'
+import { STAKE_CONSENT_STORAGE_KEY } from '../../constants'
 
 const StakePage = () => {
   const { isConsentAccepted, onAccept } = useConsent(STAKE_CONSENT_STORAGE_KEY)

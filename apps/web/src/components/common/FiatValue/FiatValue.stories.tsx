@@ -30,18 +30,21 @@ export const Default: Story = {
 }
 
 export const LargeValue: Story = {
+  tags: ['!chromatic'],
   args: {
     value: '1234567.89',
   },
 }
 
 export const SmallValue: Story = {
+  tags: ['!chromatic'],
   args: {
     value: '0.0001234',
   },
 }
 
 export const WithMaxLength: Story = {
+  tags: ['!chromatic'],
   args: {
     value: '123456789.123456',
     maxLength: 10,
@@ -49,6 +52,7 @@ export const WithMaxLength: Story = {
 }
 
 export const Precise: Story = {
+  tags: ['!chromatic'],
   args: {
     value: '1234.567890',
     precise: true,
@@ -62,12 +66,14 @@ export const NullValue: Story = {
 }
 
 export const NumberValue: Story = {
+  tags: ['!chromatic'],
   args: {
     value: 9999.99,
   },
 }
 
 export const ZeroValue: Story = {
+  tags: ['!chromatic'],
   args: {
     value: '0',
   },

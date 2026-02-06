@@ -5,74 +5,74 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1bxarir"
+    class="MuiBox-root mui-style-1bxarir"
   >
     <div
-      class="MuiStack-root css-1ucnu3w-MuiStack-root"
+      class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-10wna7a-MuiPaper-root-MuiCard-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-10wna7a-MuiPaper-root-MuiCard-root"
         style="--Paper-shadow: none;"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded Mui-expanded css-b8kipg-MuiPaper-root-MuiAccordion-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded Mui-expanded mui-style-b8kipg-MuiPaper-root-MuiAccordion-root"
           style="--Paper-shadow: none;"
         >
           <h3
-            class="MuiAccordion-heading css-cy7rkm-MuiAccordion-heading"
+            class="MuiAccordion-heading mui-style-cy7rkm-MuiAccordion-heading"
           >
             <button
               aria-expanded="true"
-              class="MuiButtonBase-root MuiAccordionSummary-root Mui-expanded css-1wczrn0-MuiButtonBase-root-MuiAccordionSummary-root"
+              class="MuiButtonBase-root MuiAccordionSummary-root Mui-expanded mui-style-1wczrn0-MuiButtonBase-root-MuiAccordionSummary-root"
               tabindex="0"
               type="button"
             >
               <span
-                class="MuiAccordionSummary-content Mui-expanded css-pp67k-MuiAccordionSummary-content"
+                class="MuiAccordionSummary-content Mui-expanded mui-style-pp67k-MuiAccordionSummary-content"
               >
                 <div
-                  class="MuiStack-root css-1ele3rf-MuiStack-root"
+                  class="MuiStack-root mui-style-1ele3rf-MuiStack-root"
                 >
                   <span
-                    class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse css-zrzlf2-MuiSkeleton-root"
+                    class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
                     style="width: 40px; height: 40px;"
                   />
                   <div
-                    class="MuiBox-root css-1rr4qq7"
+                    class="MuiBox-root mui-style-1rr4qq7"
                   >
                     <p
-                      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                     >
                       <span
-                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                         style="width: 120px;"
                       />
                     </p>
                     <p
-                      class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                      class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
                     >
                       <span
-                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                         style="width: 80px;"
                       />
                     </p>
                   </div>
                   <p
-                    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                    class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                   >
                     <span
-                      class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                      class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                       style="width: 60px;"
                     />
                   </p>
                 </div>
               </span>
               <span
-                class="MuiAccordionSummary-expandIconWrapper Mui-expanded css-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
+                class="MuiAccordionSummary-expandIconWrapper Mui-expanded mui-style-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
                   data-testid="ExpandMoreIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -85,69 +85,69 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
             </button>
           </h3>
           <div
-            class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+            class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
             style="min-height: 0px;"
           >
             <div
-              class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+              class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
             >
               <div
-                class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
               >
                 <div
                   class="MuiAccordion-region"
                   role="region"
                 >
                   <div
-                    class="MuiAccordionDetails-root css-o4cswg-MuiAccordionDetails-root"
+                    class="MuiAccordionDetails-root mui-style-o4cswg-MuiAccordionDetails-root"
                   >
                     <div
-                      class="MuiBox-root css-0"
+                      class="MuiBox-root mui-style-0"
                     >
                       <div
-                        class="MuiBox-root css-dzaqf9"
+                        class="MuiBox-root mui-style-dzaqf9"
                       >
                         <div
-                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root css-15l0b46-MuiPaper-root-MuiTableContainer-root"
+                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
                           data-testid="table-container"
                           style="--Paper-shadow: none;"
                         >
                           <table
                             aria-labelledby="tableTitle"
-                            class="MuiTable-root compactTable css-14ipoqq-MuiTable-root"
+                            class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
                           >
                             <thead
-                              class="MuiTableHead-root css-1bxxo5-MuiTableHead-root"
+                              class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
                             >
                               <tr
-                                class="MuiTableRow-root MuiTableRow-head css-ee4r5n-MuiTableRow-root"
+                                class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
                               >
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-16mkdhd-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
                                   scope="col"
                                 >
                                   <span
-                                    class="MuiBox-root css-1kuy7z7"
+                                    class="MuiBox-root mui-style-1kuy7z7"
                                   >
                                     Loading...
                                   </span>
                                 </th>
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-14qoodj-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
                                   scope="col"
                                 >
                                   <span
-                                    class="MuiBox-root css-1kuy7z7"
+                                    class="MuiBox-root mui-style-1kuy7z7"
                                   >
                                     Balance
                                   </span>
                                 </th>
                                 <th
-                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1lpfb9u-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
                                   scope="col"
                                 >
                                   <span
-                                    class="MuiBox-root css-1kuy7z7"
+                                    class="MuiBox-root mui-style-1kuy7z7"
                                   >
                                     Value
                                   </span>
@@ -155,50 +155,50 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                               </tr>
                             </thead>
                             <tbody
-                              class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
+                              class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
                             >
                               <tr
-                                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse css-zrzlf2-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
                                             style="width: 32px; height: 32px;"
                                           />
                                           <div
-                                            class="MuiBox-root css-0"
+                                            class="MuiBox-root mui-style-0"
                                           >
                                             <p
-                                              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 100px;"
                                               />
                                             </p>
                                             <p
-                                              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 80px;"
                                               />
                                             </p>
@@ -209,24 +209,24 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                             style="width: 60px;"
                                           />
                                         </p>
@@ -235,35 +235,35 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiBox-root css-s2uf1z"
+                                          class="MuiBox-root mui-style-s2uf1z"
                                         >
                                           <p
-                                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 50px;"
                                             />
                                           </p>
                                           <span
-                                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 40px;"
                                             />
                                           </span>
@@ -274,47 +274,47 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                 </td>
                               </tr>
                               <tr
-                                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse css-zrzlf2-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
                                             style="width: 32px; height: 32px;"
                                           />
                                           <div
-                                            class="MuiBox-root css-0"
+                                            class="MuiBox-root mui-style-0"
                                           >
                                             <p
-                                              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 100px;"
                                               />
                                             </p>
                                             <p
-                                              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 80px;"
                                               />
                                             </p>
@@ -325,24 +325,24 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                             style="width: 60px;"
                                           />
                                         </p>
@@ -351,35 +351,35 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiBox-root css-s2uf1z"
+                                          class="MuiBox-root mui-style-s2uf1z"
                                         >
                                           <p
-                                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 50px;"
                                             />
                                           </p>
                                           <span
-                                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 40px;"
                                             />
                                           </span>
@@ -390,47 +390,47 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                 </td>
                               </tr>
                               <tr
-                                class="MuiTableRow-root css-ee4r5n-MuiTableRow-root"
+                                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
                                 data-testid="table-row"
                                 tabindex="-1"
                               >
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-name"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiStack-root css-1rlitzi-MuiStack-root"
+                                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse css-zrzlf2-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-zrzlf2-MuiSkeleton-root"
                                             style="width: 32px; height: 32px;"
                                           />
                                           <div
-                                            class="MuiBox-root css-0"
+                                            class="MuiBox-root mui-style-0"
                                           >
                                             <p
-                                              class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 100px;"
                                               />
                                             </p>
                                             <p
-                                              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
                                             >
                                               <span
-                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                                class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                                 style="width: 80px;"
                                               />
                                             </p>
@@ -441,24 +441,24 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-balance"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <p
-                                          class="MuiTypography-root MuiTypography-body1 css-1gmilbo-MuiTypography-root"
+                                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
                                         >
                                           <span
-                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                            class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                             style="width: 60px;"
                                           />
                                         </p>
@@ -467,35 +467,35 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                                   </div>
                                 </td>
                                 <td
-                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-v0c5dw-MuiTableCell-root"
+                                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
                                   data-testid="table-cell-value"
                                 >
                                   <div
-                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered css-qr6njo-MuiCollapse-root"
+                                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
                                     style="min-height: 0px;"
                                   >
                                     <div
-                                      class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+                                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                                     >
                                       <div
-                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+                                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                                       >
                                         <div
-                                          class="MuiBox-root css-s2uf1z"
+                                          class="MuiBox-root mui-style-s2uf1z"
                                         >
                                           <p
-                                            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 50px;"
                                             />
                                           </p>
                                           <span
-                                            class="MuiTypography-root MuiTypography-caption css-19nflmw-MuiTypography-root"
+                                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                                           >
                                             <span
-                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
+                                              class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse mui-style-1daydue-MuiSkeleton-root"
                                               style="width: 40px;"
                                             />
                                           </span>

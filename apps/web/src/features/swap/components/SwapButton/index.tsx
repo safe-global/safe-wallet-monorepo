@@ -1,7 +1,7 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useSpendingLimit } from '@/features/spending-limits'
 import type { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { SWAP_EVENTS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

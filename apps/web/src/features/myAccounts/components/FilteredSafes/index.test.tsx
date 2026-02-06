@@ -1,11 +1,11 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import FilteredSafes from './index'
-import SafesList from '@/features/myAccounts/components/SafesList'
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import * as safesSearch from '@/features/myAccounts/hooks/useSafesSearch'
+import SafesList from '../SafesList'
+import type { AllSafeItems } from '@/hooks/safes'
+import * as safesSearch from '@/hooks/safes/useSafesSearch'
 
-jest.mock('@/features/myAccounts/components/SafesList', () => jest.fn(() => <div data-testid="safes-list" />))
+jest.mock('../SafesList', () => jest.fn(() => <div data-testid="safes-list" />))
 
 describe('FilteredSafes', () => {
   beforeEach(() => {

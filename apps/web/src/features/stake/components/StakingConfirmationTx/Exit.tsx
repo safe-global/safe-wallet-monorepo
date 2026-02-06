@@ -3,7 +3,7 @@ import { Alert, Stack, Typography } from '@mui/material'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
-import { InfoTooltip } from '@/features/stake/components/InfoTooltip'
+import { InfoTooltip } from '@/components/common/InfoTooltip'
 
 type StakingOrderConfirmationViewProps = {
   order: NativeStakingValidatorsExitTransactionInfo

@@ -5,13 +5,13 @@ exports[`./Chip.stories CustomLabel 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
       >
         Testing VRT
       </span>
@@ -25,13 +25,13 @@ exports[`./Chip.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
       >
         New
       </span>
@@ -45,13 +45,13 @@ exports[`./Chip.stories NormalFontWeight 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-14d0kko-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption css-1pbessu-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-caption mui-style-1pbessu-MuiTypography-root"
       >
         New
       </span>
@@ -65,13 +65,13 @@ exports[`./Chip.stories WithCustomStyling 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1gcknf1-MuiChip-root"
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1gcknf1-MuiChip-root"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption css-11b0zy1-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
       >
         Featured
       </span>

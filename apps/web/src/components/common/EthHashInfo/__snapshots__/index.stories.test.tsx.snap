@@ -5,7 +5,7 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -21,13 +21,13 @@ exports[`./index.stories Default 1`] = `
         />
       </div>
       <div
-        class="MuiBox-root css-1lchl8k"
+        class="MuiBox-root mui-style-1lchl8k"
       >
         <div
           class="addressContainer"
         >
           <div
-            class="MuiBox-root css-b5p5gz"
+            class="MuiBox-root mui-style-b5p5gz"
           >
             <span
               aria-label="Copy to clipboard"
