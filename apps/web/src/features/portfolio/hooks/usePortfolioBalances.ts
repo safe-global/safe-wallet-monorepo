@@ -2,9 +2,10 @@ import { useMemo } from 'react'
 import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useTxServiceBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
+import { useRawUrlChainId } from '@/hooks/useChainId'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
   if (!portfolio) return undefined
@@ -35,9 +36,11 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
  */
 const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
-  const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress } = useSafeInfo()
-  const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
+  const safeAddress = useSafeAddressFromUrl() // From URL directly, no API wait
+  const earlyChainId = useRawUrlChainId()
+  const isTrustedTokenList = useTokenListSetting() ?? true // Optimistic: assume trusted before chain config loads
+
+  const isReadyPortfolio = safeAddress && earlyChainId
 
   // Portfolio endpoint (called first)
   const {
@@ -47,12 +50,12 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   } = usePortfolioGetPortfolioV1Query(
     {
       address: safeAddress,
-      chainIds: safe.chainId,
+      chainIds: earlyChainId,
       fiatCode: currency,
       trusted: isTrustedTokenList,
     },
     {
-      skip: skip || !isReadyPortfolio || !safe.chainId,
+      skip: skip || !isReadyPortfolio,
     },
   )
 

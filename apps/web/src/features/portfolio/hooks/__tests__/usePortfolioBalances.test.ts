@@ -2,6 +2,8 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import usePortfolioBalances from '@/features/portfolio/hooks/usePortfolioBalances'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
+import * as useChainId from '@/hooks/useChainId'
+import * as useSafeAddressFromUrl from '@/hooks/useSafeAddressFromUrl'
 import * as store from '@/store'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import * as useLoadBalances from '@/hooks/loadables/useLoadBalances'
@@ -86,6 +88,8 @@ describe('usePortfolioBalances', () => {
     })
 
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChain)
+    jest.spyOn(useChainId, 'useRawUrlChainId').mockReturnValue(CHAIN_ID)
+    jest.spyOn(useSafeAddressFromUrl, 'useSafeAddressFromUrl').mockReturnValue(SAFE_ADDRESS)
 
     jest.spyOn(store, 'useAppSelector').mockImplementation((selector) =>
       selector({
@@ -151,6 +155,29 @@ describe('usePortfolioBalances', () => {
       expect(balances?.positions).toHaveLength(1)
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
+    })
+
+    it('should optimistically fetch with early chain id when chain config is not loaded yet', async () => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(undefined)
+
+      const portfolioQuerySpy = jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
+        currentData: undefined,
+        isLoading: true,
+        error: undefined,
+        refetch: jest.fn(),
+      } as any)
+
+      jest.spyOn(useChainId, 'useRawUrlChainId').mockReturnValue(CHAIN_ID)
+      renderHook(() => usePortfolioBalances(false))
+
+      expect(portfolioQuerySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          address: SAFE_ADDRESS,
+          chainIds: CHAIN_ID,
+          trusted: true,
+        }),
+        expect.objectContaining({ skip: false }),
+      )
     })
 
     it('should handle missing logoUri by setting empty string', async () => {

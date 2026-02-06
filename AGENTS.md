@@ -548,6 +548,7 @@ Avoid these common mistakes when contributing:
 - **RPC issues**: Check that `INFURA_TOKEN` or other RPC provider env vars are set correctly
 - **Build errors**: Check `.next` cache – sometimes `rm -rf apps/web/.next` helps
 - **Storybook issues**: Try `rm -rf node_modules/.cache/storybook`
+- **Using prod CGW locally**: The sidebar has a "Use prod CGW" toggle (bottom-left corner) to switch between staging and production Client Gateway. Enable it when testing a local build against real production data.
 
 ## Code Complexity Guidelines
 

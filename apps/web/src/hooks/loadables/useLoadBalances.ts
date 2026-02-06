@@ -110,7 +110,7 @@ const calculateTokensFiatTotal = (items: Balances['items']): string => {
  */
 const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
   const settings = useAppSelector(selectSettings)
-  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) !== false
   const isAllTokensSelected = settings.tokenList === TOKEN_LISTS.ALL
 
   const portfolioResult = usePortfolioBalances(!hasPortfolioFeature)
