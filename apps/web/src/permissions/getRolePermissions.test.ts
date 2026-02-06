@@ -1,4 +1,4 @@
-import type { SpendingLimitState } from '@/store/spendingLimitsSlice'
+import type { SpendingLimitState } from '@/features/spending-limits'
 import { getRolePermissions } from './getRolePermissions'
 import { Role } from './config'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'

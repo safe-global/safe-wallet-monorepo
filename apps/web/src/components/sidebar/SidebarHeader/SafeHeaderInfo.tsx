@@ -11,9 +11,10 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { HypernativeFeature, useIsHypernativeGuard } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
-import { useIsHypernativeGuard } from '@/features/hypernative'
 
 const SafeHeaderInfo = (): ReactElement => {
   const { balances } = useVisibleBalances()
@@ -21,6 +22,7 @@ const SafeHeaderInfo = (): ReactElement => {
   const { safe } = useSafeInfo()
   const { threshold, owners } = safe
   const { ens } = useAddressResolver(safeAddress)
+  const { SafeHeaderHnTooltip } = useLoadFeature(HypernativeFeature)
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
@@ -40,7 +42,7 @@ const SafeHeaderInfo = (): ReactElement => {
             shortAddress
             showAvatar={false}
             name={ens}
-            showShieldIcon={isHypernativeGuard}
+            badgeTooltip={isHypernativeGuard ? <SafeHeaderHnTooltip /> : undefined}
           />
         ) : (
           <Typography variant="body2">

@@ -15,8 +15,13 @@ type WcChainSwitchModalProps = {
 }
 
 function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
-  const { AccountItem } = useLoadFeature(MyAccountsFeature)
+  const feature = useLoadFeature(MyAccountsFeature)
+  const { AccountItem } = feature
   const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
+
+  if (!feature.$isReady || !AccountItem?.Button) {
+    return null
+  }
 
   return (
     <AccountItem.Button onClick={onSelect} elementRef={elementRef}>

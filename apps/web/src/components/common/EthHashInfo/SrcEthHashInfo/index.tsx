@@ -13,9 +13,6 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
-import { HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
-import SafeShieldIcon from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
 export type EthHashInfoProps = {
   address: string
@@ -37,7 +34,7 @@ export type EthHashInfoProps = {
   ExplorerButtonProps?: ExplorerButtonProps
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
-  showShieldIcon?: boolean
+  badgeTooltip?: ReactNode
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -61,14 +58,22 @@ const SrcEthHashInfo = ({
   trusted = true,
   addressBookNameSource,
   highlight4bytes = false,
-  showShieldIcon = false,
+  badgeTooltip,
 }: EthHashInfoProps): ReactElement => {
-  const hn = useLoadFeature(HypernativeFeature)
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
+
+  const accountStylesWithBadge = badgeTooltip
+    ? {
+        backgroundColor: 'var(--color-background-main)',
+        fontWeight: 'bold',
+        borderRadius: '16px',
+        padding: name ? '2px 8px 2px 6px' : undefined,
+      }
+    : undefined
 
   const highlightedAddress = highlight4bytes ? (
     <>
@@ -87,26 +92,6 @@ const SrcEthHashInfo = ({
       <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
     </>
   )
-
-  const safeShieldSvgStyles = {
-    fontSize: 'medium',
-    '& .shield-img': {
-      fill: 'var(--color-static-text-brand)',
-      transition: 'fill 0.2s ease',
-    },
-    '& .shield-lines': {
-      fill: '#121312 !important', // consistent between dark/light modes
-      stroke: '#121312 !important',
-      transition: 'fill 0.2s ease',
-    },
-  }
-
-  const accountStylesWithShieldEnabled = {
-    backgroundColor: 'var(--color-background-main)',
-    fontWeight: 'bold',
-    borderRadius: '16px',
-    padding: name ? '2px 8px 2px 6px' : undefined,
-  }
 
   return (
     <div className={css.container}>
@@ -131,38 +116,31 @@ const SrcEthHashInfo = ({
             display="flex"
             alignItems="center"
             gap={0.5}
-            sx={showShieldIcon ? accountStylesWithShieldEnabled : undefined}
+            sx={accountStylesWithBadge}
           >
             <Box overflow="hidden" textOverflow="ellipsis">
               {name}
             </Box>
 
-            {showShieldIcon ? (
-              <hn.HypernativeTooltip placement="right">
-                <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </hn.HypernativeTooltip>
-            ) : (
-              !!addressBookNameSource && (
-                <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
-                  <span style={{ lineHeight: 0 }}>
-                    <SvgIcon
-                      component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
-                      inheritViewBox
-                      color="border"
-                      fontSize="small"
-                    />
-                  </span>
-                </Tooltip>
-              )
-            )}
+            {badgeTooltip
+              ? badgeTooltip
+              : !!addressBookNameSource && (
+                  <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
+                    <span style={{ lineHeight: 0 }}>
+                      <SvgIcon
+                        component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
+                        inheritViewBox
+                        color="border"
+                        fontSize="small"
+                      />
+                    </span>
+                  </Tooltip>
+                )}
           </Box>
         ) : (
-          /* Show shield icon even when there's no name */
-          showShieldIcon && (
+          badgeTooltip && (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <hn.HypernativeTooltip placement="right">
-                <SvgIcon component={SafeShieldIcon} inheritViewBox sx={safeShieldSvgStyles} />
-              </hn.HypernativeTooltip>
+              {badgeTooltip}
             </Box>
           )
         )}
