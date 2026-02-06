@@ -18,7 +18,7 @@ const retryingBaseQuery = retry(dynamicBaseQuery, {
 
 const getChainsConfigs = async (
   api: BaseQueryApi,
-  url = '/v1/chains',
+  url = '/v1/chains?cursor=limit%3D50%26offset%3D0',
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
   const response = await retryingBaseQuery(url, api, {})

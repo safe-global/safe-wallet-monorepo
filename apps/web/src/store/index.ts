@@ -7,6 +7,7 @@ import {
   type Middleware,
 } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
+import { useEffect } from 'react'
 import merge from 'lodash/merge'
 import { IS_PRODUCTION } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
@@ -31,6 +32,9 @@ import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
+import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import staticChainsData from '@/config/__generated__/chains.json'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -185,4 +189,53 @@ export const getStoreInstance = () => {
     throw new Error('Store not initialized. Ensure _app.tsx has called setStoreInstance.')
   }
   return _store
+}
+
+/**
+ * Seed the RTK Query cache with build-time chain data so useGetChainsConfigQuery()
+ * returns data immediately without waiting for the network, then trigger a background
+ * refetch for fresh data. Runs as a client-only effect (after hydration) to avoid
+ * SSR/hydration mismatches from chain-dependent components.
+ *
+ * When the runtime response arrives, RTK Query's structuralSharing preserves object
+ * references if the data is identical, preventing unnecessary re-renders.
+ */
+export const useInitStaticChains = () => {
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    let cancelled = false
+    let unsubscribe: (() => void) | undefined
+
+    const run = async () => {
+      const typedStaticChains = staticChainsData as Chain[]
+      if (typedStaticChains.length > 0) {
+        // upsertQueryData internally calls initiate() which puts the entry into
+        // 'pending' state. We must await its completion before dispatching our own
+        // initiate(), otherwise RTK Query deduplicates it as an in-flight request.
+        await dispatch(
+          apiSliceWithChainsConfig.util.upsertQueryData(
+            'getChainsConfig',
+            undefined as void,
+            chainsAdapter.setAll(chainsInitialState, typedStaticChains),
+          ),
+        )
+      }
+
+      if (cancelled) return
+
+      // Now the entry is 'fulfilled'. Trigger a real network fetch in the background.
+      const result = dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }),
+      )
+      unsubscribe = result.unsubscribe
+    }
+
+    run()
+
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+    }
+  }, [dispatch])
 }

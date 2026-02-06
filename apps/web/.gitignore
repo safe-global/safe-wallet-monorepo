@@ -12,3 +12,6 @@ public/*.map
 
 # Storybook
 storybook-static
+
+# Generated build-time data
+src/config/__generated__/
