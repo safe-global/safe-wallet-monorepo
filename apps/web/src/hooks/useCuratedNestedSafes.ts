@@ -33,5 +33,3 @@ export function useCuratedNestedSafes(): UseCuratedNestedSafesResult {
     [curationState],
   )
 }
-
-export default useCuratedNestedSafes

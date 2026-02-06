@@ -60,5 +60,4 @@ export enum NESTED_SAFE_LABELS {
   list = 'list',
   success_screen = 'success_screen',
   first_time = 'first_time',
-  manage_mode = 'manage_mode',
 }
