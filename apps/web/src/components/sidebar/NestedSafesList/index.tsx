@@ -17,10 +17,11 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import WarningIcon from '@/public/images/notifications/warning.svg'
+import { SimilarityGroupContainer } from './SimilarityGroupContainer'
 
 const MAX_NESTED_SAFES = 5
 
-type SafeItemWithStatus = SafeItem & { isValid: boolean; isAutoHidden: boolean; isUserUnhidden: boolean }
+type SafeItemWithStatus = SafeItem & { isValid: boolean; isCurated: boolean }
 
 function NestedSafeItem({
   safeItem,
@@ -30,6 +31,7 @@ function NestedSafeItem({
   isSelected,
   onToggle,
   showWarning,
+  showSimilarityWarning,
 }: {
   safeItem: SafeItemWithStatus
   safeOverview?: SafeOverview
@@ -38,6 +40,7 @@ function NestedSafeItem({
   isSelected: boolean
   onToggle: () => void
   showWarning: boolean
+  showSimilarityWarning: boolean
 }) {
   const { AccountItem, $isReady } = useLoadFeature(MyAccountsFeature)
   const { href, name, threshold, owners, elementRef, trackingLabel } = useSafeItemData(safeItem, { safeOverview })
@@ -66,7 +69,14 @@ function NestedSafeItem({
           owners={owners.length}
           chainId={safeItem.chainId}
         />
-        <AccountItem.Info address={safeItem.address} name={name} chainId={safeItem.chainId} />
+        <AccountItem.Info
+          address={safeItem.address}
+          name={name}
+          chainId={safeItem.chainId}
+          fullAddress
+          highlight4bytes={showSimilarityWarning}
+          monospace
+        />
         <AccountItem.Group>
           <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
           {warningIcon}
@@ -91,23 +101,47 @@ function NestedSafeItem({
   )
 }
 
+interface GroupedSafes {
+  groups: { key: string; safes: NestedSafeWithStatus[] }[]
+  ungrouped: NestedSafeWithStatus[]
+}
+
 export function NestedSafesList({
   onClose,
   safesWithStatus,
   isManageMode = false,
   onToggleSafe,
   isSafeSelected,
+  isFlagged,
+  groupedSafes,
 }: {
   onClose: () => void
   safesWithStatus: NestedSafeWithStatus[]
   isManageMode?: boolean
   onToggleSafe?: (address: string) => void
   isSafeSelected?: (address: string) => boolean
+  isFlagged?: (address: string) => boolean
+  groupedSafes?: GroupedSafes
 }): ReactElement {
   const [showAll, setShowAll] = useState(false)
   const chain = useCurrentChain()
   const currency = useAppSelector(selectCurrency)
   const wallet = useWallet()
+
+  // Helper to convert NestedSafeWithStatus to SafeItemWithStatus
+  const toSafeItem = (safe: NestedSafeWithStatus): SafeItemWithStatus | null => {
+    if (!chain) return null
+    return {
+      address: safe.address,
+      chainId: chain.chainId,
+      isReadOnly: false,
+      isPinned: false,
+      lastVisited: 0,
+      name: undefined,
+      isValid: safe.isValid,
+      isCurated: safe.isCurated,
+    }
+  }
 
   const safeItems: SafeItemWithStatus[] = useMemo(() => {
     if (!chain) return []
@@ -119,13 +153,36 @@ export function NestedSafesList({
       lastVisited: 0,
       name: undefined,
       isValid: safe.isValid,
-      isAutoHidden: safe.isAutoHidden,
-      isUserUnhidden: safe.isUserUnhidden,
+      isCurated: safe.isCurated,
     }))
   }, [safesWithStatus, chain])
 
   // In manage mode, always show all safes
   const nestedSafesToShow = showAll || isManageMode ? safeItems : safeItems.slice(0, MAX_NESTED_SAFES)
+
+  // Helper to render a single safe item
+  const renderSafeItem = (safeItem: SafeItemWithStatus) => {
+    const safeOverview = safeOverviews?.find(
+      (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
+    )
+    const isSelected = isSafeSelected?.(safeItem.address) ?? false
+    const showWarning = isManageMode && !safeItem.isValid
+    const showSimilarityWarning = isManageMode && (isFlagged?.(safeItem.address) ?? false)
+
+    return (
+      <NestedSafeItem
+        key={safeItem.address}
+        safeItem={safeItem}
+        safeOverview={safeOverview}
+        onClose={onClose}
+        isManageMode={isManageMode}
+        isSelected={isSelected}
+        onToggle={() => onToggleSafe?.(safeItem.address)}
+        showWarning={showWarning}
+        showSimilarityWarning={showSimilarityWarning}
+      />
+    )
+  }
 
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
     safeItems.length > 0 && chain
@@ -141,28 +198,33 @@ export function NestedSafesList({
     setShowAll(true)
   }
 
+  // In manage mode with grouped safes, render groups first then ungrouped
+  if (isManageMode && groupedSafes) {
+    return (
+      <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
+        {/* Render similarity groups first */}
+        {groupedSafes.groups.map((group) => (
+          <SimilarityGroupContainer key={group.key}>
+            {group.safes.map((safe) => {
+              const safeItem = toSafeItem(safe)
+              return safeItem ? renderSafeItem(safeItem) : null
+            })}
+          </SimilarityGroupContainer>
+        ))}
+
+        {/* Render ungrouped safes */}
+        {groupedSafes.ungrouped.map((safe) => {
+          const safeItem = toSafeItem(safe)
+          return safeItem ? renderSafeItem(safeItem) : null
+        })}
+      </List>
+    )
+  }
+
+  // Default rendering (non-manage mode or manage mode without grouping)
   return (
     <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
-      {nestedSafesToShow.map((safeItem) => {
-        const safeOverview = safeOverviews?.find(
-          (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
-        )
-        const isSelected = isSafeSelected?.(safeItem.address) ?? false
-        const showWarning = isManageMode && !safeItem.isValid
-
-        return (
-          <NestedSafeItem
-            key={safeItem.address}
-            safeItem={safeItem}
-            safeOverview={safeOverview}
-            onClose={onClose}
-            isManageMode={isManageMode}
-            isSelected={isSelected}
-            onToggle={() => onToggleSafe?.(safeItem.address)}
-            showWarning={showWarning}
-          />
-        )
-      })}
+      {nestedSafesToShow.map((safeItem) => renderSafeItem(safeItem))}
       {safeItems.length > MAX_NESTED_SAFES && !showAll && !isManageMode && (
         <Track {...NESTED_SAFE_EVENTS.SHOW_ALL}>
           <Typography
@@ -173,7 +235,7 @@ export function NestedSafesList({
             sx={{ cursor: 'pointer', textAlign: 'center', py: 1 }}
             onClick={onShowAll}
           >
-            Show all Nested Safes
+            Show all nested Safes
             <ChevronRight color="border" sx={{ transform: 'rotate(90deg)', ml: 1 }} fontSize="inherit" />
           </Typography>
         </Track>
