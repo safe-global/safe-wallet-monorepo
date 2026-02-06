@@ -1,19 +1,16 @@
 @import 'tailwindcss';
 @import './vars.css';
 @import './onboard.css';
-@import url(/fonts/fonts.css);
+@import './fonts.css';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 /*---break---*/
 @custom-variant dark (&:is(.dark *));
 /**
 * ^^^^^^^
-* Some IDEs show the fonts file above as not existing, but it is.
-* If you modify the path to it make sure that the file is also loaded on the
-* actual website.
-* Fun fact: if this comment block is above the @import url(/fonts/fonts.css);
-* nextjs's build will incorrectly place the @import in the middle of the file
-* and the fonts won't load. More info on @import:
+* Font faces are imported from ./fonts.css instead of /fonts/fonts.css so
+* Tailwind/PostCSS can inline the import in production builds.
+* More info on @import:
 * https://developer.mozilla.org/en-US/docs/Web/CSS/@import#description
 */
 
