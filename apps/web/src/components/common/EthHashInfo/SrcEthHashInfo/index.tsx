@@ -72,7 +72,6 @@ const SrcEthHashInfo = ({
         fontWeight: 'bold',
         borderRadius: '16px',
         padding: name ? '2px 8px 2px 6px' : undefined,
-        width: 'fit-content',
       }
     : undefined
 
