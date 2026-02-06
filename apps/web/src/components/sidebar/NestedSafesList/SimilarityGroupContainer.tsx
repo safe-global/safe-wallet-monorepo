@@ -1,11 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import type { ReactElement, ReactNode } from 'react'
 
-export function SimilarityGroupContainer({
-  children,
-}: {
-  children: ReactNode
-}): ReactElement {
+export function SimilarityGroupContainer({ children }: { children: ReactNode }): ReactElement {
   return (
     <Box
       sx={{

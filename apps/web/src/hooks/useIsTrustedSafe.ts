@@ -14,9 +14,7 @@ import useIsPinnedSafe from '@/hooks/useIsPinnedSafe'
 const useIsTrustedSafe = (): boolean => {
   const isPinned = useIsPinnedSafe()
   const { safeAddress } = useSafeInfo()
-  const isCurated = useAppSelector((state) =>
-    safeAddress ? selectIsCuratedNestedSafe(state, safeAddress) : false,
-  )
+  const isCurated = useAppSelector((state) => (safeAddress ? selectIsCuratedNestedSafe(state, safeAddress) : false))
 
   return isPinned || isCurated
 }

@@ -247,8 +247,8 @@ export const selectIsCuratedNestedSafe = createSelector(
   (settings, safeAddress): boolean => {
     if (!safeAddress) return false
     const normalizedAddress = safeAddress.toLowerCase()
-    return Object.values(settings.curatedNestedSafes).some(
-      (curation) => curation?.selectedAddresses?.some((addr) => addr.toLowerCase() === normalizedAddress),
+    return Object.values(settings.curatedNestedSafes).some((curation) =>
+      curation?.selectedAddresses?.some((addr) => addr.toLowerCase() === normalizedAddress),
     )
   },
 )
