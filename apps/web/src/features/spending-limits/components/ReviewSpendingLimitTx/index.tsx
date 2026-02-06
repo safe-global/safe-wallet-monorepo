@@ -1,14 +1,12 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { useContext, useMemo, useState } from 'react'
-import { type BigNumberish, type BytesLike } from 'ethers'
 import { Button, CardActions, Typography } from '@mui/material'
 import SendToBlock from '@/components/tx/SendToBlock'
-import { type TokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer/index'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
-import useSpendingLimitGas from '@/hooks/useSpendingLimitGas'
+import useSpendingLimit from '../../hooks/useSpendingLimit'
+import useSpendingLimitGas from '../../hooks/useSpendingLimitGas'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -16,7 +14,7 @@ import { Errors, logError } from '@/services/exceptions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import { useCurrentChain } from '@/hooks/useChains'
-import { dispatchSpendingLimitTxExecution } from '@/services/tx/tx-sender'
+import { dispatchSpendingLimitTxExecution } from '../../services/spendingLimitExecution'
 import { getTxOptions } from '@/utils/transactions'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -29,16 +27,12 @@ import { isWalletRejection } from '@/utils/wallets'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import type { SpendingLimitTxParams } from '../../types'
 
-export type SpendingLimitTxParams = {
-  safeAddress: string
-  token: string
-  to: string
-  amount: BigNumberish
-  paymentToken: string
-  payment: BigNumberish
-  delegate: string
-  signature: BytesLike
+export type TokenTransferParams = {
+  recipient: string
+  tokenAddress: string
+  amount: string
 }
 
 const ReviewSpendingLimitTx = ({

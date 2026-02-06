@@ -41,12 +41,12 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
 import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
- * This ensures the entire recovery feature loads as a single chunk.
  */
 const RecoveryLoader = () => {
   const { Recovery } = useLoadFeature(RecoveryFeature)
@@ -61,6 +61,14 @@ const RecoveryLoader = () => {
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
   return <CounterfactualHooks />
+}
+
+/**
+ * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
+ */
+const SpendingLimitsLoaderWrapper = () => {
+  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
+  return <SpendingLimitsLoader />
 }
 
 /**
@@ -201,6 +209,8 @@ const SafeWalletApp = ({
             <RecoveryLoader />
 
             <CounterfactualHooksLoader />
+
+            <SpendingLimitsLoaderWrapper />
 
             <Analytics />
 

@@ -1,6 +1,6 @@
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import { getSpendingLimitInterface } from '@/services/contracts/spendingLimitContracts'
+import { getSpendingLimitInterface } from './spendingLimitContracts'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export const createEnableModuleTx = async (

@@ -117,7 +117,9 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
           [TokenTransferFields.tokenAddress]:
-            canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+            canCreateSpendingLimitTx && !canCreateStandardTx
+              ? tokenAddress || balancesItems[0]?.tokenInfo.address
+              : tokenAddress,
         })) || [],
     },
     mode: 'onChange',
