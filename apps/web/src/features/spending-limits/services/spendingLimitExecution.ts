@@ -94,7 +94,7 @@ export const createNewSpendingLimitTx = async (
 
   txs.push(tx)
 
-  return createMultiSendCallOnlyTx(txs)
+  return createMultiSendCallOnlyTx(txs, { nonce })
 }
 
 export const dispatchSpendingLimitTxExecution = async (
