@@ -25,7 +25,8 @@ const useUntrustedSafeAnalysis = (): UntrustedSafeAnalysisResult => {
       severity: Severity.CRITICAL,
       type: SafeStatus.UNTRUSTED,
       title: 'Untrusted Safe',
-      description: 'This Safe is not in your trusted list. Verify the address before proceeding.',
+      description:
+        'You are creating this transaction from a Safe that is not in your trusted list. Verify that this Safe address is correct before proceeding.',
     }
   }, [isPinned])
 
