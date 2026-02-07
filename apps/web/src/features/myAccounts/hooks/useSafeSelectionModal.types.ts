@@ -33,35 +33,3 @@ export type SelectableItem = SelectableSafe | SelectableMultiChainSafe
 export const isSelectableMultiChainSafe = (item: SelectableItem): item is SelectableMultiChainSafe => {
   return 'safes' in item && Array.isArray(item.safes)
 }
-
-/** State management for the safe selection modal */
-export interface SafeSelectionModalState {
-  /** Whether the modal is currently open */
-  isOpen: boolean
-  /** List of safes available for selection */
-  availableSafes: SelectableSafe[]
-  /** Set of currently selected addresses */
-  selectedAddresses: Set<string>
-  /** Address awaiting similarity confirmation (null if none) */
-  pendingConfirmation: string | null
-  /** Current search query */
-  searchQuery: string
-  /** Whether safes are loading */
-  isLoading: boolean
-
-  // Actions
-  /** Open the modal */
-  open: () => void
-  /** Close the modal */
-  close: () => void
-  /** Toggle selection for an address */
-  toggleSelection: (address: string) => void
-  /** Confirm selection of a similar address */
-  confirmSimilarAddress: (address: string) => void
-  /** Cancel selection of a similar address */
-  cancelSimilarAddress: () => void
-  /** Submit the current selection */
-  submitSelection: () => void
-  /** Update search query */
-  setSearchQuery: (query: string) => void
-}

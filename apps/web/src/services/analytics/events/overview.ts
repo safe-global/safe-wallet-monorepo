@@ -264,7 +264,6 @@ export enum OPEN_SAFE_LABELS {
 export enum TRUSTED_SAFE_LABELS {
   non_pinned_warning = 'non_pinned_warning',
   safe_shield = 'safe_shield',
-  migration_prompt = 'migration_prompt',
   with_similarity = 'with_similarity',
   without_similarity = 'without_similarity',
 }

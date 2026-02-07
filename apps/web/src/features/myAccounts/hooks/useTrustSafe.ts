@@ -58,5 +58,3 @@ export function useTrustSafe() {
 
   return { trustSafe }
 }
-
-export default useTrustSafe

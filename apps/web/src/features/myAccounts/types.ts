@@ -10,7 +10,7 @@ export type { SimilarityConfig, SimilarityGroup, SimilarityDetectionResult } fro
 export { DEFAULT_SIMILARITY_CONFIG } from './services/addressSimilarity.types'
 
 // Safe selection modal types
-export type { SelectableSafe, SafeSelectionModalState } from './hooks/useSafeSelectionModal.types'
+export type { SelectableSafe } from './hooks/useSafeSelectionModal.types'
 
 // Non-pinned warning types
 export type { SafeUserRole, NonPinnedWarningState } from './hooks/useNonPinnedSafeWarning.types'

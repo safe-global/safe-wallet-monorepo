@@ -36,44 +36,6 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
 const ALWAYS_DISABLED_FEATURES = ['EURCV_BOOST', 'NO_FEE_CAMPAIGN']
 
 /**
- * Preset feature configurations for common scenarios
- */
-export const chainFeaturePresets = {
-  /** Minimal features - only swaps enabled */
-  minimal: {
-    portfolio: false,
-    positions: false,
-    swaps: true,
-    recovery: false,
-    hypernative: false,
-    earn: false,
-    spaces: false,
-  } satisfies FeatureFlags,
-
-  /** Standard features - portfolio and positions enabled */
-  standard: {
-    portfolio: true,
-    positions: true,
-    swaps: true,
-    recovery: false,
-    hypernative: false,
-    earn: false,
-    spaces: false,
-  } satisfies FeatureFlags,
-
-  /** Full features - everything enabled except complex ones */
-  full: {
-    portfolio: true,
-    positions: true,
-    swaps: true,
-    recovery: true,
-    hypernative: true,
-    earn: true,
-    spaces: true,
-  } satisfies FeatureFlags,
-}
-
-/**
  * Creates chain data with specified features enabled/disabled
  *
  * @param features - Feature flags to apply (merged with DEFAULT_FEATURES)
