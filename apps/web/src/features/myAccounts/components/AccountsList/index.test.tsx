@@ -20,7 +20,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 }))
 
 // Mock useMigrationPrompt - return value can be changed per test
-let mockMigrationPromptValue = { shouldShowPrompt: false, availableSafeCount: 0, hasPinnedSafes: false, hasAssociatedSafes: false, isLoading: false }
+let mockMigrationPromptValue = {
+  shouldShowPrompt: false,
+  availableSafeCount: 0,
+  hasPinnedSafes: false,
+  hasAssociatedSafes: false,
+  isLoading: false,
+}
 jest.mock('../../hooks/useMigrationPrompt', () => ({
   __esModule: true,
   default: () => mockMigrationPromptValue,
@@ -41,7 +47,13 @@ describe('AccountsList', () => {
     jest.clearAllMocks()
     // Reset mocks to default state
     mockWalletValue = { address: '0x1234567890123456789012345678901234567890' }
-    mockMigrationPromptValue = { shouldShowPrompt: false, availableSafeCount: 0, hasPinnedSafes: false, hasAssociatedSafes: false, isLoading: false }
+    mockMigrationPromptValue = {
+      shouldShowPrompt: false,
+      availableSafeCount: 0,
+      hasPinnedSafes: false,
+      hasAssociatedSafes: false,
+      isLoading: false,
+    }
   })
 
   it('renders FilteredSafes when searchQuery is not empty', () => {
