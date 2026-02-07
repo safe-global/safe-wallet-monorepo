@@ -137,7 +137,7 @@ class SafeOverviewFetcher {
     } else {
       v1Items.forEach((item) => {
         const overview = v1Result.value.find(
-          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          (entry) => sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
         )
         item.callback({ data: overview })
       })
@@ -149,7 +149,7 @@ class SafeOverviewFetcher {
     } else {
       v2Items.forEach((item) => {
         const overview = v2Result.value.find(
-          (entry) => sameAddress(entry.address.value, item.safeAddress) && entry.chainId === item.chainId,
+          (entry) => sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
         )
         item.callback({ data: overview })
       })

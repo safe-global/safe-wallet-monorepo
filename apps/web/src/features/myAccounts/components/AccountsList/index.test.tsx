@@ -19,6 +19,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockWalletValue,
 }))
 
+// Mock useMigrationPrompt - return value can be changed per test
+let mockMigrationPromptValue = { shouldShowPrompt: false, availableSafeCount: 0, hasPinnedSafes: false, hasAssociatedSafes: false, isLoading: false }
+jest.mock('../../hooks/useMigrationPrompt', () => ({
+  __esModule: true,
+  default: () => mockMigrationPromptValue,
+}))
+
 describe('AccountsList', () => {
   const baseSafes: AllSafeItemsGrouped = {
     allMultiChainSafes: [
@@ -32,8 +39,9 @@ describe('AccountsList', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
-    // Reset wallet mock to connected state
+    // Reset mocks to default state
     mockWalletValue = { address: '0x1234567890123456789012345678901234567890' }
+    mockMigrationPromptValue = { shouldShowPrompt: false, availableSafeCount: 0, hasPinnedSafes: false, hasAssociatedSafes: false, isLoading: false }
   })
 
   it('renders FilteredSafes when searchQuery is not empty', () => {
@@ -109,33 +117,21 @@ describe('AccountsList', () => {
   })
 
   it('renders ConnectWalletPrompt when wallet is not connected and no pinned safes', () => {
-    // Set wallet mock to disconnected state
     mockWalletValue = null
+    mockMigrationPromptValue = { ...mockMigrationPromptValue, hasPinnedSafes: false }
 
-    // Ensure no pinned safes in Redux state
-    render(<AccountsList searchQuery="" safes={baseSafes} />, {
-      initialReduxState: { addedSafes: {} },
-    })
+    render(<AccountsList searchQuery="" safes={baseSafes} />)
 
     expect(screen.getByTestId('connect-wallet-prompt')).toBeInTheDocument()
     expect(screen.getByText('Connect your wallet')).toBeInTheDocument()
     expect(screen.queryByText('PinnedSafes Component')).not.toBeInTheDocument()
   })
 
-  it('renders PinnedSafes when wallet is not connected but has pinned safes in storage', () => {
-    // Set wallet mock to disconnected state
+  it('renders PinnedSafes when wallet is not connected but has pinned safes', () => {
     mockWalletValue = null
+    mockMigrationPromptValue = { ...mockMigrationPromptValue, hasPinnedSafes: true }
 
-    // Set pinned safes in Redux state (simulating localStorage)
-    render(<AccountsList searchQuery="" safes={baseSafes} />, {
-      initialReduxState: {
-        addedSafes: {
-          '1': {
-            '0xSomePinnedSafe': { threshold: 1, owners: [] },
-          },
-        },
-      },
-    })
+    render(<AccountsList searchQuery="" safes={baseSafes} />)
 
     // Should show pinned safes, not connect prompt
     expect(screen.queryByTestId('connect-wallet-prompt')).not.toBeInTheDocument()

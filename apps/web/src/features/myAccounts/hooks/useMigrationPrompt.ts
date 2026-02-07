@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useAppSelector } from '@/store'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
@@ -26,12 +24,11 @@ export interface UseMigrationPromptReturn {
  */
 const useMigrationPrompt = (): UseMigrationPromptReturn => {
   const allSafes = useAllSafes()
-  const addedSafes = useAppSelector(selectAllAddedSafes)
 
-  // Check if user has any pinned safes
+  // Check if user has any pinned safes (using allSafes to stay consistent with rendered list)
   const hasPinnedSafes = useMemo(() => {
-    return Object.values(addedSafes).some((chainSafes) => Object.keys(chainSafes).length > 0)
-  }, [addedSafes])
+    return allSafes?.some((safe) => safe.isPinned) ?? false
+  }, [allSafes])
 
   // Count unique safes by address (safes can exist on multiple chains)
   const availableSafeCount = useMemo(() => {
