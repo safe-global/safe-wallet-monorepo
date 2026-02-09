@@ -64,6 +64,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         fullAddress
         showCopyButton
         hasExplorer
+        monospace
         highlight4bytes={!!safe.similarityGroup}
       >
         {!isMobile && statusChips}

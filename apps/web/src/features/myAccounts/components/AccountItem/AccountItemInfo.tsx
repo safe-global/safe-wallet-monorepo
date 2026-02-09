@@ -16,6 +16,7 @@ export interface AccountItemInfoProps {
   showCopyButton?: boolean // Show copy button next to address
   hasExplorer?: boolean // Show explorer link next to address
   highlight4bytes?: boolean // Highlight first 4 and last 4 chars (for similar addresses)
+  monospace?: boolean // Use monospace font for address (easier to compare)
   'data-testid'?: string
 }
 
@@ -34,12 +35,18 @@ function AccountItemInfo({
   addressBookNameSource,
   showCopyButton = false,
   hasExplorer = false,
+  monospace = false,
   highlight4bytes = false,
   'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
     <div className={css.accountItemInfo} data-testid={testId}>
-      <Typography variant="body2" component="div" className={css.safeAddress}>
+      <Typography
+        variant="body2"
+        component="div"
+        className={css.safeAddress}
+        sx={monospace ? { fontFamily: 'monospace' } : undefined}
+      >
         {chainName ? (
           <Typography
             component="span"
