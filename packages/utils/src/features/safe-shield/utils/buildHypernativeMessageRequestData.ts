@@ -65,5 +65,6 @@ export const buildHypernativeMessageRequestData = ({
     },
     ...(proposer ? { proposer } : {}),
     ...(origin ? { url: origin } : {}),
+    chain: typedData.domain.chainId ? typedData.domain.chainId.toString() : '1',
   }
 }

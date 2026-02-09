@@ -140,6 +140,7 @@ export type HypernativeMessageAssessmentRequestDto = {
   message: HypernativeEIP712Message
   proposer?: `0x${string}`
   url?: string
+  chain: string
 }
 
 export type HypernativeMessageAssessmentRequestWithAuthDto = HypernativeMessageAssessmentRequestDto & {
