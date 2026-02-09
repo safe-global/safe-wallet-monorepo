@@ -6,7 +6,7 @@ type simulationState = {
   status: FETCH_STATUS
   link?: string
   error?: string
-  dataStatus: true
+  dataStatus: boolean
   callTrace: TenderlySimulation['transaction']['call_trace']
 }
 
