@@ -37,7 +37,6 @@ function AccountItemInfo({
   hasExplorer = false,
   monospace = false,
   highlight4bytes = false,
-  monospace = false,
   'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
