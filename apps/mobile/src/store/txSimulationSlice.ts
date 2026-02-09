@@ -6,8 +6,8 @@ type simulationState = {
   status: FETCH_STATUS
   link?: string
   error?: string
-  dataStatus: boolean
-  callTrace: TenderlySimulation['transaction']['call_trace']
+  dataStatus?: boolean
+  callTrace?: TenderlySimulation['transaction']['call_trace']
 }
 
 export type txSimulationState = Record<string, simulationState>
