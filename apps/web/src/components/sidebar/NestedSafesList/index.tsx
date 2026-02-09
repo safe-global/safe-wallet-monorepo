@@ -39,8 +39,10 @@ function NestedSafeItem({
   onToggle: () => void
   showWarning: boolean
 }) {
-  const { AccountItem } = useLoadFeature(MyAccountsFeature)
+  const { AccountItem, $isReady } = useLoadFeature(MyAccountsFeature)
   const { href, name, threshold, owners, elementRef, trackingLabel } = useSafeItemData(safeItem, { safeOverview })
+
+  if (!$isReady) return null
 
   const warningIcon = showWarning ? (
     <Tooltip title="This Safe was not created by the parent Safe or its signers" placement="top">

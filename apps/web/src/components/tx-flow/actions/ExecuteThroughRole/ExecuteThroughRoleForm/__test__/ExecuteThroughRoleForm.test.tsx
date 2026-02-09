@@ -69,6 +69,12 @@ jest.mock('@/services/transactions', () => ({
   getModuleTransactionId: jest.fn(() => 'i1234567890'),
 }))
 
+// Mock useIsPinnedSafe to return true (Safe is trusted)
+jest.mock('@/hooks/useIsPinnedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => true),
+}))
+
 // Mock useGasPrice
 jest.mock('@/hooks/useGasPrice', () => ({
   __esModule: true,

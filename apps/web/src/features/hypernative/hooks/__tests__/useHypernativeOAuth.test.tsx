@@ -30,6 +30,20 @@ jest.mock('@/store', () => ({
   useAppSelector: jest.fn(),
 }))
 
+// Mock useSafeInfo and useChainId
+const mockSafeInfoValues = { safeAddress: '', safe: {}, safeLoaded: false, safeLoading: false }
+const mockChainIdValue = { chainId: '' }
+
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: () => mockSafeInfoValues,
+}))
+
+jest.mock('@/hooks/useChainId', () => ({
+  __esModule: true,
+  default: () => mockChainIdValue.chainId,
+}))
+
 // Mock oauth config to ensure consistent test values
 const mockGetRedirectUri = jest.fn(() => 'http://localhost:3000/hypernative/oauth-callback')
 let mockAuthEnabled = false
@@ -98,6 +112,10 @@ describe('useHypernativeOAuth', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockDispatch.mockClear()
+
+    // Reset mock values
+    mockSafeInfoValues.safeAddress = ''
+    mockChainIdValue.chainId = ''
 
     // Clear mock cookies
     Object.keys(mockCookies).forEach((key) => delete mockCookies[key])
@@ -344,6 +362,39 @@ describe('useHypernativeOAuth', () => {
       expect(url).toContain('state=')
       expect(url).toContain('code_challenge=')
       expect(url).toContain('code_challenge_method=S256')
+    })
+
+    it('should include chain and safe parameters in URL when provided', async () => {
+      mockChainIdValue.chainId = '1'
+      mockSafeInfoValues.safeAddress = '0x1234567890123456789012345678901234567890'
+
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+      })
+
+      const callArgs = mockWindowOpen.mock.calls[0]
+      const url = callArgs[0] as string
+
+      expect(url).toContain(`chain=${mockChainIdValue.chainId}`)
+      expect(url).toContain(`safe=${mockSafeInfoValues.safeAddress}`)
+    })
+
+    it('should not include chain and safe parameters when not provided', async () => {
+      const { result } = renderHook(() => useHypernativeOAuth())
+
+      await act(async () => {
+        result.current.initiateLogin()
+        await waitFor(() => expect(mockWindowOpen).toHaveBeenCalled())
+      })
+
+      const callArgs = mockWindowOpen.mock.calls[0]
+      const url = callArgs[0] as string
+
+      expect(url).not.toContain('chain=')
+      expect(url).not.toContain('safe=')
     })
 
     it('should fallback to new tab when popup is blocked (null)', async () => {

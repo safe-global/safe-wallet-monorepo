@@ -250,8 +250,17 @@ describe('useThreatAnalysisHypernative', () => {
     })
   })
 
-  describe('nonce change handling', () => {
-    it('should not re-trigger mutation when only nonce changes', async () => {
+  describe('nonce change handling with debounce', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers()
+      jest.useRealTimers()
+    })
+
+    it('should re-trigger mutation when nonce changes (with debounce)', async () => {
       const mockSafeTx = createMockSafeTransaction()
       mockIsSafeTransaction.mockReturnValue(true)
 
@@ -268,23 +277,181 @@ describe('useThreatAnalysisHypernative', () => {
         { initialProps: { data: mockSafeTx } },
       )
 
+      // Fast-forward past initial debounce
+      jest.advanceTimersByTime(300)
+
       await waitFor(() => {
         expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
       })
 
-      // Change only nonce
+      // Create new transaction with only nonce changed
       const updatedSafeTx = {
         ...mockSafeTx,
-        data: { ...mockSafeTx.data, nonce: 2 },
+        data: {
+          ...mockSafeTx.data,
+          nonce: mockSafeTx.data.nonce + 1,
+        },
       }
 
       mockTriggerAssessment.mockClear()
       rerender({ data: updatedSafeTx })
 
-      // Should not trigger again since only nonce changed
+      // Should not trigger immediately (debounced)
+      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
+
+      // Fast-forward past debounce delay
+      jest.advanceTimersByTime(300)
+
+      // Should trigger after debounce
       await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
       })
+    })
+
+    it('should debounce multiple rapid changes and only trigger once', async () => {
+      const mockSafeTx = createMockSafeTransaction()
+      mockIsSafeTransaction.mockReturnValue(true)
+
+      const { rerender } = renderHook(
+        ({ data }) =>
+          useThreatAnalysisHypernative({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            data,
+            walletAddress: mockWalletAddress,
+            safeVersion: mockSafeVersion,
+            authToken: mockAuthToken,
+          }),
+        { initialProps: { data: mockSafeTx } },
+      )
+
+      // Fast-forward past initial debounce
+      jest.advanceTimersByTime(300)
+
+      await waitFor(() => {
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      mockTriggerAssessment.mockClear()
+
+      // Make multiple rapid changes
+      const changes = [
+        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 1 } },
+        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 2 } },
+        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 3 } },
+      ]
+
+      // Apply changes rapidly (within debounce window)
+      changes.forEach((change, index) => {
+        rerender({ data: change })
+        jest.advanceTimersByTime(100) // Less than 300ms debounce
+      })
+
+      // Should not have triggered yet
+      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
+
+      // Fast-forward past final debounce delay
+      jest.advanceTimersByTime(300)
+
+      // Should only trigger once with the final state
+      await waitFor(() => {
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should trigger for non-nonce changes with debounce', async () => {
+      const mockSafeTx = createMockSafeTransaction()
+      mockIsSafeTransaction.mockReturnValue(true)
+
+      const { rerender } = renderHook(
+        ({ data }) =>
+          useThreatAnalysisHypernative({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            data,
+            walletAddress: mockWalletAddress,
+            safeVersion: mockSafeVersion,
+            authToken: mockAuthToken,
+          }),
+        { initialProps: { data: mockSafeTx } },
+      )
+
+      // Fast-forward past initial debounce
+      jest.advanceTimersByTime(300)
+
+      await waitFor(() => {
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      // Create new transaction with different data (not just nonce)
+      const updatedSafeTx = {
+        ...mockSafeTx,
+        data: {
+          ...mockSafeTx.data,
+          to: faker.finance.ethereumAddress(),
+          value: '2000000000000000000',
+        },
+      }
+
+      mockTriggerAssessment.mockClear()
+      rerender({ data: updatedSafeTx })
+
+      // Should not trigger immediately (debounced)
+      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
+
+      // Fast-forward past debounce
+      jest.advanceTimersByTime(300)
+
+      await waitFor(() => {
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('should cancel pending debounced calls on unmount', async () => {
+      const mockSafeTx = createMockSafeTransaction()
+      mockIsSafeTransaction.mockReturnValue(true)
+
+      const { rerender, unmount } = renderHook(
+        ({ data }) =>
+          useThreatAnalysisHypernative({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            data,
+            walletAddress: mockWalletAddress,
+            safeVersion: mockSafeVersion,
+            authToken: mockAuthToken,
+          }),
+        { initialProps: { data: mockSafeTx } },
+      )
+
+      // Fast-forward past initial debounce
+      jest.advanceTimersByTime(300)
+
+      await waitFor(() => {
+        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      })
+
+      mockTriggerAssessment.mockClear()
+
+      // Make a change that would trigger debounced update
+      const updatedSafeTx = {
+        ...mockSafeTx,
+        data: {
+          ...mockSafeTx.data,
+          nonce: mockSafeTx.data.nonce + 1,
+        },
+      }
+
+      rerender({ data: updatedSafeTx })
+
+      // Unmount before debounce completes
+      unmount()
+
+      // Fast-forward past debounce delay
+      jest.advanceTimersByTime(300)
+
+      // Should not have triggered after unmount
+      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
     })
   })
 

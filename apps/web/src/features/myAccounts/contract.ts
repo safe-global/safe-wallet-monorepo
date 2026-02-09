@@ -15,6 +15,9 @@ import type { AccountItem } from './components/AccountItem'
 import type SafesList from './components/SafesList'
 import type AccountsNavigation from './components/AccountsNavigation'
 import type MyAccounts from './components/MyAccounts'
+import type SafeSelectionModal from './components/SafeSelectionModal'
+import type NonPinnedWarning from './components/NonPinnedWarning'
+import type NonPinnedWarningBanner from './components/NonPinnedWarning/NonPinnedWarningBanner'
 
 export interface MyAccountsContract {
   // Main component
@@ -24,4 +27,9 @@ export interface MyAccountsContract {
   AccountItem: typeof AccountItem
   SafesList: typeof SafesList
   AccountsNavigation: typeof AccountsNavigation
+
+  // Address safety components
+  SafeSelectionModal: typeof SafeSelectionModal
+  NonPinnedWarning: typeof NonPinnedWarning
+  NonPinnedWarningBanner: typeof NonPinnedWarningBanner
 }
