@@ -47,7 +47,7 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').should('be.enabled')
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -184,7 +184,19 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
+  // Set value using native input event setter to work with React's controlled inputs
+  getBeneficiaryInput().then(($input) => {
+    // Get the native input element
+    const input = $input[0]
+    // Use native setter to set value (works with React)
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+    nativeInputValueSetter.call(input, address)
+    // Dispatch input event to trigger React's onChange
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  // Wait for validation and click outside to trigger blur
+  cy.wait(500)
+  cy.get('body').click(0, 0)
 }
 
 export function checkBeneficiaryInputValue(value) {

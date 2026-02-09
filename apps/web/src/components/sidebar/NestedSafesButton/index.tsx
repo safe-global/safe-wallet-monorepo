@@ -7,6 +7,7 @@ import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 
 import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
@@ -26,14 +27,20 @@ export function NestedSafesButton({
     { ownerAddress: safeAddress },
     { skip: !isEnabled || !safeAddress },
   )
-  const nestedSafes = ownedSafes?.[chainId] ?? []
+  const rawNestedSafes = ownedSafes?.[chainId] ?? []
+  const { visibleSafes, allSafesWithStatus, hasCompletedCuration, isLoading, startFiltering, hasStarted } =
+    useNestedSafesVisibility(rawNestedSafes, chainId)
 
   if (!isEnabled || !safe.deployed) {
     return null
   }
 
+  // Show raw count before validation, visible count after
+  const displayCount = hasStarted && !isLoading ? visibleSafes.length : rawNestedSafes.length
+
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
+    startFiltering()
   }
   const onClose = () => {
     setAnchorEl(null)
@@ -42,7 +49,7 @@ export function NestedSafesButton({
   return (
     <>
       <Tooltip title="Nested Safes" placement="top">
-        <Badge invisible={nestedSafes.length > 0} variant="dot" className={css.badge}>
+        <Badge invisible={displayCount > 0} variant="dot" className={css.badge}>
           <IconButton
             className={headerCss.iconButton}
             sx={{
@@ -53,15 +60,23 @@ export function NestedSafesButton({
             onClick={onClick}
           >
             <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" fontSize="small" />
-            {nestedSafes.length > 0 && (
+            {displayCount > 0 && (
               <Typography component="span" variant="caption" className={css.count}>
-                {nestedSafes.length}
+                {displayCount}
               </Typography>
             )}
           </IconButton>
         </Badge>
       </Tooltip>
-      <NestedSafesPopover anchorEl={anchorEl} onClose={onClose} nestedSafes={nestedSafes} />
+      <NestedSafesPopover
+        anchorEl={anchorEl}
+        onClose={onClose}
+        rawNestedSafes={rawNestedSafes}
+        allSafesWithStatus={allSafesWithStatus}
+        visibleSafes={visibleSafes}
+        hasCompletedCuration={hasCompletedCuration}
+        isLoading={isLoading}
+      />
     </>
   )
 }

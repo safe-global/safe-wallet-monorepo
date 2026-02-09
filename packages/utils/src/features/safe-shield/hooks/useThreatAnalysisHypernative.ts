@@ -11,6 +11,7 @@ import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield
 import { buildHypernativeRequestData } from '@safe-global/utils/features/safe-shield/utils/buildHypernativeRequestData'
 import { useParsedOrigin } from './useParsedOrigin'
 import { isHypernativeAssessmentFailedResponse } from '@safe-global/store/hypernative/hypernativeApi.dto'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
 type UseThreatAnalysisHypernativeProps = {
   safeAddress: `0x${string}`
@@ -48,18 +49,16 @@ export function useThreatAnalysisHypernative({
   authToken,
   skip = false,
 }: UseThreatAnalysisHypernativeProps): AsyncResult<ThreatAnalysisResults> {
+  const debouncedData = useDebounce(dataProp, 300)
   const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
 
   useEffect(() => {
-    if (isSafeTransaction(dataProp) && isSafeTransaction(data)) {
-      const { nonce: _nonce, ...dataWithoutNonce } = dataProp.data
-      const { nonce: _prevNonce, ...prevDataWithoutNonce } = data.data
-      if (isEqual(dataWithoutNonce, prevDataWithoutNonce)) return
+    if (isSafeTransaction(debouncedData) && isSafeTransaction(data) && isEqual(debouncedData.data, data.data)) {
+      return
     }
-
-    setData(dataProp)
-  }, [dataProp, data])
+    setData(debouncedData)
+  }, [debouncedData, data])
 
   // Parse origin if it's a JSON string containing url
   const origin = useParsedOrigin(originProp)

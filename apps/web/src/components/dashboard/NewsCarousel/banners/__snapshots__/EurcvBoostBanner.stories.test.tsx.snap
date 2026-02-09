@@ -5,11 +5,11 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-t31lyp-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
+      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
     >
       <img
         alt="EURCV"
@@ -23,20 +23,20 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
         width="95"
       />
       <div
-        class="bannerContent MuiBox-root css-0"
+        class="bannerContent MuiBox-root mui-style-0"
       >
         <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1x3wnrt-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
         >
           EURCV is now available
         </h4>
         <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-17vdyq3-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
         >
           Stake EURCV and earn boosted APY on deposits.
            
           <a
-            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1spsnlm-MuiTypography-root-MuiLink-root"
+            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-1spsnlm-MuiTypography-root-MuiLink-root"
             href="https://help.safe.global/en/articles/322149-defi-lending-in-safe-wallet"
             rel="noopener noreferrer"
             target="_blank"
@@ -45,17 +45,17 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
           </a>
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText css-9raz31-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
           Start earning
           <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact mui-style-ioep0k-MuiButton-endIcon"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
               data-testid="ChevronRightIcon"
               focusable="false"
               viewBox="0 0 24 24"
@@ -70,13 +70,13 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon css-1dhtbeh-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
         data-testid="CloseIcon"
         focusable="false"
         viewBox="0 0 24 24"

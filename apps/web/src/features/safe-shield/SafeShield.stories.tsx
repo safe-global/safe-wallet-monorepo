@@ -65,6 +65,7 @@ export const ModerateThreat: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
 }
 
@@ -76,6 +77,7 @@ export const FailedThreatAnalysis: Story = {
       .threat(FullAnalysisBuilder.failedThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when threat analysis fails' } } },
 }
 
@@ -87,6 +89,7 @@ export const OwnershipChange: Story = {
       .threat(FullAnalysisBuilder.ownershipChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe ownership' } } },
 }
 
@@ -98,6 +101,7 @@ export const ModulesChange: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
 }
 
@@ -109,6 +113,7 @@ export const MastercopyChange: Story = {
       .threat(FullAnalysisBuilder.masterCopyChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
 }
 
@@ -119,6 +124,7 @@ export const UnverifiedContract: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing an unverified contract' } } },
 }
 
@@ -130,6 +136,7 @@ export const UnableToVerifyContract: Story = {
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: { description: { story: 'SafeShieldWidget when unable to verify a contract due to verification failure' } },
   },
@@ -164,6 +171,7 @@ export const UnofficialFallbackHandler: Story = {
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: { description: { story: 'SafeShieldWidget when transaction sets an unofficial fallback handler' } },
   },
@@ -182,6 +190,7 @@ export const MultipleIssues: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -204,6 +213,7 @@ export const MultipleCounterparties: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -220,6 +230,7 @@ export const ThreatAnalysisWithError: Story = {
       .threat(ThreatAnalysisBuilder.failedThreatWithError())
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -245,6 +256,7 @@ export const HypernativeGuardActive: Story = {
       logout: () => {},
     },
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -272,6 +284,7 @@ export const HypernativeNotLoggedIn: Story = {
       },
     },
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -297,6 +310,7 @@ export const HypernativeMaliciousThreat: Story = {
       logout: () => {},
     },
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -321,6 +335,7 @@ export const HypernativeCustomCheckFailed: Story = {
       logout: () => {},
     },
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {

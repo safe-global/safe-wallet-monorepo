@@ -1,14 +1,15 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { ChainIcon } from '@/components/common/SafeIcon'
-import { isMultiChainSafeItem } from '@/features/multichain'
-import { MultichainIndicator } from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
 import {
+  isMultiChainSafeItem,
+  type SafeItem,
   type AllSafeItems,
   flattenSafeItems,
   type MultiChainSafeItem,
-} from '@/features/myAccounts/hooks/useAllSafesGrouped'
+} from '@/hooks/safes'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import css from '@/features/spaces/components/AddAccounts/styles.module.css'
 import { useChain } from '@/hooks/useChains'
@@ -61,6 +62,8 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 }
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
+  const feature = useLoadFeature(MyAccountsFeature)
+  const { AccountItem } = feature
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -122,7 +125,11 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 <Box className={css.safeRow} pr={4}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
                   <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
-                    <MultichainIndicator safes={safe.safes} />
+                    {feature.$isReady && AccountItem?.ChainBadge ? (
+                      <AccountItem.ChainBadge safes={safe.safes} />
+                    ) : (
+                      <ChainIndicator chainId={safe.safes[0]?.chainId} responsive onlyLogo />
+                    )}
                   </Box>
                 </Box>
               </AccordionSummary>

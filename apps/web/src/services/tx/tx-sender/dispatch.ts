@@ -16,9 +16,7 @@ import type {
   TransactionResult,
 } from '@safe-global/types-kit'
 import { didRevert } from '@/utils/ethers-utils'
-import { type SpendingLimitTxParams } from '@/components/tx-flow/flows/TokenTransfer/ReviewSpendingLimitTx'
-import { getSpendingLimitContract } from '@/services/contracts/spendingLimitContracts'
-import type { ContractTransactionResponse, Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
+import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 import proposeTx from '../proposeTransaction'
 import { txDispatch, TxEvent } from '../txEvents'
@@ -413,71 +411,6 @@ export const dispatchModuleTxExecution = async (
 
     txDispatch(TxEvent.EXECUTING, { groupKey: id, chainId, safeAddress })
     result = await signer.sendTransaction(tx)
-  } catch (error) {
-    txDispatch(TxEvent.FAILED, { groupKey: id, chainId, safeAddress, error: asError(error) })
-    throw error
-  }
-
-  txDispatch(TxEvent.PROCESSING_MODULE, {
-    groupKey: id,
-    txHash: result.hash,
-  })
-
-  result
-    ?.wait()
-    .then((receipt) => {
-      if (receipt === null) {
-        txDispatch(TxEvent.FAILED, {
-          groupKey: id,
-          chainId,
-          safeAddress,
-          error: new Error('No transaction receipt found'),
-        })
-      } else if (didRevert(receipt)) {
-        txDispatch(TxEvent.REVERTED, {
-          groupKey: id,
-          chainId,
-          safeAddress,
-          error: new Error('Transaction reverted by EVM'),
-        })
-      } else {
-        txDispatch(TxEvent.PROCESSED, { groupKey: id, chainId, safeAddress, txHash: result?.hash })
-      }
-    })
-    .catch((error) => {
-      txDispatch(TxEvent.FAILED, { groupKey: id, chainId, safeAddress, error: asError(error) })
-    })
-
-  return result?.hash
-}
-
-export const dispatchSpendingLimitTxExecution = async (
-  txParams: SpendingLimitTxParams,
-  txOptions: TransactionOptions,
-  provider: Eip1193Provider,
-  chainId: SafeState['chainId'],
-  safeAddress: string,
-  safeModules: SafeState['modules'],
-) => {
-  const id = JSON.stringify(txParams)
-
-  let result: ContractTransactionResponse | undefined
-  try {
-    const signer = await getUncheckedSigner(provider)
-    const contract = getSpendingLimitContract(chainId, safeModules, signer)
-
-    result = await contract.executeAllowanceTransfer(
-      txParams.safeAddress,
-      txParams.token,
-      txParams.to,
-      txParams.amount,
-      txParams.paymentToken,
-      txParams.payment,
-      txParams.delegate,
-      txParams.signature,
-      txOptions,
-    )
-    txDispatch(TxEvent.EXECUTING, { groupKey: id, chainId, safeAddress })
   } catch (error) {
     txDispatch(TxEvent.FAILED, { groupKey: id, chainId, safeAddress, error: asError(error) })
     throw error

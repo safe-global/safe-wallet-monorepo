@@ -5,24 +5,24 @@ exports[`./HnDashboardBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-yd95fl-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-yd95fl-MuiPaper-root-MuiCard-root"
     role="button"
     style="--Paper-shadow: none;"
   >
     <div
-      class="tag MuiBox-root css-0"
+      class="tag MuiBox-root mui-style-0"
     >
       <p
-        class="MuiTypography-root MuiTypography-body2 tagText css-17vdyq3-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body2 tagText mui-style-17vdyq3-MuiTypography-root"
       >
         Powered by Hypernative
       </p>
     </div>
     <div
-      class="content MuiBox-root css-0"
+      class="content MuiBox-root mui-style-0"
     >
       <div
-        class="badgeContainer MuiBox-root css-0"
+        class="badgeContainer MuiBox-root mui-style-0"
       >
         <img
           alt="Guardian badge"
@@ -37,20 +37,20 @@ exports[`./HnDashboardBanner.stories Default 1`] = `
         />
       </div>
       <div
-        class="textContent MuiBox-root css-0"
+        class="textContent MuiBox-root mui-style-0"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6 title css-v1yov6-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h6 title mui-style-v1yov6-MuiTypography-root"
         >
           Enforce enterprise-grade security
         </h6>
         <p
-          class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 description mui-style-17vdyq3-MuiTypography-root"
         >
           Automatically block risky transactions using advanced, user-defined security policies.
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary ctaButton css-reb66-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary ctaButton mui-style-reb66-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >

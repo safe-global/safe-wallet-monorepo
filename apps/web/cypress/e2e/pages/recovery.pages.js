@@ -110,7 +110,7 @@ export function clickOnSetupRecoveryBtn() {
 }
 
 export function clickOnNextBtn() {
-  cy.get(recoveryNextBtn).click()
+  main.clickOnNextBtn(recoveryNextBtn)
 }
 
 export function clickOnGoToQueueBtn() {

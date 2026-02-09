@@ -1,0 +1,1 @@
+export { SafeHeaderHnTooltip } from './SafeHeaderHnTooltip'

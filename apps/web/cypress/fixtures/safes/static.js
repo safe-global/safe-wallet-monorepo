@@ -127,6 +127,9 @@ export default {
   SEP_STATIC_SAFE_44: 'sep:0x8A3faB996b721d68357B42eD0D6328eBE6113e00',
   /** Nested safes review and fund asset testing - Used in: nested_safes_review.cy.js, nested_safes_fund_asset.cy.js */
   SEP_STATIC_SAFE_45: 'sep:0x5958B92f412408bF12Bbc8638d524ebe5878E795',
+  /** Nested safes curation testing (hide/show functionality) - Used in: nested_safes_curation.cy.js
+   * This safe has 8 nested safes, 2 of which are suspicious (auto-hidden by default) */
+  SEP_STATIC_SAFE_46: 'sep:0xdC269A6415d7802B232B59034e325c9D1c8fB3E8',
 
   // More Polygon (Matic) Safes
   /** Available for general testing - Currently unused */

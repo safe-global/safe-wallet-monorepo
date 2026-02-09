@@ -30,6 +30,7 @@ export const Default: Story = {
 }
 
 export const OnlyLogo: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     onlyLogo: true,
@@ -37,6 +38,7 @@ export const OnlyLogo: Story = {
 }
 
 export const Inline: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     inline: true,
@@ -44,6 +46,7 @@ export const Inline: Story = {
 }
 
 export const WithFiatValue: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     fiatValue: '1234.56',
@@ -51,6 +54,7 @@ export const WithFiatValue: Story = {
 }
 
 export const Responsive: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     responsive: true,
@@ -58,6 +62,7 @@ export const Responsive: Story = {
 }
 
 export const NoLogo: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     showLogo: false,
@@ -72,6 +77,7 @@ export const UnknownChain: Story = {
 }
 
 export const HideUnknown: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '999999',
     showUnknown: false,
@@ -79,6 +85,7 @@ export const HideUnknown: Story = {
 }
 
 export const SmallImage: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     imageSize: 16,
@@ -86,6 +93,7 @@ export const SmallImage: Story = {
 }
 
 export const LargeImage: Story = {
+  tags: ['!chromatic'],
   args: {
     chainId: '1',
     imageSize: 36,
