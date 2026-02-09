@@ -46,39 +46,41 @@ const ProposersList = () => {
   const rows = useMemo(() => {
     if (!proposers.data) return []
 
-    return proposers.data.results.map((proposer) => {
-      return {
-        cells: {
-          proposer: {
-            rawValue: proposer.delegate,
-            content: (
-              <NamedAddressInfo
-                address={proposer.delegate}
-                showCopyButton
-                hasExplorer
-                name={proposer.label || undefined}
-                shortAddress
-              />
-            ),
-          },
+    return proposers.data.results
+      .filter((proposer) => proposer.label !== 'Mobile App Delegate')
+      .map((proposer) => {
+        return {
+          cells: {
+            proposer: {
+              rawValue: proposer.delegate,
+              content: (
+                <NamedAddressInfo
+                  address={proposer.delegate}
+                  showCopyButton
+                  hasExplorer
+                  name={proposer.label || undefined}
+                  shortAddress
+                />
+              ),
+            },
 
-          creator: {
-            rawValue: proposer.delegator,
-            content: <EthHashInfo address={proposer.delegator} showCopyButton hasExplorer shortAddress />,
+            creator: {
+              rawValue: proposer.delegator,
+              content: <EthHashInfo address={proposer.delegator} showCopyButton hasExplorer shortAddress />,
+            },
+            actions: {
+              rawValue: '',
+              sticky: true,
+              content: isEnabled && (
+                <div className={tableCss.actions}>
+                  <EditProposerDialog proposer={proposer} />
+                  <DeleteProposerDialog proposer={proposer} />
+                </div>
+              ),
+            },
           },
-          actions: {
-            rawValue: '',
-            sticky: true,
-            content: isEnabled && (
-              <div className={tableCss.actions}>
-                <EditProposerDialog proposer={proposer} />
-                <DeleteProposerDialog proposer={proposer} />
-              </div>
-            ),
-          },
-        },
-      }
-    })
+        }
+      })
   }, [isEnabled, proposers.data])
 
   if (!proposers.data?.results) return null
