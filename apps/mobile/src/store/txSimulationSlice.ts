@@ -1,4 +1,4 @@
-import { createSelector, createSlice, PayloadAction, Slice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, Slice } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { FETCH_STATUS, TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
 
@@ -30,10 +30,7 @@ const settingsSlice: Slice<txSimulationState> = createSlice({
   },
 })
 
-const selectCachedSimulationState = (state: RootState) => state.txSimulation
-
-export const selectCachedSimulation = (txId?: string) =>
-  createSelector(selectCachedSimulationState, (txSimulation) => (txId ? txSimulation[txId] : undefined))
+export const selectCachedSimulation = (state: RootState, txId?: string) => (txId ? state.txSimulation[txId] : undefined)
 
 export const { setTxSimulation } = settingsSlice.actions
 export default settingsSlice.reducer

@@ -18,7 +18,7 @@ export const useSimulation = (txId?: string): UseSimulationReturn => {
   const dispatch = useAppDispatch()
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
   const tenderly = useAppSelector(selectTenderly)
-  const cachedSimulation = useAppSelector(selectCachedSimulation(txId))
+  const cachedSimulation = useAppSelector((state) => selectCachedSimulation(state, txId))
 
   const resetSimulation = useCallback(() => {
     dispatch(setTxSimulation({ txId, status: FETCH_STATUS.NOT_ASKED }))

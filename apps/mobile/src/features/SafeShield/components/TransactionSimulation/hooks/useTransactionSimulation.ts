@@ -17,7 +17,7 @@ export const useTransactionSimulation = (safeTx?: SafeTransaction, txId?: string
   const activeSigner = useAppSelector((state) =>
     activeSafe ? selectActiveSigner(state, activeSafe.address) : undefined,
   )
-  const cachedSimulation = useAppSelector(selectCachedSimulation(txId))
+  const cachedSimulation = useAppSelector((state) => selectCachedSimulation(state, txId))
   const chain = useAppSelector((state) => (activeSafe ? selectChainById(state, activeSafe.chainId) : undefined))
 
   const simulationEnabled = chain ? isTxSimulationEnabled(chain) : false
