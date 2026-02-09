@@ -308,16 +308,6 @@ export function spacesHandlers(): RequestHandler[] {
 }
 
 /**
- * Empty transaction queue data
- */
-export const emptyTxQueue = {
-  count: 0,
-  next: null,
-  previous: null,
-  results: [],
-}
-
-/**
  * Mock executed transactions for history stories
  */
 export function createMockHistoryTransactions(safeData: SafeState) {

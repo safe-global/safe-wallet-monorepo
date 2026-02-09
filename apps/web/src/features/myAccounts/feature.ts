@@ -15,6 +15,9 @@ import MyAccounts from './components/MyAccounts'
 import { AccountItem } from './components/AccountItem'
 import SafesList from './components/SafesList'
 import AccountsNavigation from './components/AccountsNavigation'
+import SafeSelectionModal from './components/SafeSelectionModal'
+import NonPinnedWarning from './components/NonPinnedWarning'
+import NonPinnedWarningBanner from './components/NonPinnedWarning/NonPinnedWarningBanner'
 
 // Flat structure - naming determines stub behavior
 const feature: MyAccountsContract = {
@@ -25,6 +28,11 @@ const feature: MyAccountsContract = {
   AccountItem,
   SafesList,
   AccountsNavigation,
+
+  // Address safety components
+  SafeSelectionModal,
+  NonPinnedWarning,
+  NonPinnedWarningBanner,
 }
 
 export default feature satisfies MyAccountsContract

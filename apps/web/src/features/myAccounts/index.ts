@@ -44,3 +44,12 @@ export { useMultiAccountItemData } from './hooks/useMultiAccountItemData'
 export { useVisitedSafes } from './hooks/useVisitedSafes'
 export { default as useHasSafes } from './hooks/useHasSafes'
 export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
+
+// Address safety hooks
+export { default as useSafeSelectionModal } from './hooks/useSafeSelectionModal'
+export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
+export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
+export { useTrustSafe } from './hooks/useTrustSafe'
+
+// Public types
+export type * from './types'

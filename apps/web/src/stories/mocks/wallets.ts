@@ -113,11 +113,3 @@ export function resolveWallet(preset: WalletPreset | WalletContextType, safeData
       return disconnectedWallet
   }
 }
-
-/**
- * Wallet presets object for direct access
- */
-export const walletPresets = {
-  disconnected: disconnectedWallet,
-  // Dynamic presets need safe data, use resolveWallet() instead
-} as const

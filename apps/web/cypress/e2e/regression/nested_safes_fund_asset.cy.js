@@ -17,11 +17,15 @@ describe('Nested safes fund asset tests', () => {
   })
 
   beforeEach(() => {
+    const chainId = '11155111' // Sepolia
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45)
+    // Add the parent safe to trusted list (required for nested safe creation)
+    main.addSafeToTrustedList(chainId, staticSafes.SEP_STATIC_SAFE_45.substring(4))
     main.setupSafeSettingsWithAllTokens().then(() => {
       cy.reload()
       wallet.connectSigner(signer)
       sideBar.clickOnOpenNestedSafeListBtn()
+      // This safe has no existing nested safes, so no intro screen - just click add
       nsafes.clickOnAddNestedSafeBtn()
     })
   })
