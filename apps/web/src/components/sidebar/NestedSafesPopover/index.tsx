@@ -18,6 +18,205 @@ import { useManageNestedSafes } from '@/components/sidebar/NestedSafesList/useMa
 import { SimilarityConfirmDialog } from '@/components/sidebar/NestedSafesList/SimilarityConfirmDialog'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 
+function PopoverHeaderAction({
+  isManageMode,
+  selectedCount,
+  showIntroScreen,
+  hasNestedSafes,
+  isLoading,
+  onManageClick,
+}: {
+  isManageMode: boolean
+  selectedCount: number
+  showIntroScreen: boolean
+  hasNestedSafes: boolean
+  isLoading: boolean
+  onManageClick: () => void
+}): ReactElement | null {
+  if (isManageMode) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected
+      </Typography>
+    )
+  }
+
+  if (showIntroScreen || !hasNestedSafes || isLoading) return null
+
+  return (
+    <Tooltip title="Manage safes">
+      <IconButton onClick={onManageClick} size="small" sx={{ ml: 1 }} data-testid="manage-nested-safes-button">
+        <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  )
+}
+
+function NormalModeActions({
+  uncuratedCount,
+  hasVisibleSafes,
+  hideCreationButton,
+  onManageClick,
+  onAdd,
+}: {
+  uncuratedCount: number
+  hasVisibleSafes: boolean
+  hideCreationButton: boolean
+  onManageClick: () => void
+  onAdd: () => void
+}): ReactElement {
+  return (
+    <>
+      {uncuratedCount > 0 && hasVisibleSafes && (
+        <Track {...NESTED_SAFE_EVENTS.CLICK_MORE_INDICATOR}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              cursor: 'pointer',
+              textAlign: 'center',
+              mt: 2,
+              '&:hover': { textDecoration: 'underline' },
+            }}
+            onClick={onManageClick}
+            data-testid="more-nested-safes-indicator"
+          >
+            +{uncuratedCount} more nested {uncuratedCount === 1 ? 'safe' : 'safes'} found
+          </Typography>
+        </Track>
+      )}
+      {!hideCreationButton && (
+        <Track {...NESTED_SAFE_EVENTS.ADD}>
+          <CheckWallet>
+            {(ok) => (
+              <Button
+                data-testid="add-nested-safe-button"
+                variant="contained"
+                sx={{ width: '100%', mt: 3 }}
+                onClick={onAdd}
+                disabled={!ok}
+              >
+                <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
+                Add nested Safe
+              </Button>
+            )}
+          </CheckWallet>
+        </Track>
+      )}
+    </>
+  )
+}
+
+function PopoverBody({
+  isLoading,
+  isManageMode,
+  safesToShow,
+  onClose,
+  toggleSafe,
+  isSafeSelected,
+  isFlagged,
+  groupedSafes,
+  uncuratedCount,
+  hasVisibleSafes,
+  hideCreationButton,
+  onManageClick,
+  onAdd,
+}: {
+  isLoading: boolean
+  isManageMode: boolean
+  safesToShow: NestedSafeWithStatus[]
+  onClose: () => void
+  toggleSafe: (address: string) => void
+  isSafeSelected: (address: string) => boolean
+  isFlagged: (address: string) => boolean
+  groupedSafes: ReturnType<typeof useManageNestedSafes>['groupedSafes']
+  uncuratedCount: number
+  hasVisibleSafes: boolean
+  hideCreationButton: boolean
+  onManageClick: () => void
+  onAdd: () => void
+}): ReactElement {
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+        <CircularProgress size={32} />
+      </Box>
+    )
+  }
+
+  if (safesToShow.length === 0 && !isManageMode) {
+    return <NestedSafeInfo />
+  }
+
+  return (
+    <>
+      {isManageMode && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexShrink: 0 }}>
+          Select which Nested Safes you want to see in your dashboard.
+        </Typography>
+      )}
+      <Box className={css.scrollContainer}>
+        <NestedSafesList
+          onClose={onClose}
+          safesWithStatus={safesToShow}
+          isManageMode={isManageMode}
+          onToggleSafe={toggleSafe}
+          isSafeSelected={isSafeSelected}
+          isFlagged={isFlagged}
+          groupedSafes={isManageMode ? groupedSafes : undefined}
+        />
+      </Box>
+      {!isManageMode && (
+        <NormalModeActions
+          uncuratedCount={uncuratedCount}
+          hasVisibleSafes={hasVisibleSafes}
+          hideCreationButton={hideCreationButton}
+          onManageClick={onManageClick}
+          onAdd={onAdd}
+        />
+      )}
+    </>
+  )
+}
+
+function ManageModeFooter({
+  isFirstTimeCuration,
+  selectedCount,
+  onSave,
+  onCancel,
+}: {
+  isFirstTimeCuration: boolean
+  selectedCount: number
+  onSave: () => void
+  onCancel: () => void
+}): ReactElement {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderTop: ({ palette }) => `1px solid ${palette.border.light}`,
+        p: 2,
+        px: 3,
+        flexShrink: 0,
+      }}
+    >
+      <Button variant="text" onClick={onCancel} data-testid="cancel-manage-nested-safes">
+        Cancel
+      </Button>
+      <Button
+        variant="contained"
+        onClick={onSave}
+        disabled={selectedCount === 0}
+        data-testid="save-manage-nested-safes"
+      >
+        {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
+      </Button>
+    </Box>
+  )
+}
+
 export function NestedSafesPopover({
   anchorEl,
   onClose,
@@ -38,9 +237,7 @@ export function NestedSafesPopover({
   hideCreationButton?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
-  // Track whether the user manually entered manage mode (vs auto-entered for first-time curation)
   const [userRequestedManage, setUserRequestedManage] = useState(false)
-  // Track whether to show intro screen (only for first-time curation)
   const [showIntro, setShowIntro] = useState(true)
   const {
     toggleSafe,
@@ -56,10 +253,6 @@ export function NestedSafesPopover({
     groupedSafes,
   } = useManageNestedSafes(allSafesWithStatus)
 
-  // Derive manage mode from curation state and user action
-  // - If user clicked manage button, show manage mode
-  // - If curation not complete and has nested safes AND user has reviewed intro, show manage mode
-  // - Otherwise, show normal view
   const isFirstTimeCuration = !hasCompletedCuration && rawNestedSafes.length > 0
   const showIntroScreen = isFirstTimeCuration && showIntro
   const isManageMode = userRequestedManage || (isFirstTimeCuration && !showIntro)
@@ -69,13 +262,7 @@ export function NestedSafesPopover({
     onClose()
   }
 
-  const handleManageClick = () => {
-    setUserRequestedManage(true)
-  }
-
-  const handleReviewClick = () => {
-    setShowIntro(false)
-  }
+  const handleManageClick = () => setUserRequestedManage(true)
 
   const handleSave = () => {
     saveChanges()
@@ -88,13 +275,8 @@ export function NestedSafesPopover({
     onClose()
   }
 
-  // In manage mode, show all safes; otherwise show only curated (visible)
   const safesToShow = isManageMode ? allSafesWithStatus : visibleSafes
-
-  // Calculate uncurated count for "+X more" indicator
   const uncuratedCount = rawNestedSafes.length - visibleSafes.length
-
-  // Only manage mode prevents closing (intro screen can be dismissed to review later)
   const canClose = !isManageMode
 
   return (
@@ -102,18 +284,11 @@ export function NestedSafesPopover({
       open={!!anchorEl}
       anchorEl={anchorEl}
       onClose={canClose ? onClose : undefined}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'left',
-      }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       slotProps={{
         paper: {
           sx: {
-            // Narrow width for intro screen and normal view, wide for manage mode
             width: isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))',
             maxHeight: 'calc(100vh - 100px)',
             display: 'flex',
@@ -130,28 +305,17 @@ export function NestedSafesPopover({
       >
         <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
           <span>Nested Safes</span>
-          {isManageMode ? (
-            <Typography variant="body2" color="text.secondary">
-              {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected
-            </Typography>
-          ) : (
-            !showIntroScreen &&
-            rawNestedSafes.length > 0 &&
-            !isLoading && (
-              <Tooltip title="Manage safes">
-                <IconButton
-                  onClick={handleManageClick}
-                  size="small"
-                  sx={{ ml: 1 }}
-                  data-testid="manage-nested-safes-button"
-                >
-                  <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )
-          )}
+          <PopoverHeaderAction
+            isManageMode={isManageMode}
+            selectedCount={selectedCount}
+            showIntroScreen={showIntroScreen}
+            hasNestedSafes={rawNestedSafes.length > 0}
+            isLoading={isLoading}
+            onManageClick={handleManageClick}
+          />
         </Box>
       </ModalDialogTitle>
+
       <Box
         data-testid="nested-safe-list"
         p={3}
@@ -160,109 +324,39 @@ export function NestedSafesPopover({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          // Constrain max height to fit within popover (popover maxHeight minus header ~60px and padding ~40px)
           maxHeight: 'calc(100vh - 250px)',
         }}
       >
         {showIntroScreen ? (
-          <NestedSafeIntro onReviewClick={handleReviewClick} />
+          <NestedSafeIntro onReviewClick={() => setShowIntro(false)} />
         ) : (
-          <>
-            {isManageMode && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexShrink: 0 }}>
-                Select which Nested Safes you want to see in your dashboard.
-              </Typography>
-            )}
-            {isLoading ? (
-              <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-                <CircularProgress size={32} />
-              </Box>
-            ) : safesToShow.length === 0 && !isManageMode ? (
-              <NestedSafeInfo />
-            ) : (
-              <Box className={css.scrollContainer}>
-                <NestedSafesList
-                  onClose={onClose}
-                  safesWithStatus={safesToShow}
-                  isManageMode={isManageMode}
-                  onToggleSafe={toggleSafe}
-                  isSafeSelected={isSafeSelected}
-                  isFlagged={isFlagged}
-                  groupedSafes={isManageMode ? groupedSafes : undefined}
-                />
-              </Box>
-            )}
-            {!isManageMode && (
-              <>
-                {uncuratedCount > 0 && visibleSafes.length > 0 && (
-                  <Track {...NESTED_SAFE_EVENTS.CLICK_MORE_INDICATOR}>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        mt: 2,
-                        '&:hover': { textDecoration: 'underline' },
-                      }}
-                      onClick={handleManageClick}
-                      data-testid="more-nested-safes-indicator"
-                    >
-                      +{uncuratedCount} more nested {uncuratedCount === 1 ? 'safe' : 'safes'} found
-                    </Typography>
-                  </Track>
-                )}
-                {!hideCreationButton && (
-                  <Track {...NESTED_SAFE_EVENTS.ADD}>
-                    <CheckWallet>
-                      {(ok) => (
-                        <Button
-                          data-testid="add-nested-safe-button"
-                          variant="contained"
-                          sx={{ width: '100%', mt: 3 }}
-                          onClick={onAdd}
-                          disabled={!ok}
-                        >
-                          <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
-                          Add nested Safe
-                        </Button>
-                      )}
-                    </CheckWallet>
-                  </Track>
-                )}
-              </>
-            )}
-          </>
+          <PopoverBody
+            isLoading={isLoading}
+            isManageMode={isManageMode}
+            safesToShow={safesToShow}
+            onClose={onClose}
+            toggleSafe={toggleSafe}
+            isSafeSelected={isSafeSelected}
+            isFlagged={isFlagged}
+            groupedSafes={groupedSafes}
+            uncuratedCount={uncuratedCount}
+            hasVisibleSafes={visibleSafes.length > 0}
+            hideCreationButton={hideCreationButton}
+            onManageClick={handleManageClick}
+            onAdd={onAdd}
+          />
         )}
       </Box>
 
       {isManageMode && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderTop: ({ palette }) => `1px solid ${palette.border.light}`,
-            p: 2,
-            px: 3,
-            flexShrink: 0,
-          }}
-        >
-          <Button variant="text" onClick={handleCancel} data-testid="cancel-manage-nested-safes">
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={selectedCount === 0}
-            data-testid="save-manage-nested-safes"
-          >
-            {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
-          </Button>
-        </Box>
+        <ManageModeFooter
+          isFirstTimeCuration={isFirstTimeCuration}
+          selectedCount={selectedCount}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       )}
 
-      {/* Similarity confirmation dialog */}
       {pendingConfirmation && (
         <SimilarityConfirmDialog
           address={pendingConfirmation}

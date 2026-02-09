@@ -9,6 +9,46 @@ import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
 import { detectSimilarAddresses } from '@/features/myAccounts/services/addressSimilarity'
 import type { SimilarityDetectionResult } from '@/features/myAccounts/services/addressSimilarity.types'
 
+const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
+  const next = new Set(prev)
+  if (next.has(normalizedAddress)) {
+    next.delete(normalizedAddress)
+  } else {
+    next.add(normalizedAddress)
+  }
+  return next
+}
+
+const groupSafesBySimilarity = (
+  safes: NestedSafeWithStatus[],
+  similarityResult: SimilarityDetectionResult,
+): { groups: { key: string; safes: NestedSafeWithStatus[] }[]; ungrouped: NestedSafeWithStatus[] } => {
+  const groupMap = new Map<string, NestedSafeWithStatus[]>()
+  const ungrouped: NestedSafeWithStatus[] = []
+
+  for (const safe of safes) {
+    const group = similarityResult.getGroup(safe.address)
+    if (!group) {
+      ungrouped.push(safe)
+      continue
+    }
+    const existing = groupMap.get(group.bucketKey) || []
+    existing.push(safe)
+    groupMap.set(group.bucketKey, existing)
+  }
+
+  const groups: { key: string; safes: NestedSafeWithStatus[] }[] = []
+  for (const [key, items] of groupMap) {
+    if (items.length >= 2) {
+      groups.push({ key, safes: items })
+    } else {
+      ungrouped.push(...items)
+    }
+  }
+
+  return { groups, ungrouped }
+}
+
 /**
  * Manages the toggle/save/cancel logic for nested safes curation in manage mode.
  * Uses a Set to track selected addresses for curating.
@@ -56,27 +96,15 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   const toggleSafe = useCallback(
     (address: string) => {
       const normalizedAddress = address.toLowerCase()
-      const isFlagged = similarityResult.isFlagged(address)
 
-      setSelectedAddresses((prev) => {
-        const isCurrentlySelected = prev.has(normalizedAddress)
+      if (!selectedAddresses.has(normalizedAddress) && similarityResult.isFlagged(address)) {
+        setPendingConfirmation(normalizedAddress)
+        return
+      }
 
-        // If trying to select a flagged address, require confirmation
-        if (!isCurrentlySelected && isFlagged) {
-          setPendingConfirmation(normalizedAddress)
-          return prev // No change yet, wait for confirmation
-        }
-
-        const next = new Set(prev)
-        if (isCurrentlySelected) {
-          next.delete(normalizedAddress)
-        } else {
-          next.add(normalizedAddress)
-        }
-        return next
-      })
+      setSelectedAddresses((prev) => toggleAddress(prev, normalizedAddress))
     },
-    [similarityResult],
+    [similarityResult, selectedAddresses],
   )
 
   // Select all safes (excludes flagged addresses - they must be selected individually)
@@ -170,34 +198,10 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
     [similarityResult],
   )
 
-  // Group safes by similarity bucket for visual grouping in manage mode
-  const groupedSafes = useMemo(() => {
-    const groupMap = new Map<string, NestedSafeWithStatus[]>()
-    const ungrouped: NestedSafeWithStatus[] = []
-
-    for (const safe of allSafesWithStatus) {
-      const group = similarityResult.getGroup(safe.address)
-      if (group) {
-        const existing = groupMap.get(group.bucketKey) || []
-        existing.push(safe)
-        groupMap.set(group.bucketKey, existing)
-      } else {
-        ungrouped.push(safe)
-      }
-    }
-
-    // Only keep groups with 2+ items; move singletons to ungrouped
-    const groups: { key: string; safes: NestedSafeWithStatus[] }[] = []
-    for (const [key, items] of groupMap) {
-      if (items.length >= 2) {
-        groups.push({ key, safes: items })
-      } else {
-        ungrouped.push(...items)
-      }
-    }
-
-    return { groups, ungrouped }
-  }, [allSafesWithStatus, similarityResult])
+  const groupedSafes = useMemo(
+    () => groupSafesBySimilarity(allSafesWithStatus, similarityResult),
+    [allSafesWithStatus, similarityResult],
+  )
 
   return {
     toggleSafe,
