@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert, Typography, Box } from '@mui/material'
+import { DialogContent, DialogActions, Button, Alert, Typography, Box } from '@mui/material'
+import ModalDialog from '@/components/common/ModalDialog'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.types'
@@ -29,9 +30,14 @@ const AddTrustedSafeDialog = ({
   onCancel,
 }: AddTrustedSafeDialogProps) => {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth data-testid="add-trusted-safe-dialog">
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>Confirm trusted Safe</DialogTitle>
-
+    <ModalDialog
+      open={open}
+      maxWidth="sm"
+      fullWidth
+      data-testid="add-trusted-safe-dialog"
+      dialogTitle="Confirm trusted Safe"
+      hideChainIndicator
+    >
       <DialogContent>
         {hasSimilarAddress && (
           <Alert severity="warning" sx={{ mb: 2 }}>
@@ -107,7 +113,7 @@ const AddTrustedSafeDialog = ({
         </Typography>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 3 }}>
+      <DialogActions>
         <Button onClick={onCancel} variant="text">
           Cancel
         </Button>
@@ -120,7 +126,7 @@ const AddTrustedSafeDialog = ({
           {hasSimilarAddress ? 'I understand, add anyway' : 'Confirm'}
         </Button>
       </DialogActions>
-    </Dialog>
+    </ModalDialog>
   )
 }
 

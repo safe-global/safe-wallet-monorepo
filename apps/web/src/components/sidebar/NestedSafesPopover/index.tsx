@@ -1,4 +1,4 @@
-import { SvgIcon, Popover, Button, Box, Stack, IconButton, Typography, Tooltip, CircularProgress } from '@mui/material'
+import { SvgIcon, Popover, Button, Box, IconButton, Typography, Tooltip, CircularProgress } from '@mui/material'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -85,6 +85,7 @@ export function NestedSafesPopover({
   const handleCancel = () => {
     cancel()
     setUserRequestedManage(false)
+    onClose()
   }
 
   // In manage mode, show all safes; otherwise show only curated (visible)
@@ -191,20 +192,9 @@ export function NestedSafesPopover({
                 />
               </Box>
             )}
-            {isManageMode ? (
-              <Stack direction="row" spacing={2} mt={3} sx={{ flexShrink: 0 }}>
-                {hasCompletedCuration && (
-                  <Button variant="outlined" onClick={handleCancel} fullWidth data-testid="cancel-manage-nested-safes">
-                    Cancel
-                  </Button>
-                )}
-                <Button variant="contained" onClick={handleSave} fullWidth data-testid="save-manage-nested-safes">
-                  {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
-                </Button>
-              </Stack>
-            ) : (
+            {!isManageMode && (
               <>
-                {uncuratedCount > 0 && (
+                {uncuratedCount > 0 && visibleSafes.length > 0 && (
                   <Track {...NESTED_SAFE_EVENTS.CLICK_MORE_INDICATOR}>
                     <Typography
                       variant="body2"
@@ -245,6 +235,32 @@ export function NestedSafesPopover({
           </>
         )}
       </Box>
+
+      {isManageMode && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderTop: ({ palette }) => `1px solid ${palette.border.light}`,
+            p: 2,
+            px: 3,
+            flexShrink: 0,
+          }}
+        >
+          <Button variant="text" onClick={handleCancel} data-testid="cancel-manage-nested-safes">
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            disabled={selectedCount === 0}
+            data-testid="save-manage-nested-safes"
+          >
+            {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
+          </Button>
+        </Box>
+      )}
 
       {/* Similarity confirmation dialog */}
       {pendingConfirmation && (
