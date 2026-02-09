@@ -35,6 +35,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
+  TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
 }
 
 export enum MixpanelUserProperty {

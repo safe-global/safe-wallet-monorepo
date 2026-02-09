@@ -14,6 +14,24 @@ jest.mock('../hooks', () => ({
   useThreatAnalysis: jest.fn(),
 }))
 
+// Mock new dependencies for untrusted Safe check
+jest.mock('@/hooks/useIsTrustedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => true), // Trusted by default to avoid triggering untrusted warning in existing tests
+}))
+
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    safe: { chainId: '1', owners: [], threshold: 1 },
+    safeAddress: '0x1234567890123456789012345678901234567890',
+  })),
+}))
+
+jest.mock('@/features/myAccounts', () => ({
+  useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
+}))
+
 const mockSafeTxContextValue = {
   safeTx: undefined,
   setSafeTx: jest.fn(),

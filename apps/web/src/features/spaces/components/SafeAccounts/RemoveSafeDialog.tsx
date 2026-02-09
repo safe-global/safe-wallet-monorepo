@@ -1,7 +1,5 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import { isMultiChainSafeItem } from '@/features/multichain'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'

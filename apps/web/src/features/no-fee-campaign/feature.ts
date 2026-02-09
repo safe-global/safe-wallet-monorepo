@@ -2,7 +2,8 @@ import type { NoFeeCampaignContract } from './contract'
 
 // Direct imports - this file is already lazy-loaded via createFeatureHandle
 // Do NOT use lazy() or dynamic() here
-import NoFeeCampaignBanner, { noFeeCampaignBannerID } from './components/NoFeeCampaignBanner'
+import NoFeeCampaignBanner from './components/NoFeeCampaignBanner'
+const noFeeCampaignBannerID = 'noFeeCampaignBanner'
 import NoFeeCampaignTransactionCard from './components/NoFeeCampaignTransactionCard'
 import GasTooHighBanner from './components/GasTooHighBanner'
 

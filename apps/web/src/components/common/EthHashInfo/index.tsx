@@ -29,6 +29,7 @@ const EthHashInfo = ({
       customAvatar={props.customAvatar}
       ExplorerButtonProps={{ title: link?.title || '', href: link?.href || '' }}
       avatarSize={avatarSize}
+      badgeTooltip={props.badgeTooltip}
     >
       {props.children}
     </SrcEthHashInfo>

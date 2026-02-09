@@ -29,6 +29,7 @@ type TokenAmountInputProps = {
   validate?: (value: string) => string | undefined
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
+  defaultTokenAddress?: string
 }
 
 const TokenAmountInput = ({
@@ -38,6 +39,7 @@ const TokenAmountInput = ({
   validate,
   fieldArray,
   deps,
+  defaultTokenAddress,
 }: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
@@ -53,7 +55,10 @@ const TokenAmountInput = ({
   const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, fieldArray)
   const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
 
-  const tokenAddress = watch(tokenAddressField)
+  const watchedTokenAddress = watch(tokenAddressField)
+  // Ensure we always have a defined value to keep MUI Select controlled
+  // Use defaultTokenAddress as fallback when watch() returns empty on first render
+  const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
 
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 

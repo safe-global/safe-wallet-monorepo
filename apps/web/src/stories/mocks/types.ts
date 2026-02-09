@@ -1,6 +1,5 @@
 import type { RequestHandler } from 'msw'
-import type { ReactElement, ComponentType } from 'react'
-import type { StoryContext, Decorator } from '@storybook/react'
+import type { Decorator } from '@storybook/react'
 import type { WalletContextType } from '@/components/common/WalletProvider'
 import type { FixtureScenario } from '../../../../../config/test/msw/fixtures'
 
@@ -130,19 +129,3 @@ export interface MockStoryResult {
     }
   }
 }
-
-/**
- * Props for MockContextProvider component
- */
-export interface MockContextProviderProps {
-  wallet: WalletContextType
-  children: React.ReactNode
-  initialState: object
-  context?: StoryContext
-  layout?: LayoutType
-}
-
-/**
- * Story decorator function type with Storybook context
- */
-export type StoryDecoratorFn = (Story: ComponentType, context: StoryContext) => ReactElement

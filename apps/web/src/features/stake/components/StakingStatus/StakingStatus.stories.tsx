@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Stack } from '@mui/material'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import StakingStatus from './index'
+import StakingStatus from '@/components/transactions/TxDetails/TxData/Staking/StakingStatus'
 
 const meta: Meta<typeof StakingStatus> = {
   component: StakingStatus,

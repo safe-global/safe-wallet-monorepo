@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Paper, Box } from '@mui/material'
 import { AccountItem } from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import type { SafeItem } from '@/hooks/safes'
 
 const MOCK_ADDRESS = '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552'
 const MOCK_CHAIN_ID = '1'

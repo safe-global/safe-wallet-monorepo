@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import css from '@/features/myAccounts/styles.module.css'
+import css from '../../styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Chip, Stack, Typography } from '@mui/material'
 import classNames from 'classnames'

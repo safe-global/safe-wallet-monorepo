@@ -1,7 +1,5 @@
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import type { AllSafeItems, MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import MultiAccountItem from '@/features/myAccounts/components/AccountItems/MultiAccountItem'
-import { isMultiChainSafeItem } from '@/features/multichain'
+import { type SafeItem, type AllSafeItems, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
+import MultiAccountItem from '../AccountItems/MultiAccountItem'
 import { SafeListItem } from './SafeListItem'
 
 export type SafeListProps = {

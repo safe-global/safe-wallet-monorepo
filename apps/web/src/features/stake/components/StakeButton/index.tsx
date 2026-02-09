@@ -1,7 +1,7 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useSpendingLimit } from '@/features/spending-limits'
 import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useRouter } from 'next/router'

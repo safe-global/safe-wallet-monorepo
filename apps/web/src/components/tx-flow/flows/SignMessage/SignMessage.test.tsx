@@ -29,6 +29,9 @@ import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
+import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
+import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 }
@@ -113,6 +116,10 @@ describe('SignMessage', () => {
     jest.spyOn(useIsWrongChainHook, 'default').mockImplementation(() => false)
 
     jest.spyOn(sdk, 'useSafeSDK').mockReturnValue({} as unknown as Safe)
+
+    // Mock hooks for Safe Shield untrusted Safe check
+    jest.spyOn(useIsPinnedSafeHook, 'default').mockImplementation(() => true)
+    jest.spyOn(useTrustSafeHook, 'useTrustSafe').mockImplementation(() => ({ trustSafe: jest.fn() }))
   })
 
   describe('EIP-191 messages', () => {
@@ -788,6 +795,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByText } = renderWithSafeShield(
@@ -810,6 +819,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByText } = renderWithSafeShield(
@@ -832,6 +843,8 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
+        safeAnalysis: null,
+        addToTrustedList: jest.fn(),
       })
 
       const { getByTestId, getByText } = renderWithSafeShield(
