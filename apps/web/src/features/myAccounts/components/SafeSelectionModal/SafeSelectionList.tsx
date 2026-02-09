@@ -29,24 +29,22 @@ const groupItemsBySimilarity = (
   const ungroupedItems: SelectableItem[] = []
 
   for (const item of items) {
-    if (item.similarityGroup) {
-      const existing = groupMap.get(item.similarityGroup) || []
-      existing.push(item)
-      groupMap.set(item.similarityGroup, existing)
-    } else {
+    if (!item.similarityGroup) {
       ungroupedItems.push(item)
+      continue
     }
+    const existing = groupMap.get(item.similarityGroup) || []
+    existing.push(item)
+    groupMap.set(item.similarityGroup, existing)
   }
 
   const groups: SimilarityGroupData[] = []
   for (const [groupKey, groupItems] of groupMap) {
-    // Only include groups with 2+ addresses (similarity requires comparison)
-    if (groupItems.length >= 2) {
-      groups.push({ groupKey, items: groupItems })
-    } else {
-      // Single item in a "group" should be treated as ungrouped
+    if (groupItems.length < 2) {
       ungroupedItems.push(...groupItems)
+      continue
     }
+    groups.push({ groupKey, items: groupItems })
   }
 
   return { groups, ungroupedItems }

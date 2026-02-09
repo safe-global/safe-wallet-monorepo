@@ -9,6 +9,47 @@ import useAllSafes from '@/hooks/safes/useAllSafes'
 import { detectSimilarAddresses } from '../services/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useSafeSelectionModal.types'
 
+/**
+ * Collect all pinned addresses from addedSafes state (normalized to lowercase)
+ */
+const collectPinnedAddresses = (addedSafes: Record<string, Record<string, unknown>>): Set<string> => {
+  const pinnedAddresses = new Set<string>()
+  for (const chainSafes of Object.values(addedSafes)) {
+    for (const address of Object.keys(chainSafes)) {
+      pinnedAddresses.add(address.toLowerCase())
+    }
+  }
+  return pinnedAddresses
+}
+
+/**
+ * Build the notification payload based on pin/unpin counts
+ */
+const getSubmitNotification = (
+  pinnedCount: number,
+  unpinnedCount: number,
+): { title: string; message: string } | null => {
+  if (pinnedCount > 0 && unpinnedCount > 0) {
+    return {
+      title: 'Trusted Safes updated',
+      message: `${pinnedCount} Safe${pinnedCount !== 1 ? 's' : ''} added, ${unpinnedCount} Safe${unpinnedCount !== 1 ? 's' : ''} removed`,
+    }
+  }
+  if (pinnedCount > 0) {
+    return {
+      title: pinnedCount === 1 ? 'Safe confirmed' : `${pinnedCount} Safes confirmed`,
+      message: 'Trusted Safe(s) added to your list',
+    }
+  }
+  if (unpinnedCount > 0) {
+    return {
+      title: unpinnedCount === 1 ? 'Safe removed' : `${unpinnedCount} Safes removed`,
+      message: 'Safes have been removed from your Trusted Safes list',
+    }
+  }
+  return null
+}
+
 export interface UseSafeSelectionModalReturn {
   /** Whether the modal is currently open */
   isOpen: boolean
@@ -270,7 +311,6 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
 
       if (isSelected && !isPinned) {
-        // Pin the safe
         dispatch(
           addOrUpdateSafe({
             safe: {
@@ -284,49 +324,23 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
         )
         pinnedCount++
       } else if (!isSelected && isPinned) {
-        // Unpin the safe
-        dispatch(
-          unpinSafe({
-            chainId: safe.chainId,
-            address: safe.address,
-          }),
-        )
+        dispatch(unpinSafe({ chainId: safe.chainId, address: safe.address }))
         unpinnedCount++
       }
     }
 
-    // Show notification based on what changed
-    if (pinnedCount > 0 && unpinnedCount > 0) {
-      dispatch(
-        showNotification({
-          title: 'Trusted Safes updated',
-          message: `${pinnedCount} Safe${pinnedCount !== 1 ? 's' : ''} added, ${unpinnedCount} Safe${unpinnedCount !== 1 ? 's' : ''} removed`,
-          groupKey: 'pin-safes-batch-success',
-          variant: 'success',
-        }),
-      )
-    } else if (pinnedCount > 0) {
-      dispatch(
-        showNotification({
-          title: pinnedCount === 1 ? 'Safe confirmed' : `${pinnedCount} Safes confirmed`,
-          message: 'Trusted Safe(s) added to your list',
-          groupKey: 'pin-safes-batch-success',
-          variant: 'success',
-        }),
-      )
-      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
-    } else if (unpinnedCount > 0) {
-      dispatch(
-        showNotification({
-          title: unpinnedCount === 1 ? 'Safe removed' : `${unpinnedCount} Safes removed`,
-          message: 'Safes have been removed from your Trusted Safes list',
-          groupKey: 'pin-safes-batch-success',
-          variant: 'success',
-        }),
-      )
-      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
+    const notification = getSubmitNotification(pinnedCount, unpinnedCount)
+    if (notification) {
+      dispatch(showNotification({ ...notification, groupKey: 'pin-safes-batch-success', variant: 'success' }))
     }
 
+    // PIN_SAFE event only fires when exclusively pinning or unpinning (not both)
+    if (pinnedCount > 0 && unpinnedCount === 0) {
+      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
+    }
+    if (unpinnedCount > 0 && pinnedCount === 0) {
+      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
+    }
     if (pinnedCount > 0) {
       trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED, label: pinnedCount })
     }
@@ -341,14 +355,7 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
 
   // Open modal - pre-selects only already pinned safes
   const open = useCallback(() => {
-    // Pre-select only already pinned safes (user must explicitly select others)
-    const pinnedAddresses = new Set<string>()
-    for (const chainSafes of Object.values(addedSafes)) {
-      for (const address of Object.keys(chainSafes)) {
-        pinnedAddresses.add(address.toLowerCase())
-      }
-    }
-    setSelectedAddresses(pinnedAddresses)
+    setSelectedAddresses(collectPinnedAddresses(addedSafes))
     setIsOpen(true)
     trackEvent(OVERVIEW_EVENTS.OPEN_TRUSTED_SAFES_MODAL)
   }, [addedSafes])

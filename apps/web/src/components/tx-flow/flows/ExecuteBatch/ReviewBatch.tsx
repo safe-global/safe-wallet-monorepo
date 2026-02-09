@@ -56,6 +56,30 @@ const buildGasOverrides = (
   return { ...gasOverrides, nonce: userNonce }
 }
 
+const BatchErrorMessages = ({
+  estimationError,
+  submitError,
+  isRejectedByUser,
+}: {
+  estimationError: unknown
+  submitError: Error | undefined
+  isRejectedByUser: Boolean
+}) => (
+  <>
+    {estimationError && (
+      <ErrorMessage error={asError(estimationError)} context="estimation">
+        This transaction will most likely fail. To save gas costs, avoid creating the transaction.
+      </ErrorMessage>
+    )}
+    {submitError && (
+      <ErrorMessage error={submitError} context="execution">
+        Error submitting the transaction. Please try again.
+      </ErrorMessage>
+    )}
+    {isRejectedByUser && <WalletRejectionError />}
+  </>
+)
+
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
@@ -235,19 +259,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
           the loss of the allocated transaction fees.
         </Alert>
 
-        {error && (
-          <ErrorMessage error={asError(error)} context="estimation">
-            This transaction will most likely fail. To save gas costs, avoid creating the transaction.
-          </ErrorMessage>
-        )}
-
-        {submitError && (
-          <ErrorMessage error={submitError} context="execution">
-            Error submitting the transaction. Please try again.
-          </ErrorMessage>
-        )}
-
-        {isRejectedByUser && <WalletRejectionError />}
+        <BatchErrorMessages estimationError={error} submitError={submitError} isRejectedByUser={isRejectedByUser} />
 
         <div>
           <Divider className={commonCss.nestedDivider} sx={{ pt: 2 }} />
