@@ -20,6 +20,10 @@ const isAppUnavailable = (
   return Boolean(appUrl)
 }
 
+const shouldRedirectToShare = (appUrl: string | undefined, isReady: boolean, safe: unknown): boolean => {
+  return Boolean(appUrl && isReady && !safe)
+}
+
 const useSafeAppRedirects = ({
   safeAppData,
   chainId,
@@ -30,15 +34,13 @@ const useSafeAppRedirects = ({
 }: UseSafeAppRedirectsParams): boolean => {
   const router = useRouter()
 
-  // Redirect to the apps list if the current chain is not supported
   useEffect(() => {
     if (!remoteSafeAppsLoading && isAppUnavailable(safeAppData, chainId, appUrl)) {
       goToList()
     }
   }, [safeAppData, chainId, goToList, remoteSafeAppsLoading, appUrl])
 
-  // No `safe` query param, redirect to the share route
-  if (appUrl && router.isReady && !router.query.safe) {
+  if (shouldRedirectToShare(appUrl, router.isReady, router.query.safe)) {
     router.push({
       pathname: AppRoutes.share.safeApp,
       query: { appUrl },
