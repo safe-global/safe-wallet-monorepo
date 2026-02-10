@@ -71,7 +71,7 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
         </DialogTitle>
 
         <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          <SecurityBanner title="Verify Safes before confirming" />
+          <SecurityBanner title="Verify before you trust" />
 
           {/* Selection controls */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
