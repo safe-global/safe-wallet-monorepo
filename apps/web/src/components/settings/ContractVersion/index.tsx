@@ -15,6 +15,12 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
+const getReleaseUrl = (version: string): string => {
+  // Remove L2 suffix if present (e.g., "1.3.0+L2" -> "1.3.0")
+  const cleanVersion = version.split('+')[0]
+  return `https://github.com/safe-global/safe-smart-account/releases/tag/v${cleanVersion}`
+}
+
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const [masterCopies] = useMasterCopies()
@@ -31,6 +37,8 @@ export const ContractVersion = () => {
   const isLatestVersion = safe.version && !showUpdateDialog
 
   const latestSafeVersion = getLatestSafeVersion(currentChain)
+
+  const releaseUrl = safe.version ? getReleaseUrl(safe.version) : undefined
 
   return (
     <>
@@ -53,9 +61,9 @@ export const ContractVersion = () => {
         )}
       </Typography>
 
-      {safeLoaded && safe.version && (
+      {safeLoaded && releaseUrl && (
         <Typography variant="body2" mt={0.5}>
-          <ExternalLink href="https://github.com/safe-global/safe-smart-account/releases">View releases</ExternalLink>
+          <ExternalLink href={releaseUrl}>View release</ExternalLink>
         </Typography>
       )}
 
