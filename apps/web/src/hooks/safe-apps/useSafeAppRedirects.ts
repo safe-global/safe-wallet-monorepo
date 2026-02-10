@@ -11,6 +11,15 @@ type UseSafeAppRedirectsParams = {
   goToList: () => void
 }
 
+const isAppUnavailable = (
+  safeAppData: UseSafeAppRedirectsParams['safeAppData'],
+  chainId: string,
+  appUrl: string | undefined,
+): boolean => {
+  if (safeAppData) return !safeAppData.chainIds.includes(chainId)
+  return Boolean(appUrl)
+}
+
 const useSafeAppRedirects = ({
   safeAppData,
   chainId,
@@ -23,17 +32,10 @@ const useSafeAppRedirects = ({
 
   // Redirect to the apps list if the current chain is not supported
   useEffect(() => {
-    if (remoteSafeAppsLoading) return
-
-    const isUnsupportedChain = safeAppData && !safeAppData.chainIds.includes(chainId)
-    const isAppNotFound = !safeAppData && appUrl
-
-    if (isUnsupportedChain || isAppNotFound) {
+    if (!remoteSafeAppsLoading && isAppUnavailable(safeAppData, chainId, appUrl)) {
       goToList()
     }
   }, [safeAppData, chainId, goToList, remoteSafeAppsLoading, appUrl])
-
-  const canRender = Boolean(isSafeAppsEnabled && appUrl && router.isReady && router.query.safe)
 
   // No `safe` query param, redirect to the share route
   if (appUrl && router.isReady && !router.query.safe) {
@@ -43,7 +45,7 @@ const useSafeAppRedirects = ({
     })
   }
 
-  return canRender
+  return Boolean(isSafeAppsEnabled && appUrl && router.isReady && router.query.safe)
 }
 
 export { useSafeAppRedirects }
