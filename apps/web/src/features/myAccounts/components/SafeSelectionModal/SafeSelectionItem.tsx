@@ -54,7 +54,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
   )
 
   return (
-    <div className={css.listItem} data-testid="safe-list-item">
+    <div className={css.listItem}>
       <AccountItem.Button onClick={handleClick} elementRef={elementRef}>
         <AccountItem.Checkbox checked={safe.isSelected} address={safe.address} />
         <AccountItem.Icon address={safe.address} chainId={safe.chainId} threshold={threshold} owners={owners.length} />
