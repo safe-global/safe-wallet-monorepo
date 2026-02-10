@@ -71,7 +71,7 @@ exports[`./index.stories DarkMode 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -207,7 +207,7 @@ exports[`./index.stories Default 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -343,7 +343,7 @@ exports[`./index.stories LightMode 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -479,7 +479,7 @@ exports[`./index.stories NarrowViewport 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
