@@ -15,8 +15,13 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
+/**
+ * Generates a GitHub release URL for a specific Safe contract version.
+ * Strips L2 suffix if present (e.g., "1.3.0+L2" → "v1.3.0").
+ * @param version - The Safe contract version (e.g., "1.4.1" or "1.3.0+L2")
+ * @returns GitHub release URL (e.g., "https://github.com/safe-global/safe-smart-account/releases/tag/v1.4.1")
+ */
 const getReleaseUrl = (version: string): string => {
-  // Remove L2 suffix if present (e.g., "1.3.0+L2" -> "1.3.0")
   const cleanVersion = version.split('+')[0]
   return `https://github.com/safe-global/safe-smart-account/releases/tag/v${cleanVersion}`
 }
