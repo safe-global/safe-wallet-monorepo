@@ -62,9 +62,26 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={close} maxWidth="md" fullWidth>
+      <Dialog
+        open={isOpen}
+        onClose={close}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            '@media (max-width: 600px)': {
+              width: '100%',
+              margin: 0,
+            },
+          },
+        }}
+      >
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>Manage trusted Safes</Box>
+          <Box>
+            <Typography variant="h6" fontWeight={600}>
+              Manage trusted Safes
+            </Typography>
+          </Box>
           <IconButton onClick={close} size="small" edge="end">
             <CloseIcon />
           </IconButton>
@@ -79,10 +96,30 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
               {selectedCount} of {totalSafesCount} selected
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" onClick={selectAll} disabled={allSelected || isLoading}>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={selectAll}
+                disabled={allSelected || isLoading}
+                sx={{
+                  '@media (max-width: 600px)': {
+                    height: 'fit-content',
+                  },
+                }}
+              >
                 Select All
               </Button>
-              <Button size="small" variant="outlined" onClick={deselectAll} disabled={selectedCount === 0 || isLoading}>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={deselectAll}
+                disabled={selectedCount === 0 || isLoading}
+                sx={{
+                  '@media (max-width: 600px)': {
+                    height: 'fit-content',
+                  },
+                }}
+              >
                 Deselect All
               </Button>
             </Box>

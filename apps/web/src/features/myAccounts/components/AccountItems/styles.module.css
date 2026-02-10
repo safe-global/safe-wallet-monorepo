@@ -48,7 +48,8 @@
 
 .listItem > :first-child {
   flex: 1;
-  min-width: 0; /* Allow content to shrink for truncation */
+  min-width: 0;
+  /* Allow content to shrink for truncation */
 }
 
 .noActions {
@@ -61,7 +62,8 @@
   padding: var(--space-2);
   align-items: center;
   gap: var(--space-2);
-  width: 100%; /* Ensure full width */
+  width: 100%;
+  /* Ensure full width */
 }
 
 /* Deprecated: keeping for backwards compatibility */
@@ -83,7 +85,8 @@
 
 .accountItemInfo {
   flex: 1;
-  min-width: 0; /* Allow text truncation */
+  min-width: 0;
+  /* Allow text truncation */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -186,6 +189,7 @@
 @media (max-width: 599.95px) {
   .safeLink {
     flex-wrap: wrap;
+    gap: 0;
   }
 
   .multiChains {

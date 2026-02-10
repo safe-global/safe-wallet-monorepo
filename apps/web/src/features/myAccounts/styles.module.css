@@ -20,6 +20,16 @@
   margin-bottom: var(--space-1);
 }
 
+@media (max-width: 599.95px) {
+  .safeList {
+    margin: var(--space-1);
+  }
+
+  .sidebarHeader {
+    margin: var(--space-1) !important;
+  }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
