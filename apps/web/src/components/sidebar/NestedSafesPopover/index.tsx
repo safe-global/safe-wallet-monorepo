@@ -294,6 +294,12 @@ export function NestedSafesPopover({
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
+            '@media (max-width: 599.95px)': {
+              top: '16px !important',
+              left: '16px !important',
+              height: 'calc(100vh - 32px)',
+              maxHeight: 'none',
+            },
           },
         },
       }}
@@ -324,7 +330,8 @@ export function NestedSafesPopover({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          maxHeight: 'calc(100vh - 250px)',
+          flex: '1 1 auto',
+          minHeight: 0,
         }}
       >
         {showIntroScreen ? (
