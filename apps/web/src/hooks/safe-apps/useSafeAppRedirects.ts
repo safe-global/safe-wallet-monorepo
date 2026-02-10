@@ -33,18 +33,17 @@ const useSafeAppRedirects = ({
     }
   }, [safeAppData, chainId, goToList, remoteSafeAppsLoading, appUrl])
 
-  if (!isSafeAppsEnabled || !appUrl || !router.isReady) return false
+  const canRender = Boolean(isSafeAppsEnabled && appUrl && router.isReady && router.query.safe)
 
   // No `safe` query param, redirect to the share route
-  if (!router.query.safe) {
+  if (appUrl && router.isReady && !router.query.safe) {
     router.push({
       pathname: AppRoutes.share.safeApp,
       query: { appUrl },
     })
-    return false
   }
 
-  return true
+  return canRender
 }
 
 export { useSafeAppRedirects }
