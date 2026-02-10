@@ -91,7 +91,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
   const statusChips = <>{multiSafe.similarityGroup && <SimilarityWarning />}</>
 
   return (
-    <Box data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem)} sx={{ my: 0.5 }}>
+    <Box data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem)}>
       <Accordion data-testid="multichain-selection-item" expanded={expanded} sx={{ border: 'none' }}>
         <AccordionSummary
           onClick={toggleExpand}

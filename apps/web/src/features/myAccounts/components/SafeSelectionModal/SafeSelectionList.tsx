@@ -74,7 +74,7 @@ const SimilarityGroupContainer = ({
   return (
     <Box
       sx={{
-        my: 0.5,
+        mb: 1.5,
         borderRadius: 1,
         border: '1px solid',
         borderColor: 'border.light',
@@ -93,7 +93,7 @@ const SimilarityGroupContainer = ({
           Similar addresses – verify carefully
         </Typography>
       </Box>
-      <Box sx={{ backgroundColor: 'background.paper', p: 1, mb: 2 }}>
+      <Box sx={{ backgroundColor: 'background.paper', px: 1, pt: 1 }}>
         {group.items.map((item) => (
           <SelectionItem key={item.address} item={item} onToggle={onToggle} />
         ))}
@@ -137,14 +137,7 @@ const SafeSelectionList = ({ items, isLoading, searchQuery, onSearchChange, onTo
         }}
       />
 
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'border.light',
-          borderRadius: 1,
-          p: 1,
-        }}
-      >
+      <Box>
         {items.length === 0 ? (
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Typography color="text.secondary">
@@ -160,9 +153,7 @@ const SafeSelectionList = ({ items, isLoading, searchQuery, onSearchChange, onTo
 
             {/* Render ungrouped items */}
             {ungroupedItems.map((item) => (
-              <Box key={item.address} sx={{ my: 0.5 }}>
-                <SelectionItem item={item} onToggle={onToggle} />
-              </Box>
+              <SelectionItem key={item.address} item={item} onToggle={onToggle} />
             ))}
           </>
         )}

@@ -54,31 +54,33 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
   )
 
   return (
-    <AccountItem.Button onClick={handleClick} elementRef={elementRef}>
-      <AccountItem.Checkbox checked={safe.isSelected} address={safe.address} />
-      <AccountItem.Icon address={safe.address} chainId={safe.chainId} threshold={threshold} owners={owners.length} />
-      <AccountItem.Info
-        address={safe.address}
-        chainId={safe.chainId}
-        name={name}
-        fullAddress
-        showCopyButton
-        hasExplorer
-        highlight4bytes={!!safe.similarityGroup}
-      >
-        {!isMobile && statusChips}
-      </AccountItem.Info>
-      <AccountItem.ChainBadge chainId={safe.chainId} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
-      <AccountItem.ContextMenu
-        address={safe.address}
-        chainId={safe.chainId}
-        name={name}
-        isReplayable={false}
-        undeployedSafe={!!undeployedSafe}
-      />
-      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
-    </AccountItem.Button>
+    <div className={css.listItem} data-testid="safe-list-item">
+      <AccountItem.Button onClick={handleClick} elementRef={elementRef}>
+        <AccountItem.Checkbox checked={safe.isSelected} address={safe.address} />
+        <AccountItem.Icon address={safe.address} chainId={safe.chainId} threshold={threshold} owners={owners.length} />
+        <AccountItem.Info
+          address={safe.address}
+          chainId={safe.chainId}
+          name={name}
+          fullAddress
+          showCopyButton
+          hasExplorer
+          highlight4bytes={!!safe.similarityGroup}
+        >
+          {!isMobile && statusChips}
+        </AccountItem.Info>
+        <AccountItem.ChainBadge chainId={safe.chainId} />
+        <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+        <AccountItem.ContextMenu
+          address={safe.address}
+          chainId={safe.chainId}
+          name={name}
+          isReplayable={false}
+          undeployedSafe={!!undeployedSafe}
+        />
+        {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
+      </AccountItem.Button>
+    </div>
   )
 }
 
