@@ -1,3 +1,5 @@
+import { MemberRole } from './hooks/useSpaceMembers'
+import type { MemberDto } from './../../../../../packages/store/src/gateway/AUTO_GENERATED/spaces'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -41,4 +43,15 @@ export const mapSpaceContactsToAddressBookState = (spaceContacts: SpaceAddressBo
   }
 
   return addressBooks
+}
+
+/**
+ * Check if a user is an active admin of a space based on the members array
+ * @param members - Array of members from GetSpaceResponse
+ * @param userId - The user ID to check
+ */
+export const isUserActiveAdmin = (members: MemberDto[], userId: number | undefined): boolean => {
+  if (!userId) return false
+  const membership = members.find((member) => member.user.id === userId)
+  return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE
 }

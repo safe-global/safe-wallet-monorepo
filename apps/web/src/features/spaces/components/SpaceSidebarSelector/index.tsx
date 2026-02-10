@@ -27,7 +27,7 @@ const SpaceSidebarSelector = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query({}, { skip: !isUserSignedIn })
   const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
@@ -91,7 +91,7 @@ const SpaceSidebarSelector = () => {
           onClose={handleClose}
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
-          <SpaceCard space={selectedSpace} isCompact isLink={false} />
+          <SpaceCard space={selectedSpace} currentUserId={currentUser?.id} isCompact isLink={false} />
 
           <Divider sx={{ mb: 1 }} />
 

@@ -100,7 +100,7 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query({ safes: 'passCount' }, { skip: !isUserSignedIn })
 
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
@@ -129,7 +129,7 @@ const SpacesList = () => {
             {activeSpaces.length > 0 ? (
               activeSpaces.map((space) => (
                 <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} />
+                  <SpaceCard space={space} currentUserId={currentUser?.id} />
                 </Grid2>
               ))
             ) : (

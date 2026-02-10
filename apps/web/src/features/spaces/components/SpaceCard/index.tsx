@@ -5,10 +5,10 @@ import Link from 'next/link'
 import css from './styles.module.css'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
-import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
+import { isUserActiveAdmin } from '@/features/spaces/utils'
 import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
-import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SpaceSummary = ({
@@ -45,17 +45,19 @@ export const SpaceSummary = ({
 
 const SpaceCard = ({
   space,
+  currentUserId,
   isCompact = false,
   isLink = true,
 }: {
   space: GetSpaceResponse
+  currentUserId?: number | undefined
   isCompact?: boolean
   isLink?: boolean
 }) => {
-  const { id, name, members } = space
+  const { id, name, members, safes } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = useSpaceSafeCount(id)
-  const isAdmin = useIsAdmin(id)
+  const numberOfAccounts = Number(safes)
+  const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   return (
     <Card data-testid="space-card" className={classNames(css.card, { [css.compact]: isCompact })}>
