@@ -3,7 +3,7 @@ import useNonPinnedSafeWarning from './useNonPinnedSafeWarning'
 import * as store from '@/store'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import * as useIsPinnedSafe from '@/hooks/useIsPinnedSafe'
+import * as useIsTrustedSafe from '@/hooks/useIsTrustedSafe'
 import * as useProposers from '@/hooks/useProposers'
 
 jest.mock('@/store', () => ({
@@ -21,7 +21,7 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@/hooks/useIsPinnedSafe', () => ({
+jest.mock('@/hooks/useIsTrustedSafe', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
@@ -57,7 +57,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should show warning for owner of non-pinned safe', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -67,7 +67,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should not show warning for non-owner', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -77,7 +77,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should not show warning for pinned safe', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(true)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(true)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -86,7 +86,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should dismiss warning', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -102,7 +102,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should dispatch actions when adding to pinned list', async () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -115,7 +115,7 @@ describe('useNonPinnedSafeWarning', () => {
 
   it('should return correct safe info', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
@@ -126,7 +126,7 @@ describe('useNonPinnedSafeWarning', () => {
   describe('proposer detection', () => {
     it('should show warning for proposer of non-pinned safe', () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
-      ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+      ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(true)
 
       const { result } = renderHook(() => useNonPinnedSafeWarning())
@@ -137,7 +137,7 @@ describe('useNonPinnedSafeWarning', () => {
 
     it('should not show warning for proposer of pinned safe', () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
-      ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(true)
+      ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(true)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(true)
 
       const { result } = renderHook(() => useNonPinnedSafeWarning())
@@ -148,7 +148,7 @@ describe('useNonPinnedSafeWarning', () => {
 
     it('should prioritize owner role over proposer role', () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-      ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+      ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(true)
 
       const { result } = renderHook(() => useNonPinnedSafeWarning())
@@ -159,7 +159,7 @@ describe('useNonPinnedSafeWarning', () => {
 
     it('should return viewer role when not owner and not proposer', () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
-      ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+      ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(false)
 
       const { result } = renderHook(() => useNonPinnedSafeWarning())
@@ -170,7 +170,7 @@ describe('useNonPinnedSafeWarning', () => {
 
     it('should allow proposer to add safe to pinned list', async () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
-      ;(useIsPinnedSafe.default as jest.Mock).mockReturnValue(false)
+      ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(true)
 
       const { result } = renderHook(() => useNonPinnedSafeWarning())

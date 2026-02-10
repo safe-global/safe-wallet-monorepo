@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import useIsPinnedSafe from '@/hooks/useIsPinnedSafe'
+import useIsTrustedSafe from '@/hooks/useIsTrustedSafe'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
 import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -14,13 +14,14 @@ import type { SafeUserRole, NonPinnedWarningState } from './useNonPinnedSafeWarn
  * Hook for managing the non-pinned safe warning state
  *
  * Shows a warning banner when the user is viewing a safe they own
- * or are a proposer for, but haven't added to their pinned list.
+ * or are a proposer for, but haven't added to their trusted list.
+ * A safe is trusted if it's pinned OR curated as a nested safe.
  * Includes confirmation dialog with similarity checking.
  */
 const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   const { safe, safeAddress } = useSafeInfo()
   const chainId = safe?.chainId ?? ''
-  const isPinnedSafe = useIsPinnedSafe()
+  const isTrustedSafe = useIsTrustedSafe()
   const isOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
   const { trustSafe } = useTrustSafe()
@@ -36,8 +37,8 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   // Determine user role (owner takes priority over proposer)
   const userRole: SafeUserRole = isOwner ? 'owner' : isProposer ? 'proposer' : 'viewer'
 
-  // Show warning if user is owner or proposer but safe is not pinned
-  const shouldShowWarning = !isDismissed && !isPinnedSafe && (userRole === 'owner' || userRole === 'proposer')
+  // Show warning if user is owner or proposer but safe is not trusted
+  const shouldShowWarning = !isDismissed && !isTrustedSafe && (userRole === 'owner' || userRole === 'proposer')
 
   // Track when warning is first shown
   const hasTrackedWarning = useRef(false)

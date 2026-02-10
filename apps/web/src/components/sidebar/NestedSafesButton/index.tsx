@@ -28,10 +28,8 @@ export function NestedSafesButton({
     { skip: !isEnabled || !safeAddress },
   )
   const rawNestedSafes = ownedSafes?.[chainId] ?? []
-  const { visibleSafes, allSafesWithStatus, isLoading, startFiltering, hasStarted } = useNestedSafesVisibility(
-    rawNestedSafes,
-    chainId,
-  )
+  const { visibleSafes, allSafesWithStatus, hasCompletedCuration, isLoading, startFiltering, hasStarted } =
+    useNestedSafesVisibility(rawNestedSafes, chainId)
 
   if (!isEnabled || !safe.deployed) {
     return null
@@ -76,6 +74,7 @@ export function NestedSafesButton({
         rawNestedSafes={rawNestedSafes}
         allSafesWithStatus={allSafesWithStatus}
         visibleSafes={visibleSafes}
+        hasCompletedCuration={hasCompletedCuration}
         isLoading={isLoading}
       />
     </>

@@ -1,7 +1,8 @@
 .scrollContainer {
   overflow-x: hidden;
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   padding-right: 12px;
   margin-right: -12px;
   scrollbar-width: thin;
