@@ -53,6 +53,12 @@ export const ContractVersion = () => {
         )}
       </Typography>
 
+      {safeLoaded && safe.version && (
+        <Typography variant="body2" mt={0.5}>
+          <ExternalLink href="https://github.com/safe-global/safe-smart-account/releases">View releases</ExternalLink>
+        </Typography>
+      )}
+
       {safeLoaded && safe.version && showUpdateDialog ? (
         <Alert
           sx={{ mt: 2, borderRadius: '2px', borderColor: '#B0FFC9' }}
