@@ -1,27 +1,20 @@
 import type { MouseEvent } from 'react'
-import { useMediaQuery, useTheme } from '@mui/material'
 import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { hasQueuedItems } from '../../utils/accountItem'
 import { AccountItem } from '../AccountItem'
 import SimilarityWarning from './SimilarityWarning'
 import css from '../AccountItems/styles.module.css'
+import classnames from 'classnames'
 
 interface SafeSelectionItemProps {
   safe: SelectableSafe
   onToggle: (address: string) => void
 }
 
-/**
- * Individual safe item in the selection modal
- * Uses AccountItem compound components for consistent styling.
- * Includes balance, signers, status chips, queue actions, and rename menu.
- * Allows selecting/deselecting safes including already-pinned ones.
- */
 const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
-  // Get rich data (balance, threshold, owners, etc.)
+  const isMobile = useIsMobile()
   const { chain, name, safeOverview, isActivating, threshold, owners, undeployedSafe, elementRef } =
     useSafeItemData(safe)
 
@@ -30,9 +23,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
     onToggle(safe.address)
   }
 
-  // Check for queued transactions
-  const hasQueuedItems =
-    !safe.isReadOnly && safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+  const hasQueued = hasQueuedItems(safe, safeOverview)
 
   const statusChips = (
     <>
@@ -41,7 +32,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         isReadOnly={safe.isReadOnly}
         undeployedSafe={!!undeployedSafe}
       />
-      {hasQueuedItems && (
+      {hasQueued && safeOverview && (
         <AccountItem.QueueActions
           safeAddress={safeOverview.address.value}
           chainShortName={chain?.shortName || ''}
@@ -90,7 +81,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         />
         {isMobile && (
           <>
-            <div className={css.accountItemChips + ' ' + css.balanceWrapper}>
+            <div className={classnames(css.accountItemChips, css.balanceWrapper)}>
               <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
               <AccountItem.ChainBadge chainId={safe.chainId} />
             </div>

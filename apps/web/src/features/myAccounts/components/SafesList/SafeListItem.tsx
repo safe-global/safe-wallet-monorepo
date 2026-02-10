@@ -1,10 +1,12 @@
-import { useMediaQuery, useTheme } from '@mui/material'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
+import { useIsMobile } from '../../hooks/useIsMobile'
+import { hasQueuedItems } from '../../utils/accountItem'
 import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
+import classnames from 'classnames'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
@@ -13,9 +15,7 @@ export interface SafeListItemProps {
 }
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
+  const isMobile = useIsMobile()
   const {
     chain,
     name,
@@ -31,10 +31,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
     trackingLabel,
   } = useSafeItemData(safeItem, { isSpaceSafe })
 
-  const hasQueuedItems =
-    !safeItem.isReadOnly &&
-    safeOverview &&
-    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+  const hasQueued = hasQueuedItems(safeItem, safeOverview)
 
   const statusChips = (
     <>
@@ -43,7 +40,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         isReadOnly={safeItem.isReadOnly}
         undeployedSafe={!!undeployedSafe}
       />
-      {hasQueuedItems && (
+      {hasQueued && safeOverview && (
         <AccountItem.QueueActions
           safeAddress={safeOverview.address.value}
           chainShortName={chain?.shortName || ''}
@@ -93,7 +90,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         />
       )}
       {isMobile && (
-        <div className={css.accountItemChips + ' ' + css.balanceWrapper}>
+        <div className={classnames(css.accountItemChips, css.balanceWrapper)}>
           <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
           <AccountItem.ChainBadge chainId={safeItem.chainId} />
         </div>

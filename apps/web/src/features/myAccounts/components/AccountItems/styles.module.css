@@ -143,6 +143,10 @@
   display: none;
 }
 
+.accountItemChipsSpaced {
+  margin-bottom: 12px;
+}
+
 .balanceWrapper {
   padding-left: 0;
 }
