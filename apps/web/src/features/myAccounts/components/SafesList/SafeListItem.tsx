@@ -64,6 +64,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
     >
       <AccountItem.Icon
         address={safeItem.address}
+        size={isMobile ? 30 : undefined}
         chainId={safeItem.chainId}
         threshold={threshold}
         owners={owners.length}
@@ -71,8 +72,10 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
       <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={isSpaceSafe ? safeItem.name : name}>
         {!isMobile && statusChips}
       </AccountItem.Info>
-      <AccountItem.ChainBadge chainId={safeItem.chainId} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+      {!isMobile && (
+        <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+      )}
+      {!isMobile && <AccountItem.ChainBadge chainId={safeItem.chainId} />}
       {!isSpaceSafe && <AccountItem.PinButton safeItem={safeItem} threshold={threshold} owners={owners} name={name} />}
       {isSpaceSafe ? (
         <>
@@ -88,6 +91,12 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
           undeployedSafe={!!undeployedSafe}
           onClose={onLinkClick}
         />
+      )}
+      {isMobile && (
+        <div className={css.accountItemChips}>
+          <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+          <AccountItem.ChainBadge chainId={safeItem.chainId} />
+        </div>
       )}
       {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </AccountItem.Link>

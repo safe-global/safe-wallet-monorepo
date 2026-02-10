@@ -126,10 +126,17 @@
 .accountItemChips {
   flex-basis: 100%;
   margin-top: var(--space-1);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-1);
+}
+
+.accountItemChips .accountItemBalance {
+  text-align: left;
 }
 
 .accountItemChips:empty {

@@ -57,7 +57,13 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
     <div className={css.listItem}>
       <AccountItem.Button onClick={handleClick} elementRef={elementRef}>
         <AccountItem.Checkbox checked={safe.isSelected} address={safe.address} />
-        <AccountItem.Icon address={safe.address} chainId={safe.chainId} threshold={threshold} owners={owners.length} />
+        <AccountItem.Icon
+          address={safe.address}
+          size={isMobile ? 30 : undefined}
+          chainId={safe.chainId}
+          threshold={threshold}
+          owners={owners.length}
+        />
         <AccountItem.Info
           address={safe.address}
           chainId={safe.chainId}
@@ -69,8 +75,12 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         >
           {!isMobile && statusChips}
         </AccountItem.Info>
-        <AccountItem.ChainBadge chainId={safe.chainId} />
-        <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+        {!isMobile && (
+          <>
+            <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+            <AccountItem.ChainBadge chainId={safe.chainId} />
+          </>
+        )}
         <AccountItem.ContextMenu
           address={safe.address}
           chainId={safe.chainId}
@@ -78,7 +88,15 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
           isReplayable={false}
           undeployedSafe={!!undeployedSafe}
         />
-        {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
+        {isMobile && (
+          <>
+            <div className={css.accountItemChips}>
+              <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+              <AccountItem.ChainBadge chainId={safe.chainId} />
+            </div>
+            <div className={css.accountItemChips}>{statusChips}</div>
+          </>
+        )}
       </AccountItem.Button>
     </div>
   )

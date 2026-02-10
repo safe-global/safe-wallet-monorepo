@@ -107,6 +107,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
               <AccountItem.Checkbox checked={multiSafe.isSelected} address={address} />
               <AccountItem.Icon
                 address={address}
+                size={isMobile ? 30 : undefined}
                 chainId={safes[0]?.chainId ?? '1'}
                 threshold={sharedSetup?.threshold}
                 owners={sharedSetup?.owners.length}
@@ -123,8 +124,10 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
               >
                 {!isMobile && statusChips}
               </AccountItem.Info>
-              <AccountItem.ChainBadge safes={safes} />
-              <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
+              {!isMobile && (
+                <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
+              )}
+              {!isMobile && <AccountItem.ChainBadge safes={safes} />}
               <AccountItem.ContextMenu
                 address={address}
                 chainId={safes[0]?.chainId ?? '1'}
@@ -143,6 +146,12 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
           </Box>
         </AccordionDetails>
       </Accordion>
+      {isMobile && (
+        <div className={css.accountItemChips} style={{ marginBottom: '12px' }}>
+          <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
+          <AccountItem.ChainBadge safes={safes} />
+        </div>
+      )}
       {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </Box>
   )

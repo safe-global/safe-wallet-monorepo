@@ -5,7 +5,7 @@ import { useSafeItemData } from '../../hooks/useSafeItemData'
 import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, useMediaQuery, useTheme } from '@mui/material'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -24,6 +24,8 @@ function MultiChainSubItem({
   safeOverview?: SafeOverview
   onLinkClick?: () => void
 }) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
     useSafeItemData(safeItem, {
       safeOverview,
@@ -33,6 +35,24 @@ function MultiChainSubItem({
     !safeItem.isReadOnly &&
     safeOverview &&
     ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+
+  const statusChips = (
+    <>
+      <AccountItem.StatusChip
+        undeployedSafe={!!undeployedSafe}
+        isActivating={isActivating}
+        isReadOnly={safeItem.isReadOnly}
+      />
+      {hasQueuedItems && (
+        <AccountItem.QueueActions
+          safeAddress={safeOverview!.address.value}
+          chainShortName={chain?.shortName || ''}
+          queued={safeOverview!.queued ?? 0}
+          awaitingConfirmation={safeOverview!.awaitingConfirmation ?? 0}
+        />
+      )}
+    </>
+  )
 
   return (
     <AccountItem.Link
@@ -44,27 +64,26 @@ function MultiChainSubItem({
     >
       <AccountItem.Icon
         address={safeItem.address}
+        size={isMobile ? 30 : undefined}
         chainId={safeItem.chainId}
         threshold={threshold}
         owners={owners.length}
         isMultiChainItem
       />
       <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName}>
-        <AccountItem.StatusChip
-          undeployedSafe={!!undeployedSafe}
-          isActivating={isActivating}
-          isReadOnly={safeItem.isReadOnly}
-        />
-        {hasQueuedItems && (
-          <AccountItem.QueueActions
-            safeAddress={safeOverview.address.value}
-            chainShortName={chain?.shortName || ''}
-            queued={safeOverview.queued ?? 0}
-            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
-          />
-        )}
+        {!isMobile && statusChips}
       </AccountItem.Info>
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+      {!isMobile && (
+        <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+      )}
+      {!isMobile && <AccountItem.ChainBadge chainId={safeItem.chainId} />}
+      {isMobile && (
+        <div className={css.accountItemChips}>
+          <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+          <AccountItem.ChainBadge chainId={safeItem.chainId} />
+        </div>
+      )}
+      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </AccountItem.Link>
   )
 }
@@ -77,6 +96,8 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const {
     address,
     name,
@@ -123,6 +144,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
             <AccountItem.Content data-testid="multichain-content">
               <AccountItem.Icon
                 address={address}
+                size={isMobile ? 30 : undefined}
                 chainId={sortedSafes[0]?.chainId ?? '1'}
                 threshold={sharedSetup?.threshold}
                 owners={sharedSetup?.owners.length}
@@ -136,12 +158,14 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
                 data-testid="group-address"
               />
-              <AccountItem.ChainBadge safes={sortedSafes} />
-              <AccountItem.Balance
-                fiatTotal={totalFiatValue}
-                isLoading={totalFiatValue === undefined}
-                data-testid="group-balance"
-              />
+              {!isMobile && (
+                <AccountItem.Balance
+                  fiatTotal={totalFiatValue}
+                  isLoading={totalFiatValue === undefined}
+                  data-testid="group-balance"
+                />
+              )}
+              {!isMobile && <AccountItem.ChainBadge safes={sortedSafes} />}
               {!isSpaceSafe && (
                 <AccountItem.PinButton safeItems={sortedSafes} safeOverviews={safeOverviews} name={name} />
               )}
@@ -159,6 +183,16 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 />
               )}
             </AccountItem.Content>
+            {isMobile && (
+              <div className={css.accountItemChips} style={{ marginBottom: '12px' }}>
+                <AccountItem.Balance
+                  fiatTotal={totalFiatValue}
+                  isLoading={totalFiatValue === undefined}
+                  data-testid="group-balance"
+                />
+                <AccountItem.ChainBadge safes={sortedSafes} />
+              </div>
+            )}
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
