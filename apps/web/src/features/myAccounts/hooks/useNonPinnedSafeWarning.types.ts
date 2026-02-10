@@ -41,7 +41,7 @@ export interface NonPinnedWarningState {
   /** Close the confirmation dialog */
   closeConfirmDialog: () => void
   /** Add the safe to the pinned list (called after confirmation) */
-  confirmAndAddToPinnedList: () => Promise<void>
+  confirmAndAddToPinnedList: (name: string) => void
   /** Temporarily dismiss the warning for this session */
   dismiss: () => void
 }

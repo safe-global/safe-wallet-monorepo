@@ -6,6 +6,7 @@ describe('NonPinnedWarning', () => {
   const defaultProps = {
     safeAddress: '0x1234567890123456789012345678901234567890',
     safeName: undefined,
+    chainId: '1',
     hasSimilarAddress: false,
     similarAddresses: [],
     isConfirmDialogOpen: false,
@@ -73,10 +74,13 @@ describe('NonPinnedWarning', () => {
     expect(screen.getByText('Similar Safe in your account')).toBeInTheDocument()
   })
 
-  it('should call onConfirmAdd when confirm button is clicked in dialog', () => {
+  it('should call onConfirmAdd when confirm button is clicked in dialog', async () => {
     render(<NonPinnedWarning {...defaultProps} isConfirmDialogOpen={true} />)
 
-    fireEvent.click(screen.getByTestId('confirm-add-trusted-safe-button'))
+    const confirmButton = screen.getByTestId('confirm-add-trusted-safe-button')
+    fireEvent.click(confirmButton)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(defaultProps.onConfirmAdd).toHaveBeenCalled()
   })

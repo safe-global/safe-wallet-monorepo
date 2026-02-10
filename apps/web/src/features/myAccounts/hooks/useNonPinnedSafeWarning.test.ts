@@ -100,14 +100,14 @@ describe('useNonPinnedSafeWarning', () => {
     expect(result.current.isDismissed).toBe(true)
   })
 
-  it('should dispatch actions when adding to pinned list', async () => {
+  it('should dispatch actions when adding to pinned list', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
     ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
 
     const { result } = renderHook(() => useNonPinnedSafeWarning())
 
-    await act(async () => {
-      await result.current.confirmAndAddToPinnedList()
+    act(() => {
+      result.current.confirmAndAddToPinnedList('Test Safe Name')
     })
 
     expect(mockDispatch).toHaveBeenCalled()
@@ -168,7 +168,7 @@ describe('useNonPinnedSafeWarning', () => {
       expect(result.current.userRole).toBe('viewer')
     })
 
-    it('should allow proposer to add safe to pinned list', async () => {
+    it('should allow proposer to add safe to pinned list', () => {
       ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(false)
       ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
       ;(useProposers.useIsWalletProposer as jest.Mock).mockReturnValue(true)
@@ -177,8 +177,8 @@ describe('useNonPinnedSafeWarning', () => {
 
       expect(result.current.shouldShowWarning).toBe(true)
 
-      await act(async () => {
-        await result.current.confirmAndAddToPinnedList()
+      act(() => {
+        result.current.confirmAndAddToPinnedList('Test Safe Name')
       })
 
       expect(mockDispatch).toHaveBeenCalled()

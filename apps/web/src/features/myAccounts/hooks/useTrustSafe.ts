@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useAppDispatch } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
@@ -9,6 +10,7 @@ import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safe
 export interface TrustSafeParams {
   chainId: string
   address: string
+  name?: string
   owners?: AddressInfo[]
   threshold?: number
 }
@@ -26,7 +28,7 @@ export function useTrustSafe() {
   const dispatch = useAppDispatch()
 
   const trustSafe = useCallback(
-    ({ chainId, address, owners, threshold }: TrustSafeParams) => {
+    ({ chainId, address, name, owners, threshold }: TrustSafeParams) => {
       if (!chainId || !address) return
 
       dispatch(
@@ -40,6 +42,16 @@ export function useTrustSafe() {
           },
         }),
       )
+
+      if (name) {
+        dispatch(
+          upsertAddressBookEntries({
+            chainIds: [chainId],
+            address,
+            name: name.trim(),
+          }),
+        )
+      }
 
       dispatch(
         showNotification({

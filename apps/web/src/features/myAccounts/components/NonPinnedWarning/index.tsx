@@ -8,12 +8,13 @@ import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.typ
 interface NonPinnedWarningProps {
   safeAddress: string
   safeName?: string
+  chainId: string
   hasSimilarAddress: boolean
   similarAddresses: SimilarAddressInfo[]
   isConfirmDialogOpen: boolean
   onOpenConfirmDialog: () => void
   onCloseConfirmDialog: () => void
-  onConfirmAdd: () => void
+  onConfirmAdd: (name: string) => void
   onDismiss: () => void
 }
 
@@ -24,6 +25,7 @@ interface NonPinnedWarningProps {
 const NonPinnedWarning = ({
   safeAddress,
   safeName,
+  chainId,
   hasSimilarAddress,
   similarAddresses,
   isConfirmDialogOpen,
@@ -66,6 +68,7 @@ const NonPinnedWarning = ({
         open={isConfirmDialogOpen}
         safeAddress={safeAddress}
         safeName={safeName}
+        chainId={chainId}
         hasSimilarAddress={hasSimilarAddress}
         similarAddresses={similarAddresses}
         onConfirm={onConfirmAdd}

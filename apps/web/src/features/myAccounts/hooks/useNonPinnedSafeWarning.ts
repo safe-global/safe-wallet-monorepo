@@ -61,24 +61,28 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   }, [])
 
   // Add safe to pinned list (called after confirmation)
-  const confirmAndAddToPinnedList = useCallback(async () => {
-    if (!chainId || !safeAddress) return
+  const confirmAndAddToPinnedList = useCallback(
+    (name: string) => {
+      if (!chainId || !safeAddress) return
 
-    trustSafe({
-      chainId,
-      address: safeAddress,
-      owners: safe?.owners,
-      threshold: safe?.threshold,
-    })
+      trustSafe({
+        chainId,
+        address: safeAddress,
+        name: name || undefined,
+        owners: safe?.owners,
+        threshold: safe?.threshold,
+      })
 
-    trackEvent({
-      ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE_CONFIRM,
-      label: hasSimilarAddress ? TRUSTED_SAFE_LABELS.with_similarity : TRUSTED_SAFE_LABELS.without_similarity,
-    })
+      trackEvent({
+        ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE_CONFIRM,
+        label: hasSimilarAddress ? TRUSTED_SAFE_LABELS.with_similarity : TRUSTED_SAFE_LABELS.without_similarity,
+      })
 
-    // Close the dialog after adding
-    setIsConfirmDialogOpen(false)
-  }, [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress])
+      // Close the dialog after adding
+      setIsConfirmDialogOpen(false)
+    },
+    [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress],
+  )
 
   // Dismiss warning for this session
   const dismiss = useCallback(() => {

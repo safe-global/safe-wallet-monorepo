@@ -11,6 +11,7 @@ const meta = {
   args: {
     safeAddress: '0x1234567890123456789012345678901234567890',
     safeName: undefined,
+    chainId: '1',
     hasSimilarAddress: false,
     similarAddresses: [],
     isConfirmDialogOpen: false,

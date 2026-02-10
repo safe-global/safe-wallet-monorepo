@@ -10,6 +10,7 @@ const NonPinnedWarningBanner = () => {
     shouldShowWarning,
     safeAddress,
     safeName,
+    chainId,
     hasSimilarAddress,
     similarAddresses,
     isConfirmDialogOpen,
@@ -27,6 +28,7 @@ const NonPinnedWarningBanner = () => {
     <NonPinnedWarning
       safeAddress={safeAddress}
       safeName={safeName}
+      chainId={chainId}
       hasSimilarAddress={hasSimilarAddress}
       similarAddresses={similarAddresses}
       isConfirmDialogOpen={isConfirmDialogOpen}
