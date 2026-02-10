@@ -145,7 +145,20 @@ function PopoverBody({
   }
 
   if (safesToShow.length === 0 && !isManageMode) {
-    return <NestedSafeInfo />
+    return (
+      <>
+        <NestedSafeInfo />
+        {!hideCreationButton && (
+          <NormalModeActions
+            uncuratedCount={0}
+            hasVisibleSafes={false}
+            hideCreationButton={hideCreationButton}
+            onManageClick={onManageClick}
+            onAdd={onAdd}
+          />
+        )}
+      </>
+    )
   }
 
   return (
