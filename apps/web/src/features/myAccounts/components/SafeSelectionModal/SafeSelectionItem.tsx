@@ -77,6 +77,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         name={name}
         isReplayable={false}
         undeployedSafe={!!undeployedSafe}
+        hideNestedSafes
       />
       {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </AccountItem.Button>
