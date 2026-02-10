@@ -67,7 +67,7 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
                 onClick={handleOpenConfirmDialog}
                 sx={{ alignSelf: 'flex-start', mt: 1 }}
               >
-                Add to trusted list
+                Trust this Safe
               </Button>
             </Stack>
           </Stack>
