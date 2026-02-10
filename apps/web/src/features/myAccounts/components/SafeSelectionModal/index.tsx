@@ -63,14 +63,26 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onClose={close} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 'bold',
+            borderBottom: '1px solid',
+            borderColor: 'border.light',
+            px: 3,
+            pt: 3,
+            pb: 2,
+          }}
+        >
           <Box>Manage trusted Safes</Box>
           <IconButton onClick={close} size="small" edge="end">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
+        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto', pt: 3 }}>
           <SecurityBanner title="Verify before you trust" />
 
           {/* Selection controls */}
@@ -97,7 +109,15 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
           />
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 2,
+            borderTop: '1px solid',
+            borderColor: 'border.light',
+          }}
+        >
           <Button onClick={close} variant="text">
             Cancel
           </Button>
