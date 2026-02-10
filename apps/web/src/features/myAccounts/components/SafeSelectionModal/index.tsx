@@ -82,7 +82,7 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto', pt: 3 }}>
+        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto', pt: '16px !important' }}>
           <SecurityBanner title="Verify before you trust" />
 
           {/* Selection controls */}
