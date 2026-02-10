@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { Box, CircularProgress } from '@mui/material'
 
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
@@ -16,6 +16,7 @@ import useChainId from '@/hooks/useChainId'
 import { AppRoutes } from '@/config/routes'
 import { getOrigin } from '@/components/safe-apps/utils'
 import { useHasFeature } from '@/hooks/useChains'
+import { useSafeAppRedirects } from '@/hooks/safe-apps/useSafeAppRedirects'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -53,24 +54,9 @@ const SafeApps: NextPage = () => {
     })
   }, [router])
 
-  // Redirect to the apps list if the current chain is not supported by this Safe App
-  useEffect(() => {
-    if (safeAppData && !safeAppData.chainIds.includes(chainId)) {
-      goToList()
-    }
-  }, [safeAppData, chainId, goToList])
+  const shouldRender = useSafeAppRedirects({ safeAppData, chainId, isSafeAppsEnabled, appUrl, goToList })
 
-  // appUrl is required to be present
-  if (!isSafeAppsEnabled || !appUrl || !router.isReady) return null
-
-  // No `safe` query param, redirect to the share route
-  if (router.isReady && !router.query.safe) {
-    router.push({
-      pathname: AppRoutes.share.safeApp,
-      query: { appUrl },
-    })
-    return null
-  }
+  if (!shouldRender) return null
 
   if (isModalVisible) {
     return (
@@ -98,7 +84,7 @@ const SafeApps: NextPage = () => {
 
   return (
     <SafeAppsErrorBoundary render={() => <SafeAppsLoadError onBackToApps={() => router.back()} />}>
-      <AppFrame appUrl={appUrl} allowedFeaturesList={getAllowedFeaturesList(origin)} safeAppFromManifest={safeApp} />
+      <AppFrame appUrl={appUrl!} allowedFeaturesList={getAllowedFeaturesList(origin)} safeAppFromManifest={safeApp} />
     </SafeAppsErrorBoundary>
   )
 }
