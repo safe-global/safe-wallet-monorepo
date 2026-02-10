@@ -143,6 +143,10 @@
   display: none;
 }
 
+.balanceWrapper {
+  padding-left: 0;
+}
+
 .safeName,
 .safeAddress {
   white-space: nowrap;

@@ -90,7 +90,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         />
         {isMobile && (
           <>
-            <div className={css.accountItemChips}>
+            <div className={css.accountItemChips + ' ' + css.balanceWrapper}>
               <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
               <AccountItem.ChainBadge chainId={safe.chainId} />
             </div>

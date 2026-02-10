@@ -93,7 +93,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         />
       )}
       {isMobile && (
-        <div className={css.accountItemChips}>
+        <div className={css.accountItemChips + ' ' + css.balanceWrapper}>
           <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
           <AccountItem.ChainBadge chainId={safeItem.chainId} />
         </div>
