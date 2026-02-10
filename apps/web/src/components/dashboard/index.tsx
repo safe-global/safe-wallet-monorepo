@@ -11,6 +11,7 @@ import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoveryS
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning, UnsupportedMastercopyWarning } from '@/features/multichain'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
@@ -44,6 +45,7 @@ const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const hn = useLoadFeature(HypernativeFeature)
   const { NoFeeCampaignBanner, noFeeCampaignBannerID } = useLoadFeature(NoFeeCampaignFeature)
+  const { NonPinnedWarningBanner } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
@@ -90,6 +92,10 @@ const Dashboard = (): ReactElement => {
 
         <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
           <UnsupportedMastercopyWarning />
+        </Grid>
+
+        <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
+          <NonPinnedWarningBanner />
         </Grid>
       </Grid>
 

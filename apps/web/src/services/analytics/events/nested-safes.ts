@@ -21,6 +21,37 @@ export const NESTED_SAFE_EVENTS = {
     action: 'Rename',
     category: NESTED_SAFES_CATEGORY,
   },
+  // Curation events
+  CURATION_STARTED: {
+    action: 'Curation started',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  CURATION_COMPLETED: {
+    action: 'Curation completed',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  CURATION_MODIFIED: {
+    action: 'Curation modified',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  // Similarity warning events
+  SIMILARITY_WARNING_SHOWN: {
+    action: 'Similarity warning shown',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  SIMILARITY_WARNING_CONFIRMED: {
+    action: 'Similarity warning confirmed',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  // Intro screen events
+  REVIEW_NESTED_SAFES: {
+    action: 'Review nested safes clicked',
+    category: NESTED_SAFES_CATEGORY,
+  },
+  CLICK_MORE_INDICATOR: {
+    action: 'More nested safes indicator clicked',
+    category: NESTED_SAFES_CATEGORY,
+  },
 }
 
 export enum NESTED_SAFE_LABELS {
@@ -28,4 +59,5 @@ export enum NESTED_SAFE_LABELS {
   sidebar = 'sidebar',
   list = 'list',
   success_screen = 'success_screen',
+  first_time = 'first_time',
 }

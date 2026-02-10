@@ -202,6 +202,43 @@ export const OVERVIEW_EVENTS = {
     action: 'Hide EURCV boost banner',
     category: OVERVIEW_CATEGORY,
   },
+  // Trusted Safes management
+  OPEN_TRUSTED_SAFES_MODAL: {
+    action: 'Open trusted Safes modal',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_ADDED: {
+    action: 'Trusted Safe added',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_REMOVED: {
+    action: 'Trusted Safe removed',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_SIMILAR_ADDRESS_CONFIRM: {
+    action: 'Confirm similar address in trusted Safes',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_MIGRATION_PROMPT: {
+    action: 'Show trusted Safes migration prompt',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_WARNING_SHOW: {
+    action: 'Show untrusted Safe warning',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_WARNING_DISMISS: {
+    action: 'Dismiss untrusted Safe warning',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_ADD_SINGLE: {
+    action: 'Open add trusted Safe dialog',
+    category: OVERVIEW_CATEGORY,
+  },
+  TRUSTED_SAFES_ADD_SINGLE_CONFIRM: {
+    action: 'Confirm add single trusted Safe',
+    category: OVERVIEW_CATEGORY,
+  },
 }
 
 export const EXPLORE_POSSIBLE_EVENTS = {
@@ -222,6 +259,13 @@ export enum PIN_SAFE_LABELS {
 
 export enum OPEN_SAFE_LABELS {
   after_add = 'after_add',
+}
+
+export enum TRUSTED_SAFE_LABELS {
+  non_pinned_warning = 'non_pinned_warning',
+  safe_shield = 'safe_shield',
+  with_similarity = 'with_similarity',
+  without_similarity = 'without_similarity',
 }
 
 export enum OVERVIEW_LABELS {

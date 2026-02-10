@@ -91,6 +91,7 @@ To add or modify colors/tokens:
 - Run type-check, lint, prettier and unit tests before each commit
 - Never use the `any` type!
 - Treat code comments as tech debt! Add them only when really necessary & the code at hand is hard to understand.
+- **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
 
 Specifically for the web app:
 

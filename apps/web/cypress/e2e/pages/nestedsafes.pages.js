@@ -112,11 +112,14 @@ const nestedSafeList = '[data-testid="nested-safe-list"]'
 const cancelManageBtn = '[data-testid="cancel-manage-nested-safes"]'
 const saveManageBtn = '[data-testid="save-manage-nested-safes"]'
 const safeListItem = '[data-testid="safe-list-item"]'
+const reviewNestedSafesBtn = '[data-testid="review-nested-safes-button"]'
+const moreNestedSafesIndicator = '[data-testid="more-nested-safes-indicator"]'
+const closePopoverBtn = '[data-testid="modal-dialog-close-btn"]'
 
-export const hiddenSafesText = (count) => `${count} ${count === 1 ? 'safe' : 'safes'} hidden`
-export const selectedToHideText = (count) => `${count} ${count === 1 ? 'safe' : 'safes'} selected to hide`
+// UI text shows positive selection count (safes selected to SHOW)
+export const selectedSafesText = (count) => `${count} ${count === 1 ? 'safe' : 'safes'} selected`
 export const suspiciousSafeWarning = 'This Safe was not created by the parent Safe or its signers'
-export const showAllNestedSafesStr = 'Show all Nested Safes'
+export const showAllNestedSafesStr = 'Show all nested Safes'
 
 export function clickOnManageNestedSafesBtn() {
   cy.get(manageNestedSafesBtn).click()
@@ -148,16 +151,17 @@ export function verifySaveAndCancelBtnsNotExist() {
   cy.get(saveManageBtn).should('not.exist')
 }
 
-export function verifyHiddenSafesCount(count) {
-  cy.get(nestedSafeList).contains(hiddenSafesText(count)).should('exist')
+export function verifyCancelBtnNotExists() {
+  cy.get(cancelManageBtn).should('not.exist')
 }
 
-export function verifyNoHiddenSafesMessage() {
-  cy.get(nestedSafeList).should('not.contain', 'hidden')
+export function verifySaveBtnExists() {
+  cy.get(saveManageBtn).should('exist')
 }
 
-export function verifySelectedToHideCount(count) {
-  cy.contains(selectedToHideText(count)).should('exist')
+// Verify the count of selected safes shown in the manage mode header
+export function verifySelectedSafesCount(count) {
+  cy.contains(selectedSafesText(count)).should('exist')
 }
 
 export function verifyVisibleNestedSafesCount(count) {
@@ -230,6 +234,24 @@ export function clickFirstValidSafeCheckbox() {
     .click()
 }
 
+export function selectAllValidSafes() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:not(:has(${suspiciousWarningIcon}))`)
+    .each(($item) => {
+      cy.wrap($item).find('input[type="checkbox"]').click()
+    })
+}
+
+// Select ALL safes regardless of warning status (for tests that need specific safes)
+export function selectAllSafes() {
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .each(($item) => {
+      cy.wrap($item).find('input[type="checkbox"]').click()
+    })
+}
+
 export function clickFirstSuspiciousSafeCheckbox() {
   cy.get(nestedSafeList)
     .find(safeListItem)
@@ -247,4 +269,97 @@ export function waitForNestedSafeListToLoad() {
 export function waitForEditModeToLoad() {
   cy.get(cancelManageBtn).should('be.visible')
   cy.get(saveManageBtn).should('be.visible')
+}
+
+// Intro screen functions
+export function verifyIntroScreenVisible() {
+  cy.get(reviewNestedSafesBtn).should('be.visible')
+  cy.contains('Select Nested Safes').should('be.visible')
+  cy.contains('Nested Safes can include lookalike addresses').should('be.visible')
+}
+
+export function clickReviewNestedSafesBtn() {
+  cy.get(reviewNestedSafesBtn).click()
+}
+
+export function waitForIntroScreenToLoad() {
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(reviewNestedSafesBtn).should('be.visible')
+}
+
+// Complete intro screen flow, selecting all safes (including suspicious ones)
+// Use this for tests that need specific safes to be visible
+export function completeIntroScreenSelectAll() {
+  // Wait for intro screen to load
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(reviewNestedSafesBtn).should('be.visible').click()
+  // Wait for manage mode to load
+  cy.get(saveManageBtn).should('be.visible')
+  // Select all safes
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .each(($item) => {
+      cy.wrap($item).find('input[type="checkbox"]').click()
+    })
+  cy.get(saveManageBtn).click()
+  // Wait for normal view to load after save
+  cy.get(manageNestedSafesBtn).should('be.visible')
+}
+
+// Complete intro screen flow, selecting only valid (non-suspicious) safes
+export function completeIntroScreenSelectValid() {
+  // Wait for intro screen to load
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(reviewNestedSafesBtn).should('be.visible').click()
+  // Wait for manage mode to load
+  cy.get(saveManageBtn).should('be.visible')
+  // Select only valid safes (without warning icon)
+  cy.get(nestedSafeList)
+    .find(safeListItem)
+    .filter(`:not(:has(${suspiciousWarningIcon}))`)
+    .each(($item) => {
+      cy.wrap($item).find('input[type="checkbox"]').click()
+    })
+  cy.get(saveManageBtn).click()
+  // Wait for normal view to load after save
+  cy.get(manageNestedSafesBtn).should('be.visible')
+}
+
+// Complete intro screen flow without selecting any safes
+export function completeIntroScreenNoSelection() {
+  // Wait for intro screen to load
+  cy.get(nestedSafeList).should('be.visible')
+  cy.get(reviewNestedSafesBtn).should('be.visible').click()
+  // Wait for manage mode to load
+  cy.get(saveManageBtn).should('be.visible')
+  cy.get(saveManageBtn).click()
+  // Wait for normal view to load after save
+  cy.get(manageNestedSafesBtn).should('be.visible')
+}
+
+// "+X more nested safes" indicator functions
+export function verifyMoreIndicatorVisible(count) {
+  cy.get(moreNestedSafesIndicator).should('be.visible')
+  cy.get(moreNestedSafesIndicator).should('contain', `+${count} more nested`)
+}
+
+export function verifyMoreIndicatorNotVisible() {
+  cy.get(moreNestedSafesIndicator).should('not.exist')
+}
+
+export function clickMoreIndicator() {
+  cy.get(moreNestedSafesIndicator).click()
+}
+
+// Close popover functions
+export function closePopover() {
+  cy.get(closePopoverBtn).click()
+}
+
+export function verifyPopoverClosed() {
+  cy.get(nestedSafeList).should('not.exist')
+}
+
+export function verifyCloseButtonVisible() {
+  cy.get(closePopoverBtn).should('be.visible')
 }

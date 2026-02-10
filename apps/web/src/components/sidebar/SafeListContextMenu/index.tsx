@@ -69,10 +69,8 @@ const SafeListContextMenu = ({
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
   const nestedSafesForChain = ownedSafes?.[chainId] ?? []
-  const { allSafesWithStatus, visibleSafes, isLoading, startFiltering } = useNestedSafesVisibility(
-    nestedSafesForChain,
-    chainId,
-  )
+  const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
+    useNestedSafesVisibility(nestedSafesForChain, chainId)
 
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
@@ -171,6 +169,7 @@ const SafeListContextMenu = ({
           rawNestedSafes={nestedSafesForChain}
           allSafesWithStatus={allSafesWithStatus}
           visibleSafes={visibleSafes}
+          hasCompletedCuration={hasCompletedCuration}
           isLoading={isLoading}
           hideCreationButton
         />

@@ -12,9 +12,39 @@ describe('PinnedSafes', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the "Pinned" header', () => {
-    render(<PinnedSafes allSafes={[]} />)
-    expect(screen.getByText('Pinned')).toBeInTheDocument()
+  it('renders nothing when there are no pinned safes (empty array)', () => {
+    const { container } = render(<PinnedSafes allSafes={[]} />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('renders nothing when all safes are unpinned', () => {
+    const nonPinnedSafes: AllSafeItems = [
+      { name: 'NotPinned', address: '0x3', isPinned: false, chainId: '3', isReadOnly: false, lastVisited: 0 },
+    ]
+
+    const { container } = render(<PinnedSafes allSafes={nonPinnedSafes} />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('does not render "Manage trusted Safes" button when no pinned safes exist', () => {
+    const nonPinnedSafes: AllSafeItems = [
+      { name: 'NotPinned', address: '0x3', isPinned: false, chainId: '3', isReadOnly: false, lastVisited: 0 },
+    ]
+    const onOpenSelectionModal = jest.fn()
+
+    render(<PinnedSafes allSafes={nonPinnedSafes} onOpenSelectionModal={onOpenSelectionModal} />)
+
+    // Component returns null when no pinned safes, so button should not be present
+    expect(screen.queryByTestId('add-more-safes-button')).not.toBeInTheDocument()
+  })
+
+  it('renders the "Trusted Safes" header when there are pinned safes', () => {
+    const pinnedSafes: AllSafeItems = [
+      { name: 'PinnedSafe1', address: '0x1', isPinned: true, chainId: '1', isReadOnly: false, lastVisited: 0 },
+    ]
+
+    render(<PinnedSafes allSafes={pinnedSafes} />)
+    expect(screen.getByText('Trusted Safes')).toBeInTheDocument()
   })
 
   it('renders SafesList when there are pinned safes', () => {
@@ -48,24 +78,29 @@ describe('PinnedSafes', () => {
     expect(callProps.onLinkClick).toBe(onLinkClickMock)
   })
 
-  it('shows empty pinned message when there are no pinned safes', () => {
-    const nonPinnedSafes: AllSafeItems = [
-      { name: 'NotPinned', address: '0x3', isPinned: false, chainId: '3', isReadOnly: false, lastVisited: 0 },
+  it('shows "Manage trusted Safes" button when there are pinned safes and onOpenSelectionModal is provided', () => {
+    const pinnedSafes: AllSafeItems = [
+      { name: 'PinnedSafe1', address: '0x1', isPinned: true, chainId: '1', isReadOnly: false, lastVisited: 0 },
     ]
+    const onOpenSelectionModal = jest.fn()
 
-    render(<PinnedSafes allSafes={nonPinnedSafes} />)
+    render(<PinnedSafes allSafes={pinnedSafes} onOpenSelectionModal={onOpenSelectionModal} />)
 
-    // SafesList should not be rendered
-    expect(screen.queryByTestId('safes-list')).not.toBeInTheDocument()
-
-    // Empty pinned message should be visible
-    expect(screen.getByTestId('empty-pinned-list')).toBeInTheDocument()
-    expect(screen.getByText(/Personalize your account list by clicking the/i)).toBeInTheDocument()
+    const addButton = screen.getByTestId('add-more-safes-button')
+    expect(addButton).toBeInTheDocument()
+    expect(addButton).toHaveTextContent('Manage trusted Safes')
   })
 
-  it('shows empty pinned message if allSafes is empty', () => {
-    render(<PinnedSafes allSafes={[]} />)
-    expect(screen.queryByTestId('safes-list')).not.toBeInTheDocument()
-    expect(screen.getByTestId('empty-pinned-list')).toBeInTheDocument()
+  it('calls onOpenSelectionModal when "Manage trusted Safes" button is clicked', () => {
+    const pinnedSafes: AllSafeItems = [
+      { name: 'PinnedSafe1', address: '0x1', isPinned: true, chainId: '1', isReadOnly: false, lastVisited: 0 },
+    ]
+    const onOpenSelectionModal = jest.fn()
+
+    render(<PinnedSafes allSafes={pinnedSafes} onOpenSelectionModal={onOpenSelectionModal} />)
+
+    screen.getByTestId('add-more-safes-button').click()
+
+    expect(onOpenSelectionModal).toHaveBeenCalled()
   })
 })

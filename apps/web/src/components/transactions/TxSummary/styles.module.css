@@ -4,8 +4,7 @@
   --grid-info: minmax(170px, 3fr);
   --grid-date: minmax(170px, 3fr);
   --grid-confirmations: minmax(100px, 1fr);
-  --grid-assessment: minmax(80px, 1.5fr);
-
+  --grid-assessment: 0;
   --grid-status: minmax(100px, 1fr);
   --grid-actions: minmax(100px, 1fr);
 
@@ -18,6 +17,11 @@
     var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
     var(--grid-assessment) var(--grid-status) var(--grid-actions);
   grid-template-areas: 'nonce type info date confirmations assessment status actions';
+}
+
+.gridContainer.withAssessment {
+  --grid-confirmations: minmax(90px, 1fr);
+  --grid-assessment: minmax(80px, 1.5fr);
 }
 
 .gridContainer > * {
