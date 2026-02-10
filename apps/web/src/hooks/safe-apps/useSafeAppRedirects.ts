@@ -7,6 +7,7 @@ type UseSafeAppRedirectsParams = {
   chainId: string
   isSafeAppsEnabled: boolean | undefined
   appUrl: string | undefined
+  remoteSafeAppsLoading: boolean
   goToList: () => void
 }
 
@@ -15,16 +16,22 @@ const useSafeAppRedirects = ({
   chainId,
   isSafeAppsEnabled,
   appUrl,
+  remoteSafeAppsLoading,
   goToList,
 }: UseSafeAppRedirectsParams): boolean => {
   const router = useRouter()
 
   // Redirect to the apps list if the current chain is not supported
   useEffect(() => {
-    if (safeAppData && !safeAppData.chainIds.includes(chainId)) {
+    if (remoteSafeAppsLoading) return
+
+    const isUnsupportedChain = safeAppData && !safeAppData.chainIds.includes(chainId)
+    const isAppNotFound = !safeAppData && appUrl
+
+    if (isUnsupportedChain || isAppNotFound) {
       goToList()
     }
-  }, [safeAppData, chainId, goToList])
+  }, [safeAppData, chainId, goToList, remoteSafeAppsLoading, appUrl])
 
   if (!isSafeAppsEnabled || !appUrl || !router.isReady) return false
 

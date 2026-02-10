@@ -54,7 +54,14 @@ const SafeApps: NextPage = () => {
     })
   }, [router])
 
-  const shouldRender = useSafeAppRedirects({ safeAppData, chainId, isSafeAppsEnabled, appUrl, goToList })
+  const shouldRender = useSafeAppRedirects({
+    safeAppData,
+    chainId,
+    isSafeAppsEnabled,
+    appUrl,
+    remoteSafeAppsLoading,
+    goToList,
+  })
 
   if (!shouldRender) return null
 
