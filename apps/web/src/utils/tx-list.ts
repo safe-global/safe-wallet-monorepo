@@ -1,6 +1,7 @@
 import type {
   QueuedItemPage,
   TransactionItem,
+  TransactionItemPage,
   TransactionQueuedItem,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
@@ -141,4 +142,11 @@ export const getLatestTransactions = (list: QueuedItemPage['results'] = []): Tra
       .map((group) => (Array.isArray(group) ? group[0] : group))
       .filter(isTransactionQueuedItem)
   )
+}
+
+export const isSamePage = (
+  pageA: QueuedItemPage | TransactionItemPage,
+  pageB: QueuedItemPage | TransactionItemPage,
+): boolean => {
+  return pageA.count === pageB.count && pageA.next === pageB.next
 }

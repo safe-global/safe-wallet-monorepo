@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useHnQueueAssessment } from '../../hooks/useHnQueueAssessment'
+import { useHnQueueAssessmentResult } from '../../hooks/useHnQueueAssessmentResult'
 import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useIsHypernativeQueueScanFeature } from '../../hooks/useIsHypernativeQueueScanFeature'
@@ -14,7 +14,7 @@ interface HnSecuritySectionProps {
 }
 
 const HnSecuritySection = ({ txDetails, safeTxHash, chainId }: HnSecuritySectionProps): ReactElement | null => {
-  const assessment = useHnQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessmentBanner = useShowHypernativeAssessment()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()

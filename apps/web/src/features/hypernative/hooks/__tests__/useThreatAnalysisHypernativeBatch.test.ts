@@ -1,11 +1,13 @@
-import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
-import { useQueueBatchAssessments } from '../useQueueBatchAssessments'
+import { renderHook } from '@/tests/test-utils'
+import { useThreatAnalysisHypernativeBatch } from '../useThreatAnalysisHypernativeBatch'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as useAuthTokenHook from '../useAuthToken'
 import * as useThreatAnalysisHypernativeBatchHook from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
+import { hnQueueAssessmentsSlice } from '../../store/hnQueueAssessmentsSlice'
+import type { RootState } from '@/store'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('../useAuthToken')
@@ -18,7 +20,7 @@ const mockUseThreatAnalysisHypernativeBatch =
     typeof useThreatAnalysisHypernativeBatchHook.useThreatAnalysisHypernativeBatch
   >
 
-describe('useQueueBatchAssessments', () => {
+describe('useThreatAnalysisHypernativeBatch', () => {
   const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
   const mockAuthToken = 'Bearer test-token-123'
 
@@ -48,6 +50,14 @@ describe('useQueueBatchAssessments', () => {
 
     mockUseThreatAnalysisHypernativeBatch.mockReturnValue({})
   })
+
+  const createInitialState = (assessments: Record<`0x${string}`, any> = {}) => {
+    return {
+      [hnQueueAssessmentsSlice.name]: {
+        assessments,
+      },
+    } as Partial<RootState>
+  }
 
   const createMockTransactionItem = (txId: string) => ({
     type: 'TRANSACTION' as const,
@@ -89,7 +99,9 @@ describe('useQueueBatchAssessments', () => {
 
       mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }))
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: expect.arrayContaining([safeTxHash1, safeTxHash2]),
@@ -122,7 +134,9 @@ describe('useQueueBatchAssessments', () => {
 
       mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [safeTxHash],
@@ -153,13 +167,15 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
         safeAddress: mockSafeAddress,
         authToken: mockAuthToken,
-        skip: true,
+        skip: false,
       })
     })
 
@@ -172,13 +188,15 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
         safeAddress: mockSafeAddress,
         authToken: mockAuthToken,
-        skip: true,
+        skip: false,
       })
     })
 
@@ -196,7 +214,9 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [safeTxHash],
@@ -223,7 +243,9 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: expect.arrayContaining([safeTxHash1, safeTxHash2]),
@@ -243,13 +265,15 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
         safeAddress: mockSafeAddress,
         authToken: mockAuthToken,
-        skip: true,
+        skip: false,
       })
     })
 
@@ -262,13 +286,15 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
         safeAddress: mockSafeAddress,
         authToken: mockAuthToken,
-        skip: true,
+        skip: false,
       })
     })
   })
@@ -285,7 +311,9 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages, skip: true }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages, skip: true }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
@@ -304,13 +332,15 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
         safeTxHashes: [],
         safeAddress: mockSafeAddress,
         authToken: mockAuthToken,
-        skip: true,
+        skip: false,
       })
     })
   })
@@ -337,7 +367,9 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -367,13 +399,50 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      renderHook(() => useQueueBatchAssessments({ pages }))
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith(
         expect.objectContaining({
           authToken: undefined,
         }),
       )
+    })
+
+    it('should not retry null assessments when authToken is still undefined', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      mockUseAuthToken.mockReturnValue([
+        {
+          token: undefined,
+          isAuthenticated: false,
+          isExpired: false,
+        },
+        jest.fn(),
+        jest.fn(),
+      ])
+
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({
+          [safeTxHash]: null,
+        }),
+      })
+
+      expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
+        safeTxHashes: [],
+        safeAddress: mockSafeAddress,
+        authToken: undefined,
+        skip: false,
+      })
     })
   })
 
@@ -400,9 +469,154 @@ describe('useQueueBatchAssessments', () => {
         },
       ]
 
-      const { result } = renderHook(() => useQueueBatchAssessments({ pages }))
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
 
       expect(result.current).toEqual(mockAssessments)
+    })
+
+    it('should merge cached assessments with fetched assessments', () => {
+      const safeTxHash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const safeTxHash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const cachedAssessment = { severity: 'OK' } as any
+
+      const mockFetchedAssessments = {
+        [safeTxHash2]: [[], undefined, false] as any,
+      }
+
+      mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockFetchedAssessments)
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [
+            createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash1}`),
+            createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash2}`),
+          ],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({
+          [safeTxHash1]: cachedAssessment,
+        }),
+      })
+
+      expect(result.current[safeTxHash1]).toEqual([cachedAssessment, undefined, false])
+      expect(result.current[safeTxHash2]).toEqual(mockFetchedAssessments[safeTxHash2])
+    })
+
+    it('should convert cached null (error) back to AsyncResult with error', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({
+          [safeTxHash]: null,
+        }),
+      })
+
+      const [data, error, loading] = result.current[safeTxHash]
+      expect(data).toBeUndefined()
+      expect(error).toBeInstanceOf(Error)
+      expect(error?.message).toBe('Assessment failed')
+      expect(loading).toBe(false)
+    })
+
+    it('should only fetch hashes not in cache', () => {
+      const safeTxHash1 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const safeTxHash2 = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const cachedAssessment = { severity: 'OK' } as any
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [
+            createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash1}`),
+            createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash2}`),
+          ],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({
+          [safeTxHash1]: cachedAssessment,
+        }),
+      })
+
+      expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenCalledWith({
+        safeTxHashes: [safeTxHash2],
+        safeAddress: mockSafeAddress,
+        authToken: mockAuthToken,
+        skip: false,
+      })
+    })
+
+    it('should store null for errors in Redux', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+
+      const mockAssessments = {
+        [safeTxHash]: [undefined, new Error('Test error'), false] as any,
+      }
+
+      mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      const { result: store } = renderHook(
+        () => {
+          const hookResult = useThreatAnalysisHypernativeBatch({ pages })
+          return hookResult
+        },
+        {
+          initialReduxState: createInitialState(),
+        },
+      )
+
+      expect(store.current[safeTxHash]).toEqual(mockAssessments[safeTxHash])
+    })
+
+    it('should store data for successful assessments in Redux', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const mockData = { severity: 'OK' } as any
+
+      const mockAssessments = {
+        [safeTxHash]: [mockData, undefined, false] as any,
+      }
+
+      mockUseThreatAnalysisHypernativeBatch.mockReturnValue(mockAssessments)
+
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState(),
+      })
+
+      expect(result.current[safeTxHash]).toEqual(mockAssessments[safeTxHash])
     })
   })
 })

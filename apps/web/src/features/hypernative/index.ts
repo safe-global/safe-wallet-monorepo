@@ -58,6 +58,7 @@ export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueS
 // Assessment-related hooks
 export { useHnAssessmentSeverity } from './hooks/useHnAssessmentSeverity'
 export { useHnQueueAssessment } from './hooks/useHnQueueAssessment'
+export { useHnQueueAssessmentResult } from './hooks/useHnQueueAssessmentResult'
 export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessment'
 
 // Auth token hook (used by safe-shield context)
@@ -80,7 +81,7 @@ export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBan
 
 // Queue assessment components (used by TxSummary, queue page)
 export { HnQueueAssessment } from './components/HnQueueAssessment'
-export { QueueAssessmentProvider } from './components/QueueAssessmentProvider'
+export { HnQueueAssessmentProvider } from './components/HnQueueAssessmentProvider'
 
 // OAuth config (used by oauth-callback page)
 export { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from './config/oauth'

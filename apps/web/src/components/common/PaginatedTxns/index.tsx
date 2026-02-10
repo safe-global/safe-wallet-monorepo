@@ -14,6 +14,7 @@ import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import { isSamePage } from '@/utils/tx-list'
 
 const NoQueuedTxns = () => {
   return <PagePlaceholder img={<NoTransactionsIcon />} text="Queued transactions will appear here" />
@@ -36,7 +37,7 @@ const TxPage = ({
   useTxns: typeof useTxHistory | typeof useTxQueue
   onNextPage?: (pageUrl: string) => void
   isFirstPage: boolean
-  onPageLoaded: (page: QueuedItemPage | undefined) => void
+  onPageLoaded: (page: QueuedItemPage) => void
 }): ReactElement => {
   const { page, error, loading } = useTxns(pageUrl)
   const [filter] = useTxFilter()
@@ -44,15 +45,14 @@ const TxPage = ({
   const recoveryQueue = useRecoveryQueue()
   const hasPending = useHasPendingTxs()
 
-  const lastPageUrlRef = useRef<string | undefined>(undefined)
+  const lastPageRef = useRef<QueuedItemPage>(undefined)
 
-  // Notify parent when page loads (only when page actually changes and it's a queue page)
   useEffect(() => {
-    if (page && isQueue && pageUrl !== lastPageUrlRef.current) {
-      lastPageUrlRef.current = pageUrl
+    if (page && (!lastPageRef.current || !isSamePage(page, lastPageRef.current))) {
+      lastPageRef.current = page as QueuedItemPage
       onPageLoaded(page as QueuedItemPage)
     }
-  }, [page, pageUrl, onPageLoaded, isQueue])
+  }, [page, onPageLoaded])
 
   return (
     <>
@@ -85,12 +85,13 @@ const PaginatedTxns = ({
   onPagesChange,
 }: {
   useTxns: typeof useTxHistory | typeof useTxQueue
-  onPagesChange?: (pages: (QueuedItemPage | undefined)[]) => void
+  onPagesChange?: (pages: QueuedItemPage[]) => void
 }): ReactElement => {
   const [pages, setPages] = useState<string[]>([''])
   const [filter] = useTxFilter()
   const { safeAddress, safe } = useSafeInfo()
-  const [loadedPages, setLoadedPages] = useState<Map<string, QueuedItemPage | undefined>>(new Map())
+  const [loadedPages, setLoadedPages] = useState<Map<string, QueuedItemPage>>(new Map())
+  const lastPageItemsRef = useRef<QueuedItemPage[]>([])
 
   // Reset the pages when the Safe Account or filter changes
   useEffect(() => {
@@ -104,11 +105,11 @@ const PaginatedTxns = ({
 
   // Handle page loaded callback - memoized to prevent infinite loops
   const handlePageLoaded = useCallback(
-    (pageUrl: string) => (page: QueuedItemPage | undefined) => {
+    (pageUrl: string) => (page: QueuedItemPage) => {
       setLoadedPages((prev) => {
         const currentPage = prev.get(pageUrl)
         // Only update if the page actually changed
-        if (currentPage === page) {
+        if (currentPage && isSamePage(currentPage, page)) {
           return prev
         }
         const updated = new Map(prev)
@@ -121,8 +122,15 @@ const PaginatedTxns = ({
 
   // Notify parent when pages change
   useEffect(() => {
-    const pageUrls = pages.map((url) => loadedPages.get(url))
-    onPagesChange?.(pageUrls)
+    const pageItems = pages.map((url) => loadedPages.get(url)).filter((item) => !!item)
+
+    if (
+      pageItems.length !== lastPageItemsRef.current.length ||
+      pageItems.some((item, index) => !isSamePage(item, lastPageItemsRef.current[index]))
+    ) {
+      onPagesChange?.(pageItems)
+      lastPageItemsRef.current = pageItems
+    }
   }, [pages, loadedPages, onPagesChange])
 
   return (

@@ -13,7 +13,7 @@ const getIconProps = (severity: Severity, color: string) => {
   return {
     CRITICAL: { path: { fill: color }, rect: { fill: color } },
     WARN: { path: { fill: color } },
-    OK: { path: { fill: color, stroke: color } },
+    OK: { path: { fill: color } },
     INFO: { path: { fill: color }, rect: { fill: color } },
     ERROR: { path: { fill: color } },
   }[severity]

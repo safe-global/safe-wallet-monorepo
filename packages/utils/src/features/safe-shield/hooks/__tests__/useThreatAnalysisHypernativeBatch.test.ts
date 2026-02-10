@@ -140,7 +140,7 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       })
     })
 
-    it('should return error when authToken is missing', () => {
+    it('should return empty results when authToken is missing', async () => {
       const hashes = [faker.string.hexadecimal({ length: 64 }) as `0x${string}`]
 
       mockBuildHypernativeBatchRequestData.mockReturnValue({
@@ -154,8 +154,10 @@ describe('useThreatAnalysisHypernativeBatch', () => {
         }),
       )
 
-      expect(result.current[hashes[0]]).toEqual([undefined, expect.any(Error), false])
-      expect((result.current[hashes[0]][1] as Error).message).toBe('authToken is required')
+      await waitFor(() => {
+        expect(result.current[hashes[0]]).toBeUndefined()
+        expect(mockTriggerBatchAssessment).not.toHaveBeenCalled()
+      })
     })
 
     it('should not trigger when buildHypernativeBatchRequestData returns undefined', async () => {
@@ -244,7 +246,8 @@ describe('useThreatAnalysisHypernativeBatch', () => {
 
       await waitFor(() => {
         expect(result.current[hashes[0]]).toEqual([mockThreatAnalysis1, undefined, false])
-        expect(result.current[hashes[1]]).toEqual([undefined, undefined, false]) // NOT_FOUND
+        expect(result.current[hashes[1]]).toEqual([undefined, expect.any(Error), false]) // NOT_FOUND returns error
+        expect((result.current[hashes[1]][1] as Error).message).toBe('Assessment result not found')
       })
     })
 
