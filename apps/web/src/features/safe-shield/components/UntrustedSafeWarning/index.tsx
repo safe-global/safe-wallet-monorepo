@@ -35,14 +35,9 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
   }
   const handleCloseConfirmDialog = () => setIsConfirmDialogOpen(false)
   const handleConfirmAddToTrustedList = (name: string) => {
-    if (name && safeAddress && chainId) {
-      dispatch(
-        upsertAddressBookEntries({
-          chainIds: [chainId],
-          address: safeAddress,
-          name: name.trim(),
-        }),
-      )
+    const canUpdateAddressBook = name && safeAddress && chainId
+    if (canUpdateAddressBook) {
+      dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: safeAddress, name: name.trim() }))
     }
     onAddToTrustedList()
     setIsConfirmDialogOpen(false)

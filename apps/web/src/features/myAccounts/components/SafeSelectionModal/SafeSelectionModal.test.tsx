@@ -88,7 +88,7 @@ describe('SafeSelectionModal', () => {
     render(<SafeSelectionModal modal={mockModal} />)
 
     expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
-    expect(screen.getByText('Verify Safes before confirming')).toBeInTheDocument()
+    expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 
   it('should render safe items', () => {
