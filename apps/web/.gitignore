@@ -15,6 +15,7 @@ cypress/snapshots/
 
 # Chromatic
 .chromatic
+cypress/downloads/
 
 # Storybook
 storybook-static

@@ -57,11 +57,16 @@ jobs:
         with:
           pattern: chromatic-archives-*
           merge-multiple: true
-          path: apps/web/.chromatic
+          path: apps/web/cypress/downloads
 
-      - name: Upload to Chromatic
-        working-directory: apps/web
-        run: npx chromatic --cypress --project-token=${{ secrets.CHROMATIC_E2E_PROJECT_TOKEN }}
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          cypress: true
+          projectToken: ${{ secrets.CHROMATIC_E2E_PROJECT_TOKEN }}
+          workingDir: apps/web
+        env:
+          CHROMATIC_ARCHIVE_LOCATION: ./cypress/downloads
 
   notify:
     if: failure() && github.event_name == 'push'

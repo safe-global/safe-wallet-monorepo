@@ -82,6 +82,6 @@ runs:
       uses: actions/upload-artifact@v6
       with:
         name: chromatic-archives-${{ inputs.container-index }}
-        path: apps/web/.chromatic
+        path: apps/web/cypress/downloads
         if-no-files-found: ignore
         retention-days: 1
