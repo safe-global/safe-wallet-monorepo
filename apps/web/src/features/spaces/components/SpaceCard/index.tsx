@@ -10,6 +10,9 @@ import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
 import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 export const SpaceSummary = ({
   name,
@@ -45,7 +48,6 @@ export const SpaceSummary = ({
 
 const SpaceCard = ({
   space,
-  currentUserId,
   isCompact = false,
   isLink = true,
 }: {
@@ -54,10 +56,12 @@ const SpaceCard = ({
   isCompact?: boolean
   isLink?: boolean
 }) => {
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
   const numberOfAccounts = safeCount
-  const isAdmin = isUserActiveAdmin(members, currentUserId)
+  const isAdmin = isUserActiveAdmin(members, currentUser?.id)
 
   return (
     <Card data-testid="space-card" className={classNames(css.card, { [css.compact]: isCompact })}>
