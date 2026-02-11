@@ -1,5 +1,5 @@
 import { MemberRole } from './hooks/useSpaceMembers'
-import type { MemberDto } from './../../../../../packages/store/src/gateway/AUTO_GENERATED/spaces'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
