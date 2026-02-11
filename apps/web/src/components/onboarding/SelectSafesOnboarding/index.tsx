@@ -103,8 +103,8 @@ const SelectSafesOnboarding = (): ReactElement => {
     }
   }, [router, spaceId])
 
-  const redirectToSpaceDashboard = useCallback(() => {
-    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+  const redirectToNextStep = useCallback(() => {
+    router.push({ pathname: AppRoutes.onboarding.inviteMembers, query: { spaceId } })
   }, [router, spaceId])
 
   const onSubmit = handleSubmit(async (data) => {
@@ -140,7 +140,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         }),
       )
 
-      redirectToSpaceDashboard()
+      redirectToNextStep()
     } catch {
       setError('Something went wrong adding Safe Accounts. Please try again.')
     } finally {
@@ -225,7 +225,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
                 <Button
                   data-testid="select-safes-skip-button"
-                  onClick={redirectToSpaceDashboard}
+                  onClick={redirectToNextStep}
                   disabled={isSubmitting}
                   fullWidth
                   sx={{ minHeight: '42px' }}
