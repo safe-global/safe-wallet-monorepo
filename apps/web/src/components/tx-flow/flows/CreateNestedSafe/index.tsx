@@ -5,7 +5,6 @@ import { SetUpNestedSafe } from '@/components/tx-flow/flows/CreateNestedSafe/Set
 import type { SetupNestedSafeForm } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
-import { pinSafe } from '@/store/addedSafesSlice'
 import { selectCuratedNestedSafes, setCuratedNestedSafes } from '@/store/settingsSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
@@ -65,9 +64,6 @@ const CreateNestedSafe = () => {
               hasCompletedCuration: true,
             }),
           )
-
-          // Pin the safe to mark it as trusted (follows pattern from useManageNestedSafes)
-          dispatch(pinSafe({ chainId: safe.chainId, address: normalizedAddress }))
         }
       }
     },
