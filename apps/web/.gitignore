@@ -10,5 +10,11 @@ public/firebase*.js
 public/fallback*.js
 public/*.map
 
+# Cypress
+cypress/snapshots/
+
+# Chromatic
+.chromatic
+
 # Storybook
 storybook-static
