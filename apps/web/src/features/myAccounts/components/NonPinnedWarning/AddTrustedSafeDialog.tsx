@@ -82,11 +82,6 @@ const AddTrustedSafeDialog = ({
                 }}
               >
                 <EthHashInfo address={safeAddress} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
-                {safeName && (
-                  <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                    Name: {safeName}
-                  </Typography>
-                )}
               </Box>
             </Box>
 
