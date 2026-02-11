@@ -303,6 +303,7 @@ export function NestedSafesPopover({
         paper: {
           sx: {
             width: isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))',
+            height: 'calc(100vh - 100px)',
             maxHeight: 'calc(100vh - 100px)',
             display: 'flex',
             flexDirection: 'column',
