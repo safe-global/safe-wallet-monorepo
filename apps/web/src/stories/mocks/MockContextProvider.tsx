@@ -7,6 +7,10 @@ import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import PageLayout from '@/components/common/PageLayout'
 import type { StoryContext } from '@storybook/react'
 import type { LayoutType } from './types'
+import {
+  QueueAssessmentContext,
+  type QueueAssessmentContextValue,
+} from '@/features/hypernative/contexts/QueueAssessmentContext'
 
 /**
  * Mock TxModal context - provides no-op implementations
@@ -15,6 +19,16 @@ export const mockTxModalContext: TxModalContextType = {
   txFlow: undefined,
   setTxFlow: () => {},
   setFullWidth: () => {},
+}
+
+/**
+ * Mock QueueAssessment context - provides no-op implementations
+ */
+export const mockQueueAssessmentContext: QueueAssessmentContextValue = {
+  assessments: {},
+  isLoading: false,
+  setPages: () => {},
+  setTx: () => {},
 }
 
 /**
@@ -133,11 +147,13 @@ export function MockContextProvider({
     <MockSDKProvider>
       <WalletContext.Provider value={wallet}>
         <TxModalContext.Provider value={mockTxModalContext}>
-          <StoreDecorator initialState={initialState} context={context}>
-            <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id}>
-              {children}
-            </LayoutWrapper>
-          </StoreDecorator>
+          <QueueAssessmentContext.Provider value={mockQueueAssessmentContext}>
+            <StoreDecorator initialState={initialState} context={context}>
+              <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id}>
+                {children}
+              </LayoutWrapper>
+            </StoreDecorator>
+          </QueueAssessmentContext.Provider>
         </TxModalContext.Provider>
       </WalletContext.Provider>
     </MockSDKProvider>
