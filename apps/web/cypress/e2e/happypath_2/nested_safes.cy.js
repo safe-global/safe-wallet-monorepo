@@ -51,8 +51,6 @@ describe('Nested safes happy path tests', () => {
       nsafes.nonfundAssetsActions[1],
     ])
     sideBar.clickOnOpenNestedSafeListBtn()
-    // Handle intro screen if present (select valid safes including newly created one)
-    nsafes.completeIntroScreenSelectValid()
     sideBar.checkSafesCountInPopverList(1)
     sideBar.clickOnSafeInPopover(nestedSafe1Short)
   })
