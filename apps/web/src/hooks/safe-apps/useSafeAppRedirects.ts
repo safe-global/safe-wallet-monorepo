@@ -11,13 +11,10 @@ type UseSafeAppRedirectsParams = {
   goToList: () => void
 }
 
-const isAppUnavailable = (
-  safeAppData: UseSafeAppRedirectsParams['safeAppData'],
-  chainId: string,
-  appUrl: string | undefined,
-): boolean => {
-  if (safeAppData) return !safeAppData.chainIds.includes(chainId)
-  return Boolean(appUrl)
+const isAppUnavailable = (safeAppData: UseSafeAppRedirectsParams['safeAppData'], chainId: string): boolean => {
+  // Only redirect if the app is in the remote list but doesn't support this chain.
+  // Custom apps (added via URL) have no safeAppData and should always be allowed.
+  return Boolean(safeAppData && !safeAppData.chainIds.includes(chainId))
 }
 
 const shouldRedirectToShare = (appUrl: string | undefined, isReady: boolean, safe: unknown): boolean => {
@@ -35,10 +32,10 @@ const useSafeAppRedirects = ({
   const router = useRouter()
 
   useEffect(() => {
-    if (!remoteSafeAppsLoading && isAppUnavailable(safeAppData, chainId, appUrl)) {
+    if (!remoteSafeAppsLoading && isAppUnavailable(safeAppData, chainId)) {
       goToList()
     }
-  }, [safeAppData, chainId, goToList, remoteSafeAppsLoading, appUrl])
+  }, [safeAppData, chainId, goToList, remoteSafeAppsLoading])
 
   if (shouldRedirectToShare(appUrl, router.isReady, router.query.safe)) {
     router.push({
