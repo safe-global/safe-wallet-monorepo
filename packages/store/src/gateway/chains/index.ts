@@ -2,13 +2,7 @@ import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
 import { retry } from '@reduxjs/toolkit/query'
 import { cgwClient, dynamicBaseQuery } from '../cgwClient'
-import type {
-  QueryReturnValue,
-  FetchBaseQueryMeta,
-  FetchBaseQueryError,
-  BaseQueryApi,
-  FetchArgs,
-} from '@reduxjs/toolkit/query'
+import type { QueryReturnValue, FetchBaseQueryMeta, FetchBaseQueryError, BaseQueryApi } from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
@@ -24,10 +18,10 @@ const retryingBaseQuery = retry(dynamicBaseQuery, {
 
 const getChainsConfigs = async (
   api: BaseQueryApi,
-  args: string | FetchArgs = { url: '/v1/chains', params: { cursor: 'limit=50&offset=0' } },
+  url = '/v1/chains',
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
-  const response = await retryingBaseQuery(args, api, {})
+  const response = await retryingBaseQuery(url, api, {})
 
   if (response.error) {
     return { error: response.error }

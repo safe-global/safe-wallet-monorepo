@@ -133,6 +133,31 @@ describe('FallbackHandler', () => {
         expect(fbHandler.queryByText('Transaction Builder')).toBeInTheDocument()
       })
     })
+
+    it('should conditionally append the Transaction Builder link', async () => {
+      jest.spyOn(useTxBuilderHook, 'useTxBuilderApp').mockImplementation(() => undefined)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+        () =>
+          ({
+            safe: {
+              version: '1.3.0',
+              chainId: '5',
+            },
+          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+      )
+
+      const fbHandler = render(<FallbackHandler />)
+
+      await waitFor(() => {
+        expect(
+          fbHandler.queryByText(
+            createAppNameRegex(`The {APP_NAME} may not work correctly as no fallback handler is currently set.`),
+          ),
+        ).toBeInTheDocument()
+        expect(fbHandler.queryByText('Transaction Builder')).not.toBeInTheDocument()
+      })
+    })
   })
 
   describe('Unofficial Fallback Handler', () => {
@@ -165,6 +190,30 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(fbHandler.queryByText(new RegExp('An unofficial fallback handler is currently set.')))
         expect(fbHandler.queryByText('Transaction Builder')).toBeInTheDocument()
+      })
+    })
+
+    it('should conditionally append the Transaction Builder link', async () => {
+      jest.spyOn(useTxBuilderHook, 'useTxBuilderApp').mockImplementation(() => undefined)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
+        () =>
+          ({
+            safe: {
+              version: '1.3.0',
+              chainId: '5',
+              fallbackHandler: {
+                value: '0x123',
+              },
+            },
+          }) as unknown as ReturnType<typeof useSafeInfoHook.default>,
+      )
+
+      const fbHandler = render(<FallbackHandler />)
+
+      await waitFor(() => {
+        expect(fbHandler.queryByText(new RegExp('An unofficial fallback handler is currently set.')))
+        expect(fbHandler.queryByText('Transaction Builder')).not.toBeInTheDocument()
       })
     })
   })
