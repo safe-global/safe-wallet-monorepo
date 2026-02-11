@@ -355,6 +355,8 @@ main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedS
 cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28)
 ```
 
+**localStorage seeding — low risk, but watch for flakiness:** Test-only and docs changes are low risk. The main risk is E2E flakiness if (1) **reload ordering** is wrong (e.g. using `addToLocalStorage` when the app must see data → use Pattern A with `addToAppLocalStorage` after visit then reload), or (2) **scenario data is mismatched** (e.g. fixture has different chainId/address than the visited safe). If a test fails only when using a new fixture: check that the fixture’s chainId and safe addresses match the URL/safe under test, and that addressBook/undeployedSafes are set when the test expects them.
+
 ### Test Data
 
 See **Where to find things** table. In addition: use `getSafes(CATEGORIES.static)` for safe addresses (do not hardcode); use `cy.fixture()` for JSON/CSV; put new localStorage scenarios in `support/localstorage_data.js`.
