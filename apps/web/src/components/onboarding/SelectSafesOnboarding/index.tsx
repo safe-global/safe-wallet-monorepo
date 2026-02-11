@@ -107,6 +107,10 @@ const SelectSafesOnboarding = (): ReactElement => {
     router.push({ pathname: AppRoutes.onboarding.inviteMembers, query: { spaceId } })
   }, [router, spaceId])
 
+  const redirectToSpaceDashboard = useCallback(() => {
+    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+  }, [router, spaceId])
+
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
@@ -225,7 +229,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
                 <Button
                   data-testid="select-safes-skip-button"
-                  onClick={redirectToNextStep}
+                  onClick={redirectToSpaceDashboard}
                   disabled={isSubmitting}
                   fullWidth
                   sx={{ minHeight: '42px' }}
