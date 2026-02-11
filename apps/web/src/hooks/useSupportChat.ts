@@ -48,21 +48,9 @@ export const useSupportChat = () => {
     const aliasSource = connectedWallet?.address || safeAddress
     const email = aliasSource ? deriveAliasEmail(aliasSource) : `guest@${SUPPORT_CHAT_ALIAS_DOMAIN}`
 
-    let name = 'Safe User'
-    if (connectedWallet?.ens) {
-      name = connectedWallet.ens
-    } else if (connectedWallet?.label) {
-      name = connectedWallet.label
-    } else if (connectedWallet?.address) {
-      name = shortenAddress(connectedWallet.address)
-    } else if (safeAddress) {
-      name = shortenAddress(safeAddress)
-    }
-
     return {
       email,
-      name,
-      avatarUrl: connectedWallet?.icon,
+      name: 'Safe{Wallet}',
       accountId: safeAddress,
     }
   }, [connectedWallet, safeAddress])
