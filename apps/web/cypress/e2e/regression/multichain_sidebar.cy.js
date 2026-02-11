@@ -60,9 +60,9 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
     wallet.connectSigner(signer2)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.removeSafeItem(sideBar.undeployedSafe)
-    cy.window()
+    cy.window({ timeout: 10000 })
       .invoke('localStorage.getItem', constants.localStorageKeys.SAFE_v2__addressBook)
-      .should('equal', '{}', { timeout: 10000 })
+      .should('equal', '{}')
   })
 
   it('Verify "Add network" in more options menu for the single safe', () => {
