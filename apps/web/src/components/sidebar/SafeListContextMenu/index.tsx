@@ -119,19 +119,23 @@ const SafeListContextMenu = ({
           e.stopPropagation()
         }}
       >
-        {isNestedSafesEnabled && !hideNestedSafes && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
-          <MenuItem
-            onClick={handleOpenModal(ModalType.NESTED_SAFES, {
-              ...NESTED_SAFE_EVENTS.OPEN_LIST,
-              label: NESTED_SAFE_LABELS.sidebar,
-            })}
-          >
-            <ListItemIcon>
-              <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
-            </ListItemIcon>
-            <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
-          </MenuItem>
-        )}
+        {isNestedSafesEnabled &&
+          !hideNestedSafes &&
+          !undeployedSafe &&
+          nestedSafesForChain &&
+          nestedSafesForChain.length > 0 && (
+            <MenuItem
+              onClick={handleOpenModal(ModalType.NESTED_SAFES, {
+                ...NESTED_SAFE_EVENTS.OPEN_LIST,
+                label: NESTED_SAFE_LABELS.sidebar,
+              })}
+            >
+              <ListItemIcon>
+                <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
+              </ListItemIcon>
+              <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
+            </MenuItem>
+          )}
 
         {rename && (
           <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
