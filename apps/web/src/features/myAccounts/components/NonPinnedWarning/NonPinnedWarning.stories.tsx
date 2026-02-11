@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import NonPinnedWarning from './index'
 
 const meta = {
   title: 'Features/MyAccounts/NonPinnedWarning',
   component: NonPinnedWarning,
+  decorators: [withMockProvider()],
   parameters: {
     layout: 'padded',
   },

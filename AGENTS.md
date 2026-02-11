@@ -338,6 +338,23 @@ export const Default: Story = {
 }
 ```
 
+#### Component Stories with Redux
+
+For components that use Redux hooks (`useAppSelector`, `useDispatch`, RTK Query) but don't need full API mocking, wrap with `withMockProvider()`:
+
+```typescript
+import { withMockProvider } from '@/storybook/preview'
+
+const meta = {
+  title: 'Features/MyFeature/MyComponent',
+  component: MyComponent,
+  decorators: [withMockProvider()],
+  tags: ['autodocs'],
+} satisfies Meta<typeof MyComponent>
+```
+
+For detailed Storybook patterns, context error reference, MSW fixtures, and the full provider stack, see `apps/web/.storybook/AGENTS.md`.
+
 #### Page/Widget Stories with API Mocking
 
 For pages, widgets, or components that need Redux state and API mocking, use the `createMockStory` factory from `@/stories/mocks`:
