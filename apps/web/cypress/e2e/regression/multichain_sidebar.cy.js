@@ -34,8 +34,7 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
   it('Verify Give name and Add network options are available for a deployed safe', () => {
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
-
-    sideBar.clickOnMultichainItemOptionsBtn(0)
+    sideBar.clickOnSafeItemOptionsBtnByIndex(1)
     main.verifyElementsIsVisible([sideBar.safeItemOptionsAddChainBtn, sideBar.safeItemOptionsRenameBtn])
   })
 
