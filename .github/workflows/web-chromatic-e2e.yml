@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Cypress ${{ inputs.scope == 'smoke' && 'Smoke' || 'Full' }} tests
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
@@ -45,6 +47,8 @@ jobs:
     needs: [e2e]
     if: always() && needs.e2e.result == 'success'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
