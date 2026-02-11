@@ -394,19 +394,6 @@ export function addToAppLocalStorage(key, jsonValue) {
 }
 
 /**
- * Builds SAFE_v2__addedSafes object from a list of { chainId, address } entries.
- * Use with addToAppLocalStorage when replacing addSafeToTrustedList.
- */
-export function buildAddedSafes(entries) {
-  const result = {}
-  entries.forEach(({ chainId, address }) => {
-    if (!result[chainId]) result[chainId] = {}
-    result[chainId][address] = { owners: [], threshold: 1, ethBalance: '0' }
-  })
-  return result
-}
-
-/**
  * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
  * This function sets up the settings and verifies they are stored correctly before proceeding
  * @returns {Promise} A promise that resolves when settings are set and verified
@@ -468,25 +455,6 @@ export function getAddedSafeAddressFromLocalStorage(chainId, index) {
     const addedSafesObj = JSON.parse(addedSafes)
     const safeAddress = Object.keys(addedSafesObj[chainId])[index]
     return safeAddress
-  })
-}
-
-export function addSafeToTrustedList(chainId, safeAddress) {
-  cy.window().then((win) => {
-    const existingData = win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes)
-    const addedSafes = existingData ? JSON.parse(existingData) : {}
-
-    if (!addedSafes[chainId]) {
-      addedSafes[chainId] = {}
-    }
-
-    addedSafes[chainId][safeAddress] = {
-      owners: [],
-      threshold: 1,
-      ethBalance: '0',
-    }
-
-    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addedSafes, JSON.stringify(addedSafes))
   })
 }
 

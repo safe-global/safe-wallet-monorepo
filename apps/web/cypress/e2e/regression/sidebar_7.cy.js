@@ -19,11 +19,10 @@ describe('Sidebar tests 7', () => {
   })
 
   it('Verify Import/export buttons are present', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe2)
-    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     main.checkButtonByTextExists(sideBar.importBtnStr)
@@ -31,16 +30,18 @@ describe('Sidebar tests 7', () => {
   })
 
   it('Verify that safes the user do not owns show in the watchlist after adding them', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.reload()
     wallet.connectSigner(signer1)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafes.safe3short])
   })
 
   it('Verify that safes that the user owns do show in the watchlist after adding them', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.reload()
     wallet.connectSigner(signer1)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafes.safe3short])
@@ -48,8 +49,9 @@ describe('Sidebar tests 7', () => {
 
   // Added to prod
   it('Verify pending signature is displayed in sidebar for unsigned tx', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafesPendingActions.safe1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.verifyTxToConfirmDoesNotExist()
@@ -62,8 +64,9 @@ describe('Sidebar tests 7', () => {
 
   // Added to prod
   it('Verify balance exists in a tx in sidebar', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafesPendingActions.safe1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.verifyTxToConfirmDoesNotExist()
