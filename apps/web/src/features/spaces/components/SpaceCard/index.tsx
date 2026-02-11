@@ -54,9 +54,9 @@ const SpaceCard = ({
   isCompact?: boolean
   isLink?: boolean
 }) => {
-  const { id, name, members, safes } = space
+  const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = Number(safes)
+  const numberOfAccounts = safeCount
   const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   return (

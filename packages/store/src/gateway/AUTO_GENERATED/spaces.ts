@@ -77,12 +77,7 @@ const injectedRtkApi = api
         invalidatesTags: ['spaces'],
       }),
       spacesGetV1: build.query<SpacesGetV1ApiResponse, SpacesGetV1ApiArg>({
-        query: (queryArg) => ({
-          url: `/v1/spaces`,
-          params: {
-            safes: queryArg.safes,
-          },
-        }),
+        query: () => ({ url: `/v1/spaces` }),
         providesTags: ['spaces'],
       }),
       spacesCreateWithUserV1: build.mutation<SpacesCreateWithUserV1ApiResponse, SpacesCreateWithUserV1ApiArg>({
@@ -222,10 +217,7 @@ export type SpacesCreateV1ApiArg = {
   createSpaceDto: CreateSpaceDto
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
-export type SpacesGetV1ApiArg = {
-  /** Optional: include Safe data. Values: passFullData (returns addresses), passCount (returns count). */
-  safes?: SafesMode
-}
+export type SpacesGetV1ApiArg = void
 export type SpacesCreateWithUserV1ApiResponse =
   /** status 200 Space and user created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
@@ -372,14 +364,9 @@ export type GetSpaceResponse = {
   name: string
   status: 'ACTIVE'
   members: MemberDto[]
-  /** Optional: safes data. Returns addresses grouped by chainId (passFullData) or total count (passCount). */
-  safes?:
-    | {
-        [key: string]: string[]
-      }
-    | number
+  /** Total count of Safes in the space */
+  safeCount: number
 }
-export type SafesMode = 'passFullData' | 'passCount'
 export type UpdateSpaceResponse = {
   id: number
 }

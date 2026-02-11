@@ -100,7 +100,7 @@ const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query({ safes: 'passCount' }, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
 
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)

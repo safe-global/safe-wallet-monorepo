@@ -27,7 +27,7 @@ const SpaceSidebarSelector = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query({ safes: 'passCount' }, { skip: !isUserSignedIn })
+  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
