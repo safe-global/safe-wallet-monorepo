@@ -698,8 +698,14 @@ export const addedSafes = {
       },
     },
   },
+  /** Watchlist safe (safe3short). Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
   set4: {
     11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
       '0x86Cb401afF6A25A335c440C25954A70b3c232C27': {
         owners: [
           {
@@ -763,8 +769,14 @@ export const addedSafes = {
       },
     },
   },
+  /** CF safe + undeployed. Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
   set6_undeployed_safe: {
     11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': {
         owners: [
           {
@@ -780,9 +792,14 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: one trusted safe (safe1) on Sepolia */
+  /** Sidebar tests: one trusted safe (safe1) on Sepolia. Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
   sidebarTrustedSafe1: {
     11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
       '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
         owners: [],
         threshold: 1,
@@ -790,9 +807,14 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: safe1 + safe2 on Sepolia */
+  /** Sidebar tests: safe1 + safe2 on Sepolia. Includes visited safe SEP_STATIC_SAFE_9 and chain 1 for tests that visit MATIC_STATIC_SAFE_28 on eth. */
   sidebarTrustedSafe1Safe2: {
     11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
       '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
         owners: [],
         threshold: 1,
@@ -804,10 +826,22 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
+    1: {
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
   },
-  /** Sidebar tests: safe3 on Sepolia + safe3 on Ethereum (chain 1) */
+  /** Sidebar tests: safe3 on Sepolia + safe3 on Ethereum (chain 1). Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
   sidebarTrustedSafe3TwoChains: {
     11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
         owners: [],
         threshold: 1,
@@ -822,7 +856,7 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: safe1 + safe2 + safe3 on Sepolia */
+  /** Sidebar tests: safe1 + safe2 + safe3 on Sepolia. Includes chain 1 (Ethereum) visited safe for tests that visit MATIC_STATIC_SAFE_28 on eth. */
   sidebarTrustedSafe1Safe2Safe3: {
     11155111: {
       '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
@@ -835,6 +869,13 @@ export const addedSafes = {
         threshold: 1,
         ethBalance: '0',
       },
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+    1: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
         owners: [],
         threshold: 1,
