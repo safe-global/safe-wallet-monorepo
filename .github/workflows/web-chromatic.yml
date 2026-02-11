@@ -2,11 +2,6 @@ name: Web Chromatic
 
 on:
   workflow_dispatch:
-    inputs:
-      branch_name:
-        description: 'Chromatic baseline branch name (leave empty to use release)'
-        required: false
-        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,27 +30,15 @@ jobs:
           version=$(node -p 'require("./package.json").version')
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Determine baseline branch
-        id: branch
-        run: |
-          if [ -n "${{ inputs.branch_name }}" ]; then
-            BRANCH="${{ inputs.branch_name }}"
-            echo "📍 Using custom branch: $BRANCH"
-          else
-            BRANCH="release"
-            echo "📍 Using default branch: $BRANCH"
-          fi
-          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
-
       # Run Chromatic visual regression testing
-      # Defaults to 'release' branch as baseline
+      # Uses the selected branch (from GitHub UI) as the baseline
       # TurboSnap is always enabled to only test changed stories
       - name: Run Chromatic
         uses: chromaui/action@latest
         with:
           workingDir: apps/web
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          branchName: ${{ steps.branch.outputs.name }} # Baseline branch for visual comparisons
+          branchName: ${{ github.ref_name }} # Use the branch selected in GitHub UI
           autoAcceptChanges: main # Only auto-accept on main branch
           onlyChanged: true # TurboSnap always enabled
           exitZeroOnChanges: true # Don't fail on visual diffs
@@ -68,7 +51,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Configuration:**" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Baseline Branch**: ${{ steps.branch.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Baseline Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **TurboSnap**: ✅ Enabled (only changed stories)" >> $GITHUB_STEP_SUMMARY
           echo "- **Auto-accept**: Only on main branch" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
