@@ -95,108 +95,112 @@ const Dashboard = (): ReactElement => {
   }
 
   return (
-    <Wrapper>
-      <Grid container justifyContent="center" alignItems="flex-start" spacing={6}>
-        <AddNewTransactionFormWrapper size={{ xs: 12, md: 6 }}>
-          <Grid container alignItems="center">
-            <Grid size={6}>
-              <StyledTitle variant="h6">New Transaction</StyledTitle>
-            </Grid>
-            <Grid container size={6} alignItems="center" justifyContent="flex-end">
-              <Grid>
-                <Switch checked={showHexEncodedData} onChange={() => setShowHexEncodedData(!showHexEncodedData)} />
+    <>
+      <div>asdasd</div>
+      <Wrapper>
+        <Grid container justifyContent="center" alignItems="flex-start" spacing={6}>
+          <AddNewTransactionFormWrapper size={{ xs: 12, md: 6 }}>
+            <Grid container alignItems="center">
+              <Grid size={6}>
+                <StyledTitle variant="h6">New Transaction</StyledTitle>
               </Grid>
-              <Grid>
-                <Text variant="body2">Custom data</Text>
+              <Grid container size={6} alignItems="center" justifyContent="flex-end">
+                <Grid>
+                  <Switch checked={showHexEncodedData} onChange={() => setShowHexEncodedData(!showHexEncodedData)} />
+                </Grid>
+                <Grid>
+                  <Text variant="body2">Custom data</Text>
+                </Grid>
               </Grid>
             </Grid>
-          </Grid>
 
-          <StyledDivider />
+            <StyledDivider />
 
-          {/* ABI Address Input */}
-          <AddressInput
-            id="address"
-            name="address"
-            label="Enter Address or ENS Name"
-            hiddenLabel={false}
-            address={abiAddress}
-            fullWidth
-            showNetworkPrefix={!!networkPrefix}
+            {/* ABI Address Input */}
+            <AddressInput
+              id="address"
+              name="address"
+              label="Enter Address or ENS Name"
+              hiddenLabel={false}
+              address={abiAddress}
+              fullWidth
+              showNetworkPrefix={!!networkPrefix}
+              networkPrefix={networkPrefix}
+              error={isAbiAddressInputFieldValid ? '' : 'The address is not valid'}
+              showLoadingSpinner={abiStatus === FETCH_STATUS.LOADING}
+              showErrorsInTheLabel={false}
+              getAddressFromDomain={getAddressFromDomain}
+              onChangeAddress={handleAbiAddressInput}
+              InputProps={{
+                endAdornment: contractHasMethods && isValidAddress(abiAddress) && (
+                  <InputAdornment position="end">
+                    <CheckIconAddressAdornment />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            {/* ABI Warning */}
+            {abiStatus === FETCH_STATUS.ERROR && (
+              <StyledWarningText color="warning" variant="body2">
+                No ABI found for this address
+              </StyledWarningText>
+            )}
+
+            <JsonField id="abi" name="abi" label="Enter ABI" value={abi} onChange={setAbi} />
+
+            {/* No public methods Warning */}
+            {showNoPublicMethodsWarning && (
+              <StyledMethodWarning color="warning" variant="body2">
+                Contract ABI doesn't have any public methods.
+              </StyledMethodWarning>
+            )}
+
+            {showNewTransactionForm && (
+              <>
+                <Divider />
+                <AddNewTransactionForm
+                  contract={contract}
+                  to={transactionRecipientAddress}
+                  showHexEncodedData={showHexEncodedData}
+                />
+              </>
+            )}
+          </AddNewTransactionFormWrapper>
+
+          <Outlet />
+        </Grid>
+
+        {implementationABIDialog.open && (
+          <ImplementationABIDialog
             networkPrefix={networkPrefix}
-            error={isAbiAddressInputFieldValid ? '' : 'The address is not valid'}
-            showLoadingSpinner={abiStatus === FETCH_STATUS.LOADING}
-            showErrorsInTheLabel={false}
-            getAddressFromDomain={getAddressFromDomain}
-            onChangeAddress={handleAbiAddressInput}
-            InputProps={{
-              endAdornment: contractHasMethods && isValidAddress(abiAddress) && (
-                <InputAdornment position="end">
-                  <CheckIconAddressAdornment />
-                </InputAdornment>
-              ),
+            blockExplorerLink={evalTemplate(chainInfo.blockExplorerUriTemplate.address, {
+              address: implementationABIDialog.implementationAddress,
+            })}
+            implementationAddress={implementationABIDialog.implementationAddress}
+            onCancel={() => {
+              setAbiAddress(implementationABIDialog.proxyAddress)
+              setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
+              setImplementationABIDialog({
+                open: false,
+                implementationAddress: '',
+                proxyAddress: '',
+              })
+            }}
+            onConfirm={() => {
+              setAbiAddress(implementationABIDialog.implementationAddress)
+              setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
+              setImplementationABIDialog({
+                open: false,
+                implementationAddress: '',
+                proxyAddress: '',
+              })
             }}
           />
-
-          {/* ABI Warning */}
-          {abiStatus === FETCH_STATUS.ERROR && (
-            <StyledWarningText color="warning" variant="body2">
-              No ABI found for this address
-            </StyledWarningText>
-          )}
-
-          <JsonField id="abi" name="abi" label="Enter ABI" value={abi} onChange={setAbi} />
-
-          {/* No public methods Warning */}
-          {showNoPublicMethodsWarning && (
-            <StyledMethodWarning color="warning" variant="body2">
-              Contract ABI doesn't have any public methods.
-            </StyledMethodWarning>
-          )}
-
-          {showNewTransactionForm && (
-            <>
-              <Divider />
-              <AddNewTransactionForm
-                contract={contract}
-                to={transactionRecipientAddress}
-                showHexEncodedData={showHexEncodedData}
-              />
-            </>
-          )}
-        </AddNewTransactionFormWrapper>
-
-        <Outlet />
-      </Grid>
-
-      {implementationABIDialog.open && (
-        <ImplementationABIDialog
-          networkPrefix={networkPrefix}
-          blockExplorerLink={evalTemplate(chainInfo.blockExplorerUriTemplate.address, {
-            address: implementationABIDialog.implementationAddress,
-          })}
-          implementationAddress={implementationABIDialog.implementationAddress}
-          onCancel={() => {
-            setAbiAddress(implementationABIDialog.proxyAddress)
-            setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
-            setImplementationABIDialog({
-              open: false,
-              implementationAddress: '',
-              proxyAddress: '',
-            })
-          }}
-          onConfirm={() => {
-            setAbiAddress(implementationABIDialog.implementationAddress)
-            setTransactionRecipientAddress(implementationABIDialog.proxyAddress)
-            setImplementationABIDialog({
-              open: false,
-              implementationAddress: '',
-              proxyAddress: '',
-            })
-          }}
-        />
-      )}
-    </Wrapper>
+        )}
+      </Wrapper>
+      asdasdij
+    </>
   )
 }
 

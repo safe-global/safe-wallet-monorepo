@@ -1,5 +1,5 @@
 import { createContext, type ReactElement, type ReactNode, useEffect, useState, useMemo } from 'react'
-import useOnboard, { type ConnectedWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
+import useOnboard, { type ConnectedWallet, getConnectedWallet, useIsWalletReady } from '@/hooks/wallets/useOnboard'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -19,6 +19,7 @@ export type WalletContextType = {
   connectedWallet: ConnectedWallet | null
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
+  isWalletReady: boolean
 }
 
 export const WalletContext = createContext<WalletContextType | null>(null)
@@ -28,6 +29,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const currentChain = useCurrentChain()
   const web3ReadOnly = useWeb3ReadOnly()
   const router = useRouter()
+  const isWalletReady = useIsWalletReady() ?? false
   const onboardWallets = onboard?.state.get().wallets || []
   const [wallet, setWallet] = useState<ConnectedWallet | null>(getConnectedWallet(onboardWallets))
 
@@ -67,6 +69,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
         connectedWallet: wallet,
         signer,
         setSignerAddress,
+        isWalletReady,
       }}
     >
       {children}

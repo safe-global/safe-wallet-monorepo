@@ -1,5 +1,5 @@
 import { renderHook } from '@/tests/test-utils'
-import useWallet, { useSigner, useWalletContext } from '@/hooks/wallets/useWallet'
+import useWallet, { useSigner, useWalletContext, useIsWalletReady } from '@/hooks/wallets/useWallet'
 import { WalletContext } from '@/components/common/WalletProvider'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -20,7 +20,9 @@ describe('useWallet hook', () => {
     const mockWallet = connectedWalletBuilder().build()
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WalletContext.Provider value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn() }}>
+      <WalletContext.Provider
+        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isWalletReady: true }}
+      >
         {children}
       </WalletContext.Provider>
     )
@@ -39,7 +41,9 @@ describe('useWallet hook', () => {
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WalletContext.Provider value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn() }}>
+      <WalletContext.Provider
+        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isWalletReady: true }}
+      >
         {children}
       </WalletContext.Provider>
     )
@@ -80,7 +84,9 @@ describe('useSigner hook', () => {
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WalletContext.Provider value={{ connectedWallet: null, signer: mockSigner as any, setSignerAddress: jest.fn() }}>
+      <WalletContext.Provider
+        value={{ connectedWallet: null, signer: mockSigner as any, setSignerAddress: jest.fn(), isWalletReady: true }}
+      >
         {children}
       </WalletContext.Provider>
     )
@@ -104,7 +110,9 @@ describe('useSigner hook', () => {
     const mockWallet = connectedWalletBuilder().build()
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <WalletContext.Provider value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn() }}>
+      <WalletContext.Provider
+        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isWalletReady: true }}
+      >
         {children}
       </WalletContext.Provider>
     )
@@ -136,6 +144,7 @@ describe('useWalletContext hook', () => {
       connectedWallet: mockWallet,
       signer: mockSigner as any,
       setSignerAddress: jest.fn(),
+      isWalletReady: true,
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -155,6 +164,7 @@ describe('useWalletContext hook', () => {
       connectedWallet: mockWallet,
       signer: null,
       setSignerAddress: jest.fn(),
+      isWalletReady: true,
     }
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -165,5 +175,55 @@ describe('useWalletContext hook', () => {
 
     expect(result.current?.connectedWallet).toEqual(mockWallet)
     expect(result.current?.signer).toBeNull()
+  })
+})
+
+describe('useIsWalletReady hook', () => {
+  it('should return false when context is null', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletContext.Provider value={null}>{children}</WalletContext.Provider>
+    )
+
+    const { result } = renderHook(() => useIsWalletReady(), { wrapper })
+
+    expect(result.current).toBe(false)
+  })
+
+  it('should return false when wallet is not ready', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletContext.Provider
+        value={{ connectedWallet: null, signer: null, setSignerAddress: jest.fn(), isWalletReady: false }}
+      >
+        {children}
+      </WalletContext.Provider>
+    )
+
+    const { result } = renderHook(() => useIsWalletReady(), { wrapper })
+
+    expect(result.current).toBe(false)
+  })
+
+  it('should return true when wallet is ready', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletContext.Provider
+        value={{ connectedWallet: null, signer: null, setSignerAddress: jest.fn(), isWalletReady: true }}
+      >
+        {children}
+      </WalletContext.Provider>
+    )
+
+    const { result } = renderHook(() => useIsWalletReady(), { wrapper })
+
+    expect(result.current).toBe(true)
+  })
+
+  it('should return false when context is undefined', () => {
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletContext.Provider value={undefined as any}>{children}</WalletContext.Provider>
+    )
+
+    const { result } = renderHook(() => useIsWalletReady(), { wrapper })
+
+    expect(result.current).toBe(false)
   })
 })

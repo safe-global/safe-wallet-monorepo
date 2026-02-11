@@ -58,6 +58,7 @@ const TestWalletContextProvider = ({
                 provider: null,
                 isSafe: Boolean(signerAddress),
               },
+              isWalletReady: true,
             }
           : null
       }

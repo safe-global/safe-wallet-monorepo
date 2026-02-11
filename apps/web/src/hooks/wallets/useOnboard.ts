@@ -28,6 +28,9 @@ export type ConnectedWallet = {
 
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
+const walletReadyStore = new ExternalStore<boolean>(false)
+export const useIsWalletReady = walletReadyStore.useStore
+
 export const initOnboard = async (
   chainConfigs: Chain[],
   currentChain: Chain,
@@ -152,7 +155,7 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
     if (isUnlocked === true || isUnlocked === undefined) {
-      connectWallet(onboard, {
+      await connectWallet(onboard, {
         autoSelect: { label: lastWalletLabel, disableModals: isUnlocked || false },
       })
     }
@@ -187,10 +190,9 @@ export const useInitOnboard = () => {
       onboard.state.actions.setWalletModules(supportedWallets)
     }
 
-    enableWallets().then(() => {
-      // Reconnect last wallet
-      connectLastWallet(onboard)
-    })
+    enableWallets()
+      .then(() => connectLastWallet(onboard))
+      .finally(() => walletReadyStore.setStore(true))
   }, [chain, onboard])
 
   // Track connected wallet
