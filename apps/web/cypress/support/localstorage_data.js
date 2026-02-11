@@ -735,6 +735,34 @@ export const addedSafes = {
       },
     },
   },
+  /** set5 plus one trusted safe (safe1) on Sepolia - for "Add network" single-safe sidebar test */
+  set5WithSingleSafe: {
+    137: {
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [
+          {
+            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
+          },
+        ],
+        threshold: 1,
+      },
+    },
+    11155111: {
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [
+          {
+            value: '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED',
+          },
+        ],
+        threshold: 1,
+      },
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
   set6_undeployed_safe: {
     11155111: {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': {
@@ -744,6 +772,103 @@ export const addedSafes = {
           },
         ],
         threshold: 1,
+      },
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Sidebar tests: one trusted safe (safe1) on Sepolia */
+  sidebarTrustedSafe1: {
+    11155111: {
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Sidebar tests: safe1 + safe2 on Sepolia */
+  sidebarTrustedSafe1Safe2: {
+    11155111: {
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Sidebar tests: safe3 on Sepolia + safe3 on Ethereum (chain 1) */
+  sidebarTrustedSafe3TwoChains: {
+    11155111: {
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+    1: {
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Sidebar tests: safe1 + safe2 + safe3 on Sepolia */
+  sidebarTrustedSafe1Safe2Safe3: {
+    11155111: {
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+      '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Sidebar tests: pending-actions safe (SEP_STATIC_SAFE_7) on Sepolia */
+  sidebarTrustedPendingSafe1: {
+    11155111: {
+      '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Nested safes: parent safe SEP_STATIC_SAFE_39 on Sepolia */
+  nestedParentSafe39: {
+    11155111: {
+      '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Nested safes: parent safe SEP_STATIC_SAFE_45 on Sepolia */
+  nestedParentSafe45: {
+    11155111: {
+      '0x5958B92f412408bF12Bbc8638d524ebe5878E795': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
       },
     },
   },

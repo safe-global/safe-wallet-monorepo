@@ -384,6 +384,29 @@ export function addToLocalStorage(key, jsonValue) {
 }
 
 /**
+ * Sets localStorage in the app window (AUT). Use after cy.visit() then cy.reload() so the app picks up the data.
+ * Use this when the test runs in Cypress and the app must see the data (addToLocalStorage writes to the runner's window).
+ */
+export function addToAppLocalStorage(key, jsonValue) {
+  return cy.window().then((win) => {
+    win.localStorage.setItem(key, JSON.stringify(jsonValue))
+  })
+}
+
+/**
+ * Builds SAFE_v2__addedSafes object from a list of { chainId, address } entries.
+ * Use with addToAppLocalStorage when replacing addSafeToTrustedList.
+ */
+export function buildAddedSafes(entries) {
+  const result = {}
+  entries.forEach(({ chainId, address }) => {
+    if (!result[chainId]) result[chainId] = {}
+    result[chainId][address] = { owners: [], threshold: 1, ethBalance: '0' }
+  })
+  return result
+}
+
+/**
  * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
  * This function sets up the settings and verifies they are stored correctly before proceeding
  * @returns {Promise} A promise that resolves when settings are set and verified
