@@ -52,7 +52,6 @@ const SpaceCard = ({
   isLink = true,
 }: {
   space: GetSpaceResponse
-  currentUserId?: number | undefined
   isCompact?: boolean
   isLink?: boolean
 }) => {
