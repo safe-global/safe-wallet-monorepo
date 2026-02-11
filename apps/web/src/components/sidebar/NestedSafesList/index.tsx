@@ -75,7 +75,6 @@ function NestedSafeItem({
           chainId={safeItem.chainId}
           fullAddress
           highlight4bytes={showSimilarityWarning}
-          monospace
         />
         <AccountItem.Group>
           <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
