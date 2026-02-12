@@ -210,8 +210,8 @@ function SafeSelectorDropdown({
                             }
                           }}
                         >
-                          <span className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center bg-background">
-                            <ChainIndicator chainId={selectedChainId} imageSize={16} showLogo onlyLogo />
+                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 items-center justify-flex-start bg-background">
+                            <ChainIndicator chainId={selectedChainId} imageSize={22} showLogo onlyLogo />
                           </span>
                           <ChevronDown className="size-4 text-muted-foreground shrink-0" />
                         </span>
@@ -228,8 +228,8 @@ function SafeSelectorDropdown({
                           }}
                           className="gap-4 cursor-pointer"
                         >
-                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-center">
-                            <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
+                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-flex-start">
+                            <ChainIndicator chainId={chainItem.chainId} imageSize={22} showLogo onlyLogo />
                           </span>
                           <span className="text-sm font-medium">{chainItem.chainName}</span>
                         </DropdownMenuItem>
