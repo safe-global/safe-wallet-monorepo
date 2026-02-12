@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
-import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { logError, Errors } from '@/services/exceptions'
 import type { FeatureHandle, FeatureImplementation } from './types'
 
@@ -10,8 +9,6 @@ import type { FeatureHandle, FeatureImplementation } from './types'
  * Prefixed with $ to avoid conflicts with feature exports.
  */
 interface FeatureMeta {
-  /** True while feature code is loading */
-  $isLoading: boolean
   /** True if feature flag is disabled */
   $isDisabled: boolean
   /** True when feature is loaded and ready to use */
@@ -37,7 +34,6 @@ function createStableStubProxy<T extends FeatureImplementation>(
   return new Proxy({} as T & FeatureMeta, {
     get(_, prop) {
       // Meta properties read from the ref — always fresh
-      if (prop === '$isLoading') return metaRef.current.$isLoading
       if (prop === '$isDisabled') return metaRef.current.$isDisabled
       if (prop === '$isReady') return metaRef.current.$isReady
       if (prop === '$error') return metaRef.current.$error
@@ -51,11 +47,11 @@ function createStableStubProxy<T extends FeatureImplementation>(
       const name = String(prop)
       let stub: unknown
 
-      if (name[0] === name[0].toUpperCase() && !name.startsWith('use')) {
-        // Component stub - renders null
+      if (name[0] >= 'A' && name[0] <= 'Z') {
+        // Component stub - renders null (PascalCase names)
         stub = () => null
       } else {
-        // Hooks and services - undefined (no stub)
+        // Hooks, services, and unknown $ props - undefined (no stub)
         stub = undefined
       }
 
@@ -65,32 +61,20 @@ function createStableStubProxy<T extends FeatureImplementation>(
   })
 }
 
-/** Derives FeatureMeta from the flag and async load state. */
-function computeMeta(
-  isEnabled: boolean | undefined,
-  feature: unknown,
-  loading: boolean,
-  error: Error | undefined,
-): FeatureMeta {
-  return {
-    $isDisabled: isEnabled === false,
-    $isLoading: isEnabled === undefined || loading,
-    $isReady: isEnabled === true && !loading && !!feature,
-    $error: error,
-  }
-}
-
 /**
  * Hook to load a feature lazily based on its handle.
  *
  * ALWAYS returns an object - never null or undefined. When the feature is
- * loading or disabled, returns a Proxy with automatic stubs based on naming:
+ * not yet ready or disabled, returns a Proxy with automatic stubs based on naming:
  * - PascalCase -> component returning null
  * - useSomething -> undefined (hooks not stubbed - component must not mount until ready)
  * - camelCase -> undefined (will throw if called without checking $isReady)
  *
+ * There is no intermediate "loading" state — the hook goes directly from not-ready
+ * to ready in a single transition, minimizing re-renders.
+ *
  * @param handle - The feature handle with name, useIsEnabled, and load function.
- * @returns Feature object with meta properties ($isLoading, $isDisabled, $isReady, $error)
+ * @returns Feature object with meta properties ($isDisabled, $isReady, $error)
  *
  * @example
  * ```typescript
@@ -140,37 +124,59 @@ export function useLoadFeature<T extends FeatureImplementation>(
   // module is loaded it never changes, so re-fetching is pure waste.
   const cachedFeatureRef = useRef<LoadedFeature | undefined>(undefined)
 
-  // Load feature when enabled, or return from cache
-  const [feature, error, loading] = useAsync(
-    () => {
-      if (isEnabled !== true) return
+  // Single state: the loaded feature or an error. No intermediate "loading" state —
+  // we go directly from undefined to the loaded feature in one transition.
+  const [loaded, setLoaded] = useState<{ feature: LoadedFeature } | { error: Error } | undefined>(() =>
+    cachedFeatureRef.current ? { feature: cachedFeatureRef.current } : undefined,
+  )
 
-      // Already loaded? Return from cache — skip the import() entirely
-      if (cachedFeatureRef.current) {
-        return Promise.resolve(cachedFeatureRef.current)
-      }
+  useEffect(() => {
+    if (isEnabled !== true) return
 
-      return handle.load().then((module) => {
-        const loaded = {
+    // Already loaded? No state update needed.
+    if (cachedFeatureRef.current) {
+      // Ensure state reflects the cached feature (handles flicker recovery)
+      setLoaded({ feature: cachedFeatureRef.current })
+      return
+    }
+
+    let cancelled = false
+
+    handle.load().then(
+      (module) => {
+        if (cancelled) return
+
+        const feature = {
           name: handle.name,
           useIsEnabled: handle.useIsEnabled,
           ...module.default,
         } as LoadedFeature
 
-        cachedFeatureRef.current = loaded
-        return loaded
-      })
-    },
-    [isEnabled, handle],
-    false,
-  )
+        cachedFeatureRef.current = feature
+        setLoaded({ feature })
+      },
+      (err) => {
+        if (cancelled) return
+        const error = err instanceof Error ? err : new Error(String(err))
+        logError(Errors._906, error)
+        setLoaded({ error })
+      },
+    )
 
-  // Log errors for debugging
-  if (error) {
-    logError(Errors._906, error)
+    return () => {
+      cancelled = true
+    }
+  }, [isEnabled, handle])
+
+  // Derive meta from current state
+  const feature = loaded && 'feature' in loaded ? loaded.feature : undefined
+  const error = loaded && 'error' in loaded ? loaded.error : undefined
+
+  const meta: FeatureMeta = {
+    $isDisabled: isEnabled === false,
+    $isReady: !!feature,
+    $error: error,
   }
-
-  const meta = computeMeta(isEnabled, feature, loading, error)
 
   // Stable proxy — created once per hook instance, reads meta from ref
   const metaRef = useRef<FeatureMeta>(meta)

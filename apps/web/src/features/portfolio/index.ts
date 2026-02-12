@@ -26,7 +26,7 @@
  * function MyComponentWithStates() {
  *   const feature = useLoadFeature(PortfolioFeature)
  *
- *   if (feature.$isLoading) return <Skeleton />
+ *   if (!feature.$isReady) return <Skeleton />
  *   if (feature.$isDisabled) return null
  *
  *   return <feature.PortfolioRefreshHint entryPoint="Dashboard" />

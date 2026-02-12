@@ -22,7 +22,7 @@
  * function MyComponentWithStates() {
  *   const feature = useLoadFeature(TargetedOutreachFeature)
  *
- *   if (feature.$isLoading) return <Skeleton />
+ *   if (!feature.$isReady) return <Skeleton />
  *   if (feature.$isDisabled) return null
  *
  *   return <feature.OutreachPopup />

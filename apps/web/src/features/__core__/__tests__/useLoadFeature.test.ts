@@ -54,20 +54,19 @@ describe('useLoadFeature', () => {
   describe('meta state lifecycle', () => {
     it.each([
       {
-        scenario: 'loading (isEnabled undefined)',
+        scenario: 'flag still loading (isEnabled undefined)',
         isEnabled: undefined as boolean | undefined,
-        expected: { $isLoading: true, $isDisabled: false, $isReady: false, $error: undefined },
+        expected: { $isDisabled: false, $isReady: false, $error: undefined },
       },
       {
         scenario: 'disabled (isEnabled false)',
         isEnabled: false as boolean | undefined,
-        expected: { $isLoading: false, $isDisabled: true, $isReady: false, $error: undefined },
+        expected: { $isDisabled: true, $isReady: false, $error: undefined },
       },
     ])('should report correct meta when $scenario', ({ isEnabled, expected }) => {
       const handle = createMockHandle({ isEnabled })
       const { result } = renderHook(() => useLoadFeature(handle))
 
-      expect(result.current.$isLoading).toBe(expected.$isLoading)
       expect(result.current.$isDisabled).toBe(expected.$isDisabled)
       expect(result.current.$isReady).toBe(expected.$isReady)
       expect(result.current.$error).toBe(expected.$error)
@@ -77,7 +76,6 @@ describe('useLoadFeature', () => {
       const { result } = await renderFeatureHook({ isEnabled: true })
 
       expect(result.current.$isReady).toBe(true)
-      expect(result.current.$isLoading).toBe(false)
       expect(result.current.$isDisabled).toBe(false)
       expect(result.current.$error).toBeUndefined()
     })
@@ -88,7 +86,14 @@ describe('useLoadFeature', () => {
 
       expect(result.current.$error).toEqual(loadError)
       expect(result.current.$isReady).toBe(false)
-      expect(result.current.$isLoading).toBe(false)
+    })
+
+    it('should not expose a $isLoading meta property', () => {
+      const handle = createMockHandle({ isEnabled: undefined })
+      const { result } = renderHook(() => useLoadFeature(handle))
+
+      // $isLoading was removed — only $isDisabled, $isReady, $error exist
+      expect((result.current as unknown as Record<string, unknown>).$isLoading).toBeUndefined()
     })
   })
 
@@ -208,7 +213,7 @@ describe('useLoadFeature', () => {
         expect(result.current.$isReady).toBe(true)
       })
 
-      // Mount render + ready render (useAsync resolves in single dispatch)
+      // Mount render + ready render (no intermediate loading state)
       expect(renderCount).toBeLessThanOrEqual(3)
     })
 
@@ -261,8 +266,7 @@ describe('useLoadFeature', () => {
         expect(result.current.$isReady).toBe(true)
       })
 
-      // 2 explicit rerenders + effect re-runs from idle dispatch and cache restore.
-      // Without caching this would be higher (full async load cycle each time).
+      // 2 explicit rerenders + possible effect re-run for cache restore.
       const flickerRenders = renderCount - countAfterReady
       expect(flickerRenders).toBeLessThanOrEqual(5)
     })

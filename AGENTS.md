@@ -149,10 +149,10 @@ function ParentComponent() {
 
 // For explicit loading/disabled states:
 function ParentWithStates() {
-  const { MyComponent, $isLoading, $isDisabled } = useLoadFeature(MyFeature)
+  const { MyComponent, $isReady, $isDisabled } = useLoadFeature(MyFeature)
 
-  if ($isLoading) return <Skeleton />
   if ($isDisabled) return null
+  if (!$isReady) return <Skeleton />
 
   return <MyComponent />
 }
@@ -199,7 +199,7 @@ export default {
 
 **Hooks Pattern:** Hooks are exported directly from `index.ts` (always loaded, not lazy) to avoid Rules of Hooks violations. Keep hooks lightweight with minimal imports. Put heavy logic in services (lazy-loaded).
 
-See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isLoading`, `$isDisabled`, `$isReady`).
+See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
 ## Workflow
 
