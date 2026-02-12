@@ -16,22 +16,7 @@ import useBalances from '@/hooks/useBalances'
 import { useGetHref } from '@/hooks/safes/useGetHref'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import FiatValue from '@/components/common/FiatValue'
-
-export interface SafeInfo {
-  id: string
-  name: string
-  address: string
-  threshold: number
-  owners: number
-  balance: string
-  chains: ChainInfo[]
-}
-
-export interface ChainInfo {
-  id: string
-  name: string
-  logo: string
-}
+import type { SafeInfo } from '@/features/spaces/types'
 
 export interface SafeSelectorDropdownProps {
   safes: SafeInfo[]
@@ -163,7 +148,11 @@ function SafeSelectorDropdown({
     () =>
       chainsData?.ids?.map((id) => {
         const c = chainsData.entities?.[id]
-        return { id, name: c?.chainName ?? c?.shortName ?? id }
+        return {
+          chainId: id,
+          chainName: c?.chainName ?? c?.shortName ?? id,
+          chainLogoUri: c?.chainLogoUri ?? undefined,
+        }
       }) ?? [],
     [chainsData?.ids, chainsData?.entities],
   )
@@ -231,18 +220,18 @@ function SafeSelectorDropdown({
                     <DropdownMenuContent align="end" className="w-[200px] bg-card text-foreground">
                       {chainsToShow.map((chainItem) => (
                         <DropdownMenuItem
-                          key={chainItem.id}
-                          onClick={(e) => handleChainSelect(chainItem.id, e)}
+                          key={chainItem.chainId}
+                          onClick={(e) => handleChainSelect(chainItem.chainId, e)}
                           onSelect={(e) => {
                             e.preventDefault()
-                            handleChainSelect(chainItem.id)
+                            handleChainSelect(chainItem.chainId)
                           }}
                           className="gap-4 cursor-pointer"
                         >
                           <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex [&_img]:size-full">
-                            <ChainIndicator chainId={chainItem.id} imageSize={24} showLogo onlyLogo />
+                            <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
                           </span>
-                          <span className="text-sm font-medium">{chainItem.name}</span>
+                          <span className="text-sm font-medium">{chainItem.chainName}</span>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -286,8 +275,16 @@ function SafeSelectorDropdown({
                   const address = isCurrent ? currentSafeDisplayAddress : safeItem.address
                   const thresholdVal = isCurrent ? threshold : safeItem.threshold
                   const ownersVal = isCurrent ? ownerCount : safeItem.owners
-                  const itemChains =
-                    isCurrent && chain ? [{ id: chainId, name: chain.chainName ?? chain.shortName }] : safeItem.chains
+                  const itemChains: SafeInfo['chains'] =
+                    isCurrent && chain
+                      ? [
+                          {
+                            chainId,
+                            chainName: chain.chainName ?? chain.shortName,
+                            chainLogoUri: chain.chainLogoUri ?? undefined,
+                          },
+                        ]
+                      : safeItem.chains
                   return (
                     <SelectItem
                       key={safeItem.id}
@@ -305,11 +302,11 @@ function SafeSelectorDropdown({
                         <div className="flex items-center gap-2 bg-muted rounded-full px-0.5 py-0.5 pl-0.5 pr-2.5 shrink-0">
                           {itemChains.slice(0, 3).map((chainItem, index) => (
                             <span
-                              key={chainItem.id}
+                              key={chainItem.chainId}
                               className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex [&_img]:size-full"
                               style={{ marginLeft: index > 0 ? '-8px' : '0' }}
                             >
-                              <ChainIndicator chainId={chainItem.id} imageSize={24} showLogo onlyLogo />
+                              <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
                             </span>
                           ))}
                         </div>

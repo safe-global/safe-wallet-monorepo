@@ -31,9 +31,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const baseChains = [
-  { id: '1', name: 'Ethereum', logo: '' },
-  { id: '100', name: 'Gnosis Chain', logo: '' },
-  { id: '8453', name: 'Base', logo: '' },
+  { chainId: '1', chainName: 'Ethereum', chainLogoUri: undefined },
+  { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: undefined },
+  { chainId: '8453', chainName: 'Base', chainLogoUri: undefined },
 ]
 
 const mockSafes = [
@@ -78,7 +78,7 @@ const safeNames = [
 
 const createMockSafesLong = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
-    id: `${baseChains[i % baseChains.length].id}:0x${(i + 1).toString(16).padStart(4, '0')}...${(i + 100).toString(16).padStart(4, '0')}`,
+    id: `${baseChains[i % baseChains.length].chainId}:0x${(i + 1).toString(16).padStart(4, '0')}...${(i + 100).toString(16).padStart(4, '0')}`,
     name: safeNames[i % safeNames.length],
     address: `0x${(i + 1).toString(16).padStart(4, '0')}...${(i + 100).toString(16).padStart(4, '0')}`,
     threshold: 2 + (i % 2),
