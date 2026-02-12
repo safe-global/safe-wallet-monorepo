@@ -23,7 +23,7 @@ export const ProtocolDetailSheetContainer = () => {
   const percentageRatio = calculateProtocolPercentage(protocol.fiatTotal, totalFiatValue)
 
   return (
-    <SafeBottomSheet title={protocol.protocol_metadata.name}>
+    <SafeBottomSheet>
       <ProtocolDetailSheet protocol={protocol} percentageRatio={percentageRatio} currency={currency} />
     </SafeBottomSheet>
   )
