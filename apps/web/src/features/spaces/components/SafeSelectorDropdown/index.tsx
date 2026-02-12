@@ -40,6 +40,68 @@ const shortenAddress = (address: string): string => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
+const parseSafeId = (safeId: string) => {
+  const colonIndex = safeId.indexOf(':')
+  const isSafeIdFormat = colonIndex > 0 && safeId.slice(colonIndex + 1).startsWith('0x')
+
+  if (!isSafeIdFormat) return null
+
+  return {
+    chainId: safeId.slice(0, colonIndex),
+    address: safeId.slice(colonIndex + 1),
+  }
+}
+
+interface SafeInfoDisplayProps {
+  name: string
+  address: string
+  className?: string
+}
+
+const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => (
+  <div className={cn('flex items-center gap-3', className)}>
+    <Avatar size="sm">
+      <AvatarFallback>{getInitials(name)}</AvatarFallback>
+    </Avatar>
+    <div className="flex flex-col items-start flex-1 min-w-0">
+      <span className="text-sm font-medium text-foreground">{name}</span>
+      <span className="text-xs text-muted-foreground">{address}</span>
+    </div>
+  </div>
+)
+
+interface BalanceDisplayProps {
+  balance: string | React.ReactNode
+  threshold: number
+  owners: number
+  isLoading?: boolean
+}
+
+const BalanceDisplay = ({ balance, threshold, owners, isLoading }: BalanceDisplayProps) => (
+  <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
+    {isLoading ? (
+      <span className="text-xs font-medium text-muted-foreground">--</span>
+    ) : (
+      <span className="text-xs font-medium text-muted-foreground">{balance}</span>
+    )}
+    <Badge variant="secondary" className="gap-1">
+      <User className="size-3" />
+      {threshold}/{owners}
+    </Badge>
+  </div>
+)
+
+interface ChainLogoProps {
+  chainId: string
+  size?: number
+}
+
+const ChainLogo = ({ chainId, size = 22 }: ChainLogoProps) => (
+  <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-flex-start bg-background">
+    <ChainIndicator chainId={chainId} imageSize={size} showLogo onlyLogo />
+  </span>
+)
+
 function SafeSelectorDropdown({
   safes,
   selectedSafeId,
@@ -56,7 +118,11 @@ function SafeSelectorDropdown({
   const addressBook = useAppSelector((state) => selectAddressBookByChain(state, chainId))
   const { balances, loading: balancesLoading } = useBalances()
 
+  // Determine current safe identity
   const currentSafeId = safeAddress && chainId ? `${chainId}:${safeAddress}` : null
+  const safeNameFromBook = safeAddress ? addressBook?.[safeAddress] : undefined
+  const currentSafeName = safeNameFromBook ?? safe?.address?.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
+  const currentSafeDisplayAddress = safeAddress ? shortenAddress(safeAddress) : ''
 
   // Track the selected chain and safe locally
   const [selectedChainId, setSelectedChainId] = React.useState<string>(chainId)
@@ -82,21 +148,33 @@ function SafeSelectorDropdown({
       setLocalSelectedSafeId(safes.length > 0 ? safes[0]?.id : (currentSafeId ?? undefined))
     }
   }, [safes, currentSafeId, localSelectedSafeId])
-  const safeNameFromBook = safeAddress ? addressBook?.[safeAddress] : undefined
-  const currentSafeName = safeNameFromBook ?? safe?.address?.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
-  const currentSafeDisplayAddress = safeAddress ? shortenAddress(safeAddress) : ''
-  const ownerCount = safe?.owners?.length ?? 0
-  const threshold = safe?.threshold ?? 0
 
+  // Determine display values
   const selectedSafe = safes.find((s) => s.id === localSelectedSafeId) ?? safes[0]
   const isCurrentSafeSelected = currentSafeId != null && (localSelectedSafeId === currentSafeId || safes.length === 0)
-  const selectValue = safes.length > 0 ? localSelectedSafeId : (currentSafeId ?? '')
 
-  const displayName = isCurrentSafeSelected ? currentSafeName : (selectedSafe?.name ?? '')
-  const displayAddress = isCurrentSafeSelected ? currentSafeDisplayAddress : (selectedSafe?.address ?? '')
-  const displayThreshold = isCurrentSafeSelected ? threshold : (selectedSafe?.threshold ?? 0)
-  const displayOwners = isCurrentSafeSelected ? ownerCount : (selectedSafe?.owners ?? 0)
-  const showLiveBalance = isCurrentSafeSelected
+  const getSafeDisplayInfo = () => {
+    if (isCurrentSafeSelected) {
+      return {
+        name: currentSafeName,
+        address: currentSafeDisplayAddress,
+        threshold: safe?.threshold ?? 0,
+        owners: safe?.owners?.length ?? 0,
+        showLiveBalance: true,
+      }
+    }
+
+    return {
+      name: selectedSafe?.name ?? '',
+      address: selectedSafe?.address ?? '',
+      threshold: selectedSafe?.threshold ?? 0,
+      owners: selectedSafe?.owners ?? 0,
+      showLiveBalance: false,
+    }
+  }
+
+  const displayInfo = getSafeDisplayInfo()
+  const selectValue = safes.length > 0 ? localSelectedSafeId : (currentSafeId ?? '')
   const showTrigger = (safes.length > 0 && selectedSafe != null) || (safes.length === 0 && currentSafeId != null)
 
   const handleChainSelect = React.useCallback(
@@ -121,18 +199,13 @@ function SafeSelectorDropdown({
 
   const handleSafeChange = React.useCallback(
     (value: string) => {
-      // Update the selected safe state to reflect it in the UI immediately
       setLocalSelectedSafeId(value)
       onSafeChange?.(value)
 
-      const colonIndex = value.indexOf(':')
-      const isSafeIdFormat = colonIndex > 0 && value.slice(colonIndex + 1).startsWith('0x')
-      if (!isSafeIdFormat) return
+      const parsed = parseSafeId(value)
+      if (!parsed) return
 
-      const selectedChainId = value.slice(0, colonIndex)
-      const selectedSafeAddress = value.slice(colonIndex + 1)
-
-      // Update the chain state as well when selecting a safe from a different chain
+      const { chainId: selectedChainId, address: selectedSafeAddress } = parsed
       setSelectedChainId(selectedChainId)
 
       const selectedChain = chainsData?.entities?.[selectedChainId]
@@ -158,6 +231,34 @@ function SafeSelectorDropdown({
   )
   const chainsToShow = isCurrentSafeSelected ? allChainsFromConfig : (selectedSafe?.chains ?? [])
 
+  const getSafeItemData = (safeItem: SafeInfo) => {
+    const isCurrent = safeItem.id === currentSafeId
+
+    if (isCurrent) {
+      return {
+        name: currentSafeName,
+        address: currentSafeDisplayAddress,
+        threshold: safe?.threshold ?? 0,
+        owners: safe?.owners?.length ?? 0,
+        chains: chain
+          ? [{ chainId, chainName: chain.chainName ?? chain.shortName, chainLogoUri: chain.chainLogoUri ?? undefined }]
+          : [],
+        balance: <FiatValue value={balances.fiatTotal} />,
+        isLoading: balancesLoading,
+      }
+    }
+
+    return {
+      name: safeItem.name,
+      address: safeItem.address,
+      threshold: safeItem.threshold,
+      owners: safeItem.owners,
+      chains: safeItem.chains,
+      balance: safeItem.balance,
+      isLoading: false,
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -180,14 +281,14 @@ function SafeSelectorDropdown({
             {showTrigger && (
               <div className="flex items-center gap-4 w-full">
                 <Avatar size="sm">
-                  <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
+                  <AvatarFallback>{getInitials(displayInfo.name || '?')}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col items-start flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
+                    <span className="text-sm font-medium text-foreground truncate">{displayInfo.name}</span>
                     <Settings className="size-3 text-muted-foreground shrink-0" />
                   </div>
-                  <span className="text-xs text-muted-foreground">{displayAddress}</span>
+                  <span className="text-xs text-muted-foreground">{displayInfo.address}</span>
                 </div>
                 <div
                   className="shrink-0"
@@ -210,9 +311,7 @@ function SafeSelectorDropdown({
                             }
                           }}
                         >
-                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 items-center justify-flex-start bg-background">
-                            <ChainIndicator chainId={selectedChainId} imageSize={22} showLogo onlyLogo />
-                          </span>
+                          <ChainLogo chainId={selectedChainId} />
                           <ChevronDown className="size-4 text-muted-foreground shrink-0" />
                         </span>
                       }
@@ -228,9 +327,7 @@ function SafeSelectorDropdown({
                           }}
                           className="gap-4 cursor-pointer"
                         >
-                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-flex-start">
-                            <ChainIndicator chainId={chainItem.chainId} imageSize={22} showLogo onlyLogo />
-                          </span>
+                          <ChainLogo chainId={chainItem.chainId} />
                           <span className="text-sm font-medium">{chainItem.chainName}</span>
                         </DropdownMenuItem>
                       ))}
@@ -238,7 +335,7 @@ function SafeSelectorDropdown({
                   </DropdownMenu>
                 </div>
                 <div className="flex flex-col items-end gap-2 py-2 min-w-[90px] shrink-0">
-                  {showLiveBalance ? (
+                  {displayInfo.showLiveBalance ? (
                     balancesLoading ? (
                       <span className="text-sm text-muted-foreground">--</span>
                     ) : (
@@ -251,7 +348,7 @@ function SafeSelectorDropdown({
                   )}
                   <Badge variant="secondary" className="gap-1">
                     <User className="size-3" />
-                    {displayThreshold}/{displayOwners}
+                    {displayInfo.threshold}/{displayInfo.owners}
                   </Badge>
                 </div>
               </div>
@@ -270,21 +367,7 @@ function SafeSelectorDropdown({
             ? safes
                 .filter((safeItem) => safeItem.id !== selectValue)
                 .map((safeItem) => {
-                  const isCurrent = safeItem.id === currentSafeId
-                  const name = isCurrent ? currentSafeName : safeItem.name
-                  const address = isCurrent ? currentSafeDisplayAddress : safeItem.address
-                  const thresholdVal = isCurrent ? threshold : safeItem.threshold
-                  const ownersVal = isCurrent ? ownerCount : safeItem.owners
-                  const itemChains: SafeInfo['chains'] =
-                    isCurrent && chain
-                      ? [
-                          {
-                            chainId,
-                            chainName: chain.chainName ?? chain.shortName,
-                            chainLogoUri: chain.chainLogoUri ?? undefined,
-                          },
-                        ]
-                      : safeItem.chains
+                  const itemData = getSafeItemData(safeItem)
                   return (
                     <SelectItem
                       key={safeItem.id}
@@ -292,15 +375,9 @@ function SafeSelectorDropdown({
                       className="h-auto py-4 px-4 rounded-3xl my-1 data-[state=checked]:bg-muted hover:bg-muted/50 cursor-pointer"
                     >
                       <div className="flex items-center gap-3 w-full">
-                        <Avatar size="sm">
-                          <AvatarFallback>{getInitials(name)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col items-start flex-1 min-w-0">
-                          <span className="text-sm font-medium text-foreground">{name}</span>
-                          <span className="text-xs text-muted-foreground">{address}</span>
-                        </div>
+                        <SafeInfoDisplay name={itemData.name} address={itemData.address} className="flex-1" />
                         <div className="flex items-center gap-2 bg-muted rounded-full px-0.5 py-0.5 pl-0.5 pr-2.5 shrink-0">
-                          {itemChains.slice(0, 3).map((chainItem, index) => (
+                          {itemData.chains.slice(0, 3).map((chainItem, index) => (
                             <span
                               key={chainItem.chainId}
                               className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
@@ -310,23 +387,12 @@ function SafeSelectorDropdown({
                             </span>
                           ))}
                         </div>
-                        <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
-                          {isCurrent ? (
-                            balancesLoading ? (
-                              <span className="text-xs font-medium text-muted-foreground">--</span>
-                            ) : (
-                              <span className="text-xs font-medium text-muted-foreground">
-                                <FiatValue value={balances.fiatTotal} />
-                              </span>
-                            )
-                          ) : (
-                            <span className="text-xs font-medium text-muted-foreground">{safeItem.balance}</span>
-                          )}
-                          <Badge variant="secondary" className="gap-1">
-                            <User className="size-3" />
-                            {thresholdVal}/{ownersVal}
-                          </Badge>
-                        </div>
+                        <BalanceDisplay
+                          balance={itemData.balance}
+                          threshold={itemData.threshold}
+                          owners={itemData.owners}
+                          isLoading={itemData.isLoading}
+                        />
                       </div>
                     </SelectItem>
                   )
@@ -337,31 +403,18 @@ function SafeSelectorDropdown({
                   className="h-auto py-4 px-4 rounded-3xl my-1 data-[state=checked]:bg-muted hover:bg-muted/50 cursor-pointer"
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <Avatar size="sm">
-                      <AvatarFallback>{getInitials(currentSafeName)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start flex-1 min-w-0">
-                      <span className="text-sm font-medium text-foreground">{currentSafeName}</span>
-                      <span className="text-xs text-muted-foreground">{currentSafeDisplayAddress}</span>
-                    </div>
+                    <SafeInfoDisplay name={currentSafeName} address={currentSafeDisplayAddress} className="flex-1" />
                     {chain != null && (
                       <span className="size-6 shrink-0 inline-flex items-center justify-center">
                         <ChainIndicator chainId={chainId} imageSize={16} showLogo onlyLogo />
                       </span>
                     )}
-                    <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
-                      {balancesLoading ? (
-                        <span className="text-xs font-medium text-muted-foreground">--</span>
-                      ) : (
-                        <span className="text-xs font-medium text-muted-foreground">
-                          <FiatValue value={balances.fiatTotal} />
-                        </span>
-                      )}
-                      <Badge variant="secondary" className="gap-1">
-                        <User className="size-3" />
-                        {threshold}/{ownerCount}
-                      </Badge>
-                    </div>
+                    <BalanceDisplay
+                      balance={<FiatValue value={balances.fiatTotal} />}
+                      threshold={safe?.threshold ?? 0}
+                      owners={safe?.owners?.length ?? 0}
+                      isLoading={balancesLoading}
+                    />
                   </div>
                 </SelectItem>
               )}
