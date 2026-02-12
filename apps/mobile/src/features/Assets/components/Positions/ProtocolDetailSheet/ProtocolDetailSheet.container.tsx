@@ -48,12 +48,13 @@ export const ProtocolDetailSheetContainer = () => {
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      <ProtocolDetailSheetHeader protocol={protocol} percentageRatio={percentageRatio} currency={currency} />
       <BottomSheetScrollView
+        stickyHeaderIndices={[0]}
         contentContainerStyle={{
           paddingBottom: insets.bottom + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
         }}
       >
+        <ProtocolDetailSheetHeader protocol={protocol} percentageRatio={percentageRatio} currency={currency} />
         <ProtocolDetailSheetPositions protocol={protocol} currency={currency} />
       </BottomSheetScrollView>
     </BottomSheet>
