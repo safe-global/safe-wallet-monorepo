@@ -7,34 +7,27 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 import useWallet from '@/hooks/wallets/useWallet'
 import { useHasSafes } from '@/features/myAccounts'
 import Track from '@/components/common/Track'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import WalletLogin from './WalletLogin'
+import { useHomeAuth } from './hooks/useHomeAuth'
 
 const WelcomeLogin = () => {
   const router = useRouter()
   const wallet = useWallet()
   const { isLoaded, hasSafes } = useHasSafes()
-  const [shouldRedirect, setShouldRedirect] = useState(false)
 
-  const redirect = useCallback(() => {
-    if (wallet) {
-      if (isLoaded && !hasSafes) {
-        trackEvent(CREATE_SAFE_EVENTS.OPEN_SAFE_CREATION)
-        router.push({ pathname: AppRoutes.newSafe.create, query: router.query })
-      } else {
-        router.push({ pathname: AppRoutes.welcome.accounts, query: router.query })
-      }
+  const onSuccess = useCallback(() => {
+    if (isLoaded && !hasSafes) {
+      trackEvent(CREATE_SAFE_EVENTS.OPEN_SAFE_CREATION)
+      router.push({ pathname: AppRoutes.newSafe.create, query: router.query })
+    } else {
+      router.push({ pathname: AppRoutes.welcome.accounts, query: router.query })
     }
-  }, [hasSafes, isLoaded, router, wallet])
+  }, [isLoaded, hasSafes, router])
 
-  const onLogin = useCallback(() => {
-    setShouldRedirect(true)
-  }, [])
-
-  useEffect(() => {
-    if (!shouldRedirect) return
-    redirect()
-  }, [redirect, shouldRedirect])
+  const { performAuth, loading } = useHomeAuth({
+    onSuccess,
+  })
 
   return (
     <Paper className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
@@ -51,7 +44,7 @@ const WelcomeLogin = () => {
 
         <Box className={css.fullWidth}>
           <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-            <WalletLogin onLogin={onLogin} onContinue={redirect} fullWidth />
+            <WalletLogin onLogin={performAuth} onContinue={performAuth} fullWidth isLoading={loading} />
           </Track>
         </Box>
 
