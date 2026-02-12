@@ -21,13 +21,18 @@ describe('Nested safes happy path tests', () => {
 
   it('Verify that batch tx appears in the Queue with create proxy action', () => {
     const safe = 'Created safe'
+    const chainId = '11155111' // Sepolia
 
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
+    // Add the parent safe to trusted list (required for nested safe creation)
+    main.addSafeToTrustedList(chainId, staticSafes.SEP_STATIC_SAFE_39.substring(4))
     wallet.connectSigner(signer)
     cy.wait(5000)
     createTx.deleteAllTx()
 
     sideBar.clickOnOpenNestedSafeListBtn()
+    // Handle intro screen if present (select valid safes)
+    nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
     createTx.hasNonce()
     createTx.changeNonce(3)

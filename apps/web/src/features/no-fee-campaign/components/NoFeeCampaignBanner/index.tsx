@@ -9,8 +9,6 @@ import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 
-export const noFeeCampaignBannerID = 'noFeeCampaignBanner'
-
 const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const { setTxFlow } = useContext(TxModalContext)
 

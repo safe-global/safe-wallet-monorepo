@@ -86,6 +86,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
           name={name}
           isReplayable={isReplayable}
           undeployedSafe={!!undeployedSafe}
+          hideNestedSafes={true}
           onClose={onLinkClick}
         />
       )}

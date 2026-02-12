@@ -11,6 +11,20 @@ export enum TOKEN_LISTS {
   ALL = 'ALL',
 }
 
+// Curation state for nested safes (replaces old hide/show mechanism)
+export interface CuratedNestedSafeState {
+  /** Addresses of nested safes selected by user */
+  selectedAddresses: string[]
+  /** Timestamp of last modification (for detecting new safes) */
+  lastModified: number
+  /** Whether user has completed initial curation */
+  hasCompletedCuration: boolean
+}
+
+export interface CuratedNestedSafesMap {
+  [parentSafeAddress: string]: CuratedNestedSafeState
+}
+
 export type SettingsState = {
   currency: string
 
@@ -18,13 +32,8 @@ export type SettingsState = {
     [chainId: string]: string[]
   }
 
-  manuallyHiddenSafes: {
-    [safeAddress: string]: string[]
-  }
-
-  overriddenAutoHideSafes: {
-    [safeAddress: string]: string[]
-  }
+  // Curation state for nested safes (replaces old hide/show)
+  curatedNestedSafes: CuratedNestedSafesMap
 
   tokenList: TOKEN_LISTS
 
@@ -54,9 +63,7 @@ export const initialState: SettingsState = {
 
   hiddenTokens: {},
 
-  manuallyHiddenSafes: {},
-
-  overriddenAutoHideSafes: {},
+  curatedNestedSafes: {},
 
   hideDust: true,
 
@@ -108,13 +115,25 @@ export const settingsSlice = createSlice({
       const { chainId, assets } = payload
       state.hiddenTokens[chainId] = assets
     },
-    setManuallyHiddenSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
-      const { safeAddress, nestedSafes } = payload
-      state.manuallyHiddenSafes[safeAddress] = nestedSafes
+    setCuratedNestedSafes: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{
+        parentSafeAddress: string
+        selectedAddresses: string[]
+        hasCompletedCuration: boolean
+      }>,
+    ) => {
+      const { parentSafeAddress, selectedAddresses, hasCompletedCuration } = payload
+      state.curatedNestedSafes[parentSafeAddress.toLowerCase()] = {
+        selectedAddresses: selectedAddresses.map((addr) => addr.toLowerCase()),
+        lastModified: Date.now(),
+        hasCompletedCuration,
+      }
     },
-    setOverriddenAutoHideSafes: (state, { payload }: PayloadAction<{ safeAddress: string; nestedSafes: string[] }>) => {
-      const { safeAddress, nestedSafes } = payload
-      state.overriddenAutoHideSafes[safeAddress] = nestedSafes
+    clearCuratedNestedSafes: (state, { payload }: PayloadAction<{ parentSafeAddress: string }>) => {
+      delete state.curatedNestedSafes[payload.parentSafeAddress.toLowerCase()]
     },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
@@ -156,8 +175,8 @@ export const {
   setQrShortName,
   setDarkMode,
   setHiddenTokensForChain,
-  setManuallyHiddenSafes,
-  setOverriddenAutoHideSafes,
+  setCuratedNestedSafes,
+  clearCuratedNestedSafes,
   setTokenList,
   setHideDust,
   hideSuspiciousTransactions,
@@ -197,16 +216,39 @@ export const selectOnChainSigning = createSelector(selectSettings, (settings) =>
 export const selectBlindSigning = createSelector(selectSettings, (settings) => settings.signing.blindSigning)
 export const selectHideDust = createSelector(selectSettings, (settings) => settings.hideDust ?? true)
 
-export const selectManuallyHiddenSafes = createSelector(
-  [selectSettings, (_, safeAddress: string) => safeAddress],
-  (settings, safeAddress) => {
-    return settings.manuallyHiddenSafes?.[safeAddress] || []
+// Curation selectors
+export const selectCuratedNestedSafes = createSelector(
+  [selectSettings, (_, parentSafeAddress: string) => parentSafeAddress],
+  (settings, parentSafeAddress): CuratedNestedSafeState | undefined => {
+    return settings.curatedNestedSafes?.[parentSafeAddress.toLowerCase()]
   },
 )
 
-export const selectOverriddenAutoHideSafes = createSelector(
+export const selectHasCompletedCuration = createSelector(
+  [selectSettings, (_, parentSafeAddress: string) => parentSafeAddress],
+  (settings, parentSafeAddress): boolean => {
+    return settings.curatedNestedSafes?.[parentSafeAddress.toLowerCase()]?.hasCompletedCuration ?? false
+  },
+)
+
+export const selectCuratedAddresses = createSelector(
+  [selectSettings, (_, parentSafeAddress: string) => parentSafeAddress],
+  (settings, parentSafeAddress): string[] => {
+    return settings.curatedNestedSafes?.[parentSafeAddress.toLowerCase()]?.selectedAddresses ?? []
+  },
+)
+
+/**
+ * Checks if a safe address is curated under ANY parent safe.
+ * Used to determine trust status for nested safes.
+ */
+export const selectIsCuratedNestedSafe = createSelector(
   [selectSettings, (_, safeAddress: string) => safeAddress],
-  (settings, safeAddress) => {
-    return settings.overriddenAutoHideSafes?.[safeAddress] || []
+  (settings, safeAddress): boolean => {
+    if (!safeAddress) return false
+    const normalizedAddress = safeAddress.toLowerCase()
+    return Object.values(settings.curatedNestedSafes).some((curation) =>
+      curation?.selectedAddresses?.some((addr) => addr.toLowerCase() === normalizedAddress),
+    )
   },
 )

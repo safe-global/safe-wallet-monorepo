@@ -88,6 +88,7 @@ import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 // Initialize observability before React rendering starts
@@ -142,7 +143,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     <WalletProvider>
       <GeoblockingProvider>
         <TxModalProvider>
-          <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+          <AddressBookSourceProvider>
+            <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+          </AddressBookSourceProvider>
         </TxModalProvider>
       </GeoblockingProvider>
     </WalletProvider>

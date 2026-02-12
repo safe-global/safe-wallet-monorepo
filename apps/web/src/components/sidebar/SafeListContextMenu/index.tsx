@@ -48,6 +48,7 @@ const SafeListContextMenu = ({
   addNetwork,
   rename,
   undeployedSafe,
+  hideNestedSafes = false,
   onClose,
 }: {
   name: string
@@ -56,23 +57,22 @@ const SafeListContextMenu = ({
   addNetwork: boolean
   rename: boolean
   undeployedSafe: boolean
+  hideNestedSafes?: boolean
   onClose?: () => void
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: address },
-    { skip: !isNestedSafesEnabled || !address || !anchorEl },
+    { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
   const nestedSafesForChain = ownedSafes?.[chainId] ?? []
-  const { allSafesWithStatus, visibleSafes, isLoading, startFiltering } = useNestedSafesVisibility(
-    nestedSafesForChain,
-    chainId,
-  )
+  const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
+    useNestedSafesVisibility(nestedSafesForChain, chainId)
 
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
@@ -119,19 +119,23 @@ const SafeListContextMenu = ({
           e.stopPropagation()
         }}
       >
-        {isNestedSafesEnabled && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
-          <MenuItem
-            onClick={handleOpenModal(ModalType.NESTED_SAFES, {
-              ...NESTED_SAFE_EVENTS.OPEN_LIST,
-              label: NESTED_SAFE_LABELS.sidebar,
-            })}
-          >
-            <ListItemIcon>
-              <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
-            </ListItemIcon>
-            <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
-          </MenuItem>
-        )}
+        {isNestedSafesEnabled &&
+          !hideNestedSafes &&
+          !undeployedSafe &&
+          nestedSafesForChain &&
+          nestedSafesForChain.length > 0 && (
+            <MenuItem
+              onClick={handleOpenModal(ModalType.NESTED_SAFES, {
+                ...NESTED_SAFE_EVENTS.OPEN_LIST,
+                label: NESTED_SAFE_LABELS.sidebar,
+              })}
+            >
+              <ListItemIcon>
+                <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
+              </ListItemIcon>
+              <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
+            </MenuItem>
+          )}
 
         {rename && (
           <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
@@ -171,6 +175,7 @@ const SafeListContextMenu = ({
           rawNestedSafes={nestedSafesForChain}
           allSafesWithStatus={allSafesWithStatus}
           visibleSafes={visibleSafes}
+          hasCompletedCuration={hasCompletedCuration}
           isLoading={isLoading}
           hideCreationButton
         />

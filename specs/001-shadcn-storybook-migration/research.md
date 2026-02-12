@@ -887,6 +887,6 @@ Created bottom-up stories for individual widgets before composing page:
 
 ### Reference Files
 
-- Knowledge base: `apps/web/CLAUDE.storybook.md`
+- Knowledge base: `apps/web/.storybook/AGENTS.md`
 - Example real Dashboard: `apps/web/src/components/dashboard/Dashboard.stories.tsx`
 - Fixture infrastructure: `config/test/msw/fixtures/`

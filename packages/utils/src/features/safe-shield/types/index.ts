@@ -104,6 +104,19 @@ export enum CommonSharedStatus {
   FAILED = 'FAILED',
 }
 
+// Safe-level status types (distinct from transaction-level threats)
+export enum SafeStatus {
+  UNTRUSTED = 'UNTRUSTED',
+  // Future: COUNTERFACTUAL, RECOVERY_PENDING, etc.
+}
+
+export type SafeAnalysisResult = {
+  severity: Severity
+  type: SafeStatus
+  title: string
+  description: string
+}
+
 export type AnyStatus = RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | CommonSharedStatus
 
 export type AnalysisResult<T extends AnyStatus = AnyStatus> = {

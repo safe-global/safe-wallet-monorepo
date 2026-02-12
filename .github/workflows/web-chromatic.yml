@@ -1,0 +1,64 @@
+name: Web Chromatic
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Checkout repository
+      statuses: write # Update commit statuses
+      pull-requests: write # Comment on PRs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for TurboSnap git history analysis
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Read version from package.json
+        id: version
+        working-directory: apps/web
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Run Chromatic visual regression testing
+      # Uses the selected branch (from GitHub UI) as the baseline
+      # TurboSnap is always enabled to only test changed stories
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          workingDir: apps/web
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          branchName: ${{ github.ref_name }} # Use the branch selected in GitHub UI
+          autoAcceptChanges: main # Only auto-accept on main branch
+          onlyChanged: true # TurboSnap always enabled
+          exitZeroOnChanges: true # Don't fail on visual diffs
+          exitOnceUploaded: true # Don't wait for Chromatic processing
+          zip: true # Faster uploads
+
+      - name: Summary
+        run: |
+          echo "### 🎨 Chromatic Visual Regression Test" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Configuration:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Baseline Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **TurboSnap**: ✅ Enabled (only changed stories)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Auto-accept**: Only on main branch" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ **Chromatic tests uploaded and processing**" >> $GITHUB_STEP_SUMMARY
+          echo "2. ⏳ Check the Chromatic UI for visual diff results" >> $GITHUB_STEP_SUMMARY
+          echo "3. ⏳ Review and approve/reject changes in Chromatic" >> $GITHUB_STEP_SUMMARY
+          echo "4. ⏳ Approved changes will update the baseline for this version" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 [View Chromatic Build](https://www.chromatic.com/builds?appId=YOUR_APP_ID)" >> $GITHUB_STEP_SUMMARY

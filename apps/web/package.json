@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.80.1",
+  "version": "1.81.0",
   "type": "module",
   "scripts": {
     "dev": "cross-env USE_RSPACK=1 next dev",
@@ -111,6 +111,7 @@
     "zodiac-roles-deployments": "^2.3.4"
   },
   "devDependencies": {
+    "@chromatic-com/cypress": "^0.11.8",
     "@chromatic-com/storybook": "^4.1.2",
     "@cowprotocol/app-data": "^3.1.0",
     "@eslint/eslintrc": "^3.3.1",
@@ -161,7 +162,6 @@
     "chromatic": "^13.3.5",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
-    "cypress-visual-regression": "^5.3.0",
     "eslint": "^9.29.0",
     "eslint-config-next": "^15.0.4",
     "eslint-plugin-no-only-tests": "^3.3.0",
@@ -184,7 +184,7 @@
     "remark-gfm": "^4.0.0",
     "remark-heading-id": "^1.0.1",
     "remark-mdx-frontmatter": "^5.2.0",
-    "storybook": "^10.2.6",
+    "storybook": "^10.2.7",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",

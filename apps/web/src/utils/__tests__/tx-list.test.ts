@@ -1,8 +1,8 @@
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
 
-import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations } from '@/utils/tx-list'
-import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { groupTxs, groupRecoveryTransactions, _getRecoveryCancellations, isSamePage } from '@/utils/tx-list'
+import type { QueuedItemPage, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 describe('tx-list', () => {
   describe('groupConflictingTxs', () => {
@@ -297,6 +297,64 @@ describe('tx-list', () => {
           address: moduleAddress2,
         },
       ])
+    })
+  })
+
+  describe('isSamePage', () => {
+    const createPage = (count: number, next: string | null): QueuedItemPage => ({
+      count,
+      next,
+      previous: null,
+      results: [],
+    })
+
+    it('should return true when pages have same count and next', () => {
+      const pageA = createPage(10, 'https://api.example.com/page2')
+      const pageB = createPage(10, 'https://api.example.com/page2')
+
+      expect(isSamePage(pageA, pageB)).toBe(true)
+    })
+
+    it('should return true when both pages have null next', () => {
+      const pageA = createPage(5, null)
+      const pageB = createPage(5, null)
+
+      expect(isSamePage(pageA, pageB)).toBe(true)
+    })
+
+    it('should return false when counts differ', () => {
+      const pageA = createPage(10, 'https://api.example.com/page2')
+      const pageB = createPage(20, 'https://api.example.com/page2')
+
+      expect(isSamePage(pageA, pageB)).toBe(false)
+    })
+
+    it('should return false when next URLs differ', () => {
+      const pageA = createPage(10, 'https://api.example.com/page2')
+      const pageB = createPage(10, 'https://api.example.com/page3')
+
+      expect(isSamePage(pageA, pageB)).toBe(false)
+    })
+
+    it('should return false when one has next and other has null', () => {
+      const pageA = createPage(10, 'https://api.example.com/page2')
+      const pageB = createPage(10, null)
+
+      expect(isSamePage(pageA, pageB)).toBe(false)
+    })
+
+    it('should work with TransactionItemPage type', () => {
+      const pageA: TransactionItemPage = { count: 5, next: null, previous: null, results: [] }
+      const pageB: TransactionItemPage = { count: 5, next: null, previous: null, results: [] }
+
+      expect(isSamePage(pageA, pageB)).toBe(true)
+    })
+
+    it('should return true for empty pages with same metadata', () => {
+      const pageA = createPage(0, null)
+      const pageB = createPage(0, null)
+
+      expect(isSamePage(pageA, pageB)).toBe(true)
     })
   })
 })

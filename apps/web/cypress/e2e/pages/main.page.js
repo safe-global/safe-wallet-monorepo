@@ -448,6 +448,25 @@ export function getAddedSafeAddressFromLocalStorage(chainId, index) {
   })
 }
 
+export function addSafeToTrustedList(chainId, safeAddress) {
+  cy.window().then((win) => {
+    const existingData = win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes)
+    const addedSafes = existingData ? JSON.parse(existingData) : {}
+
+    if (!addedSafes[chainId]) {
+      addedSafes[chainId] = {}
+    }
+
+    addedSafes[chainId][safeAddress] = {
+      owners: [],
+      threshold: 1,
+      ethBalance: '0',
+    }
+
+    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addedSafes, JSON.stringify(addedSafes))
+  })
+}
+
 export function changeSafeChainName(originalChain, newChain) {
   return originalChain.replace(/^[^:]+:/, newChain + ':')
 }
