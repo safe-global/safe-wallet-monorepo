@@ -39,6 +39,7 @@ export const ProtocolDetailSheetContainer = () => {
     <BottomSheet
       ref={ref}
       enableOverDrag={false}
+      snapPoints={[600, '100%']}
       enableDynamicSizing={true}
       onChange={handleSheetChanges}
       enablePanDownToClose
