@@ -1,9 +1,12 @@
 import { MemberRole } from './hooks/useSpaceMembers'
-import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import type { GetSpaceResponse, SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  GetSpaceResponse,
+  MemberDto,
+  SpaceAddressBookItemDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import type { AddressBookState } from '@/store/addressBookSlice'
 

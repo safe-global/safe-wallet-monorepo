@@ -347,7 +347,6 @@ export type CreateSpaceDto = {
 }
 export type UserDto = {
   id: number
-  status: 'PENDING' | 'ACTIVE'
 }
 export type MemberDto = {
   id: number
@@ -355,14 +354,11 @@ export type MemberDto = {
   name: string
   invitedBy: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  createdAt: string
-  updatedAt: string
   user: UserDto
 }
 export type GetSpaceResponse = {
   id: number
   name: string
-  status: 'ACTIVE'
   members: MemberDto[]
   /** Total count of Safes in the space */
   safeCount: number
