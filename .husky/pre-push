@@ -1,4 +1,7 @@
 #!/bin/bash
+set -euo pipefail
+
+lint-staged
 
 # Store the initial git status
 initial_status=$(git status --porcelain)
@@ -14,16 +17,6 @@ if [ "$initial_status" != "$post_lint_status" ]; then
   echo "===================================="
   echo "Linters gonna lint!"
   echo "Linting made changes. Please commit these changes before pushing or push with --no-verify flag to omit this check."
-  echo "===================================="
-  exit 1
-fi
-
-# Run prettier check — CI runs this too, so catch issues before pushing
-echo "Checking formatting..."
-if ! yarn workspace @safe-global/web prettier 2>/dev/null; then
-  echo "===================================="
-  echo "Prettier found formatting issues!"
-  echo "Run 'yarn prettier:fix' and commit the changes before pushing."
   echo "===================================="
   exit 1
 fi
