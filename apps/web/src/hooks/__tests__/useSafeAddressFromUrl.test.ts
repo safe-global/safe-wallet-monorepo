@@ -1,9 +1,9 @@
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/compat/router'
 import { renderHook } from '@/tests/test-utils'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
-// Mock useRouter
-jest.mock('next/router', () => ({
+// Mock useRouter from next/compat/router (returns null when router is not mounted)
+jest.mock('next/compat/router', () => ({
   useRouter: jest.fn(() => ({
     pathname: '/safe/home',
     query: {
@@ -83,5 +83,12 @@ describe('useSafeAddress hook', () => {
 
     const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('0x220866B1A2219f40e72f5c628B65D54268cA3A9D')
+  })
+
+  it('should return empty address when router is null (not mounted)', () => {
+    ;(useRouter as any).mockImplementation(() => null)
+
+    const { result } = renderHook(() => useSafeAddressFromUrl())
+    expect(result.current).toBe('')
   })
 })

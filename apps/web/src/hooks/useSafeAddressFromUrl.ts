@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/compat/router'
 import { parse, type ParsedUrlQuery } from 'querystring'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
@@ -11,7 +11,7 @@ const getLocationQuery = (): ParsedUrlQuery => {
 
 export const useSafeAddressFromUrl = (): string => {
   const router = useRouter()
-  const { safe = '' } = router.query
+  const { safe = '' } = router?.query ?? {}
   // Fall back to location.search when router.query is empty (SSG hydration)
   const fullAddress = safe ? (Array.isArray(safe) ? safe[0] : safe) : getLocationQuery().safe?.toString() || ''
 
