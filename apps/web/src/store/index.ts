@@ -39,7 +39,6 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 // that skip the build step (e.g. type-check, unit tests).
 let staticChainsData: Chain[] = []
 try {
-   
   staticChainsData = require('@/config/__generated__/chains.json') as Chain[]
 } catch {
   // File doesn't exist — fall back to empty array (runtime fetch will populate)
