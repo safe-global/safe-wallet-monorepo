@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ListRenderItem } from 'react-native'
 import { useSelector } from 'react-redux'
 import { getTokenValue, Text, View } from 'tamagui'
@@ -6,7 +6,7 @@ import { getTokenValue, Text, View } from 'tamagui'
 import { SafeTab } from '@/src/components/SafeTab'
 import { AssetsCard } from '@/src/components/transactions-list/Card/AssetsCard'
 import { FiatChange } from '@/src/components/FiatChange'
-import { POLLING_INTERVAL } from '@/src/config/constants'
+import { DUST_THRESHOLD, POLLING_INTERVAL } from '@/src/config/constants'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { Balance, useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Fallback } from '../Fallback'
@@ -17,7 +17,7 @@ import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { selectCurrency, selectHideDust, selectTokenList, TOKEN_LISTS } from '@/src/store/settingsSlice'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -25,6 +25,7 @@ export function TokensContainer() {
   const activeSafe = useSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
   const tokenList = useAppSelector(selectTokenList)
+  const hideDust = useAppSelector(selectHideDust)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
   const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : false
@@ -42,6 +43,18 @@ export function TokensContainer() {
       pollingInterval: POLLING_INTERVAL,
     },
   )
+
+  const visibleItems = useMemo(() => {
+    if (!data?.items) {
+      return undefined
+    }
+    if (!hideDust) {
+      return data.items
+    }
+    return data.items.filter((item) => Number(item.fiatBalance) >= DUST_THRESHOLD)
+  }, [data?.items, hideDust])
+
+  const allFilteredByDust = hideDust && data?.items && data.items.length > 0 && visibleItems?.length === 0
 
   const renderItem: ListRenderItem<Balance> = React.useCallback(
     ({ item }) => {
@@ -93,9 +106,21 @@ export function TokensContainer() {
     )
   }
 
+  if (allFilteredByDust) {
+    return (
+      <Fallback loading={isFetching}>
+        <NoFunds
+          fundsType={'token'}
+          title={'No tokens to show'}
+          description={'All tokens have a value below $0.01. Disable "Hide small balances" to see them.'}
+        />
+      </Fallback>
+    )
+  }
+
   return (
     <SafeTab.FlatList<Balance>
-      data={data?.items}
+      data={visibleItems}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
       style={{ marginTop: getTokenValue('$2') }}
