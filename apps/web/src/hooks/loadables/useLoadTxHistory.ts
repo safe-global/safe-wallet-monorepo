@@ -3,28 +3,22 @@ import { useEffect } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from '../useSafeInfo'
-import useChainId from '../useChainId'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { getTxHistory } from '@/services/transactions'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from '../useChains'
-import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const safeAddressFromUrl = useSafeAddressFromUrl()
-  const chainId = useChainId()
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   const { txHistoryTag } = safe
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const hideUntrustedTxs = (hasDefaultTokenlist && hideSuspiciousTransactions) ?? true
   const hideImitationTxs = hideSuspiciousTransactions ?? true
-
-  // Use URL-derived address for initial load, safe info address for subsequent reloads
-  const effectiveAddress = safeAddress || safeAddressFromUrl
-  const effectiveChainId = safe.chainId || chainId
 
   // Re-fetch when chainId, address, hideSuspiciousTransactions, or txHistoryTag changes
   const [data, error, loading] = useAsync<TransactionItemPage>(

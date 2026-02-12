@@ -2,24 +2,18 @@ import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/t
 import { useEffect, useState } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
-import useChainId from '../useChainId'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
-import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
 export const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const safeAddressFromUrl = useSafeAddressFromUrl()
-  const chainId = useChainId()
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   const { txQueuedTag, txHistoryTag } = safe
   const [updatedTxId, setUpdatedTxId] = useState<string>('')
   // N.B. we reload when txQueuedTag/txHistoryTag/updatedTxId changes as txQueuedTag alone is not enough
   const reloadTag = (txQueuedTag ?? '') + (txHistoryTag ?? '') + updatedTxId
-
-  // Use URL-derived address for initial load, safe info address for subsequent reloads
-  const effectiveAddress = safeAddress || safeAddressFromUrl
-  const effectiveChainId = safe.chainId || chainId
 
   // Re-fetch when chainId/address, or txQueueTag change
   const [data, error, loadingQueueItems] = useAsync<QueuedItemPage>(

@@ -5,8 +5,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
-import useChainId from '../useChainId'
-import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual/hooks'
 import { usePortfolioBalances } from '@/features/portfolio'
@@ -49,13 +48,8 @@ export const useTokenListSetting = (): boolean | undefined => {
 export const useTxServiceBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const safeAddressFromUrl = useSafeAddressFromUrl()
-  const chainId = useChainId()
-
-  // Use URL-derived address/chainId for initial load before safe info arrives
-  const effectiveAddress = safeAddress || safeAddressFromUrl
-  const effectiveChainId = safe.chainId || chainId
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   // Assume deployed until safe info confirms otherwise (counterfactual hook handles undeployed)
   const isReady = effectiveAddress && effectiveChainId && isTrustedTokenList !== undefined
   const isCounterfactual = safeLoaded && !safe.deployed

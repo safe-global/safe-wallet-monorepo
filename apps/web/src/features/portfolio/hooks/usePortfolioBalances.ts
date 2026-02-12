@@ -2,9 +2,7 @@ import { useMemo } from 'react'
 import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import useChainId from '@/hooks/useChainId'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import useEffectiveSafeParams from '@/hooks/useEffectiveSafeParams'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useTxServiceBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
@@ -38,13 +36,7 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
 const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress } = useSafeInfo()
-  const safeAddressFromUrl = useSafeAddressFromUrl()
-  const chainId = useChainId()
-
-  // Use URL-derived address/chainId for initial load before safe info arrives
-  const effectiveAddress = safeAddress || safeAddressFromUrl
-  const effectiveChainId = safe.chainId || chainId
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   const isReadyPortfolio = effectiveAddress && effectiveChainId && isTrustedTokenList !== undefined
 
   // Portfolio endpoint (called first)
