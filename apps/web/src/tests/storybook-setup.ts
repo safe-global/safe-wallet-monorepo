@@ -6,6 +6,21 @@ import * as previewAnnotations from '../../.storybook/preview'
 import { faker } from '@faker-js/faker'
 import * as formatters from '@safe-global/utils/utils/formatters'
 
+// Mock next/router for storybook snapshot tests where NextRouter is not mounted
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(() => ({
+    pathname: '/',
+    query: {},
+    asPath: '/',
+    push: jest.fn(),
+    replace: jest.fn(),
+    back: jest.fn(),
+    prefetch: jest.fn().mockResolvedValue(undefined),
+    events: { on: jest.fn(), off: jest.fn(), emit: jest.fn() },
+    isReady: true,
+  })),
+}))
+
 // Seed faker for deterministic test data
 faker.seed(123)
 
