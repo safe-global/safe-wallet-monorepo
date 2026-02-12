@@ -49,13 +49,14 @@ const SAFE_NAMES = [
 const createMockAddress = (index: number) =>
   `0x${index.toString(16).padStart(4, '0')}...${(index + 100).toString(16).padStart(4, '0')}`
 
+/** Fiat balance as numeric string; FiatValue will format (e.g. to $16.78M) */
 const createMockSafe = (index: number, overrides = {}) => ({
   id: `${baseChains[index % baseChains.length].chainId}:${createMockAddress(index + 1)}`,
   name: SAFE_NAMES[index % SAFE_NAMES.length],
   address: createMockAddress(index + 1),
   threshold: 2 + (index % 2),
   owners: 3 + (index % 4),
-  balance: `$${(1 + (index % 50)).toFixed(2)}M`,
+  balance: String((1 + (index % 50)) * 1_000_000),
   chains: baseChains,
   ...overrides,
 })
@@ -67,7 +68,7 @@ const mockSafes = [
     address: '0xA77D...98b6',
     threshold: 3,
     owners: 5,
-    balance: '$16.78M',
+    balance: '16780000',
   }),
   createMockSafe(1, {
     id: '100:0x8675...cdba',
@@ -75,7 +76,7 @@ const mockSafes = [
     address: '0x8675...cdba',
     threshold: 3,
     owners: 5,
-    balance: '$40.07M',
+    balance: '40070000',
   }),
   createMockSafe(2, {
     id: '8453:0x8675...abcd',
@@ -83,7 +84,7 @@ const mockSafes = [
     address: '0x8675...abcd',
     threshold: 3,
     owners: 5,
-    balance: '$31.9M',
+    balance: '31900000',
   }),
 ]
 

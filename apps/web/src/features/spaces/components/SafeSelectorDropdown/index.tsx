@@ -176,6 +176,16 @@ function SafeSelectorDropdown({
   const displayInfo = getSafeDisplayInfo()
   const selectValue = safes.length > 0 ? localSelectedSafeId : (currentSafeId ?? '')
   const showTrigger = (safes.length > 0 && selectedSafe != null) || (safes.length === 0 && currentSafeId != null)
+  const isSingleSafe = safes.length <= 1
+
+  const [dropdownOpen, setDropdownOpen] = React.useState(false)
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      if (isSingleSafe) setDropdownOpen(false)
+      else setDropdownOpen(next)
+    },
+    [isSingleSafe],
+  )
 
   const handleChainSelect = React.useCallback(
     (selectedChainId: string, e?: React.PointerEvent | React.MouseEvent) => {
@@ -254,7 +264,7 @@ function SafeSelectorDropdown({
       threshold: safeItem.threshold,
       owners: safeItem.owners,
       chains: safeItem.chains,
-      balance: safeItem.balance,
+      balance: <FiatValue value={safeItem.balance} />,
       isLoading: false,
     }
   }
@@ -263,6 +273,7 @@ function SafeSelectorDropdown({
     <div
       className={cn(
         'flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-2xl p-2 overflow-hidden bg-card',
+        !isSingleSafe && 'cursor-pointer',
         className,
       )}
     >
@@ -271,9 +282,14 @@ function SafeSelectorDropdown({
         onValueChange={(value) => {
           if (value) handleSafeChange(value)
         }}
+        open={isSingleSafe ? false : dropdownOpen}
+        onOpenChange={handleOpenChange}
       >
         <SelectTrigger
-          className="-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent py-0 pl-6 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0"
+          className={cn(
+            '-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent py-0 pl-6 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0',
+            !isSingleSafe && 'cursor-pointer',
+          )}
           size="default"
           iconWrapperClassName="border-l border-border pl-4 pr-4 ml-1 self-stretch flex items-center min-h-[2.5rem]"
         >
@@ -344,7 +360,9 @@ function SafeSelectorDropdown({
                       </span>
                     )
                   ) : (
-                    <span className="text-sm text-muted-foreground">{selectedSafe?.balance ?? '--'}</span>
+                    <span className="text-sm text-muted-foreground">
+                      <FiatValue value={selectedSafe?.balance} />
+                    </span>
                   )}
                   <Badge variant="secondary" className="gap-1">
                     <User className="size-3" />
@@ -383,7 +401,7 @@ function SafeSelectorDropdown({
                               className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
                               style={{ marginLeft: index > 0 ? '-8px' : '0' }}
                             >
-                              <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
+                              <ChainLogo chainId={chainItem.chainId} />
                             </span>
                           ))}
                         </div>
