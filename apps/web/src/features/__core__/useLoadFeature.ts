@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { logError, Errors } from '@/services/exceptions'
 import type { FeatureHandle, FeatureImplementation } from './types'
@@ -22,20 +22,25 @@ interface FeatureMeta {
 
 /**
  * Creates a proxy that provides automatic stubs based on naming conventions.
- * - PascalCase → component returning null
- * - useSomething → undefined (hooks not stubbed - see Hooks Pattern in docs)
- * - camelCase → undefined (will throw if called, helping catch missing $isReady checks)
+ * The proxy is created once per hook instance and reads meta values from a ref,
+ * so its reference stays stable while the feature is not ready.
+ *
+ * - PascalCase -> component returning null
+ * - useSomething -> undefined (hooks not stubbed - see Hooks Pattern in docs)
+ * - camelCase -> undefined (will throw if called, helping catch missing $isReady checks)
  */
-function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T & FeatureMeta {
+function createStableStubProxy<T extends FeatureImplementation>(
+  metaRef: React.RefObject<FeatureMeta>,
+): T & FeatureMeta {
   const stubCache = new Map<string | symbol, unknown>()
 
   return new Proxy({} as T & FeatureMeta, {
     get(_, prop) {
-      // Return meta properties directly
-      if (prop === '$isLoading') return meta.$isLoading
-      if (prop === '$isDisabled') return meta.$isDisabled
-      if (prop === '$isReady') return meta.$isReady
-      if (prop === '$error') return meta.$error
+      // Meta properties read from the ref — always fresh
+      if (prop === '$isLoading') return metaRef.current.$isLoading
+      if (prop === '$isDisabled') return metaRef.current.$isDisabled
+      if (prop === '$isReady') return metaRef.current.$isReady
+      if (prop === '$error') return metaRef.current.$error
 
       // Return cached stub if exists
       if (stubCache.has(prop)) {
@@ -51,8 +56,6 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
         stub = () => null
       } else {
         // Hooks and services - undefined (no stub)
-        // Hooks: undefined when not ready (component must not mount until ready)
-        // Services: undefined when not ready (will throw if called, catching missing $isReady checks)
         stub = undefined
       }
 
@@ -62,14 +65,29 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
   })
 }
 
+/** Derives FeatureMeta from the flag and async load state. */
+function computeMeta(
+  isEnabled: boolean | undefined,
+  feature: unknown,
+  loading: boolean,
+  error: Error | undefined,
+): FeatureMeta {
+  return {
+    $isDisabled: isEnabled === false,
+    $isLoading: isEnabled === undefined || loading,
+    $isReady: isEnabled === true && !loading && !!feature,
+    $error: error,
+  }
+}
+
 /**
  * Hook to load a feature lazily based on its handle.
  *
  * ALWAYS returns an object - never null or undefined. When the feature is
  * loading or disabled, returns a Proxy with automatic stubs based on naming:
- * - PascalCase → component returning null
- * - useSomething → undefined (hooks not stubbed - component must not mount until ready)
- * - camelCase → undefined (will throw if called without checking $isReady)
+ * - PascalCase -> component returning null
+ * - useSomething -> undefined (hooks not stubbed - component must not mount until ready)
+ * - camelCase -> undefined (will throw if called without checking $isReady)
  *
  * @param handle - The feature handle with name, useIsEnabled, and load function.
  * @returns Feature object with meta properties ($isLoading, $isDisabled, $isReady, $error)
@@ -117,18 +135,31 @@ export function useLoadFeature<T extends FeatureImplementation>(
   // Check feature flag (must be called unconditionally as it's a hook)
   const isEnabled = handle.useIsEnabled()
 
-  // Load feature when enabled
+  // Cache loaded feature in a ref — survives isEnabled flicker (e.g. chain switch
+  // where the flag briefly becomes undefined then true again). Once a feature
+  // module is loaded it never changes, so re-fetching is pure waste.
+  const cachedFeatureRef = useRef<LoadedFeature | undefined>(undefined)
+
+  // Load feature when enabled, or return from cache
   const [feature, error, loading] = useAsync(
     () => {
       if (isEnabled !== true) return
-      return handle.load().then(
-        (module) =>
-          ({
-            name: handle.name,
-            useIsEnabled: handle.useIsEnabled,
-            ...module.default,
-          }) as LoadedFeature,
-      )
+
+      // Already loaded? Return from cache — skip the import() entirely
+      if (cachedFeatureRef.current) {
+        return Promise.resolve(cachedFeatureRef.current)
+      }
+
+      return handle.load().then((module) => {
+        const loaded = {
+          name: handle.name,
+          useIsEnabled: handle.useIsEnabled,
+          ...module.default,
+        } as LoadedFeature
+
+        cachedFeatureRef.current = loaded
+        return loaded
+      })
     },
     [isEnabled, handle],
     false,
@@ -139,31 +170,19 @@ export function useLoadFeature<T extends FeatureImplementation>(
     logError(Errors._906, error)
   }
 
-  // Compute meta state
-  const $isDisabled = isEnabled === false
-  const $isLoading = isEnabled === undefined || loading
-  const $isReady = isEnabled === true && !loading && !!feature
-  const $error = error
+  const meta = computeMeta(isEnabled, feature, loading, error)
 
-  // Return feature with meta, or stub proxy
+  // Stable proxy — created once per hook instance, reads meta from ref
+  const metaRef = useRef<FeatureMeta>(meta)
+  metaRef.current = meta
+
+  const stubProxy = useMemo(() => createStableStubProxy<T>(metaRef), [])
+
+  // Return feature with meta, or the stable stub proxy
   return useMemo(() => {
-    if ($isReady && feature) {
-      // Feature loaded - return real implementation with meta
-      return {
-        ...feature,
-        $isLoading: false,
-        $isDisabled: false,
-        $isReady: true,
-        $error: undefined,
-      } as LoadedFeature & FeatureMeta
+    if (meta.$isReady && feature) {
+      return { ...feature, ...meta } as LoadedFeature & FeatureMeta
     }
-
-    // Not ready - return stub proxy
-    return createStubProxy<T>({
-      $isLoading,
-      $isDisabled,
-      $isReady: false,
-      $error,
-    }) as LoadedFeature & FeatureMeta
-  }, [$isReady, $isLoading, $isDisabled, $error, feature])
+    return stubProxy as unknown as LoadedFeature & FeatureMeta
+  }, [meta.$isReady, feature, stubProxy, meta])
 }
