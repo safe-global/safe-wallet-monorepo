@@ -1,62 +1,19 @@
-import * as React from 'react'
-import { useRouter } from 'next/router'
 import { ChevronDown, Settings, User } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { cn } from '@/utils/cn'
-import { useAppSelector } from '@/store'
-import { selectAddressBookByChain } from '@/store/addressBookSlice'
-import { useGetChainsConfigQuery } from '@safe-global/store/gateway'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import useChainId from '@/hooks/useChainId'
-import { useCurrentChain } from '@/hooks/useChains'
-import useBalances from '@/hooks/useBalances'
-import { useGetHref } from '@/hooks/safes/useGetHref'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import FiatValue from '@/components/common/FiatValue'
-import type { SafeInfo } from '@/features/spaces/types'
-
-export interface SafeSelectorDropdownProps {
-  safes: SafeInfo[]
-  selectedSafeId?: string
-  onSafeChange?: (safeId: string) => void
-  onChainChange?: (chainId: string) => void
-  className?: string
-}
-
-const getInitials = (name: string): string => {
-  return name
-    .split(' ')
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-const shortenAddress = (address: string): string => {
-  if (address.length <= 10) return address
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
-}
-
-const parseSafeId = (safeId: string) => {
-  const colonIndex = safeId.indexOf(':')
-  const isSafeIdFormat = colonIndex > 0 && safeId.slice(colonIndex + 1).startsWith('0x')
-
-  if (!isSafeIdFormat) return null
-
-  return {
-    chainId: safeId.slice(0, colonIndex),
-    address: safeId.slice(colonIndex + 1),
-  }
-}
-
-interface SafeInfoDisplayProps {
-  name: string
-  address: string
-  className?: string
-}
+import { useSafeSelectorState } from './hooks/useSafeSelectorState'
+import { getInitials } from './utils'
+import {
+  type SafeSelectorDropdownProps,
+  type SafeInfoDisplayProps,
+  type BalanceDisplayProps,
+  type ChainLogoProps,
+} from './types'
 
 const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => (
   <div className={cn('flex items-center gap-3', className)}>
@@ -69,13 +26,6 @@ const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => 
     </div>
   </div>
 )
-
-interface BalanceDisplayProps {
-  balance: string | React.ReactNode
-  threshold: number
-  owners: number
-  isLoading?: boolean
-}
 
 const BalanceDisplay = ({ balance, threshold, owners, isLoading }: BalanceDisplayProps) => (
   <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
@@ -91,11 +41,6 @@ const BalanceDisplay = ({ balance, threshold, owners, isLoading }: BalanceDispla
   </div>
 )
 
-interface ChainLogoProps {
-  chainId: string
-  size?: number
-}
-
 const ChainLogo = ({ chainId, size = 22 }: ChainLogoProps) => (
   <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-flex-start bg-background">
     <ChainIndicator chainId={chainId} imageSize={size} showLogo onlyLogo />
@@ -109,165 +54,28 @@ function SafeSelectorDropdown({
   onChainChange,
   className,
 }: SafeSelectorDropdownProps) {
-  const router = useRouter()
-  const getHref = useGetHref(router)
-  const { data: chainsData } = useGetChainsConfigQuery()
-  const { safeAddress, safe } = useSafeInfo()
-  const chainId = useChainId()
-  const chain = useCurrentChain()
-  const addressBook = useAppSelector((state) => selectAddressBookByChain(state, chainId))
-  const { balances, loading: balancesLoading } = useBalances()
-
-  // Determine current safe identity
-  const currentSafeId = safeAddress && chainId ? `${chainId}:${safeAddress}` : null
-  const safeNameFromBook = safeAddress ? addressBook?.[safeAddress] : undefined
-  const currentSafeName = safeNameFromBook ?? safe?.address?.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
-  const currentSafeDisplayAddress = safeAddress ? shortenAddress(safeAddress) : ''
-
-  // Track the selected chain and safe locally
-  const [selectedChainId, setSelectedChainId] = React.useState<string>(chainId)
-  const [localSelectedSafeId, setLocalSelectedSafeId] = React.useState<string | undefined>(
-    selectedSafeId ?? (safes.length > 0 ? safes[0]?.id : (currentSafeId ?? undefined)),
-  )
-
-  // Sync with chainId from hook when it changes
-  React.useEffect(() => {
-    setSelectedChainId(chainId)
-  }, [chainId])
-
-  // Sync with selectedSafeId prop when it changes
-  React.useEffect(() => {
-    if (selectedSafeId !== undefined) {
-      setLocalSelectedSafeId(selectedSafeId)
-    }
-  }, [selectedSafeId])
-
-  // Update local state when safes or currentSafeId changes
-  React.useEffect(() => {
-    if (localSelectedSafeId === undefined) {
-      setLocalSelectedSafeId(safes.length > 0 ? safes[0]?.id : (currentSafeId ?? undefined))
-    }
-  }, [safes, currentSafeId, localSelectedSafeId])
-
-  // Determine display values
-  const selectedSafe = safes.find((s) => s.id === localSelectedSafeId) ?? safes[0]
-  const isCurrentSafeSelected = currentSafeId != null && (localSelectedSafeId === currentSafeId || safes.length === 0)
-
-  const getSafeDisplayInfo = () => {
-    if (isCurrentSafeSelected) {
-      return {
-        name: currentSafeName,
-        address: currentSafeDisplayAddress,
-        threshold: safe?.threshold ?? 0,
-        owners: safe?.owners?.length ?? 0,
-        showLiveBalance: true,
-      }
-    }
-
-    return {
-      name: selectedSafe?.name ?? '',
-      address: selectedSafe?.address ?? '',
-      threshold: selectedSafe?.threshold ?? 0,
-      owners: selectedSafe?.owners ?? 0,
-      showLiveBalance: false,
-    }
-  }
-
-  const displayInfo = getSafeDisplayInfo()
-  const selectValue = safes.length > 0 ? localSelectedSafeId : (currentSafeId ?? '')
-  const showTrigger = (safes.length > 0 && selectedSafe != null) || (safes.length === 0 && currentSafeId != null)
-  const isSingleSafe = safes.length <= 1
-
-  const [dropdownOpen, setDropdownOpen] = React.useState(false)
-  const handleOpenChange = React.useCallback(
-    (next: boolean) => {
-      if (isSingleSafe) setDropdownOpen(false)
-      else setDropdownOpen(next)
-    },
-    [isSingleSafe],
-  )
-
-  const handleChainSelect = React.useCallback(
-    (selectedChainId: string, e?: React.PointerEvent | React.MouseEvent) => {
-      e?.preventDefault()
-      e?.stopPropagation()
-
-      // Update the selected chain state to reflect it in the UI immediately
-      setSelectedChainId(selectedChainId)
-      onChainChange?.(selectedChainId)
-
-      const selectedChain = chainsData?.entities?.[selectedChainId]
-      if (selectedChain && safeAddress) {
-        const route = getHref(selectedChain, safeAddress)
-        queueMicrotask(() => {
-          router.push(route)
-        })
-      }
-    },
-    [onChainChange, chainsData?.entities, getHref, router, safeAddress],
-  )
-
-  const handleSafeChange = React.useCallback(
-    (value: string) => {
-      setLocalSelectedSafeId(value)
-      onSafeChange?.(value)
-
-      const parsed = parseSafeId(value)
-      if (!parsed) return
-
-      const { chainId: selectedChainId, address: selectedSafeAddress } = parsed
-      setSelectedChainId(selectedChainId)
-
-      const selectedChain = chainsData?.entities?.[selectedChainId]
-      if (selectedChain && selectedSafeAddress) {
-        const route = getHref(selectedChain, selectedSafeAddress)
-        router.push(route)
-      }
-    },
-    [onSafeChange, chainsData?.entities, getHref, router],
-  )
-
-  const allChainsFromConfig = React.useMemo(
-    () =>
-      chainsData?.ids?.map((id) => {
-        const c = chainsData.entities?.[id]
-        return {
-          chainId: id,
-          chainName: c?.chainName ?? c?.shortName ?? id,
-          chainLogoUri: c?.chainLogoUri ?? undefined,
-        }
-      }) ?? [],
-    [chainsData?.ids, chainsData?.entities],
-  )
-  const chainsToShow = isCurrentSafeSelected ? allChainsFromConfig : (selectedSafe?.chains ?? [])
-
-  const getSafeItemData = (safeItem: SafeInfo) => {
-    const isCurrent = safeItem.id === currentSafeId
-
-    if (isCurrent) {
-      return {
-        name: currentSafeName,
-        address: currentSafeDisplayAddress,
-        threshold: safe?.threshold ?? 0,
-        owners: safe?.owners?.length ?? 0,
-        chains: chain
-          ? [{ chainId, chainName: chain.chainName ?? chain.shortName, chainLogoUri: chain.chainLogoUri ?? undefined }]
-          : [],
-        balance: <FiatValue value={balances.fiatTotal} />,
-        isLoading: balancesLoading,
-      }
-    }
-
-    return {
-      name: safeItem.name,
-      address: safeItem.address,
-      threshold: safeItem.threshold,
-      owners: safeItem.owners,
-      chains: safeItem.chains,
-      balance: <FiatValue value={safeItem.balance} />,
-      isLoading: false,
-    }
-  }
+  const {
+    displayInfo,
+    selectValue,
+    showTrigger,
+    isSingleSafe,
+    dropdownOpen,
+    handleOpenChange,
+    handleChainSelect,
+    handleSafeChange,
+    selectedChainId,
+    chainsToShow,
+    getSafeItemData,
+    currentSafeId,
+    currentSafeName,
+    currentSafeDisplayAddress,
+    selectedSafe,
+    balances,
+    balancesLoading,
+    safe,
+    chain,
+    chainId,
+  } = useSafeSelectorState({ safes, selectedSafeId, onSafeChange, onChainChange })
 
   return (
     <div
@@ -406,7 +214,7 @@ function SafeSelectorDropdown({
                           ))}
                         </div>
                         <BalanceDisplay
-                          balance={itemData.balance}
+                          balance={<FiatValue value={itemData.balanceValue} />}
                           threshold={itemData.threshold}
                           owners={itemData.owners}
                           isLoading={itemData.isLoading}
@@ -443,3 +251,4 @@ function SafeSelectorDropdown({
 }
 
 export default SafeSelectorDropdown
+export type { SafeSelectorDropdownProps }
