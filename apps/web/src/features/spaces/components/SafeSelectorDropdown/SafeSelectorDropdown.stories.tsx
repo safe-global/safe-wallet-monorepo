@@ -1,27 +1,44 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { createMockStory } from '@/stories/mocks'
+import { action } from '@storybook/addon-actions'
+import { useState } from 'react'
 import SafeSelectorDropdown from './index'
+
+const defaultSetup = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'disconnected',
+  layout: 'none',
+})
 
 const meta = {
   title: 'Features/Spaces/SafeSelectorDropdown',
   component: SafeSelectorDropdown,
   parameters: {
     layout: 'centered',
+    ...defaultSetup.parameters,
   },
+  decorators: [defaultSetup.decorator],
   tags: ['autodocs'],
+  argTypes: {
+    safes: { control: 'object' },
+    selectedSafeId: { control: 'text' },
+    onSafeChange: { action: 'Safe changed' },
+    onChainChange: { action: 'Chain changed' },
+  },
 } satisfies Meta<typeof SafeSelectorDropdown>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 const baseChains = [
-  { id: 'eth', name: 'Ethereum', logo: '' },
-  { id: 'gnosis', name: 'Gnosis Chain', logo: '' },
-  { id: 'base', name: 'Base', logo: '' },
+  { id: '1', name: 'Ethereum', logo: '' },
+  { id: '100', name: 'Gnosis Chain', logo: '' },
+  { id: '8453', name: 'Base', logo: '' },
 ]
 
 const mockSafes = [
   {
-    id: '1',
+    id: '1:0xA77DE...98b6',
     name: 'My Safe',
     address: '0xA77D...98b6',
     threshold: 3,
@@ -30,7 +47,7 @@ const mockSafes = [
     chains: baseChains,
   },
   {
-    id: '2',
+    id: '100:0x8675...cdba',
     name: 'Another Safe',
     address: '0x8675...cdba',
     threshold: 3,
@@ -39,7 +56,7 @@ const mockSafes = [
     chains: baseChains,
   },
   {
-    id: '3',
+    id: '8453:0x8675...abcd',
     name: 'One more Safe',
     address: '0x8675...abcd',
     threshold: 3,
@@ -61,7 +78,7 @@ const safeNames = [
 
 const createMockSafesLong = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
-    id: String(i + 1),
+    id: `${baseChains[i % baseChains.length].id}:0x${(i + 1).toString(16).padStart(4, '0')}...${(i + 100).toString(16).padStart(4, '0')}`,
     name: safeNames[i % safeNames.length],
     address: `0x${(i + 1).toString(16).padStart(4, '0')}...${(i + 100).toString(16).padStart(4, '0')}`,
     threshold: 2 + (i % 2),
@@ -72,25 +89,40 @@ const createMockSafesLong = (count: number) =>
 
 const mockSafesLong = createMockSafesLong(7)
 
+// Interactive wrapper component to manage state
+const InteractiveWrapper = ({ safes, initialSafeId }: { safes: typeof mockSafes; initialSafeId: string }) => {
+  const [selectedSafeId, setSelectedSafeId] = useState(initialSafeId)
+
+  return (
+    <SafeSelectorDropdown
+      safes={safes}
+      selectedSafeId={selectedSafeId}
+      onSafeChange={(safeId: string) => {
+        action('Safe changed')(safeId)
+        setSelectedSafeId(safeId)
+      }}
+      onChainChange={action('Chain changed')}
+    />
+  )
+}
+
 export const Default: Story = {
+  render: () => <InteractiveWrapper safes={mockSafes} initialSafeId={mockSafes[0].id} />,
   args: {
     safes: mockSafes,
-    selectedSafeId: '1',
-    onSafeChange: (safeId: string) => console.log('Safe changed:', safeId),
-    onChainChange: (chainId: string) => console.log('Chain changed:', chainId),
   },
 }
 
 export const SingleSafe: Story = {
+  render: () => <InteractiveWrapper safes={[mockSafes[0]]} initialSafeId={mockSafes[0].id} />,
   args: {
     safes: [mockSafes[0]],
-    selectedSafeId: '1',
   },
 }
 
 export const MultipleSafes: Story = {
+  render: () => <InteractiveWrapper safes={mockSafesLong} initialSafeId={mockSafesLong[1].id} />,
   args: {
     safes: mockSafesLong,
-    selectedSafeId: '2',
   },
 }
