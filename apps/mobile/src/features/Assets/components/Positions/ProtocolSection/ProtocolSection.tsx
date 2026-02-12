@@ -47,19 +47,25 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
           size="$8"
           fallbackIcon="apps"
         />
-        <View flex={1} marginLeft="$3">
+        <View flex={1} marginLeft="$3" overflow="hidden">
           <View flexDirection="row" alignItems="center" gap="$2">
-            <Text fontSize="$4" fontWeight={600} color="$color" numberOfLines={1} lineHeight={20}>
+            <Text fontSize="$4" fontWeight={600} color="$color" numberOfLines={1} lineHeight={20} flexShrink={1}>
               {protocol_metadata.name}
             </Text>
-            <View backgroundColor="$backgroundSecondary" paddingHorizontal="$2" paddingVertical={2} borderRadius="$2">
+            <View
+              backgroundColor="$backgroundSecondary"
+              paddingHorizontal="$2"
+              paddingVertical={2}
+              borderRadius="$2"
+              flexShrink={0}
+            >
               <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
                 {formattedPercentage}
               </Text>
             </View>
           </View>
         </View>
-        <View flexDirection="row" alignItems="center" gap="$2">
+        <View flexDirection="row" alignItems="center" gap="$2" flexShrink={0}>
           <View alignItems="flex-end">
             <Text fontSize="$4" fontWeight={600} color="$color" lineHeight={20}>
               {formattedFiatTotal}

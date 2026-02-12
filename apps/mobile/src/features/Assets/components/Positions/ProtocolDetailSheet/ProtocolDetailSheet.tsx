@@ -31,23 +31,29 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
         alignItems="center"
         justifyContent="space-between"
       >
-        <View flexDirection="row" alignItems="center" gap="$2" flex={1}>
+        <View flexDirection="row" alignItems="center" gap="$2" flex={1} overflow="hidden">
           <Logo
             logoUri={protocol_metadata.icon.url}
             accessibilityLabel={protocol_metadata.name}
             size="$10"
             fallbackIcon="apps"
           />
-          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28}>
+          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28} numberOfLines={1} flexShrink={1}>
             {protocol_metadata.name}
           </Text>
-          <View backgroundColor="$backgroundSecondary" paddingHorizontal="$2" paddingVertical={2} borderRadius="$2">
+          <View
+            backgroundColor="$backgroundSecondary"
+            paddingHorizontal="$2"
+            paddingVertical={2}
+            borderRadius="$2"
+            flexShrink={0}
+          >
             <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
               {formattedPercentage}
             </Text>
           </View>
         </View>
-        <View alignItems="flex-end">
+        <View alignItems="flex-end" flexShrink={0}>
           <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28}>
             {formattedFiatTotal}
           </Text>
