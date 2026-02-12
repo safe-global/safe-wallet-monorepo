@@ -69,6 +69,11 @@ export const AppRoutes = {
     index: '/transactions',
     history: '/transactions/history',
   },
+  onboarding: {
+    createSpace: '/onboarding/create-space',
+    selectSafes: '/onboarding/select-safes',
+    inviteMembers: '/onboarding/invite-members',
+  },
   welcome: {
     spaces: '/welcome/spaces',
     index: '/welcome',
