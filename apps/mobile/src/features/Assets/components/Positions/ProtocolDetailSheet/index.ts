@@ -1,2 +1,2 @@
 export { ProtocolDetailSheetContainer } from './ProtocolDetailSheet.container'
-export { ProtocolDetailSheet } from './ProtocolDetailSheet'
+export { ProtocolDetailSheetHeader, ProtocolDetailSheetPositions } from './ProtocolDetailSheet'

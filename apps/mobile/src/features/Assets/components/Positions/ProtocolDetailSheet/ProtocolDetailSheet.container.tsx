@@ -1,7 +1,11 @@
-import React, { useMemo } from 'react'
-import { useLocalSearchParams } from 'expo-router'
-import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
-import { ProtocolDetailSheet } from './ProtocolDetailSheet'
+import React, { useCallback, useMemo, useRef } from 'react'
+import { Platform } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { getTokenValue, getVariable, useTheme } from 'tamagui'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
+import { ProtocolDetailSheetHeader, ProtocolDetailSheetPositions } from './ProtocolDetailSheet'
 import { usePositions } from '@/src/features/Assets/hooks/usePositions'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
@@ -11,10 +15,19 @@ export const ProtocolDetailSheetContainer = () => {
   const { protocolId } = useLocalSearchParams<{ protocolId: string }>()
   const currency = useAppSelector(selectCurrency)
   const { data } = usePositions()
+  const ref = useRef<BottomSheet>(null)
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const theme = useTheme()
 
   const totalFiatValue = useMemo(() => calculatePositionsFiatTotal(data), [data])
-
   const protocol = useMemo(() => data?.find((p) => p.protocol === protocolId), [data, protocolId])
+
+  const handleSheetChanges = useCallback((index: number) => {
+    if (index === -1) {
+      router.back()
+    }
+  }, [])
 
   if (!protocol) {
     return null
@@ -23,8 +36,26 @@ export const ProtocolDetailSheetContainer = () => {
   const percentageRatio = calculateProtocolPercentage(protocol.fiatTotal, totalFiatValue)
 
   return (
-    <SafeBottomSheet>
-      <ProtocolDetailSheet protocol={protocol} percentageRatio={percentageRatio} currency={currency} />
-    </SafeBottomSheet>
+    <BottomSheet
+      ref={ref}
+      enableOverDrag={false}
+      enableDynamicSizing={true}
+      onChange={handleSheetChanges}
+      enablePanDownToClose
+      overDragResistanceFactor={10}
+      backgroundComponent={BackgroundComponent}
+      backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
+      topInset={insets.top}
+      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+    >
+      <ProtocolDetailSheetHeader protocol={protocol} percentageRatio={percentageRatio} currency={currency} />
+      <BottomSheetScrollView
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
+        }}
+      >
+        <ProtocolDetailSheetPositions protocol={protocol} currency={currency} />
+      </BottomSheetScrollView>
+    </BottomSheet>
   )
 }

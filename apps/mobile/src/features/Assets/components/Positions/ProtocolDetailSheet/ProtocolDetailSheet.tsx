@@ -7,21 +7,20 @@ import { PositionItem } from '../PositionItem'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculateProtocolFiatChange } from './utils'
 
-interface ProtocolDetailSheetProps {
+interface ProtocolDetailSheetHeaderProps {
   protocol: Protocol
   percentageRatio: number
   currency: string
 }
 
-export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: ProtocolDetailSheetProps) => {
-  const { protocol_metadata, fiatTotal, items } = protocol
+export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency }: ProtocolDetailSheetHeaderProps) => {
+  const { protocol_metadata, fiatTotal } = protocol
   const formattedPercentage = formatPercentage(percentageRatio)
   const formattedFiatTotal = formatCurrency(fiatTotal, currency)
   const fiatChange = calculateProtocolFiatChange(protocol)
 
   return (
     <View paddingHorizontal="$2" width="100%">
-      {/* Protocol header row */}
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
@@ -74,7 +73,20 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
       <Text fontSize={16} fontWeight={700} color="$colorSecondary" marginTop="$4" marginBottom="$3" lineHeight={22}>
         Your positions
       </Text>
+    </View>
+  )
+}
 
+interface ProtocolDetailSheetPositionsProps {
+  protocol: Protocol
+  currency: string
+}
+
+export const ProtocolDetailSheetPositions = ({ protocol, currency }: ProtocolDetailSheetPositionsProps) => {
+  const { items } = protocol
+
+  return (
+    <View paddingHorizontal="$2" width="100%">
       {items.map((group, groupIndex) => (
         <View
           key={`${group.name}-${groupIndex}`}
