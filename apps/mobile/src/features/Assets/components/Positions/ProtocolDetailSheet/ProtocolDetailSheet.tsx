@@ -24,8 +24,10 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
-        height={72}
-        padding="$3"
+        height={64}
+        paddingLeft="$3"
+        paddingRight="$2"
+        paddingVertical="$3"
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
@@ -34,10 +36,10 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
           <Logo
             logoUri={protocol_metadata.icon.url}
             accessibilityLabel={protocol_metadata.name}
-            size="$10"
+            size="$8"
             fallbackIcon="apps"
           />
-          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28} numberOfLines={1} flexShrink={1}>
+          <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26} numberOfLines={1} flexShrink={1}>
             {protocol_metadata.name}
           </Text>
           <View
@@ -53,7 +55,7 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
           </View>
         </View>
         <View alignItems="flex-end" flexShrink={0}>
-          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28}>
+          <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26}>
             {formattedFiatTotal}
           </Text>
           {fiatChange !== null && (
