@@ -210,8 +210,8 @@ function SafeSelectorDropdown({
                             }
                           }}
                         >
-                          <span className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center bg-background [&_img]:size-full">
-                            <ChainIndicator chainId={selectedChainId} imageSize={24} showLogo onlyLogo />
+                          <span className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center bg-background">
+                            <ChainIndicator chainId={selectedChainId} imageSize={16} showLogo onlyLogo />
                           </span>
                           <ChevronDown className="size-4 text-muted-foreground shrink-0" />
                         </span>
@@ -228,7 +228,7 @@ function SafeSelectorDropdown({
                           }}
                           className="gap-4 cursor-pointer"
                         >
-                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex [&_img]:size-full">
+                          <span className="size-6 rounded-full border border-border overflow-hidden shrink-0 inline-flex items-center justify-center">
                             <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
                           </span>
                           <span className="text-sm font-medium">{chainItem.chainName}</span>
@@ -303,7 +303,7 @@ function SafeSelectorDropdown({
                           {itemChains.slice(0, 3).map((chainItem, index) => (
                             <span
                               key={chainItem.chainId}
-                              className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex [&_img]:size-full"
+                              className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
                               style={{ marginLeft: index > 0 ? '-8px' : '0' }}
                             >
                               <ChainIndicator chainId={chainItem.chainId} imageSize={24} showLogo onlyLogo />
@@ -345,8 +345,8 @@ function SafeSelectorDropdown({
                       <span className="text-xs text-muted-foreground">{currentSafeDisplayAddress}</span>
                     </div>
                     {chain != null && (
-                      <span className="size-6 shrink-0 inline-flex [&_img]:size-full">
-                        <ChainIndicator chainId={chainId} imageSize={24} showLogo onlyLogo />
+                      <span className="size-6 shrink-0 inline-flex items-center justify-center">
+                        <ChainIndicator chainId={chainId} imageSize={16} showLogo onlyLogo />
                       </span>
                     )}
                     <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
