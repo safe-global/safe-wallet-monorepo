@@ -14,7 +14,6 @@ A dropdown component for selecting Safe accounts with integrated chain selection
 
 ```tsx
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
-
 ;<SafeSelectorDropdown
   safes={safes}
   selectedSafeId={selectedSafeId}
