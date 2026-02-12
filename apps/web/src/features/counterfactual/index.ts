@@ -26,7 +26,7 @@
  * function MyComponentWithStates() {
  *   const cf = useLoadFeature(CounterfactualFeature)
  *
- *   if (cf.$isLoading) return <Skeleton />
+ *   if (!cf.$isReady) return <Skeleton />
  *   if (cf.$isDisabled) return null
  *
  *   return <cf.CheckBalance />

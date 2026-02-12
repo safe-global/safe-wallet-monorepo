@@ -1,6 +1,19 @@
 import { http, HttpResponse } from 'msw'
 
 export const handlers = [
+  http.get('https://sourcify.dev/server/v2/contract/:chainId/:address', ({ params }) => {
+    return HttpResponse.json({
+      abi: [],
+      matchId: '1',
+      creationMatch: 'exact_match',
+      runtimeMatch: 'exact_match',
+      match: 'exact_match',
+      verifiedAt: '2024-01-01T00:00:00Z',
+      chainId: params.chainId,
+      address: params.address,
+    })
+  }),
+
   http.get('*/v1/chains/:chainId/contracts/:address', ({ params }) => {
     return HttpResponse.json({
       address: params.address,
