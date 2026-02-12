@@ -216,14 +216,20 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
      - Formatting: Run `yarn prettier:fix` to auto-fix
      - Linting: Run `yarn workspace @safe-global/web lint:fix` to auto-fix where possible
 
-3. **Formatting**: run `yarn prettier:fix` before committing (also handled automatically by pre-commit hook).
+3. **Formatting (CRITICAL)**: **ALWAYS** run `yarn prettier:fix` before staging and committing. Do NOT rely on lint-staged alone — it can miss formatting issues due to stash/restore edge cases. Run it explicitly:
+
+   ```bash
+   yarn prettier:fix
+   ```
+
+   Then verify with `yarn workspace @safe-global/web prettier` (the check-only command). **CI will reject unformatted code.**
 
 4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
 
    ```bash
    yarn workspace @safe-global/web type-check
    yarn workspace @safe-global/web lint
-   yarn workspace @safe-global/web prettier
+   yarn workspace @safe-global/web prettier   # verify formatting (CI runs this)
    yarn workspace @safe-global/web test
    ```
 
