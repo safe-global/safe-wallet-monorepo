@@ -21,32 +21,42 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
 
   return (
     <View paddingHorizontal="$4" width="100%">
-      <View alignItems="center" paddingVertical="$4" gap="$2">
-        <Logo
-          logoUri={protocol_metadata.icon.url}
-          accessibilityLabel={protocol_metadata.name}
-          size="$8"
-          fallbackIcon="apps"
-        />
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Text fontSize="$5" fontWeight={600} color="$color">
+      {/* Protocol header row */}
+      <View
+        backgroundColor="$backgroundPaper"
+        borderRadius="$3"
+        height={72}
+        padding="$3"
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <View flexDirection="row" alignItems="center" gap="$2" flex={1}>
+          <Logo
+            logoUri={protocol_metadata.icon.url}
+            accessibilityLabel={protocol_metadata.name}
+            size="$10"
+            fallbackIcon="apps"
+          />
+          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28}>
             {protocol_metadata.name}
           </Text>
-          <View backgroundColor="$backgroundSecondary" paddingHorizontal="$1" paddingVertical="$1" borderRadius="$2">
-            <Text fontSize="$3" color="$color" fontWeight={400} lineHeight={16}>
+          <View backgroundColor="$backgroundSecondary" paddingHorizontal="$2" paddingVertical={2} borderRadius="$2">
+            <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
               {formattedPercentage}
             </Text>
           </View>
         </View>
-        <View flexDirection="row" alignItems="center" gap="$2">
-          <Text fontSize="$8" fontWeight={600} color="$color" lineHeight={28}>
+        <View alignItems="flex-end">
+          <Text fontSize={24} fontWeight={600} color="$color" lineHeight={28}>
             {formattedFiatTotal}
           </Text>
           {fiatChange !== null && (
             <Text
-              fontSize="$3"
+              fontSize="$4"
               fontWeight={400}
               color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
+              lineHeight={20}
             >
               {fiatChange > 0 ? '+' : ''}
               {formatPercentage(fiatChange)}
@@ -55,7 +65,7 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
         </View>
       </View>
 
-      <Text fontSize="$3" fontWeight={600} color="$colorSecondary" marginBottom="$2" marginTop="$2">
+      <Text fontSize={16} fontWeight={700} color="$colorSecondary" marginTop="$4" marginBottom="$3" lineHeight={22}>
         Your positions
       </Text>
 
@@ -64,12 +74,13 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
           key={`${group.name}-${groupIndex}`}
           backgroundColor="$backgroundPaper"
           borderRadius="$3"
-          marginBottom="$3"
+          marginBottom="$2"
           padding="$3"
         >
-          <Text fontSize="$4" fontWeight={600} color="$color" marginBottom="$2">
+          <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26}>
             {group.name}
           </Text>
+          <View height={1} backgroundColor="$borderLight" marginVertical="$3" />
           {group.items.map((position, positionIndex) => (
             <PositionItem
               key={`${position.tokenInfo.address}-${positionIndex}`}

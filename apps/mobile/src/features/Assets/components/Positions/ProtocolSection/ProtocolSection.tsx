@@ -33,9 +33,11 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
-        marginBottom="$3"
+        marginBottom="$2"
+        height={64}
+        paddingLeft="$3"
+        paddingRight="$2"
         paddingVertical="$3"
-        paddingHorizontal="$3"
         flexDirection="row"
         alignItems="center"
       >
@@ -50,29 +52,32 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
             <Text fontSize="$4" fontWeight={600} color="$color" numberOfLines={1} lineHeight={20}>
               {protocol_metadata.name}
             </Text>
-            <View backgroundColor="$backgroundSecondary" paddingHorizontal="$1" paddingVertical="$1" borderRadius="$2">
-              <Text fontSize="$3" color="$color" fontWeight={400} lineHeight={16}>
+            <View backgroundColor="$backgroundSecondary" paddingHorizontal="$2" paddingVertical={2} borderRadius="$2">
+              <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
                 {formattedPercentage}
               </Text>
             </View>
           </View>
         </View>
-        <View alignItems="flex-end" marginRight="$2">
-          <Text fontSize="$4" fontWeight={600} color="$color">
-            {formattedFiatTotal}
-          </Text>
-          {fiatChange !== null && (
-            <Text
-              fontSize="$3"
-              fontWeight={400}
-              color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
-            >
-              {fiatChange > 0 ? '+' : ''}
-              {formatPercentage(fiatChange)}
+        <View flexDirection="row" alignItems="center" gap="$2">
+          <View alignItems="flex-end">
+            <Text fontSize="$4" fontWeight={600} color="$color" lineHeight={20}>
+              {formattedFiatTotal}
             </Text>
-          )}
+            {fiatChange !== null && (
+              <Text
+                fontSize="$4"
+                fontWeight={400}
+                color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
+                lineHeight={20}
+              >
+                {fiatChange > 0 ? '+' : ''}
+                {formatPercentage(fiatChange)}
+              </Text>
+            )}
+          </View>
+          <SafeFontIcon name="chevron-right" size={24} color="$colorSecondary" />
         </View>
-        <SafeFontIcon name="chevron-right" size={16} color="$colorSecondary" />
       </View>
     </Pressable>
   )
