@@ -150,11 +150,56 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
+/**
+ * Build preloadedState for the RTK Query cache with build-time chain data.
+ * This is purely synchronous — both SSR and client start with identical fulfilled
+ * state, so no hydration mismatch can occur (unlike upsertQueryData which uses
+ * microtasks that resolve differently on server vs client).
+ */
+const getStaticChainsPreloadedState = (): Partial<RootState> | undefined => {
+  if (staticChainsData.length === 0) return undefined
+
+  return {
+    [cgwClient.reducerPath]: {
+      queries: {
+        'getChainsConfig(undefined)': {
+          status: 'fulfilled' as const,
+          endpointName: 'getChainsConfig' as const,
+          requestId: `static-chains-${Date.now()}`,
+          originalArgs: undefined,
+          startedTimeStamp: Date.now(),
+          data: chainsAdapter.setAll(chainsInitialState, staticChainsData),
+          fulfilledTimeStamp: Date.now(),
+          error: undefined,
+        },
+      },
+      mutations: {},
+      provided: { tags: {}, keys: {} },
+      subscriptions: {},
+      config: {
+        online: true,
+        focused: true,
+        middlewareRegistered: false,
+        refetchOnFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMountOrArgChange: false,
+        keepUnusedDataFor: 60,
+        reducerPath: cgwClient.reducerPath,
+        invalidationBehavior: 'delayed',
+      },
+    },
+  } as unknown as Partial<RootState>
+}
+
 type MakeStoreOptions = {
   skipBroadcast?: boolean
 }
 export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
   setBaseUrl(GATEWAY_URL)
+
+  // Merge user-provided initial state with build-time chains cache
+  const chainsPreload = getStaticChainsPreloadedState()
+  const mergedInitialState = chainsPreload ? { ...chainsPreload, ...initialState } : initialState
 
   const store = configureStore({
     reducer: _hydrationReducer,
@@ -163,7 +208,7 @@ export const makeStore = (initialState?: Partial<RootState>, options?: MakeStore
       return getDefaultMiddleware({ serializableCheck: false }).concat(cgwClient.middleware).concat(middleware)
     },
     devTools: !IS_PRODUCTION,
-    preloadedState: initialState,
+    preloadedState: mergedInitialState,
   })
 
   if (!options?.skipBroadcast) {
@@ -201,10 +246,10 @@ export const getStoreInstance = () => {
 }
 
 /**
- * Seed the RTK Query cache with build-time chain data so useGetChainsConfigQuery()
- * returns data immediately without waiting for the network, then trigger a background
- * refetch for fresh data. Runs as a client-only effect (after hydration) to avoid
- * SSR/hydration mismatches from chain-dependent components.
+ * Trigger a background refetch of chain configurations so the app picks up any
+ * changes since the build-time snapshot. The static chain data is already seeded
+ * into the RTK Query cache via preloadedState in makeStore(), so
+ * useGetChainsConfigQuery() returns data immediately on first render.
  *
  * When the runtime response arrives, RTK Query's structuralSharing preserves object
  * references if the data is identical, preventing unnecessary re-renders.
@@ -213,39 +258,10 @@ export const useInitStaticChains = () => {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    let cancelled = false
-    let unsubscribe: (() => void) | undefined
+    const result = dispatch(
+      apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }),
+    )
 
-    const run = async () => {
-      // Seed cache with static data if available (build-time prefetch succeeded).
-      // Skip when empty (e.g. CI or failed fetch) — the forceRefetch below handles it.
-      if (staticChainsData.length > 0) {
-        // upsertQueryData internally calls initiate() which puts the entry into
-        // 'pending' state. We must await its completion before dispatching our own
-        // initiate(), otherwise RTK Query deduplicates it as an in-flight request.
-        await dispatch(
-          apiSliceWithChainsConfig.util.upsertQueryData(
-            'getChainsConfig',
-            undefined as void,
-            chainsAdapter.setAll(chainsInitialState, staticChainsData),
-          ),
-        )
-      }
-
-      if (cancelled) return
-
-      // Now the entry is 'fulfilled'. Trigger a real network fetch in the background.
-      const result = dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }),
-      )
-      unsubscribe = result.unsubscribe
-    }
-
-    run()
-
-    return () => {
-      cancelled = true
-      unsubscribe?.()
-    }
+    return result.unsubscribe
   }, [dispatch])
 }

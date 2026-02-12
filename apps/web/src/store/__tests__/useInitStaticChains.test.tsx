@@ -12,9 +12,8 @@ describe('useInitStaticChains', () => {
 
     renderHook(() => useInitStaticChains(), { wrapper })
 
-    // The hook dispatches initiate({ forceRefetch: true }) which is a thunk.
-    // In the test env, staticChainsData is [] (no generated file), so it skips
-    // upsertQueryData and goes straight to the background refetch.
+    // The hook dispatches initiate({ forceRefetch: true }) to trigger a
+    // background network fetch for fresh chain data.
     await waitFor(() => {
       expect(dispatchSpy).toHaveBeenCalled()
     })
