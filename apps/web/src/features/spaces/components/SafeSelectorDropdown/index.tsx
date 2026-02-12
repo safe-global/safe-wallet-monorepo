@@ -183,7 +183,7 @@ function SafeSelectorDropdown({
         }}
       >
         <SelectTrigger
-          className="-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent p-4 pl-4 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0"
+          className="-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent py-0 pl-6 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0"
           size="default"
           iconWrapperClassName="border-l border-border pl-4 pr-4 ml-1 self-stretch flex items-center min-h-[2.5rem]"
         >
