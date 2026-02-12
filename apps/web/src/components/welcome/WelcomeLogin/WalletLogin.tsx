@@ -43,7 +43,7 @@ const WalletLogin = ({ onLogin, onContinue, buttonText, fullWidth, isLoading }: 
         disabled={isLoading}
       >
         {isLoading ? (
-          <CircularProgress size={20} />
+          <CircularProgress size={20} sx={{ color: '#fff' }} />
         ) : (
           <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
             <Box display="flex" flexDirection="column" alignItems="flex-start">
