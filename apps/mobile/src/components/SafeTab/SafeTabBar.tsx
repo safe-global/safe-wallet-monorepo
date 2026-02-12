@@ -21,7 +21,7 @@ export const SafeTabBar = ({
 
   const activeButtonStyle = {
     paddingBottom: 8,
-    borderBottomColor: theme.color?.get(),
+    borderBottomColor: theme.primary?.get(),
     borderBottomWidth: 2,
   }
 

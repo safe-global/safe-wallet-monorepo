@@ -8,7 +8,7 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 
 import css from './styles.module.css'
-import { TokenAmountFields } from '@/components/common/TokenAmountInput'
+import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
 import { useContext, useEffect } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'

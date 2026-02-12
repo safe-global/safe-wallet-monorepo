@@ -26,7 +26,7 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
 
   it('Verify Rename and Add network options are available for Group of safes', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnMultichainItemOptionsBtn(0)
     main.verifyElementsIsVisible([sideBar.safeItemOptionsAddChainBtn, sideBar.safeItemOptionsRenameBtn])
   })
@@ -40,31 +40,32 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
       11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
     })
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
 
     sideBar.clickOnMultichainItemOptionsBtn(0)
     main.verifyElementsIsVisible([sideBar.safeItemOptionsAddChainBtn, sideBar.safeItemOptionsRenameBtn])
   })
 
   it('Verify Give name and Add network options are available for a CF safe', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
+    main.addSafeToTrustedList('11155111', '0x926186108f74dB20BFeb2b6c888E523C78cb7E00')
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
     wallet.connectSigner(signer2)
-    cy.intercept('GET', constants.safeListEndpoint, {})
-    sideBar.openSidebar()
-    sideBar.clickOnSafeItemOptionsBtnByIndex(0)
+    sideBar.clickOnOpenSidebarBtn()
+    sideBar.clickOnSafeItemOptionsBtn(sideBar.undeployedSafe)
     main.verifyElementsIsVisible([sideBar.safeItemOptionsRemoveBtn, sideBar.safeItemOptionsRenameBtn])
   })
 
   it('Verify that removed from side bar CF safe is removed from the address book', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_0)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
+    main.addSafeToTrustedList('11155111', '0x926186108f74dB20BFeb2b6c888E523C78cb7E00')
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
     wallet.connectSigner(signer2)
-    cy.intercept('GET', constants.safeListEndpoint, {})
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.removeSafeItem(sideBar.undeployedSafe)
     cy.wrap(null, { timeout: 10000 }).should(() => {
       expect(localStorage.getItem(constants.localStorageKeys.SAFE_v2__addressBook) === '{}').to.be.true
@@ -75,69 +76,66 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     wallet.connectSigner(signer)
     cy.visit(constants.BALANCE_URL + safe)
-
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
-    })
+    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnSafeItemOptionsBtnByIndex(1)
     sideBar.checkAddChainDialogDisplayed()
   })
 
   it('Verify "Add Networks" option for the group of safes with multi-chain safe', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnSafeItemOptionsBtnByIndex(0)
     sideBar.checkAddChainDialogDisplayed()
   })
 
   it('Verify "Add another network" button in safe group', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     main.verifyElementsExist([sideBar.addNetworkBtn])
   })
 
   it('Verify there is no Rename option for a safe in the group', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkThereIsNoOptionsMenu(0)
   })
 
   it('Verify Rename option in the group of safes opens a new edit entry modal', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnMultichainItemOptionsBtn(0)
     sideBar.clickOnRenameBtn()
   })
   it('Verify "Add another network" at the end of the group list', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkAddNetworkBtnPosition(0)
   })
 
   it('Verify balance of the safe group', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkSafeGroupBalance(0, '0.73')
   })
 
   it('Verify address of the safe group', () => {
     const address = '0xC96e...ee3B'
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkSafeGroupAddress(0, address)
   })
 
   it('Verify network logo for safes in the group', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkSafeGroupIconsExist(0, 3)
   })
 
   it('Verify tooltip with networks for multichain safe', () => {
     wallet.connectSigner(signer)
-    sideBar.openSidebar()
+    sideBar.clickOnOpenSidebarBtn()
     sideBar.checkMultichainTooltipExists(0)
   })
 })

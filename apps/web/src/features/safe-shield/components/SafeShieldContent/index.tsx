@@ -1,15 +1,17 @@
-import { type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { Box } from '@mui/material'
 import type {
   ContractAnalysisResults,
   ThreatAnalysisResults,
   RecipientAnalysisResults,
   Severity,
+  SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
+import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -32,6 +34,8 @@ export const SafeShieldContent = ({
   hypernativeAuth,
   showHypernativeInfo = true,
   showHypernativeActiveStatus = true,
+  safeAnalysis,
+  onAddToTrustedList,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -41,6 +45,8 @@ export const SafeShieldContent = ({
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
   showHypernativeActiveStatus?: boolean
+  safeAnalysis?: SafeAnalysisResult | null
+  onAddToTrustedList?: () => void
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -81,6 +87,11 @@ export const SafeShieldContent = ({
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
         <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
+          {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
+          {safeAnalysis && onAddToTrustedList && (
+            <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
+          )}
+
           <AnalysisGroupCard
             data-testid="recipient-analysis-group-card"
             delay={recipientDelay}

@@ -1,5 +1,5 @@
 import type { BigNumberish, BytesLike } from 'ethers'
-import { TokenAmountFields } from '@/components/common/TokenAmountInput'
+import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
 
 // Re-export the type from the slice (where it's defined to avoid pulling deps into main bundle)
 export type { SpendingLimitState } from './store/spendingLimitsSlice'

@@ -19,6 +19,7 @@ import GroupLabel from '../GroupLabel'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { useHnQueueAssessment } from '@/features/hypernative'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: ModuleTransaction = makeTxFromDetails(txDetails)
@@ -43,6 +44,7 @@ const SingleTx = () => {
   const { id } = router.query
   const transactionId = Array.isArray(id) ? id[0] : id
   const { safe, safeAddress } = useSafeInfo()
+  const { setTx } = useHnQueueAssessment()
 
   const {
     data: txDetails,
@@ -67,6 +69,14 @@ const SingleTx = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safe.txHistoryTag, safe.txQueuedTag, safeAddress])
+
+  useEffect(() => {
+    setTx(txDetails, 'single-tx')
+
+    return () => {
+      setTx(undefined, 'single-tx')
+    }
+  }, [setTx, txDetails])
 
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
     txDetailsError = new Error('Transaction with this id was not found in this Safe Account')
