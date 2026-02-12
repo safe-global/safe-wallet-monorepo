@@ -278,60 +278,62 @@ function SafeSelectorDropdown({
           collisionAvoidance={{ side: 'none', align: 'shift' }}
         >
           {safes.length > 0
-            ? safes.map((safeItem) => {
-                const isCurrent = safeItem.id === currentSafeId
-                const name = isCurrent ? currentSafeName : safeItem.name
-                const address = isCurrent ? currentSafeDisplayAddress : safeItem.address
-                const thresholdVal = isCurrent ? threshold : safeItem.threshold
-                const ownersVal = isCurrent ? ownerCount : safeItem.owners
-                const itemChains =
-                  isCurrent && chain ? [{ id: chainId, name: chain.chainName ?? chain.shortName }] : safeItem.chains
-                return (
-                  <SelectItem
-                    key={safeItem.id}
-                    value={safeItem.id}
-                    className="h-auto py-4 px-4 rounded-3xl my-1 data-[state=checked]:bg-muted hover:bg-muted/50 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      <Avatar size="sm">
-                        <AvatarFallback>{getInitials(name)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start flex-1 min-w-0">
-                        <span className="text-sm font-medium text-foreground">{name}</span>
-                        <span className="text-xs text-muted-foreground">{address}</span>
-                      </div>
-                      <div className="flex items-center gap-2 bg-muted rounded-full px-0.5 py-0.5 pl-0.5 pr-2.5 shrink-0">
-                        {itemChains.slice(0, 3).map((chainItem, index) => (
-                          <span
-                            key={chainItem.id}
-                            className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex [&_img]:size-full"
-                            style={{ marginLeft: index > 0 ? '-8px' : '0' }}
-                          >
-                            <ChainIndicator chainId={chainItem.id} imageSize={24} showLogo onlyLogo />
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
-                        {isCurrent ? (
-                          balancesLoading ? (
-                            <span className="text-xs font-medium text-muted-foreground">--</span>
-                          ) : (
-                            <span className="text-xs font-medium text-muted-foreground">
-                              <FiatValue value={balances.fiatTotal} />
+            ? safes
+                .filter((safeItem) => safeItem.id !== selectValue)
+                .map((safeItem) => {
+                  const isCurrent = safeItem.id === currentSafeId
+                  const name = isCurrent ? currentSafeName : safeItem.name
+                  const address = isCurrent ? currentSafeDisplayAddress : safeItem.address
+                  const thresholdVal = isCurrent ? threshold : safeItem.threshold
+                  const ownersVal = isCurrent ? ownerCount : safeItem.owners
+                  const itemChains =
+                    isCurrent && chain ? [{ id: chainId, name: chain.chainName ?? chain.shortName }] : safeItem.chains
+                  return (
+                    <SelectItem
+                      key={safeItem.id}
+                      value={safeItem.id}
+                      className="h-auto py-4 px-4 rounded-3xl my-1 data-[state=checked]:bg-muted hover:bg-muted/50 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <Avatar size="sm">
+                          <AvatarFallback>{getInitials(name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col items-start flex-1 min-w-0">
+                          <span className="text-sm font-medium text-foreground">{name}</span>
+                          <span className="text-xs text-muted-foreground">{address}</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-muted rounded-full px-0.5 py-0.5 pl-0.5 pr-2.5 shrink-0">
+                          {itemChains.slice(0, 3).map((chainItem, index) => (
+                            <span
+                              key={chainItem.id}
+                              className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex [&_img]:size-full"
+                              style={{ marginLeft: index > 0 ? '-8px' : '0' }}
+                            >
+                              <ChainIndicator chainId={chainItem.id} imageSize={24} showLogo onlyLogo />
                             </span>
-                          )
-                        ) : (
-                          <span className="text-xs font-medium text-muted-foreground">{safeItem.balance}</span>
-                        )}
-                        <Badge variant="secondary" className="gap-1">
-                          <User className="size-3" />
-                          {thresholdVal}/{ownersVal}
-                        </Badge>
+                          ))}
+                        </div>
+                        <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
+                          {isCurrent ? (
+                            balancesLoading ? (
+                              <span className="text-xs font-medium text-muted-foreground">--</span>
+                            ) : (
+                              <span className="text-xs font-medium text-muted-foreground">
+                                <FiatValue value={balances.fiatTotal} />
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-xs font-medium text-muted-foreground">{safeItem.balance}</span>
+                          )}
+                          <Badge variant="secondary" className="gap-1">
+                            <User className="size-3" />
+                            {thresholdVal}/{ownersVal}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                )
-              })
+                    </SelectItem>
+                  )
+                })
             : currentSafeId != null && (
                 <SelectItem
                   value={currentSafeId}
