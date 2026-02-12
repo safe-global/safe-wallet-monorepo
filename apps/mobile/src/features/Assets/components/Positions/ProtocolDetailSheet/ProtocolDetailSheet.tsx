@@ -58,7 +58,7 @@ export const ProtocolDetailSheet = ({ protocol, percentageRatio, currency }: Pro
               color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
               lineHeight={20}
             >
-              {fiatChange > 0 ? '+' : ''}
+              {fiatChange > 0 ? '+' : fiatChange < 0 ? '-' : ''}
               {formatPercentage(fiatChange)}
             </Text>
           )}

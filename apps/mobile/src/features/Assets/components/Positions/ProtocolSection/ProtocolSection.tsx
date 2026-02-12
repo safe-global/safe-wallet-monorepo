@@ -71,7 +71,7 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
                 color={fiatChange > 0 ? '$success' : fiatChange < 0 ? '$error' : '$colorSecondary'}
                 lineHeight={20}
               >
-                {fiatChange > 0 ? '+' : ''}
+                {fiatChange > 0 ? '+' : fiatChange < 0 ? '-' : ''}
                 {formatPercentage(fiatChange)}
               </Text>
             )}

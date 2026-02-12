@@ -44,17 +44,19 @@ export function TokensContainer() {
     },
   )
 
+  const shouldFilterDust = hideDust && hasDefaultTokenlist
+
   const visibleItems = useMemo(() => {
     if (!data?.items) {
       return undefined
     }
-    if (!hideDust) {
+    if (!shouldFilterDust) {
       return data.items
     }
     return data.items.filter((item) => Number(item.fiatBalance) >= DUST_THRESHOLD)
-  }, [data?.items, hideDust])
+  }, [data?.items, shouldFilterDust])
 
-  const allFilteredByDust = hideDust && data?.items && data.items.length > 0 && visibleItems?.length === 0
+  const allFilteredByDust = shouldFilterDust && data?.items && data.items.length > 0 && visibleItems?.length === 0
 
   const renderItem: ListRenderItem<Balance> = React.useCallback(
     ({ item }) => {
