@@ -63,6 +63,7 @@ describe('Sidebar search tests', () => {
   })
 
   it('Verify search shows number of results found', () => {
+    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
     const safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
     cy.visit(constants.BALANCE_URL + safe, { skipAutoTrust: true })
     main.addToAppLocalStorage(
