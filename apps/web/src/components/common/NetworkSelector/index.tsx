@@ -20,7 +20,6 @@ import partition from 'lodash/partition'
 import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
-import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { type ReactElement, useCallback, useMemo, useState } from 'react'
@@ -36,16 +35,12 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 import { InfoOutlined } from '@mui/icons-material'
-import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import { AppRoutes } from '@/config/routes'
-
 export const getNetworkLink = (
   router: NextRouter,
   safeAddress: string,
   chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
-  currentSafeApp?: SafeAppData,
 ) => {
-  const { shortName, chainId } = chainInfo
+  const { shortName } = chainInfo
   const isSafeOpened = safeAddress !== ''
 
   const query = (
@@ -72,14 +67,6 @@ export const getNetworkLink = (
     if (router.query?.[key]) {
       route.query[key] = router.query?.[key].toString()
     }
-  }
-
-  // If we are currently on an app page and switching networks, determine if the app supports the target network.
-  // If not supported, redirect to the apps list instead of keeping the app open.
-  // If the app supports the target network, keep the app open.
-  if (router.pathname === AppRoutes.apps.open && currentSafeApp && !currentSafeApp.chainIds.includes(chainId)) {
-    delete route.query.appUrl
-    route.pathname = AppRoutes.apps.index
   }
 
   return route
@@ -339,8 +326,6 @@ const NetworkSelector = ({
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
-  const { currentSafeApp } = useSafeApps()
-
   const isSafeOpened = safeAddress !== ''
 
   const addNetworkFeatureEnabled = hasMultiChainAddNetworkFeature(currentChain)
@@ -386,11 +371,7 @@ const NetworkSelector = ({
           disableRipple={isSelected}
           onClick={onSwitchNetwork}
         >
-          <Link
-            href={getNetworkLink(router, safeAddress, chain, currentSafeApp)}
-            onClick={onChainSelect}
-            className={css.item}
-          >
+          <Link href={getNetworkLink(router, safeAddress, chain)} onClick={onChainSelect} className={css.item}>
             <ChainIndicator
               responsive={isSelected}
               chainId={chain.chainId}
@@ -401,7 +382,7 @@ const NetworkSelector = ({
         </MenuItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, currentSafeApp, compactButton],
+    [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
   const handleClose = () => {

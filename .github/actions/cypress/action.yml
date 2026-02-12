@@ -27,6 +27,16 @@ inputs:
     description: 'Cypress cloud tag key'
     required: false
 
+  chromatic:
+    description: 'Enable Chromatic archive generation'
+    required: false
+    default: 'false'
+
+  container-index:
+    description: 'Container index for parallel runs (used for artifact naming)'
+    required: false
+    default: '0'
+
 runs:
   using: 'composite'
   steps:
@@ -65,3 +75,13 @@ runs:
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
         CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
         BEAMER_DATA_E2E: ${{ fromJSON(inputs.secrets).BEAMER_DATA_E2E }}
+        ELECTRON_EXTRA_LAUNCH_ARGS: ${{ inputs.chromatic == 'true' && '--remote-debugging-port=9222' || '' }}
+
+    - name: Upload Chromatic archives
+      if: inputs.chromatic == 'true' && !cancelled()
+      uses: actions/upload-artifact@v6
+      with:
+        name: chromatic-archives-${{ inputs.container-index }}
+        path: apps/web/cypress/downloads
+        if-no-files-found: ignore
+        retention-days: 1

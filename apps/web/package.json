@@ -110,6 +110,7 @@
     "zodiac-roles-deployments": "^2.3.4"
   },
   "devDependencies": {
+    "@chromatic-com/cypress": "^0.11.8",
     "@chromatic-com/storybook": "^4.1.2",
     "@cowprotocol/app-data": "^3.1.0",
     "@eslint/eslintrc": "^3.3.1",
@@ -160,7 +161,6 @@
     "chromatic": "^13.3.5",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
-    "cypress-visual-regression": "^5.3.0",
     "eslint": "^9.29.0",
     "eslint-config-next": "^15.0.4",
     "eslint-plugin-no-only-tests": "^3.3.0",
