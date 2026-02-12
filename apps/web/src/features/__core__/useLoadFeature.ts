@@ -70,6 +70,57 @@ function createStableStubProxy<T extends FeatureImplementation>(
   })
 }
 
+// ── Shared Feature Registry ──────────────────────────────────────
+// Stores loaded features globally so multiple components calling
+// useLoadFeature(SameFeature) share a single load and get the result
+// synchronously on first render. Only successful loads are cached;
+// errors remain per-instance so retry is possible on remount.
+
+type CachedLoadResult = { feature: unknown }
+
+/** Resolved features keyed by handle.name. */
+const featureCache = new Map<string, CachedLoadResult>()
+
+/** In-flight promises for deduplication. Removed on resolve/reject. */
+const pendingLoads = new Map<string, Promise<CachedLoadResult>>()
+
+/** Returns a cached load result from the registry, or undefined. */
+function getCachedResult(name: string): CachedLoadResult | undefined {
+  return featureCache.get(name)
+}
+
+/** Returns a shared load promise, deduplicating concurrent loads. */
+function getOrCreateLoadPromise<T extends FeatureImplementation>(handle: FeatureHandle<T>): Promise<CachedLoadResult> {
+  const existing = pendingLoads.get(handle.name)
+  if (existing) return existing
+
+  const promise = handle
+    .load()
+    .then((module) => {
+      const result: CachedLoadResult = {
+        feature: { name: handle.name, useIsEnabled: handle.useIsEnabled, ...module.default },
+      }
+      featureCache.set(handle.name, result)
+      pendingLoads.delete(handle.name)
+      return result
+    })
+    .catch((err) => {
+      pendingLoads.delete(handle.name)
+      throw err
+    })
+
+  pendingLoads.set(handle.name, promise)
+  return promise
+}
+
+/** @internal Clears the shared registry. Exported for test cleanup only. */
+export function _resetFeatureRegistry(): void {
+  featureCache.clear()
+  pendingLoads.clear()
+}
+
+// ── Hook ─────────────────────────────────────────────────────────
+
 /**
  * Hook to load a feature lazily based on its handle.
  *
@@ -81,6 +132,10 @@ function createStableStubProxy<T extends FeatureImplementation>(
  *
  * There is no intermediate "loading" state — the hook goes directly from not-ready
  * to ready in a single transition, minimizing re-renders.
+ *
+ * Features are cached in a shared registry so that when multiple components use the
+ * same feature, only the first triggers a load. Subsequent components get the result
+ * synchronously on first render (1 render instead of 2).
  *
  * @param handle - The feature handle with name, useIsEnabled, and load function.
  * @returns Feature object with meta properties ($isDisabled, $isReady, $error)
@@ -128,40 +183,30 @@ export function useLoadFeature<T extends FeatureImplementation>(
   // Check feature flag (must be called unconditionally as it's a hook)
   const isEnabled = handle.useIsEnabled()
 
-  // Cache loaded feature in a ref — survives isEnabled flicker (e.g. chain switch
-  // where the flag briefly becomes undefined then true again). Once a feature
-  // module is loaded it never changes, so re-fetching is pure waste.
-  const cachedFeatureRef = useRef<LoadedFeature | undefined>(undefined)
-
-  // Single state: the loaded feature or an error. No intermediate "loading" state —
-  // we go directly from undefined to the loaded feature in one transition.
-  const [loaded, setLoaded] = useState<LoadResult<LoadedFeature>>(() =>
-    cachedFeatureRef.current ? { feature: cachedFeatureRef.current } : undefined,
+  // Single state: the loaded feature or an error. No intermediate "loading" state.
+  // Check the shared registry synchronously — if another component already loaded
+  // this feature, we get it on first render without any async work.
+  const [loaded, setLoaded] = useState<LoadResult<LoadedFeature>>(
+    () => (isEnabled === true ? getCachedResult(handle.name) : undefined) as unknown as LoadResult<LoadedFeature>,
   )
 
   useEffect(() => {
     if (isEnabled !== true) return
 
-    // Already loaded? Ensure state reflects the cached feature (handles flicker recovery)
-    if (cachedFeatureRef.current) {
-      setLoaded({ feature: cachedFeatureRef.current })
+    // Shared registry has this feature? Restore state with the cached reference.
+    // React bails out if setLoaded receives the same referential object.
+    const cached = getCachedResult(handle.name)
+    if (cached) {
+      setLoaded(cached as unknown as LoadResult<LoadedFeature>)
       return
     }
 
     let cancelled = false
 
-    handle.load().then(
-      (module) => {
+    getOrCreateLoadPromise(handle).then(
+      (result) => {
         if (cancelled) return
-
-        const feature = {
-          name: handle.name,
-          useIsEnabled: handle.useIsEnabled,
-          ...module.default,
-        } as LoadedFeature
-
-        cachedFeatureRef.current = feature
-        setLoaded({ feature })
+        setLoaded(result as unknown as LoadResult<LoadedFeature>)
       },
       (err) => {
         if (cancelled) return

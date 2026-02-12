@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useLoadFeature } from '../useLoadFeature'
+import { useLoadFeature, _resetFeatureRegistry } from '../useLoadFeature'
 import type { FeatureHandle } from '../types'
 
 // Shared mock feature implementation
@@ -47,6 +47,10 @@ async function renderFeatureHook(overrides: Parameters<typeof createMockHandle>[
 
   return { ...rendered, handle }
 }
+
+afterEach(() => {
+  _resetFeatureRegistry()
+})
 
 describe('useLoadFeature', () => {
   // ── Meta state lifecycle ──────────────────────────────────────
@@ -152,6 +156,106 @@ describe('useLoadFeature', () => {
       const stub1 = result.current.MyComponent
       const stub2 = result.current.MyComponent
       expect(stub1).toBe(stub2)
+    })
+  })
+
+  // ── Shared feature registry ────────────────────────────────────
+
+  describe('shared registry', () => {
+    it('should provide feature synchronously to second hook when already loaded', async () => {
+      const loadSpy = jest.fn(() => Promise.resolve({ default: mockImpl }))
+      const handle: FeatureHandle<MockImpl> = {
+        name: 'test-feature',
+        useIsEnabled: () => true,
+        load: loadSpy,
+      }
+
+      // First hook loads the feature
+      const { result: result1 } = renderHook(() => useLoadFeature(handle))
+      await waitFor(() => expect(result1.current.$isReady).toBe(true))
+
+      // Second hook should get it synchronously
+      let renderCount = 0
+      const { result: result2 } = renderHook(() => {
+        renderCount++
+        return useLoadFeature(handle)
+      })
+
+      expect(result2.current.$isReady).toBe(true)
+      expect(result2.current.MyComponent).toBe(mockImpl.MyComponent)
+      // Synchronous init means at most 2 renders (React StrictMode may double-invoke)
+      expect(renderCount).toBeLessThanOrEqual(2)
+      // load() should have been called exactly once (by the first hook)
+      expect(loadSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should deduplicate concurrent load() calls for same feature', async () => {
+      const loadSpy = jest.fn(() => Promise.resolve({ default: mockImpl }))
+      const handle: FeatureHandle<MockImpl> = {
+        name: 'test-feature',
+        useIsEnabled: () => true,
+        load: loadSpy,
+      }
+
+      // Mount two hooks simultaneously
+      const { result: r1 } = renderHook(() => useLoadFeature(handle))
+      const { result: r2 } = renderHook(() => useLoadFeature(handle))
+
+      await waitFor(() => {
+        expect(r1.current.$isReady).toBe(true)
+        expect(r2.current.$isReady).toBe(true)
+      })
+
+      expect(loadSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not cache errors globally, allowing retry on remount', async () => {
+      const loadError = new Error('network error')
+      let shouldFail = true
+      const loadSpy = jest.fn(() => (shouldFail ? Promise.reject(loadError) : Promise.resolve({ default: mockImpl })))
+      const handle: FeatureHandle<MockImpl> = {
+        name: 'test-feature',
+        useIsEnabled: () => true,
+        load: loadSpy,
+      }
+
+      // First mount fails
+      const { result: r1, unmount } = renderHook(() => useLoadFeature(handle))
+      await waitFor(() => expect(r1.current.$error).toBeDefined())
+      unmount()
+
+      // Second mount should retry and succeed
+      shouldFail = false
+      const { result: r2 } = renderHook(() => useLoadFeature(handle))
+      await waitFor(() => expect(r2.current.$isReady).toBe(true))
+
+      expect(loadSpy).toHaveBeenCalledTimes(2)
+    })
+
+    it('should maintain separate registry entries per feature name', async () => {
+      const mockImpl2 = { OtherComponent: () => 'other' }
+
+      const handle1: FeatureHandle<MockImpl> = {
+        name: 'feature-a',
+        useIsEnabled: () => true,
+        load: () => Promise.resolve({ default: mockImpl }),
+      }
+      const handle2: FeatureHandle<typeof mockImpl2> = {
+        name: 'feature-b',
+        useIsEnabled: () => true,
+        load: () => Promise.resolve({ default: mockImpl2 }),
+      }
+
+      const { result: r1 } = renderHook(() => useLoadFeature(handle1))
+      const { result: r2 } = renderHook(() => useLoadFeature(handle2))
+
+      await waitFor(() => {
+        expect(r1.current.$isReady).toBe(true)
+        expect(r2.current.$isReady).toBe(true)
+      })
+
+      expect(r1.current.MyComponent).toBe(mockImpl.MyComponent)
+      expect((r2.current as unknown as Record<string, unknown>).OtherComponent).toBe(mockImpl2.OtherComponent)
     })
   })
 
