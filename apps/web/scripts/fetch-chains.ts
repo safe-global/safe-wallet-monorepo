@@ -27,7 +27,7 @@ type ChainPage = {
 
 async function fetchAllChains(): Promise<unknown[]> {
   const allChains: unknown[] = []
-  let url = `${GATEWAY_URL}/v1/chains?cursor=limit%3D50%26offset%3D0`
+  let url: string | null = `${GATEWAY_URL}/v1/chains?cursor=limit%3D50%26offset%3D0`
 
   while (url) {
     const response = await fetch(url)
@@ -39,7 +39,7 @@ async function fetchAllChains(): Promise<unknown[]> {
     const data: ChainPage = await response.json()
     allChains.push(...data.results)
 
-    url = data.next || ''
+    url = data.next ?? null
   }
 
   return allChains

@@ -217,6 +217,8 @@ export const useInitStaticChains = () => {
     let unsubscribe: (() => void) | undefined
 
     const run = async () => {
+      // Seed cache with static data if available (build-time prefetch succeeded).
+      // Skip when empty (e.g. CI or failed fetch) — the forceRefetch below handles it.
       if (staticChainsData.length > 0) {
         // upsertQueryData internally calls initiate() which puts the entry into
         // 'pending' state. We must await its completion before dispatching our own
