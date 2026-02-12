@@ -17,6 +17,23 @@ interface FeatureMeta {
   $error: Error | undefined
 }
 
+type LoadResult<T> = { feature: T } | { error: Error } | undefined
+
+/** Extracts the feature from a load result, or undefined. */
+function getFeature<T>(result: LoadResult<T>): T | undefined {
+  return result && 'feature' in result ? result.feature : undefined
+}
+
+/** Extracts the error from a load result, or undefined. */
+function getError<T>(result: LoadResult<T>): Error | undefined {
+  return result && 'error' in result ? result.error : undefined
+}
+
+/** Coerces an unknown thrown value into an Error instance. */
+function toError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err))
+}
+
 /**
  * Creates a proxy that provides automatic stubs based on naming conventions.
  * The proxy is created once per hook instance and reads meta values from a ref,
@@ -45,15 +62,7 @@ function createStableStubProxy<T extends FeatureImplementation>(
 
       // Create stub based on naming convention
       const name = String(prop)
-      let stub: unknown
-
-      if (name[0] >= 'A' && name[0] <= 'Z') {
-        // Component stub - renders null (PascalCase names)
-        stub = () => null
-      } else {
-        // Hooks, services, and unknown $ props - undefined (no stub)
-        stub = undefined
-      }
+      const stub = name[0] >= 'A' && name[0] <= 'Z' ? () => null : undefined
 
       stubCache.set(prop, stub)
       return stub
@@ -126,16 +135,15 @@ export function useLoadFeature<T extends FeatureImplementation>(
 
   // Single state: the loaded feature or an error. No intermediate "loading" state —
   // we go directly from undefined to the loaded feature in one transition.
-  const [loaded, setLoaded] = useState<{ feature: LoadedFeature } | { error: Error } | undefined>(() =>
+  const [loaded, setLoaded] = useState<LoadResult<LoadedFeature>>(() =>
     cachedFeatureRef.current ? { feature: cachedFeatureRef.current } : undefined,
   )
 
   useEffect(() => {
     if (isEnabled !== true) return
 
-    // Already loaded? No state update needed.
+    // Already loaded? Ensure state reflects the cached feature (handles flicker recovery)
     if (cachedFeatureRef.current) {
-      // Ensure state reflects the cached feature (handles flicker recovery)
       setLoaded({ feature: cachedFeatureRef.current })
       return
     }
@@ -157,9 +165,8 @@ export function useLoadFeature<T extends FeatureImplementation>(
       },
       (err) => {
         if (cancelled) return
-        const error = err instanceof Error ? err : new Error(String(err))
-        logError(Errors._906, error)
-        setLoaded({ error })
+        logError(Errors._906, toError(err))
+        setLoaded({ error: toError(err) })
       },
     )
 
@@ -169,13 +176,11 @@ export function useLoadFeature<T extends FeatureImplementation>(
   }, [isEnabled, handle])
 
   // Derive meta from current state
-  const feature = loaded && 'feature' in loaded ? loaded.feature : undefined
-  const error = loaded && 'error' in loaded ? loaded.error : undefined
-
+  const feature = getFeature(loaded)
   const meta: FeatureMeta = {
     $isDisabled: isEnabled === false,
     $isReady: !!feature,
-    $error: error,
+    $error: getError(loaded),
   }
 
   // Stable proxy — created once per hook instance, reads meta from ref
@@ -186,9 +191,9 @@ export function useLoadFeature<T extends FeatureImplementation>(
 
   // Return feature with meta, or the stable stub proxy
   return useMemo(() => {
-    if (meta.$isReady && feature) {
+    if (feature) {
       return { ...feature, ...meta } as LoadedFeature & FeatureMeta
     }
     return stubProxy as unknown as LoadedFeature & FeatureMeta
-  }, [meta.$isReady, feature, stubProxy, meta])
+  }, [feature, stubProxy, meta])
 }
