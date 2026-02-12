@@ -807,7 +807,27 @@ export const addedSafes = {
       },
     },
   },
-  /** Sidebar tests: safe1 + safe2 on Sepolia. Includes visited safe SEP_STATIC_SAFE_9 and chain 1 for tests that visit MATIC_STATIC_SAFE_28 on eth. */
+  // sidebar_6.cy.js - single safes for sorting tests
+  sidebarTrustedSafesForSorting: {
+    11155111: {
+      '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+      '0xBb26E3717172d5000F87DeFd391994f789D80aEB': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+      '0x905934aA8758c06B2422F0C90D97d2fbb6677811': {
+        owners: [],
+        threshold: 1,
+        ethBalance: '0',
+      },
+    },
+  },
+  /** Trusted safes in sidebar-sidebar3.cy.js, sidebar5.cy.js */
   sidebarTrustedSafe1Safe2: {
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {

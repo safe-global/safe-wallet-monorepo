@@ -60,7 +60,10 @@ describe('Sidebar sorting tests', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__visitedSafes, ls.visitedSafes.set1)
-    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    main.addToAppLocalStorage(
+      constants.localStorageKeys.SAFE_v2__addedSafes,
+      ls.addedSafes.sidebarTrustedSafesForSorting,
+    )
     cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
