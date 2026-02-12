@@ -1,66 +1,45 @@
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export type AsyncResult<T> = [result: T | undefined, error: Error | undefined, loading: boolean]
-
-interface AsyncState<T> {
-  data: T | undefined
-  error: Error | undefined
-  loading: boolean
-}
-
-type AsyncAction<T> =
-  | { type: 'reset' }
-  | { type: 'start'; clearData: boolean }
-  | { type: 'success'; data: T }
-  | { type: 'error'; error: Error }
-  | { type: 'loading_done' }
-
-function asyncReducer<T>(state: AsyncState<T>, action: AsyncAction<T>): AsyncState<T> {
-  switch (action.type) {
-    case 'reset':
-      return { data: undefined, error: undefined, loading: false }
-    case 'start':
-      return { data: action.clearData ? undefined : state.data, error: undefined, loading: true }
-    case 'success':
-      return { data: action.data, error: undefined, loading: false }
-    case 'error':
-      return { data: undefined, error: action.error, loading: false }
-    case 'loading_done':
-      return state.loading ? { ...state, loading: false } : state
-  }
-}
-
-const INITIAL_STATE: AsyncState<unknown> = { data: undefined, error: undefined, loading: false }
 
 const useAsync = <T>(
   asyncCall: () => Promise<T> | undefined,
   dependencies: unknown[],
   clearData = true,
 ): AsyncResult<T> => {
-  const [state, dispatch] = useReducer(asyncReducer<T>, INITIAL_STATE as AsyncState<T>)
+  const [data, setData] = useState<T | undefined>()
+  const [error, setError] = useState<Error>()
+  const [loading, setLoading] = useState<boolean>(false)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const callback = useCallback(asyncCall, dependencies)
 
   useEffect(() => {
+    setError(undefined)
+
     const promise = callback()
 
     // Not a promise, exit early
     if (!promise) {
-      dispatch({ type: 'reset' })
+      setData(undefined)
+      setLoading(false)
       return
     }
 
     let isCurrent = true
-    dispatch({ type: 'start', clearData })
+    clearData && setData(undefined)
+    setLoading(true)
 
     promise
       .then((val: T) => {
-        isCurrent && dispatch({ type: 'success', data: val })
+        isCurrent && setData(val)
       })
       .catch((err) => {
-        isCurrent && dispatch({ type: 'error', error: asError(err) })
+        isCurrent && setError(asError(err))
+      })
+      .finally(() => {
+        isCurrent && setLoading(false)
       })
 
     return () => {
@@ -68,7 +47,7 @@ const useAsync = <T>(
     }
   }, [callback, clearData])
 
-  return [state.data, state.error, state.loading]
+  return [data, error, loading]
 }
 
 export default useAsync
@@ -80,28 +59,29 @@ export const useAsyncCallback = <T extends (...args: any) => Promise<any>>(
   error: Error | undefined
   isLoading: boolean
 } => {
-  const [state, dispatch] = useReducer(asyncReducer<ReturnType<T>>, INITIAL_STATE as AsyncState<ReturnType<T>>)
+  const [error, setError] = useState<Error>()
+  const [isLoading, setLoading] = useState<boolean>(false)
 
   const asyncCallback = useCallback(
     async (...args: Parameters<T>) => {
-      dispatch({ type: 'reset' })
+      setError(undefined)
 
       const result = callback(...args)
 
       // Not a promise, exit early
       if (!result) {
-        dispatch({ type: 'loading_done' })
+        setLoading(false)
         return result
       }
 
-      dispatch({ type: 'start', clearData: false })
+      setLoading(true)
 
       result
         .catch((err) => {
-          dispatch({ type: 'error', error: asError(err) })
+          setError(asError(err))
         })
         .finally(() => {
-          dispatch({ type: 'loading_done' })
+          setLoading(false)
         })
 
       return result
@@ -109,5 +89,5 @@ export const useAsyncCallback = <T extends (...args: any) => Promise<any>>(
     [callback],
   )
 
-  return { asyncCallback, error: state.error, isLoading: state.loading }
+  return { asyncCallback, error, isLoading }
 }
