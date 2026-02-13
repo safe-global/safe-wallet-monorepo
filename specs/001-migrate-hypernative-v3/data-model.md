@@ -106,12 +106,11 @@ These are imported directly from `@/features/hypernative`, not via `useLoadFeatu
 
 When using `useLoadFeature(HypernativeFeature)`, these properties are always available:
 
-| Property      | Type            | Description                        |
-| ------------- | --------------- | ---------------------------------- |
-| `$isLoading`  | `boolean`       | True while feature code is loading |
-| `$isDisabled` | `boolean`       | True if feature flag is disabled   |
-| `$isReady`    | `boolean`       | True when loaded and enabled       |
-| `$error`      | `Error \| null` | Error if loading failed            |
+| Property      | Type                 | Description                      |
+| ------------- | -------------------- | -------------------------------- |
+| `$isDisabled` | `boolean`            | True if feature flag is disabled |
+| `$isReady`    | `boolean`            | True when loaded and enabled     |
+| `$error`      | `Error \| undefined` | Error if loading failed          |
 
 ## Feature Flag Mapping
 
@@ -168,10 +167,9 @@ Initial → Loading → Ready
                  ↘ Error
 ```
 
-| State    | $isLoading | $isDisabled | $isReady | Component Behavior | Service Behavior   |
-| -------- | ---------- | ----------- | -------- | ------------------ | ------------------ |
-| Initial  | `false`    | `false`     | `false`  | Renders `null`     | `undefined`        |
-| Loading  | `true`     | `false`     | `false`  | Renders `null`     | `undefined`        |
-| Ready    | `false`    | `false`     | `true`   | Renders component  | Function available |
-| Disabled | `false`    | `true`      | `false`  | Renders `null`     | `undefined`        |
-| Error    | `false`    | `false`     | `false`  | Renders `null`     | `undefined`        |
+| State    | $isDisabled | $isReady | Component Behavior | Service Behavior   |
+| -------- | ----------- | -------- | ------------------ | ------------------ |
+| Initial  | `false`     | `false`  | Renders `null`     | `undefined`        |
+| Ready    | `false`     | `true`   | Renders component  | Function available |
+| Disabled | `true`      | `false`  | Renders `null`     | `undefined`        |
+| Error    | `false`     | `false`  | Renders `null`     | `undefined`        |

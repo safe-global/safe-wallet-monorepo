@@ -130,7 +130,7 @@
 **Findings**:
 
 - **Error Handling**: `useLoadFeature` exposes `$error` meta property
-- **Loading States**: `$isLoading`, `$isDisabled`, `$isReady` meta properties
+- **Loading States**: `$isDisabled`, `$isReady` meta properties
 - **Feature Flag Toggling**: React reactivity handles changes automatically
 - **Chain Switching**: `useHasFeature` reacts to chain changes, feature reloads
 - **Business Logic**: Eligibility, gas limits, blocked addresses - all unchanged

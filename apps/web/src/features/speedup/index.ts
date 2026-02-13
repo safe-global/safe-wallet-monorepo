@@ -21,7 +21,7 @@
  * function MyComponentWithStates() {
  *   const feature = useLoadFeature(SpeedupFeature)
  *
- *   if (feature.$isLoading) return <Skeleton />
+ *   if (!feature.$isReady) return <Skeleton />
  *   if (feature.$isDisabled) return null
  *
  *   return <feature.SpeedUpModal />
