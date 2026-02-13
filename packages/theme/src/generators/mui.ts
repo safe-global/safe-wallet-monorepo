@@ -373,7 +373,12 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           root: ({ theme }) => ({ borderColor: theme.palette.border.main }),
         },
       },
-      MuiSvgIcon: { styleOverrides: { fontSizeSmall: { width: '1rem', height: '1rem' } } },
+      MuiSvgIcon: {
+        styleOverrides: {
+          root: { display: 'inline-flex', verticalAlign: 'middle' },
+          fontSizeSmall: { width: '1rem', height: '1rem' },
+        },
+      },
       MuiFilledInput: {
         styleOverrides: {
           root: ({ theme }) => ({

@@ -1,0 +1,43 @@
+/*
+ * MUI compatibility overrides for Tailwind v4 preflight conflicts.
+ *
+ * Tailwind v4 preflight sets:
+ *   svg { display: block }
+ *   img { max-width: 100%; height: auto }
+ *
+ * These break MUI components that expect inline SVGs and unconstrained images.
+ *
+ * Rules are placed in @layer base so they:
+ *   1. Override Tailwind preflight (same layer, later source order)
+ *   2. Lose to Tailwind utilities like `hidden`, `block`, `flex` (@layer utilities wins)
+ *   3. Lose to MUI Emotion styles (unlayered, beat all layers)
+ *
+ * Cascade: Tailwind preflight < mui-compat < Tailwind utilities < MUI Emotion
+ */
+
+@layer base {
+  /* --- SVG display fix --- */
+
+  /*
+   * Revert Tailwind's `svg { display: block }` globally.
+   * All existing SVGs (MUI icons, custom icons, inline SVGs) expect inline display.
+   * Tailwind utilities (hidden, block, flex, etc.) still override this.
+   */
+  svg {
+    display: inline;
+    vertical-align: middle;
+  }
+
+  /* --- Image sizing fix --- */
+
+  /* MUI Avatar images have explicit dimensions */
+  .MuiAvatar-img {
+    max-width: none;
+    height: auto;
+  }
+
+  /* Chip avatar images */
+  .MuiChip-avatar img {
+    max-width: none;
+  }
+}

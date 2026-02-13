@@ -83,7 +83,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                         >
                           <mock-icon
                             aria-hidden=""
-                            class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                            class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                             data-testid="copy-btn-icon"
                             focusable="false"
                           />
@@ -135,7 +135,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                     >
                       <mock-icon
                         aria-hidden=""
-                        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1scz1j1-MuiSvgIcon-root"
                         focusable="false"
                       />
                     </span>
@@ -147,7 +147,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cu1ut8-MuiSvgIcon-root"
                   data-testid="ExpandMoreIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -205,7 +205,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Safe Utils
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-1ts1yjx-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Transaction Decoder
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-1ts1yjx-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"
@@ -444,7 +444,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                     )
                                     <svg
                                       aria-hidden="true"
-                                      class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeInherit css-113mief-MuiSvgIcon-root"
+                                      class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeInherit css-esq05i-MuiSvgIcon-root"
                                       data-testid="CheckIcon"
                                       focusable="false"
                                       viewBox="0 0 24 24"

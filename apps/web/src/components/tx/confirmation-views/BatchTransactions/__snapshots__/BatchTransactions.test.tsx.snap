@@ -38,7 +38,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                     data-testid="CodeIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cu1ut8-MuiSvgIcon-root"
                   data-testid="ExpandMoreIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
@@ -224,7 +224,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                       >
                                         <mock-icon
                                           aria-hidden=""
-                                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                                           data-testid="copy-btn-icon"
                                           focusable="false"
                                         />
