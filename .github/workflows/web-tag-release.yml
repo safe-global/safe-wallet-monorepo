@@ -15,6 +15,7 @@ jobs:
   tag:
     if: github.event.pull_request.merged == true
     permissions:
+      actions: write
       contents: write
     runs-on: ubuntu-latest
     outputs:
@@ -38,6 +39,12 @@ jobs:
       - name: Create a git tag
         if: steps.version.outputs.version
         run: git tag ${{ steps.version.outputs.version }} && git push --tags
+
+      - name: Trigger Docker Hub release
+        if: steps.version.outputs.version
+        run: gh workflow run web-deploy-dockerhub.yml -f tag=${{ steps.version.outputs.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Extract changelog from PR body
         id: extract_changelog
@@ -281,39 +288,3 @@ jobs:
             }' | curl -X POST "$SLACK_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d @-
-
-  dockerhub-release:
-    needs: tag
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: main
-
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Push release image to Docker Hub
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: |
-            safeglobal/safe-wallet-web:${{ needs.tag.outputs.version }}
-            safeglobal/safe-wallet-web:latest
-          platforms: |
-            linux/amd64
-            linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
