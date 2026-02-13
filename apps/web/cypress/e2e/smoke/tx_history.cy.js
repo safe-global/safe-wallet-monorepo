@@ -20,9 +20,9 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
     cy.fixture('history/history_tx_1.json').then((mockData) => {
       cy.intercept('GET', constants.transactionHistoryEndpoint, mockData).as('getHistory')
+      cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
     })
     cy.wait('@getHistory')
   })
