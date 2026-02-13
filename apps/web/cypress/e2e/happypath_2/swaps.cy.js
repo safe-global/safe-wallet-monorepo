@@ -23,8 +23,9 @@ describe('Happy path Swaps tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_1)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })

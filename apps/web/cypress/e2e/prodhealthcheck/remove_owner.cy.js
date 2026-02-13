@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as owner from '../pages/owners.pages'
 import * as createwallet from '../pages/create_wallet.pages'
 import * as createTx from '../pages/create_tx.pages.js'
@@ -17,8 +16,9 @@ describe('[PROD] Remove Owners tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.prodbaseUrl + constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     acceptCookies2()
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
