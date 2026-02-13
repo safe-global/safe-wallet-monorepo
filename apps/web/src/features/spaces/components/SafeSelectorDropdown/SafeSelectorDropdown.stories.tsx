@@ -8,6 +8,11 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
   layout: 'none',
+  store: {
+    safeInfo: {
+      data: { chainId: '1' },
+    },
+  },
 })
 
 const meta = {
@@ -109,14 +114,32 @@ const InteractiveWrapper = ({ safes, initialSafeId }: { safes: typeof mockSafes;
   )
 }
 
+/** One safe with only one chain: threshold badge visible, no divider line or chevron. */
+const singleChainSafe = createMockSafe(0, {
+  id: '1:0xA77DE...98b6',
+  name: 'My Safe',
+  address: '0xA77D...98b6',
+  threshold: 3,
+  owners: 5,
+  balance: '16780000',
+  chains: [baseChains[0]],
+})
+
 export const Default: Story = {
   render: () => <InteractiveWrapper safes={mockSafes} initialSafeId={mockSafes[0].id} />,
   args: {
-    safes: mockSafes,
+    safes: [...mockSafes, singleChainSafe],
   },
 }
 
-export const SingleSafe: Story = {
+export const SingleSafeSingleChain: Story = {
+  render: () => <InteractiveWrapper safes={[singleChainSafe]} initialSafeId={singleChainSafe.id} />,
+  args: {
+    safes: [singleChainSafe],
+  },
+}
+
+export const SingleSafeMultiChains: Story = {
   render: () => <InteractiveWrapper safes={[mockSafes[0]]} initialSafeId={mockSafes[0].id} />,
   args: {
     safes: [mockSafes[0]],

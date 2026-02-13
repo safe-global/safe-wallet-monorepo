@@ -20,6 +20,7 @@ export interface BalanceDisplayProps {
   threshold: number
   owners: number
   isLoading?: boolean
+  showThreshold?: boolean
 }
 
 export interface ChainLogoProps {

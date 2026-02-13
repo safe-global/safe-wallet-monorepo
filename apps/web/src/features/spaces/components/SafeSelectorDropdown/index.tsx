@@ -27,17 +27,19 @@ const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => 
   </div>
 )
 
-const BalanceDisplay = ({ balance, threshold, owners, isLoading }: BalanceDisplayProps) => (
+const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold = true }: BalanceDisplayProps) => (
   <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
     {isLoading ? (
       <span className="text-xs font-medium text-muted-foreground">--</span>
     ) : (
       <span className="text-xs font-medium text-muted-foreground">{balance}</span>
     )}
-    <Badge variant="secondary" className="gap-1">
-      <User className="size-3" />
-      {threshold}/{owners}
-    </Badge>
+    {showThreshold && (
+      <Badge variant="secondary" className="gap-1">
+        <User className="size-3" />
+        {threshold}/{owners}
+      </Badge>
+    )}
   </div>
 )
 
@@ -97,9 +99,13 @@ function SafeSelectorDropdown({
           className={cn(
             '-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent py-0 pl-6 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0',
             !isSingleSafe && 'cursor-pointer',
+            isSingleSafe && 'pr-10',
           )}
           size="default"
-          iconWrapperClassName="border-l border-border pl-4 pr-4 ml-1 self-stretch flex items-center min-h-[2.5rem]"
+          iconWrapperClassName={cn(
+            !isSingleSafe && 'border-l border-border pl-4 pr-4 ml-1 self-stretch flex items-center min-h-[2.5rem]',
+            isSingleSafe && 'hidden',
+          )}
         >
           <SelectValue>
             {showTrigger && (
@@ -119,44 +125,50 @@ function SafeSelectorDropdown({
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                   role="group"
-                  aria-label="Chain selector"
+                  aria-label={displayInfo.hasMultipleChains ? 'Chain selector' : undefined}
                 >
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          className="flex items-center gap-1.5 bg-muted rounded-full pl-0.5 pr-2 py-0.5 shrink-0 cursor-pointer hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
+                  {displayInfo.hasMultipleChains ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="flex items-center gap-1.5 bg-muted rounded-full pl-0.5 pr-2 py-0.5 shrink-0 cursor-pointer hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                ;(e.currentTarget as HTMLElement).click()
+                              }
+                            }}
+                          >
+                            <ChainLogo chainId={selectedChainId} />
+                            <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+                          </span>
+                        }
+                      />
+                      <DropdownMenuContent align="end" className="w-[200px] bg-card text-foreground">
+                        {chainsToShow.map((chainItem) => (
+                          <DropdownMenuItem
+                            key={chainItem.chainId}
+                            onClick={(e) => handleChainSelect(chainItem.chainId, e)}
+                            onSelect={(e) => {
                               e.preventDefault()
-                              ;(e.currentTarget as HTMLElement).click()
-                            }
-                          }}
-                        >
-                          <ChainLogo chainId={selectedChainId} />
-                          <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                        </span>
-                      }
-                    />
-                    <DropdownMenuContent align="end" className="w-[200px] bg-card text-foreground">
-                      {chainsToShow.map((chainItem) => (
-                        <DropdownMenuItem
-                          key={chainItem.chainId}
-                          onClick={(e) => handleChainSelect(chainItem.chainId, e)}
-                          onSelect={(e) => {
-                            e.preventDefault()
-                            handleChainSelect(chainItem.chainId)
-                          }}
-                          className="gap-4 cursor-pointer"
-                        >
-                          <ChainLogo chainId={chainItem.chainId} />
-                          <span className="text-sm font-medium">{chainItem.chainName}</span>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                              handleChainSelect(chainItem.chainId)
+                            }}
+                            className="gap-4 cursor-pointer"
+                          >
+                            <ChainLogo chainId={chainItem.chainId} />
+                            <span className="text-sm font-medium">{chainItem.chainName}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+                      <ChainLogo chainId={selectedChainId} />
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-2 py-2 min-w-[90px] shrink-0">
                   {displayInfo.showLiveBalance ? (
@@ -172,10 +184,12 @@ function SafeSelectorDropdown({
                       <FiatValue value={selectedSafe?.balance} />
                     </span>
                   )}
-                  <Badge variant="secondary" className="gap-1">
-                    <User className="size-3" />
-                    {displayInfo.threshold}/{displayInfo.owners}
-                  </Badge>
+                  {!displayInfo.hasMultipleChains && (
+                    <Badge variant="secondary" className="gap-1">
+                      <User className="size-3" />
+                      {displayInfo.threshold}/{displayInfo.owners}
+                    </Badge>
+                  )}
                 </div>
               </div>
             )}
@@ -218,6 +232,7 @@ function SafeSelectorDropdown({
                           threshold={itemData.threshold}
                           owners={itemData.owners}
                           isLoading={itemData.isLoading}
+                          showThreshold={itemData.chains.length <= 1}
                         />
                       </div>
                     </SelectItem>
@@ -240,6 +255,7 @@ function SafeSelectorDropdown({
                       threshold={safe?.threshold ?? 0}
                       owners={safe?.owners?.length ?? 0}
                       isLoading={balancesLoading}
+                      showThreshold={true}
                     />
                   </div>
                 </SelectItem>

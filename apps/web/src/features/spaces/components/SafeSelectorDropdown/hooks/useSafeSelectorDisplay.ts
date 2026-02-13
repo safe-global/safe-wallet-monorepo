@@ -8,6 +8,7 @@ interface DisplayInfo {
   threshold: number
   owners: number
   showLiveBalance: boolean
+  hasMultipleChains: boolean
 }
 
 interface UseSafeSelectorDisplayParams {
@@ -32,21 +33,26 @@ export const useSafeSelectorDisplay = ({
 
   const displayInfo = useMemo((): DisplayInfo => {
     if (isCurrentSafeSelected) {
+      const currentSafeInList = safes.find((s) => s.id === currentSafeId)
+      const chainCount = currentSafeInList?.chains?.length ?? 1
       return {
         name: currentSafeName,
         address: currentSafeDisplayAddress,
         threshold: safe.threshold,
         owners: safe.owners.length,
         showLiveBalance: true,
+        hasMultipleChains: chainCount > 1,
       }
     }
 
+    const chainCount = selectedSafe?.chains?.length ?? 0
     return {
       name: selectedSafe?.name ?? '',
       address: selectedSafe.address,
       threshold: selectedSafe.threshold,
       owners: selectedSafe.owners,
       showLiveBalance: false,
+      hasMultipleChains: chainCount > 1,
     }
   }, [
     isCurrentSafeSelected,
@@ -54,10 +60,13 @@ export const useSafeSelectorDisplay = ({
     currentSafeDisplayAddress,
     safe.threshold,
     safe.owners.length,
+    safes,
+    currentSafeId,
     selectedSafe?.name,
-    selectedSafe.address,
-    selectedSafe.threshold,
-    selectedSafe.owners,
+    selectedSafe?.address,
+    selectedSafe?.threshold,
+    selectedSafe?.owners,
+    selectedSafe?.chains?.length,
   ])
 
   const selectValue = safes.length > 0 ? localSelectedSafeId : (currentSafeId ?? '')
