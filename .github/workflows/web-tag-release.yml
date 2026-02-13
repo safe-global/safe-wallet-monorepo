@@ -282,6 +282,8 @@ jobs:
 
   dockerhub-release:
     needs: tag
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
