@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Alert, Box, Button, CircularProgress, Paper, SvgIcon, Typography } from '@mui/material'
@@ -11,11 +11,11 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
-import useWallet, { useWalletContext } from '@/hooks/wallets/useWallet'
+import useWallet from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 
 interface CreateSpaceOnboardingProps {
-  isOnboarding: boolean
+  isOnboarding?: boolean
 }
 
 const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): ReactElement => {
@@ -50,7 +50,7 @@ const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): Re
           }),
         )
 
-        if(isOnboarding) {
+        if (isOnboarding) {
           router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
         } else {
           router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })

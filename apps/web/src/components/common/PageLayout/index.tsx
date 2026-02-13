@@ -12,7 +12,7 @@ import BatchSidebar from '@/components/batch/BatchSidebar'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { AppRoutes } from '@/config/routes'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
-import {useFlowActivationGuard} from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -31,7 +31,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useEffect(() => {
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
-  
 
   return (
     <>

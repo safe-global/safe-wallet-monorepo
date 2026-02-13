@@ -8,10 +8,10 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-/**
- * Routes that are always accessible regardless of auth state
- * (legal pages, error pages, offline fallback).
- */
+// ---------------------------------------------------------------------------
+// Route classifications
+// ---------------------------------------------------------------------------
+
 const PUBLIC_ROUTES = [
   AppRoutes.terms,
   AppRoutes.privacy,
@@ -25,32 +25,104 @@ const PUBLIC_ROUTES = [
   AppRoutes.welcome.index,
 ]
 
-/**
- * Welcome routes include the sign-in page and onboarding flow.
- * They are always accessible and don't require auth or a space.
- */
+const ONBOARDING_ROUTES = [
+  AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.selectSafes,
+  AppRoutes.welcome.inviteMembers,
+]
 
-const ONBOARDING_ROUTES = [AppRoutes.welcome.createSpace, AppRoutes.welcome.selectSafes, AppRoutes.welcome.inviteMembers]
+// ---------------------------------------------------------------------------
+// Guard helpers
+// ---------------------------------------------------------------------------
 
-const isPublicRoute = (pathname: string) => {
-  return PUBLIC_ROUTES.some((route) => route.startsWith(pathname))
-} 
-
-const isOnboardingRoute = (pathname: string) => {
-  return ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
+interface GuardResult {
+  success: boolean
+  redirectTo?: string
 }
+
+const allow = (): GuardResult => ({ success: true })
+const redirect = (redirectTo: string): GuardResult => ({ success: false, redirectTo })
+
+// ---------------------------------------------------------------------------
+// Guard context — all derived state the rules need to make decisions
+// ---------------------------------------------------------------------------
+
+interface GuardContext {
+  pathname: string
+  isPublicRoute: boolean
+  isOnboardingRoute: boolean
+  isWalletReady: boolean
+  isConnected: boolean
+  isSiweAuthenticated: boolean
+  isLoadingSpaces: boolean
+  hasSpaces: boolean
+  hasValidSpaceSelected: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Guard rules — evaluated in order, first match wins
+// ---------------------------------------------------------------------------
+
+interface GuardRule {
+  match: (ctx: GuardContext) => boolean
+  action: (ctx: GuardContext) => GuardResult
+}
+
+const guardRules: GuardRule[] = [
+  // Public and welcome routes are always accessible
+  {
+    match: ({ isPublicRoute }) => isPublicRoute,
+    action: () => allow(),
+  },
+
+  // Wallet provider or spaces data still loading — keep current page visible
+  {
+    match: ({ isWalletReady, isLoadingSpaces }) => !isWalletReady || isLoadingSpaces,
+    action: () => allow(),
+  },
+
+  // Not connected → welcome or not signed in with SIWE
+  {
+    match: ({ isConnected, isSiweAuthenticated }) => !isConnected || !isSiweAuthenticated,
+    action: () => redirect(AppRoutes.welcome.index),
+  },
+
+  // Authenticated with spaces but navigating to onboarding → spaces create page
+  {
+    match: ({ isOnboardingRoute, hasSpaces }) => isOnboardingRoute && hasSpaces,
+    action: () => redirect(AppRoutes.spaces.createSpace),
+  },
+
+  // Authenticated but has no spaces → onboarding
+  {
+    match: ({ hasSpaces, isOnboardingRoute }) => !hasSpaces && !isOnboardingRoute,
+    action: () => redirect(AppRoutes.welcome.createSpace),
+  },
+
+  // Has spaces but no valid space selected → welcome
+  {
+    match: ({ hasValidSpaceSelected }) => !hasValidSpaceSelected,
+    action: () => redirect(AppRoutes.welcome.index),
+  },
+]
+
 /**
- * Guard that enforces the main authentication / onboarding flow:
- *
- * 1. Public & welcome routes are always accessible.
- * 2. If the wallet provider is still initialising → wait (keep loading state).
- * 3. Not connected → redirect to welcome.
- * 4. Connected but not signed in with SIWE → redirect to welcome.
- * 5. If spaces data is still loading → wait.
- * 6. No spaces → redirect to onboarding (create-space).
- * 7. Has spaces but no active / valid space selected → redirect to welcome.
- * 8. Otherwise → allow.
+ * Runs the guard rules against the given context.
+ * Returns the result of the first matching rule, or `allow()` if none match.
  */
+const evaluateGuard = (ctx: GuardContext): GuardResult => {
+  for (const rule of guardRules) {
+    if (rule.match(ctx)) {
+      return rule.action(ctx)
+    }
+  }
+  return allow()
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
 export const useFlowActivationGuard: UseGuard = () => {
   const { pathname } = useRouter()
   const wallet = useWallet()
@@ -63,52 +135,24 @@ export const useFlowActivationGuard: UseGuard = () => {
     skip: !isSiweAuthenticated,
   })
 
+  const hasSpaces = !!spaces && spaces.length > 0
+  const hasValidSpaceSelected = hasSpaces && !!currentSpaceId && spaces.some((s) => String(s.id) === currentSpaceId)
+
   const activationGuard = useCallback(async () => {
-console.log('### activationGuard', pathname, isPublicRoute(pathname))
-    // 1 – Public and welcome routes (including onboarding) are always reachable
-    if (isPublicRoute(pathname)) {
-      return { success: true }
-    }
-    console.log('### isOnboardingRoute(pathname)', isOnboardingRoute(pathname))
-
-    // 2 – Wallet provider still loading (e.g. hard refresh, onboard reconnecting)
-    if (!isWalletReady || isLoadingSpaces) {
-      return { success: true }
-    }
-
-    // 3 – User is not connected → redirect to welcome
-    if (!wallet) {
-      return { success: false, redirectTo: AppRoutes.welcome.index }
-    }
-
-    // 4 – Connected but not signed in with SIWE → redirect to welcome
-    if (!isSiweAuthenticated) {
-      return { success: false, redirectTo: AppRoutes.welcome.index }
-    }
-console.log('### isOnboardingRoute(pathname)', isOnboardingRoute(pathname))
-    //  5 - Has spaces and is trying to access onboarding routes
-    if(isOnboardingRoute(pathname) && spaces?.length ) {
-      return { success: false, redirectTo: AppRoutes.spaces.createSpace }
-    }
-
-    // 6 – Authenticated but has no spaces → redirect to onboarding
-    if (!spaces || spaces.length === 0) {
-      return { success: false, redirectTo: AppRoutes.welcome.createSpace }
-    }
-
-    // 7 – Has spaces but either no space is selected or the selected space is
-    //     not in the user's list → redirect to welcome
-    const isInValidSpace = spaces.some((space) => String(space.id) === currentSpaceId)
-    if (!currentSpaceId || !isInValidSpace) {
-      return { success: false, redirectTo: AppRoutes.welcome.index }
-    }
-
-    // 8 – All checks passed
-    return { success: true }
-  }, [pathname, wallet, isWalletReady, isSiweAuthenticated, isLoadingSpaces, spaces, currentSpaceId])
+    return evaluateGuard({
+      pathname,
+      isPublicRoute: PUBLIC_ROUTES.some((route) => route.startsWith(pathname)),
+      isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
+      isWalletReady,
+      isConnected: !!wallet,
+      isSiweAuthenticated,
+      isLoadingSpaces,
+      hasSpaces,
+      hasValidSpaceSelected,
+    })
+  }, [pathname, wallet, isWalletReady, isSiweAuthenticated, isLoadingSpaces, hasSpaces, hasValidSpaceSelected])
 
   return {
     activationGuard,
   }
 }
-

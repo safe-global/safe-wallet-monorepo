@@ -28,10 +28,7 @@ export type ConnectedWallet = {
 
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
-const {
-  setStore: setWalletReady,
-  useStore: useIsWalletReady,
-} = new ExternalStore<boolean>()
+const { setStore: setWalletReady, useStore: useIsWalletReady } = new ExternalStore<boolean>()
 
 export { useIsWalletReady }
 

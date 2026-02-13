@@ -22,7 +22,6 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
 
       const { success, redirectTo } = await activationGuard()
 
-
       if (success) {
         setIsCheckingAccess(false)
       } else {
