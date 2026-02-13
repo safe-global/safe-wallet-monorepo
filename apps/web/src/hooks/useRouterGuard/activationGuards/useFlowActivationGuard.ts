@@ -84,7 +84,7 @@ const guardRules: GuardRule[] = [
 
   // Not connected or not signed in with SIWE → welcome
   {
-    match: ({ isConnected, isSiweAuthenticated, isWalletReady }) => {
+    match: ({ isConnected, isSiweAuthenticated }) => {
       const shouldRedirect = !isConnected || !isSiweAuthenticated
       console.log('## shouldRedirect Not connected or not signed in with SIWE → welcome', shouldRedirect)
       return shouldRedirect
@@ -104,10 +104,13 @@ const guardRules: GuardRule[] = [
 
   // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
   {
-    match: ({ hasSpaces, pathname, isOnboardingRoute, isWalletReady, query }) => {
+    match: ({ hasSpaces, isOnboardingRoute, query }) => {
       // query paramerters are only available on the client side
-      const shouldRedirect =  hasSpaces && isOnboardingRoute && !query.spaceId
-      console.log('## shouldRedirect Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page', shouldRedirect)
+      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
+      console.log(
+        '## shouldRedirect Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page',
+        shouldRedirect,
+      )
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.spaces.createSpace),
@@ -120,7 +123,7 @@ const guardRules: GuardRule[] = [
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.welcome.index),
-  }
+  },
 ]
 
 /**
