@@ -15,8 +15,9 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     main.verifyElementsExist([navigation.setupSection])
   })
 
@@ -49,8 +50,9 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   it('[SMOKE] Verify "Manage Signers" button is disabled for Non-Owner', () => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     owner.verifyManageSignersBtnIsDisabled()
   })
 })

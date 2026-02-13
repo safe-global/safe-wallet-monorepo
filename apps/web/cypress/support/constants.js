@@ -98,7 +98,7 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 export const spacesEndpoint = '**/**/spaces*'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '/**/safe-apps*'
-export const transactionHistoryEndpoint = '**/history**'
+export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'

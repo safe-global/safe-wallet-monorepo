@@ -224,9 +224,17 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
       class="chainIcon"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="indicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="17.333342000000002"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="17.333342000000002"
+        />
+      </span>
     </div>
   </div>
 </div>

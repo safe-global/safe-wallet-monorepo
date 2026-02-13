@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { usePortfolioGetPortfolioV1Query, type Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import useSafeInfo from '@/hooks/useSafeInfo'
+import useEffectiveSafeParams from '@/hooks/useEffectiveSafeParams'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useTxServiceBalances, useTokenListSetting, type PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 
@@ -36,8 +36,8 @@ const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances 
 const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress } = useSafeInfo()
-  const isReadyPortfolio = safeAddress && isTrustedTokenList !== undefined
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
+  const isReadyPortfolio = effectiveAddress && effectiveChainId && isTrustedTokenList !== undefined
 
   // Portfolio endpoint (called first)
   const {
@@ -46,13 +46,13 @@ const usePortfolioBalances = (skip = false): AsyncResult<PortfolioBalances> => {
     error: portfolioError,
   } = usePortfolioGetPortfolioV1Query(
     {
-      address: safeAddress,
-      chainIds: safe.chainId,
+      address: effectiveAddress,
+      chainIds: effectiveChainId,
       fiatCode: currency,
       trusted: isTrustedTokenList,
     },
     {
-      skip: skip || !isReadyPortfolio || !safe.chainId,
+      skip: skip || !isReadyPortfolio,
     },
   )
 

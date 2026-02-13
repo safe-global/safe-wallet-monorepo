@@ -15,7 +15,7 @@ import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
@@ -102,6 +102,7 @@ setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
+  useInitStaticChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()
