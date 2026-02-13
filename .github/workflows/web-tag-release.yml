@@ -9,6 +9,8 @@ on:
       - apps/web/**
       - packages/**
 
+permissions: {}
+
 jobs:
   tag:
     if: github.event.pull_request.merged == true
