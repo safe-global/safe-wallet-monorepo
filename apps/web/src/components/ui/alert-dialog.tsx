@@ -4,6 +4,7 @@ import * as React from 'react'
 import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog'
 
 import { cn } from '@/utils/cn'
+import { usePortalContainer } from '@/components/ui/ShadcnProvider'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -45,7 +46,8 @@ function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {
 }
 
 function AlertDialogPortal({ ...props }: AlertDialogPrimitive.Portal.Props) {
-  return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+  const portalContainer = usePortalContainer()
+  return <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" container={portalContainer} {...props} />
 }
 
 function AlertDialogOverlay({ className, ...props }: AlertDialogPrimitive.Backdrop.Props) {

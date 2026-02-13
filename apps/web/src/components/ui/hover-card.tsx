@@ -3,6 +3,7 @@
 import { PreviewCard as PreviewCardPrimitive } from '@base-ui/react/preview-card'
 
 import { cn } from '@/utils/cn'
+import { usePortalContainer } from '@/components/ui/ShadcnProvider'
 
 /**
  * Hover Card Component
@@ -42,8 +43,9 @@ function HoverCardContent({
   ...props
 }: PreviewCardPrimitive.Popup.Props &
   Pick<PreviewCardPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>) {
+  const portalContainer = usePortalContainer()
   return (
-    <PreviewCardPrimitive.Portal data-slot="hover-card-portal">
+    <PreviewCardPrimitive.Portal data-slot="hover-card-portal" container={portalContainer}>
       <PreviewCardPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
