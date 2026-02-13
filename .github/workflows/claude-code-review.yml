@@ -14,10 +14,12 @@ jobs:
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude review')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude review'))
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -30,9 +32,11 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
-            --model claude-sonnet-4-5-20250929
+          track_progress: true
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
             Please review this pull request and provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
@@ -44,5 +48,6 @@ jobs:
             Make it short and concise, avoid unnecessary details.
             Only focus on things to improve.
             Do not need to check the comments of the PR.
-
+          claude_args: |
+            --model claude-sonnet-4-5-20250929 --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
           trigger_phrase: '@claude review'
