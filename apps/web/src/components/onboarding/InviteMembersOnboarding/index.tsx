@@ -69,7 +69,7 @@ const InviteMembersOnboarding = (): ReactElement => {
   // Redirect to create-space if no spaceId
   useEffect(() => {
     if (router.isReady && !spaceId) {
-      router.replace({ pathname: AppRoutes.onboarding.createSpace })
+      router.replace({ pathname: AppRoutes.welcome.createSpace })
     }
   }, [router, spaceId])
 
@@ -78,7 +78,7 @@ const InviteMembersOnboarding = (): ReactElement => {
   }
 
   const goBack = () => {
-    router.push({ pathname: AppRoutes.onboarding.selectSafes, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
   }
 
   const onSubmit = handleSubmit(async (data) => {

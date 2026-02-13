@@ -22,24 +22,23 @@ const PUBLIC_ROUTES = [
   AppRoutes['403'],
   AppRoutes['404'],
   AppRoutes._offline,
+  AppRoutes.welcome.index,
 ]
 
-const WELCOME_ROUTES = Object.values(AppRoutes.welcome)
+/**
+ * Welcome routes include the sign-in page and onboarding flow.
+ * They are always accessible and don't require auth or a space.
+ */
 
-const ONBOARDING_ROUTES = Object.values(AppRoutes.onboarding)
+const ONBOARDING_ROUTES = [AppRoutes.welcome.createSpace, AppRoutes.welcome.selectSafes, AppRoutes.welcome.inviteMembers]
 
 const isPublicRoute = (pathname: string) => {
-  return PUBLIC_ROUTES.some((route) => pathname.startsWith(route))
-}
-
-const isWelcomeRoute = (pathname: string) => {
-  return WELCOME_ROUTES.some((route) => pathname.startsWith(route))
-}
+  return PUBLIC_ROUTES.some((route) => route.startsWith(pathname))
+} 
 
 const isOnboardingRoute = (pathname: string) => {
   return ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
 }
-
 /**
  * Guard that enforces the main authentication / onboarding flow:
  *
@@ -47,14 +46,13 @@ const isOnboardingRoute = (pathname: string) => {
  * 2. If the wallet provider is still initialising → wait (keep loading state).
  * 3. Not connected → redirect to welcome.
  * 4. Connected but not signed in with SIWE → redirect to welcome.
- * 5. Onboarding routes are accessible once signed in.
- * 6. If spaces data is still loading → wait.
- * 7. No spaces → redirect to onboarding.
- * 8. Has spaces but no active / valid space selected → redirect to welcome.
- * 9. Otherwise → allow.
+ * 5. If spaces data is still loading → wait.
+ * 6. No spaces → redirect to onboarding (create-space).
+ * 7. Has spaces but no active / valid space selected → redirect to welcome.
+ * 8. Otherwise → allow.
  */
-const useFlowActivationGuard: UseGuard = () => {
-  const router = useRouter()
+export const useFlowActivationGuard: UseGuard = () => {
+  const { pathname } = useRouter()
   const wallet = useWallet()
   const walletContext = useWalletContext()
   const isWalletReady = walletContext?.isReady ?? false
@@ -66,47 +64,51 @@ const useFlowActivationGuard: UseGuard = () => {
   })
 
   const activationGuard = useCallback(async () => {
-    const { pathname } = router
+console.log('### activationGuard', pathname, isPublicRoute(pathname))
+    // 1 – Public and welcome routes (including onboarding) are always reachable
+    if (isPublicRoute(pathname)) {
+      return { success: true }
+    }
+    console.log('### isOnboardingRoute(pathname)', isOnboardingRoute(pathname))
 
-    // 1 – Public and welcome routes are always reachable
-    if (isPublicRoute(pathname) || isWelcomeRoute(pathname) || !isWalletReady) {
+    // 2 – Wallet provider still loading (e.g. hard refresh, onboard reconnecting)
+    if (!isWalletReady || isLoadingSpaces) {
       return { success: true }
     }
 
     // 3 – User is not connected → redirect to welcome
-    if (!wallet || !isSiweAuthenticated) {
+    if (!wallet) {
       return { success: false, redirectTo: AppRoutes.welcome.index }
     }
 
-    // 5 – Onboarding routes are reachable once the user is authenticated
-    if (isOnboardingRoute(pathname)) {
-      return { success: true }
+    // 4 – Connected but not signed in with SIWE → redirect to welcome
+    if (!isSiweAuthenticated) {
+      return { success: false, redirectTo: AppRoutes.welcome.index }
+    }
+console.log('### isOnboardingRoute(pathname)', isOnboardingRoute(pathname))
+    //  5 - Has spaces and is trying to access onboarding routes
+    if(isOnboardingRoute(pathname) && spaces?.length ) {
+      return { success: false, redirectTo: AppRoutes.spaces.createSpace }
     }
 
-    // 6 – Wait for spaces data before making space-dependent decisions
-    if (isLoadingSpaces) {
-      return { success: true }
-    }
-
-    // 7 – Authenticated but has no spaces → redirect to onboarding
+    // 6 – Authenticated but has no spaces → redirect to onboarding
     if (!spaces || spaces.length === 0) {
-      return { success: false, redirectTo: AppRoutes.onboarding.createSpace }
+      return { success: false, redirectTo: AppRoutes.welcome.createSpace }
     }
 
-    // 8 – Has spaces but either no space is selected or the selected space is
+    // 7 – Has spaces but either no space is selected or the selected space is
     //     not in the user's list → redirect to welcome
     const isInValidSpace = spaces.some((space) => String(space.id) === currentSpaceId)
     if (!currentSpaceId || !isInValidSpace) {
       return { success: false, redirectTo: AppRoutes.welcome.index }
     }
 
-    // 9 – All checks passed
+    // 8 – All checks passed
     return { success: true }
-  }, [router.pathname, wallet, isWalletReady, isSiweAuthenticated, isLoadingSpaces, spaces, currentSpaceId])
+  }, [pathname, wallet, isWalletReady, isSiweAuthenticated, isLoadingSpaces, spaces, currentSpaceId])
 
   return {
     activationGuard,
   }
 }
 
-export default useFlowActivationGuard

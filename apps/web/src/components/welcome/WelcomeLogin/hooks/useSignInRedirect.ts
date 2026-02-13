@@ -23,7 +23,7 @@ export const useSignInRedirect = () => {
     const hasSpaces = spaces && spaces.length > 0
 
     if (!hasSpaces) {
-      router.push({ pathname: AppRoutes.onboarding.createSpace, query: router.query })
+      router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
       return
     }
 

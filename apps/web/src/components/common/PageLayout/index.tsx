@@ -11,6 +11,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { AppRoutes } from '@/config/routes'
+import { useRouterGuard } from '@/hooks/useRouterGuard'
+import {useFlowActivationGuard} from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
@@ -21,12 +23,15 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isWelcomePage = pathname === AppRoutes.welcome.index
   const hideHeader = isSafeLabsTermsPage || isWelcomePage
 
+  useRouterGuard({ useGuard: useFlowActivationGuard })
+
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
 
   useEffect(() => {
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
+  
 
   return (
     <>
