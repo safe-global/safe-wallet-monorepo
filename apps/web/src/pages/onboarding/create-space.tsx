@@ -9,7 +9,6 @@ const CreateSpacePage: NextPage = () => {
       <Head>
         <title>{`${BRAND_NAME} – Create space`}</title>
       </Head>
-
       <CreateSpaceOnboarding />
     </>
   )
