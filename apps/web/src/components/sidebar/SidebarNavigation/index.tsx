@@ -105,7 +105,7 @@ const Navigation = (): ReactElement | null => {
   return (
     <SidebarList>
       {visibleNavItems.map((item) => {
-        const isSelected = currentSubdirectory === getSubdirectory(item.href)
+        const isSelected = !item.externalUrl && currentSubdirectory === getSubdirectory(item.href)
         const isDisabled = item.disabled || !enabledNavItems.includes(item)
         let ItemTag = item.tag ? item.tag : null
         const spaceId = router.query.spaceId
@@ -124,25 +124,31 @@ const Navigation = (): ReactElement | null => {
           <Tooltip
             title={isDisabled ? 'You need to activate your Safe first.' : ''}
             placement="right"
-            key={item.href}
+            key={item.externalUrl || item.href}
             arrow
           >
             <div>
               <ListItemButton
-                // disablePadding
                 sx={{ padding: 0 }}
                 disabled={isDisabled}
                 selected={isSelected}
                 onClick={isDisabled ? undefined : () => handleNavigationClick(item)}
-                key={item.href}
+                {...(item.externalUrl && {
+                  component: 'a',
+                  href: item.externalUrl,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                })}
               >
                 <SidebarListItemButton
                   selected={isSelected}
                   href={
-                    item.href && {
-                      pathname: getRoute(item.href),
-                      query,
-                    }
+                    item.href
+                      ? {
+                          pathname: getRoute(item.href),
+                          query,
+                        }
+                      : undefined
                   }
                   disabled={isDisabled}
                 >
