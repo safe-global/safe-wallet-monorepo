@@ -1,4 +1,6 @@
-# This Docker image is meant to be used only by our safe-infrastructure repository
+# Deploys Docker images for dev/staging branches.
+# Release images (vX.Y.Z + latest) are published by web-tag-release.yml.
+# The release trigger below is kept as a fallback for manually published releases.
 
 name: Web Deploy to Dockerhub
 

@@ -10,14 +10,14 @@ on:
       - packages/**
 
 jobs:
-  tag-release-deploy:
+  tag:
     if: github.event.pull_request.merged == true
     permissions:
-      attestations: write
       contents: write
-      id-token: write
-      pull-requests: write
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.extract_changelog.outputs.changelog }}
 
     steps:
       - name: Checkout
@@ -56,20 +56,36 @@ jobs:
             echo 'CHANGELOG_EOF'
           } >> $GITHUB_OUTPUT
 
+  release-deploy:
+    needs: tag
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
       - name: Create GitHub release (draft)
-        if: steps.version.outputs.version
+        if: needs.tag.outputs.version
         uses: softprops/action-gh-release@v2
         id: create_release
         with:
           draft: true
           prerelease: false
-          name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ needs.tag.outputs.version }}
+          tag_name: ${{ needs.tag.outputs.version }}
           body: |
-            ${{ steps.extract_changelog.outputs.changelog }}
+            ${{ needs.tag.outputs.changelog }}
 
             [🔗 IPFS release](
-            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ steps.version.outputs.version }})
+            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ needs.tag.outputs.version }})
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -85,29 +101,29 @@ jobs:
         working-directory: apps/web
 
       - name: Create archive
-        run: tar -czf "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz out
+        run: tar -czf "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}".tar.gz out
         working-directory: apps/web
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+          subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Create checksum
-        run: sha256sum "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz > "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt"
+        run: sha256sum "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}".tar.gz > "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt"
         working-directory: apps/web
 
       - name: Upload archive as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -118,8 +134,8 @@ jobs:
       # Script to upload release files
       - name: Upload release build files for production
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
-          CHECKSUM_FILE: ${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ needs.tag.outputs.version }}
+          CHECKSUM_FILE: ${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
 
@@ -130,14 +146,14 @@ jobs:
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
-          VERSION_TAG: ${{ steps.version.outputs.version }}
+          VERSION_TAG: ${{ needs.tag.outputs.version }}
 
       - name: Create back-merge PR
         continue-on-error: true
         id: backmerge
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.tag.outputs.version }}
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         run: |
@@ -214,8 +230,8 @@ jobs:
           fi
 
       - name: Publish GitHub release
-        if: steps.version.outputs.version && success()
-        run: gh release edit ${{ steps.version.outputs.version }} --draft=false
+        if: needs.tag.outputs.version && success()
+        run: gh release edit ${{ needs.tag.outputs.version }} --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -229,8 +245,8 @@ jobs:
             exit 0
           fi
 
-          VERSION="${{ steps.version.outputs.version }}"
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+          VERSION="${{ needs.tag.outputs.version }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ needs.tag.outputs.version }}"
           BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
           HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
 
@@ -263,3 +279,37 @@ jobs:
             }' | curl -X POST "$SLACK_WEBHOOK_URL" \
               -H 'Content-Type: application/json' \
               -d @-
+
+  dockerhub-release:
+    needs: tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push release image to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            safeglobal/safe-wallet-web:${{ needs.tag.outputs.version }}
+            safeglobal/safe-wallet-web:latest
+          platforms: |
+            linux/amd64
+            linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
