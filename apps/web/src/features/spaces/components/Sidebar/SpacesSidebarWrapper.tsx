@@ -46,13 +46,7 @@ export const SpacesSidebarWrapper = (): ReactElement => {
                 </SidebarMenuButton>
                 {item.badge !== undefined && item.badge > 0 && (
                   <>
-                    <span
-                      className={
-                        css.transactionsBadge + ' absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium'
-                      }
-                    >
-                      {item.badge}
-                    </span>
+                    <span className={css.transactionsBadge}>{item.badge}</span>
                     <span className={css.transactionsBadgeDot} aria-hidden />
                   </>
                 )}

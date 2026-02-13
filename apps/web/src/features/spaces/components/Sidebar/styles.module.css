@@ -1,6 +1,3 @@
-/* Custom styles for the Enhanced Sidebar */
-
-/* Match Figma spacing and sizing */
 .sidebarContainer {
   width: var(--sidebar-width, 16rem);
 }
@@ -9,12 +6,10 @@
   width: var(--sidebar-width-icon, 3rem);
 }
 
-/* Cursor pointer for all interactive sidebar elements */
 .sidebarInteractive {
   cursor: pointer;
 }
 
-/* Space selector styling (Figma: node 7524-14116) */
 .spaceSelector {
   display: flex;
   align-items: center;
@@ -55,15 +50,18 @@
   color: #737373;
 }
 
-/* Transactions badge (expanded only): circle with number – hidden on small/collapsed sidebar */
 .transactionsBadge {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 16px;
   color: #166534;
@@ -75,7 +73,6 @@
   display: none;
 }
 
-/* Green dot for collapsed sidebar when N tx > 0 – upper-right of icon, no overlap */
 .transactionsBadgeDot {
   display: none;
   position: absolute;
@@ -93,7 +90,6 @@
   display: block;
 }
 
-/* Navigation item styling */
 .navItem {
   gap: 12px;
   padding: 8px 12px;
@@ -104,7 +100,6 @@
   background-color: var(--sidebar-accent);
 }
 
-/* Group label styling */
 .groupLabel {
   color: var(--sidebar-muted, #737373);
   font-size: 12px;
@@ -112,7 +107,6 @@
   padding: 8px 12px;
 }
 
-/* Badge styling */
 .badge {
   background-color: var(--green-400, #4ade80);
   border: 1px solid var(--white, white);
@@ -121,7 +115,6 @@
   height: 8px;
 }
 
-/* Typography */
 .textSmall {
   font-size: 14px;
   line-height: 20px;
@@ -146,7 +139,6 @@
   font-weight: 600;
 }
 
-/* Back button in Safe view */
 .backButton {
   display: flex;
   align-items: center;

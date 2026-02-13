@@ -18,9 +18,8 @@ import {
   PanelRight,
   EllipsisVertical,
 } from 'lucide-react'
-import type { SidebarItemConfig, SidebarGroupConfig } from './types'
+import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
-// Spaces Sidebar Navigation
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
     icon: House,
@@ -67,7 +66,6 @@ export const spacesSetupGroup: SidebarGroupConfig = {
   ],
 }
 
-// Safe Sidebar Navigation
 export const safeMainNavigation: SidebarItemConfig[] = [
   {
     icon: Wallet,
@@ -119,7 +117,6 @@ export const safeDefiGroup: SidebarGroupConfig = {
   ],
 }
 
-// Export icons for use in other components
 export const icons = {
   CircleHelp,
   ChevronLeft,
