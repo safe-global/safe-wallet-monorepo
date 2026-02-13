@@ -11,7 +11,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     >
       <mock-icon
         aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-nwwip4-MuiSvgIcon-root"
         focusable="false"
       />
       Previous signer
@@ -72,7 +72,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             >
               <mock-icon
                 aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                 data-testid="copy-btn-icon"
                 focusable="false"
               />
@@ -94,7 +94,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     >
       <mock-icon
         aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-nwwip4-MuiSvgIcon-root"
         focusable="false"
       />
       Add owner
@@ -155,7 +155,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
             >
               <mock-icon
                 aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                 data-testid="copy-btn-icon"
                 focusable="false"
               />
@@ -185,7 +185,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
     >
       <mock-icon
         aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-nwwip4-MuiSvgIcon-root"
         focusable="false"
       />
       Add owner
@@ -246,7 +246,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
             >
               <mock-icon
                 aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-72fuak-MuiSvgIcon-root"
                 data-testid="copy-btn-icon"
                 focusable="false"
               />

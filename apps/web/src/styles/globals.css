@@ -4,6 +4,7 @@
 @import './fonts.css';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import './mui-compat.css';
 /*---break---*/
 @custom-variant dark (&:is(.dark *));
 /**
