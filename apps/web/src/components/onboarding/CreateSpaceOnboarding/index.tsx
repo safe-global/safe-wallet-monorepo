@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
+import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 
 interface CreateSpaceOnboardingProps {
   isOnboarding?: boolean
@@ -25,6 +26,7 @@ const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): Re
   const dispatch = useAppDispatch()
   const wallet = useWallet()
   const isUserAuthenticated = useAppSelector(isAuthenticated)
+  const isCheckingAccess = useIsCheckingAccess() ?? true
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
@@ -89,7 +91,14 @@ const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): Re
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <Box mb={2} textAlign="left">
-              <NameInput data-testid="space-name-input" label="Space name" autoFocus name="name" required />
+              <NameInput
+                data-testid="space-name-input"
+                label="Space name"
+                autoFocus
+                name="name"
+                required
+                disabled={isCheckingAccess}
+              />
             </Box>
 
             <Typography variant="body2" color="text.secondary" mb={2} textAlign="left">
@@ -106,7 +115,7 @@ const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): Re
               data-testid="create-space-button"
               type="submit"
               variant="contained"
-              disabled={!formState.isValid || isSubmitting}
+              disabled={!formState.isValid || isSubmitting || isCheckingAccess}
               disableElevation
               fullWidth
               sx={{ minHeight: '42px' }}
