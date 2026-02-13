@@ -14,27 +14,20 @@ import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
 import useWallet, { useWalletContext } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 
-const CreateSpaceOnboarding = (): ReactElement => {
+interface CreateSpaceOnboardingProps {
+  isOnboarding: boolean
+}
+
+const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): ReactElement => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
   const wallet = useWallet()
-  const walletContext = useWalletContext()
-  const isWalletReady = walletContext?.isReady ?? false
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
   const { handleSubmit, formState } = methods
-
-  // Redirect to welcome if not authenticated
-  useEffect(() => {
-    if(!isWalletReady) return
-    
-    if (!wallet || !isUserAuthenticated) {
-      router.replace({ pathname: AppRoutes.welcome.index })
-    }
-  }, [wallet, isUserAuthenticated, router, isWalletReady])
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -57,7 +50,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
           }),
         )
 
-        router.push({ pathname: AppRoutes.onboarding.selectSafes, query: { spaceId } })
+        if(isOnboarding) {
+          router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
+        } else {
+          router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+        }
       }
 
       if (response.error) {

@@ -99,12 +99,12 @@ const SelectSafesOnboarding = (): ReactElement => {
   // Redirect to create-space if no spaceId
   useEffect(() => {
     if (router.isReady && !spaceId) {
-      router.replace({ pathname: AppRoutes.onboarding.createSpace })
+      router.replace({ pathname: AppRoutes.welcome.createSpace })
     }
   }, [router, spaceId])
 
   const redirectToNextStep = useCallback(() => {
-    router.push({ pathname: AppRoutes.onboarding.inviteMembers, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
   }, [router, spaceId])
 
   const redirectToSpaceDashboard = useCallback(() => {
