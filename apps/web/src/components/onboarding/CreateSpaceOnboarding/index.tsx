@@ -11,7 +11,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
-import useWallet from '@/hooks/wallets/useWallet'
+import useWallet, { useWalletContext } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 
 const CreateSpaceOnboarding = (): ReactElement => {
@@ -20,6 +20,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const wallet = useWallet()
+  const walletContext = useWalletContext()
+  const isWalletReady = walletContext?.isReady ?? false
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
@@ -27,10 +29,12 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   // Redirect to welcome if not authenticated
   useEffect(() => {
+    if(!isWalletReady) return
+    
     if (!wallet || !isUserAuthenticated) {
       router.replace({ pathname: AppRoutes.welcome.index })
     }
-  }, [wallet, isUserAuthenticated, router])
+  }, [wallet, isUserAuthenticated, router, isWalletReady])
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
