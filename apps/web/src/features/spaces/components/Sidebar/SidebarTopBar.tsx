@@ -14,10 +14,10 @@ export const SidebarTopBar = (): ReactElement => {
           : 'flex items-center justify-between w-full'
       }
     >
-      <div className="relative shrink-0 size-6 flex items-center justify-center">
+      <div className="relative shrink-0 size-6 flex items-center justify-center cursor-pointer">
         <Image src="/images/logo-no-text.svg" alt="Safe" width={24} height={24} className="size-6" />
       </div>
-      <SidebarTrigger className="shrink-0" />
+      <SidebarTrigger className="shrink-0 cursor-pointer" />
     </div>
   )
 }

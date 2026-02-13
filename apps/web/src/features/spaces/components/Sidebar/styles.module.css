@@ -22,6 +22,17 @@
   cursor: pointer;
 }
 
+.backToSpace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 .spaceSelectorAvatar {
   width: 32px;
   height: 32px;

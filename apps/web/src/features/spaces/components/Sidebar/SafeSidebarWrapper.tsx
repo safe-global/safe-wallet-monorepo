@@ -15,25 +15,22 @@ import css from './styles.module.css'
 export const SafeSidebarWrapper = (): ReactElement => {
   return (
     <SidebarContent>
-      {/* Back to Space */}
+      {/* Back to Space - same structure as SpacesSidebar so collapsed state shows Acme "A" */}
       <SidebarGroup>
-        <div className="flex gap-1 items-center w-full">
-          <button
-            type="button"
-            className={'flex items-center justify-center size-5 shrink-0 ' + css.sidebarInteractive}
-          >
-            <icons.ChevronLeft className="size-5" />
-          </button>
-          <div className="flex gap-3 items-center min-h-[36px] px-3 py-2 flex-1 rounded-md">
-            <Avatar className="size-6 rounded-md">
-              <AvatarFallback className="rounded-md bg-primary text-primary-foreground text-xs">A</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-0.5 leading-none">
-              <span className="font-semibold text-sm">Acme Inc</span>
-              <span className="text-xs text-muted-foreground">Space</span>
-            </div>
-          </div>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" tooltip="Back to Space" className={css.backToSpace}>
+              <Avatar className={css.spaceSelectorAvatar + ' rounded-md'}>
+                <AvatarFallback className="rounded-md bg-primary text-primary-foreground">A</AvatarFallback>
+              </Avatar>
+              <div className={css.spaceSelectorText}>
+                <span className={css.spaceSelectorName}>Acme Inc</span>
+                <span className={css.spaceSelectorSubtitle}>Space</span>
+              </div>
+              <icons.ChevronLeft className="ml-auto size-4 shrink-0" />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarGroup>
 
       {/* Main Navigation */}

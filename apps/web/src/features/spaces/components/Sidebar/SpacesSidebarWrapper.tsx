@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -16,7 +16,6 @@ import css from './styles.module.css'
 export const SpacesSidebarWrapper = (): ReactElement => {
   return (
     <SidebarContent>
-      {/* Space Selector (Figma: 7524-14116) */}
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -28,7 +27,10 @@ export const SpacesSidebarWrapper = (): ReactElement => {
                 <span className={css.spaceSelectorName}>Acme Inc</span>
                 <span className={css.spaceSelectorSubtitle}>Space</span>
               </div>
-              <ChevronDown className="ml-auto size-4 shrink-0" />
+              <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
+                <ChevronUp className="size-4" />
+                <ChevronDown className="size-4" />
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
