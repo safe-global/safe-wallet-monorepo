@@ -122,14 +122,22 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   /* Synced from Figma: xN0ennrwA6cqy3navhpLYB (2026-01-29) */
-  --radius-2xs: 0.25rem; /* 4px - Figma: 2xs */
-  --radius-xs: 0.5rem; /* 8px - Figma: xs, rounded-md */
-  --radius-sm: 0.5rem; /* 8px - Figma: absolute/radius-8 */
-  --radius-md: 0.75rem; /* 12px - Figma: rounded-lg, semantic/rounded-lg-xl */
-  --radius-lg: 1rem; /* 16px - Figma: radius, md */
-  --radius-xl: 1.5rem; /* 24px - Figma: rounded-xl, xl */
-  --radius-2xl: 1.5rem; /* 24px - Figma: rounded-xl */
-  --radius-infinite: 9999px; /* Figma: rounded-full, radius-infinite */
+  --radius-2xs: 0.25rem;
+  /* 4px - Figma: 2xs */
+  --radius-xs: 0.5rem;
+  /* 8px - Figma: xs, rounded-md */
+  --radius-sm: 0.5rem;
+  /* 8px - Figma: absolute/radius-8 */
+  --radius-md: 0.75rem;
+  /* 12px - Figma: rounded-lg, semantic/rounded-lg-xl */
+  --radius-lg: 1rem;
+  /* 16px - Figma: radius, md */
+  --radius-xl: 1.5rem;
+  /* 24px - Figma: rounded-xl, xl */
+  --radius-2xl: 1.5rem;
+  /* 24px - Figma: rounded-xl */
+  --radius-infinite: 9999px;
+  /* Figma: rounded-full, radius-infinite */
 }
 
 /* shadcn base styles - scoped to .shadcn-scope */
