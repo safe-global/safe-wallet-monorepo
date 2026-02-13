@@ -301,7 +301,9 @@ export function verifySafeHeaderDetails(details) {
 }
 
 export function clickOnQRCodeBtn() {
-  cy.get(qrModalBtn).should('be.visible').click()
+  cy.get(sidebarContainer).within(() => {
+    cy.get(qrModalBtn).should('have.length', 1).click()
+  })
 }
 
 export function verifyQRModalDisplayed() {
