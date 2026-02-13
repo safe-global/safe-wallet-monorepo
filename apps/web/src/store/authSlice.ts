@@ -5,11 +5,13 @@ import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 type AuthPayload = {
   sessionExpiresAt: number | null
   lastUsedSpace: string | null
+  isStoreHydrated: boolean
 }
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
   lastUsedSpace: null,
+  isStoreHydrated: false,
 }
 
 export const authSlice = createSlice({
@@ -38,6 +40,10 @@ export const isAuthenticated = (state: RootState): boolean => {
 
 export const lastUsedSpace = (state: RootState) => {
   return state.auth.lastUsedSpace
+}
+
+export const selectIsStoreHydrated = (state: RootState): boolean => {
+  return state.auth.isStoreHydrated
 }
 
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
