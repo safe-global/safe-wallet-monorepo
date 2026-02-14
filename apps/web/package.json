@@ -175,6 +175,7 @@
     "jest-fixed-jsdom": "^0.0.10",
     "jest-image-snapshot": "^6.5.1",
     "knip": "^5.0.0",
+    "lost-pixel": "^3.22.0",
     "mockdate": "^3.0.5",
     "msw": "^2.7.3",
     "msw-storybook-addon": "^2.0.6",
