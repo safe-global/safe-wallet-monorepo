@@ -7,10 +7,46 @@ import { isAuthenticated, setAuthenticated } from '@/store/authSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { showNotification } from '@/store/notificationsSlice'
+import type { AppDispatch } from '@/store'
+
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000
 
 interface UseSIWEAuthArgs {
   onSuccess: () => void
   onError?: (error: Error) => void
+}
+
+/**
+ * Attempts SIWE sign-in and dispatches the authenticated state.
+ * Returns `true` if authentication succeeded, `false` if the user
+ * rejected or the provider was unavailable.
+ */
+const performSignIn = async (signIn: ReturnType<typeof useSiwe>['signIn'], dispatch: AppDispatch): Promise<boolean> => {
+  trackEvent({ ...SPACE_EVENTS.SIGN_IN_BUTTON, label: OVERVIEW_LABELS.welcome_page })
+
+  const result = await signIn()
+
+  if (result?.error) {
+    throw result.error
+  }
+
+  if (!result) return false
+
+  dispatch(setAuthenticated(Date.now() + ONE_DAY_IN_MS))
+  return true
+}
+
+const handleAuthError = (error: unknown, dispatch: AppDispatch, onError?: (error: Error) => void) => {
+  logError(ErrorCodes._640)
+  onError?.(error as Error)
+
+  dispatch(
+    showNotification({
+      message: 'Something went wrong while trying to sign in',
+      variant: 'error',
+      groupKey: 'sign-in-failed',
+    }),
+  )
 }
 
 export const useHomeAuth = ({ onSuccess, onError }: UseSIWEAuthArgs) => {
@@ -22,39 +58,14 @@ export const useHomeAuth = ({ onSuccess, onError }: UseSIWEAuthArgs) => {
     if (loading) return
 
     try {
-      // Skip SIWE if already authenticated
       if (!isUserAuthenticated) {
-        trackEvent({ ...SPACE_EVENTS.SIGN_IN_BUTTON, label: OVERVIEW_LABELS.welcome_page })
-        const result = await signIn()
-
-        if (result && result.error) {
-          throw result.error
-        }
-
-        if (!result) {
-          // User rejected or provider unavailable — stay on welcome
-          return
-        }
-
-        const oneDayInMs = 24 * 60 * 60 * 1000
-        dispatch(setAuthenticated(Date.now() + oneDayInMs))
+        const didSignIn = await performSignIn(signIn, dispatch)
+        if (!didSignIn) return
       }
 
       onSuccess()
     } catch (error) {
-      logError(ErrorCodes._640)
-
-      if (onError) {
-        onError(error as Error)
-      }
-
-      dispatch(
-        showNotification({
-          message: 'Something went wrong while trying to sign in',
-          variant: 'error',
-          groupKey: 'sign-in-failed',
-        }),
-      )
+      handleAuthError(error, dispatch, onError)
     }
   }, [isUserAuthenticated, signIn, dispatch, onSuccess, onError, loading])
 
