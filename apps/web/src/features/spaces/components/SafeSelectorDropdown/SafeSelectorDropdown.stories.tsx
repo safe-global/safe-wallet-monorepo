@@ -145,3 +145,45 @@ export const MultipleSafes: Story = {
   render: () => <InteractiveWrapper items={mockItemsLong} initialItemId={mockItemsLong[1].id} />,
   args: {} as any,
 }
+
+const mockItemsWithNested: SafeItemData[] = [
+  createMockSafeItem(0, {
+    id: '1:0xA77DE...98b6',
+    name: 'Parent Safe',
+    address: '0xA77D...98b6',
+    threshold: 3,
+    owners: 5,
+    balance: '16780000',
+  }),
+  createMockSafeItem(1, {
+    id: '100:0x8675...cdba',
+    name: 'Nested Safe 1',
+    address: '0x8675...cdba',
+    threshold: 2,
+    owners: 3,
+    balance: '5000000',
+    parentSafeId: '1:0xA77DE...98b6',
+  }),
+  createMockSafeItem(2, {
+    id: '8453:0x8675...abcd',
+    name: 'Nested Safe 2',
+    address: '0x8675...abcd',
+    threshold: 2,
+    owners: 4,
+    balance: '3200000',
+    parentSafeId: '1:0xA77DE...98b6',
+  }),
+  createMockSafeItem(3, {
+    id: '137:0x9988...ffee',
+    name: 'Another Parent',
+    address: '0x9988...ffee',
+    threshold: 4,
+    owners: 7,
+    balance: '25000000',
+  }),
+]
+
+export const WithNestedSafes: Story = {
+  render: () => <InteractiveWrapper items={mockItemsWithNested} initialItemId={mockItemsWithNested[0].id} />,
+  args: {} as any,
+}

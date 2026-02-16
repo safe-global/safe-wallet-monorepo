@@ -9,6 +9,7 @@ export interface SafeItemData {
   chains: ChainInfo[]
   balance: string
   isLoading?: boolean
+  parentSafeId?: string
 }
 
 export interface SafeSelectorDropdownProps {
