@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -12,6 +13,20 @@ import { useSafeSelectorDisplay } from './useSafeSelectorDisplay'
 import { useSafeItemTransform } from './useSafeItemTransform'
 
 export type { SafeItemData } from './useSafeItemTransform'
+
+interface CurrentSafeFields {
+  currentSafeId: string | null
+  currentSafeName: string
+  currentSafeDisplayAddress: string
+}
+
+const getCurrentSafeId = (safeAddress: string, chainId: string): string | null =>
+  safeAddress && chainId ? `${chainId}:${safeAddress}` : null
+
+const getCurrentSafeName = (safeAddress: string, addressBook: Record<string, string>, safe: ExtendedSafeInfo): string =>
+  addressBook[safeAddress] ?? safe.address.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
+
+const getCurrentSafeDisplayAddress = (safeAddress: string): string => (safeAddress ? shortenAddress(safeAddress) : '')
 
 export const useSafeSelectorState = ({
   safes,
@@ -26,31 +41,28 @@ export const useSafeSelectorState = ({
   const addressBook = useAddressBook(chainId)
   const { balances, loading: balancesLoading } = useBalances()
 
-  const currentSafeId = safeAddress && chainId ? `${chainId}:${safeAddress}` : null
-  const safeNameFromBook = safeAddress ? addressBook[safeAddress] : undefined
-  const currentSafeName = safeNameFromBook ?? safe.address.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
-  const currentSafeDisplayAddress = safeAddress ? shortenAddress(safeAddress) : ''
+  const { currentSafeId, currentSafeName, currentSafeDisplayAddress } = useMemo<CurrentSafeFields>(
+    () => ({
+      currentSafeId: getCurrentSafeId(safeAddress, chainId),
+      currentSafeName: getCurrentSafeName(safeAddress, addressBook, safe),
+      currentSafeDisplayAddress: getCurrentSafeDisplayAddress(safeAddress),
+    }),
+    [safeAddress, chainId, addressBook, safe],
+  )
 
   const [selectedChainId, setSelectedChainId] = useState<string>(chainId)
   const [localSelectedSafeId, setLocalSelectedSafeId] = useState<string | undefined>(
     selectedSafeId ?? safes[0]?.id ?? currentSafeId ?? undefined,
   )
 
-  useEffect(() => {
-    setSelectedChainId(chainId)
-  }, [chainId])
+  useEffect(() => setSelectedChainId(chainId), [chainId])
 
   useEffect(() => {
-    if (selectedSafeId !== undefined) {
-      setLocalSelectedSafeId(selectedSafeId)
-    }
-  }, [selectedSafeId])
-
-  useEffect(() => {
-    if (localSelectedSafeId === undefined) {
+    if (selectedSafeId !== undefined) setLocalSelectedSafeId(selectedSafeId)
+    else if (localSelectedSafeId === undefined) {
       setLocalSelectedSafeId(safes[0]?.id ?? currentSafeId ?? undefined)
     }
-  }, [safes, currentSafeId, localSelectedSafeId])
+  }, [selectedSafeId, safes, currentSafeId, localSelectedSafeId])
 
   const { displayInfo, selectValue, showTrigger, isSingleSafe, selectedSafe, isCurrentSafeSelected } =
     useSafeSelectorDisplay({

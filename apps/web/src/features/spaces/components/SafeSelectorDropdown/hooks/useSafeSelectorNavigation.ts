@@ -24,43 +24,37 @@ export const useSafeSelectorNavigation = ({
   const router = useRouter()
   const getHref = useGetHref(router)
 
+  const navigateToSafe = useCallback(
+    (chainId: string, address: string) => {
+      const selectedChain = chainByChainId[chainId]
+      if (!selectedChain || !address) return
+      const route = getHref(selectedChain, address)
+      queueMicrotask(() => router.push(route))
+    },
+    [chainByChainId, getHref, router],
+  )
+
   const handleChainSelect = useCallback(
     (newSelectedChainId: string, e?: PointerEvent | MouseEvent) => {
       e?.preventDefault()
       e?.stopPropagation()
-
       setSelectedChainId(newSelectedChainId)
       onChainChange?.(newSelectedChainId)
-
-      const selectedChain = chainByChainId[newSelectedChainId]
-      if (selectedChain && safeAddress) {
-        const route = getHref(selectedChain, safeAddress)
-        queueMicrotask(() => {
-          router.push(route)
-        })
-      }
+      navigateToSafe(newSelectedChainId, safeAddress)
     },
-    [onChainChange, chainByChainId, getHref, router, safeAddress, setSelectedChainId],
+    [onChainChange, navigateToSafe, safeAddress, setSelectedChainId],
   )
 
   const handleSafeChange = useCallback(
     (value: string) => {
       setLocalSelectedSafeId(value)
       onSafeChange?.(value)
-
       const parsed = parseSafeId(value)
       if (!parsed) return
-
-      const { chainId: newSelectedChainId, address: selectedSafeAddress } = parsed
-      setSelectedChainId(newSelectedChainId)
-
-      const selectedChain = chainByChainId[newSelectedChainId]
-      if (selectedChain && selectedSafeAddress) {
-        const route = getHref(selectedChain, selectedSafeAddress)
-        router.push(route)
-      }
+      setSelectedChainId(parsed.chainId)
+      navigateToSafe(parsed.chainId, parsed.address)
     },
-    [onSafeChange, chainByChainId, getHref, router, setLocalSelectedSafeId, setSelectedChainId],
+    [onSafeChange, navigateToSafe, setLocalSelectedSafeId, setSelectedChainId],
   )
 
   return {
