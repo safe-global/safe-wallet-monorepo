@@ -3,6 +3,7 @@ import { createMockStory } from '@/stories/mocks'
 import { action } from '@storybook/addon-actions'
 import { useState } from 'react'
 import SafeSelectorDropdown from './index'
+import type { SafeItemData } from './types'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
@@ -25,9 +26,9 @@ const meta = {
   decorators: [defaultSetup.decorator],
   tags: ['autodocs'],
   argTypes: {
-    safes: { control: 'object' },
-    selectedSafeId: { control: 'text' },
-    onSafeChange: { action: 'Safe changed' },
+    items: { control: 'object' },
+    selectedItemId: { control: 'text' },
+    onItemSelect: { action: 'Item selected' },
     onChainChange: { action: 'Chain changed' },
   },
 } satisfies Meta<typeof SafeSelectorDropdown>
@@ -54,8 +55,7 @@ const SAFE_NAMES = [
 const createMockAddress = (index: number) =>
   `0x${index.toString(16).padStart(4, '0')}...${(index + 100).toString(16).padStart(4, '0')}`
 
-/** Fiat balance as numeric string; FiatValue will format (e.g. to $16.78M) */
-const createMockSafe = (index: number, overrides = {}) => ({
+const createMockSafeItem = (index: number, overrides = {}): SafeItemData => ({
   id: `${baseChains[index % baseChains.length].chainId}:${createMockAddress(index + 1)}`,
   name: SAFE_NAMES[index % SAFE_NAMES.length],
   address: createMockAddress(index + 1),
@@ -66,8 +66,8 @@ const createMockSafe = (index: number, overrides = {}) => ({
   ...overrides,
 })
 
-const mockSafes = [
-  createMockSafe(0, {
+const mockItems: SafeItemData[] = [
+  createMockSafeItem(0, {
     id: '1:0xA77DE...98b6',
     name: 'My Safe',
     address: '0xA77D...98b6',
@@ -75,7 +75,7 @@ const mockSafes = [
     owners: 5,
     balance: '16780000',
   }),
-  createMockSafe(1, {
+  createMockSafeItem(1, {
     id: '100:0x8675...cdba',
     name: 'Another Safe',
     address: '0x8675...cdba',
@@ -83,7 +83,7 @@ const mockSafes = [
     owners: 5,
     balance: '40070000',
   }),
-  createMockSafe(2, {
+  createMockSafeItem(2, {
     id: '8453:0x8675...abcd',
     name: 'One more Safe',
     address: '0x8675...abcd',
@@ -93,21 +93,22 @@ const mockSafes = [
   }),
 ]
 
-const createMockSafes = (count: number) => Array.from({ length: count }, (_, i) => createMockSafe(i))
+const createMockItems = (count: number): SafeItemData[] =>
+  Array.from({ length: count }, (_, i) => createMockSafeItem(i))
 
-const mockSafesLong = createMockSafes(7)
+const mockItemsLong = createMockItems(7)
 
 // Interactive wrapper component to manage state
-const InteractiveWrapper = ({ safes, initialSafeId }: { safes: typeof mockSafes; initialSafeId: string }) => {
-  const [selectedSafeId, setSelectedSafeId] = useState(initialSafeId)
+const InteractiveWrapper = ({ items, initialItemId }: { items: SafeItemData[]; initialItemId: string }) => {
+  const [selectedItemId, setSelectedItemId] = useState(initialItemId)
 
   return (
     <SafeSelectorDropdown
-      safes={safes}
-      selectedSafeId={selectedSafeId}
-      onSafeChange={(safeId: string) => {
-        action('Safe changed')(safeId)
-        setSelectedSafeId(safeId)
+      items={items}
+      selectedItemId={selectedItemId}
+      onItemSelect={(itemId: string) => {
+        action('Item selected')(itemId)
+        setSelectedItemId(itemId)
       }}
       onChainChange={action('Chain changed')}
     />
@@ -115,7 +116,7 @@ const InteractiveWrapper = ({ safes, initialSafeId }: { safes: typeof mockSafes;
 }
 
 /** One safe with only one chain: threshold badge visible, no divider line or chevron. */
-const singleChainSafe = createMockSafe(0, {
+const singleChainItem: SafeItemData = createMockSafeItem(0, {
   id: '1:0xA77DE...98b6',
   name: 'My Safe',
   address: '0xA77D...98b6',
@@ -126,29 +127,21 @@ const singleChainSafe = createMockSafe(0, {
 })
 
 export const Default: Story = {
-  render: () => <InteractiveWrapper safes={mockSafes} initialSafeId={mockSafes[0].id} />,
-  args: {
-    safes: [...mockSafes, singleChainSafe],
-  },
+  render: () => <InteractiveWrapper items={mockItems} initialItemId={mockItems[0].id} />,
+  args: {} as any,
 }
 
 export const SingleSafeSingleChain: Story = {
-  render: () => <InteractiveWrapper safes={[singleChainSafe]} initialSafeId={singleChainSafe.id} />,
-  args: {
-    safes: [singleChainSafe],
-  },
+  render: () => <InteractiveWrapper items={[singleChainItem]} initialItemId={singleChainItem.id} />,
+  args: {} as any,
 }
 
 export const SingleSafeMultiChains: Story = {
-  render: () => <InteractiveWrapper safes={[mockSafes[0]]} initialSafeId={mockSafes[0].id} />,
-  args: {
-    safes: [mockSafes[0]],
-  },
+  render: () => <InteractiveWrapper items={[mockItems[0]]} initialItemId={mockItems[0].id} />,
+  args: {} as any,
 }
 
 export const MultipleSafes: Story = {
-  render: () => <InteractiveWrapper safes={mockSafesLong} initialSafeId={mockSafesLong[1].id} />,
-  args: {
-    safes: mockSafesLong,
-  },
+  render: () => <InteractiveWrapper items={mockItemsLong} initialItemId={mockItemsLong[1].id} />,
+  args: {} as any,
 }

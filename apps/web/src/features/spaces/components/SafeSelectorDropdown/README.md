@@ -14,11 +14,25 @@ A dropdown component for selecting Safe accounts with integrated chain selection
 
 ```tsx
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
+
+const items: SafeItemData[] = [
+  {
+    id: '1:0xA77D...98b6',
+    name: 'My Safe',
+    address: '0xA77D...98b6',
+    threshold: 3,
+    owners: 5,
+    balance: '16780000',
+    chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null }],
+  },
+]
+
 ;<SafeSelectorDropdown
-  safes={safes}
-  selectedSafeId={selectedSafeId}
-  onSafeChange={(safeId) => {
-    // Handle Safe selection and navigation
+  items={items}
+  selectedItemId={selectedItemId}
+  onItemSelect={(itemId) => {
+    // Handle Safe selection
   }}
   onChainChange={(chainId) => {
     // Handle chain context change
@@ -30,36 +44,39 @@ import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropd
 
 | Prop             | Type                         | Description                       |
 | ---------------- | ---------------------------- | --------------------------------- |
-| `safes`          | `SafeInfo[]`                 | Array of Safe accounts to display |
-| `selectedSafeId` | `string?`                    | ID of the currently selected Safe |
-| `onSafeChange`   | `(safeId: string) => void?`  | Callback when a Safe is selected  |
+| `items`          | `SafeItemData[]`             | Array of Safe items to display    |
+| `selectedItemId` | `string?`                    | ID of the currently selected item |
+| `onItemSelect`   | `(itemId: string) => void?`  | Callback when an item is selected |
 | `onChainChange`  | `(chainId: string) => void?` | Callback when a chain is selected |
 | `className`      | `string?`                    | Additional CSS classes            |
 
 ## Architecture
 
-The component is built with a clean separation of concerns:
+The component uses a layered architecture with pure presentational components:
 
 ```
 SafeSelectorDropdown/
-├── hooks/
-│   ├── useSafeSelectorState.ts      # Main orchestration hook
-│   ├── useSafeSelectorDisplay.ts    # Display data derivation
-│   ├── useSafeSelectorNavigation.ts # Navigation handlers
-│   └── useSafeItemTransform.ts      # Safe data transformation
-├── index.tsx                         # Main component
-├── types.ts                          # TypeScript interfaces
-└── utils.ts                          # Helper functions
+├── components/
+│   ├── SafeInfoDisplay.tsx         # Avatar + name/address
+│   ├── BalanceDisplay.tsx          # Balance + threshold badge
+│   ├── ChainLogo.tsx               # Chain logo wrapper
+│   ├── SafeItem.tsx                # Single safe item (atomic)
+│   └── SafeDropdownContainer.tsx   # List container
+├── index.tsx                        # Main orchestrator
+├── types.ts                         # TypeScript interfaces
+└── utils.ts                         # Helper functions
 ```
 
-### Hooks
+### Components
 
-- **`useSafeSelectorState`**: Main hook that orchestrates state, composes other hooks
-- **`useSafeSelectorDisplay`**: Derives display info (name, address, threshold) from state
-- **`useSafeSelectorNavigation`**: Handles routing for Safe/chain changes
-- **`useSafeItemTransform`**: Transforms SafeInfo to display format with live balance
+- **`SafeSelectorDropdown`**: Main orchestrator managing UI state (open/close, selection)
+- **`SafeDropdownContainer`**: Renders list of items with filtering
+- **`SafeItem`**: Atomic item component (avatar, name, chains, balance, threshold)
+- **`SafeInfoDisplay`**: Reusable avatar + name/address display
+- **`BalanceDisplay`**: Reusable balance + threshold badge
+- **`ChainLogo`**: Reusable chain logo wrapper
 
-Each hook follows single-responsibility principle and uses existing app hooks (`useSafeInfo`, `useAddressBook`, `useChains`, `useBalances`).
+All components are pure and stateless, accepting pre-formatted data via props.
 
 ## Storybook
 

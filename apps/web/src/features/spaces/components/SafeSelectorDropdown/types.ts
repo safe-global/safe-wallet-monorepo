@@ -1,29 +1,20 @@
-import type { ReactNode } from 'react'
-import type { SafeInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '@/features/spaces/types'
 
-export interface SafeSelectorDropdownProps {
-  safes: SafeInfo[]
-  selectedSafeId?: string
-  onSafeChange?: (safeId: string) => void
-  onChainChange?: (chainId: string) => void
-  className?: string
-}
-
-export interface SafeInfoDisplayProps {
+export interface SafeItemData {
+  id: string
   name: string
   address: string
-  className?: string
-}
-
-export interface BalanceDisplayProps {
-  balance: string | ReactNode
   threshold: number
   owners: number
+  chains: ChainInfo[]
+  balance: string
   isLoading?: boolean
-  showThreshold?: boolean
 }
 
-export interface ChainLogoProps {
-  chainId: string
-  size?: number
+export interface SafeSelectorDropdownProps {
+  items: SafeItemData[]
+  selectedItemId?: string
+  onItemSelect?: (itemId: string) => void
+  onChainChange?: (chainId: string) => void
+  className?: string
 }
