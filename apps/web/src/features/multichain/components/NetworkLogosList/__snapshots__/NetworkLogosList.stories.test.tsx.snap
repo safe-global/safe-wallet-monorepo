@@ -2,31 +2,35 @@
 
 exports[`./NetworkLogosList.stories FourNetworks 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
     >
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+      <div
+        class="networks MuiBox-root mui-style-0"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -34,36 +38,40 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
 
 exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
     >
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
       <div
-        class="moreChainsIndicator MuiBox-root mui-style-0"
+        class="networks MuiBox-root mui-style-0"
       >
-        +
-        2
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <div
+          class="moreChainsIndicator MuiBox-root mui-style-0"
+        >
+          +
+          2
+        </div>
       </div>
     </div>
   </div>
@@ -72,35 +80,39 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
 
 exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
     >
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+      <div
+        class="networks MuiBox-root mui-style-0"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -108,19 +120,23 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
 
 exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
     >
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+      <div
+        class="networks MuiBox-root mui-style-0"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -128,23 +144,27 @@ exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
 
 exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="networks MuiBox-root mui-style-0"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
     >
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
-      <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+      <div
+        class="networks MuiBox-root mui-style-0"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+        <span
+          class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+          style="width: 100%; height: 22px;"
+        />
+      </div>
     </div>
   </div>
 </div>
