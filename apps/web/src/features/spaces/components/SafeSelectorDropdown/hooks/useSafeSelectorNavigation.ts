@@ -1,13 +1,12 @@
 import { useCallback, type MouseEvent, type PointerEvent } from 'react'
 import { useRouter } from 'next/router'
-import type { EntityState } from '@reduxjs/toolkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useGetHref } from '@/hooks/safes/useGetHref'
 import { parseSafeId } from '../utils'
 
 interface UseSafeSelectorNavigationParams {
   safeAddress: string
-  chainsData: EntityState<Chain, string> | undefined
+  chainByChainId: Record<string, Chain>
   onChainChange?: (chainId: string) => void
   onSafeChange?: (safeId: string) => void
   setSelectedChainId: (chainId: string) => void
@@ -16,7 +15,7 @@ interface UseSafeSelectorNavigationParams {
 
 export const useSafeSelectorNavigation = ({
   safeAddress,
-  chainsData,
+  chainByChainId,
   onChainChange,
   onSafeChange,
   setSelectedChainId,
@@ -33,7 +32,7 @@ export const useSafeSelectorNavigation = ({
       setSelectedChainId(newSelectedChainId)
       onChainChange?.(newSelectedChainId)
 
-      const selectedChain = chainsData?.entities?.[newSelectedChainId]
+      const selectedChain = chainByChainId[newSelectedChainId]
       if (selectedChain && safeAddress) {
         const route = getHref(selectedChain, safeAddress)
         queueMicrotask(() => {
@@ -41,7 +40,7 @@ export const useSafeSelectorNavigation = ({
         })
       }
     },
-    [onChainChange, chainsData?.entities, getHref, router, safeAddress, setSelectedChainId],
+    [onChainChange, chainByChainId, getHref, router, safeAddress, setSelectedChainId],
   )
 
   const handleSafeChange = useCallback(
@@ -55,13 +54,13 @@ export const useSafeSelectorNavigation = ({
       const { chainId: newSelectedChainId, address: selectedSafeAddress } = parsed
       setSelectedChainId(newSelectedChainId)
 
-      const selectedChain = chainsData?.entities?.[newSelectedChainId]
+      const selectedChain = chainByChainId[newSelectedChainId]
       if (selectedChain && selectedSafeAddress) {
         const route = getHref(selectedChain, selectedSafeAddress)
         router.push(route)
       }
     },
-    [onSafeChange, chainsData?.entities, getHref, router, setLocalSelectedSafeId, setSelectedChainId],
+    [onSafeChange, chainByChainId, getHref, router, setLocalSelectedSafeId, setSelectedChainId],
   )
 
   return {

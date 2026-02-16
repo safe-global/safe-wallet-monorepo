@@ -59,7 +59,7 @@ SafeSelectorDropdown/
 - **`useSafeSelectorNavigation`**: Handles routing for Safe/chain changes
 - **`useSafeItemTransform`**: Transforms SafeInfo to display format with live balance
 
-Each hook follows single-responsibility principle and uses existing app hooks (`useSafeInfo`, `useChains`, `useBalances`).
+Each hook follows single-responsibility principle and uses existing app hooks (`useSafeInfo`, `useAddressBook`, `useChains`, `useBalances`).
 
 ## Storybook
 

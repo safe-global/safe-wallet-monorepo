@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useAppSelector } from '@/store'
-import { selectAddressBookByChain } from '@/store/addressBookSlice'
-import { useGetChainsConfigQuery } from '@safe-global/store/gateway'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
-import { useCurrentChain } from '@/hooks/useChains'
+import useAddressBook from '@/hooks/useAddressBook'
+import useChains, { useCurrentChain } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { shortenAddress } from '../utils'
 import type { SafeSelectorDropdownProps } from '../types'
@@ -20,15 +19,15 @@ export const useSafeSelectorState = ({
   onSafeChange,
   onChainChange,
 }: Pick<SafeSelectorDropdownProps, 'safes' | 'selectedSafeId' | 'onSafeChange' | 'onChainChange'>) => {
-  const { data: chainsData } = useGetChainsConfigQuery()
+  const { configs } = useChains()
   const { safeAddress, safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
-  const addressBook = useAppSelector((state) => selectAddressBookByChain(state, chainId))
+  const addressBook = useAddressBook(chainId)
   const { balances, loading: balancesLoading } = useBalances()
 
   const currentSafeId = safeAddress && chainId ? `${chainId}:${safeAddress}` : null
-  const safeNameFromBook = safeAddress ? addressBook?.[safeAddress] : undefined
+  const safeNameFromBook = safeAddress ? addressBook[safeAddress] : undefined
   const currentSafeName = safeNameFromBook ?? safe.address.name ?? (safeAddress ? shortenAddress(safeAddress) : '')
   const currentSafeDisplayAddress = safeAddress ? shortenAddress(safeAddress) : ''
 
@@ -71,9 +70,14 @@ export const useSafeSelectorState = ({
     [isSingleSafe],
   )
 
+  const chainByChainId = useMemo(
+    () => Object.fromEntries(configs.map((c: Chain) => [c.chainId, c])) as Record<string, Chain>,
+    [configs],
+  )
+
   const { handleChainSelect, handleSafeChange } = useSafeSelectorNavigation({
     safeAddress,
-    chainsData,
+    chainByChainId,
     onChainChange,
     onSafeChange,
     setSelectedChainId,
@@ -82,15 +86,12 @@ export const useSafeSelectorState = ({
 
   const allChainsFromConfig = useMemo(
     () =>
-      chainsData?.ids.map((id) => {
-        const chain = chainsData.entities[id]
-        return {
-          chainId: id,
-          chainName: chain.chainName ?? chain.shortName ?? id,
-          chainLogoUri: chain.chainLogoUri ?? undefined,
-        }
-      }) ?? [],
-    [chainsData],
+      configs.map((chain: Chain) => ({
+        chainId: chain.chainId,
+        chainName: chain.chainName ?? chain.shortName ?? chain.chainId,
+        chainLogoUri: chain.chainLogoUri ?? undefined,
+      })),
+    [configs],
   )
 
   const chainsToShow = isCurrentSafeSelected ? allChainsFromConfig : (selectedSafe?.chains ?? [])
