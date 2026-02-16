@@ -27,7 +27,7 @@ export function useTokenBalances() {
   const hideDust = useAppSelector(selectHideDust)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
 
-  const trusted = hasDefaultTokenlist ? tokenList === TOKEN_LISTS.TRUSTED : false
+  const trusted = hasDefaultTokenlist && tokenList === TOKEN_LISTS.TRUSTED
   const shouldFilterDust = Boolean(hideDust && hasDefaultTokenlist)
 
   const { data, isFetching, error, isLoading, refetch } = useBalancesGetBalancesV1Query(
