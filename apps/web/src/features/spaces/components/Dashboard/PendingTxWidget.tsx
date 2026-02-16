@@ -15,10 +15,13 @@ interface PendingTransaction {
 
 interface PendingTxWidgetProps {
   transactions: PendingTransaction[]
+  loading?: boolean
   remainingCount?: number
   onViewAll?: () => void
   onNavigate?: () => void
 }
+
+const SKELETON_COUNT = 3
 
 const TxIcon = (): ReactElement => (
   <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
@@ -28,6 +31,7 @@ const TxIcon = (): ReactElement => (
 
 const PendingTxWidget = ({
   transactions,
+  loading = false,
   remainingCount,
   onViewAll,
   onNavigate,
@@ -41,23 +45,25 @@ const PendingTxWidget = ({
         </Button>
       }
     >
-      {transactions.map((tx) => (
-        <SafeWidget.Item
-          key={tx.id}
-          label={tx.label}
-          info={tx.info}
-          startNode={<TxIcon />}
-          featuredNode={
-            tx.initials ? (
-              <Avatar size="xs">
-                <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">{tx.initials}</AvatarFallback>
-              </Avatar>
-            ) : undefined
-          }
-          actionNode={<Badge variant="secondary">{tx.status}</Badge>}
-        />
-      ))}
-      {remainingCount !== undefined && (
+      {loading
+        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
+        : transactions.map((tx) => (
+            <SafeWidget.Item
+              key={tx.id}
+              label={tx.label}
+              info={tx.info}
+              startNode={<TxIcon />}
+              featuredNode={
+                tx.initials ? (
+                  <Avatar size="xs">
+                    <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">{tx.initials}</AvatarFallback>
+                  </Avatar>
+                ) : undefined
+              }
+              actionNode={<Badge variant="secondary">{tx.status}</Badge>}
+            />
+          ))}
+      {!loading && remainingCount !== undefined && (
         <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={onViewAll} />
       )}
     </SafeWidget>

@@ -68,6 +68,13 @@ export const SingleAccount: Story = {
   },
 }
 
+export const Loading: Story = {
+  args: {
+    accounts: [],
+    loading: true,
+  },
+}
+
 export const ManyAccounts: Story = {
   args: {
     accounts: MOCK_ACCOUNTS,

@@ -52,6 +52,13 @@ export const WithInitials: Story = {
   },
 }
 
+export const Loading: Story = {
+  args: {
+    transactions: [],
+    loading: true,
+  },
+}
+
 export const ManyPending: Story = {
   args: {
     transactions: MOCK_PENDING_TRANSACTIONS,
