@@ -48,7 +48,6 @@ const items: SafeItemData[] = [
 | `selectedItemId` | `string?`                    | ID of the currently selected item |
 | `onItemSelect`   | `(itemId: string) => void?`  | Callback when an item is selected |
 | `onChainChange`  | `(chainId: string) => void?` | Callback when a chain is selected |
-| `className`      | `string?`                    | Additional CSS classes            |
 
 ## Architecture
 

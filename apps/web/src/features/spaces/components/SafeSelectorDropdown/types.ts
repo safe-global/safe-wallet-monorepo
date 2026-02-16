@@ -16,5 +16,4 @@ export interface SafeSelectorDropdownProps {
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
   onChainChange?: (chainId: string) => void
-  className?: string
 }

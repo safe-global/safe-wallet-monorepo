@@ -11,13 +11,7 @@ import ChainLogo from './components/ChainLogo'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
 import type { SafeSelectorDropdownProps } from './types'
 
-function SafeSelectorDropdown({
-  items,
-  selectedItemId,
-  onItemSelect,
-  onChainChange,
-  className,
-}: SafeSelectorDropdownProps) {
+function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, onChainChange }: SafeSelectorDropdownProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedChainId, setSelectedChainId] = useState<string>('')
 
@@ -62,7 +56,6 @@ function SafeSelectorDropdown({
       className={cn(
         'flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-2xl p-2 overflow-hidden bg-card',
         !isSingleSafe && 'cursor-pointer',
-        className,
       )}
     >
       <Select
