@@ -6,10 +6,12 @@ const meta = {
   title: 'Features/Spaces/SafeSidebar',
   component: EnhancedSidebar,
   args: {
+    type: 'safe' as const,
     spaceName: 'CompanyName',
     spaceInitial: 'C',
   },
   argTypes: {
+    type: { control: false },
     spaceName: { control: 'text' },
     spaceInitial: { control: 'text' },
   },
@@ -30,7 +32,7 @@ const meta = {
       <SidebarProvider defaultOpen>
         <div className="flex min-h-screen w-full">
           <EnhancedSidebar
-            isSpacesRoute={false}
+            type={context.args.type}
             spaceName={context.args.spaceName}
             spaceInitial={context.args.spaceInitial}
           />

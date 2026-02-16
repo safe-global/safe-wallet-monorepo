@@ -167,3 +167,8 @@
 .backButton:hover {
   opacity: 0.8;
 }
+
+.footerHelp {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

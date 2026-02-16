@@ -6,6 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuAction,
 } from '@/components/ui/sidebar'
+import { cn } from '@/utils/cn'
 import { icons } from './config'
 import css from './styles.module.css'
 
@@ -14,11 +15,11 @@ export const SidebarCommonFooter = (): ReactElement => {
     <SidebarFooter>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton tooltip="Help" className={css.sidebarInteractive}>
+          <SidebarMenuButton tooltip="Help" className={cn(css.sidebarInteractive, css.footerHelp)}>
             <icons.CircleHelp />
             <span>Help</span>
           </SidebarMenuButton>
-          <SidebarMenuAction showOnHover className={css.sidebarInteractive}>
+          <SidebarMenuAction className={css.sidebarInteractive}>
             <icons.EllipsisVertical />
             <span className="sr-only">More options</span>
           </SidebarMenuAction>

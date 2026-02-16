@@ -1,26 +1,24 @@
 import type { ReactElement } from 'react'
 import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
-import { SidebarMapper } from './SidebarMapper'
+import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { SpaceSelectorProps } from './types'
+import type { SidebarVariantType } from './variants'
 
-interface EnhancedSidebarProps extends SpaceSelectorProps {
-  isSpacesRoute?: boolean
+interface SidebarProps extends SpaceSelectorProps {
+  type: SidebarVariantType
 }
 
-export const EnhancedSidebar = ({
-  isSpacesRoute = false,
-  spaceName,
-  spaceInitial,
-}: EnhancedSidebarProps): ReactElement => {
+export const EnhancedSidebar = ({ type, spaceName, spaceInitial }: SidebarProps): ReactElement => {
+  const Variant = getSidebarVariant(type)
   return (
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarHeader>
         <SidebarTopBar />
       </SidebarHeader>
 
-      <SidebarMapper isSpacesRoute={isSpacesRoute} spaceName={spaceName} spaceInitial={spaceInitial} />
+      <Variant spaceName={spaceName} spaceInitial={spaceInitial} />
       <SidebarCommonFooter />
     </Sidebar>
   )

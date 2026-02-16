@@ -9,14 +9,14 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { icons, safeMainNavigation, safeDefiGroup } from './config'
-import css from './styles.module.css'
-import type { SpaceSelectorProps } from './types'
+import { icons, safeMainNavigation, safeDefiGroup } from '../config'
+import css from '../styles.module.css'
+import type { SpaceSelectorProps } from '../types'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
 
-export const SafeSidebarWrapper = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
+export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
   return (
     <SidebarContent>

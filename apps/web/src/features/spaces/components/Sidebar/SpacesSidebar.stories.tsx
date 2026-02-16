@@ -6,10 +6,12 @@ const meta = {
   title: 'Features/Spaces/SpacesSidebar',
   component: EnhancedSidebar,
   args: {
+    type: 'spaces' as const,
     spaceName: 'CompanyName',
     spaceInitial: 'C',
   },
   argTypes: {
+    type: { control: false },
     spaceName: { control: 'text' },
     spaceInitial: { control: 'text' },
   },
@@ -26,7 +28,11 @@ const meta = {
     (_Story, context) => (
       <SidebarProvider defaultOpen>
         <div className="flex min-h-screen w-full">
-          <EnhancedSidebar isSpacesRoute spaceName={context.args.spaceName} spaceInitial={context.args.spaceInitial} />
+          <EnhancedSidebar
+            type={context.args.type}
+            spaceName={context.args.spaceName}
+            spaceInitial={context.args.spaceInitial}
+          />
           <SidebarInset>
             <header className="flex h-14 items-center gap-2 border-b px-4">
               <span className="font-semibold">Example Spaces Content Area</span>
