@@ -33,15 +33,6 @@ export interface HeaderNavigationProps {
 /**
  * HeaderNavigation component displays navigation actions with icons
  * for search, notifications, and wallet address.
- *
- * @example
- * ```tsx
- * <HeaderNavigation
- *   walletAddress="0xA77D...98b6"
- *   messages={3}
- *   showSearch
- * />
- * ```
  */
 export function HeaderNavigation({
   walletAddress: walletAddress,
