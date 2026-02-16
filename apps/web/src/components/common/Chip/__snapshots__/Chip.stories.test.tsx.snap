@@ -2,80 +2,96 @@
 
 exports[`./Chip.stories CustomLabel 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        Testing VRT
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        >
+          Testing VRT
+        </span>
       </span>
     </span>
-  </span>
+  </div>
 </div>
 `;
 
 exports[`./Chip.stories Default 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        New
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        >
+          New
+        </span>
       </span>
     </span>
-  </span>
+  </div>
 </div>
 `;
 
 exports[`./Chip.stories NormalFontWeight 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-1pbessu-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        New
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-1pbessu-MuiTypography-root"
+        >
+          New
+        </span>
       </span>
     </span>
-  </span>
+  </div>
 </div>
 `;
 
 exports[`./Chip.stories WithCustomStyling 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
-  <span
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1gcknf1-MuiChip-root"
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1gcknf1-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        Featured
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+        >
+          Featured
+        </span>
       </span>
     </span>
-  </span>
+  </div>
 </div>
 `;
