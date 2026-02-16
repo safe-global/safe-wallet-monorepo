@@ -13,6 +13,7 @@ export interface SidebarGroupConfig {
   items: SidebarItemConfig[]
 }
 
-export interface SidebarWrapperProps {
-  // Common props for both wrappers if needed in the future
+export interface SpaceSelectorProps {
+  spaceName?: string
+  spaceInitial?: string
 }

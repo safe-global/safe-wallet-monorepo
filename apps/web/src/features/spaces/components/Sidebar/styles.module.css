@@ -37,6 +37,14 @@
   width: 32px;
   height: 32px;
   flex-shrink: 0;
+  border-radius: var(--rounded-md, 8px);
+  overflow: hidden;
+}
+
+.spaceSelectorAvatarFallback {
+  border-radius: var(--rounded-md, 8px);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .spaceSelectorText {

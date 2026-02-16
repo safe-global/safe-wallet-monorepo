@@ -5,6 +5,14 @@ import { EnhancedSidebar } from './index'
 const meta = {
   title: 'Features/Spaces/SpacesSidebar',
   component: EnhancedSidebar,
+  args: {
+    spaceName: 'CompanyName',
+    spaceInitial: 'C',
+  },
+  argTypes: {
+    spaceName: { control: 'text' },
+    spaceInitial: { control: 'text' },
+  },
   parameters: {
     layout: 'fullscreen',
     nextjs: {
@@ -15,10 +23,10 @@ const meta = {
     },
   },
   decorators: [
-    () => (
+    (_Story, context) => (
       <SidebarProvider defaultOpen>
         <div className="flex min-h-screen w-full">
-          <EnhancedSidebar isSpacesRoute />
+          <EnhancedSidebar isSpacesRoute spaceName={context.args.spaceName} spaceInitial={context.args.spaceInitial} />
           <SidebarInset>
             <header className="flex h-14 items-center gap-2 border-b px-4">
               <span className="font-semibold">Example Spaces Content Area</span>

@@ -12,19 +12,24 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { spacesMainNavigation, spacesSetupGroup } from './config'
 import css from './styles.module.css'
+import type { SpaceSelectorProps } from './types'
 
-export const SpacesSidebarWrapper = (): ReactElement => {
+const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
+  initial ?? (name?.charAt(0) ?? '').toUpperCase()
+
+export const SpacesSidebarWrapper = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
+  const initial = getSpaceInitial(spaceName, spaceInitial)
   return (
     <SidebarContent>
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className={css.spaceSelector}>
-              <Avatar className={css.spaceSelectorAvatar + ' rounded-md'}>
-                <AvatarFallback className="rounded-md bg-primary text-primary-foreground">A</AvatarFallback>
+              <Avatar className={css.spaceSelectorAvatar}>
+                <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
               </Avatar>
               <div className={css.spaceSelectorText}>
-                <span className={css.spaceSelectorName}>Acme Inc</span>
+                <span className={css.spaceSelectorName}>{spaceName}</span>
                 <span className={css.spaceSelectorSubtitle}>Space</span>
               </div>
               <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
