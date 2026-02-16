@@ -2,12 +2,12 @@
 
 exports[`./ChainIndicator.stories Default 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo"
       data-testid="chain-logo"
@@ -29,29 +29,55 @@ exports[`./ChainIndicator.stories Default 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories HideUnknown 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
+<<<<<<< HEAD
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   />
+=======
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+  </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
 </div>
 `;
 
 exports[`./ChainIndicator.stories Inline 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="inlineIndicator withLogo"
       data-testid="chain-logo"
@@ -73,18 +99,29 @@ exports[`./ChainIndicator.stories Inline 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories LargeImage 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo"
       data-testid="chain-logo"
@@ -106,18 +143,29 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories NoLogo 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator"
       data-testid="chain-logo"
@@ -133,18 +181,29 @@ exports[`./ChainIndicator.stories NoLogo 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories OnlyLogo 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo onlyLogo"
       data-testid="chain-logo"
@@ -157,18 +216,29 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
         width="24"
       />
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories Responsive 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo responsive"
       data-testid="chain-logo"
@@ -190,18 +260,29 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories SmallImage 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo"
       data-testid="chain-logo"
@@ -223,18 +304,29 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories UnknownChain 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo"
       data-testid="chain-logo"
@@ -254,18 +346,29 @@ exports[`./ChainIndicator.stories UnknownChain 1`] = `
         </span>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
 
 exports[`./ChainIndicator.stories WithFiatValue 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
+<<<<<<< HEAD
     <span
       class="indicator withLogo"
       data-testid="chain-logo"
@@ -299,6 +402,17 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
         </p>
       </div>
     </span>
+=======
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <span
+        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+        style="width: 100%; height: 22px;"
+      />
+    </div>
+>>>>>>> 178d7c2ad (chore: update snapshots)
   </div>
 </div>
 `;
