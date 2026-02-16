@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 3 * * 1-5'
+  pull_request_target:
+    branches:
+      - dev
+    types: [closed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,6 +15,7 @@ concurrency:
 
 jobs:
   e2e:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     timeout-minutes: 40
     name: Cypress Full Regression on demand tests
@@ -20,6 +25,8 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.ref }}
 
       - uses: ./.github/actions/cypress
         with:
@@ -63,3 +70,28 @@ jobs:
           -f "apps/web/reports/junit-report.xml"; then
             echo -e "\e[41;32mTestRail upload failed. Pipeline will continue, please check the upload process.\e[0m"
           fi
+
+  notify:
+    if: failure() && github.event_name == 'pull_request_target'
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web full regression tests failed on ${{ github.event.pull_request.base.ref }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Full Regression Tests (E2E) Failed*\n• Branch: `${{ github.event.pull_request.base.ref }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.pull_request.merge_commit_sha }}|${{ github.event.pull_request.merge_commit_sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
