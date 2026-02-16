@@ -2,60 +2,343 @@
 
 exports[`./StakingStatus.stories Activating 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Activating
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Activating
+        </span>
       </span>
-    </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./StakingStatus.stories Active 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
     >
       <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Validating
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Validating
+        </span>
       </span>
-    </span>
+    </div>
   </div>
 </div>
 `;
 
 exports[`./StakingStatus.stories AllStatuses 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiStack-root mui-style-1sazv7p-MuiStack-root"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiStack-root mui-style-1sazv7p-MuiStack-root"
+    >
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Inactive
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Activating
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Awaiting entry
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Validating
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Requested exit
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Request pending
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Withdrawn
+          </span>
+        </span>
+      </div>
+      <div
+        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      >
+        <span
+          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+          >
+            <mock-icon
+              aria-hidden=""
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              focusable="false"
+            />
+            Slashed
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories DepositInProgress 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+    >
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Awaiting entry
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories ExitRequested 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+    >
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Requested exit
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories Exited 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+    >
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Withdrawn
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories Exiting 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
+    <div
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
+    >
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
+        >
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Request pending
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories NotStaked 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
       class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
@@ -75,114 +358,17 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
         </span>
       </span>
     </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Activating
-        </span>
-      </span>
-    </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Awaiting entry
-        </span>
-      </span>
-    </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Validating
-        </span>
-      </span>
-    </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Requested exit
-        </span>
-      </span>
-    </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Request pending
-        </span>
-      </span>
-    </div>
-    <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
-    >
-      <span
-        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-      >
-        <span
-          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-        >
-          <mock-icon
-            aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-            focusable="false"
-          />
-          Withdrawn
-        </span>
-      </span>
-    </div>
+  </div>
+</div>
+`;
+
+exports[`./StakingStatus.stories Slashed 1`] = `
+<div
+  class="shadcn-scope"
+>
+  <div
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  >
     <div
       class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
     >
@@ -201,156 +387,6 @@ exports[`./StakingStatus.stories AllStatuses 1`] = `
         </span>
       </span>
     </div>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories DepositInProgress 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Awaiting entry
-      </span>
-    </span>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories ExitRequested 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Requested exit
-      </span>
-    </span>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories Exited 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Withdrawn
-      </span>
-    </span>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories Exiting 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-10fp53-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Request pending
-      </span>
-    </span>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories NotStaked 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Inactive
-      </span>
-    </span>
-  </div>
-</div>
-`;
-
-exports[`./StakingStatus.stories Slashed 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
-  >
-    <span
-      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-    >
-      <span
-        class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Slashed
-      </span>
-    </span>
   </div>
 </div>
 `;
