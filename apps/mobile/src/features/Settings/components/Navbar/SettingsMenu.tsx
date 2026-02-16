@@ -27,8 +27,8 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
-  const color = theme.color?.get()
-  const colorError = theme.error?.get() || '#FF5F72'
+  const color = theme.color.get()
+  const colorError = theme.error.get() || '#FF5F72'
 
   if (!safeAddress) {
     return null
