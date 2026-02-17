@@ -1,0 +1,174 @@
+.sidebarContainer {
+  width: var(--sidebar-width, 16rem);
+}
+
+.sidebarCollapsed {
+  width: var(--sidebar-width-icon, 3rem);
+}
+
+.sidebarInteractive {
+  cursor: pointer;
+}
+
+.spaceSelector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.backToSpace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.spaceSelectorAvatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--rounded-md, 8px);
+  overflow: hidden;
+}
+
+.spaceSelectorAvatarFallback {
+  border-radius: var(--rounded-md, 8px);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.spaceSelectorText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.spaceSelectorName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #171717;
+}
+
+.spaceSelectorSubtitle {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #737373;
+}
+
+.transactionsBadge {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 16px;
+  color: #166534;
+  background-color: #dcfce7;
+  border-radius: 12px;
+}
+
+:global(.group[data-collapsible='icon']) .transactionsBadge {
+  display: none;
+}
+
+.transactionsBadgeDot {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+:global(.group[data-collapsible='icon']) .transactionsBadgeDot {
+  display: block;
+}
+
+.navItem {
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--rounded-md, 8px);
+}
+
+.navItemActive {
+  background-color: var(--sidebar-accent);
+}
+
+.groupLabel {
+  color: var(--sidebar-muted, #737373);
+  font-size: 12px;
+  line-height: 16px;
+  padding: 8px 12px;
+}
+
+.badge {
+  background-color: var(--green-400, #4ade80);
+  border: 1px solid var(--white, white);
+  border-radius: var(--rounded-lg, 12px);
+  width: 8px;
+  height: 8px;
+}
+
+.textSmall {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+.textSmallBold {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.textMini {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.textMiniBold {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+.footerHelp {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
