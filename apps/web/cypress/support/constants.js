@@ -125,8 +125,6 @@ export const TXActionNames = {
   setAllowance: 'setAllowance',
 }
 
-export const VISUAL_VIEWPORT = { width: 1920, height: 1080 }
-
 export const networkKeys = {
   sepolia: '11155111',
   polygon: '137',

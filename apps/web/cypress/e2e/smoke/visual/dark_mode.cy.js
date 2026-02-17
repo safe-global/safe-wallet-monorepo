@@ -5,7 +5,7 @@ import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('[SMOKE] Dark mode screenshots', { defaultCommandTimeout: 60000 }, () => {
+describe('[SMOKE] Dark mode screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
