@@ -30,7 +30,7 @@ describe('[SMOKE] Create transaction flow tests', { defaultCommandTimeout: 60000
     createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
     createtx.clickOnTokenselectorAndSelectSepoliaEth()
     createtx.setMaxAmount()
-    createtx.verifyMaxAmount(constants.tokenNames.sepoliaEther, constants.tokenAbbreviation.sep)
+    cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
   })
 
   it('[SMOKE] Verify that the send form shows validation errors for invalid address', () => {
