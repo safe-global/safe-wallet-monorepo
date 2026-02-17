@@ -4,11 +4,13 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AllSafeItems } from '@/hooks/safes'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { SafeListItem } from '../SafesList/SafeListItem'
 
 function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
   const { safe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
+  const isSafeOwner = useIsSafeOwner()
 
   const safeInList = useMemo(
     () => (safeAddress ? allSafes?.find((s) => sameAddress(s.address, safeAddress)) : undefined),
@@ -19,12 +21,12 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
     () => ({
       chainId: safe.chainId,
       address: safeAddress,
-      isReadOnly: !safeInList,
+      isReadOnly: !isSafeOwner,
       isPinned: false,
       lastVisited: -1,
       name: addressBook[safeAddress],
     }),
-    [safe.chainId, safeAddress, safeInList, addressBook],
+    [safe.chainId, safeAddress, isSafeOwner, addressBook],
   )
 
   if (!safeAddress || safeInList?.isPinned) return null
