@@ -7,14 +7,12 @@ import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeCon
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/services'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
 import {
   getL2MasterCopyVersionByCodeHash,
   isL2MasterCopyCodeHash,
-  isCanonicalDeployment,
-  getCanonicalMultiSendCallOnlyAddress,
-  getCanonicalMultiSendAddress,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
 
@@ -95,22 +93,12 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = true
   }
 
-  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
-  // we must use canonical auxiliary contracts (MultiSend, etc.) because
-  // EVM contracts cannot delegatecall to EraVM contracts.
-  if (isCanonicalDeployment(implementation, chainId, safeVersion)) {
-    const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
-    const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)
-
-    contractNetworks = {
-      ...contractNetworks,
-      [chainId]: {
-        ...contractNetworks?.[chainId],
-        ...(canonicalMultiSendCallOnly && { multiSendCallOnlyAddress: canonicalMultiSendCallOnly }),
-        ...(canonicalMultiSend && { multiSendAddress: canonicalMultiSend }),
-      },
-    }
-  }
+  contractNetworks = getCanonicalMultiSendContractNetworks({
+    implementationAddress: implementation,
+    chainId,
+    safeVersion,
+    contractNetworks,
+  })
 
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {

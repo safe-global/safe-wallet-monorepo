@@ -1,10 +1,11 @@
-import type { SingletonDeploymentV2 } from '@safe-global/safe-deployments'
+import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import {
   getCanonicalOrFirstAddress,
   hasCanonicalDeployment,
   hasMatchingDeployment,
   isCanonicalDeployment,
   getCanonicalMultiSendCallOnlyAddress,
+  getCanonicalMultiSendAddress,
 } from '../../contracts/deployments'
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
 
@@ -48,25 +49,24 @@ describe('deployments utils', () => {
   })
 
   describe('getCanonicalOrFirstAddress', () => {
-    it('returns canonical when present for chain', () => {
+    it.each([
+      {
+        testName: 'returns canonical when present for chain',
+        addresses: ['0x4444444444444444444444444444444444444444', '0x3333333333333333333333333333333333333333'],
+        expectedAddress: '0x3333333333333333333333333333333333333333',
+      },
+      {
+        testName: 'returns first network address when canonical not present for chain',
+        addresses: ['0x4444444444444444444444444444444444444444', '0x5555555555555555555555555555555555555555'],
+        expectedAddress: '0x4444444444444444444444444444444444444444',
+      },
+    ])('$testName', ({ addresses, expectedAddress }) => {
       const canonical = '0x3333333333333333333333333333333333333333'
-      const first = '0x4444444444444444444444444444444444444444'
       const deployment = makeDeployment(
         { canonical: { address: canonical, codeHash: '0xhash' } },
-        { [chainId]: [first, canonical] },
+        { [chainId]: addresses },
       )
-      expect(getCanonicalOrFirstAddress(deployment, chainId)).toBe(canonical)
-    })
-
-    it('returns first network address when canonical not present for chain', () => {
-      const canonical = '0x3333333333333333333333333333333333333333'
-      const first = '0x4444444444444444444444444444444444444444'
-      const second = '0x5555555555555555555555555555555555555555'
-      const deployment = makeDeployment(
-        { canonical: { address: canonical, codeHash: '0xhash' } },
-        { [chainId]: [first, second] },
-      )
-      expect(getCanonicalOrFirstAddress(deployment, chainId)).toBe(first)
+      expect(getCanonicalOrFirstAddress(deployment, chainId)).toBe(expectedAddress)
     })
 
     it('returns undefined when no deployment', () => {
@@ -101,7 +101,7 @@ describe('deployments utils', () => {
     })
 
     it('checks multiple versions', () => {
-      const getDeployments = jest.fn((filter) => {
+      const getDeployments = jest.fn((filter?: DeploymentFilter) => {
         if (filter?.version === '1.3.0') {
           return makeDeployment(
             { canonical: { address: contractAddress, codeHash: '0xhash' } },
@@ -164,6 +164,18 @@ describe('deployments utils', () => {
       const address = getCanonicalMultiSendCallOnlyAddress(null)
       // Should fallback to 1.3.0
       expect(address).toBe('0x40A2aCCbd92BCA938b02010E17A5b8929b49130D')
+    })
+  })
+
+  describe('getCanonicalMultiSendAddress', () => {
+    it('returns canonical MultiSend address for version 1.3.0', () => {
+      const address = getCanonicalMultiSendAddress('1.3.0')
+      expect(address).toBe('0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761')
+    })
+
+    it('falls back to 1.3.0 for null version', () => {
+      const address = getCanonicalMultiSendAddress(null)
+      expect(address).toBe('0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761')
     })
   })
 })

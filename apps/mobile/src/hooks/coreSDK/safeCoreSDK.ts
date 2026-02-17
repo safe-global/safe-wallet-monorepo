@@ -2,16 +2,12 @@ import chains from '@safe-global/utils/config/chains'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
-import Safe, { type ContractNetworksConfig } from '@safe-global/protocol-kit'
+import Safe from '@safe-global/protocol-kit'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
-import {
-  isCanonicalDeployment,
-  getCanonicalMultiSendCallOnlyAddress,
-  getCanonicalMultiSendAddress,
-} from '@safe-global/utils/services/contracts/deployments'
+import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 
 const singletonSafeSDK = new Map<string, Safe>()
 // Safe Core SDK
@@ -58,21 +54,11 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = true
   }
 
-  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
-  // we must use canonical auxiliary contracts (MultiSend, etc.) because
-  // EVM contracts cannot delegatecall to EraVM contracts.
-  let contractNetworks: ContractNetworksConfig | undefined
-  if (isCanonicalDeployment(implementation, chainId, safeVersion)) {
-    const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
-    const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)
-
-    contractNetworks = {
-      [chainId]: {
-        ...(canonicalMultiSendCallOnly && { multiSendCallOnlyAddress: canonicalMultiSendCallOnly }),
-        ...(canonicalMultiSend && { multiSendAddress: canonicalMultiSend }),
-      },
-    }
-  }
+  const contractNetworks = getCanonicalMultiSendContractNetworks({
+    implementationAddress: implementation,
+    chainId,
+    safeVersion,
+  })
 
   const safeSDK = await Safe.init({
     provider: providerUrl,
