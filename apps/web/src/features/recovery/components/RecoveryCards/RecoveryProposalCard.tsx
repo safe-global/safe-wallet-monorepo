@@ -35,10 +35,13 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const onRecover = async () => {
     onClose?.()
     setTxFlow(<RecoverAccountFlow />)
-    // Only track for vertical orientation; horizontal ActionCard handles its own tracking
-    if (orientation === 'vertical') {
-      trackEvent({ ...ATTENTION_PANEL_EVENTS.START_RECOVERY, label: 'pop-up' })
-    }
+  }
+
+  const handleRecover = () => {
+    onRecover()
+    // Track with appropriate label based on orientation
+    const label = orientation === 'vertical' ? 'pop-up' : 'panel'
+    trackEvent({ ...ATTENTION_PANEL_EVENTS.START_RECOVERY, label })
   }
 
   const icon = (
@@ -51,7 +54,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button data-testid="start-recovery-btn" variant="contained" onClick={onRecover} className={css.button}>
+    <Button data-testid="start-recovery-btn" variant="contained" onClick={handleRecover} className={css.button}>
       Start recovery
     </Button>
   )
@@ -67,8 +70,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
           trackingEvent: RECOVERY_EVENTS.LEARN_MORE,
           label: 'proposal-card',
         }}
-        action={{ label: 'Start recovery', onClick: onRecover }}
-        trackingEvent={ATTENTION_PANEL_EVENTS.START_RECOVERY}
+        action={{ label: 'Start recovery', onClick: handleRecover }}
         testId="recovery-proposal-card"
       />
     )

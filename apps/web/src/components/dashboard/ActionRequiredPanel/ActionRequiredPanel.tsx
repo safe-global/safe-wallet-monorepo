@@ -38,6 +38,13 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
     setIsExpanded((prev) => !prev)
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      toggleExpanded()
+    }
+  }
+
   // Render children in hidden container for counting, but don't show panel if no warnings
   if (warningCount === 0) {
     return (
@@ -58,8 +65,13 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         justifyContent="space-between"
         alignItems="center"
         onClick={toggleExpanded}
+        onKeyDown={handleKeyDown}
         className={css.header}
         sx={{ px: 1.5, mb: 1, cursor: 'pointer' }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-label="Toggle action required panel"
       >
         <Typography fontWeight={700} className={css.headerText}>
           Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />

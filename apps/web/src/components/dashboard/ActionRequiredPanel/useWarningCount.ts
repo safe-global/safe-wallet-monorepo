@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type RefObject } from 'react'
+import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
 /**
  * Hook to count the number of rendered warning components
@@ -17,13 +17,14 @@ import { useLayoutEffect, useState, type RefObject } from 'react'
 export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>): number {
   const [count, setCount] = useState(0)
   const [container, setContainer] = useState<HTMLDivElement | null>(null)
+  const observerRef = useRef<MutationObserver | null>(null)
 
   // Track when containerRef.current changes
   useLayoutEffect(() => {
     if (containerRef.current !== container) {
       setContainer(containerRef.current)
     }
-  })
+  }, [containerRef, container])
 
   useLayoutEffect(() => {
     if (!container) {
@@ -34,9 +35,7 @@ export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>):
     // Count direct children that are actually rendered (excludes null returns)
     const updateCount = () => {
       const warnings = container.querySelectorAll(':scope > *')
-      const newCount = warnings.length
-
-      setCount((prevCount) => (newCount !== prevCount ? newCount : prevCount))
+      setCount(warnings.length)
     }
 
     // Initial count
@@ -44,6 +43,7 @@ export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>):
 
     // Watch for changes to children (e.g., async components rendering after data fetch)
     const observer = new MutationObserver(updateCount)
+    observerRef.current = observer
     observer.observe(container, {
       childList: true, // Watch for children being added/removed
       subtree: false, // Only watch direct children
@@ -51,8 +51,16 @@ export function useWarningCount(containerRef: RefObject<HTMLDivElement | null>):
 
     return () => {
       observer.disconnect()
+      observerRef.current = null
     }
   }, [container])
+
+  // Ensure cleanup on unmount regardless of container state
+  useLayoutEffect(() => {
+    return () => {
+      observerRef.current?.disconnect()
+    }
+  }, [])
 
   return count
 }

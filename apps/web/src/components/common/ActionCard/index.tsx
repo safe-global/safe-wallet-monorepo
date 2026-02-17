@@ -111,7 +111,7 @@ export const ActionCard = ({
           <Box component="span" sx={{ fontWeight: 700 }}>
             {title}
           </Box>
-          {content && <>{typeof content === 'string' ? content : content}</>}
+          {content && <> {content}</>}
           {learnMore && (
             <>
               {' '}
@@ -137,31 +137,37 @@ export const ActionCard = ({
 
       {/* Action */}
       {action && (
-        <Box sx={{ paddingLeft: '28px' }}>
-          <Button
-            variant="text"
-            size="small"
-            endIcon={<KeyboardArrowRightRoundedIcon />}
-            sx={ACTION_BUTTON_SX}
-            {...(action.href
-              ? {
-                  href: action.href,
-                  target: action.target,
-                  rel: action.rel,
-                  component: 'a' as const,
-                  onClick: trackingEvent ? () => trackEvent(trackingEvent) : undefined,
+        <Box sx={{ paddingLeft: 'calc(20px + 0.85 * 8px)' }}>
+          {action.href ? (
+            <Button
+              variant="text"
+              size="small"
+              component="a"
+              href={action.href}
+              target={action.target}
+              rel={action.rel}
+              endIcon={<KeyboardArrowRightRoundedIcon />}
+              sx={ACTION_BUTTON_SX}
+              onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
+            >
+              {action.label}
+            </Button>
+          ) : (
+            <Button
+              variant="text"
+              size="small"
+              endIcon={<KeyboardArrowRightRoundedIcon />}
+              sx={ACTION_BUTTON_SX}
+              onClick={() => {
+                if (trackingEvent) {
+                  trackEvent(trackingEvent)
                 }
-              : {
-                  onClick: () => {
-                    if (trackingEvent) {
-                      trackEvent(trackingEvent)
-                    }
-                    action.onClick?.()
-                  },
-                })}
-          >
-            {action.label}
-          </Button>
+                action.onClick?.()
+              }}
+            >
+              {action.label}
+            </Button>
+          )}
         </Box>
       )}
     </Paper>

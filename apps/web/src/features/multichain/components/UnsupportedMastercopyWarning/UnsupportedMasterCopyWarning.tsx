@@ -27,7 +27,7 @@ export const UnsupportedMastercopyWarning = () => {
   // Show warning for all unsupported mastercopies
   const showWarning = !isValidMasterCopy(safe.implementationVersionState)
 
-  if (!showWarning) return
+  if (!showWarning) return null
 
   // Check if migration is possible based on bytecode comparison
   const canMigrate =
