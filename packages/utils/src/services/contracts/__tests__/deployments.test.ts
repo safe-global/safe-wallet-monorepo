@@ -144,6 +144,10 @@ describe('deployments utils', () => {
       expect(isCanonicalDeployment(CANONICAL_L2_SAFE, '137', '1.3.0')).toBe(false)
     })
 
+    it('returns false for unsupported zkSync chains', () => {
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, '300', '1.3.0')).toBe(false)
+    })
+
     it('returns false for empty implementation address', () => {
       expect(isCanonicalDeployment('', ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(false)
     })

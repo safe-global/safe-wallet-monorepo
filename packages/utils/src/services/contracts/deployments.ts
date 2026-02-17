@@ -31,6 +31,8 @@ const SAFE_L2_CODE_HASHES = new Set<string>(
   ),
 )
 
+const SUPPORTED_ZKSYNC_CANONICAL_CHAIN_IDS = new Set([ZKSYNC_ERA_CHAIN_ID])
+
 export const isL2MasterCopyCodeHash = (codeHash: string | undefined): boolean => {
   if (!codeHash) {
     return false
@@ -208,7 +210,8 @@ export const isCanonicalDeployment = (
   chainId: string,
   version: SafeState['version'],
 ): boolean => {
-  if (chainId !== ZKSYNC_ERA_CHAIN_ID) {
+  // Canonical aux-contract override is currently enabled only for zkSync Era mainnet.
+  if (!SUPPORTED_ZKSYNC_CANONICAL_CHAIN_IDS.has(chainId)) {
     return false
   }
 
