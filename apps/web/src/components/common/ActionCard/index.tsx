@@ -75,6 +75,49 @@ const DEFAULT_LEARN_MORE_EVENT: AnalyticsEvent = {
   category: 'action_card',
 }
 
+const ActionButton = ({
+  action,
+  trackingEvent,
+}: {
+  action: ActionCardButton
+  trackingEvent?: AnalyticsEvent
+}): ReactElement => {
+  if (action.href) {
+    return (
+      <Button
+        variant="text"
+        size="small"
+        component="a"
+        href={action.href}
+        target={action.target}
+        rel={action.rel}
+        endIcon={<KeyboardArrowRightRoundedIcon />}
+        sx={ACTION_BUTTON_SX}
+        onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
+      >
+        {action.label}
+      </Button>
+    )
+  }
+
+  return (
+    <Button
+      variant="text"
+      size="small"
+      endIcon={<KeyboardArrowRightRoundedIcon />}
+      sx={ACTION_BUTTON_SX}
+      onClick={() => {
+        if (trackingEvent) {
+          trackEvent(trackingEvent)
+        }
+        action.onClick?.()
+      }}
+    >
+      {action.label}
+    </Button>
+  )
+}
+
 export const ActionCard = ({
   severity,
   title,
@@ -138,36 +181,7 @@ export const ActionCard = ({
       {/* Action */}
       {action && (
         <Box sx={{ paddingLeft: 'calc(20px + 0.85 * 8px)' }}>
-          {action.href ? (
-            <Button
-              variant="text"
-              size="small"
-              component="a"
-              href={action.href}
-              target={action.target}
-              rel={action.rel}
-              endIcon={<KeyboardArrowRightRoundedIcon />}
-              sx={ACTION_BUTTON_SX}
-              onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
-            >
-              {action.label}
-            </Button>
-          ) : (
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<KeyboardArrowRightRoundedIcon />}
-              sx={ACTION_BUTTON_SX}
-              onClick={() => {
-                if (trackingEvent) {
-                  trackEvent(trackingEvent)
-                }
-                action.onClick?.()
-              }}
-            >
-              {action.label}
-            </Button>
-          )}
+          <ActionButton action={action} trackingEvent={trackingEvent} />
         </Box>
       )}
     </Paper>
