@@ -1,6 +1,7 @@
 import * as constants from '../../../support/constants.js'
 import * as main from '../../pages/main.page.js'
 import * as navigation from '../../pages/navigation.page.js'
+import * as owners from '../../pages/owners.pages.js'
 import * as notifications from '../../pages/notifications.page.js'
 import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
@@ -11,10 +12,11 @@ describe('[SMOKE] Settings pages tests', { defaultCommandTimeout: 60000 }, () =>
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[SMOKE] Verify that the setup page with owners list is displayed', () => {
+  it('[SMOKE] Verify that the setup page with signers is displayed', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     main.verifyElementsExist([navigation.setupSection])
     cy.contains('Required confirmations', { timeout: 10000 }).should('be.visible')
+    owners.checkExistingSignerCount(2)
   })
 
   it('[SMOKE] Verify that the appearance settings page is displayed', () => {
