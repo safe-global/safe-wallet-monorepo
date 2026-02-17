@@ -1354,7 +1354,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -1385,7 +1402,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -1416,7 +1450,24 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2094,7 +2145,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2125,7 +2193,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -2156,7 +2241,24 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           </span>
                                           <span
                                             class="MuiBox-root mui-style-yjghm1"
-                                          />
+                                          >
+                                            <a
+                                              aria-label=""
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              data-mui-internal-clone-element="true"
+                                              data-testid="explorer-btn"
+                                              href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
+                                              rel="noreferrer"
+                                              tabindex="0"
+                                              target="_blank"
+                                            >
+                                              <mock-icon
+                                                aria-hidden=""
+                                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                focusable="false"
+                                              />
+                                            </a>
+                                          </span>
                                         </p>
                                       </div>
                                       <div
@@ -3381,7 +3483,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3466,7 +3585,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3551,7 +3687,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3573,7 +3726,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x75a4a3378eb9be1d6cd40847aa7fac5d66b99cfe"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3658,7 +3828,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3680,7 +3867,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x9648b1e4ad3eecbae513afb45e7ea8b2918e91ff"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3859,7 +4063,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3890,7 +4111,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -3997,7 +4235,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4029,7 +4284,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4124,7 +4396,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4156,7 +4445,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4251,7 +4557,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
@@ -4283,7 +4606,24 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   </span>
                                                   <span
                                                     class="MuiBox-root mui-style-yjghm1"
-                                                  />
+                                                  >
+                                                    <a
+                                                      aria-label=""
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      data-mui-internal-clone-element="true"
+                                                      data-testid="explorer-btn"
+                                                      href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                      rel="noreferrer"
+                                                      tabindex="0"
+                                                      target="_blank"
+                                                    >
+                                                      <mock-icon
+                                                        aria-hidden=""
+                                                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                                                        focusable="false"
+                                                      />
+                                                    </a>
+                                                  </span>
                                                 </p>
                                               </div>
                                             </div>
