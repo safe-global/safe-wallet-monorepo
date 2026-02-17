@@ -5,24 +5,24 @@ import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('[SMOKE] Dark mode screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
+describe('[VISUAL] Dark mode screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[SMOKE] Screenshot balances page in dark mode', () => {
+  it('[VISUAL] Screenshot balances page in dark mode', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
     cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
   })
 
-  it('[SMOKE] Screenshot dashboard in dark mode', () => {
+  it('[VISUAL] Screenshot dashboard in dark mode', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     cy.contains('Top assets', { timeout: 30000 }).should('be.visible')
   })
 
-  it('[SMOKE] Screenshot settings setup page in dark mode', () => {
+  it('[VISUAL] Screenshot settings setup page in dark mode', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.contains('Required confirmations', { timeout: 30000 }).should('be.visible')

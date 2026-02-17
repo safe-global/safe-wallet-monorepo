@@ -9,7 +9,7 @@ const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe(
-  '[SMOKE] Create transaction flow screenshots',
+  '[VISUAL] Create transaction flow screenshots',
   { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT },
   () => {
     before(async () => {
@@ -21,13 +21,13 @@ describe(
       wallet.connectSigner(signer)
     })
 
-    it('[SMOKE] Screenshot send form initial state', () => {
+    it('[VISUAL] Screenshot send form initial state', () => {
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
     })
 
-    it('[SMOKE] Screenshot send form with filled recipient and amount', () => {
+    it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
@@ -36,7 +36,7 @@ describe(
       cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
     })
 
-    it('[SMOKE] Screenshot send form validation errors for invalid address', () => {
+    it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       createtx.verifyRandomStringAddress('Lorem Ipsum')

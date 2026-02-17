@@ -4,24 +4,24 @@ import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('[SMOKE] Safe Apps screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
+describe('[VISUAL] Safe Apps screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[SMOKE] Screenshot Safe Apps list', () => {
+  it('[VISUAL] Screenshot Safe Apps list', () => {
     cy.visit(constants.appsUrlGeneral + staticSafes.SEP_STATIC_SAFE_2)
     cy.get(safeapps.safeAppsList, { timeout: 30000 }).should('be.visible')
   })
 
-  it('[SMOKE] Screenshot Safe Apps search filtered results', () => {
+  it('[VISUAL] Screenshot Safe Apps search filtered results', () => {
     cy.visit(constants.appsUrlGeneral + staticSafes.SEP_STATIC_SAFE_2)
     cy.get(safeapps.safeAppsList, { timeout: 30000 }).should('be.visible')
     safeapps.typeAppName('Transaction Builder')
     cy.contains('Transaction Builder').should('be.visible')
   })
 
-  it('[SMOKE] Screenshot Safe Apps no results state', () => {
+  it('[VISUAL] Screenshot Safe Apps no results state', () => {
     cy.visit(constants.appsUrlGeneral + staticSafes.SEP_STATIC_SAFE_2)
     cy.get(safeapps.safeAppsList, { timeout: 30000 }).should('be.visible')
     safeapps.typeAppName('zzzznonexistentapp12345')
