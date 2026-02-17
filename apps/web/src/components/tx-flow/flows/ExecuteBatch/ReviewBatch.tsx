@@ -37,7 +37,6 @@ import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/u
 import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useMultiSendContract } from './useMultiSendContract'
 
 /**
