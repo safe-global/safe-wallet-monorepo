@@ -1,7 +1,6 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
 import { Box, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 
