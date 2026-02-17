@@ -33,9 +33,9 @@ type HeaderProps = {
 
 export function getLogoLink(router: ReturnType<typeof useRouter>): Url {
   return router.pathname === AppRoutes.home || !router.query.safe
-    ? router.pathname === AppRoutes.welcome.accounts
+    ? router.pathname === AppRoutes.spaces.index
       ? AppRoutes.welcome.index
-      : AppRoutes.welcome.accounts
+      : { pathname: AppRoutes.spaces.index }
     : { pathname: AppRoutes.home, query: { safe: router.query.safe } }
 }
 
