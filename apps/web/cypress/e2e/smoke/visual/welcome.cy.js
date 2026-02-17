@@ -1,5 +1,6 @@
 import * as constants from '../../../support/constants.js'
 import * as main from '../../pages/main.page.js'
+import * as sideBar from '../../pages/sidebar.pages.js'
 import * as ls from '../../../support/localstorage_data.js'
 
 describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
@@ -11,6 +12,6 @@ describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ..
   it('[VISUAL] Screenshot accounts page with added safes', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set1)
     cy.visit(constants.welcomeAccountUrl)
-    cy.get('[data-testid="safe-list-item"]', { timeout: 30000 }).should('be.visible')
+    cy.get(sideBar.sideSafeListItem, { timeout: 30000 }).should('be.visible')
   })
 })
