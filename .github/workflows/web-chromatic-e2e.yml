@@ -2,15 +2,6 @@ name: Web Chromatic E2E
 
 on:
   workflow_dispatch:
-    inputs:
-      scope:
-        description: 'Test scope'
-        required: true
-        type: choice
-        default: 'smoke'
-        options:
-          - smoke
-          - full
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,14 +11,14 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    name: Cypress ${{ inputs.scope == 'smoke' && 'Smoke' || 'Full' }} tests
+    name: Cypress Smoke tests
     permissions:
       contents: read
 
     strategy:
       fail-fast: false
       matrix:
-        containers: ${{ fromJSON(inputs.scope == 'smoke' && '[1, 2, 3, 4, 5]' || '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]') }}
+        containers: [1, 2, 3, 4, 5]
 
     steps:
       - uses: actions/checkout@v6
@@ -37,7 +28,7 @@ jobs:
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: ${{ inputs.scope == 'smoke' && 'cypress/e2e/smoke/*.cy.js' || 'cypress/e2e/smoke/*.cy.js,cypress/e2e/regression/*.cy.js,cypress/e2e/safe-apps/*.cy.js' }}
+          spec: 'cypress/e2e/smoke/*.cy.js'
           group: 'Chromatic E2E'
           tag: 'chromatic-e2e'
           chromatic: 'true'
@@ -66,7 +57,7 @@ jobs:
         uses: chromaui/action@latest
         with:
           cypress: true
-          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_SMOKE_TESTS }}
           workingDir: apps/web
         env:
           CHROMATIC_ARCHIVE_LOCATION: ./cypress/downloads
