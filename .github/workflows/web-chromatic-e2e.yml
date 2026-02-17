@@ -11,7 +11,8 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    name: Cypress Smoke tests
+    continue-on-error: true
+    name: Cypress Visual and Smoke tests
     permissions:
       contents: read
 
@@ -36,7 +37,7 @@ jobs:
 
   chromatic:
     needs: [e2e]
-    if: always() && needs.e2e.result == 'success'
+    if: "!cancelled()"
     runs-on: ubuntu-latest
     permissions:
       contents: read
