@@ -9,6 +9,8 @@ concurrency:
 
 jobs:
   e2e:
+    env:
+      NEXT_PUBLIC_COMMIT_HASH: '0000000'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true
@@ -37,7 +39,7 @@ jobs:
 
   chromatic:
     needs: [e2e]
-    if: "!cancelled()"
+    if: '!cancelled()'
     runs-on: ubuntu-latest
     permissions:
       contents: read

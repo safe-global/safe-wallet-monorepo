@@ -24,8 +24,10 @@ runs:
     - name: Set environment variables
       shell: bash
       run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
+        if [ -z "$NEXT_PUBLIC_COMMIT_HASH" ]; then
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
+        fi
 
         # Datadog RUM env:
         # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
