@@ -28,7 +28,7 @@ jobs:
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: 'cypress/e2e/smoke/*.cy.js'
+          spec: 'cypress/e2e/smoke/**/*.cy.js'
           group: 'Chromatic E2E'
           tag: 'chromatic-e2e'
           chromatic: 'true'
