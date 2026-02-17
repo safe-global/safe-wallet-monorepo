@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants.js'
+import * as ls from '../../support/localstorage_data.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -17,10 +18,9 @@ describe('Nested safes fund asset tests', () => {
   })
 
   beforeEach(() => {
-    const chainId = '11155111' // Sepolia
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45)
-    // Add the parent safe to trusted list (required for nested safe creation)
-    main.addSafeToTrustedList(chainId, staticSafes.SEP_STATIC_SAFE_45.substring(4))
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe45)
+    cy.reload()
     main.setupSafeSettingsWithAllTokens().then(() => {
       cy.reload()
       wallet.connectSigner(signer)

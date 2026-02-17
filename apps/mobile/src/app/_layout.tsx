@@ -254,6 +254,10 @@ function RootLayout() {
                             name="manage-tokens-sheet"
                             options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
                           />
+                          <Stack.Screen
+                            name="protocol-detail-sheet"
+                            options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
+                          />
                           <Stack.Screen name="signing-error" options={{ headerShown: false, presentation: 'modal' }} />
                           <Stack.Screen
                             name="signing-success"

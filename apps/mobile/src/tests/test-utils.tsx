@@ -24,6 +24,7 @@ const defaultSettings: SettingsState = {
   themePreference: 'light',
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
+  hideDust: true,
   env: {
     rpc: {},
     tenderly: {

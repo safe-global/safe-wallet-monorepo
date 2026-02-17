@@ -105,7 +105,6 @@ describe('PositionsContainer', () => {
     render(<PositionsContainer />)
 
     expect(await screen.findByText('Aave V3')).toBeTruthy()
-    expect(await screen.findByText('USD Coin')).toBeTruthy()
   })
 
   it('renders empty state when no positions', async () => {
