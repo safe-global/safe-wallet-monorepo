@@ -59,7 +59,6 @@ const SpaceCard = ({
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = safeCount
   const isAdmin = isUserActiveAdmin(members, currentUser?.id)
 
   return (
@@ -68,12 +67,7 @@ const SpaceCard = ({
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 
-      <SpaceSummary
-        name={name}
-        numberOfAccounts={numberOfAccounts}
-        numberOfMembers={numberOfMembers}
-        isCompact={isCompact}
-      />
+      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} isCompact={isCompact} />
 
       {isAdmin && <SpaceContextMenu space={space} />}
     </Card>
