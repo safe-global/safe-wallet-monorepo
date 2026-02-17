@@ -4,7 +4,7 @@ import { useAppSelector } from '@/store'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import useChains from '@/hooks/useChains'
-import useWallet from '@/hooks/wallets/useWallet'
+import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import type { AddressBookState, VisitedSafesState } from '@/store/slices'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
@@ -70,9 +70,28 @@ export const _buildSafeItem = (
   }
 }
 
+export const _mergeOwnedSafes = (a: AllOwnedSafes, b: AllOwnedSafes): AllOwnedSafes => {
+  const merged: AllOwnedSafes = { ...a }
+  for (const chainId in b) {
+    merged[chainId] = [...new Set([...(merged[chainId] || []), ...b[chainId]])]
+  }
+  return merged
+}
+
 const useAllSafes = (): SafeItems | undefined => {
   const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const signer = useSigner()
+  const signerAddress = signer?.address || ''
+  const signerDiffers = signerAddress !== '' && !sameAddress(signerAddress, walletAddress)
+
+  const [ownedByWallet = {}] = useAllOwnedSafes(walletAddress)
+  const [ownedBySigner = {}] = useAllOwnedSafes(signerDiffers ? signerAddress : '')
+
+  const allOwned = useMemo(
+    () => (signerDiffers ? _mergeOwnedSafes(ownedByWallet, ownedBySigner) : ownedByWallet),
+    [ownedByWallet, ownedBySigner, signerDiffers],
+  )
+
   const { configs } = useChains()
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
