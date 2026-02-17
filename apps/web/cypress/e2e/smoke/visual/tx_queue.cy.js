@@ -3,12 +3,12 @@ import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('[SMOKE] Transaction queue tests', { defaultCommandTimeout: 60000 }, () => {
+describe('[SMOKE] Transaction queue screenshots', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[SMOKE] Verify that the queue page with pending transactions is displayed', () => {
+  it('[SMOKE] Screenshot queue page with pending transactions', () => {
     cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
       cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
       cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)
@@ -17,7 +17,7 @@ describe('[SMOKE] Transaction queue tests', { defaultCommandTimeout: 60000 }, ()
     cy.contains('Batch', { timeout: 10000 }).should('be.visible')
   })
 
-  it('[SMOKE] Verify that expanding a queued transaction shows details', () => {
+  it('[SMOKE] Screenshot expanded queued transaction details', () => {
     cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
       cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
       cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)

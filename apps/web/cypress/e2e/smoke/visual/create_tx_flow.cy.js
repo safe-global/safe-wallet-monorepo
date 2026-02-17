@@ -8,7 +8,7 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('[SMOKE] Create transaction flow tests', { defaultCommandTimeout: 60000 }, () => {
+describe('[SMOKE] Create transaction flow screenshots', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -18,13 +18,13 @@ describe('[SMOKE] Create transaction flow tests', { defaultCommandTimeout: 60000
     wallet.connectSigner(signer)
   })
 
-  it('[SMOKE] Verify that the send form initial state is displayed', () => {
+  it('[SMOKE] Screenshot send form initial state', () => {
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
   })
 
-  it('[SMOKE] Verify that the send form with filled recipient and amount is displayed', () => {
+  it('[SMOKE] Screenshot send form with filled recipient and amount', () => {
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
@@ -33,7 +33,7 @@ describe('[SMOKE] Create transaction flow tests', { defaultCommandTimeout: 60000
     cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
   })
 
-  it('[SMOKE] Verify that the send form shows validation errors for invalid address', () => {
+  it('[SMOKE] Screenshot send form validation errors for invalid address', () => {
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     createtx.verifyRandomStringAddress('Lorem Ipsum')
