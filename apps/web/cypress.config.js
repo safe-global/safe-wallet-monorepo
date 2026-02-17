@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 import 'dotenv/config'
 import * as fs from 'fs'
-import { configureVisualRegression } from 'cypress-visual-regression'
+import { installPlugin } from '@chromatic-com/cypress'
 import { version } from './src/markdown/terms/version.js'
 
 export default defineConfig({
@@ -22,13 +22,15 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // Set Cookie term version on the cypress env - this way we can access it in the tests
       config.env.CURRENT_COOKIE_TERMS_VERSION = version
-      ;(configureVisualRegression(on),
-        on('task', {
-          log(message) {
-            console.log(message)
-            return null
-          },
-        }))
+
+      installPlugin(on, config)
+
+      on('task', {
+        log(message) {
+          console.log(message)
+          return null
+        },
+      })
 
       on('after:spec', (spec, results) => {
         if (results && results.video) {
@@ -43,10 +45,6 @@ export default defineConfig({
     },
     env: {
       ...process.env,
-      visualRegressionType: 'regression',
-      visualRegressionBaseDirectory: 'cypress/snapshots/actual',
-      visualRegressionDiffDirectory: 'cypress/snapshots/diff',
-      visualRegressionGenerateDiff: 'fail',
     },
     baseUrl: 'http://localhost:3000',
     testIsolation: false,

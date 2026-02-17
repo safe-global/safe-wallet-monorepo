@@ -16,8 +16,9 @@ describe('Remove Owners tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_13)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
 
@@ -26,8 +27,9 @@ describe('Remove Owners tests', () => {
   })
 
   it('Verify remove button does not exist for Non-Owner when there is only 1 owner in the safe', () => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     main.verifyElementsCount(owner.removeOwnerBtn, 0)
   })
 
@@ -40,7 +42,7 @@ describe('Remove Owners tests', () => {
     owner.openRemoveOwnerWindow(1)
   })
 
-  it('Verify threshold input displays the upper limit as the current safe number of owners minus one', () => {
+  it('Verify that threshold input displays the upper limit as the current safe number of owners minus one', () => {
     wallet.connectSigner(signer)
     owner.openRemoveOwnerWindow(1)
     owner.verifyThresholdLimit(1, 1)

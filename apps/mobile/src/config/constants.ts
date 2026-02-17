@@ -8,6 +8,7 @@ export const isAndroid = Platform.OS === 'android'
 export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'
 export const POLLING_INTERVAL = 15_000
+export const DUST_THRESHOLD = 0.01
 export const POSITIONS_POLLING_INTERVAL = 300_000 // 5 minutes
 
 export const COMING_SOON_MESSAGE = 'This feature is coming soon.'

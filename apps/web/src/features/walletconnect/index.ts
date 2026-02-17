@@ -21,7 +21,7 @@
  * function MyComponentWithStates() {
  *   const wc = useLoadFeature(WalletConnectFeature)
  *
- *   if (wc.$isLoading) return <Skeleton />
+ *   if (!wc.$isReady) return <Skeleton />
  *   if (wc.$isDisabled) return null
  *
  *   return <wc.WalletConnectWidget />

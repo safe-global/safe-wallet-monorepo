@@ -117,7 +117,7 @@ const ExplorePossibleWidget = () => {
         subtitle: 'subtitle' in config ? config.subtitle : undefined,
         badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
-        link: config.getLink(router.query.safe, txBuilderApp?.link),
+        link: config.getLink(router.query.safe, txBuilderApp.link),
       })),
     [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )

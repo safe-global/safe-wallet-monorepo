@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react'
+import React, { ReactElement } from 'react'
 import { TabBarProps, Tabs } from 'react-native-collapsible-tab-view'
 import { safeTabItem } from './types'
 import { SafeTabBar } from './SafeTabBar'
@@ -25,8 +25,6 @@ export function SafeTab<T extends object>({
   onIndexChange,
   rightNode,
 }: SafeTabProps<T>) {
-  const [activeTab, setActiveTab] = useState(items[0].label)
-
   return (
     <Theme name={'tab'}>
       <Tabs.Container
@@ -34,10 +32,7 @@ export function SafeTab<T extends object>({
         renderHeader={renderHeader}
         headerContainerStyle={headerContainerStyle}
         headerHeight={headerHeight}
-        renderTabBar={(props) => (
-          <SafeTabBar activeTab={activeTab} setActiveTab={setActiveTab} rightNode={rightNode?.(activeTab)} {...props} />
-        )}
-        onTabChange={(event) => setActiveTab(event.tabName)}
+        renderTabBar={(props) => <SafeTabBar rightNode={rightNode} {...props} />}
         onIndexChange={onIndexChange}
         initialTabName={items[0].label}
       >

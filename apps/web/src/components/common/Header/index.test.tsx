@@ -40,7 +40,6 @@ describe('Header', () => {
     jest.resetAllMocks()
     // Default: WalletConnect disabled - useLoadFeature always returns an object with stubs
     mockUseLoadFeature.mockReturnValue({
-      $isLoading: false,
       $isDisabled: true,
       $isReady: false,
       WalletConnectWidget: () => null,

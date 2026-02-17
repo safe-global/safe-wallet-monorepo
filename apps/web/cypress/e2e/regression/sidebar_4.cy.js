@@ -15,8 +15,9 @@ describe('Sidebar tests 4', () => {
   })
 
   it('Verify "Manage trusted Safes" button is displayed in the sidebar', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     cy.wait(500)
@@ -24,8 +25,9 @@ describe('Sidebar tests 4', () => {
   })
 
   it('Verify a safe can be removed from the trusted list', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe1short)
@@ -34,9 +36,10 @@ describe('Sidebar tests 4', () => {
   })
 
   it('Verify undeployed safe appears when added to trusted list', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    main.addSafeToTrustedList('11155111', '0x926186108f74dB20BFeb2b6c888E523C78cb7E00')
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe4short)

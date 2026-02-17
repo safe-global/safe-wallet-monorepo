@@ -35,7 +35,6 @@ jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
-    $isLoading: false,
     $isDisabled: false,
     HnAnalysisGroupCard: jest.fn(
       ({ children, delay, highlightedSeverity, analyticsEvent, requestId, 'data-testid': testId }) => (

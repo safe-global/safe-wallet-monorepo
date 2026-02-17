@@ -20,7 +20,7 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
   beforeEach(() => {
     cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_28)
     cy.wait(2000)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set5)
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set5WithSingleSafe)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.multichain)
   })
 
@@ -32,26 +32,18 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('Verify Give name and Add network options are available for a deployed safe', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    wallet.connectSigner(signer)
-    cy.visit(constants.BALANCE_URL + safe)
-
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
-    })
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
-
-    sideBar.clickOnMultichainItemOptionsBtn(0)
+    sideBar.clickOnSafeItemOptionsBtnByIndex(1)
     main.verifyElementsIsVisible([sideBar.safeItemOptionsAddChainBtn, sideBar.safeItemOptionsRenameBtn])
   })
 
   it('Verify Give name and Add network options are available for a CF safe', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
-    main.addSafeToTrustedList('11155111', '0x926186108f74dB20BFeb2b6c888E523C78cb7E00')
-    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
+    cy.reload()
     wallet.connectSigner(signer2)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnSafeItemOptionsBtn(sideBar.undeployedSafe)
@@ -59,24 +51,20 @@ describe('Multichain sidebar tests', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('Verify that removed from side bar CF safe is removed from the address book', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
-    main.addSafeToTrustedList('11155111', '0x926186108f74dB20BFeb2b6c888E523C78cb7E00')
-    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
+    cy.reload()
     wallet.connectSigner(signer2)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.removeSafeItem(sideBar.undeployedSafe)
-    cy.wrap(null, { timeout: 10000 }).should(() => {
-      expect(localStorage.getItem(constants.localStorageKeys.SAFE_v2__addressBook) === '{}').to.be.true
-    })
+    cy.window({ timeout: 10000 })
+      .invoke('localStorage.getItem', constants.localStorageKeys.SAFE_v2__addressBook)
+      .should('equal', '{}')
   })
 
   it('Verify "Add network" in more options menu for the single safe', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    wallet.connectSigner(signer)
-    cy.visit(constants.BALANCE_URL + safe)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.clickOnSafeItemOptionsBtnByIndex(1)

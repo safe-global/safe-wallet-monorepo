@@ -117,17 +117,15 @@
 
 **Properties** (prefixed with `$`):
 
-- `$isLoading: boolean` - Feature code is currently loading
 - `$isDisabled: boolean` - Feature flag is disabled for current chain
 - `$isReady: boolean` - Feature is loaded and enabled
 - `$error: Error | undefined` - Error if loading failed
 
 **State Transitions**:
 
-- Initial: `$isLoading: true`, `$isDisabled: false`, `$isReady: false`
-- Loading: `$isLoading: true`, `$isDisabled: false`, `$isReady: false`
-- Ready: `$isLoading: false`, `$isDisabled: false`, `$isReady: true`
-- Disabled: `$isLoading: false`, `$isDisabled: true`, `$isReady: false`
+- Initial: `$isDisabled: false`, `$isReady: false`
+- Ready: `$isDisabled: false`, `$isReady: true`
+- Disabled: `$isDisabled: true`, `$isReady: false`
 - Error: `$error` set, `$isReady: false`
 
 ## Relationships Summary

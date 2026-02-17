@@ -42,8 +42,6 @@ export const TxBuilderButton = () => {
   const router = useRouter()
   const { setTxFlow } = useContext(TxModalContext)
 
-  if (!txBuilder?.app) return null
-
   const isTxBuilder = typeof txBuilder.link.query === 'object' && router.query.appUrl === txBuilder.link.query?.appUrl
   const onClick = isTxBuilder ? () => setTxFlow(undefined) : undefined
 
@@ -55,7 +53,7 @@ export const TxBuilderButton = () => {
           sx={buttonSx}
           fullWidth
           onClick={onClick}
-          startIcon={<img src={txBuilder.app.iconUrl || ''} height={24} width="auto" alt={txBuilder.app.name} />}
+          startIcon={<img src="/images/apps/tx-builder.png" height={24} width="auto" alt="Transaction Builder" />}
         >
           Transaction Builder
         </Button>
