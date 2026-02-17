@@ -1,4 +1,5 @@
 import * as constants from '../../../support/constants.js'
+import * as main from '../../pages/main.page.js'
 import * as createtx from '../../pages/create_tx.pages.js'
 import * as wallet from '../../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
@@ -25,6 +26,7 @@ describe(
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
+      main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
@@ -34,12 +36,14 @@ describe(
       createtx.clickOnTokenselectorAndSelectSepoliaEth()
       createtx.setMaxAmount()
       cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
+      main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       createtx.verifyRandomStringAddress('Lorem Ipsum')
+      main.verifySkeletonsGone()
     })
   },
 )

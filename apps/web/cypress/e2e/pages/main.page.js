@@ -29,6 +29,11 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/** Waits until all MUI Skeleton placeholders have disappeared, ensuring the page is fully rendered. Used in visual tests before Chromatic captures the screenshot. */
+export function verifySkeletonsGone(timeout = 30000) {
+  cy.get('.MuiSkeleton-root', { timeout }).should('not.exist')
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }

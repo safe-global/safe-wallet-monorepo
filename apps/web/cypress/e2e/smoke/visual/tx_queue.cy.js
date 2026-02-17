@@ -1,4 +1,5 @@
 import * as constants from '../../../support/constants.js'
+import * as main from '../../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -18,6 +19,7 @@ describe(
       })
       cy.wait('@getQueuedTransactions')
       cy.contains('Batch', { timeout: 10000 }).should('be.visible')
+      main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
@@ -27,6 +29,7 @@ describe(
       })
       cy.wait('@getQueuedTransactions')
       cy.contains('Batch', { timeout: 10000 }).should('be.visible').first().click()
+      main.verifySkeletonsGone()
     })
   },
 )
