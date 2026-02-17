@@ -9,6 +9,15 @@ import * as chainHooks from '@/hooks/useChains'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
+jest.mock(
+  'msw-storybook-addon',
+  () => ({
+    initialize: jest.fn(),
+    mswLoader: jest.fn(),
+  }),
+  { virtual: true },
+)
+
 // Seed faker for deterministic test data
 faker.seed(123)
 
