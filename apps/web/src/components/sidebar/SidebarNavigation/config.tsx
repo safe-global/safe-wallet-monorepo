@@ -7,7 +7,7 @@ import TransactionIcon from '@/public/images/sidebar/transactions.svg'
 import ABIcon from '@/public/images/sidebar/address-book.svg'
 import AppsIcon from '@/public/images/apps/apps-icon.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import LinkIcon from '@/public/images/sidebar/link.svg'
+import ApiIcon from '@/public/images/sidebar/api.svg'
 import { Chip } from '@/components/common/Chip'
 import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
@@ -50,7 +50,7 @@ export const navItems: NavItem[] = [
   },
   {
     label: 'API',
-    icon: <SvgIcon component={LinkIcon} inheritViewBox />,
+    icon: <SvgIcon component={ApiIcon} inheritViewBox />,
     href: '',
     externalUrl: 'https://developer.safe.global/login',
     tag: <Chip sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
