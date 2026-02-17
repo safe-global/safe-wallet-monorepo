@@ -4,6 +4,12 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * 3'
+  push:
+    branches:
+      - dev
+    paths:
+      - apps/web/**
+      - packages/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -58,3 +64,28 @@ jobs:
           --title "Happy Path Automated Tests, branch: ${GITHUB_REF_NAME}" \
           --run-description ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
           -f "apps/web/reports/junit-report.xml"
+
+  notify:
+    if: failure() && github.event_name == 'push'
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web happy path tests failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Happy Path Tests (E2E) Failed*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
