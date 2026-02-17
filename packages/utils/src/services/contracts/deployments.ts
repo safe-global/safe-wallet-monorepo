@@ -9,7 +9,6 @@ import {
   getFallbackHandlerDeployment,
   getProxyFactoryDeployment,
   getSignMessageLibDeployment,
-  getSignMessageLibDeployments,
   getCreateCallDeployment,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
@@ -251,15 +250,5 @@ export const getCanonicalMultiSendCallOnlyAddress = (version: SafeState['version
 export const getCanonicalMultiSendAddress = (version: SafeState['version']): string | undefined => {
   const safeVersion = version ?? '1.3.0'
   const deployment = getMultiSendDeployments({ version: safeVersion })
-  return deployment?.deployments.canonical?.address
-}
-
-/**
- * Gets the canonical SignMessageLib address for a given version.
- * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
- */
-export const getCanonicalSignMessageLibAddress = (version: SafeState['version']): string | undefined => {
-  const safeVersion = version ?? '1.3.0'
-  const deployment = getSignMessageLibDeployments({ version: safeVersion })
   return deployment?.deployments.canonical?.address
 }
