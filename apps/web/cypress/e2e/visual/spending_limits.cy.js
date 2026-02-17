@@ -1,9 +1,9 @@
-import * as constants from '../../../support/constants.js'
-import * as main from '../../pages/main.page.js'
-import * as spendinglimit from '../../pages/spending_limits.pages.js'
-import * as owner from '../../pages/owners.pages.js'
-import * as wallet from '../../../support/utils/wallet.js'
-import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as spendinglimit from '../pages/spending_limits.pages.js'
+import * as owner from '../pages/owners.pages.js'
+import * as wallet from '../../support/utils/wallet.js'
+import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 

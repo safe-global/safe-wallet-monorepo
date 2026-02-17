@@ -1,7 +1,7 @@
-import * as constants from '../../../support/constants.js'
-import * as main from '../../pages/main.page.js'
-import * as notifications from '../../pages/notifications.page.js'
-import { getSafes, CATEGORIES } from '../../../support/safes/safesHandler.js'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as notifications from '../pages/notifications.page.js'
+import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 

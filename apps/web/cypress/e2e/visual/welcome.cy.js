@@ -1,7 +1,7 @@
-import * as constants from '../../../support/constants.js'
-import * as main from '../../pages/main.page.js'
-import * as sideBar from '../../pages/sidebar.pages.js'
-import * as ls from '../../../support/localstorage_data.js'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as sideBar from '../pages/sidebar.pages.js'
+import * as ls from '../../support/localstorage_data.js'
 
 describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   it('[VISUAL] Screenshot welcome page', () => {

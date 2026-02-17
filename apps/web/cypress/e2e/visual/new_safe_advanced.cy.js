@@ -1,5 +1,5 @@
-import * as constants from '../../../support/constants.js'
-import * as main from '../../pages/main.page.js'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
 
 describe(
   '[VISUAL] Advanced create safe screenshots',
