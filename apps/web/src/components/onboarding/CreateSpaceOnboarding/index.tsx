@@ -15,11 +15,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 
-interface CreateSpaceOnboardingProps {
-  isOnboarding?: boolean
-}
-
-const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): ReactElement => {
+const CreateSpaceOnboarding = (): ReactElement => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
@@ -52,11 +48,7 @@ const CreateSpaceOnboarding = ({ isOnboarding }: CreateSpaceOnboardingProps): Re
           }),
         )
 
-        if (isOnboarding) {
-          router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
-        } else {
-          router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
-        }
+        router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
       }
 
       if (response.error) {
