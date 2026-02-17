@@ -1,40 +1,20 @@
 import { AppRoutes } from '@/config/routes'
 import { Paper, Typography, Divider, Box, Link, Button } from '@mui/material'
 import css from './styles.module.css'
-import { useRouter } from 'next/router'
-import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useHasSafes } from '@/features/myAccounts'
 import Track from '@/components/common/Track'
-import { useCallback, useEffect, useState } from 'react'
 import WalletLogin from './WalletLogin'
+import { useHomeAuth } from './hooks/useHomeAuth'
+import { useSignInRedirect } from './hooks/useSignInRedirect'
 
 const WelcomeLogin = () => {
-  const router = useRouter()
   const wallet = useWallet()
-  const { isLoaded, hasSafes } = useHasSafes()
-  const [shouldRedirect, setShouldRedirect] = useState(false)
+  const { redirect, spaces } = useSignInRedirect()
 
-  const redirect = useCallback(() => {
-    if (wallet) {
-      if (isLoaded && !hasSafes) {
-        trackEvent(CREATE_SAFE_EVENTS.OPEN_SAFE_CREATION)
-        router.push({ pathname: AppRoutes.newSafe.create, query: router.query })
-      } else {
-        router.push({ pathname: AppRoutes.welcome.accounts, query: router.query })
-      }
-    }
-  }, [hasSafes, isLoaded, router, wallet])
-
-  const onLogin = useCallback(() => {
-    setShouldRedirect(true)
-  }, [])
-
-  useEffect(() => {
-    if (!shouldRedirect) return
-    redirect()
-  }, [redirect, shouldRedirect])
+  const { performAuth, loading } = useHomeAuth({
+    onSuccess: redirect,
+  })
 
   return (
     <Paper className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
@@ -51,7 +31,7 @@ const WelcomeLogin = () => {
 
         <Box className={css.fullWidth}>
           <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-            <WalletLogin onLogin={onLogin} onContinue={redirect} fullWidth />
+            <WalletLogin onLogin={performAuth} onContinue={performAuth} fullWidth isLoading={loading} />
           </Track>
         </Box>
 
@@ -62,7 +42,7 @@ const WelcomeLogin = () => {
                 or
               </Typography>
             </Divider>
-            {hasSafes ? (
+            {spaces && spaces.length > 0 ? (
               <Link href={AppRoutes.welcome.accounts}>
                 <Button disableElevation size="small">
                   View my accounts

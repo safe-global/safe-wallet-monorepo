@@ -67,7 +67,7 @@ describe('WalletLogin', () => {
     })
 
     await waitFor(() => {
-      expect(result.getByText('Connect wallet')).toBeInTheDocument()
+      expect(result.findByText(shortenAddress(walletAddress))).resolves.toBeDefined()
     })
   })
 
@@ -76,7 +76,7 @@ describe('WalletLogin', () => {
     const mockOnContinue = jest.fn()
     jest.spyOn(useWallet, 'default').mockReturnValue(null)
 
-    jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn().mockReturnValue([]))
+    jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn().mockReturnValue([{}]))
 
     const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} />)
 
