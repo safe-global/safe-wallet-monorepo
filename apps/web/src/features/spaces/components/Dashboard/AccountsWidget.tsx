@@ -43,8 +43,8 @@ const AccountsWidget = ({
     <SafeWidget
       title="Accounts"
       action={
-        <Button variant="outline" size="sm" onClick={onAddAccount}>
-          <Plus data-icon="inline-start" className="size-4" />
+        <Button className="px-5 rounded-md" variant="outline" size="sm" onClick={onAddAccount}>
+          <Plus className="size-4" />
           Add account
         </Button>
       }
