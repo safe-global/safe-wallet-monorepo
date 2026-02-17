@@ -85,7 +85,7 @@ const mockChain = {
 
 const mockL2Chain = {
   chainId: '10',
-  chainName: 'Optimism',
+  chainName: 'OP Mainnet',
   shortName: 'oeth',
   l2: true,
 } as any

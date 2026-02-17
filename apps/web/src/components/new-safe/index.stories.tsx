@@ -188,7 +188,7 @@ export const CreateSafeAllSteps: StoryObj = {
                   <MenuItem value="1">Ethereum</MenuItem>
                   <MenuItem value="137">Polygon</MenuItem>
                   <MenuItem value="42161">Arbitrum</MenuItem>
-                  <MenuItem value="10">Optimism</MenuItem>
+                  <MenuItem value="10">OP Mainnet</MenuItem>
                 </Select>
               </FormControl>
               <Alert severity="info" sx={{ mb: 3 }}>
@@ -379,7 +379,7 @@ export const CreateSafeInteractive: StoryObj = {
                   <MenuItem value="1">Ethereum</MenuItem>
                   <MenuItem value="137">Polygon</MenuItem>
                   <MenuItem value="42161">Arbitrum</MenuItem>
-                  <MenuItem value="10">Optimism</MenuItem>
+                  <MenuItem value="10">OP Mainnet</MenuItem>
                 </Select>
               </FormControl>
 

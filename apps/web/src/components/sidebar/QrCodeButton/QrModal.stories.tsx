@@ -152,7 +152,7 @@ export const ArbitrumNetwork: Story = (() => {
 })()
 
 /**
- * QR modal for Optimism network with chain prefix enabled.
+ * QR modal for OP Mainnet network with chain prefix enabled.
  */
 export const OptimismWithPrefix: Story = (() => {
   const setup = createMockStory({
@@ -165,7 +165,7 @@ export const OptimismWithPrefix: Story = (() => {
         data: [
           {
             chainId: '10',
-            chainName: 'Optimism',
+            chainName: 'OP Mainnet',
             shortName: 'oeth',
             nativeCurrency: { symbol: 'ETH', decimals: 18, name: 'Ether' },
             theme: {

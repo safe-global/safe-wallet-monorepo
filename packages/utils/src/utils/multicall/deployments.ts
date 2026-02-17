@@ -64,7 +64,7 @@ export const MULTICALL_DEPLOYMENTS: MulticallDeployment[] = [
     url: 'https://testnet.xterscan.io/address/0xcA11bde05977b3631167028862bE2a173976CA11?tab=contract',
   },
   {
-    name: 'Optimism',
+    name: 'OP Mainnet',
     chainId: 10,
     url: 'https://optimistic.etherscan.io/address/0xcA11bde05977b3631167028862bE2a173976CA11#code',
   },

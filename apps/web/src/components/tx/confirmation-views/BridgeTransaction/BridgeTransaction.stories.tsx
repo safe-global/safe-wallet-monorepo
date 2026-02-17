@@ -14,7 +14,7 @@ const meta = {
             chains: {
               data: [
                 { chainId: '1', chainName: 'Ethereum' },
-                { chainId: '10', chainName: 'Optimism' },
+                { chainId: '10', chainName: 'OP Mainnet' },
               ],
             },
           }}

@@ -38,7 +38,7 @@ describe('NetworkMultiSelector', () => {
       .build(),
     chainBuilder()
       .with({ chainId: '10' })
-      .with({ chainName: 'Optimism' })
+      .with({ chainName: 'OP Mainnet' })
       .with({ shortName: 'oeth' })
       .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
       .with({ recommendedMasterCopyVersion: '1.4.1' })
@@ -84,7 +84,7 @@ describe('NetworkMultiSelector', () => {
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
       expect(queryByText('Ethereum')).toBeVisible()
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
       expect(queryByText('Gnosis Chain')).toBeVisible()
       expect(queryByText('ZkSync Era')).toBeVisible()
       expect(queryByText('Worldchain')).toBeVisible()
@@ -145,7 +145,7 @@ describe('NetworkMultiSelector', () => {
     // Only the selected chains remain visible
     await waitFor(() => {
       expect(getByText('Ethereum')).toBeVisible()
-      expect(getByText('Optimism')).toBeVisible()
+      expect(getByText('OP Mainnet')).toBeVisible()
       expect(getByText('Gnosis Chain')).toBeVisible()
       expect(queryByText('Worldchain')).toBeNull()
     })
@@ -158,7 +158,7 @@ describe('NetworkMultiSelector', () => {
     // No more chains are visible
     await waitFor(() => {
       expect(queryByText('Ethereum')).toBeNull()
-      expect(queryByText('Optimism')).toBeNull()
+      expect(queryByText('OP Mainnet')).toBeNull()
       expect(queryByText('Gnosis Chain')).toBeNull()
       expect(queryByText('Worldchain')).toBeNull()
       expect(queryByText('Select at least one network')).toBeVisible()
@@ -183,7 +183,7 @@ describe('NetworkMultiSelector', () => {
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
       expect(queryByText('Ethereum')).toBeVisible()
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
       expect(queryByText('Gnosis Chain')).toBeVisible()
       expect(queryByText('ZkSync Era')).toBeVisible()
       expect(queryByText('Worldchain')).toBeVisible()
@@ -231,19 +231,19 @@ describe('NetworkMultiSelector', () => {
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
       expect(queryByText('Ethereum')).toBeVisible()
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
       expect(queryByText('Gnosis Chain')).toBeVisible()
       expect(queryByText('ZkSync Era')).toBeVisible()
       expect(queryByText('Worldchain')).toBeVisible()
     })
 
-    // Select first Optimism and Gnosis Chain
+    // Select first OP Mainnet and Gnosis Chain
     act(() => {
-      userEvent.click(getByText('Optimism'))
+      userEvent.click(getByText('OP Mainnet'))
       userEvent.click(getByText('Gnosis Chain'))
     })
 
-    // As we were connected to Ethereum and had only one selected network different from Ethereum, we should switch the chain to Optimism
+    // As we were connected to Ethereum and had only one selected network different from Ethereum, we should switch the chain to OP Mainnet
     await waitFor(() => {
       expect(mockRouterReplace).toHaveBeenCalledWith({
         pathname: '/new-safe/create',
@@ -272,7 +272,7 @@ describe('NetworkMultiSelector', () => {
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
       expect(queryByText('Ethereum')).toBeVisible()
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
       expect(queryByText('Gnosis Chain')).toBeVisible()
       expect(queryByText('ZkSync Era')).toBeVisible()
       expect(queryByText('Worldchain')).toBeVisible()
@@ -332,12 +332,12 @@ describe('NetworkMultiSelector', () => {
       const allOptions = getAllByRole('option')
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
     })
 
-    // Select Optimism to trigger a chain switch
+    // Select OP Mainnet to trigger a chain switch
     act(() => {
-      userEvent.click(getByText('Optimism'))
+      userEvent.click(getByText('OP Mainnet'))
     })
 
     await waitFor(() => {
@@ -377,12 +377,12 @@ describe('NetworkMultiSelector', () => {
       const allOptions = getAllByRole('option')
       expect(allOptions).toHaveLength(5)
       allOptions.forEach((option) => expect(option).toHaveAttribute('aria-disabled', 'false'))
-      expect(queryByText('Optimism')).toBeVisible()
+      expect(queryByText('OP Mainnet')).toBeVisible()
     })
 
-    // Select Optimism to trigger a chain switch
+    // Select OP Mainnet to trigger a chain switch
     act(() => {
-      userEvent.click(getByText('Optimism'))
+      userEvent.click(getByText('OP Mainnet'))
     })
 
     await waitFor(() => {

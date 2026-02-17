@@ -10,6 +10,17 @@ import type {
   FetchArgs,
 } from '@reduxjs/toolkit/query'
 
+// Override chain display names where the API name differs from the canonical name
+const CHAIN_NAME_OVERRIDES: Record<string, string> = {
+  '10': 'OP Mainnet',
+}
+
+const applyChainNameOverrides = (chains: ChainInfo[]): ChainInfo[] =>
+  chains.map((chain) => {
+    const override = CHAIN_NAME_OVERRIDES[chain.chainId]
+    return override ? { ...chain, chainName: override } : chain
+  })
+
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
 
@@ -42,7 +53,7 @@ const getChainsConfigs = async (
     return getChainsConfigs(api, nextUrl, nextResults)
   }
 
-  return { data: chainsAdapter.setAll(initialState, nextResults) }
+  return { data: chainsAdapter.setAll(initialState, applyChainNameOverrides(nextResults)) }
 }
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({

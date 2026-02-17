@@ -475,7 +475,7 @@ const CONFIG_SERVICE_CHAINS: Chain[] = [
     transactionService: 'https://safe-transaction.optimism.gnosis.io',
     contractAddresses,
     chainId: '10',
-    chainName: 'Optimism',
+    chainName: 'OP Mainnet',
     chainLogoUri: '',
     shortName: 'oeth',
     l2: true,
