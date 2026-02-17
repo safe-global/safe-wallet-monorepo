@@ -27,14 +27,18 @@ jest.mock('@datadog/browser-logs', () => ({
   },
 }))
 
-jest.mock('@datadog/browser-rum', () => ({
-  datadogRum: {
-    init: jest.fn(),
-    addError: jest.fn(),
-    setGlobalContextProperty: jest.fn(),
-    getInitConfiguration: jest.fn(),
-  },
-}))
+jest.mock(
+  '@datadog/browser-rum',
+  () => ({
+    datadogRum: {
+      init: jest.fn(),
+      addError: jest.fn(),
+      setGlobalContextProperty: jest.fn(),
+      getInitConfiguration: jest.fn(),
+    },
+  }),
+  { virtual: true },
+)
 
 // Mock Sentry SDK to prevent it from loading during tests
 jest.mock('@sentry/react', () => ({
