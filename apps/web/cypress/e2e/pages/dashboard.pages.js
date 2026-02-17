@@ -24,8 +24,12 @@ export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {
+  cy.intercept('GET', constants.queuedEndpoint).as('queuedTransactions')
   cy.get(pendingTxItem).eq(index).click()
+  cy.location('pathname', { timeout: 30000 }).should('eq', '/transactions/tx')
+  cy.wait('@queuedTransactions', { timeout: 30000 })
   cy.get(singleTxDetailsHeader).should('be.visible')
+  cy.get(createtx.transactionItem, { timeout: 30000 }).should('be.visible')
 }
 
 export function verifySingleTxItem(data) {
@@ -59,7 +63,11 @@ export function verifyEmptyTxSection() {
 }
 
 export function clickOnViewAllBtn() {
+  cy.intercept('GET', constants.queuedEndpoint).as('queuedTransactions')
   cy.get(viewAllLink).click()
+  cy.location('pathname', { timeout: 30000 }).should('eq', '/transactions/queue')
+  cy.wait('@queuedTransactions', { timeout: 30000 })
+  cy.get(createtx.transactionItem, { timeout: 30000 }).should('be.visible')
 }
 
 export function pinAppByIndex(index) {
