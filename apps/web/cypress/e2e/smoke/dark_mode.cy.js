@@ -21,7 +21,7 @@ describe('[SMOKE] Dark mode tests', { defaultCommandTimeout: 60000 }, () => {
   it('[SMOKE] Verify the dashboard is displayed in dark mode', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
-    cy.contains('Overview', { timeout: 30000 }).should('be.visible')
+    cy.contains('Top assets', { timeout: 30000 }).should('be.visible')
     cy.get('html', { timeout: 10000 }).should('have.attr', 'data-theme', 'dark')
   })
 
