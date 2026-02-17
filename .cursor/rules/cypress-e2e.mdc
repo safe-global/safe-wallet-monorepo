@@ -458,14 +458,11 @@ it('[Category] Verify that [behavior] - [ID]', () => {
 
 ## Common Mistakes
 
-1. **Raw selectors in test files** — Always use page object functions/exports. Search `cypress/e2e/pages/*.pages.js` before writing `cy.get('[data-testid="..."]')` in a test.
+1. **Hardcoded selectors in test files** — Never use raw `data-testid` strings or CSS selectors directly in `.cy.js` files. Always use page object constants/functions from `cypress/e2e/pages/*.pages.js`. If a selector doesn't exist yet, add it to the correct page object file first.
+   - `cy.get('[data-testid="safe-list-item"]')` → `cy.get(sideBar.sideSafeListItem)`
    - `cy.get('[data-testid="apps-list"]')` → `cy.get(safeapps.safeAppsList)`
    - `cy.get('input[id="search-by-name"]').type(...)` → `safeapps.typeAppName(...)`
-   - `cy.contains(/no Safe Apps found/i)` → `safeapps.verifyNoAppsTextPresent()`
-   - `cy.get('[data-testid="safe-list-item"]')` → `sideBar.verifySafeCount(1)`
-   - `cy.contains('Overview')` → `dashboard.verifyOverviewWidgetData()`
-   - Manual notifications checks → `notifications.checkCoreElementsVisible()`
-2. **Test naming** — Must be "Verify that ...", not "Verify the ..." or other formats.
+2. **Test naming** — Smoke tests: `[SMOKE] Verify that ...`. Visual tests: `[VISUAL] Screenshot ...`.
 3. **Visual tests in wrong folder** — Visual regression tests go in `smoke/visual/`, not `smoke/`. They only run in Chromatic E2E workflow, not in smoke CI.
 4. **Import paths after moving** — Tests in `smoke/visual/` need an extra `../` level for relative imports to pages and support.
 
