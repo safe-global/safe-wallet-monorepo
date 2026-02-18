@@ -3,6 +3,7 @@ import * as main from '../pages/main.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -18,6 +19,7 @@ describe(
     })
 
     beforeEach(() => {
+      mockVisualTestApis()
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
       wallet.connectSigner(signer)
       createtx.clickOnNewtransactionBtn()

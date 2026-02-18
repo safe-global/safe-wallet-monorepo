@@ -2,8 +2,13 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import * as ls from '../../support/localstorage_data.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
+  beforeEach(() => {
+    mockVisualTestApis()
+  })
+
   it('[VISUAL] Screenshot welcome page', () => {
     cy.visit(constants.welcomeUrl)
     cy.contains('Own your assets onchain securely', { timeout: 30000 }).should('be.visible')

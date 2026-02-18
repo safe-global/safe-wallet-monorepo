@@ -3,6 +3,7 @@ import * as main from '../pages/main.page.js'
 import * as batch from '../pages/batches.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -12,6 +13,10 @@ describe(
   () => {
     before(async () => {
       staticSafes = await getSafes(CATEGORIES.static)
+    })
+
+    beforeEach(() => {
+      mockVisualTestApis()
     })
 
     it('[VISUAL] Screenshot empty batch list', () => {

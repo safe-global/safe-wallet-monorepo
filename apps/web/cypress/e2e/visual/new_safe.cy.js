@@ -1,8 +1,13 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as safe from '../pages/load_safe.pages.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 describe('[VISUAL] New safe form screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
+  beforeEach(() => {
+    mockVisualTestApis()
+  })
+
   it('[VISUAL] Screenshot create new safe form', () => {
     cy.visit(constants.createNewSafeSepoliaUrl)
     cy.contains('Create new Safe Account', { timeout: 30000 }).should('be.visible')
