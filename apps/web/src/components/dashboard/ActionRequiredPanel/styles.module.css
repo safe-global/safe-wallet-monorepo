@@ -34,8 +34,3 @@
 .warningsContainer :global(> *) {
   margin: 0 !important;
 }
-
-/* Ensure Grid items from RecoveryHeader render properly */
-.warningsContainer :global(.MuiGrid-item) {
-  padding: 0;
-}
