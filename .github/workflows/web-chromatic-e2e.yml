@@ -10,7 +10,7 @@ concurrency:
 jobs:
   e2e:
     env:
-      NEXT_PUBLIC_COMMIT_HASH: '0000000'
+      VISUAL_REGRESSION_BUILD: 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true

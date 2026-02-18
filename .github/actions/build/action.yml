@@ -24,7 +24,9 @@ runs:
     - name: Set environment variables
       shell: bash
       run: |
-        if [ -z "$NEXT_PUBLIC_COMMIT_HASH" ]; then
+        if [ "$VISUAL_REGRESSION_BUILD" = "true" ]; then
+          echo "NEXT_PUBLIC_COMMIT_HASH=vistest" >> $GITHUB_ENV
+        else
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
         fi
