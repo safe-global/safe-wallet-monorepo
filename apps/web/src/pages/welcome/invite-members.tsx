@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import InviteMembersOnboarding from '@/components/onboarding/InviteMembersOnboarding'
+import InviteMembersOnboarding from '@/features/spaces/components/InviteMembersOnboarding'
 
 const InviteMembersPage: NextPage = () => {
   return (

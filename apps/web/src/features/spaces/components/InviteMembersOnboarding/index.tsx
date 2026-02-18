@@ -1,8 +1,11 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { ChevronLeft, Plus, X } from 'lucide-react'
+import { isAddress } from 'ethers'
+import { blo } from 'blo'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { validateAddress } from '@safe-global/utils/utils/validation'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -16,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
-import StepIndicator from '@/components/onboarding/StepIndicator'
+import StepIndicator from '@/features/spaces/components/StepIndicator'
 
 const ONBOARDING_STEP = 3
 const TOTAL_STEPS = 4
@@ -43,47 +46,83 @@ interface MemberInviteRowProps {
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, canRemove, onRemove }: MemberInviteRowProps) => (
-  <div className="flex items-center gap-2">
-    <Input
-      {...register(`members.${index}.address`, {
-        required: index === 0,
-      })}
-      placeholder="Type wallet address"
-      className="h-11 flex-1 rounded-lg bg-card px-4"
-      data-testid={`invite-address-input-${index}`}
-    />
+const IDENTICON_SIZE = 32
 
-    <Controller
-      control={control}
-      name={`members.${index}.role`}
-      render={({ field }) => (
-        <Select value={field.value} onValueChange={field.onChange}>
-          <SelectTrigger className="h-11 min-w-[120px] rounded-lg bg-card">
-            <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
-            <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
-          </SelectContent>
-        </Select>
+const AddressIdenticon = ({ address }: { address: string }) => {
+  const style = useMemo(() => {
+    try {
+      if (!isAddress(address)) return null
+      return {
+        backgroundImage: `url(${blo(address as `0x${string}`)})`,
+        width: `${IDENTICON_SIZE}px`,
+        height: `${IDENTICON_SIZE}px`,
+      }
+    } catch {
+      return null
+    }
+  }, [address])
+
+  if (!style) {
+    return <div className="size-8 shrink-0 rounded-full bg-muted" />
+  }
+
+  return <div className="size-8 shrink-0 rounded-full bg-cover" style={style} />
+}
+
+const MemberInviteRow = ({ index, control, register, canRemove, onRemove }: MemberInviteRowProps) => {
+  const addressValue = useWatch({ control, name: `members.${index}.address` })
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative flex-1">
+        <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+          <AddressIdenticon address={addressValue || ''} />
+        </div>
+        <Input
+          {...register(`members.${index}.address`, {
+            required: index === 0,
+            validate: (value) => {
+              if (!value.trim()) return undefined
+              return validateAddress(value)
+            },
+          })}
+          placeholder="Type wallet address"
+          className="h-11 rounded-lg bg-card pl-12 pr-4"
+          data-testid={`invite-address-input-${index}`}
+        />
+      </div>
+
+      <Controller
+        control={control}
+        name={`members.${index}.role`}
+        render={({ field }) => (
+          <Select value={field.value} onValueChange={field.onChange}>
+            <SelectTrigger className="h-11 min-w-[120px] rounded-lg bg-card">
+              <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
+              <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      />
+
+      {canRemove && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={onRemove}
+          aria-label="Remove member"
+          data-testid={`remove-member-${index}`}
+        >
+          <X className="size-4" />
+        </Button>
       )}
-    />
-
-    {canRemove && (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        onClick={onRemove}
-        aria-label="Remove member"
-        data-testid={`remove-member-${index}`}
-      >
-        <X className="size-4" />
-      </Button>
-    )}
-  </div>
-)
+    </div>
+  )
+}
 
 const InviteMembersOnboarding = (): ReactElement => {
   const router = useRouter()

@@ -1,7 +1,9 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import { ChevronLeft, Plus, X } from 'lucide-react'
+import { isAddress } from 'ethers'
+import { blo } from 'blo'
 import { validateAddress } from '@safe-global/utils/utils/validation'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -14,7 +16,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import StepIndicator from '@/components/onboarding/StepIndicator'
+import StepIndicator from '@/features/spaces/components/StepIndicator'
 
 const ONBOARDING_STEP = 4
 const TOTAL_STEPS = 4
@@ -31,14 +33,39 @@ interface AddressBookFormValues {
 
 interface AddressBookEntryRowProps {
   index: number
+  control: ReturnType<typeof useForm<AddressBookFormValues>>['control']
   register: ReturnType<typeof useForm<AddressBookFormValues>>['register']
   errors: ReturnType<typeof useForm<AddressBookFormValues>>['formState']['errors']
   canRemove: boolean
   onRemove: () => void
 }
 
-const AddressBookEntryRow = ({ index, register, errors, canRemove, onRemove }: AddressBookEntryRowProps) => {
+const IDENTICON_SIZE = 32
+
+const AddressIdenticon = ({ address }: { address: string }) => {
+  const style = useMemo(() => {
+    try {
+      if (!isAddress(address)) return null
+      return {
+        backgroundImage: `url(${blo(address as `0x${string}`)})`,
+        width: `${IDENTICON_SIZE}px`,
+        height: `${IDENTICON_SIZE}px`,
+      }
+    } catch {
+      return null
+    }
+  }, [address])
+
+  if (!style) {
+    return <div className="size-8 shrink-0 rounded-full bg-muted" />
+  }
+
+  return <div className="size-8 shrink-0 rounded-full bg-cover" style={style} />
+}
+
+const AddressBookEntryRow = ({ index, control, register, errors, canRemove, onRemove }: AddressBookEntryRowProps) => {
   const entryErrors = errors.entries?.[index]
+  const addressValue = useWatch({ control, name: `entries.${index}.address` })
 
   return (
     <div className="flex flex-col gap-1">
@@ -52,17 +79,22 @@ const AddressBookEntryRow = ({ index, register, errors, canRemove, onRemove }: A
           data-testid={`address-book-name-input-${index}`}
         />
 
-        <Input
-          {...register(`entries.${index}.address`, {
-            validate: (value) => {
-              if (!value.trim()) return undefined
-              return validateAddress(value)
-            },
-          })}
-          placeholder="Address"
-          className="h-11 min-w-0 flex-[2] rounded-lg bg-card px-4"
-          data-testid={`address-book-address-input-${index}`}
-        />
+        <div className="relative min-w-0 flex-[2]">
+          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            <AddressIdenticon address={addressValue || ''} />
+          </div>
+          <Input
+            {...register(`entries.${index}.address`, {
+              validate: (value) => {
+                if (!value.trim()) return undefined
+                return validateAddress(value)
+              },
+            })}
+            placeholder="Address"
+            className="h-11 rounded-lg bg-card pl-12 pr-4"
+            data-testid={`address-book-address-input-${index}`}
+          />
+        </div>
 
         {canRemove && (
           <Button
@@ -191,6 +223,7 @@ const AddAddressBookOnboarding = (): ReactElement => {
               <AddressBookEntryRow
                 key={field.id}
                 index={index}
+                control={control}
                 register={register}
                 errors={errors}
                 canRemove={fields.length > 1}
