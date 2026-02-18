@@ -1,6 +1,6 @@
 # Visual Test Coverage Report
 
-**59 screenshots** across **33 test files** covering **all testable pages**
+**58 screenshots** across **33 test files** covering **all testable pages**
 
 ## Covered pages
 
