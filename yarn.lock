@@ -28347,6 +28347,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^12.34.0":
+  version: 12.34.1
+  resolution: "framer-motion@npm:12.34.1"
+  dependencies:
+    motion-dom: "npm:^12.34.1"
+    motion-utils: "npm:^12.29.2"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10/406ba84c1b6ecb33e9a14793039f2c71fabea7327bd3c3c772dcd468dadbae9ae1c37750cfdbe6cd604dce8d0537de37014f541490203d4711ef6b35dc82b3c4
+  languageName: node
+  linkType: hard
+
 "framer-motion@npm:^6.5.1":
   version: 6.5.1
   resolution: "framer-motion@npm:6.5.1"
@@ -29405,13 +29427,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hono@npm:^4.11.4":
-  version: 4.11.9
-  resolution: "hono@npm:4.11.9"
-  checksum: 10/4332c09f446782da981b488e206dc4509bbd812f795f27cf532e3342f6f2e418cad5549859e35725cc0f8029ecb8f19ef74a7fc94a11f91c3988540c3176ca86
-  languageName: node
-  linkType: hard
-
 "hosted-git-info@npm:^2.1.4":
   version: 2.8.9
   resolution: "hosted-git-info@npm:2.8.9"
@@ -30063,13 +30078,6 @@ __metadata:
   peerDependencies:
     reflect-metadata: ~0.2.2
   checksum: 10/3ce73d09611a947e601d86f025517d83c5187c1b8287c244d8955f297ba2850fbdffaa509a5e5c7f98617875cea68fde7d4ca23775b68edca4c197222cf9913e
-  languageName: node
-  linkType: hard
-
-"ip-address@npm:10.0.1":
-  version: 10.0.1
-  resolution: "ip-address@npm:10.0.1"
-  checksum: 10/09731acda32cd8e14c46830c137e7e5940f47b36d63ffb87c737331270287d631cf25aa95570907a67d3f919fdb25f4470c404eda21e62f22e0a55927f4dd0fb
   languageName: node
   linkType: hard
 
@@ -35312,12 +35320,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"motion-dom@npm:^12.34.0":
-  version: 12.34.0
-  resolution: "motion-dom@npm:12.34.0"
+"motion-dom@npm:^12.34.1":
+  version: 12.34.1
+  resolution: "motion-dom@npm:12.34.1"
   dependencies:
     motion-utils: "npm:^12.29.2"
-  checksum: 10/017048ea7c53171711cf9fd2f446b7901c7ab321f1337993e9e8e26673ce188f3268be6acea32f9b8c936ca91f7fe656cecb42ae91d3043cd4a04ef6d84d2cd9
+  checksum: 10/776ee4350307894a7f4328a0a0436f4e117fd10972bc2c50baf384c4a93030c80eacbd122f93a63b840b162786291c49895521a75e69835733e9c067f02e881f
   languageName: node
   linkType: hard
 
