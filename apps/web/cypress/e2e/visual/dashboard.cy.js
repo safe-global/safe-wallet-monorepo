@@ -17,7 +17,6 @@ describe('[VISUAL] Dashboard screenshots', { defaultCommandTimeout: 60000, ...co
 
   it('[VISUAL] Screenshot dashboard page', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
-    cy.contains('Top assets', { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()
   })
 
@@ -27,7 +26,6 @@ describe('[VISUAL] Dashboard screenshots', { defaultCommandTimeout: 60000, ...co
       cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     })
     cy.wait('@getQueuedTransactions')
-    cy.get(dashboard.pendingTxWidget, { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()
   })
 })

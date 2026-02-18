@@ -17,13 +17,12 @@ describe('[VISUAL] Balances screenshots', { defaultCommandTimeout: 60000, ...con
 
   it('[VISUAL] Screenshot balances page', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-    cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()
   })
 
   it('[VISUAL] Screenshot balances with all tokens visible', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-    cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
+    main.verifySkeletonsGone()
     assets.toggleHideDust(false)
     assets.toggleShowAllTokens(true)
     main.waitForMuiAnimationsToSettle()

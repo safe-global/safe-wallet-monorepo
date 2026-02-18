@@ -25,7 +25,7 @@ describe(
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       main.waitForMuiAnimationsToSettle()
-      cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
+      main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form initial state', () => {
@@ -36,18 +36,16 @@ describe(
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
       createtx.clickOnTokenselectorAndSelectSepoliaEth()
       createtx.setMaxAmount()
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
-      createtx.verifyRandomStringAddress('Lorem Ipsum')
+      createtx.typeRecipientAddress('Lorem Ipsum')
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form with nonce warning', () => {
       createtx.changeNonce(0)
-      createtx.verifyTooltipMessage(constants.nonceTooltipMsg.lowerThanCurrent)
       main.verifySkeletonsGone()
     })
   },

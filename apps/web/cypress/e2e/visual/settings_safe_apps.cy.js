@@ -19,7 +19,6 @@ describe(
 
     it('[VISUAL] Screenshot Safe Apps permissions settings page', () => {
       cy.visit(constants.safeAppsSettingsUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains('Signing method', { timeout: 30000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
   },

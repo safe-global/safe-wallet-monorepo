@@ -15,7 +15,7 @@ const MASTER_COPIES = [
 ]
 
 /**
- * Mocks all CGW API endpoints for deterministic visual regression screenshots.
+ * Mocks volatile CGW API endpoints for deterministic visual regression screenshots.
  * Uses shared MSW fixtures from config/test/msw/fixtures/ (via symlink).
  * Call in beforeEach() of visual tests.
  * Per-test cy.intercept() calls registered AFTER this one override these defaults
