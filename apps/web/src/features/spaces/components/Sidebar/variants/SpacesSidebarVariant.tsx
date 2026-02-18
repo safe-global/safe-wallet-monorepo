@@ -17,7 +17,12 @@ import type { SpaceSelectorProps } from '../types'
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
 
-export const SpacesSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
+export const SpacesSidebarVariant = ({
+  spaceName = '',
+  spaceInitial,
+  selectedSpace,
+  spaces,
+}: SpaceSelectorProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
   return (
     <SidebarContent>

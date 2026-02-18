@@ -10,7 +10,13 @@ interface SidebarProps extends SpaceSelectorProps {
   type: SidebarVariantType
 }
 
-export const EnhancedSidebar = ({ type, spaceName, spaceInitial }: SidebarProps): ReactElement => {
+export const EnhancedSidebar = ({
+  type,
+  spaceName,
+  spaceInitial,
+  selectedSpace,
+  spaces,
+}: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -18,7 +24,7 @@ export const EnhancedSidebar = ({ type, spaceName, spaceInitial }: SidebarProps)
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant spaceName={spaceName} spaceInitial={spaceInitial} />
+      <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
       <SidebarCommonFooter />
     </Sidebar>
   )
