@@ -27,8 +27,8 @@
   gap: var(--space-1);
 }
 
-/* Override MUI Typography font-size for all Typography elements in message */
-.message :global .MuiTypography-root {
+/* Ensure body text uses 14px font-size */
+.message :global .MuiTypography-body2 {
   font-size: 14px;
 }
 
