@@ -476,14 +476,12 @@ export function verifyNumberOfExternalLinks(number) {
 }
 
 export function clickOnTransactionItemByName(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .then(($elements) => {
-      if (token) {
-        $elements = $elements.filter(':contains("' + token + '")')
-      }
-      cy.wrap($elements.first()).click({ force: true })
-    })
+  let selector = `${transactionItem}:contains("${name}")`
+  if (token) {
+    selector += `:contains("${token}")`
+  }
+
+  cy.get(selector, { timeout: 30000 }).first().scrollIntoView().should('be.visible').click({ force: true })
 }
 
 export function clickOnTransactionItemByIndex(index) {
