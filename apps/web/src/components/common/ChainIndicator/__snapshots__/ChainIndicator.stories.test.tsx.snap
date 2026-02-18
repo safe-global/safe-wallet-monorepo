@@ -9,26 +9,9 @@ exports[`./ChainIndicator.stories Default 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -40,7 +23,12 @@ exports[`./ChainIndicator.stories HideUnknown 1`] = `
   <div
     class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
-  />
+  >
+    <span
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
+  </div>
 </div>
 `;
 
@@ -53,26 +41,9 @@ exports[`./ChainIndicator.stories Inline 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="inlineIndicator withLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -86,26 +57,9 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="36"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="36"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -119,20 +73,9 @@ exports[`./ChainIndicator.stories NoLogo 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator"
-      data-testid="chain-logo"
-      style="background-color: rgb(98, 126, 234); color: rgb(255, 255, 255);"
-    >
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -146,17 +89,9 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo onlyLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="24"
-      />
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -170,26 +105,9 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo responsive"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -203,26 +121,9 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="16"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="16"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -236,24 +137,9 @@ exports[`./ChainIndicator.stories UnknownChain 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
-    >
-      <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
-        focusable="false"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Unknown network
-        </span>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
@@ -267,38 +153,9 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
     style="--Paper-shadow: none;"
   >
     <span
-      class="indicator withLogo"
-      data-testid="chain-logo"
-    >
-      <img
-        alt="Ethereum Logo"
-        height="24"
-        loading="lazy"
-        src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
-        width="24"
-      />
-      <div
-        class="MuiStack-root mui-style-nen11g-MuiStack-root"
-      >
-        <span
-          class="name"
-        >
-          Ethereum
-        </span>
-        <p
-          class="MuiTypography-root MuiTypography-body1 mui-style-10xjelx-MuiTypography-root"
-        >
-          <span
-            aria-label="$ 1,234.56"
-            class=""
-            data-mui-internal-clone-element="true"
-            style="white-space: nowrap;"
-          >
-            $ 1,235
-          </span>
-        </p>
-      </div>
-    </span>
+      class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse mui-style-18ae3nr-MuiSkeleton-root"
+      style="width: 100%; height: 22px;"
+    />
   </div>
 </div>
 `;
