@@ -24,7 +24,7 @@
     "@safe-global/safe-apps-provider": "^0.18.5",
     "@safe-global/safe-apps-react-sdk": "^4.7.2",
     "@safe-global/safe-apps-sdk": "^9.1.0",
-    "@safe-global/safe-deployments": "^1.37.49",
+    "@safe-global/safe-deployments": "^1.37.51",
     "@safe-global/safe-gateway-typescript-sdk": "^3.22.9",
     "axios": "^1.13.5",
     "ethereum-blockies-base64": "^1.0.2",

@@ -29,7 +29,7 @@ jobs:
       - uses: ./.github/actions/yarn
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@v4.1.21
+        uses: CatChen/eslint-suggestion-action@v4.1.23
         with:
           request-changes: true
           fail-check: true

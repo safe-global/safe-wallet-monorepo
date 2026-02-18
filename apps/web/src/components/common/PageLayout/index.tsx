@@ -43,6 +43,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
+  useRouterGuard({ useGuard: useFlowActivationGuard })
+
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
 

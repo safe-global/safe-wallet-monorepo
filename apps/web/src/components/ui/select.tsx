@@ -49,10 +49,12 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 function SelectTrigger({
   className,
   size = 'default',
+  iconWrapperClassName,
   children,
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: 'sm' | 'default'
+  iconWrapperClassName?: string
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -65,7 +67,11 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon render={<ChevronDownIcon className="text-muted-foreground size-4 pointer-events-none" />} />
+      <span className={cn('flex items-center shrink-0', iconWrapperClassName)}>
+        <SelectPrimitive.Icon
+          render={<ChevronDownIcon className="text-muted-foreground size-4 pointer-events-none" />}
+        />
+      </span>
     </SelectPrimitive.Trigger>
   )
 }
@@ -78,9 +84,20 @@ function SelectContent({
   align = 'center',
   alignOffset = 0,
   alignItemWithTrigger = true,
+  collisionBoundary,
+  collisionAvoidance,
   ...props
 }: SelectPrimitive.Popup.Props &
-  Pick<SelectPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset' | 'alignItemWithTrigger'>) {
+  Pick<
+    SelectPrimitive.Positioner.Props,
+    | 'align'
+    | 'alignOffset'
+    | 'side'
+    | 'sideOffset'
+    | 'alignItemWithTrigger'
+    | 'collisionBoundary'
+    | 'collisionAvoidance'
+  >) {
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Positioner
@@ -89,6 +106,8 @@ function SelectContent({
         align={align}
         alignOffset={alignOffset}
         alignItemWithTrigger={alignItemWithTrigger}
+        {...(collisionBoundary !== undefined && { collisionBoundary })}
+        {...(collisionAvoidance !== undefined && { collisionAvoidance })}
         className="isolate z-50"
       >
         <SelectPrimitive.Popup

@@ -1,6 +1,9 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
 import safes from '../fixtures/safes/static.js'
 
+// Viewport for visual regression (Chromatic) smoke tests — 1920x1080 (Full HD)
+export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
+
 export const RECIPIENT_ADDRESS = '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC'
 export const GOERLI_SAFE_APPS_SAFE = 'gor:0x168ca275d1103cb0a30980813140053c7566932F'
 export const GOERLI_TEST_SAFE = 'gor:0x97d314157727D517A706B5D08507A1f9B44AaaE9'
@@ -98,7 +101,7 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 export const spacesEndpoint = '**/**/spaces*'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '/**/safe-apps*'
-export const transactionHistoryEndpoint = '**/history**'
+export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'

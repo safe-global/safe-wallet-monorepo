@@ -8,6 +8,7 @@ describe('settingsSlice', () => {
     themePreference: 'auto',
     currency: 'usd',
     tokenList: TOKEN_LISTS.TRUSTED,
+    hideDust: true,
     env: {
       rpc: {},
       tenderly: {
