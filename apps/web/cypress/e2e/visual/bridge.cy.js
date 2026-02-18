@@ -10,16 +10,7 @@ describe('[VISUAL] Bridge page screenshots', { defaultCommandTimeout: 60000, ...
   })
 
   it('[VISUAL] Screenshot bridge page', () => {
-    // Intercept chain config to enable BRIDGE feature
-    cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
-      req.continue((res) => {
-        if (res.body && res.body.features) {
-          if (!res.body.features.includes(constants.chainFeatures.bridge)) {
-            res.body.features.push(constants.chainFeatures.bridge)
-          }
-        }
-      })
-    })
+    main.enableChainFeature(constants.chainFeatures.bridge)
     cy.visit(constants.bridgeUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.verifySkeletonsGone()
   })

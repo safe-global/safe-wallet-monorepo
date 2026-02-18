@@ -10,16 +10,7 @@ describe('[VISUAL] Earn page screenshots', { defaultCommandTimeout: 60000, ...co
   })
 
   it('[VISUAL] Screenshot earn page', () => {
-    // Intercept chain config to enable EARN feature
-    cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
-      req.continue((res) => {
-        if (res.body && res.body.features) {
-          if (!res.body.features.includes(constants.chainFeatures.earn)) {
-            res.body.features.push(constants.chainFeatures.earn)
-          }
-        }
-      })
-    })
+    main.enableChainFeature(constants.chainFeatures.earn)
     cy.visit(constants.earnUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.verifySkeletonsGone()
   })

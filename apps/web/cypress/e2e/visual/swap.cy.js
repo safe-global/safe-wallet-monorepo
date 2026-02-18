@@ -10,16 +10,7 @@ describe('[VISUAL] Swap page screenshots', { defaultCommandTimeout: 60000, ...co
   })
 
   it('[VISUAL] Screenshot swap page', () => {
-    // Intercept chain config to enable NATIVE_SWAPS feature
-    cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
-      req.continue((res) => {
-        if (res.body && res.body.features) {
-          if (!res.body.features.includes(constants.chainFeatures.nativeSwaps)) {
-            res.body.features.push(constants.chainFeatures.nativeSwaps)
-          }
-        }
-      })
-    })
+    main.enableChainFeature(constants.chainFeatures.nativeSwaps)
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.verifySkeletonsGone()
   })

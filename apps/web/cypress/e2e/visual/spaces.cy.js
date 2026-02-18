@@ -4,16 +4,7 @@ import * as main from '../pages/main.page.js'
 const SPACE_ID = '1'
 
 function setupSpacesAuth() {
-  // Enable SPACES feature flag via chain config intercept
-  cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
-    req.continue((res) => {
-      if (res.body && res.body.features) {
-        if (!res.body.features.includes(constants.chainFeatures.spaces)) {
-          res.body.features.push(constants.chainFeatures.spaces)
-        }
-      }
-    })
-  })
+  main.enableChainFeature(constants.chainFeatures.spaces)
 
   // Mock auth state in localStorage (session expires 24h from now)
   const authData = {

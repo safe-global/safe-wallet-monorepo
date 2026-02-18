@@ -10,16 +10,7 @@ describe('[VISUAL] Stake page screenshots', { defaultCommandTimeout: 60000, ...c
   })
 
   it('[VISUAL] Screenshot stake page', () => {
-    // Intercept chain config to enable STAKING feature
-    cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
-      req.continue((res) => {
-        if (res.body && res.body.features) {
-          if (!res.body.features.includes(constants.chainFeatures.staking)) {
-            res.body.features.push(constants.chainFeatures.staking)
-          }
-        }
-      })
-    })
+    main.enableChainFeature(constants.chainFeatures.staking)
     cy.visit(constants.stakingUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.verifySkeletonsGone()
   })
