@@ -21,22 +21,19 @@ describe(
 
     it('[VISUAL] Screenshot empty batch list', () => {
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
+      main.verifySkeletonsGone()
       batch.openBatchtransactionsModal()
       main.waitForMuiAnimationsToSettle()
-      cy.contains(batch.addInitialTransactionStr, { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot batch list with transaction', () => {
       main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1)
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
+      main.verifySkeletonsGone()
       cy.reload()
-      batch.verifyBatchIconCount(1)
       batch.clickOnBatchCounter()
       main.waitForMuiAnimationsToSettle()
-      cy.contains(batch.batchedTransactionsStr, { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
   },

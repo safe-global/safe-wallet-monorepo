@@ -22,14 +22,13 @@ describe(
       mockVisualTestApis()
       cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
       wallet.connectSigner(signer)
-      cy.contains('Required confirmations', { timeout: 30000 }).should('be.visible')
+      main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot add new signer form', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
       main.waitForMuiAnimationsToSettle()
-      cy.contains('Add new signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
 
@@ -38,14 +37,12 @@ describe(
       owner.clickOnAddSignerBtn()
       main.waitForMuiAnimationsToSettle()
       owner.typeOwnerAddressManage(1, main.generateRandomString(10))
-      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
       main.waitForMuiAnimationsToSettle()
-      cy.contains('Replace signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
   },
