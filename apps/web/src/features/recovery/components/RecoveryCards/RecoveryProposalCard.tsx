@@ -1,7 +1,6 @@
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
@@ -32,16 +31,14 @@ type Props =
 export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose, setTxFlow }: Props): ReactElement {
   const isDarkMode = useDarkMode()
 
-  const onRecover = async () => {
+  const handleRecover = () => {
     onClose?.()
     setTxFlow(<RecoverAccountFlow />)
   }
 
-  const handleRecover = () => {
-    onRecover()
-    // Track with appropriate label based on orientation
-    const label = orientation === 'vertical' ? 'pop-up' : 'panel'
-    trackEvent({ ...ATTENTION_PANEL_EVENTS.START_RECOVERY, label })
+  const handleRecoverWithTracking = () => {
+    trackEvent(RECOVERY_EVENTS.START_RECOVERY)
+    handleRecover()
   }
 
   const icon = (
@@ -54,7 +51,12 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button data-testid="start-recovery-btn" variant="contained" onClick={handleRecover} className={css.button}>
+    <Button
+      data-testid="start-recovery-btn"
+      variant="contained"
+      onClick={handleRecoverWithTracking}
+      className={css.button}
+    >
       Start recovery
     </Button>
   )
@@ -71,6 +73,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
           label: 'proposal-card',
         }}
         action={{ label: 'Start recovery', onClick: handleRecover }}
+        trackingEvent={RECOVERY_EVENTS.START_RECOVERY}
         testId="recovery-proposal-card"
       />
     )

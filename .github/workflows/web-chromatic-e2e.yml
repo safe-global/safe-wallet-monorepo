@@ -37,7 +37,7 @@ jobs:
 
   chromatic:
     needs: [e2e]
-    if: "!cancelled()"
+    if: '!cancelled()'
     runs-on: ubuntu-latest
     permissions:
       contents: read

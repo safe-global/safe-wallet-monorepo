@@ -17,7 +17,7 @@ export const ATTENTION_PANEL_EVENTS = {
     category: ATTENTION_PANEL_CATEGORY,
   },
 
-  // Recovery
+  // Recovery - DEPRECATED: Use RECOVERY_EVENTS instead for recovery feature actions
   START_RECOVERY: {
     action: 'Start recovery proposal',
     category: ATTENTION_PANEL_CATEGORY,
