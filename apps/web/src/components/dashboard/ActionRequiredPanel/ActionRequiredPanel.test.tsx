@@ -44,8 +44,9 @@ describe('ActionRequiredPanel', () => {
         expect(helpers.queries.getTitleRequired()).toBeInTheDocument()
       },
       expectPanelHidden: () => {
-        expect(helpers.queries.getPanel()).not.toBeInTheDocument()
-        expect(helpers.queries.getTitle()).not.toBeInTheDocument()
+        const panel = helpers.queries.getPanel()
+        expect(panel).toBeInTheDocument()
+        expect(panel).not.toBeVisible()
       },
       expectCollapsed: () => {
         expect(helpers.queries.getExpandButton()).toBeInTheDocument()
