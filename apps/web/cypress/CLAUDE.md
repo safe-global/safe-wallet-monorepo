@@ -34,8 +34,14 @@ All visual tests in `e2e/visual/`. Chromatic captures light + dark mode automati
 ### Structure
 
 ```js
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
+
 describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => { staticSafes = await getSafes(CATEGORIES.static) })
+
+  beforeEach(() => {
+    mockVisualTestApis()  // Mock CGW APIs for deterministic screenshots
+  })
 
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
@@ -71,6 +77,17 @@ Use `wallet.connectSigner(signer)` in `beforeEach`, not in individual `it` block
 | `connectSigner()`                | `support/utils/wallet.js`       | Connect wallet in tests                 |
 | `getSafes()`                     | `support/safes/safesHandler.js` | Get safe addresses                      |
 | `VISUAL_VIEWPORT`                | `support/constants.js`          | Viewport config for visual tests        |
+| `mockVisualTestApis()`           | `support/visual-mocks.js`       | Mock CGW APIs for deterministic visuals |
+
+### API mocking for visual tests
+
+All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky Chromatic diffs caused by changing token prices, balances, and fiat values.
+
+- Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
+- Uses the `safe-token-holder` scenario for balances/portfolio/positions
+- Mocks tx queue and history as empty by default
+- Tests that need specific data (e.g., `tx_queue.cy.js` with pending transactions) call their own `cy.intercept()` AFTER `mockVisualTestApis()` to override (Cypress last-registered-wins)
+- Safe info, chain config, and nonces are NOT mocked (stable for static test safes)
 
 ## Selectors
 

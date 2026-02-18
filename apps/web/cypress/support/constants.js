@@ -124,6 +124,11 @@ export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
 export const collectiblesEndpoint = '**/collectibles*'
 export const chainConfigEndpoint = '**/v1/chains/*'
+export const balancesEndpoint = '**/v1/**/safes/**/balances/**'
+export const portfolioEndpoint = '**/v1/portfolio/**'
+export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
+export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
+export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
 
 export const indexStatusUrl = 'https://status.safe.global'
 

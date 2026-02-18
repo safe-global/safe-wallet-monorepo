@@ -2,6 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -11,6 +12,10 @@ describe(
   () => {
     before(async () => {
       staticSafes = await getSafes(CATEGORIES.static)
+    })
+
+    beforeEach(() => {
+      mockVisualTestApis()
     })
 
     it('[VISUAL] Screenshot message detail page', () => {

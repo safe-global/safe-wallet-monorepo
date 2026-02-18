@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 const SPACE_ID = '1'
 
@@ -29,6 +30,7 @@ function setupSpacesAuth() {
 
 describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   beforeEach(() => {
+    mockVisualTestApis()
     setupSpacesAuth()
   })
 
