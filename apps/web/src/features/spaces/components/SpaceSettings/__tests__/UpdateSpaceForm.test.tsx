@@ -39,8 +39,8 @@ describe('UpdateSpaceForm', () => {
   const mockSpace: GetSpaceResponse = {
     id: 123,
     name: 'Test Space',
-    status: 'ACTIVE',
     members: [],
+    safeCount: 0,
   }
 
   // Helper functions to reduce code duplication
