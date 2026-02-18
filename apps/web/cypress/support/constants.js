@@ -40,8 +40,12 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
+export const spaceDashboardUrl = '/spaces?spaceId='
 export const spaceUrl = '/spaces/settings?spaceId='
 export const spaceMembersUrl = '/spaces/members?spaceId='
+export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
+export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
+export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
@@ -104,7 +108,12 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
+export const usersEndpoint = '**/v1/users'
 export const spacesEndpoint = '**/**/spaces*'
+export const spacesGetOneEndpoint = '**/v1/spaces/*'
+export const spacesMembersEndpoint = '**/v1/spaces/*/members'
+export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
+export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
@@ -281,6 +290,7 @@ export const chainFeatures = {
   bridge: 'BRIDGE',
   staking: 'STAKING',
   earn: 'EARN',
+  spaces: 'SPACES',
 }
 
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')
@@ -299,4 +309,5 @@ export const localStorageKeys = {
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
   SAFE_v2__batch: 'SAFE_v2__batch',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
+  SAFE_v2__auth: 'SAFE_v2__auth',
 }
