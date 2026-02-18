@@ -536,7 +536,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             data-testid="review-step-next-btn"
             onClick={handleCreateSafeClick}
             variant="contained"
-            size="large"
+            size="xlarge"
             disabled={isDisabled}
           >
             {isCreating ? <CircularProgress size={18} /> : 'Create account'}

@@ -153,6 +153,8 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       },
       MuiButton: {
         variants: [
+          // Primary CTA variant for hero buttons and prominent actions
+          { props: { size: 'xlarge' }, style: { fontSize: '16px', padding: '16px 24px', height: '58px' } },
           // @deprecated Use size="medium" instead. Compact variant is redundant now that medium is correctly sized at 36px.
           { props: { size: 'compact' }, style: { padding: '8px 16px' } },
           // @deprecated Use size="large" instead. Stretched variant will be removed in a future version.
