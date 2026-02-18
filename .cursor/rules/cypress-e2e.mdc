@@ -255,7 +255,8 @@ Use this structure to find or place code. Do not invent new folders or helpers t
 ```
 cypress/
 ├── e2e/                    # Test specs and page objects
-│   ├── smoke/               # Critical path tests
+│   ├── smoke/               # Critical path tests (functional)
+│   │   └── visual/          # Visual regression tests (Chromatic E2E only)
 │   ├── regression/          # Feature tests
 │   ├── happypath/           # User journey tests
 │   ├── safe-apps/           # Safe Apps tests
@@ -288,7 +289,12 @@ cypress/
 | Custom Cypress commands | `support/commands.js`, `support/safe-apps-commands.js` |
 | Page selectors and flows | `e2e/pages/*.pages.js`, `e2e/pages/main.page.js` |
 
-Test categories: **smoke/** (critical path), **regression/** (feature tests), **happypath/** (user journeys), **safe-apps/** (Safe Apps).
+Test categories:
+- **smoke/** — critical path, functional (runs on every PR)
+- **smoke/visual/** — visual regression for Chromatic (only runs in Chromatic E2E workflow, not in smoke CI)
+- **regression/** — feature tests
+- **happypath/** — user journeys
+- **safe-apps/** — Safe Apps tests
 
 ## Data Management
 
@@ -449,6 +455,16 @@ it('[Category] Verify that [behavior] - [ID]', () => {
 })
 
 ```
+
+## Common Mistakes
+
+1. **Hardcoded selectors in test files** — Never use raw `data-testid` strings or CSS selectors directly in `.cy.js` files. Always use page object constants/functions from `cypress/e2e/pages/*.pages.js`. If a selector doesn't exist yet, add it to the correct page object file first.
+   - `cy.get('[data-testid="safe-list-item"]')` → `cy.get(sideBar.sideSafeListItem)`
+   - `cy.get('[data-testid="apps-list"]')` → `cy.get(safeapps.safeAppsList)`
+   - `cy.get('input[id="search-by-name"]').type(...)` → `safeapps.typeAppName(...)`
+2. **Test naming** — Smoke tests: `[SMOKE] Verify that ...`. Visual tests: `[VISUAL] Screenshot ...`.
+3. **Visual tests in wrong folder** — Visual regression tests go in `smoke/visual/`, not `smoke/`. They only run in Chromatic E2E workflow, not in smoke CI.
+4. **Import paths after moving** — Tests in `smoke/visual/` need an extra `../` level for relative imports to pages and support.
 
 ## Implementation Checklist
 
