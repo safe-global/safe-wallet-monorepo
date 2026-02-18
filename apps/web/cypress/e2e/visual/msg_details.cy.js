@@ -14,14 +14,12 @@ describe(
     })
 
     it('[VISUAL] Screenshot message detail page', () => {
-      // First load the messages list with mocked data, then click into a message
       cy.fixture('messages/messages.json').then((mockData) => {
         cy.intercept('GET', constants.messagesEndpoint, mockData).as('getMessages')
         cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_23)
       })
       cy.wait('@getMessages')
       cy.contains('Sign', { timeout: 10000 }).should('be.visible')
-      // Click on the first message to expand details
       cy.get(createtx.messageItem).first().click()
       cy.wait(1000)
       cy.contains('Created by', { timeout: 10000 }).should('be.visible')

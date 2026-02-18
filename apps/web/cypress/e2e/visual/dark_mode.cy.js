@@ -10,22 +10,23 @@ describe('[VISUAL] Dark mode screenshots', { defaultCommandTimeout: 60000, ...co
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[VISUAL] Screenshot balances page in dark mode', () => {
+  beforeEach(() => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
+  })
+
+  it('[VISUAL] Screenshot balances page in dark mode', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
     cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()
   })
 
   it('[VISUAL] Screenshot dashboard in dark mode', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     cy.contains('Top assets', { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()
   })
 
   it('[VISUAL] Screenshot settings setup page in dark mode', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, ls.safeSettings.settings1)
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.contains('Required confirmations', { timeout: 30000 }).should('be.visible')
     main.verifySkeletonsGone()

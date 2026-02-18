@@ -6,21 +6,17 @@ const SPACE_ID = '1'
 function setupSpacesAuth() {
   main.enableChainFeature(constants.chainFeatures.spaces)
 
-  // Mock auth state in localStorage (session expires 24h from now)
-  const authData = {
+  main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, {
     sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
     lastUsedSpace: SPACE_ID,
-  }
-  main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, authData)
+  })
 
-  // Mock spaces API endpoints
   cy.fixture('spaces/user.json').then((mockUser) => {
     cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
   })
   cy.fixture('spaces/space.json').then((mockSpace) => {
     cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
     cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
-    // Only intercept API calls for listing spaces, not page navigation
     cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
   })
   cy.fixture('spaces/members.json').then((mockMembers) => {

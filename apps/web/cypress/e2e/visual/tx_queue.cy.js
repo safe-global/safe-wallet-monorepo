@@ -12,25 +12,22 @@ describe(
       staticSafes = await getSafes(CATEGORIES.static)
     })
 
-    it('[VISUAL] Screenshot queue page with pending transactions', () => {
+    beforeEach(() => {
       cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
         cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
         cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)
       })
       cy.wait('@getQueuedTransactions')
       cy.contains('Batch', { timeout: 10000 }).should('be.visible')
+    })
+
+    it('[VISUAL] Screenshot queue page with pending transactions', () => {
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
-      cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
-        cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
-        cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)
-      })
-      cy.wait('@getQueuedTransactions')
-      cy.contains('Batch', { timeout: 10000 }).should('be.visible').first().click()
+      cy.contains('Batch').first().click()
       cy.wait(1000)
-
       main.verifySkeletonsGone()
     })
   },
