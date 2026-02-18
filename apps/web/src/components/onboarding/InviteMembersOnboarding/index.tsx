@@ -1,22 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import CloseIcon from '@mui/icons-material/Close'
+import { ChevronLeft, Plus, X } from 'lucide-react'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -26,8 +11,20 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
-import { RoleMenuItem } from '@/features/spaces/components/AddMemberModal'
-import css from '@/features/spaces/components/AddMemberModal/styles.module.css'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Spinner } from '@/components/ui/spinner'
+import StepIndicator from '@/components/onboarding/StepIndicator'
+
+const ONBOARDING_STEP = 3
+const TOTAL_STEPS = 4
+
+const ROLE_LABELS: Record<MemberRole, string> = {
+  [MemberRole.ADMIN]: 'Admin',
+  [MemberRole.MEMBER]: 'Member',
+}
 
 interface MemberInvite {
   address: string
@@ -37,6 +34,56 @@ interface MemberInvite {
 interface InviteMembersFormValues {
   members: MemberInvite[]
 }
+
+interface MemberInviteRowProps {
+  index: number
+  control: ReturnType<typeof useForm<InviteMembersFormValues>>['control']
+  register: ReturnType<typeof useForm<InviteMembersFormValues>>['register']
+  canRemove: boolean
+  onRemove: () => void
+}
+
+const MemberInviteRow = ({ index, control, register, canRemove, onRemove }: MemberInviteRowProps) => (
+  <div className="flex items-center gap-2">
+    <Input
+      {...register(`members.${index}.address`, {
+        required: index === 0,
+      })}
+      placeholder="Type wallet address"
+      className="h-11 flex-1 rounded-lg bg-card px-4"
+      data-testid={`invite-address-input-${index}`}
+    />
+
+    <Controller
+      control={control}
+      name={`members.${index}.role`}
+      render={({ field }) => (
+        <Select value={field.value} onValueChange={field.onChange}>
+          <SelectTrigger className="h-11 min-w-[120px] rounded-lg bg-card">
+            <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
+            <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+    />
+
+    {canRemove && (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onRemove}
+        aria-label="Remove member"
+        data-testid={`remove-member-${index}`}
+      >
+        <X className="size-4" />
+      </Button>
+    )}
+  </div>
+)
 
 const InviteMembersOnboarding = (): ReactElement => {
   const router = useRouter()
@@ -56,25 +103,17 @@ const InviteMembersOnboarding = (): ReactElement => {
     },
   })
 
-  const { handleSubmit, control, formState } = methods
+  const { handleSubmit, control, formState, register } = methods
   const { fields, append, remove } = useFieldArray({ control, name: 'members' })
 
-  // Redirect to welcome if not authenticated
-  useEffect(() => {
-    if (!wallet || !isUserAuthenticated) {
-      router.replace({ pathname: AppRoutes.welcome.index })
-    }
-  }, [wallet, isUserAuthenticated, router])
-
-  // Redirect to create-space if no spaceId
   useEffect(() => {
     if (router.isReady && !spaceId) {
       router.replace({ pathname: AppRoutes.welcome.createSpace })
     }
   }, [router, spaceId])
 
-  const redirectToSpaceDashboard = () => {
-    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+  const redirectToNextStep = () => {
+    router.push({ pathname: AppRoutes.welcome.addressBook, query: { spaceId } })
   }
 
   const goBack = () => {
@@ -86,7 +125,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
     const validMembers = data.members.filter((m) => m.address.trim() !== '')
     if (validMembers.length === 0) {
-      redirectToSpaceDashboard()
+      redirectToNextStep()
       return
     }
 
@@ -122,7 +161,7 @@ const InviteMembersOnboarding = (): ReactElement => {
         }),
       )
 
-      redirectToSpaceDashboard()
+      redirectToNextStep()
     } catch {
       setError('Something went wrong inviting members. Please try again.')
     } finally {
@@ -135,120 +174,84 @@ const InviteMembersOnboarding = (): ReactElement => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh" p={3}>
-      <Paper sx={{ maxWidth: 500, width: '100%', p: 4, position: 'relative' }}>
-        <IconButton onClick={goBack} sx={{ position: 'absolute', top: 16, left: 16 }} aria-label="Go back">
-          <ArrowBackIcon />
-        </IconButton>
+    <div className="shadcn-scope">
+      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
+        <form onSubmit={onSubmit} className="flex w-full max-w-[350px] flex-col gap-6">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={goBack}
+            className="rounded-md border border-card shadow-sm"
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
 
-        <Box textAlign="center" mb={3}>
-          <Typography variant="h3" fontWeight={700} mb={1}>
+          <div className="flex items-center justify-center">
+            <StepIndicator currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+          </div>
+
+          <h2 className="w-full text-center text-[30px] font-semibold leading-[30px] tracking-[-1px] text-foreground">
             Invite team members
-          </Typography>
+          </h2>
 
-          <Typography variant="body2" color="text.secondary">
+          <p className="mx-auto w-[93%] text-center text-base leading-6 text-muted-foreground">
             Add people to collaborate on this space.
-          </Typography>
-        </Box>
+          </p>
 
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <Stack spacing={2} mb={2}>
-              {fields.map((field, index) => (
-                <Stack key={field.id} direction="row" spacing={1} alignItems="center">
-                  <TextField
-                    {...methods.register(`members.${index}.address`, {
-                      required: index === 0,
-                    })}
-                    placeholder="Type wallet address"
-                    variant="outlined"
-                    size="small"
-                    fullWidth
-                    data-testid={`invite-address-input-${index}`}
-                  />
+          <div className="flex flex-col gap-3">
+            {fields.map((field, index) => (
+              <MemberInviteRow
+                key={field.id}
+                index={index}
+                control={control}
+                register={register}
+                canRemove={fields.length > 1}
+                onRemove={() => remove(index)}
+              />
+            ))}
+          </div>
 
-                  <Controller
-                    control={control}
-                    name={`members.${index}.role`}
-                    render={({ field: { value, onChange, ...fieldProps } }) => (
-                      <Select
-                        {...fieldProps}
-                        value={value}
-                        onChange={onChange}
-                        size="small"
-                        sx={{ minWidth: '140px' }}
-                        renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
-                      >
-                        <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>
-                          <RoleMenuItem role={MemberRole.ADMIN} hasDescription selected={value === MemberRole.ADMIN} />
-                        </MenuItem>
-                        <MenuItem value={MemberRole.MEMBER} className={css.menuItem}>
-                          <RoleMenuItem
-                            role={MemberRole.MEMBER}
-                            hasDescription
-                            selected={value === MemberRole.MEMBER}
-                          />
-                        </MenuItem>
-                      </Select>
-                    )}
-                  />
+          <button
+            type="button"
+            onClick={() => append({ address: '', role: MemberRole.MEMBER })}
+            className="flex items-center justify-center gap-2 text-sm font-medium text-foreground"
+            data-testid="add-another-member"
+          >
+            <Plus className="size-4" />
+            Add another
+          </button>
 
-                  {fields.length > 1 && (
-                    <IconButton
-                      onClick={() => remove(index)}
-                      size="small"
-                      aria-label="Remove member"
-                      data-testid={`remove-member-${index}`}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Stack>
-              ))}
-            </Stack>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() => append({ address: '', role: MemberRole.MEMBER })}
-              sx={{ mb: 3 }}
-              data-testid="add-another-member"
-            >
-              Add another
-            </Button>
+          <Button
+            data-testid="invite-members-continue-button"
+            type="submit"
+            size="lg"
+            disabled={!formState.isValid || isSubmitting}
+            className="w-full"
+          >
+            {isSubmitting ? <Spinner /> : 'Continue'}
+          </Button>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Button
-                data-testid="invite-members-continue-button"
-                type="submit"
-                variant="contained"
-                disabled={!formState.isValid || isSubmitting}
-                disableElevation
-                fullWidth
-                sx={{ minHeight: '42px' }}
-              >
-                {isSubmitting ? <CircularProgress size={20} /> : 'Continue'}
-              </Button>
-
-              <Button
-                data-testid="invite-members-skip-button"
-                onClick={redirectToSpaceDashboard}
-                disabled={isSubmitting}
-                fullWidth
-                sx={{ minHeight: '42px' }}
-              >
-                Skip
-              </Button>
-            </Box>
-          </form>
-        </FormProvider>
-      </Paper>
-    </Box>
+          <Button
+            data-testid="invite-members-skip-button"
+            type="button"
+            variant="ghost"
+            size="lg"
+            onClick={redirectToNextStep}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            Skip
+          </Button>
+        </form>
+      </div>
+    </div>
   )
 }
 

@@ -30,6 +30,7 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.addressBook,
 ]
 
 // ---------------------------------------------------------------------------
@@ -86,6 +87,7 @@ const guardRules: GuardRule[] = [
   {
     match: ({ isConnected, isSiweAuthenticated }) => {
       const shouldRedirect = !isConnected || !isSiweAuthenticated
+      console.log('## data', { isConnected, isSiweAuthenticated })
       console.log('## shouldRedirect Not connected or not signed in with SIWE → welcome', shouldRedirect)
       return shouldRedirect
     },

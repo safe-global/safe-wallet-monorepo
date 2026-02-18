@@ -1,24 +1,20 @@
 @import './vars.css';
 @import './onboard.css';
 @import './fonts.css';
+@import './shadcn.css';
 /*---break---*/
 /**
  * Font faces are imported from ./fonts.css instead of /fonts/fonts.css for
  * proper resolution in production builds.
  * More info on @import:
  * https://developer.mozilla.org/en-US/docs/Web/CSS/@import#description
- *
- * NOTE: shadcn/Tailwind CSS styles are isolated in ./shadcn.css
- * and should NOT be imported here to avoid conflicts with MUI.
  */
 
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family:
-    DM Sans,
-    sans-serif;
+  font-family: DM Sans, sans-serif;
   background-color: var(--color-background-paper);
 }
 
