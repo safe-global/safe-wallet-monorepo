@@ -53,6 +53,8 @@ export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
 export const appsUrlGeneral = '/apps?safe='
 export const stakingUrl = '/stake?safe='
+export const earnUrl = '/earn?safe='
+export const bridgeUrl = '/bridge?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
@@ -84,6 +86,7 @@ export const securityUrl = '/settings/security?safe='
 export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
+export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
@@ -263,8 +266,21 @@ export const addresBookContacts = {
   },
 }
 
+export const termsUrl = '/terms'
+export const privacyUrl = '/privacy'
+export const licensesUrl = '/licenses'
+export const imprintUrl = '/imprint'
+export const cookiePolicyUrl = '/cookie'
+export const safeLabsTermsUrl = '/safe-labs-terms'
+export const error403Url = '/403'
+export const error404Url = '/404'
+
 export const chainFeatures = {
   positions: 'POSITIONS',
+  nativeSwaps: 'NATIVE_SWAPS',
+  bridge: 'BRIDGE',
+  staking: 'STAKING',
+  earn: 'EARN',
 }
 
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')
