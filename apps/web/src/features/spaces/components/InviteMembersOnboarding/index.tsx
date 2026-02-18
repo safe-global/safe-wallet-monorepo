@@ -97,7 +97,7 @@ const MemberInviteRow = ({ index, control, register, canRemove, onRemove }: Memb
         name={`members.${index}.role`}
         render={({ field }) => (
           <Select value={field.value} onValueChange={field.onChange}>
-            <SelectTrigger className="h-11 min-w-[120px] rounded-lg bg-card">
+            <SelectTrigger className="min-w-[120px] rounded-lg bg-card data-[size=default]:h-11">
               <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -164,6 +164,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
     const validMembers = data.members.filter((m) => m.address.trim() !== '')
     if (validMembers.length === 0) {
+      setIsSubmitting(true)
       redirectToNextStep()
       return
     }
@@ -189,6 +190,7 @@ const InviteMembersOnboarding = (): ReactElement => {
         // @ts-ignore
         const errorMessage = result.error?.data?.message || 'Failed to invite members. Please try again.'
         setError(errorMessage)
+        setIsSubmitting(false)
         return
       }
 
@@ -203,7 +205,6 @@ const InviteMembersOnboarding = (): ReactElement => {
       redirectToNextStep()
     } catch {
       setError('Something went wrong inviting members. Please try again.')
-    } finally {
       setIsSubmitting(false)
     }
   })

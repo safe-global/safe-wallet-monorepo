@@ -16,6 +16,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import StepIndicator from '@/features/spaces/components/StepIndicator'
 
 const ONBOARDING_STEP = 4
@@ -166,6 +167,7 @@ const AddAddressBookOnboarding = (): ReactElement => {
     const validEntries = data.entries.filter((entry) => entry.name.trim() !== '' && entry.address.trim() !== '')
 
     if (validEntries.length === 0) {
+      setIsSubmitting(true)
       redirectToSpaceDashboard()
       return
     }
@@ -249,7 +251,7 @@ const AddAddressBookOnboarding = (): ReactElement => {
             disabled={isSubmitting}
             className="w-full"
           >
-            Continue
+            {isSubmitting ? <Spinner /> : 'Continue'}
           </Button>
 
           <Button

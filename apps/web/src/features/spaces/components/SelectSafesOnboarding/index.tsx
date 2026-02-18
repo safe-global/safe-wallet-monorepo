@@ -358,6 +358,7 @@ const SelectSafesOnboarding = (): ReactElement => {
       if (result.error) {
         // @ts-ignore
         setError(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
+        setIsSubmitting(false)
         return
       }
 
@@ -372,7 +373,6 @@ const SelectSafesOnboarding = (): ReactElement => {
       redirectToNextStep()
     } catch {
       setError('Something went wrong adding Safe Accounts. Please try again.')
-    } finally {
       setIsSubmitting(false)
     }
   })

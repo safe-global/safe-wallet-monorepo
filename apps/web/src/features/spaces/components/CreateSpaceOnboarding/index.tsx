@@ -67,7 +67,6 @@ const CreateSpaceOnboarding = (): ReactElement => {
       // @ts-ignore
       const errorMessage = error?.data?.message || 'Failed creating the space. Please try again.'
       setError(errorMessage)
-    } finally {
       setIsSubmitting(false)
     }
   })
