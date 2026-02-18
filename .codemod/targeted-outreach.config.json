@@ -1,0 +1,36 @@
+{
+  "featureName": "targeted-outreach",
+  "featureFlag": "TARGETED_SURVEY",
+  "publicAPI": {
+    "components": ["OutreachPopup"],
+    "hooks": [],
+    "services": [],
+    "types": [],
+    "constants": []
+  },
+  "structure": {
+    "hasComponentsFolder": true,
+    "hasHooksFolder": true,
+    "hasServicesFolder": true,
+    "hasStoreFolder": true,
+    "hasUtilsFolder": false,
+    "hasContextsFolder": false,
+    "hasTypesFile": false,
+    "hasConstantsFile": true,
+    "hasReadme": false
+  },
+  "consumers": [
+    {
+      "filePath": "apps/web/src/pages/_app.tsx",
+      "imports": [
+        {
+          "name": "OutreachPopup",
+          "type": "component",
+          "importPath": "@/features/targeted-outreach/components/OutreachPopup",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    }
+  ]
+}

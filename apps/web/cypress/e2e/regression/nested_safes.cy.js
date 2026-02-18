@@ -30,6 +30,8 @@ describe('Nested safes basic flow tests', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_39)
     // Check nested safe 1
     sideBar.clickOnOpenNestedSafeListBtn()
+    // Handle intro screen if present (select all safes including suspicious ones)
+    nsafes.completeIntroScreenSelectAll()
     sideBar.checkSafesInPopverList([nestedSafe1Short])
     sideBar.clickOnSafeInPopover(nestedSafe1Short)
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_40.substring(4))
@@ -42,6 +44,8 @@ describe('Nested safes basic flow tests', () => {
 
     // Check nested safe 2
     sideBar.clickOnOpenNestedSafeListBtn()
+    // Handle intro screen if present (select all safes including suspicious ones)
+    nsafes.completeIntroScreenSelectAll()
     sideBar.checkSafesInPopverList([nestedSafe2Short])
     sideBar.clickOnSafeInPopover(nestedSafe2Short)
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_41.substring(4))

@@ -4,6 +4,8 @@ import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../
 import { showNotification } from '@/store/notificationsSlice'
 import Cookies from 'js-cookie'
 import { useAuthToken } from './useAuthToken'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
 
 /**
  * OAuth authentication status and controls
@@ -146,9 +148,11 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
  * Build OAuth authorization URL with PKCE challenge
  * Generates PKCE parameters, stores them in sessionStorage, and constructs
  * the full authorization URL with all required query parameters.
+ * @param chainId - Optional chain ID to verify Safe ownership
+ * @param safeAddress - Optional Safe address to verify ownership
  * @returns Complete OAuth authorization URL
  */
-async function buildAuthUrl(): Promise<string> {
+async function buildAuthUrl(chainId?: string, safeAddress?: string): Promise<string> {
   const { authUrl, clientId } = HYPERNATIVE_OAUTH_CONFIG
 
   const redirectUri = getRedirectUri()
@@ -178,6 +182,14 @@ async function buildAuthUrl(): Promise<string> {
     code_challenge_method: 'S256',
   })
 
+  // Add chain and safe parameters if provided to verify Safe ownership
+  if (chainId) {
+    params.append('chain', chainId)
+  }
+  if (safeAddress) {
+    params.append('safe', safeAddress)
+  }
+
   return `${authUrl}?${params.toString()}`
 }
 
@@ -197,6 +209,8 @@ async function buildAuthUrl(): Promise<string> {
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
   const [{ isAuthenticated, isExpired }, setToken, clearToken] = useAuthToken()
+  const { safeAddress } = useSafeInfo()
+  const chainId = useChainId()
 
   // Reference to popup check interval
   const popupCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -306,7 +320,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
       }
 
       // Real OAuth flow
-      const authUrl = await buildAuthUrl()
+      const authUrl = await buildAuthUrl(chainId, safeAddress)
 
       // Calculate centered position for popup relative to current window
       // Center in the current window's viewport, accounting for window position on screen
@@ -324,7 +338,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     } catch (error) {
       handleOAuthError(error)
     }
-  }, [clearAllTimers, handlePopupOpen, handleOAuthError, setToken])
+  }, [clearAllTimers, handlePopupOpen, handleOAuthError, setToken, chainId, safeAddress])
 
   /**
    * Logout - clear authentication token

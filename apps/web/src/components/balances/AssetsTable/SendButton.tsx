@@ -3,7 +3,7 @@ import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
 import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useSpendingLimit } from '@/features/spending-limits'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'

@@ -4,6 +4,7 @@ import {
   safeCreationDispatch,
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
+  activateReplayedSafe,
 } from '@/features/counterfactual/services'
 import { PayNowPayLater } from '@/features/counterfactual/components'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
@@ -50,7 +51,7 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NetworkWarning from '../../NetworkWarning'
-import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
+import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
@@ -364,6 +365,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             onSubmitCallback(undefined, txHash)
           },
           true,
+          activateReplayedSafe,
         )
       }
     } catch (_err) {

@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllSafeItems } from '../../hooks/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
 import { SafeListItem } from '../SafesList/SafeListItem'

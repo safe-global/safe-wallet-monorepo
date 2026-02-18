@@ -9,6 +9,7 @@ import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@/public/images/common/lock-small.svg'
+import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 
 interface HnQueueAssessmentBannerProps {
   safeTxHash: string
@@ -81,7 +82,7 @@ export const HnQueueAssessmentBanner = ({
   const alertSeverity = ALERT_SEVERITIES[severity]
 
   return (
-    <Alert severity={alertSeverity}>
+    <Alert severity={alertSeverity} icon={<SeverityIcon severity={severity} width={20} height={20} />}>
       <Stack gap={1}>
         <Typography variant="body2">{message}</Typography>
         <ExternalLink

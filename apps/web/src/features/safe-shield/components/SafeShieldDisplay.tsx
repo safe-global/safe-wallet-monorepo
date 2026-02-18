@@ -9,6 +9,7 @@ import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
   ThreatAnalysisResults,
+  SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
@@ -49,6 +50,8 @@ export const SafeShieldDisplay = ({
   hypernativeAuth,
   showHypernativeInfo = true,
   showHypernativeActiveStatus = true,
+  safeAnalysis,
+  onAddToTrustedList,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -57,6 +60,8 @@ export const SafeShieldDisplay = ({
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
   showHypernativeActiveStatus?: boolean
+  safeAnalysis?: SafeAnalysisResult | null
+  onAddToTrustedList?: () => void
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -88,6 +93,8 @@ export const SafeShieldDisplay = ({
           hypernativeAuth={hypernativeAuth}
           showHypernativeInfo={showHypernativeInfo}
           showHypernativeActiveStatus={showHypernativeActiveStatus}
+          safeAnalysis={safeAnalysis}
+          onAddToTrustedList={onAddToTrustedList}
         />
       </Card>
 

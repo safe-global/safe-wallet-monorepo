@@ -2,7 +2,7 @@ export const stableCoinAddresses: {
   [address: string]: {
     name: string
     symbol: string
-    chains: Array<'gnosis' | 'ethereum' | 'arbitrum-one' | 'sepolia' | 'base' | 'linea'>
+    chains: Array<'gnosis' | 'ethereum' | 'arbitrum-one' | 'sepolia' | 'base' | 'linea' | 'plasma'>
   }
 } = {
   '0xdd96b45877d0e8361a4ddb732da741e97f3191ff': {
@@ -565,7 +565,7 @@ export const stableCoinAddresses: {
   '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34': {
     name: 'USDe',
     symbol: 'usde',
-    chains: ['base'],
+    chains: ['base', 'plasma'],
   },
   '0x820c137fa70c8691f0e44dc420a5e53c168921dc': {
     name: 'USDS Stablecoin',
@@ -592,5 +592,15 @@ export const stableCoinAddresses: {
     name: 'Dai Stablecoin',
     symbol: 'dai',
     chains: ['linea'],
+  },
+  '0x1B64B9025EEbb9A6239575dF9Ea4b9Ac46D4d193': {
+    name: 'XAUT0 on plasma',
+    symbol: 'XAUT0',
+    chains: ['plasma'],
+  },
+  '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb': {
+    name: 'USDT0 on plasma ',
+    symbol: 'USDT0',
+    chains: ['plasma'],
   },
 }

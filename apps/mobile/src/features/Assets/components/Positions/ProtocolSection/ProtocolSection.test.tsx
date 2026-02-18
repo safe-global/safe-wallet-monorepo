@@ -3,6 +3,11 @@ import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { ProtocolSection } from './ProtocolSection'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
+const mockPush = jest.fn()
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+}))
+
 const createMockProtocol = (overrides?: Partial<Protocol>): Protocol => ({
   protocol: 'aave-v3',
   protocol_metadata: {
@@ -42,6 +47,10 @@ describe('ProtocolSection', () => {
     currency: 'usd',
   }
 
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('renders protocol name', () => {
     render(<ProtocolSection {...defaultProps} />)
     expect(screen.getByText('Aave V3')).toBeTruthy()
@@ -57,75 +66,21 @@ describe('ProtocolSection', () => {
     expect(screen.getByText('50.00%')).toBeTruthy()
   })
 
-  it('renders positions when expanded by default', () => {
+  it('does not render individual positions inline', () => {
     render(<ProtocolSection {...defaultProps} />)
-    expect(screen.getByText('USD Coin')).toBeTruthy()
-  })
-
-  it('collapses positions when header is pressed', () => {
-    render(<ProtocolSection {...defaultProps} />)
-
-    const header = screen.getByTestId('protocol-section-header')
-    fireEvent.press(header)
-
     expect(screen.queryByText('USD Coin')).toBeNull()
   })
 
-  it('expands positions when collapsed header is pressed', () => {
+  it('navigates to protocol detail sheet when pressed', () => {
     render(<ProtocolSection {...defaultProps} />)
 
-    const header = screen.getByTestId('protocol-section-header')
-    fireEvent.press(header)
-    fireEvent.press(header)
+    const row = screen.getByTestId('protocol-section-aave-v3')
+    fireEvent.press(row)
 
-    expect(screen.getByText('USD Coin')).toBeTruthy()
-  })
-
-  it('handles protocol with multiple positions', () => {
-    const protocol = createMockProtocol({
-      items: [
-        {
-          name: 'Main Pool',
-          items: [
-            {
-              balance: '1000000000',
-              fiatBalance: '1000.00',
-              fiatConversion: '1000',
-              tokenInfo: {
-                address: '0x1111111111111111111111111111111111111111',
-                decimals: 6,
-                logoUri: 'https://example.com/usdc.png',
-                name: 'USD Coin',
-                symbol: 'USDC',
-                type: 'ERC20',
-              },
-              fiatBalance24hChange: '1.5',
-              position_type: 'deposit',
-            },
-            {
-              balance: '500000000000000000',
-              fiatBalance: '500.00',
-              fiatConversion: '500',
-              tokenInfo: {
-                address: '0x2222222222222222222222222222222222222222',
-                decimals: 18,
-                logoUri: 'https://example.com/eth.png',
-                name: 'Ethereum',
-                symbol: 'ETH',
-                type: 'NATIVE_TOKEN',
-              },
-              fiatBalance24hChange: '-2.0',
-              position_type: 'staked',
-            },
-          ],
-        },
-      ],
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/protocol-detail-sheet',
+      params: { protocolId: 'aave-v3' },
     })
-
-    render(<ProtocolSection {...defaultProps} protocol={protocol} />)
-
-    expect(screen.getByText('USD Coin')).toBeTruthy()
-    expect(screen.getByText('Ethereum')).toBeTruthy()
   })
 
   it('handles null icon URL with fallback', () => {

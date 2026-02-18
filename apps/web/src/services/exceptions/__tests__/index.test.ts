@@ -2,18 +2,16 @@ import { Errors, CodedException } from '..'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 describe('CodedException', () => {
-  beforeAll(() => {
-    console.error = jest.fn()
-  })
-
   beforeEach(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = 'false'
     jest.resetModules()
     jest.clearAllMocks()
+    jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = defaultPublicIsProduction
+    jest.restoreAllMocks()
   })
 
   it('throws an error if code is not found', () => {
@@ -91,46 +89,43 @@ describe('CodedException', () => {
   })
 
   describe('Tracking', () => {
-    beforeAll(() => {
-      console.error = jest.fn()
-    })
-
     beforeEach(() => {
       jest.resetModules()
       jest.clearAllMocks()
+      jest.spyOn(console, 'error').mockImplementation(() => {})
     })
 
     // I can't figure out a way to override the IS_PRODUCTION constant
-    it('tracks using Sentry on production', async () => {
+    it('tracks using observability on production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
 
-      const mockSentryCaptureException = jest.fn()
+      const mockCaptureException = jest.fn()
 
-      jest.doMock('@/services/sentry', () => ({
+      jest.doMock('@/services/observability', () => ({
         __esModule: true,
-        ...jest.requireActual('@/services/sentry'),
-        sentryCaptureException: mockSentryCaptureException,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
       }))
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockSentryCaptureException).toHaveBeenCalled()
+      expect(mockCaptureException).toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err.message)
     })
 
-    it('does not track using Sentry in non-production envs', async () => {
-      const mockSentryCaptureException = jest.fn()
-      jest.doMock('@/services/sentry', () => ({
+    it('does not track using observability in non-production envs', async () => {
+      const mockCaptureException = jest.fn()
+      jest.doMock('@/services/observability', () => ({
         __esModule: true,
-        ...jest.requireActual('@/services/sentry'),
-        sentryCaptureException: mockSentryCaptureException,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
       }))
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockSentryCaptureException).not.toHaveBeenCalled()
+      expect(mockCaptureException).not.toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err)
     })
   })

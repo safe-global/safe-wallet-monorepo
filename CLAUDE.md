@@ -12,12 +12,15 @@ Always create a feature branch and submit a pull request:
 # Create a feature branch
 git checkout -b feature/your-feature-name
 
-# Make your changes and ALWAYS run tests before committing
+# Make your changes and ALWAYS run checks before committing
 yarn workspace @safe-global/web type-check
 yarn workspace @safe-global/web lint
 yarn workspace @safe-global/web test
 
-# Commit only after tests pass
+# ALWAYS run prettier before committing — CI will reject unformatted code
+yarn prettier:fix
+
+# Commit only after ALL checks pass (including prettier)
 git add .
 git commit -m "feat: your change description"
 
@@ -36,7 +39,8 @@ git push -u origin feature/your-feature-name
 gh pr create
 ```
 
-**All tests must pass before committing. Never commit failing code.**
+**All checks must pass before committing. Never commit failing code.**
+**ALWAYS run `yarn prettier:fix` before staging and committing. Prettier failures block CI.**
 
 Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 
@@ -48,6 +52,9 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Common pitfalls and debugging tips
 
 ## Active Technologies
+
+- TypeScript 5.x (Next.js 14.x) + Storybook 10.x, MSW 2.x, Chromatic, @storybook/nextjs, shadcn/ui (001-shadcn-storybook-migration)
+- N/A (tooling/documentation feature) (001-shadcn-storybook-migration)
 
 - TypeScript 5.x (Next.js 14.x) + Next.js (dynamic imports), ESLint (import restrictions), Redux Toolkit (state management) (001-feature-architecture)
 - N/A (architecture pattern, no new data storage) (001-feature-architecture)

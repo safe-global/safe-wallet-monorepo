@@ -1,4 +1,5 @@
 import * as constants from '../../support/constants.js'
+import * as ls from '../../support/localstorage_data.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -18,10 +19,13 @@ describe('Nested safes fund asset tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_45)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe45)
+    cy.reload()
     main.setupSafeSettingsWithAllTokens().then(() => {
       cy.reload()
       wallet.connectSigner(signer)
       sideBar.clickOnOpenNestedSafeListBtn()
+      // This safe has no existing nested safes, so no intro screen - just click add
       nsafes.clickOnAddNestedSafeBtn()
     })
   })

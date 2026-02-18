@@ -2,9 +2,9 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import type { SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { useLoadFeature } from '@/features/__core__'
+import { type SafeItem } from '@/hooks/safes'
+import { MyAccountsFeature, useSafeItemData } from '@/features/myAccounts'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
@@ -15,7 +15,13 @@ type WcChainSwitchModalProps = {
 }
 
 function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
+  const feature = useLoadFeature(MyAccountsFeature)
+  const { AccountItem } = feature
   const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
+
+  if (!feature.$isReady || !AccountItem?.Button) {
+    return null
+  }
 
   return (
     <AccountItem.Button onClick={onSelect} elementRef={elementRef}>

@@ -64,5 +64,3 @@ export const AccountItem = {
   QueueActions: AccountItemQueueActions,
   Content: AccountItemContent,
 }
-
-export default AccountItem

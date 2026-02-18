@@ -1,4 +1,7 @@
 #!/bin/bash
+set -euo pipefail
+
+lint-staged
 
 # Store the initial git status
 initial_status=$(git status --porcelain)
@@ -19,7 +22,7 @@ if [ "$initial_status" != "$post_lint_status" ]; then
 fi
 
 # Check if the user wants to run tests on push
-if [ "$RUN_TESTS_ON_PUSH" == "true" ]; then
+if [ "${RUN_TESTS_ON_PUSH:-}" == "true" ]; then
   echo "Running tests..."
   if ! yarn test; then
     echo "===================================="

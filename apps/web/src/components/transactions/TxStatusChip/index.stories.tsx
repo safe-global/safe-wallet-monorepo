@@ -1,30 +1,48 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import StatusChip from './index'
 import { Paper } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
+import ScheduleIcon from '@mui/icons-material/Schedule'
 
-const meta = {
+const meta: Meta<typeof StatusChip> = {
+  title: 'Components/Base/TxStatusChip',
   component: StatusChip,
-  parameters: {
-    componentSubtitle: 'Renders a token Amount with Token Symbol and Logo',
-  },
-
+  parameters: { layout: 'centered' },
   decorators: [
-    (Story) => {
-      return (
-        <Paper sx={{ padding: 2 }}>
-          <Story />
-        </Paper>
-      )
-    },
+    (Story) => (
+      <Paper sx={{ padding: 2 }}>
+        <Story />
+      </Paper>
+    ),
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof StatusChip>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  args: { children: 'Processing' },
+}
+
+export const Success: Story = {
   args: {
-    children: 'Processing',
+    color: 'success',
+    children: (
+      <>
+        <CheckIcon fontSize="small" /> Executed
+      </>
+    ),
+  },
+}
+
+export const Warning: Story = {
+  args: {
+    color: 'warning',
+    children: (
+      <>
+        <ScheduleIcon fontSize="small" /> Pending
+      </>
+    ),
   },
 }

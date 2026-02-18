@@ -5,10 +5,10 @@ exports[`./index.stories DarkMode 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-9whsf3"
+    class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -71,7 +71,7 @@ exports[`./index.stories DarkMode 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -141,10 +141,10 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-9whsf3"
+    class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -207,7 +207,7 @@ exports[`./index.stories Default 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -277,10 +277,10 @@ exports[`./index.stories LightMode 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-9whsf3"
+    class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -343,7 +343,7 @@ exports[`./index.stories LightMode 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "
@@ -413,10 +413,10 @@ exports[`./index.stories NarrowViewport 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-9whsf3"
+    class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -479,7 +479,7 @@ exports[`./index.stories NarrowViewport 1`] = `
             <a
               aria-label="Build custom transactions"
               class="cardLink"
-              href="/apps?safe=sep%3A0x0000000000000000000000000000000000000001"
+              href="/apps/open?safe=sep%3A0x0000000000000000000000000000000000000001&appUrl=https%3A%2F%2Fsafe-apps.dev.5afe.dev%2Ftx-builder"
             >
               <div
                 class="card "

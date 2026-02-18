@@ -21,7 +21,6 @@ jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
-    $isLoading: false,
     $isDisabled: false,
     HnInfoCard: ({
       hypernativeAuth,
@@ -73,6 +72,8 @@ describe('SafeShieldWidget', () => {
       setIsRiskConfirmed: jest.fn(),
       setRecipientAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      safeAnalysis: null,
+      addToTrustedList: jest.fn(),
     })
     mockUseHypernativeOAuth.mockReturnValue({
       isAuthenticated: false,

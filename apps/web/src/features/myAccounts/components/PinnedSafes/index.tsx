@@ -1,35 +1,38 @@
-import SafesList from '@/features/myAccounts/components/SafesList'
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import css from '@/features/myAccounts/styles.module.css'
+import SafesList from '../SafesList'
+import type { AllSafeItems } from '@/hooks/safes'
+import css from '../../styles.module.css'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
-import { Box, SvgIcon, Typography } from '@mui/material'
+import { Box, Button, SvgIcon, Typography } from '@mui/material'
 import { useMemo } from 'react'
 
-const PinnedSafes = ({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) => {
+interface PinnedSafesProps {
+  allSafes: AllSafeItems
+  onLinkClick?: () => void
+  onOpenSelectionModal?: () => void
+}
+
+const PinnedSafes = ({ allSafes, onLinkClick, onOpenSelectionModal }: PinnedSafesProps) => {
   const pinnedSafes = useMemo<AllSafeItems>(() => [...(allSafes?.filter(({ isPinned }) => isPinned) ?? [])], [allSafes])
 
+  // Don't render anything if there are no pinned safes
+  if (pinnedSafes.length === 0) {
+    return null
+  }
+
   return (
-    <Box data-testid="pinned-accounts" mb={2} minHeight="170px">
+    <Box data-testid="pinned-accounts" mb={2}>
       <div className={css.listHeader}>
         <SvgIcon component={BookmarkIcon} inheritViewBox fontSize="small" sx={{ mt: '2px', mr: 1, strokeWidth: 2 }} />
         <Typography variant="h5" fontWeight={700} mb={2}>
-          Pinned
+          Trusted Safes
         </Typography>
       </div>
-      {pinnedSafes.length > 0 ? (
-        <SafesList safes={pinnedSafes} onLinkClick={onLinkClick} />
-      ) : (
-        <Box data-testid="empty-pinned-list" className={css.noPinnedSafesMessage}>
-          <Typography color="text.secondary" variant="body2" maxWidth="350px" textAlign="center">
-            Personalize your account list by clicking the
-            <SvgIcon
-              component={BookmarkIcon}
-              inheritViewBox
-              fontSize="small"
-              sx={{ mx: '4px', color: 'text.secondary', position: 'relative', top: '2px' }}
-            />
-            icon on the accounts most important to you.
-          </Typography>
+      <SafesList safes={pinnedSafes} onLinkClick={onLinkClick} />
+      {onOpenSelectionModal && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Button variant="outlined" size="small" onClick={onOpenSelectionModal} data-testid="add-more-safes-button">
+            Manage trusted Safes
+          </Button>
         </Box>
       )}
     </Box>

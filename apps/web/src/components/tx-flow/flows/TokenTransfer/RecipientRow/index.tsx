@@ -4,20 +4,20 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import { Box, Button, FormControl, Stack, SvgIcon } from '@mui/material'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
-import type { MultiTokenTransferParams, TokenTransferParams } from '..'
-import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from '..'
+import type { MultiTokenTransferParams, TokenTransferParams } from '../types'
+import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from '../types'
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import SpendingLimitRow from '../SpendingLimitRow'
-import { useSelector } from 'react-redux'
-import { selectSpendingLimits } from '@/store/spendingLimitsSlice'
+import { selectSpendingLimits } from '@/features/spending-limits'
+import { useAppSelector } from '@/store'
 import { useVisibleTokens } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
+import SpendingLimitRow from '../SpendingLimitRow'
 
 const getFieldName = (
   field: keyof TokenTransferParams,
@@ -33,7 +33,7 @@ type RecipientRowProps = {
 
 const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
   const balancesItems = useVisibleTokens()
-  const spendingLimits = useSelector(selectSpendingLimits)
+  const spendingLimits = useAppSelector(selectSpendingLimits)
 
   const {
     formState: { errors },
@@ -64,7 +64,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const spendingLimitBalances = useMemo(
     () =>
       balancesItems.filter(({ tokenInfo }) =>
-        spendingLimits.find((sl) => sameAddress(sl.token.address, tokenInfo.address)),
+        spendingLimits.find((limit) => sameAddress(limit.token.address, tokenInfo.address)),
       ),
     [balancesItems, spendingLimits],
   )
@@ -95,6 +95,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
               selectedToken={selectedToken}
               maxAmount={maxAmount}
               deps={[MultiTokenTransferFields.recipients]}
+              defaultTokenAddress={tokenAddress}
             />
           </FormControl>
 

@@ -1,8 +1,8 @@
-import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
+import type { SafeListProps } from '../SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
-import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
+import { AccountItem } from '../AccountItem'
+import { useSafeItemData } from '../../hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
@@ -10,8 +10,7 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 import css from './styles.module.css'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
-import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
+import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
@@ -25,9 +24,15 @@ function MultiChainSubItem({
   safeOverview?: SafeOverview
   onLinkClick?: () => void
 }) {
-  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe } = useSafeItemData(safeItem, {
-    safeOverview,
-  })
+  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
+    useSafeItemData(safeItem, {
+      safeOverview,
+    })
+
+  const hasQueuedItems =
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
   return (
     <AccountItem.Link
@@ -44,8 +49,22 @@ function MultiChainSubItem({
         owners={owners.length}
         isMultiChainItem
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName}>
+        <AccountItem.StatusChip
+          undeployedSafe={!!undeployedSafe}
+          isActivating={isActivating}
+          isReadOnly={safeItem.isReadOnly}
+        />
+        {hasQueuedItems && (
+          <AccountItem.QueueActions
+            safeAddress={safeOverview.address.value}
+            chainShortName={chain?.shortName || ''}
+            queued={safeOverview.queued ?? 0}
+            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+          />
+        )}
+      </AccountItem.Info>
+      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
     </AccountItem.Link>
   )
 }

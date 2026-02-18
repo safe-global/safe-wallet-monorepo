@@ -51,7 +51,7 @@
 - [x] T008 [US1] Verify HypernativeFeature exports correctly from `features/hypernative/index.ts`
 - [x] T009 [US1] Verify all 9 components accessible via feature handle (HnBanner, HnDashboardBanner, etc.)
 - [x] T010 [US1] Verify isHypernativeGuard service accessible via feature handle
-- [x] T011 [US1] Verify $isLoading, $isDisabled, $isReady meta properties work correctly
+- [x] T011 [US1] Verify $isDisabled, $isReady, $error meta properties work correctly
 - [x] T012 [US1] Verify stub behavior: components render null when disabled
 
 **Checkpoint**: Feature handle works - developers can use v3 pattern

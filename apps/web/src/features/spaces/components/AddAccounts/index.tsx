@@ -1,6 +1,13 @@
 import ModalDialog from '@/components/common/ModalDialog'
-import type { SafeItem, SafeItems } from '@/features/myAccounts/hooks/useAllSafes'
-import { useSafesSearch } from '@/features/myAccounts/hooks/useSafesSearch'
+import {
+  type SafeItem,
+  type SafeItems,
+  type AllSafeItems,
+  flattenSafeItems,
+  useOwnedSafesGrouped,
+  useSafesSearch,
+  getComparator,
+} from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from '@/features/spaces/components/AddAccounts/AddManually'
 import SafesList, { getSafeId } from '@/features/spaces/components/AddAccounts/SafesList'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
@@ -9,12 +16,6 @@ import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_G
 
 import debounce from 'lodash/debounce'
 import css from './styles.module.css'
-import {
-  type AllSafeItems,
-  flattenSafeItems,
-  useOwnedSafesGrouped,
-} from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { getComparator } from '@/features/myAccounts/utils/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {

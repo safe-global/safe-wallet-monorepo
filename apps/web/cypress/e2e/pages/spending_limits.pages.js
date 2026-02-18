@@ -47,7 +47,7 @@ export const timePeriodOptions = {
   oneHr: '1 hour',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').should('be.enabled')
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -184,7 +184,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  getBeneficiaryInput().clear({ force: true }).type(address, { force: true })
+  getBeneficiaryInput().clear().type(address)
 }
 
 export function checkBeneficiaryInputValue(value) {

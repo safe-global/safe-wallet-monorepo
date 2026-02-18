@@ -8,7 +8,8 @@ import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
 import InfoIcon from '@mui/icons-material/Info'
-import GasTooHighBanner from '@/features/no-fee-campaign/components/GasTooHighBanner'
+import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
+import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -21,6 +22,12 @@ export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
   NO_FEE_CAMPAIGN = 'NO_FEE_CAMPAIGN',
+}
+
+// Wrapper component to load GasTooHighBanner (follows React naming conventions)
+const GasTooHighBannerLoader = () => {
+  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
+  return <GasTooHighBanner />
 }
 
 const _ExecutionMethodSelector = ({
@@ -190,7 +197,7 @@ const _ExecutionMethodSelector = ({
         {/* Gas too high banner - shown inside method section when gas is too high */}
         {gasTooHigh && noFeeCampaign?.isEligible && (
           <div className={css.gasBannerWrapper}>
-            <GasTooHighBanner />
+            <GasTooHighBannerLoader />
           </div>
         )}
       </div>

@@ -1,0 +1,35 @@
+name: Web Lost Pixel
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: 'Lost Pixel public project ID (from app.lost-pixel.com)'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lost-pixel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Build Storybook
+        run: yarn workspace @safe-global/web build-storybook
+
+      - name: Run Lost Pixel
+        uses: lost-pixel/lost-pixel@v3.22.0
+        env:
+          LOST_PIXEL_CONFIG_DIR: apps/web
+          LOST_PIXEL_API_KEY: ${{ secrets.LOST_PIXEL_API_KEY }}
+          LOST_PIXEL_PROJECT_ID: ${{ inputs.project_id }}

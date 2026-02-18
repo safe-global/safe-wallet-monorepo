@@ -1,5 +1,4 @@
 import Analytics from '@/services/analytics/Analytics'
-import { SentryErrorBoundary } from '@/services/sentry'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
@@ -16,7 +15,7 @@ import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
@@ -31,7 +30,6 @@ import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
 import useBeamer from '@/hooks/Beamer/useBeamer'
-import ErrorBoundary from '@/components/common/ErrorBoundary'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -43,11 +41,12 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
+import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
- * This ensures the entire recovery feature loads as a single chunk.
  */
 const RecoveryLoader = () => {
   const { Recovery } = useLoadFeature(RecoveryFeature)
@@ -63,24 +62,48 @@ const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
   return <CounterfactualHooks />
 }
+
+/**
+ * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
+ */
+const SpendingLimitsLoaderWrapper = () => {
+  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
+  return <SpendingLimitsLoader />
+}
+
+/**
+ * Wrapper that lazy-loads OutreachPopup via the feature system.
+ * This ensures the entire targeted-outreach feature loads as a single chunk.
+ */
+const TargetedOutreachPopupLoader = () => {
+  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
+  return <OutreachPopup />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
 import { GATEWAY_URL } from '@/config/gateway'
-import { useDatadog } from '@/services/datadog'
+import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import { HnQueueAssessmentProvider } from '@/features/hypernative'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+
+// Initialize observability before React rendering starts
+// This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
+if (typeof window !== 'undefined') {
+  initObservability()
+}
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
+  useInitStaticChains()
   useAdjustUrl()
-  useDatadog()
   useGtm()
   useMixpanel()
   useNotificationTracking()
@@ -112,19 +135,27 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   const isDarkMode = useDarkMode()
   const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
+  const handleError = (error: Error, componentStack?: string) => {
+    captureException(error, { componentStack })
+  }
+
+  const content = (
+    <WalletProvider>
+      <GeoblockingProvider>
+        <TxModalProvider>
+          <AddressBookSourceProvider>
+            <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+          </AddressBookSourceProvider>
+        </TxModalProvider>
+      </GeoblockingProvider>
+    </WalletProvider>
+  )
+
   return (
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
-          <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-            <WalletProvider>
-              <GeoblockingProvider>
-                <TxModalProvider>
-                  <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
-                </TxModalProvider>
-              </GeoblockingProvider>
-            </WalletProvider>
-          </SentryErrorBoundary>
+          <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
         </ThemeProvider>
       )}
     </SafeThemeProvider>
@@ -175,13 +206,15 @@ const SafeWalletApp = ({
 
             <CookieAndTermBanner />
 
-            <OutreachPopup />
+            <TargetedOutreachPopupLoader />
 
             <Notifications />
 
             <RecoveryLoader />
 
             <CounterfactualHooksLoader />
+
+            <SpendingLimitsLoaderWrapper />
 
             <Analytics />
 

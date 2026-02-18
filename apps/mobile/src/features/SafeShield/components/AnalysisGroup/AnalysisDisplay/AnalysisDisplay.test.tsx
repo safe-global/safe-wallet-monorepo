@@ -1,4 +1,4 @@
-import { render } from '@/src/tests/test-utils'
+import { render, fireEvent } from '@/src/tests/test-utils'
 import { AnalysisDisplay } from './AnalysisDisplay'
 import {
   RecipientAnalysisResultBuilder,
@@ -113,5 +113,109 @@ describe('AnalysisDisplay', () => {
     expect(getByText(result.description)).toBeTruthy()
     expect(getByText('Critical issue')).toBeTruthy()
     expect(getByText('CURRENT MASTERCOPY:')).toBeTruthy()
+  })
+
+  describe('Error Dropdown', () => {
+    it('should render error dropdown when result has error field', () => {
+      const result = ThreatAnalysisResultBuilder.failedWithError().build()
+
+      const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
+
+      expect(getByText('Show details')).toBeTruthy()
+    })
+
+    it('should NOT render error dropdown when result has no error field', () => {
+      const result = ThreatAnalysisResultBuilder.failedWithoutError().build()
+
+      const { queryByText } = render(<AnalysisDisplay result={result} />, { initialStore })
+
+      expect(queryByText('Show details')).toBeNull()
+      expect(queryByText('Hide details')).toBeNull()
+    })
+
+    it('should expand and collapse error dropdown', () => {
+      const result = ThreatAnalysisResultBuilder.failedWithError().error('Test error message').build()
+
+      const { getByText, queryByText } = render(<AnalysisDisplay result={result} />, { initialStore })
+
+      expect(getByText('Show details')).toBeTruthy()
+      expect(queryByText('Hide details')).toBeNull()
+      expect(queryByText('Test error message')).toBeNull()
+
+      const toggle = getByText('Show details')
+      const touchableOpacity = toggle.parent?.parent
+      if (touchableOpacity) {
+        fireEvent.press(touchableOpacity)
+      } else {
+        fireEvent.press(toggle)
+      }
+
+      expect(getByText('Hide details')).toBeTruthy()
+      expect(queryByText('Show details')).toBeNull()
+      expect(getByText('Test error message')).toBeTruthy()
+
+      const hideToggle = getByText('Hide details')
+      const hideTouchableOpacity = hideToggle.parent?.parent
+      if (hideTouchableOpacity) {
+        fireEvent.press(hideTouchableOpacity)
+      } else {
+        fireEvent.press(hideToggle)
+      }
+
+      expect(getByText('Show details')).toBeTruthy()
+      expect(queryByText('Hide details')).toBeNull()
+      expect(queryByText('Test error message')).toBeNull()
+    })
+
+    it('should display error text when expanded', () => {
+      const errorMessage = 'Simulation Error: Reverted'
+      const result = ThreatAnalysisResultBuilder.failedWithError().error(errorMessage).build()
+
+      const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
+
+      const toggle = getByText('Show details')
+      const touchableOpacity = toggle.parent?.parent
+      if (touchableOpacity) {
+        fireEvent.press(touchableOpacity)
+      } else {
+        fireEvent.press(toggle)
+      }
+
+      expect(getByText(errorMessage)).toBeTruthy()
+      expect(getByText('Hide details')).toBeTruthy()
+    })
+
+    it('should not interfere with other components when error is present', () => {
+      const result = ThreatAnalysisResultBuilder.failedWithError()
+        .error('Test error')
+        .description('Threat analysis failed. Review before processing.')
+        .build()
+
+      const { getByText } = render(<AnalysisDisplay result={result} />, { initialStore })
+
+      expect(getByText('Show details')).toBeTruthy()
+      expect(getByText('Threat analysis failed. Review before processing.')).toBeTruthy()
+    })
+
+    it('should work with different error messages', () => {
+      const result1 = ThreatAnalysisResultBuilder.failedWithError().error('Simulation Error: Reverted').build()
+      const result2 = ThreatAnalysisResultBuilder.failedWithError().error('Reverted').build()
+
+      const { rerender, getByText } = render(<AnalysisDisplay result={result1} />, { initialStore })
+      expect(getByText('Show details')).toBeTruthy()
+
+      rerender(<AnalysisDisplay result={result2} />)
+      expect(getByText('Show details')).toBeTruthy()
+
+      const toggle = getByText('Show details')
+      const touchableOpacity = toggle.parent?.parent
+      if (touchableOpacity) {
+        fireEvent.press(touchableOpacity)
+      } else {
+        fireEvent.press(toggle)
+      }
+
+      expect(getByText('Reverted')).toBeTruthy()
+    })
   })
 })

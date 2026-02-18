@@ -64,7 +64,7 @@ export function cancelRecoveryTx() {
   cy.get(cancelProposalBtn).scrollIntoView().click()
 }
 export function clickOnRecoveryExecuteBtn() {
-  cy.get(executeBtn).eq(0).should('be.enabled', { timeout: 300000 })
+  cy.get(executeBtn, { timeout: 300000 }).eq(0).should('be.enabled')
   cy.wait(1000)
   cy.get(executeBtn).eq(0).click()
 }
