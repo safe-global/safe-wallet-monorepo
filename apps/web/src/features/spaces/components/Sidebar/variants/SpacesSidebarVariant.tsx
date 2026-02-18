@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -9,39 +8,18 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { spacesMainNavigation, spacesSetupGroup } from '../config'
 import css from '../styles.module.css'
 import type { SpaceSelectorProps } from '../types'
+import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 
-const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
-  initial ?? (name?.charAt(0) ?? '').toUpperCase()
-
-export const SpacesSidebarVariant = ({
-  spaceName = '',
-  spaceInitial,
-  selectedSpace,
-  spaces,
-}: SpaceSelectorProps): ReactElement => {
-  const initial = getSpaceInitial(spaceName, spaceInitial)
+export const SpacesSidebarVariant = ({ selectedSpace, spaces }: SpaceSelectorProps): ReactElement => {
   return (
     <SidebarContent>
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className={css.spaceSelector}>
-              <Avatar className={css.spaceSelectorAvatar}>
-                <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
-              </Avatar>
-              <div className={css.spaceSelectorText}>
-                <span className={css.spaceSelectorName}>{spaceName}</span>
-                <span className={css.spaceSelectorSubtitle}>Space</span>
-              </div>
-              <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
-                <ChevronUp className="size-4" />
-                <ChevronDown className="size-4" />
-              </div>
-            </SidebarMenuButton>
+            <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>

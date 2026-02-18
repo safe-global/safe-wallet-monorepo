@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarItemConfig {
   icon: LucideIcon
@@ -14,9 +13,14 @@ export interface SidebarGroupConfig {
   items: SidebarItemConfig[]
 }
 
+export interface SpaceItem {
+  id: number
+  name: string
+}
+
 export interface SpaceSelectorProps {
   spaceName?: string
   spaceInitial?: string
-  selectedSpace?: GetSpaceResponse
-  spaces?: GetSpaceResponse[]
+  selectedSpace?: SpaceItem
+  spaces?: SpaceItem[]
 }

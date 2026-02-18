@@ -1,0 +1,96 @@
+import type { ReactElement } from 'react'
+import { Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { useRouter } from 'next/router'
+import { SidebarMenuButton } from '@/components/ui/sidebar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { AppRoutes } from '@/config/routes'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import css from '../styles.module.css'
+import type { SpaceItem } from '../types'
+
+interface SpaceSelectorDropdownProps {
+  selectedSpace?: SpaceItem
+  spaces?: SpaceItem[]
+}
+
+export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelectorDropdownProps): ReactElement => {
+  const router = useRouter()
+  const spaceName = selectedSpace?.name ?? ''
+  const initial = spaceName.charAt(0).toUpperCase()
+
+  const handleSelectSpace = (spaceId: number) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, spaceId: spaceId.toString() },
+    })
+  }
+
+  const handleCreateSpace = () => {
+    trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
+    router.push(AppRoutes.spaces.createSpace)
+  }
+
+  const handleViewSpaces = () => {
+    trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.space_selector })
+    router.push(AppRoutes.welcome.spaces)
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className={css.spaceSelector} />}>
+        <Avatar className={css.spaceSelectorAvatar}>
+          <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+        </Avatar>
+        <div className={css.spaceSelectorText}>
+          <span className={css.spaceSelectorName}>{spaceName}</span>
+          <span className={css.spaceSelectorSubtitle}>Space</span>
+        </div>
+        <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
+          <ChevronUp className="size-4" />
+          <ChevronDown className="size-4" />
+        </div>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent side="bottom" align="start">
+        {selectedSpace && (
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <Avatar className={css.spaceSelectorAvatar}>
+              <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className={css.textSmallBold}>{selectedSpace.name}</div>
+              <div className={css.textMini}>Space</div>
+            </div>
+          </div>
+        )}
+
+        <DropdownMenuSeparator />
+
+        {spaces.map((space) => (
+          <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
+            <Avatar className="size-6 rounded-md shrink-0">
+              <AvatarFallback className="rounded-md bg-primary text-primary-foreground text-xs">
+                {space.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span>{space.name}</span>
+            {selectedSpace?.id === space.id && <Check className="ml-auto size-4" />}
+          </DropdownMenuItem>
+        ))}
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={handleCreateSpace}>Create space</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleViewSpaces}>View spaces</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
