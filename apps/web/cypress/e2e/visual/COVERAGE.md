@@ -1,6 +1,6 @@
 # Visual Test Coverage Report
 
-**55 tests** across **32 test files** — each test captures **light + dark mode** (110 Chromatic snapshots total)
+**64 tests** across **33 test files** — each test captures **light + dark mode** (128 Chromatic snapshots total)
 
 Dark mode is applied automatically via a global `afterEach` hook in `cypress/support/e2e.js` that toggles `data-theme="dark"` and takes a second Chromatic snapshot.
 
@@ -9,11 +9,11 @@ Dark mode is applied automatically via a global `afterEach` hook in `cypress/sup
 | Page                              | Test file                | Tests | Mocked?          | Wallet? |
 | --------------------------------- | ------------------------ | ----- | ---------------- | ------- |
 | `/welcome`                        | welcome.cy.js            | 2     | No               | No      |
-| `/home`                           | dashboard.cy.js          | 1     | No               | No      |
-| `/balances`                       | balances.cy.js           | 1     | No               | No      |
+| `/home`                           | dashboard.cy.js          | 2     | Yes (1 mocked)   | No      |
+| `/balances`                       | balances.cy.js           | 2     | No               | No      |
 | `/balances/nfts`                  | nfts.cy.js               | 1     | Yes              | No      |
 | `/balances/positions`             | positions.cy.js          | 1     | No               | No      |
-| `/address-book`                   | address_book.cy.js       | 1     | No               | No      |
+| `/address-book`                   | address_book.cy.js       | 2     | No               | No      |
 | `/transactions/queue`             | tx_queue.cy.js           | 2     | Yes              | No      |
 | `/transactions/history`           | tx_history.cy.js         | 1     | Yes              | No      |
 | `/transactions/messages`          | messages.cy.js           | 1     | Yes              | No      |
@@ -23,15 +23,15 @@ Dark mode is applied automatically via a global `afterEach` hook in `cypress/sup
 | `/settings/appearance`            | settings_pages.cy.js     | 1     | No               | No      |
 | `/settings/modules`               | settings_pages.cy.js     | 1     | No               | No      |
 | `/settings/notifications`         | settings_pages.cy.js     | 1     | No               | No      |
-| `/settings/data`                  | settings_data.cy.js      | 1     | No               | No      |
-| `/settings/security`              | settings_data.cy.js      | 1     | No               | No      |
+| `/settings/data`                  | settings_data_security.cy.js | 1 | No               | No      |
+| `/settings/security`              | settings_data_security.cy.js | 1 | No               | No      |
 | `/settings/cookies`               | settings_cookies.cy.js   | 1     | No               | No      |
 | `/settings/safe-apps`             | settings_safe_apps.cy.js | 1     | No               | No      |
 | `/settings/environment-variables` | env_variables.cy.js      | 1     | No               | No      |
 | `/apps`                           | safe_apps.cy.js          | 3     | No               | No      |
 | `/apps/custom`                    | apps_custom.cy.js        | 1     | No               | No      |
 | `/new-safe/create`                | new_safe.cy.js           | 1     | No               | No      |
-| `/new-safe/load`                  | new_safe.cy.js           | 1     | No               | No      |
+| `/new-safe/load`                  | new_safe.cy.js           | 2     | No               | No      |
 | `/new-safe/advanced-create`       | new_safe_advanced.cy.js  | 1     | No               | No      |
 | `/swap`                           | swap.cy.js               | 1     | No               | No      |
 | `/bridge`                         | bridge.cy.js             | 1     | No               | No      |
@@ -51,10 +51,11 @@ Dark mode is applied automatically via a global `afterEach` hook in `cypress/sup
 | `/spaces/safe-accounts`           | spaces.cy.js             | 1     | Yes (auth + API) | No      |
 | `/spaces/address-book`            | spaces.cy.js             | 1     | Yes (auth + API) | No      |
 | `/user-settings`                  | user_settings.cy.js      | 1     | Yes (auth + API) | No      |
-| Send tx form (modal)              | create_tx_flow.cy.js     | 3     | No               | Yes     |
-| Add owner form (modal)            | owner_management.cy.js   | 1     | No               | Yes     |
+| Send tx form (modal)              | create_tx_flow.cy.js     | 4     | No               | Yes     |
+| Add owner form (modal)            | owner_management.cy.js   | 2     | No               | Yes     |
 | Replace owner dialog (modal)      | owner_management.cy.js   | 1     | No               | Yes     |
-| Spending limit form (modal)       | spending_limits.cy.js    | 1     | No               | Yes     |
+| Spending limit form (modal)       | spending_limits.cy.js    | 3     | No               | Yes     |
+| Sidebar multichain safes          | sidebar.cy.js            | 1     | No               | No      |
 | Batch tx modal                    | batch_tx.cy.js           | 2     | No               | Yes     |
 
 ## Gaps — interactive states not yet covered

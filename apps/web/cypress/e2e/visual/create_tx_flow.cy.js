@@ -20,18 +20,16 @@ describe(
     beforeEach(() => {
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
       wallet.connectSigner(signer)
-    })
-
-    it('[VISUAL] Screenshot send form initial state', () => {
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
       cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
+    })
+
+    it('[VISUAL] Screenshot send form initial state', () => {
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
-      createtx.clickOnNewtransactionBtn()
-      createtx.clickOnSendTokensBtn()
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
       createtx.clickOnTokenselectorAndSelectSepoliaEth()
       createtx.setMaxAmount()
@@ -40,9 +38,13 @@ describe(
     })
 
     it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
-      createtx.clickOnNewtransactionBtn()
-      createtx.clickOnSendTokensBtn()
       createtx.verifyRandomStringAddress('Lorem Ipsum')
+      main.verifySkeletonsGone()
+    })
+
+    it('[VISUAL] Screenshot send form with nonce warning', () => {
+      createtx.changeNonce(0)
+      createtx.verifyTooltipMessage(constants.nonceTooltipMsg.lowerThanCurrent)
       main.verifySkeletonsGone()
     })
   },

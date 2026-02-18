@@ -15,7 +15,7 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('[VISUAL] Screenshot spending limit form', () => {
+  beforeEach(() => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
@@ -23,6 +23,21 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
     spendinglimit.clickOnNewSpendingLimitBtn()
     cy.wait(1000)
     cy.contains('New transaction', { timeout: 10000 }).should('be.visible')
+  })
+
+  it('[VISUAL] Screenshot spending limit form', () => {
+    main.verifySkeletonsGone()
+  })
+
+  it('[VISUAL] Screenshot spending limit amount validation error', () => {
+    spendinglimit.enterSpendingLimitAmount('0')
+    spendinglimit.verifyNumberErrorValidation()
+    main.verifySkeletonsGone()
+  })
+
+  it('[VISUAL] Screenshot spending limit reset time dropdown', () => {
+    spendinglimit.clickOnTimePeriodDropdown()
+    spendinglimit.checkTimeDropdownOptions()
     main.verifySkeletonsGone()
   })
 })

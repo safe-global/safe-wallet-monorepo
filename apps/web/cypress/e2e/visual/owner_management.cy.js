@@ -31,6 +31,15 @@ describe(
       main.verifySkeletonsGone()
     })
 
+    it('[VISUAL] Screenshot add signer with invalid address error', () => {
+      owner.openManageSignersWindow()
+      owner.clickOnAddSignerBtn()
+      cy.wait(1000)
+      owner.typeOwnerAddressManage(1, main.generateRandomString(10))
+      owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
+      main.verifySkeletonsGone()
+    })
+
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
       cy.wait(1000)
