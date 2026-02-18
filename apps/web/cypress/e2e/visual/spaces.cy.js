@@ -3,83 +3,6 @@ import * as main from '../pages/main.page.js'
 
 const SPACE_ID = '1'
 
-const mockUser = {
-  id: 1,
-  status: 1,
-  wallets: [{ id: 1, address: '0x1234567890123456789012345678901234567890' }],
-}
-
-const mockSpace = {
-  id: 1,
-  name: 'Test Space',
-  status: 'ACTIVE',
-  members: [
-    {
-      id: 1,
-      role: 'ADMIN',
-      name: 'Admin User',
-      invitedBy: 'system',
-      status: 'ACTIVE',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      updatedAt: '2025-01-01T00:00:00.000Z',
-      user: { id: 1, status: 'ACTIVE' },
-    },
-  ],
-}
-
-const mockMembers = {
-  members: [
-    {
-      id: 1,
-      role: 'ADMIN',
-      name: 'Admin User',
-      status: 'ACTIVE',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      updatedAt: '2025-01-01T00:00:00.000Z',
-      user: { id: 1, status: 'ACTIVE' },
-    },
-    {
-      id: 2,
-      role: 'MEMBER',
-      name: 'Team Member',
-      status: 'ACTIVE',
-      createdAt: '2025-01-02T00:00:00.000Z',
-      updatedAt: '2025-01-02T00:00:00.000Z',
-      user: { id: 2, status: 'ACTIVE' },
-    },
-    {
-      id: 3,
-      role: 'MEMBER',
-      name: 'Invited User',
-      status: 'INVITED',
-      invitedBy: 'Admin User',
-      createdAt: '2025-01-03T00:00:00.000Z',
-      updatedAt: '2025-01-03T00:00:00.000Z',
-      user: { id: 3, status: 'PENDING' },
-    },
-  ],
-}
-
-const mockAddressBook = {
-  spaceId: SPACE_ID,
-  data: [
-    {
-      name: 'Treasury',
-      address: '0xA77DE01e157f9f57C7c4A326eeEbA7d043150Fa4',
-      chainIds: ['11155111'],
-      createdBy: 'Admin User',
-      lastUpdatedBy: 'Admin User',
-    },
-    {
-      name: 'Operations',
-      address: '0xB77DE01e157f9f57C7c4A326eeEbA7d043150Fa5',
-      chainIds: ['11155111'],
-      createdBy: 'Admin User',
-      lastUpdatedBy: 'Team Member',
-    },
-  ],
-}
-
 function setupSpacesAuth() {
   // Enable SPACES feature flag via chain config intercept
   cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
@@ -99,14 +22,22 @@ function setupSpacesAuth() {
   }
   main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, authData)
 
-  // Mock spaces API endpoints (order matters: more specific patterns last)
-  cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
-  cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
-  cy.intercept('GET', constants.spacesMembersEndpoint, mockMembers).as('getSpaceMembers')
-  cy.intercept('GET', constants.spacesAddressBookEndpoint, mockAddressBook).as('getSpaceAddressBook')
-  cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
-  // Only intercept API calls for listing spaces, not page navigation
-  cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
+  // Mock spaces API endpoints
+  cy.fixture('spaces/user.json').then((mockUser) => {
+    cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
+  })
+  cy.fixture('spaces/space.json').then((mockSpace) => {
+    cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
+    cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
+    // Only intercept API calls for listing spaces, not page navigation
+    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
+  })
+  cy.fixture('spaces/members.json').then((mockMembers) => {
+    cy.intercept('GET', constants.spacesMembersEndpoint, mockMembers).as('getSpaceMembers')
+  })
+  cy.fixture('spaces/address_book.json').then((mockAddressBook) => {
+    cy.intercept('GET', constants.spacesAddressBookEndpoint, mockAddressBook).as('getSpaceAddressBook')
+  })
 }
 
 describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
