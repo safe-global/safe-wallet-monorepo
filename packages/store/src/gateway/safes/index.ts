@@ -83,7 +83,7 @@ export const additionalSafesRtkApiV2 = cgwClient
         Omit<SafesGetSafeOverviewV2ApiArg, 'safes'> & { safes: string[] }
       >({
         async queryFn(args, _api, _extraOptions, fetchWithBaseQuery) {
-          const { safes, currency, trusted, excludeSpam, walletAddress } = args
+          const { safes, currency, trusted, walletAddress } = args
           const chunkedSafes = chunkArray(safes, MAX_SAFES_PER_REQUEST)
 
           let combinedData: SafesGetSafeOverviewV2ApiResponse = []
@@ -94,7 +94,6 @@ export const additionalSafesRtkApiV2 = cgwClient
               currency,
               safes: chunk.join(','), // convert the chunk back to comma-separated
               trusted,
-              excludeSpam,
               walletAddress,
             }
 
@@ -105,7 +104,6 @@ export const additionalSafesRtkApiV2 = cgwClient
                 currency: chunkArg.currency,
                 safes: chunkArg.safes,
                 trusted: chunkArg.trusted,
-                exclude_spam: chunkArg.excludeSpam,
                 wallet_address: chunkArg.walletAddress,
               },
             })
