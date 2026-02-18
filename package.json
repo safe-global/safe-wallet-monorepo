@@ -35,7 +35,7 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
     "prettier": "^3.6.2",
-    "storybook": "^10.2.7"
+    "storybook": "^10.2.9"
   },
   "dependenciesMeta": {
     "cypress": {

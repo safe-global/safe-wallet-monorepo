@@ -179,7 +179,7 @@
     "jest-expo": "~54.0.12",
     "prettier": "^3.6.2",
     "redux-devtools-expo-dev-plugin": "^2.0.0",
-    "storybook": "^10.2.7",
+    "storybook": "^10.2.9",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.31.1",

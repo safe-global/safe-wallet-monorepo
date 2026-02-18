@@ -185,7 +185,7 @@
     "remark-gfm": "^4.0.0",
     "remark-heading-id": "^1.0.1",
     "remark-mdx-frontmatter": "^5.2.0",
-    "storybook": "^10.2.7",
+    "storybook": "^10.2.9",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
     "typescript": "~5.9.2",

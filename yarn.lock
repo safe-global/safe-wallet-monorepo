@@ -13054,7 +13054,7 @@ __metadata:
     redux-persist: "npm:^6.0.0"
     semver: "npm:^7.7.2"
     siwe: "npm:^3.0.0"
-    storybook: "npm:^10.2.7"
+    storybook: "npm:^10.2.9"
     tamagui: "npm:^1.126.3"
     timezone-mock: "npm:^1.3.6"
     ts-node: "npm:^10.9.2"
@@ -13205,7 +13205,7 @@ __metadata:
     lint-staged: "npm:^16.2.7"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
-    storybook: "npm:^10.2.7"
+    storybook: "npm:^10.2.9"
   dependenciesMeta:
     cypress:
       built: true
@@ -13497,7 +13497,7 @@ __metadata:
     remark-heading-id: "npm:^1.0.1"
     remark-mdx-frontmatter: "npm:^5.2.0"
     semver: "npm:^7.7.1"
-    storybook: "npm:^10.2.7"
+    storybook: "npm:^10.2.9"
     ts-prune: "npm:^0.10.3"
     typechain: "npm:^8.3.2"
     typescript: "npm:~5.9.2"
@@ -39957,9 +39957,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:^10.2.7":
-  version: 10.2.8
-  resolution: "storybook@npm:10.2.8"
+"storybook@npm:^10.2.9":
+  version: 10.2.9
+  resolution: "storybook@npm:10.2.9"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     "@storybook/icons": "npm:^2.0.1"
@@ -39980,7 +39980,7 @@ __metadata:
       optional: true
   bin:
     storybook: ./dist/bin/dispatcher.js
-  checksum: 10/2a401ee42c303f44199f0bb5be2983a22c0a3c8962cba31401bb6a3f75eefc909238c32d4a2bc2040df853f4f813432c9e6ac7223740cdc7d4e83b5f76c3c2cd
+  checksum: 10/d6cc4627ed48fff3bb57d3ff5821a989e4398a24268bdb46db35d1c520bdb6fc113676ab9fcef0a5bd25b81598d13f3d24d6d83b1dae18ce3f3810858b363964
   languageName: node
   linkType: hard
 
