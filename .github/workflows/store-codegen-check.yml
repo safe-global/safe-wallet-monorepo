@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if AUTO_GENERATED files changed in PR
+      - name: Check if AUTO_GENERATED files or schema.json changed in PR
         id: check-files
         run: |
           # Get the list of changed files in the PR
@@ -65,14 +65,15 @@ jobs:
       - name: Check for uncommitted changes
         if: steps.check-files.outputs.should_validate == 'true'
         run: |
-          if ! git diff --exit-code packages/store/src/gateway/AUTO_GENERATED/; then
-            echo "❌ AUTO_GENERATED files don't match schema.json!"
+          # Check both schema.json and AUTO_GENERATED files
+          CHANGED_FILES=$(git diff --name-only packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/ || true)
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "❌ Generated files don't match the committed versions!"
             echo ""
-            echo "Changed files:"
-            git diff --name-only packages/store/src/gateway/AUTO_GENERATED/
-            echo ""
-            echo "Diff:"
-            git diff packages/store/src/gateway/AUTO_GENERATED/
+            echo "Files that differ:"
+            echo "$CHANGED_FILES"
             exit 1
           fi
-          echo "✅ AUTO_GENERATED files match schema.json"
+
+          echo "✅ Both schema.json and AUTO_GENERATED files match the staging API"

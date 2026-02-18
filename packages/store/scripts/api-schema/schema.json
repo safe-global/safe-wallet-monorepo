@@ -4219,8 +4219,8 @@
             }
           },
           {
-            "name": "safeAddress",
-            "required": true,
+            "name": "safeAddress1",
+            "required": false,
             "in": "path",
             "description": "Safe contract address (0x prefixed hex string)",
             "schema": {
