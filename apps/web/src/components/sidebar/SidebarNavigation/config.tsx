@@ -14,6 +14,7 @@ import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
 import { SvgIcon } from '@mui/material'
+import { DEVELOPER_PORTAL_URL } from '@/config/constants'
 
 export type NavItem = {
   label: string
@@ -52,7 +53,7 @@ export const navItems: NavItem[] = [
     label: 'API',
     icon: <SvgIcon component={ApiIcon} inheritViewBox />,
     href: '',
-    externalUrl: 'https://developer.safe.global/login',
+    externalUrl: DEVELOPER_PORTAL_URL,
     tag: <Chip sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
   },
 ]
