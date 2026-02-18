@@ -1,0 +1,78 @@
+name: Store Codegen Check
+
+on:
+  pull_request:
+    paths:
+      - packages/store/src/gateway/AUTO_GENERATED/**
+      - packages/store/scripts/api-schema/schema.json
+      - .github/workflows/store-codegen-check.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-codegen:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if AUTO_GENERATED files changed in PR
+        id: check-files
+        run: |
+          # Get the list of changed files in the PR
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Check if schema.json changed
+          SCHEMA_CHANGED=false
+          if echo "$CHANGED_FILES" | grep -q "packages/store/scripts/api-schema/schema.json"; then
+            SCHEMA_CHANGED=true
+            echo "schema_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "schema_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if any AUTO_GENERATED files changed
+          AUTO_GEN_CHANGED=false
+          if echo "$CHANGED_FILES" | grep -q "packages/store/src/gateway/AUTO_GENERATED/"; then
+            AUTO_GEN_CHANGED=true
+            echo "auto_generated_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "auto_generated_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Determine if validation should run
+          if [ "$SCHEMA_CHANGED" == "true" ] || [ "$AUTO_GEN_CHANGED" == "true" ]; then
+            echo "should_validate=true" >> $GITHUB_OUTPUT
+            echo "✅ Will validate AUTO_GENERATED files against schema.json"
+          else
+            echo "should_validate=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Neither schema.json nor AUTO_GENERATED files changed - skipping validation"
+          fi
+
+      - uses: ./.github/actions/yarn
+        if: steps.check-files.outputs.should_validate == 'true'
+
+      - name: Run codegen
+        if: steps.check-files.outputs.should_validate == 'true'
+        run: yarn workspace @safe-global/store build:dev
+
+      - name: Check for uncommitted changes
+        if: steps.check-files.outputs.should_validate == 'true'
+        run: |
+          if ! git diff --exit-code packages/store/src/gateway/AUTO_GENERATED/; then
+            echo "❌ AUTO_GENERATED files don't match schema.json!"
+            echo ""
+            echo "Changed files:"
+            git diff --name-only packages/store/src/gateway/AUTO_GENERATED/
+            echo ""
+            echo "Diff:"
+            git diff packages/store/src/gateway/AUTO_GENERATED/
+            exit 1
+          fi
+          echo "✅ AUTO_GENERATED files match schema.json"

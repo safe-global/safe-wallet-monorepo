@@ -568,7 +568,10 @@ Avoid these common mistakes when contributing:
 2. **Forgetting to run tests** – Always run tests before committing (`yarn workspace @safe-global/web test`)
 3. **Breaking mobile when changing shared code** – Shared packages (`packages/**`) affect both web and mobile
 4. **Hardcoding values** – Use theme variables from `vars.css` (web) or Tamagui tokens (mobile)
-5. **Modifying generated files** – Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+5. **Modifying generated files** – Never manually edit auto-generated files:
+   - Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+   - Files in `packages/store/src/gateway/AUTO_GENERATED/` are generated from `schema.json` (run `yarn workspace @safe-global/store build:dev` to regenerate)
+   - CI will fail if AUTO_GENERATED files don't match the schema
 6. **Not handling chain-specific logic** – Always consider multi-chain scenarios
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components
