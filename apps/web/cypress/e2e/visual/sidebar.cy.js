@@ -23,6 +23,7 @@ describe('[VISUAL] Sidebar screenshots', { defaultCommandTimeout: 60000, ...cons
     sideBar.openSidebar()
     sideBar.searchSafe(sideBar.sideBarSafes.multichain_short_)
     sideBar.expandGroupSafes(0)
+    main.waitForMuiAnimationsToSettle()
     sideBar.checkMultichainSubSafeExists([constants.networks.ethereum, constants.networks.sepolia])
 
     cy.contains('Sepolia Ether', { timeout: 30000 }).should('be.visible')

@@ -21,7 +21,7 @@ describe(
       cy.wait('@getMessages')
       cy.contains('Sign', { timeout: 10000 }).should('be.visible')
       cy.get(createtx.messageItem).first().click()
-      cy.wait(1000)
+      main.waitForMuiAnimationsToSettle()
       cy.contains('Created by', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })

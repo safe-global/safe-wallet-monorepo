@@ -27,7 +27,7 @@ describe(
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
       cy.contains('Batch').first().click()
-      cy.wait(1000)
+      main.waitForMuiAnimationsToSettle()
       main.verifySkeletonsGone()
     })
   },

@@ -21,7 +21,7 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     spendinglimit.clickOnNewSpendingLimitBtn()
-    cy.wait(1000)
+    main.waitForMuiAnimationsToSettle()
     cy.contains('New transaction', { timeout: 10000 }).should('be.visible')
   })
 
@@ -37,6 +37,7 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
 
   it('[VISUAL] Screenshot spending limit reset time dropdown', () => {
     spendinglimit.clickOnTimePeriodDropdown()
+    main.waitForMuiAnimationsToSettle()
     spendinglimit.checkTimeDropdownOptions()
     main.verifySkeletonsGone()
   })

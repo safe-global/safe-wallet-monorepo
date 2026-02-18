@@ -26,7 +26,7 @@ describe(
     it('[VISUAL] Screenshot add new signer form', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
-      cy.wait(1000)
+      main.waitForMuiAnimationsToSettle()
       cy.contains('Add new signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
@@ -34,7 +34,7 @@ describe(
     it('[VISUAL] Screenshot add signer with invalid address error', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
-      cy.wait(1000)
+      main.waitForMuiAnimationsToSettle()
       owner.typeOwnerAddressManage(1, main.generateRandomString(10))
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
       main.verifySkeletonsGone()
@@ -42,7 +42,7 @@ describe(
 
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
-      cy.wait(1000)
+      main.waitForMuiAnimationsToSettle()
       cy.contains('Replace signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })

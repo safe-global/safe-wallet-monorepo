@@ -24,6 +24,7 @@ describe('[VISUAL] Address book screenshots', { defaultCommandTimeout: 60000, ..
 
   it('[VISUAL] Screenshot address book edit entry with empty name error', () => {
     addressBook.clickOnEditEntryBtn()
+    main.waitForMuiAnimationsToSettle()
     addressBook.verifyEmptyOwnerNameNotAllowed()
     main.verifySkeletonsGone()
   })

@@ -34,6 +34,15 @@ export function verifySkeletonsGone(timeout = 30000) {
   cy.get('.MuiSkeleton-root', { timeout }).should('not.exist')
 }
 
+/**
+ * Waits for MUI animations (button ripple, modal slide-in, accordion expand) to fully settle.
+ * Must be called in visual regression tests after any click or toggle that triggers a MUI transition,
+ * otherwise the screenshot captures the mid-animation state and causes flaky Chromatic diffs.
+ */
+export function waitForMuiAnimationsToSettle() {
+  cy.wait(1000)
+}
+
 /** Intercepts the chain config API and injects a feature flag if not already present. */
 export function enableChainFeature(featureName) {
   cy.intercept('GET', constants.chainConfigEndpoint, (req) => {

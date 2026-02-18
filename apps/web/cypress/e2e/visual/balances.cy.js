@@ -21,7 +21,7 @@ describe('[VISUAL] Balances screenshots', { defaultCommandTimeout: 60000, ...con
     cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
     assets.toggleHideDust(false)
     assets.toggleShowAllTokens(true)
-    cy.wait(1000)
+    main.waitForMuiAnimationsToSettle()
     main.verifySkeletonsGone()
   })
 })

@@ -22,6 +22,7 @@ describe(
       wallet.connectSigner(signer)
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
+      main.waitForMuiAnimationsToSettle()
       cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
     })
 
