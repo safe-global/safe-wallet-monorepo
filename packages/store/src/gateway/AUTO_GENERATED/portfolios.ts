@@ -14,6 +14,7 @@ const injectedRtkApi = api
             chainIds: queryArg.chainIds,
             trusted: queryArg.trusted,
             excludeDust: queryArg.excludeDust,
+            sync: queryArg.sync,
           },
         }),
         providesTags: ['portfolio'],
@@ -38,6 +39,8 @@ export type PortfolioGetPortfolioV1ApiArg = {
   trusted?: boolean
   /** If true, filters out dust positions (balance < $0.001 USD) */
   excludeDust?: boolean
+  /** If true, waits for position data to be aggregated before responding (up to 30s) */
+  sync?: boolean
 }
 export type PortfolioClearPortfolioV1ApiResponse = unknown
 export type PortfolioClearPortfolioV1ApiArg = {

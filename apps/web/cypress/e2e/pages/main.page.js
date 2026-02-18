@@ -29,6 +29,33 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/** Waits until all MUI Skeleton placeholders have disappeared, ensuring the page is fully rendered. Used in visual tests before Chromatic captures the screenshot. */
+export function verifySkeletonsGone(timeout = 30000) {
+  cy.get('.MuiSkeleton-root', { timeout }).should('not.exist')
+}
+
+/**
+ * Waits for MUI animations (button ripple, modal slide-in, accordion expand) to fully settle.
+ * Must be called in visual regression tests after any click or toggle that triggers a MUI transition,
+ * otherwise the screenshot captures the mid-animation state and causes flaky Chromatic diffs.
+ */
+export function waitForMuiAnimationsToSettle() {
+  cy.wait(1000)
+}
+
+/** Intercepts the chain config API and injects a feature flag if not already present. */
+export function enableChainFeature(featureName) {
+  cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+    req.continue((res) => {
+      if (res.body && res.body.features) {
+        if (!res.body.features.includes(featureName)) {
+          res.body.features.push(featureName)
+        }
+      }
+    })
+  })
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }

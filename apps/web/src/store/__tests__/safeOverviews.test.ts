@@ -516,7 +516,6 @@ describe('safeOverviews', () => {
         safes: [`1:${fakeSafeAddress}`],
         currency: 'usd',
         trusted: false,
-        excludeSpam: true,
         walletAddress: undefined,
       })
       expect(mockedInitiateV1).not.toHaveBeenCalled()
@@ -622,7 +621,6 @@ describe('safeOverviews', () => {
         safes: [`10:${request.safes[1].address}`],
         currency: 'usd',
         trusted: false,
-        excludeSpam: true,
         walletAddress: undefined,
       })
     })
