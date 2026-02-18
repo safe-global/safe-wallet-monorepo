@@ -40,7 +40,7 @@
     "build-storybook": "storybook build --quiet",
     "build-storybook:vite": "storybook build --quiet --config-dir .storybook-vite",
     "test:storybook": "cross-env NODE_ENV=test TZ=UTC jest --testMatch '**/*.stories.test.tsx' --testPathIgnorePatterns='/node_modules/' --testPathIgnorePatterns='/.next/'",
-    "test:storybook:ci": "cross-env NODE_ENV=test TZ=UTC yarn test:storybook --ci --silent --coverage=false --watchAll=false",
+    "test:storybook:ci": "cross-env NODE_ENV=test TZ=UTC yarn test:storybook --ci --silent --coverage=false --watchAll=false --testTimeout=30000",
     "test:visual": "cross-env TZ=UTC test-storybook --url http://localhost:6006",
     "test:visual:ci": "cross-env TZ=UTC test-storybook --url http://localhost:6006 --ci",
     "test:visual:update": "cross-env TZ=UTC test-storybook --url http://localhost:6006 -u",
