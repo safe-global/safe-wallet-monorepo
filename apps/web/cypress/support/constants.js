@@ -56,6 +56,7 @@ export const stakingUrl = '/stake?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
+export const positionsUrl = '/balances/positions?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
 export const transactionsMessagesUrl = '/transactions/messages?safe='
@@ -72,6 +73,7 @@ export const chainMaticUrl = '/welcome?chain=matic'
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
+export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
@@ -79,6 +81,7 @@ export const appSettingsUrl = '/settings/safe-apps'
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
 export const securityUrl = '/settings/security?safe='
+export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
@@ -107,6 +110,7 @@ export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
 export const collectiblesEndpoint = '**/collectibles*'
+export const chainConfigEndpoint = '**/v1/chains/*'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -257,6 +261,10 @@ export const addresBookContacts = {
     address: 'francotest.eth',
     name: 'Franco ESN',
   },
+}
+
+export const chainFeatures = {
+  positions: 'POSITIONS',
 }
 
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')

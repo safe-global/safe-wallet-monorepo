@@ -21,6 +21,7 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     spendinglimit.clickOnNewSpendingLimitBtn()
+    cy.wait(1000)
     cy.contains('New transaction', { timeout: 10000 }).should('be.visible')
     main.verifySkeletonsGone()
   })

@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as owner from '../pages/owners.pages.js'
-import * as navigation from '../pages/navigation.page.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
@@ -27,12 +26,14 @@ describe(
     it('[VISUAL] Screenshot add new signer form', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
+      cy.wait(1000)
       cy.contains('Add new signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })
 
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
+      cy.wait(1000)
       cy.contains('Replace signer', { timeout: 10000 }).should('be.visible')
       main.verifySkeletonsGone()
     })

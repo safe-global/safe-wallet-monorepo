@@ -6,7 +6,7 @@ describe(
   { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT },
   () => {
     it('[VISUAL] Screenshot advanced create new safe form', () => {
-      cy.visit('/new-safe/advanced-create?chain=sep')
+      cy.visit(constants.advancedCreateSafeSepoliaUrl)
       cy.contains('Create new Safe Account', { timeout: 30000 }).should('be.visible')
       main.verifySkeletonsGone()
     })

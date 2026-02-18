@@ -29,6 +29,8 @@ describe(
       })
       cy.wait('@getQueuedTransactions')
       cy.contains('Batch', { timeout: 10000 }).should('be.visible').first().click()
+      cy.wait(1000)
+
       main.verifySkeletonsGone()
     })
   },
