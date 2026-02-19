@@ -115,7 +115,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
                 aria-label="Remove recipient"
                 variant="text"
                 startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}
-                size="compact"
+                size="medium"
               >
                 Remove recipient
               </Button>

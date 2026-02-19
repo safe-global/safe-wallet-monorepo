@@ -40,7 +40,7 @@ exports[`./PromoBanner.stories Default 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -94,7 +94,7 @@ exports[`./PromoBanner.stories ShortText 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -165,7 +165,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -233,7 +233,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
           Click the button to perform a custom action
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-reb66-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-rx2h81-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
@@ -303,7 +303,7 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
@@ -344,7 +344,7 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
           href="#"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >

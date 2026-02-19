@@ -32,7 +32,7 @@ const MembersCard = () => {
                   data-testid="add-member-button"
                   onClick={handleInviteClick}
                   variant={isButtonDisabled ? 'contained' : 'outlined'}
-                  size="compact"
+                  size="medium"
                   aria-label="Invite team members"
                   disabled={isButtonDisabled}
                 >

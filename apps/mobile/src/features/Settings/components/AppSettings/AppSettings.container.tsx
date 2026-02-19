@@ -124,13 +124,6 @@ export const AppSettingsContainer = () => {
           ),
           disabled: false,
         },
-        {
-          label: 'Change passcode',
-          leftIcon: 'lock',
-          onPress: () => console.log('change passcode'),
-          disabled: true,
-          tag: 'Coming soon',
-        },
       ],
     },
     {

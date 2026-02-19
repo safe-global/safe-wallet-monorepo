@@ -2,7 +2,7 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Grid, Stack } from '@mui/material'
+import { Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
@@ -12,6 +12,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning, UnsupportedMastercopyWarning } from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
@@ -45,7 +46,7 @@ const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const hn = useLoadFeature(HypernativeFeature)
   const { NoFeeCampaignBanner, noFeeCampaignBannerID } = useLoadFeature(NoFeeCampaignFeature)
-  const { NonPinnedWarningBanner } = useLoadFeature(MyAccountsFeature)
+  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
@@ -83,22 +84,6 @@ const Dashboard = (): ReactElement => {
 
   return (
     <>
-      <Grid container spacing={3} mb={3}>
-        {supportsRecovery && <RecoveryHeader />}
-
-        <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
-          <InconsistentSignerSetupWarning />
-        </Grid>
-
-        <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
-          <UnsupportedMastercopyWarning />
-        </Grid>
-
-        <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
-          <NonPinnedWarningBanner />
-        </Grid>
-      </Grid>
-
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
           <Overview />
@@ -136,6 +121,13 @@ const Dashboard = (): ReactElement => {
         </div>
 
         <div className={css.rightCol}>
+          <ActionRequiredPanel>
+            {supportsRecovery && <RecoveryHeader />}
+            <InconsistentSignerSetupWarning />
+            <UnsupportedMastercopyWarning />
+            <NonPinnedWarning />
+          </ActionRequiredPanel>
+
           {safe.deployed && <PendingTxsList />}
 
           <hn.HnPendingBanner />

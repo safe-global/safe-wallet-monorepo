@@ -25,7 +25,7 @@ const SpacesCTACard = () => {
           <Button
             onClick={handleLearnMore}
             variant="outlined"
-            size="compact"
+            size="medium"
             sx={{
               position: 'absolute',
               top: 0,

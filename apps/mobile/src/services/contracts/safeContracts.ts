@@ -7,6 +7,10 @@ import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/
 import type { SafeState as SafeInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
+import {
+  isCanonicalDeployment,
+  getCanonicalMultiSendCallOnlyAddress,
+} from '@safe-global/utils/services/contracts/deployments'
 
 const getGnosisSafeContract = async (safe: SafeInfo, safeProvider: SafeProvider) => {
   return getSafeContractInstance(
@@ -28,7 +32,11 @@ export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeInfo): Prom
   return getGnosisSafeContract(safe, safeProvider)
 }
 
-export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeInfo['version']) => {
+export const getReadOnlyMultiSendCallOnlyContract = async (
+  safeVersion: SafeInfo['version'],
+  chainId?: string,
+  implementationAddress?: string,
+) => {
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error('Safe SDK not found.')
@@ -36,5 +44,17 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeInfo
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
+  // we must use canonical auxiliary contracts because EVM contracts
+  // cannot delegatecall to EraVM contracts.
+  let customContractAddress: string | undefined
+  if (chainId && implementationAddress && isCanonicalDeployment(implementationAddress, chainId, safeVersion)) {
+    customContractAddress = getCanonicalMultiSendCallOnlyAddress(safeVersion)
+  }
+
+  return getMultiSendCallOnlyContractInstance(
+    _getValidatedGetContractProps(safeVersion).safeVersion,
+    safeProvider,
+    customContractAddress,
+  )
 }
