@@ -113,6 +113,21 @@ import { PanelLeftIcon } from 'lucide-react'
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'
+
+function getSidebarStateFromCookie(fallback: boolean): boolean {
+  if (typeof document === 'undefined') return fallback
+  try {
+    const match = document.cookie.match(
+      new RegExp(`(?:^|; )${SIDEBAR_COOKIE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=([^;]*)`),
+    )
+    const value = match?.[1]?.trim()
+    if (value === 'true') return true
+    if (value === 'false') return false
+  } catch {
+    // ignore - falling back to the default sidebar state
+  }
+  return fallback
+}
 const SIDEBAR_WIDTH_MOBILE = '18rem'
 const SIDEBAR_WIDTH_ICON = '3rem'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
@@ -178,12 +193,17 @@ function SidebarProvider({
   onOpenMobileChange?: (open: boolean) => void
 }) {
   const isMobile = useIsMobile()
+  const initialOpen = React.useMemo(
+    () => getSidebarStateFromCookie(defaultOpen),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read cookie only once on mount
+    [],
+  )
   const [openMobile, setOpenMobile] = useControlledBoolean(
     openMobileProp,
     setOpenMobileProp,
     false,
   )
-  const [open, setOpenBase] = useControlledBoolean(openProp, setOpenProp, defaultOpen)
+  const [open, setOpenBase] = useControlledBoolean(openProp, setOpenProp, initialOpen)
   const setOpen = React.useCallback(
     (update: boolean | ((prev: boolean) => boolean)) => {
       setOpenBase((prev) => {
