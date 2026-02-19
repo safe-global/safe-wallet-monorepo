@@ -78,7 +78,6 @@
       "useIsActiceMember",
       "useIsAdmin",
       "useIsInvited",
-      "useSpaceSafeCount",
       "useSpaceSafes",
       "useTrackSpace"
     ],

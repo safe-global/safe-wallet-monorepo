@@ -73,8 +73,5 @@ export {
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
 
-// Hooks from useSpaceSafeCount.tsx
-export { useSpaceSafeCount } from './hooks/useSpaceSafeCount'
-
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
