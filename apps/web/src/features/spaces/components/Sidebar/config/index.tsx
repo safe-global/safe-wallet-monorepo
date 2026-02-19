@@ -18,30 +18,30 @@ import {
   PanelRight,
   EllipsisVertical,
 } from 'lucide-react'
+import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
     icon: House,
     label: 'Home',
-    href: '/spaces',
-    isActive: true,
+    href: AppRoutes.spaces.index,
   },
   {
     icon: ArrowRightLeft,
     label: 'Transactions',
-    href: '/spaces/transactions',
+    href: AppRoutes.spaces.transactions,
     badge: 1,
   },
   {
     icon: WalletCards,
     label: 'Accounts',
-    href: '/spaces/safe-accounts',
+    href: AppRoutes.spaces.safeAccounts,
   },
   {
     icon: BookUser,
     label: 'Address book',
-    href: '/spaces/address-book',
+    href: AppRoutes.spaces.addressBook,
   },
 ]
 
@@ -51,17 +51,19 @@ export const spacesSetupGroup: SidebarGroupConfig = {
     {
       icon: UsersRound,
       label: 'Team',
-      href: '/spaces/members',
+      href: AppRoutes.spaces.members,
     },
     {
       icon: Shield,
       label: 'Security',
-      href: '/spaces/security',
+      href: AppRoutes.spaces.security,
+      activeMemberOnly: true,
     },
     {
       icon: Settings,
       label: 'Settings',
-      href: '/spaces/settings',
+      href: AppRoutes.spaces.settings,
+      activeMemberOnly: true,
     },
   ],
 }
@@ -71,7 +73,6 @@ export const safeMainNavigation: SidebarItemConfig[] = [
     icon: Wallet,
     label: 'Overview',
     href: '/home',
-    isActive: true,
   },
   {
     icon: ArrowRightLeft,

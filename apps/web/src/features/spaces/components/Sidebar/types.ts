@@ -6,11 +6,23 @@ export interface SidebarItemConfig {
   href: string
   badge?: number
   isActive?: boolean
+  activeMemberOnly?: boolean
 }
 
 export interface SidebarGroupConfig {
   label: string
   items: SidebarItemConfig[]
+}
+
+export interface ResolvedSidebarItem extends Omit<SidebarItemConfig, 'isActive' | 'activeMemberOnly'> {
+  isActive: boolean
+  disabled: boolean
+  link: { pathname: string; query: { spaceId: string | null } }
+}
+
+export interface ResolvedSidebarGroup {
+  label: string
+  items: ResolvedSidebarItem[]
 }
 
 export interface SpaceItem {
