@@ -16,21 +16,21 @@ describe('[VISUAL] Settings pages screenshots', { defaultCommandTimeout: 60000, 
 
   it('[VISUAL] Screenshot setup page', () => {
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot appearance settings page', () => {
     cy.visit(constants.appearanceSettingsUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot modules page', () => {
     cy.visit(constants.modulesUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot notifications settings page', () => {
     cy.visit(constants.notificationsUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

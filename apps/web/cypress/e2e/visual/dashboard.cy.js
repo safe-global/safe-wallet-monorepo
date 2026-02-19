@@ -17,7 +17,7 @@ describe('[VISUAL] Dashboard screenshots', { defaultCommandTimeout: 60000, ...co
 
   it('[VISUAL] Screenshot dashboard page', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot dashboard with pending transactions widget', () => {
@@ -26,6 +26,6 @@ describe('[VISUAL] Dashboard screenshots', { defaultCommandTimeout: 60000, ...co
       cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     })
     cy.wait('@getQueuedTransactions')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

@@ -22,28 +22,25 @@ describe(
       mockVisualTestApis()
       cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
       wallet.connectSigner(signer)
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot add new signer form', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot add signer with invalid address error', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
-      main.waitForMuiAnimationsToSettle()
       owner.typeOwnerAddressManage(1, main.generateRandomString(10))
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot replace signer dialog', () => {
       owner.openReplaceOwnerWindow(0)
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

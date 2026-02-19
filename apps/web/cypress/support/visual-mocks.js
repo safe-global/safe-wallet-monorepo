@@ -1,6 +1,8 @@
 import * as constants from './constants'
 
 const FIXTURES = {
+  chains: 'msw/chains/all.json',
+  safeInfo: 'msw/safes/sepolia.json',
   balances: 'msw/balances/safe-token-holder.json',
   portfolio: 'msw/portfolio/safe-token-holder.json',
   positions: 'msw/positions/safe-token-holder.json',
@@ -22,6 +24,32 @@ const MASTER_COPIES = [
  * (Cypress uses last-registered-wins for matching intercepts).
  */
 export function mockVisualTestApis() {
+  // Chain config — prevents empty sidebar when CGW is slow
+  cy.fixture(FIXTURES.chains).then((data) => {
+    cy.intercept('GET', constants.chainsEndpoint, data)
+    cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+      const chainId = req.url.split('/').pop().split('?')[0]
+      const chain = data.results.find((c) => c.chainId === chainId)
+      req.reply(chain || { statusCode: 404 })
+    })
+  })
+
+  // Safe info — dynamically patches address/chainId from the request URL
+  cy.fixture(FIXTURES.safeInfo).then((data) => {
+    cy.intercept('GET', constants.safeInfoEndpoint, (req) => {
+      const parts = req.url.split('/')
+      const safeAddress = parts.pop()
+      // walk back to find chainId: .../chains/{chainId}/safes/{safeAddress}
+      const chainsIdx = parts.indexOf('chains')
+      const chainId = chainsIdx !== -1 ? parts[chainsIdx + 1] : data.chainId
+      req.reply({
+        ...data,
+        address: { ...data.address, value: safeAddress },
+        chainId,
+      })
+    })
+  })
+
   cy.fixture(FIXTURES.balances).then((data) => cy.intercept('GET', constants.balancesEndpoint, data))
   cy.fixture(FIXTURES.portfolio).then((data) => cy.intercept('GET', constants.portfolioEndpoint, data))
   cy.fixture(FIXTURES.positions).then((data) => cy.intercept('GET', constants.positionsEndpoint, data))

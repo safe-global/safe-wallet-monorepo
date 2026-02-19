@@ -17,6 +17,6 @@ describe('[VISUAL] Cookie settings screenshots', { defaultCommandTimeout: 60000,
   it('[VISUAL] Screenshot cookie preferences page', () => {
     cy.visit(constants.cookiesUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.contains('Cookie preferences', { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

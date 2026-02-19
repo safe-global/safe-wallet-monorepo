@@ -12,13 +12,13 @@ describe('[VISUAL] Welcome page screenshots', { defaultCommandTimeout: 60000, ..
   it('[VISUAL] Screenshot welcome page', () => {
     cy.visit(constants.welcomeUrl)
     cy.contains('Own your assets onchain securely', { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot accounts page with added safes', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set1)
     cy.visit(constants.welcomeAccountUrl)
     cy.get(sideBar.sideSafeListItem, { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

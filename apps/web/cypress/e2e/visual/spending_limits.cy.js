@@ -22,22 +22,20 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     spendinglimit.clickOnNewSpendingLimitBtn()
-    main.waitForMuiAnimationsToSettle()
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit form', () => {
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit amount validation error', () => {
     spendinglimit.enterSpendingLimitAmount('0')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit reset time dropdown', () => {
     spendinglimit.clickOnTimePeriodDropdown()
-    main.waitForMuiAnimationsToSettle()
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

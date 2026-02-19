@@ -46,20 +46,9 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
   })
 })
-```
-
-### Animation settling
-
-`main.waitForMuiAnimationsToSettle()` — call after any click/toggle that triggers MUI animation (button ripple, modal slide-in, accordion expand, dropdown open). Without this, screenshots capture mid-animation state causing flaky Chromatic diffs.
-
-```js
-owner.clickOnAddSignerBtn()
-main.waitForMuiAnimationsToSettle() // ripple + modal transition
-cy.contains('Add new signer', { timeout: 10000 }).should('be.visible')
-main.verifySkeletonsGone()
 ```
 
 ### Wallet tests
@@ -68,16 +57,15 @@ Use `wallet.connectSigner(signer)` in `beforeEach`, not in individual `it` block
 
 ### Key utilities
 
-| Utility                          | Location                        | Purpose                                 |
-| -------------------------------- | ------------------------------- | --------------------------------------- |
-| `verifySkeletonsGone()`          | `pages/main.page.js`            | Wait for all MUI skeletons to disappear |
-| `waitForMuiAnimationsToSettle()` | `pages/main.page.js`            | 1s settle after MUI animations          |
-| `addToLocalStorage()`            | `pages/main.page.js`            | Set data before first visit             |
-| `addToAppLocalStorage()`         | `pages/main.page.js`            | Set data after visit (needs reload)     |
-| `connectSigner()`                | `support/utils/wallet.js`       | Connect wallet in tests                 |
-| `getSafes()`                     | `support/safes/safesHandler.js` | Get safe addresses                      |
-| `VISUAL_VIEWPORT`                | `support/constants.js`          | Viewport config for visual tests        |
-| `mockVisualTestApis()`           | `support/visual-mocks.js`       | Mock CGW APIs for deterministic visuals |
+| Utility                  | Location                        | Purpose                                       |
+| ------------------------ | ------------------------------- | --------------------------------------------- |
+| `awaitVisualStability()` | `pages/main.page.js`            | Wait for skeletons + settle before screenshot |
+| `addToLocalStorage()`    | `pages/main.page.js`            | Set data before first visit                   |
+| `addToAppLocalStorage()` | `pages/main.page.js`            | Set data after visit (needs reload)           |
+| `connectSigner()`        | `support/utils/wallet.js`       | Connect wallet in tests                       |
+| `getSafes()`             | `support/safes/safesHandler.js` | Get safe addresses                            |
+| `VISUAL_VIEWPORT`        | `support/constants.js`          | Viewport config for visual tests              |
+| `mockVisualTestApis()`   | `support/visual-mocks.js`       | Mock CGW APIs for deterministic visuals       |
 
 ### API mocking for visual tests
 

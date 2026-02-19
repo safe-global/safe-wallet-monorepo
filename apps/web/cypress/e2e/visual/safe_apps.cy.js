@@ -18,18 +18,18 @@ describe('[VISUAL] Safe Apps screenshots', { defaultCommandTimeout: 60000, ...co
   })
 
   it('[VISUAL] Screenshot Safe Apps list', () => {
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot Safe Apps search filtered results', () => {
     safeapps.typeAppName('Transaction Builder')
     cy.contains('Transaction Builder').should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot Safe Apps no results state', () => {
     safeapps.typeAppName('zzzznonexistentapp12345')
     cy.contains(/no Safe Apps found/i, { timeout: 10000 }).should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

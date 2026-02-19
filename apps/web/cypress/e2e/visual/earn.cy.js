@@ -17,6 +17,6 @@ describe('[VISUAL] Earn page screenshots', { defaultCommandTimeout: 60000, ...co
   it('[VISUAL] Screenshot earn page', () => {
     main.enableChainFeature(constants.chainFeatures.earn)
     cy.visit(constants.earnUrl + staticSafes.SEP_STATIC_SAFE_2)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

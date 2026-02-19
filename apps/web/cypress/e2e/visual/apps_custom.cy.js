@@ -20,7 +20,7 @@ describe(
     it('[VISUAL] Screenshot custom Safe Apps page', () => {
       cy.visit(constants.appsCustomUrl + staticSafes.SEP_STATIC_SAFE_2)
       cy.contains('Custom apps', { timeout: 30000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

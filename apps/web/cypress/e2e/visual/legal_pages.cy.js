@@ -9,31 +9,31 @@ describe('[VISUAL] Legal page screenshots', { defaultCommandTimeout: 60000, ...c
 
   it('[VISUAL] Screenshot terms page', () => {
     cy.visit(constants.termsUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot privacy policy page', () => {
     cy.visit(constants.privacyUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot licenses page', () => {
     cy.visit(constants.licensesUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot imprint page', () => {
     cy.visit(constants.imprintUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot cookie policy page', () => {
     cy.visit(constants.cookiePolicyUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot Safe Labs terms page', () => {
     cy.visit(constants.safeLabsTermsUrl)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

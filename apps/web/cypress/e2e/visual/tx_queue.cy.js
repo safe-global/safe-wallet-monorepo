@@ -24,13 +24,12 @@ describe(
     })
 
     it('[VISUAL] Screenshot queue page with pending transactions', () => {
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
       cy.contains('Batch').first().click()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

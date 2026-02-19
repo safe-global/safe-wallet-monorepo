@@ -21,13 +21,12 @@ describe('[VISUAL] Address book screenshots', { defaultCommandTimeout: 60000, ..
   })
 
   it('[VISUAL] Screenshot address book page with entries', () => {
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot address book edit entry with empty name error', () => {
     addressBook.clickOnEditEntryBtn()
-    main.waitForMuiAnimationsToSettle()
     cy.get(main.nameInput).clear()
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

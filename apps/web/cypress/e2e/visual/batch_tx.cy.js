@@ -21,20 +21,18 @@ describe(
 
     it('[VISUAL] Screenshot empty batch list', () => {
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
       batch.openBatchtransactionsModal()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot batch list with transaction', () => {
       main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1)
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
       cy.reload()
       batch.clickOnBatchCounter()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

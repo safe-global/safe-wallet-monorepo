@@ -24,29 +24,28 @@ describe(
       wallet.connectSigner(signer)
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form initial state', () => {
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
-      createtx.clickOnTokenselectorAndSelectSepoliaEth()
+      createtx.clickOnTokenselectorAndSelectToken('Ether')
       createtx.setMaxAmount()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
       createtx.typeRecipientAddress('Lorem Ipsum')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form with nonce warning', () => {
       createtx.changeNonce(0)
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

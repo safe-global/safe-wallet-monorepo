@@ -22,6 +22,6 @@ describe('[VISUAL] NFTs page screenshots', { defaultCommandTimeout: 60000, ...co
     })
     cy.wait('@getCollectibles')
     nfts.waitForNftItems(1)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

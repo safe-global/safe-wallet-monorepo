@@ -24,7 +24,7 @@ describe(
       })
       cy.wait('@getMessages')
       cy.contains('Sign', { timeout: 10000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )
