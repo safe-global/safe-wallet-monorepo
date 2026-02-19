@@ -28,26 +28,8 @@ jobs:
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
 
-          # Check if schema.json changed
-          SCHEMA_CHANGED=false
-          if echo "$CHANGED_FILES" | grep -q "packages/store/scripts/api-schema/schema.json"; then
-            SCHEMA_CHANGED=true
-            echo "schema_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "schema_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Check if any AUTO_GENERATED files changed
-          AUTO_GEN_CHANGED=false
-          if echo "$CHANGED_FILES" | grep -q "packages/store/src/gateway/AUTO_GENERATED/"; then
-            AUTO_GEN_CHANGED=true
-            echo "auto_generated_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "auto_generated_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Determine if validation should run
-          if [ "$SCHEMA_CHANGED" == "true" ] || [ "$AUTO_GEN_CHANGED" == "true" ]; then
+          # Check if schema.json or AUTO_GENERATED files changed
+          if echo "$CHANGED_FILES" | grep -qE "packages/store/(scripts/api-schema/schema\.json|src/gateway/AUTO_GENERATED/)"; then
             echo "should_validate=true" >> $GITHUB_OUTPUT
             echo "✅ Will validate AUTO_GENERATED files against schema.json"
           else
