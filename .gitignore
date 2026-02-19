@@ -107,3 +107,7 @@ apps/web/src/types/contracts/*
 
 # tx-builder
 apps/tx-builder/build/*
+
+# claude-workflows
+todos/*
+docs/

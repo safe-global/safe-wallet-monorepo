@@ -280,11 +280,21 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 
 ### E2E Tests (Web only)
 
-- Located in `apps/web/cypress/e2e/`
-- **IMPORTANT**: Follow the Cypress E2E automation rules in `.cursor/rules/cypress-e2e.mdc` when writing or modifying tests
-- Run with `yarn workspace @safe-global/web cypress:open` for interactive mode
-- Run with `yarn workspace @safe-global/web cypress:run` for headless mode
-- Smoke tests in `cypress/e2e/smoke/` are run in CI
+Located in `apps/web/cypress/e2e/`. Full conventions and patterns: `apps/web/cypress/CLAUDE.md`.
+
+| Category   | Folder            | CI                           | Purpose                                    |
+| ---------- | ----------------- | ---------------------------- | ------------------------------------------ |
+| Smoke      | `e2e/smoke/`      | Every PR                     | Critical path functional tests             |
+| Visual     | `e2e/visual/`     | Manual (`workflow_dispatch`) | Chromatic visual regression (light + dark) |
+| Regression | `e2e/regression/` | On-demand                    | Feature tests                              |
+| Happy path | `e2e/happypath/`  | On-demand                    | User journey tests                         |
+
+```bash
+yarn workspace @safe-global/web cypress:open   # interactive
+yarn workspace @safe-global/web cypress:run    # headless
+```
+
+Coverage report: `apps/web/cypress/COVERAGE.md`
 
 ### Test Coverage
 
@@ -558,7 +568,10 @@ Avoid these common mistakes when contributing:
 2. **Forgetting to run tests** – Always run tests before committing (`yarn workspace @safe-global/web test`)
 3. **Breaking mobile when changing shared code** – Shared packages (`packages/**`) affect both web and mobile
 4. **Hardcoding values** – Use theme variables from `vars.css` (web) or Tamagui tokens (mobile)
-5. **Modifying generated files** – Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+5. **Modifying generated files** – Never manually edit auto-generated files:
+   - Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+   - Files in `packages/store/src/gateway/AUTO_GENERATED/` are generated from `schema.json` (run `yarn workspace @safe-global/store build:dev` to regenerate)
+   - CI will fail if AUTO_GENERATED files don't match the schema
 6. **Not handling chain-specific logic** – Always consider multi-chain scenarios
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components

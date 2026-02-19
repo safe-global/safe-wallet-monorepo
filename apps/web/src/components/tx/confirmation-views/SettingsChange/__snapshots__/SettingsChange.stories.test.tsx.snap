@@ -59,6 +59,10 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
                 data-mui-internal-clone-element="true"
                 style="cursor: pointer;"
               >
+                <b>
+                  rin
+                  :
+                </b>
                 <span>
                   0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
                 </span>
@@ -86,7 +90,24 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             </span>
             <div
               class="MuiBox-root mui-style-yjghm1"
-            />
+            >
+              <a
+                aria-label="View on rinkeby.etherscan.io"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                data-mui-internal-clone-element="true"
+                data-testid="explorer-btn"
+                href="https://rinkeby.etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                rel="noreferrer"
+                tabindex="0"
+                target="_blank"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                  focusable="false"
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -209,7 +230,24 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             </span>
             <div
               class="MuiBox-root mui-style-yjghm1"
-            />
+            >
+              <a
+                aria-label="View on rinkeby.etherscan.io"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                data-mui-internal-clone-element="true"
+                data-testid="explorer-btn"
+                href="https://rinkeby.etherscan.io/address/0x00000000"
+                rel="noreferrer"
+                tabindex="0"
+                target="_blank"
+              >
+                <mock-icon
+                  aria-hidden=""
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                  focusable="false"
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>

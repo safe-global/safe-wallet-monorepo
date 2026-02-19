@@ -35,6 +35,10 @@ exports[`./index.stories Default 1`] = `
               data-mui-internal-clone-element="true"
               style="cursor: pointer;"
             >
+              <b>
+                rin
+                :
+              </b>
               <span>
                 0xd9Db...9552
               </span>

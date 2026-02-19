@@ -7,6 +7,7 @@ import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 
 const singletonSafeSDK = new Map<string, Safe>()
 // Safe Core SDK
@@ -53,10 +54,17 @@ export const initSafeSDK = async ({
     isL1SafeSingleton = true
   }
 
+  const contractNetworks = getCanonicalMultiSendContractNetworks({
+    implementationAddress: implementation,
+    chainId,
+    safeVersion,
+  })
+
   const safeSDK = await Safe.init({
     provider: providerUrl,
     safeAddress: address,
     isL1SafeSingleton,
+    ...(contractNetworks ? { contractNetworks } : {}),
   })
   singletonSafeSDK.set(key, safeSDK)
 

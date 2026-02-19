@@ -40,8 +40,12 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
+export const spaceDashboardUrl = '/spaces?spaceId='
 export const spaceUrl = '/spaces/settings?spaceId='
 export const spaceMembersUrl = '/spaces/members?spaceId='
+export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
+export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
+export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
@@ -53,9 +57,12 @@ export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
 export const appsUrlGeneral = '/apps?safe='
 export const stakingUrl = '/stake?safe='
+export const earnUrl = '/earn?safe='
+export const bridgeUrl = '/bridge?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
+export const positionsUrl = '/balances/positions?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
 export const transactionsMessagesUrl = '/transactions/messages?safe='
@@ -72,15 +79,19 @@ export const chainMaticUrl = '/welcome?chain=matic'
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
+export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
 export const appSettingsUrl = '/settings/safe-apps'
+export const safeAppsSettingsUrl = '/settings/safe-apps?safe='
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
 export const securityUrl = '/settings/security?safe='
+export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
+export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
@@ -98,7 +109,12 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
+export const usersEndpoint = '**/v1/users'
 export const spacesEndpoint = '**/**/spaces*'
+export const spacesGetOneEndpoint = '**/v1/spaces/*'
+export const spacesMembersEndpoint = '**/v1/spaces/*/members'
+export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
+export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
@@ -107,6 +123,7 @@ export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
 export const collectiblesEndpoint = '**/collectibles*'
+export const chainConfigEndpoint = '**/v1/chains/*'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -259,6 +276,24 @@ export const addresBookContacts = {
   },
 }
 
+export const termsUrl = '/terms'
+export const privacyUrl = '/privacy'
+export const licensesUrl = '/licenses'
+export const imprintUrl = '/imprint'
+export const cookiePolicyUrl = '/cookie'
+export const safeLabsTermsUrl = '/safe-labs-terms'
+export const error403Url = '/403'
+export const error404Url = '/404'
+
+export const chainFeatures = {
+  positions: 'POSITIONS',
+  nativeSwaps: 'NATIVE_SWAPS',
+  bridge: 'BRIDGE',
+  staking: 'STAKING',
+  earn: 'EARN',
+  spaces: 'SPACES',
+}
+
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')
 
 export const localStorageKeys = {
@@ -275,4 +310,5 @@ export const localStorageKeys = {
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
   SAFE_v2__batch: 'SAFE_v2__batch',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
+  SAFE_v2__auth: 'SAFE_v2__auth',
 }

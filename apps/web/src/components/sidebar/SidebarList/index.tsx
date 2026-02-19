@@ -78,13 +78,21 @@ export const SidebarListItemText = ({
   </ListItemText>
 )
 
-export const SidebarListItemCounter = ({ count }: { count?: string }): ReactElement | null =>
+export const SidebarListItemCounter = ({
+  count,
+  variant = 'warning',
+}: {
+  count?: string
+  variant?: 'warning' | 'subtle'
+}): ReactElement | null =>
   count ? (
     <Badge
       sx={{
         '& .MuiBadge-badge': {
-          color: 'static.main',
-          backgroundColor: 'warning.light',
+          color: variant === 'warning' ? 'static.main' : 'text.primary',
+          backgroundColor: variant === 'warning' ? 'warning.light' : 'background.main',
+          border: variant === 'subtle' ? '1px solid' : undefined,
+          borderColor: variant === 'subtle' ? 'background.main' : undefined,
           transform: 'none',
           fontWeight: 'bold',
           padding: '0 4px',

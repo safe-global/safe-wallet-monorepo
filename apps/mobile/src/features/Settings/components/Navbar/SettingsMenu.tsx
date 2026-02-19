@@ -28,7 +28,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
   const color = theme.color?.get()
-  const colorError = 'red'
+  const colorError = theme.error?.get() || '#FF5F72'
 
   if (!safeAddress) {
     return null

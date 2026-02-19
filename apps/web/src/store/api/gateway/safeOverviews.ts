@@ -61,7 +61,6 @@ class SafeOverviewFetcher {
         currency,
         walletAddress,
         trusted: false,
-        excludeSpam: true,
       })
       const queryAction: SafesV2QueryActionResult = dispatchV2(queryThunk)
 

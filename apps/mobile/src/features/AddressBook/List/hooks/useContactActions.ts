@@ -5,7 +5,7 @@ import { useTheme } from 'tamagui'
 export const useContactActions = () => {
   const theme = useTheme()
   const color = theme.color?.get()
-  const colorError = 'red'
+  const colorError = theme.error?.get() || '#FF5F72'
 
   const actions = useMemo(
     () => [
