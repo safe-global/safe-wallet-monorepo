@@ -24,6 +24,11 @@ export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {
+  // Wait for hydration to set the correct safe query param in the link href
+  cy.get(pendingTxItem)
+    .eq(index)
+    .should('have.attr', 'href')
+    .and('match', /safe=.{3,}/)
   cy.get(pendingTxItem).eq(index).click()
   cy.get(singleTxDetailsHeader).should('be.visible')
 }

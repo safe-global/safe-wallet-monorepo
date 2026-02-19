@@ -22,6 +22,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     cy.intercept('GET', constants.queuedEndpoint).as('getQueuedTransactions')
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     cy.wait('@getQueuedTransactions')
+    cy.get(dashboard.pendingTxWidget).should('be.visible')
   })
 
   it('Verify clicking on View All button directs to list of all queued txs', () => {
