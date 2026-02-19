@@ -24,7 +24,7 @@ const InviteMembersOnboarding = (): ReactElement => {
   return (
     <div className="shadcn-scope">
       <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-        <form onSubmit={onSubmit} className="flex w-full max-w-[350px] flex-col gap-6">
+        <form onSubmit={onSubmit} className="flex w-full max-w-[400px] flex-col gap-6">
           <Button
             type="button"
             variant="ghost"
