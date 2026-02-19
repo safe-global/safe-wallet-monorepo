@@ -91,7 +91,7 @@ const SpaceSidebarSelector = () => {
           onClose={handleClose}
           sx={{ '& .MuiPaper-root': { minWidth: '260px !important' } }}
         >
-          <SpaceCard space={selectedSpace} isCompact isLink={false} />
+          <SpaceCard space={selectedSpace} isCompact isLink={false} currentUserId={currentUser?.id} />
 
           <Divider sx={{ mb: 1 }} />
 

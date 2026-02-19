@@ -129,7 +129,7 @@ const SpacesList = () => {
             {activeSpaces.length > 0 ? (
               activeSpaces.map((space) => (
                 <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} />
+                  <SpaceCard space={space} currentUserId={currentUser?.id} />
                 </Grid2>
               ))
             ) : (
