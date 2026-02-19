@@ -87,7 +87,7 @@ jobs:
             ✅ Deploy successful!
 
             **Preview URL:**
-            https://${{ steps.extract_branch.outputs.branch }}--tx-builder.review.5afe.dev/tx-builder/
+            https://${{ steps.extract_branch.outputs.branch }}--tx-builder.review.5afe.dev/
           message-failure: |
             ## tx-builder Preview
             ❌ Deploy failed!
@@ -120,7 +120,7 @@ jobs:
 
       - name: Deploy to staging
         env:
-          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/current/tx-builder
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/current
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
