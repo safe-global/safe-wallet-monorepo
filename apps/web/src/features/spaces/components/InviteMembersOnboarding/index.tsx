@@ -14,10 +14,8 @@ const TOTAL_STEPS = 4
 
 const InviteMembersOnboarding = (): ReactElement => {
   const { spaceId, isReady, goBack, redirectToNextStep } = useInviteNavigation()
-  const { control, formState, register, fields, append, remove, onSubmit, error, isSubmitting } = useInviteForm(
-    spaceId,
-    redirectToNextStep,
-  )
+  const { control, formState, register, setValue, fields, append, remove, onSubmit, error, isSubmitting } =
+    useInviteForm(spaceId, redirectToNextStep)
 
   if (!isReady) {
     return <></>
@@ -56,6 +54,7 @@ const InviteMembersOnboarding = (): ReactElement => {
                 index={index}
                 control={control}
                 register={register}
+                setValue={setValue}
                 canRemove={fields.length > 1}
                 onRemove={() => remove(index)}
               />

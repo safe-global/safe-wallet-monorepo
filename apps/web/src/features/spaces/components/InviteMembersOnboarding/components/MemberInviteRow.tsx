@@ -1,13 +1,16 @@
+import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
+import type { UseFormSetValue } from 'react-hook-form'
 import { X } from 'lucide-react'
 import { validateAddress } from '@safe-global/utils/utils/validation'
+import { isDomain } from '@/services/ens'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
-import AddressIdenticon from './AddressIdenticon'
+import EnsAddressIdenticon from './EnsAddressIdenticon'
 
 const ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.ADMIN]: 'Admin',
@@ -18,32 +21,38 @@ interface MemberInviteRowProps {
   index: number
   control: ReturnType<typeof import('react-hook-form').useForm<InviteMembersFormValues>>['control']
   register: ReturnType<typeof import('react-hook-form').useForm<InviteMembersFormValues>>['register']
+  setValue: UseFormSetValue<InviteMembersFormValues>
   canRemove: boolean
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, canRemove, onRemove }: MemberInviteRowProps) => {
+const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemove }: MemberInviteRowProps) => {
   const addressValue = useWatch({ control, name: `members.${index}.address` })
+
+  const handleAddressResolved = useCallback(
+    (address: string) => {
+      setValue(`members.${index}.address`, address, { shouldValidate: true })
+    },
+    [setValue, index],
+  )
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative flex-1">
-        <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-          <AddressIdenticon address={addressValue || ''} />
-        </div>
+      <EnsAddressIdenticon address={addressValue || ''} onAddressResolved={handleAddressResolved}>
         <Input
           {...register(`members.${index}.address`, {
             required: index === 0,
             validate: (value) => {
               if (!value.trim()) return undefined
+              if (isDomain(value)) return undefined
               return validateAddress(value)
             },
           })}
-          placeholder="Type wallet address"
+          placeholder="Wallet address or ENS name"
           className="h-11 rounded-lg bg-card pl-12 pr-4"
           data-testid={`invite-address-input-${index}`}
         />
-      </div>
+      </EnsAddressIdenticon>
 
       <Controller
         control={control}

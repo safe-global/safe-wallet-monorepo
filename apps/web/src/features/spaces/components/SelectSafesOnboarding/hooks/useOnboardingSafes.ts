@@ -1,11 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
-import {
-  type AllSafeItems,
-  getComparator,
-  useOwnedSafesGrouped,
-  useSafesSearch,
-} from '@/hooks/safes'
+import { type AllSafeItems, getComparator, useOwnedSafesGrouped, useSafesSearch } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 

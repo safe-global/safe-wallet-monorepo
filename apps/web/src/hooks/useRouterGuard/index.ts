@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
 export type ActivationGuard = () => Promise<{ success: boolean; redirectTo?: string }>
-export type UseGuard = () => {
+export type UseGuard = (evaluateGuard: (ctx: GuardContext) => GuardResult) => {
   activationGuard: ActivationGuard
 }
 

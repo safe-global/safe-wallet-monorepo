@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
+import { isAddress } from 'ethers'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -30,13 +31,20 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     },
   })
 
-  const { handleSubmit, control, formState, register } = methods
+  const { handleSubmit, control, formState, register, setValue } = methods
   const { fields, append, remove } = useFieldArray({ control, name: 'members' })
 
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
     const validMembers = data.members.filter((m) => m.address.trim() !== '')
+
+    const hasUnresolvedNames = validMembers.some((m) => !isAddress(m.address))
+    if (hasUnresolvedNames) {
+      setError('Please wait for all ENS names to resolve')
+      return
+    }
+
     if (validMembers.length === 0) {
       setIsSubmitting(true)
       onSuccess()
@@ -87,6 +95,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     control,
     formState,
     register,
+    setValue,
     fields,
     append,
     remove,
