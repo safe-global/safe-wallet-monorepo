@@ -8,10 +8,10 @@ const defaultSetup = createMockStory({
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/welcome/address-book',
+  query: { spaceId: '1' },
 })
 
 const meta = {
-  title: 'Pages/Onboarding/AddAddressBook',
   component: AddAddressBookOnboarding,
   loaders: [mswLoader],
   parameters: {

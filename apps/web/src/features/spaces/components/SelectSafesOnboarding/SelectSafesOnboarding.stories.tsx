@@ -1,25 +1,25 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
-import InviteMembersOnboarding from '.'
+import SelectSafesOnboarding from '.'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   features: { spaces: true },
-  pathname: '/welcome/invite-members',
+  pathname: '/welcome/select-safes',
   query: { spaceId: '1' },
 })
 
 const meta = {
-  component: InviteMembersOnboarding,
+  component: SelectSafesOnboarding,
   loaders: [mswLoader],
   parameters: {
     layout: 'fullscreen',
     ...defaultSetup.parameters,
   },
   decorators: [defaultSetup.decorator],
-} satisfies Meta<typeof InviteMembersOnboarding>
+} satisfies Meta<typeof SelectSafesOnboarding>
 
 export default meta
 type Story = StoryObj<typeof meta>
