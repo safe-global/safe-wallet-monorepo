@@ -120,7 +120,7 @@ jobs:
 
       - name: Deploy to staging
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current/tx-builder
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/current/tx-builder
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
@@ -175,7 +175,7 @@ jobs:
 
       - name: Deploy to production S3
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
