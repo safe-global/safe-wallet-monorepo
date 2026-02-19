@@ -8,7 +8,17 @@ import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 
-export const SpacesEnhancedSidebar = (): ReactElement => {
+interface SpacesEnhancedSidebarProps {
+  /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
+  isDrawerOpen?: boolean
+  /** Called when the mobile Sheet is closed so the parent can sync (e.g. close the drawer). */
+  onDrawerClose?: () => void
+}
+
+export const SpacesEnhancedSidebar = ({
+  isDrawerOpen,
+  onDrawerClose,
+}: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
 
@@ -25,6 +35,8 @@ export const SpacesEnhancedSidebar = (): ReactElement => {
 
   return (
     <SidebarProvider
+      openMobile={isDrawerOpen}
+      onOpenMobileChange={(open) => !open && onDrawerClose?.()}
       style={
         {
           '--sidebar-width': spacesSidebarWidth,

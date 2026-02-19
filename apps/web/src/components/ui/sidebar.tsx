@@ -138,10 +138,34 @@ function useSidebar() {
   return context
 }
 
+/** Shared logic for sidebar open state: desktop (expand/collapse) and mobile (sheet open/closed). Controlled when props are passed (e.g. parent drawer), otherwise internal. Supports both value and updater for toggling. */
+function useControlledBoolean(
+  controlled: boolean | undefined,
+  onChange: ((value: boolean) => void) | undefined,
+  defaultValue: boolean,
+): [boolean, (value: boolean | ((prev: boolean) => boolean)) => void] {
+  const [internal, setInternal] = React.useState(defaultValue)
+  const value = controlled ?? internal
+  const setValue = React.useCallback(
+    (update: boolean | ((prev: boolean) => boolean)) => {
+      const next = typeof update === 'function' ? update(value) : update
+      if (onChange) {
+        onChange(next)
+      } else {
+        setInternal(next)
+      }
+    },
+    [value, onChange],
+  )
+  return [value, setValue]
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  openMobile: openMobileProp,
+  onOpenMobileChange: setOpenMobileProp,
   className,
   style,
   children,
@@ -150,27 +174,25 @@ function SidebarProvider({
   defaultOpen?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  openMobile?: boolean
+  onOpenMobileChange?: (open: boolean) => void
 }) {
   const isMobile = useIsMobile()
-  const [openMobile, setOpenMobile] = React.useState(false)
-
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen)
-  const open = openProp ?? _open
+  const [openMobile, setOpenMobile] = useControlledBoolean(
+    openMobileProp,
+    setOpenMobileProp,
+    false,
+  )
+  const [open, setOpenBase] = useControlledBoolean(openProp, setOpenProp, defaultOpen)
   const setOpen = React.useCallback(
-    (value: boolean | ((value: boolean) => boolean)) => {
-      const openState = typeof value === 'function' ? value(open) : value
-      if (setOpenProp) {
-        setOpenProp(openState)
-      } else {
-        _setOpen(openState)
-      }
-
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+    (update: boolean | ((prev: boolean) => boolean)) => {
+      setOpenBase((prev) => {
+        const next = typeof update === 'function' ? update(prev) : update
+        document.cookie = `${SIDEBAR_COOKIE_NAME}=${next}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        return next
+      })
     },
-    [setOpenProp, open],
+    [setOpenBase],
   )
 
   // Helper to toggle the sidebar.

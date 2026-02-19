@@ -45,8 +45,6 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
     }
   }, [onToggle, router, isSmallScreen])
 
-  const SidebarComponent = isSpaceRoute ? SpacesEnhancedSidebar : Sidebar
-
   return (
     <>
       <Drawer
@@ -64,7 +62,14 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          <SidebarComponent />
+          {isSpaceRoute ? (
+            <SpacesEnhancedSidebar
+              isDrawerOpen={isOpen}
+              onDrawerClose={() => onToggle(false)}
+            />
+          ) : (
+            <Sidebar />
+          )}
         </aside>
       </Drawer>
 
