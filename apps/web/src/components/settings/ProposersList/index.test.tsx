@@ -38,9 +38,9 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(() => true),
 }))
 
-jest.mock('@/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+jest.mock('@/features/spending-limits', () => ({
   __esModule: true,
-  default: jest.fn(() => false),
+  useIsOnlySpendingLimitBeneficiary: jest.fn(() => false),
 }))
 
 jest.mock('@/hooks/useIsWrongChain', () => ({
