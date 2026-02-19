@@ -1,9 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 
-const DevTool = lazy(() =>
-  import('@hookform/devtools').then((m) => ({ default: m.DevTool })),
-)
+const DevTool = lazy(() => import('@hookform/devtools').then((m) => ({ default: m.DevTool })))
 import { getAddress, parseEther } from 'ethers'
 
 import {
