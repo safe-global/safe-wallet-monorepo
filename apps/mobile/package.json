@@ -173,7 +173,7 @@
     "babel-loader": "^10.0.0",
     "eslint": "^9.29.0",
     "eslint-plugin-react": "^7.37.1",
-    "glob": "^13.0.3",
+    "glob": "^13.0.5",
     "globals": "^15.14.0",
     "jest": "^29.7.0",
     "jest-expo": "~54.0.12",
