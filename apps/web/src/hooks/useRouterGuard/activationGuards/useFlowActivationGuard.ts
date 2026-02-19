@@ -7,7 +7,7 @@ import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { GuardRule } from '../types'
+import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 
 // ---------------------------------------------------------------------------

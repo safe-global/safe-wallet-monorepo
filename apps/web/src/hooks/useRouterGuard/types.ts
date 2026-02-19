@@ -2,7 +2,7 @@
 // Guard helpers
 // ---------------------------------------------------------------------------
 
-import { ParsedUrlQuery } from '@/storybook/mocks/querystring'
+import type { ParsedUrlQuery } from '@/storybook/mocks/querystring'
 
 export interface GuardResult {
   success: boolean

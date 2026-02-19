@@ -1,4 +1,4 @@
-import { GuardContext, GuardResult, GuardRule } from './types'
+import type { GuardContext, GuardResult, GuardRule } from './types'
 
 export const allow = (): GuardResult => ({ success: true })
 export const redirect = (redirectTo: string): GuardResult => ({ success: false, redirectTo })
