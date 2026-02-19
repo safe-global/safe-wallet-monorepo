@@ -10,11 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
+
+const SPACE_NAME_MAX_LENGTH = 15
+
+const truncateSpaceName = (name: string, maxLength: number): string =>
+  name.length > maxLength ? `${name.slice(0, maxLength)}...` : name
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
@@ -24,6 +30,7 @@ interface SpaceSelectorDropdownProps {
 export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelectorDropdownProps): ReactElement => {
   const router = useRouter()
   const spaceName = selectedSpace?.name ?? ''
+  const displayName = truncateSpaceName(spaceName, SPACE_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
 
   const handleSelectSpace = (spaceId: number) => {
@@ -50,7 +57,16 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
         </Avatar>
         <div className={css.spaceSelectorText}>
-          <span className={css.spaceSelectorName}>{spaceName}</span>
+          {spaceName ? (
+            <Tooltip>
+              <TooltipTrigger>
+                <span className={css.spaceSelectorName}>{displayName}</span>
+              </TooltipTrigger>
+              <TooltipContent side="top">{spaceName}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className={css.spaceSelectorName} />
+          )}
           <span className={css.spaceSelectorSubtitle}>Space</span>
         </div>
         <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">

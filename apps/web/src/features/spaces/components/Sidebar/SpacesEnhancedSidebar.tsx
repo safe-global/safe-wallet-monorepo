@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import React, { type ReactElement } from 'react'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from './index'
 import { useAppSelector } from '@/store'
@@ -21,8 +21,16 @@ export const SpacesEnhancedSidebar = (): ReactElement => {
   const spaceName = selectedSpace?.name ?? ''
   const spaceInitial = spaceName.charAt(0).toUpperCase()
 
+  const spacesSidebarWidth = 'min(230px, 100%)'
+
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={
+        {
+          '--sidebar-width': spacesSidebarWidth,
+        } as React.CSSProperties
+      }
+    >
       <EnhancedSidebar
         type="spaces"
         spaceName={spaceName}

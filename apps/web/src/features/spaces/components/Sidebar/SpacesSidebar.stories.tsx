@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset, Sidebar } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
@@ -89,10 +89,21 @@ const mockSpaces = [
 
 const selectedSpace = mockSpaces[0]
 
+const SPACES_SIDEBAR_WIDTH = 'min(230px, 100%)'
+
 const SidebarWrapper = ({ children }: { children: React.ReactNode }) => (
-  <SidebarProvider defaultOpen>
+  <SidebarProvider
+    defaultOpen
+    style={
+      {
+        '--sidebar-width': SPACES_SIDEBAR_WIDTH,
+      } as React.CSSProperties
+    }
+  >
     <div className="flex min-h-screen w-full">
-      {children}
+      <Sidebar collapsible="icon" variant="sidebar" className="!border-r-0">
+        {children}
+      </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <span className="font-semibold">Example Spaces Content Area</span>

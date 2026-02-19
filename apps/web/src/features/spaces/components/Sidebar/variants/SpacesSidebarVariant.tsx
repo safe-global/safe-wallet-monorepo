@@ -21,6 +21,7 @@ interface SpacesSidebarVariantProps extends SpaceSelectorProps {
 const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
   <SidebarMenuItem key={item.href} className="relative">
     <SidebarMenuButton
+      size="lg"
       isActive={item.isActive}
       disabled={item.disabled}
       className={css.sidebarInteractive}

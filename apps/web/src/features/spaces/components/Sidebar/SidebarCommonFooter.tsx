@@ -15,7 +15,7 @@ export const SidebarCommonFooter = (): ReactElement => {
     <SidebarFooter>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton tooltip="Help" className={cn(css.sidebarInteractive, css.footerHelp)}>
+          <SidebarMenuButton size="lg" tooltip="Help" className={cn(css.sidebarInteractive, css.footerHelp)}>
             <icons.CircleHelp />
             <span>Help</span>
           </SidebarMenuButton>
