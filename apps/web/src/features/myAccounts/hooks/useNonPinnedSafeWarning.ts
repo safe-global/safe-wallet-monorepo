@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -31,23 +31,13 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   const addressBook = useAppSelector((state) => selectAddressBookByChain(state, chainId))
   const safeName = safeAddress ? addressBook?.[safeAddress] : undefined
 
-  const [isDismissed, setIsDismissed] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
 
   // Determine user role (owner takes priority over proposer)
   const userRole: SafeUserRole = isOwner ? 'owner' : isProposer ? 'proposer' : 'viewer'
 
   // Show warning if user is owner or proposer but safe is not trusted
-  const shouldShowWarning = !isDismissed && !isTrustedSafe && (userRole === 'owner' || userRole === 'proposer')
-
-  // Track when warning is first shown
-  const hasTrackedWarning = useRef(false)
-  useEffect(() => {
-    if (shouldShowWarning && !hasTrackedWarning.current) {
-      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW)
-      hasTrackedWarning.current = true
-    }
-  }, [shouldShowWarning])
+  const shouldShowWarning = !isTrustedSafe && (userRole === 'owner' || userRole === 'proposer')
 
   // Open confirmation dialog
   const openConfirmDialog = useCallback(() => {
@@ -84,26 +74,18 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
     [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress],
   )
 
-  // Dismiss warning for this session
-  const dismiss = useCallback(() => {
-    setIsDismissed(true)
-    trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_DISMISS)
-  }, [])
-
   return {
     shouldShowWarning,
     safeAddress,
     safeName,
     chainId,
     userRole,
-    isDismissed,
     isConfirmDialogOpen,
     hasSimilarAddress,
     similarAddresses,
     openConfirmDialog,
     closeConfirmDialog,
     confirmAndAddToPinnedList,
-    dismiss,
   }
 }
 

@@ -46,7 +46,7 @@ const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
   const hn = useLoadFeature(HypernativeFeature)
   const { NoFeeCampaignBanner, noFeeCampaignBannerID } = useLoadFeature(NoFeeCampaignFeature)
-  const { NonPinnedWarningBanner } = useLoadFeature(MyAccountsFeature)
+  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
 
@@ -125,7 +125,7 @@ const Dashboard = (): ReactElement => {
             {supportsRecovery && <RecoveryHeader />}
             <InconsistentSignerSetupWarning />
             <UnsupportedMastercopyWarning />
-            <NonPinnedWarningBanner />
+            <NonPinnedWarning />
           </ActionRequiredPanel>
 
           {safe.deployed && <PendingTxsList />}

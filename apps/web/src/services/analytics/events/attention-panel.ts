@@ -21,4 +21,9 @@ export const ATTENTION_PANEL_EVENTS = {
     action: 'Check recovery proposal',
     category: ATTENTION_PANEL_CATEGORY,
   },
+
+  TRUST_SAFE: {
+    action: 'Trust Safe from warning',
+    category: ATTENTION_PANEL_CATEGORY,
+  },
 }
