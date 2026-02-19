@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
-import type { UseFormSetValue } from 'react-hook-form'
+import type { UseFormSetValue, UseFormReturn } from 'react-hook-form'
 import { X } from 'lucide-react'
 import { validateAddress } from '@safe-global/utils/utils/validation'
 import { isDomain } from '@/services/ens'
@@ -19,8 +19,8 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 interface MemberInviteRowProps {
   index: number
-  control: ReturnType<typeof import('react-hook-form').useForm<InviteMembersFormValues>>['control']
-  register: ReturnType<typeof import('react-hook-form').useForm<InviteMembersFormValues>>['register']
+  control: UseFormReturn<InviteMembersFormValues>['control']
+  register: UseFormReturn<InviteMembersFormValues>['register']
   setValue: UseFormSetValue<InviteMembersFormValues>
   canRemove: boolean
   onRemove: () => void
