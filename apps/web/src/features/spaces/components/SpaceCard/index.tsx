@@ -52,7 +52,7 @@ const SpaceCard = ({
   space: GetSpaceResponse
   isCompact?: boolean
   isLink?: boolean
-  currentUserId: number | undefined
+  currentUserId?: number
 }) => {
   const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
