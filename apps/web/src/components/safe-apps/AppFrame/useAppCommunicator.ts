@@ -91,7 +91,9 @@ const useAppCommunicator = (
     let communicatorInstance: AppCommunicator
 
     const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement | null>, app?: SafeAppData) => {
-      communicatorInstance = new AppCommunicator(iframeRef, {
+      const allowedOrigin = new URL(app?.url ?? '').origin
+
+      communicatorInstance = new AppCommunicator(iframeRef, allowedOrigin, {
         onMessage: (msg) => {
           if (!msg.data) return
 
