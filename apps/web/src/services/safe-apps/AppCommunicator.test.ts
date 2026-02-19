@@ -149,6 +149,32 @@ describe('AppCommunicator', () => {
 
       communicator.clear()
     })
+
+    it('should reject messages with isCookieEnabled from a different origin', async () => {
+      const communicator = new AppCommunicator(iframeRef, ALLOWED_ORIGIN)
+      const handler = jest.fn().mockReturnValue({ info: 'safe-info' })
+      communicator.on(Methods.getSafeInfo, handler)
+
+      const msg = createSDKMessage({ origin: 'https://evil.com', source: {} as Window }, iframeRef)
+      ;(msg.data as Record<string, unknown>).isCookieEnabled = true
+      await communicator.handleIncomingMessage(msg)
+
+      expect(handler).not.toHaveBeenCalled()
+      communicator.clear()
+    })
+
+    it('should reject messages with isCookieEnabled from wrong source window', async () => {
+      const communicator = new AppCommunicator(iframeRef, ALLOWED_ORIGIN)
+      const handler = jest.fn().mockReturnValue({ info: 'safe-info' })
+      communicator.on(Methods.getSafeInfo, handler)
+
+      const msg = createSDKMessage({ source: {} as Window }, iframeRef)
+      ;(msg.data as Record<string, unknown>).isCookieEnabled = true
+      await communicator.handleIncomingMessage(msg)
+
+      expect(handler).not.toHaveBeenCalled()
+      communicator.clear()
+    })
   })
 
   describe('handler responses', () => {
@@ -180,6 +206,22 @@ describe('AppCommunicator', () => {
         expect.objectContaining({ id: 'req-1', success: false }),
         ALLOWED_ORIGIN,
       )
+
+      communicator.clear()
+    })
+
+    it('should send a generic error message instead of raw error details', async () => {
+      const communicator = new AppCommunicator(iframeRef, ALLOWED_ORIGIN)
+      const handler = jest.fn().mockRejectedValue(new Error('Internal: secret path /home/user/.config leaked'))
+      communicator.on(Methods.getSafeInfo, handler)
+
+      const msg = createSDKMessage({}, iframeRef)
+      await communicator.handleIncomingMessage(msg)
+
+      const [sentMessage] = (iframeRef.current?.contentWindow?.postMessage as jest.Mock).mock.calls[0]
+      expect(sentMessage.error).not.toContain('secret')
+      expect(sentMessage.error).not.toContain('/home/user')
+      expect(sentMessage.error).toBe('Request failed')
 
       communicator.clear()
     })

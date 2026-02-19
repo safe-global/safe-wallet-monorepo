@@ -32,9 +32,6 @@ class AppCommunicator {
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
     if (!msg.data) return false
-    if (msg.data.hasOwnProperty('isCookieEnabled')) {
-      return true
-    }
 
     const sentFromIframe = this.iframeRef.current?.contentWindow === msg.source
     const originMatches = msg.origin === this.allowedOrigin
@@ -81,7 +78,7 @@ class AppCommunicator {
       } catch (e) {
         const error = asError(e)
 
-        this.send(error.message, msg.data.id, true)
+        this.send('Request failed', msg.data.id, true)
         this.config?.onError?.(error, msg.data)
       }
     }
