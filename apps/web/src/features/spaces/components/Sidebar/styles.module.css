@@ -23,6 +23,11 @@
   cursor: pointer;
 }
 
+/* Match dropdown panel width to sidebar when open (same as expanded sidebar) */
+.spaceSelectorDropdownContent {
+  min-width: var(--sidebar-width, 230px) !important;
+}
+
 .backToSpace {
   display: flex;
   align-items: center;

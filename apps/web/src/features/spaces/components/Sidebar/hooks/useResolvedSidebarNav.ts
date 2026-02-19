@@ -6,11 +6,7 @@ interface NavResolverOptions {
   isItemDisabled?: (item: SidebarItemConfig) => boolean
 }
 
-const resolveItem = (
-  item: SidebarItemConfig,
-  pathname: string,
-  options: NavResolverOptions,
-): ResolvedSidebarItem => ({
+const resolveItem = (item: SidebarItemConfig, pathname: string, options: NavResolverOptions): ResolvedSidebarItem => ({
   icon: item.icon,
   label: item.label,
   href: item.href,

@@ -63,10 +63,7 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
       >
         <aside>
           {isSpaceRoute ? (
-            <SpacesEnhancedSidebar
-              isDrawerOpen={isOpen}
-              onDrawerClose={() => onToggle(false)}
-            />
+            <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
           ) : (
             <Sidebar />
           )}

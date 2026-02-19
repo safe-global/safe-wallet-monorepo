@@ -75,7 +75,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="bottom" align="start">
+      <DropdownMenuContent side="bottom" align="start" className={css.spaceSelectorDropdownContent}>
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>

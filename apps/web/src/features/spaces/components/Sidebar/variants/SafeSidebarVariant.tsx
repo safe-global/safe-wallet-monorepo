@@ -43,7 +43,12 @@ export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelect
           <SidebarMenu>
             {safeMainNavigation.map((item) => (
               <SidebarMenuItem key={item.href} className="relative">
-                <SidebarMenuButton size="lg" isActive={item.isActive} tooltip={item.label} className={css.sidebarInteractive}>
+                <SidebarMenuButton
+                  size="lg"
+                  isActive={item.isActive}
+                  tooltip={item.label}
+                  className={css.sidebarInteractive}
+                >
                   <item.icon />
                   <span>{item.label}</span>
                 </SidebarMenuButton>
