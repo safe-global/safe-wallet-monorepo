@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { lazy } from 'react'
 
 const DevTool = lazy(() =>
   import('@hookform/devtools').then((m) => ({ default: m.DevTool })),
@@ -247,8 +246,12 @@ const SolidityForm = ({
       </form>
 
       {/* set up the dev tool only in dev env */}
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {!isProdEnv() && <DevTool control={control as any} />}
+      {!isProdEnv() && (
+        <Suspense>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <DevTool control={control as any} />
+        </Suspense>
+      )}
     </>
   )
 }
