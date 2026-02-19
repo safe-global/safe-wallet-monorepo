@@ -1,7 +1,7 @@
 import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
-import { useSpaceSafeCount, MemberStatus } from '@/features/spaces'
+import { MemberStatus } from '@/features/spaces'
 import InitialsAvatar from '../InitialsAvatar'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
