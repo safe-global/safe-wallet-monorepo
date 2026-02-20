@@ -12,16 +12,31 @@ const receiveStr = 'Receive'
 const viewAllStr = 'View all'
 const explorePossibleStr = "Explore what's possible"
 const swapSuggestion = 'Swap tokens instantly'
-export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const noTxText = '[data-testid="no-tx-text"]'
+const actionRequiredPanel = '[data-testid="action-required-panel"]'
+const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
+const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
+export const outdatedSafeWarningTitle = 'This Safe is running an outdated version'
+export const outdatedSafeWarningContent = 'and may miss security fixes and improvements.'
+const updateVersionAction = 'Update version'
+const useCliAction = 'Use CLI'
+const migrateSafeSubtitle = 'Update Safe Account base contract'
+export const nonPinnedWarningTitle = 'Not in your trusted list'
+export const trustThisSafeButtonLabel = 'Trust this Safe'
+const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
+
+export const outdatedMastercopyActions = {
+  updateVersion: updateVersionAction,
+  useCli: useCliAction,
+}
 
 export function clickOnTxByIndex(index) {
   // Wait for hydration to set the correct safe query param in the link href
@@ -146,4 +161,60 @@ export function verifyTxQueueWidget() {
 export function verifyExplorePossibleSection() {
   cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
   cy.get('@explorePossibleSection').contains(swapSuggestion)
+}
+
+export function expandActionRequiredPanel() {
+  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
+  cy.get(actionRequiredPanelToggle).click()
+  cy.get(actionRequiredPanelContent, { timeout: 10000 }).should('be.visible')
+}
+
+/**
+ * Verify the action required panel shows the expected message count.
+ * @param {number} expectedCount - Expected count displayed in the panel badge
+ */
+export function verifyActionRequiredPanelCount(expectedCount) {
+  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
+  cy.get(actionRequiredPanel).contains('Action required').should('be.visible')
+  cy.get(actionRequiredPanel).invoke('text').should('include', String(expectedCount))
+}
+
+/**
+ * Verify a card in the action required panel by message(s) and/or action label.
+ * Uses main.verifyValuesExist for message verification (elements inside panel).
+ * @param {Object} options
+ * @param {boolean} [options.expandFirst=true] - Expand the panel before verifying
+ * @param {string[]} [options.messages=[]] - Text(s) that must be visible in the card (title, content)
+ * @param {string} [options.actionLabel] - Text on the action button/link to verify visible
+ */
+export function verifyActionRequiredCard({ expandFirst = true, messages = [], actionLabel } = {}) {
+  if (expandFirst) {
+    expandActionRequiredPanel()
+  }
+  if (messages.length > 0) {
+    main.verifyValuesExist(actionRequiredPanel, messages)
+  }
+  if (actionLabel) {
+    cy.get(actionRequiredPanel).within(() => {
+      cy.contains('button, a', actionLabel).should('be.visible')
+    })
+  }
+}
+
+/**
+ * Click an action (button or link) in the action required panel by its label text.
+ * @param {string} actionLabel - Text on the button/link to click
+ */
+export function clickActionInPanel(actionLabel) {
+  cy.get(actionRequiredPanel).within(() => {
+    cy.contains('button, a', actionLabel).click()
+  })
+}
+
+export function verifyMigrateSafeFlowOpened() {
+  cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
+}
+
+export function verifyTrustDialogVisible() {
+  cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
 }

@@ -2,6 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as owner from '../pages/owners.pages.js'
 import * as recovery from '../pages/recovery.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as modules from '../pages/modules.page.js'
@@ -78,6 +79,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     wallet.connectSigner(guardian)
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
+    dashboard.expandActionRequiredPanel()
     recovery.verifyRecoveryProposalModalState(constants.elementExistanceStates.exist, true)
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
@@ -188,6 +190,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
     main.acceptCookies()
     recovery.clickOnRecoverLaterBtn()
     cy.visit(constants.homeUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
+    dashboard.expandActionRequiredPanel()
     recovery.clickOnStartRecoveryBtn()
     recovery.enterRecovererAddress(getMockAddress())
     navigation.clickOnWalletExpandMoreIcon()

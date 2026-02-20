@@ -137,4 +137,8 @@ export default {
   /** Safe Shield tests - Used in: safe_shield.cy.js
    * Dedicated for Safe Shield transaction monitoring and risk detection tests */
   MATIC_STATIC_SAFE_30: 'matic:0x65e1Ff7e0901055B3bea7D8b3AF457a659714013',
+  /** Unofficial mastercopy migration testing - Used in: dashboard.cy.js */
+  MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
+  /** Unsupported mastercopy CLI guidance testing - Used in: dashboard.cy.js */
+  MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
 }

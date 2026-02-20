@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -45,11 +46,11 @@ describe('Sidebar tests 4', () => {
     sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe4short)
   })
 
-  it('Verify untrusted safe can be added to trusted list from dashboard banner', () => {
+  it('Verify that untrusted safe can be added to trusted list from dashboard action required panel', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
     wallet.connectSigner(signer)
-    cy.get('[data-testid="non-pinned-warning"]').should('exist')
-    cy.get('[data-testid="add-to-pinned-list-button"]').click()
-    cy.get('[role="dialog"]').should('be.visible')
+    dashboard.verifyActionRequiredCard({ messages: [dashboard.nonPinnedWarningTitle] })
+    dashboard.clickActionInPanel(dashboard.trustThisSafeButtonLabel)
+    dashboard.verifyTrustDialogVisible()
   })
 })

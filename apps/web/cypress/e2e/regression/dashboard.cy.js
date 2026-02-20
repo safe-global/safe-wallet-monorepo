@@ -56,4 +56,30 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyTxItemInPendingTx(txaddOwner)
     dashboard.verifyTxItemInPendingTx(txMultiSendCall2)
   })
+
+  it('Verify that action required panel shows message count and expands when toggled', () => {
+    cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_31)
+    dashboard.verifyActionRequiredPanelCount(1)
+    dashboard.expandActionRequiredPanel()
+  })
+
+  it('Verify that unofficial mastercopy safe displays update version action in action required panel', () => {
+    cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_31)
+
+    dashboard.verifyActionRequiredCard({
+      messages: [dashboard.outdatedSafeWarningTitle, dashboard.outdatedSafeWarningContent],
+      actionLabel: dashboard.outdatedMastercopyActions.updateVersion,
+    })
+    dashboard.clickActionInPanel(dashboard.outdatedMastercopyActions.updateVersion)
+    dashboard.verifyMigrateSafeFlowOpened()
+  })
+
+  it('Verify that unsupported mastercopy safe displays use CLI action when update is not available', () => {
+    cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_32)
+
+    dashboard.verifyActionRequiredCard({
+      messages: [dashboard.outdatedSafeWarningTitle, dashboard.outdatedSafeWarningContent],
+      actionLabel: dashboard.outdatedMastercopyActions.useCli,
+    })
+  })
 })

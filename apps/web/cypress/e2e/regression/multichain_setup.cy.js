@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -49,6 +50,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     sideBar.addNetwork(constants.networks.ethereum)
     cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
+    dashboard.expandActionRequiredPanel()
     sideBar.checkInconsistentSignersMsgDisplayed(constants.networks.ethereum)
   })
 
