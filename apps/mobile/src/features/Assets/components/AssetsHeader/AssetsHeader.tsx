@@ -15,7 +15,11 @@ interface AssetsHeaderProps {
 export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, hasMore }: AssetsHeaderProps) {
   return (
     <StyledAssetsHeader>
-      <View marginBottom="$8" marginTop="$4">
+      <BalanceContainer />
+
+      <ReadOnlyContainer />
+
+      <View marginTop="$4">
         {amount > 0 && (
           <PendingTransactions
             isLoading={isLoading}
@@ -24,10 +28,6 @@ export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, ha
           />
         )}
       </View>
-
-      <BalanceContainer />
-
-      <ReadOnlyContainer />
     </StyledAssetsHeader>
   )
 }

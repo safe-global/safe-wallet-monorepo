@@ -19,7 +19,7 @@ export function Balance({ isLoading, balanceAmount }: BalanceProps) {
   const showSkeleton = isLoading || !balanceAmount
 
   return (
-    <View>
+    <View alignItems="center">
       <Skeleton.Group show={showSkeleton}>
         <Skeleton colorMode={colorScheme} width={220}>
           <Fiat value={balanceAmount} currency={currency} precise />
