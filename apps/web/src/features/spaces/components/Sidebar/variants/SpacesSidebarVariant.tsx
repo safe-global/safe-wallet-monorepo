@@ -25,10 +25,7 @@ const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
       isActive={item.isActive}
       disabled={item.disabled}
       className={css.sidebarInteractive}
-      // When disabled: tooltip identifies the item in collapsed state; no render (no navigation).
-      // When enabled: render as Link for navigation; tooltip is omitted because SidebarMenuButton
-      // overrides the render prop with TooltipTrigger when tooltip is set.
-      tooltip={item.disabled ? item.label : undefined}
+      // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
       render={!item.disabled ? <Link href={item.link} /> : undefined}
     >
       <item.icon />
