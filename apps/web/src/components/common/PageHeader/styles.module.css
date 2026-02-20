@@ -24,6 +24,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.pageHeader {
+  row-gap: var(--space-3);
 }
 
 .actionsWrapper {
@@ -55,6 +60,7 @@
   }
 
   .actionsWrapper {
-    padding-bottom: 16px;
+    padding-bottom: var(--space-2);
+    display: contents;
   }
 }

@@ -1,4 +1,5 @@
-import AccountsNavigation from '@/features/myAccounts/components/AccountsNavigation'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SpaceCreationModal from '@/features/spaces/components/SpaceCreationModal'
 import SignInButton from '@/features/spaces/components/SignInButton'
@@ -96,6 +97,7 @@ const NoSpacesState = () => {
 }
 
 const SpacesList = () => {
+  const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
@@ -127,7 +129,7 @@ const SpacesList = () => {
             {activeSpaces.length > 0 ? (
               activeSpaces.map((space) => (
                 <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} />
+                  <SpaceCard space={space} currentUserId={currentUser?.id} />
                 </Grid2>
               ))
             ) : (

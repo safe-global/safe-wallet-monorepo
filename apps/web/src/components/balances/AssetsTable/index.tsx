@@ -1,4 +1,5 @@
-import CheckBalance from '@/features/counterfactual/CheckBalance'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import React, { type ReactElement } from 'react'
 import { Box, Card, Skeleton, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import classNames from 'classnames'
@@ -9,8 +10,8 @@ import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn'
+import { useIsStakingBannerEnabled as useIsStakingPromoEnabled } from '@/features/stake'
 import { FiatChange } from './FiatChange'
 import { FiatBalance } from './FiatBalance'
 import useChainId from '@/hooks/useChainId'
@@ -81,6 +82,15 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
 
+/**
+ * Wrapper component for counterfactual CheckBalance.
+ * Extracted to reduce cyclomatic complexity in AssetsTable.
+ */
+function CounterfactualCheckBalance(): ReactElement | null {
+  const { CheckBalance } = useLoadFeature(CounterfactualFeature)
+  return CheckBalance ? <CheckBalance /> : null
+}
+
 const AssetsTable = ({
   showHiddenAssets,
   setShowHiddenAssets,
@@ -105,7 +115,7 @@ const AssetsTable = ({
       align: 'right',
     },
     { id: 'value', label: 'Value', width: '17%', align: 'right' },
-    { id: 'actions', label: 'Actions', width: '130px', align: 'right' },
+    { id: 'actions', label: 'Actions', width: showHiddenAssets ? '130px' : '86px', align: 'right', disableSort: true },
   ]
   const { balances, loading } = useBalances()
   const { balances: visibleBalances } = useVisibleBalances()
@@ -170,7 +180,7 @@ const AssetsTable = ({
             balance: {
               rawValue: Number(item.balance) / 10 ** (item.tokenInfo.decimals ?? 0),
               content: (
-                <Typography className={css.balanceColumn}>
+                <Typography className={css.balanceColumn} data-testid="token-balance">
                   <TokenAmount value={item.balance} decimals={item.tokenInfo.decimals} />
                 </Typography>
               ),
@@ -232,7 +242,7 @@ const AssetsTable = ({
       {hasNoAssets ? (
         <AddFundsCTA />
       ) : isMobile ? (
-        <Card sx={{ px: 2, mb: 2 }}>
+        <Card sx={{ mb: 2, border: '4px solid transparent' }}>
           <Box className={css.mobileContainer}>
             <Box className={css.mobileHeader}>
               <Typography variant="body2" color="text.secondary">
@@ -268,12 +278,12 @@ const AssetsTable = ({
                   </Box>
                 ))}
           </Box>
-          <Box sx={{ pt: 2, pb: 2 }}>
+          <Box sx={{ pt: 2, pb: 2, px: '16px' }}>
             <HiddenTokensInfo onOpenManageTokens={onOpenManageTokens} />
           </Box>
         </Card>
       ) : (
-        <Card sx={{ px: 2, mb: 2 }}>
+        <Card sx={{ mb: 2, border: '4px solid transparent' }}>
           <div className={classNames(css.container, { [css.containerWideActions]: showHiddenAssets })}>
             <EnhancedTable
               rows={rows}
@@ -285,7 +295,7 @@ const AssetsTable = ({
         </Card>
       )}
 
-      <CheckBalance />
+      <CounterfactualCheckBalance />
     </>
   )
 }

@@ -66,6 +66,38 @@
   background-color: var(--color-background-secondary);
 }
 
+.earnCard {
+  background-color: var(--color-secondary-background);
+  border: 1px solid var(--color-static-text-brand);
+}
+
+.earnCard:hover {
+  background-color: #e5f5ea;
+}
+
+.earnCard .title,
+.earnCard .subtitle {
+  color: var(--color-static-main);
+}
+
+[data-theme='dark'] .earnCard .title,
+[data-theme='dark'] .earnCard .subtitle {
+  color: white;
+}
+
+[data-theme='dark'] .earnCard:hover {
+  background-color: #2a3f31;
+}
+
+[data-theme='dark'] .earnCard:hover .title,
+[data-theme='dark'] .earnCard:hover .subtitle {
+  color: white;
+}
+
+.earnCard .badge {
+  background-color: var(--color-static-text-brand);
+}
+
 .iconContainer {
   width: 60px;
   height: 60px;
@@ -95,10 +127,34 @@
   line-height: 22px;
 }
 
-.title {
+.titleContainer {
   width: 100%;
   text-align: left;
   align-self: flex-start;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  letter-spacing: 0.15px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  background-color: var(--color-success-main);
+  color: var(--color-static-main);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.subtitle {
   font-weight: 700;
   font-size: 16px;
   line-height: 22px;

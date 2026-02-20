@@ -27,6 +27,18 @@ const injectedRtkApi = api
         }),
         providesTags: ['safes'],
       }),
+      safesGetSafeOverviewV2: build.query<SafesGetSafeOverviewV2ApiResponse, SafesGetSafeOverviewV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/safes`,
+          params: {
+            currency: queryArg.currency,
+            safes: queryArg.safes,
+            trusted: queryArg.trusted,
+            wallet_address: queryArg.walletAddress,
+          },
+        }),
+        providesTags: ['safes'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -56,6 +68,18 @@ export type SafesGetSafeOverviewV1ApiArg = {
   trusted?: boolean
   /** If true, excludes spam tokens from balance calculations */
   excludeSpam?: boolean
+  /** Optional wallet address to filter Safes where this address is an owner */
+  walletAddress?: string
+}
+export type SafesGetSafeOverviewV2ApiResponse =
+  /** status 200 Array of Safe overviews with balances and metadata */ SafeOverview[]
+export type SafesGetSafeOverviewV2ApiArg = {
+  /** Fiat currency code for balance conversion (e.g., USD, EUR) */
+  currency: string
+  /** Comma-separated list of Safe addresses in chainId:address format */
+  safes: string
+  /** If true, only includes trusted tokens in balance calculations. */
+  trusted?: boolean
   /** Optional wallet address to filter Safes where this address is an owner */
   walletAddress?: string
 }
@@ -101,4 +125,6 @@ export const {
   useLazySafesGetNoncesV1Query,
   useSafesGetSafeOverviewV1Query,
   useLazySafesGetSafeOverviewV1Query,
+  useSafesGetSafeOverviewV2Query,
+  useLazySafesGetSafeOverviewV2Query,
 } = injectedRtkApi

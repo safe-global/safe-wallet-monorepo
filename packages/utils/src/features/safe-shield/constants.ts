@@ -71,4 +71,6 @@ export const MULTI_RESULT_DESCRIPTION: Record<
       number === 1 ? 'it' : 'they'
     } will be marked as such after the first transaction.`,
   [ContractStatus.VERIFICATION_UNAVAILABLE]: undefined,
+  [ContractStatus.UNOFFICIAL_FALLBACK_HANDLER]: (number, totalNumber) =>
+    `Verify ${formatCount(number, 'fallback handler', totalNumber, undefined, 'all')} ${number === 1 ? 'is' : 'are'} trusted and secure before proceeding.`,
 }

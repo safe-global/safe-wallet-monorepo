@@ -1,5 +1,5 @@
 import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
-import { type TransactionResponse, type Eip1193Provider, type Provider } from 'ethers'
+import { type TransactionResponse, type Eip1193Provider, type Provider, type BrowserProvider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
 import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
@@ -25,7 +25,7 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
+import { isPredictedSafeProps } from '@/features/counterfactual/services'
 import {
   getSafeContractDeployment,
   getCanonicalOrFirstAddress,
@@ -36,8 +36,16 @@ import {
   Safe_to_l2_setup__factory,
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { hasMultiChainCreationFeatures } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+
+// Type for the lazy-loaded activateReplayedSafe function
+export type ActivateReplayedSafeFn = (
+  chain: Chain,
+  props: ReplayedSafeProps,
+  provider: BrowserProvider,
+  options: TransactionOptions,
+) => Promise<TransactionResponse>
 
 export type SafeCreationProps = {
   owners: string[]
@@ -47,6 +55,8 @@ export type SafeCreationProps = {
 
 /**
  * Create a Safe creation transaction via Core SDK and submits it to the wallet
+ *
+ * @param activateReplayedSafe - Optional function for activating replayed safes (lazy-loaded from counterfactual feature)
  */
 export const createNewSafe = async (
   provider: Eip1193Provider,
@@ -55,6 +65,7 @@ export const createNewSafe = async (
   options: TransactionOptions,
   callback: (txHash: string) => void,
   isL1SafeSingleton?: boolean,
+  activateReplayedSafe?: ActivateReplayedSafeFn,
 ): Promise<void> => {
   let txResponse: TransactionResponse
   if (isPredictedSafeProps(undeployedSafeProps)) {
@@ -73,6 +84,9 @@ export const createNewSafe = async (
       ...options,
     })
   } else {
+    if (!activateReplayedSafe) {
+      throw new Error('activateReplayedSafe function is required for replayed safes')
+    }
     txResponse = await activateReplayedSafe(chain, undeployedSafeProps, createWeb3(provider), options)
   }
   callback(txResponse.hash)

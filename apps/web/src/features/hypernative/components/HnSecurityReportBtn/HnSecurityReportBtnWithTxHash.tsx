@@ -4,7 +4,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { getSafeTxHashFromDetails } from '../../services/safeTxHashCalculation'
-import { HnSecurityReportBtn } from './HnSecurityReportBtn'
+import HnSecurityReportBtn from './HnSecurityReportBtn'
 
 export interface HnSecurityReportBtnWithTxHashProps {
   txDetails: TransactionDetails

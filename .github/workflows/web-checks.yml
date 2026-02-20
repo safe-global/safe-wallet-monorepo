@@ -27,7 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
-      - uses: CatChen/eslint-suggestion-action@v4.1.20
+      - name: Run ESLint with suggestions (PR only)
+        if: github.event_name == 'pull_request'
+        uses: CatChen/eslint-suggestion-action@v4.1.23
         with:
           request-changes: true
           fail-check: true
@@ -35,6 +37,9 @@ jobs:
           directory: './'
           targets: '/apps/web/src'
           config-path: './apps/web/eslint.config.mjs'
+      - name: Run ESLint (push only)
+        if: github.event_name == 'push'
+        run: yarn workspace @safe-global/web lint
 
   prettier:
     permissions:
@@ -60,3 +65,40 @@ jobs:
       - name: Type check
         run: yarn type-check
         working-directory: apps/web
+
+  knip-exports:
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/yarn
+      - name: Check for unused exports
+        run: yarn workspace @safe-global/web knip:exports
+
+  notify:
+    if: failure() && github.event_name == 'push'
+    needs: [lint, prettier, type-check, knip-exports]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Web checks failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Web Checks Failed (lint/prettier/type-check)*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }

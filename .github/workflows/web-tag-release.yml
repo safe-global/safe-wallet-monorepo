@@ -9,14 +9,18 @@ on:
       - apps/web/**
       - packages/**
 
+permissions: {}
+
 jobs:
-  tag-release-deploy:
+  tag:
     if: github.event.pull_request.merged == true
     permissions:
-      attestations: write
+      actions: write
       contents: write
-      id-token: write
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.extract_changelog.outputs.changelog }}
 
     steps:
       - name: Checkout
@@ -35,6 +39,12 @@ jobs:
       - name: Create a git tag
         if: steps.version.outputs.version
         run: git tag ${{ steps.version.outputs.version }} && git push --tags
+
+      - name: Trigger Docker Hub release
+        if: steps.version.outputs.version
+        run: gh workflow run web-deploy-dockerhub.yml -f tag=${{ steps.version.outputs.version }}
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Extract changelog from PR body
         id: extract_changelog
@@ -55,20 +65,36 @@ jobs:
             echo 'CHANGELOG_EOF'
           } >> $GITHUB_OUTPUT
 
+  release-deploy:
+    needs: tag
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
       - name: Create GitHub release (draft)
-        if: steps.version.outputs.version
+        if: needs.tag.outputs.version
         uses: softprops/action-gh-release@v2
         id: create_release
         with:
           draft: true
           prerelease: false
-          name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ needs.tag.outputs.version }}
+          tag_name: ${{ needs.tag.outputs.version }}
           body: |
-            ${{ steps.extract_changelog.outputs.changelog }}
+            ${{ needs.tag.outputs.changelog }}
 
             [🔗 IPFS release](
-            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ steps.version.outputs.version }})
+            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ needs.tag.outputs.version }})
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -84,32 +110,32 @@ jobs:
         working-directory: apps/web
 
       - name: Create archive
-        run: tar -czf "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz out
+        run: tar -czf "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}".tar.gz out
         working-directory: apps/web
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+          subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Create checksum
-        run: sha256sum "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}".tar.gz > "${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt"
+        run: sha256sum "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}".tar.gz > "${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt"
         working-directory: apps/web
 
       - name: Upload archive as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}.tar.gz
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
         uses: shogo82148/actions-upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: apps/web/${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+          asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -117,8 +143,8 @@ jobs:
       # Script to upload release files
       - name: Upload release build files for production
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
-          CHECKSUM_FILE: ${{ github.event.repository.name }}-${{ steps.version.outputs.version }}-sha256-checksum.txt
+          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ needs.tag.outputs.version }}
+          CHECKSUM_FILE: ${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
         run: bash ./scripts/github/s3_upload.sh
         working-directory: apps/web
 
@@ -129,11 +155,16 @@ jobs:
         env:
           PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
           PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
-          VERSION_TAG: ${{ steps.version.outputs.version }}
+          VERSION_TAG: ${{ needs.tag.outputs.version }}
 
-      - name: Back-merge to dev
+      - name: Create back-merge PR
         continue-on-error: true
         id: backmerge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.tag.outputs.version }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -141,35 +172,75 @@ jobs:
           # Fetch latest changes
           git fetch origin main dev
 
-          # Checkout dev branch with proper tracking (fixes "unrelated histories" error)
-          git checkout -B dev origin/dev
+          # Create a branch for the back-merge PR
+          BRANCH_NAME="backmerge/main-to-dev-${VERSION}"
+          git checkout -B "$BRANCH_NAME" origin/dev
 
-          # Attempt to merge main into dev
-          if git merge origin/main -m "chore: back-merge main to dev after release ${{ steps.version.outputs.version }}"; then
-            # Push to dev if merge succeeded
-            git push origin dev
-            echo "✅ Back-merge completed: main → dev"
+          # Attempt to merge main into the branch
+          if git merge origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
+            git push origin "$BRANCH_NAME"
+
+            # Create PR body file to avoid shell interpolation issues
+            cat > /tmp/pr-body.md << EOF
+          ## Back-merge from main
+
+          This PR syncs changes from \`main\` back to \`dev\` after release ${VERSION}.
+
+          ✅ Clean merge - no conflicts detected.
+
+          🤖 *Created automatically by [Tag Release workflow](https://github.com/${REPO}/actions/runs/${RUN_ID})*
+          EOF
+
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$BRANCH_NAME" \
+              --title "🔄 Back-merge main to dev after ${VERSION}" \
+              --body-file /tmp/pr-body.md \
+              | tail -n 1)
+
+            echo "✅ Back-merge PR created: $PR_URL"
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "has_conflicts=false" >> $GITHUB_OUTPUT
           else
-            # Merge failed due to conflicts
-            echo "⚠️ Back-merge failed due to conflicts"
-            echo "Please manually resolve conflicts using the instructions in the documentation"
+            # Merge failed due to conflicts - abort and create PR with conflict note
             git merge --abort
-            exit 1
-          fi
+            git checkout -B "$BRANCH_NAME" origin/dev
+            git push origin "$BRANCH_NAME"
 
-      - name: Report back-merge status
-        if: always()
-        run: |
-          if [ "${{ steps.backmerge.outcome }}" = "success" ]; then
-            echo "✅ Back-merge to dev completed successfully"
-          else
-            echo "⚠️ Back-merge to dev failed - manual intervention required"
-            echo "See troubleshooting docs: https://github.com/${{ github.repository }}/blob/dev/apps/web/docs/release-procedure-automated.md#back-merge-conflicts"
+            # Create PR body file to avoid shell interpolation issues
+            cat > /tmp/pr-body.md << EOF
+          ## ⚠️ Back-merge from main - CONFLICTS DETECTED
+
+          This PR syncs changes from \`main\` back to \`dev\` after release ${VERSION}.
+
+          **Action Required:** Please resolve merge conflicts manually by merging \`main\` into this branch.
+
+          \`\`\`bash
+          git fetch origin
+          git checkout ${BRANCH_NAME}
+          git merge origin/main
+          # Resolve conflicts
+          git push
+          \`\`\`
+
+          🤖 *Created automatically by [Tag Release workflow](https://github.com/${REPO}/actions/runs/${RUN_ID})*
+          EOF
+
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$BRANCH_NAME" \
+              --title "🔄 Back-merge main to dev after ${VERSION} (CONFLICTS)" \
+              --body-file /tmp/pr-body.md \
+              | tail -n 1)
+
+            echo "Back-merge PR created with conflicts: $PR_URL"
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "has_conflicts=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Publish GitHub release
-        if: steps.version.outputs.version && success()
-        run: gh release edit ${{ steps.version.outputs.version }} --draft=false
+        if: needs.tag.outputs.version && success()
+        run: gh release edit ${{ needs.tag.outputs.version }} --draft=false
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -183,14 +254,19 @@ jobs:
             exit 0
           fi
 
-          VERSION="${{ steps.version.outputs.version }}"
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
-          BACKMERGE_STATUS="${{ steps.backmerge.outcome }}"
+          VERSION="${{ needs.tag.outputs.version }}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ needs.tag.outputs.version }}"
+          BACKMERGE_PR_URL="${{ steps.backmerge.outputs.pr_url }}"
+          HAS_CONFLICTS="${{ steps.backmerge.outputs.has_conflicts }}"
 
-          if [ "$BACKMERGE_STATUS" = "success" ]; then
-            BACKMERGE_MSG="_Back-merge to dev completed automatically_ 🔄"
+          if [ -n "$BACKMERGE_PR_URL" ]; then
+            if [ "$HAS_CONFLICTS" = "true" ]; then
+              BACKMERGE_MSG="🔄 <$BACKMERGE_PR_URL|Back-merge PR> created (conflicts need resolution)"
+            else
+              BACKMERGE_MSG="🔄 <$BACKMERGE_PR_URL|Back-merge PR> created - please review and merge"
+            fi
           else
-            BACKMERGE_MSG="_⚠️ Back-merge failed - manual resolution needed_"
+            BACKMERGE_MSG="_⚠️ Back-merge PR creation failed - manual action needed_"
           fi
 
           jq -n \

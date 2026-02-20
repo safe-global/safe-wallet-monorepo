@@ -5,10 +5,10 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-const txData = ['Send', '-0.00002 ETH', '1 out of 1']
-const txaddOwner = ['addOwnerWithThreshold', '1 out of 2']
-const txMultiSendCall3 = ['Batch', '3 actions', '1 out of 2']
-const txMultiSendCall2 = ['Batch', '2 actions', '1 out of 2']
+const txData = ['Send', '-0.00002 ETH', '1/1']
+const txaddOwner = ['addOwnerWithThreshold', '1/2']
+const txMultiSendCall3 = ['Batch', '3 actions', '1/2']
+const txMultiSendCall2 = ['Batch', '2 actions', '1/2']
 
 describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
@@ -31,10 +31,11 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyExplorePossibleSection()
   })
 
-  // mock
+  // mock — intercept must be set up before visit so the mock catches the parallel queue request
   it('[SMOKE] Verify that the last created tx in conflicting tx is showed in the widget', () => {
     cy.fixture('pending_tx/pending_tx.json').then((mockData) => {
       cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
+      cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     })
     cy.wait('@getQueuedTransactions')
     cy.get(dashboard.pendingTxWidget, { timeout: 30000 }).should('be.visible')
@@ -42,10 +43,11 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyDataInPendingTx(txData)
   })
 
-  // mock
+  // mock — intercept must be set up before visit so the mock catches the parallel queue request
   it('[SMOKE] Verify that tx are displayed correctly in Pending tx section', () => {
     cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
       cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
+      cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
     })
     cy.wait('@getQueuedTransactions')
     dashboard.verifyTxItemInPendingTx(txMultiSendCall3)

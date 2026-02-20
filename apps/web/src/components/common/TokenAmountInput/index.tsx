@@ -8,14 +8,13 @@ import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
-import { MultiTokenTransferFields, type MultiTokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer'
+import {
+  MultiTokenTransferFields,
+  type MultiTokenTransferParams,
+  TokenAmountFields,
+} from '@/components/tx-flow/flows/TokenTransfer/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-
-export enum TokenAmountFields {
-  tokenAddress = 'tokenAddress',
-  amount = 'amount',
-}
 
 export const InsufficientFundsValidationError = 'Insufficient funds'
 
@@ -29,6 +28,7 @@ type TokenAmountInputProps = {
   validate?: (value: string) => string | undefined
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
+  defaultTokenAddress?: string
 }
 
 const TokenAmountInput = ({
@@ -38,6 +38,7 @@ const TokenAmountInput = ({
   validate,
   fieldArray,
   deps,
+  defaultTokenAddress,
 }: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
@@ -53,7 +54,10 @@ const TokenAmountInput = ({
   const tokenAddressField = getFieldName(TokenAmountFields.tokenAddress, fieldArray)
   const amountField = getFieldName(TokenAmountFields.amount, fieldArray)
 
-  const tokenAddress = watch(tokenAddressField)
+  const watchedTokenAddress = watch(tokenAddressField)
+  // Ensure we always have a defined value to keep MUI Select controlled
+  // Use defaultTokenAddress as fallback when watch() returns empty on first render
+  const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
 
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 
@@ -143,7 +147,7 @@ const TokenAmountInput = ({
         />
         <Divider orientation="vertical" flexItem />
         <TextField
-          data-testid="token-balance"
+          data-testid="token-selector"
           select
           variant="standard"
           InputProps={{

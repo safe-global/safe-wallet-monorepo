@@ -1,4 +1,5 @@
-import CounterfactualStatusButton from '@/features/counterfactual/CounterfactualStatusButton'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -38,6 +39,7 @@ const SafeHeader = ({ onDrawerToggle, isDrawerOpen }: SidebarHeaderProps): React
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
+  const { CounterfactualStatusButton } = useLoadFeature(CounterfactualFeature)
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
@@ -46,7 +48,7 @@ const SafeHeader = ({ onDrawerToggle, isDrawerOpen }: SidebarHeaderProps): React
   return (
     <div className={css.container}>
       <div className={css.info}>
-        <SafeHeaderInfo onClick={onDrawerToggle} open={isDrawerOpen} />
+        <SafeHeaderInfo />
 
         <div className={css.iconButtons}>
           <Track

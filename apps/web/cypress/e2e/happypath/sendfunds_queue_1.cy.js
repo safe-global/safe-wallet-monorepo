@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as assets from '../pages/assets.pages'
+import * as createTx from '../pages/create_tx.pages'
 import * as tx from '../pages/transactions.page'
 import { ethers } from 'ethers'
 import SafeApiKit from '@safe-global/api-kit'
@@ -47,7 +48,7 @@ function visit(url) {
 function executeTransactionFlow(fromSafe) {
   visit(constants.transactionQueueUrl + fromSafe)
   wallet.connectSigner(signer)
-  assets.clickOnConfirmBtn(0)
+  createTx.clickOnConfirmBtn(0)
   tx.executeFlow_1()
   cy.wait(5000)
 }
@@ -125,7 +126,7 @@ describe('Send funds from queue happy path tests 1', () => {
     function executeTransactionFlow(fromSafe) {
       visit(constants.transactionQueueUrl + fromSafe)
       wallet.connectSigner(signer)
-      assets.clickOnConfirmBtn(0)
+      createTx.clickOnConfirmBtn(0)
       tx.executeFlow_2()
       cy.wait(5000)
     }
@@ -164,7 +165,7 @@ describe('Send funds from queue happy path tests 1', () => {
     function executeTransaction(fromSafe) {
       visit(constants.transactionQueueUrl + fromSafe)
       wallet.connectSigner(signer)
-      assets.clickOnExecuteBtn(0)
+      createTx.clickOnExecuteBtn(0)
       tx.executeFlow_3()
       cy.wait(5000)
     }

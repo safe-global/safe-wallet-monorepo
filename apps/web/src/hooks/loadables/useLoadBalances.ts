@@ -5,9 +5,10 @@ import { useAppSelector } from '@/store'
 import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual/useCounterfactualBalances'
-import usePortfolioBalances from '@/features/portfolio/hooks/usePortfolioBalances'
+import { useCounterfactualBalances } from '@/features/counterfactual/hooks'
+import { usePortfolioBalances } from '@/features/portfolio'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
@@ -47,9 +48,11 @@ export const useTokenListSetting = (): boolean | undefined => {
 export const useTxServiceBalances = (skip = false): AsyncResult<PortfolioBalances> => {
   const currency = useAppSelector(selectCurrency)
   const isTrustedTokenList = useTokenListSetting()
-  const { safe, safeAddress } = useSafeInfo()
-  const isReady = safeAddress && safe.deployed && isTrustedTokenList !== undefined
-  const isCounterfactual = !safe.deployed
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
+  // Assume deployed until safe info confirms otherwise (counterfactual hook handles undeployed)
+  const isReady = effectiveAddress && effectiveChainId && isTrustedTokenList !== undefined
+  const isCounterfactual = safeLoaded && !safe.deployed
 
   const {
     currentData: txServiceBalances,
@@ -57,8 +60,8 @@ export const useTxServiceBalances = (skip = false): AsyncResult<PortfolioBalance
     error: txServiceError,
   } = useBalancesGetBalancesV1Query(
     {
-      chainId: safe.chainId,
-      safeAddress,
+      chainId: effectiveChainId,
+      safeAddress: effectiveAddress,
       fiatCode: currency,
       trusted: isTrustedTokenList,
     },

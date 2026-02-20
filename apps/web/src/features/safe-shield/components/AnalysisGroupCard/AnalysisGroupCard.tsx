@@ -1,7 +1,6 @@
-import { type ReactElement, useMemo, useState, useEffect, useRef } from 'react'
+import { type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-
 import {
   ContractStatus,
   type GroupedAnalysisResults,
@@ -12,10 +11,11 @@ import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shiel
 import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
+import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
 
-interface AnalysisGroupCardProps {
+export interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
   showImage?: boolean
   highlightedSeverity?: Severity
@@ -23,6 +23,7 @@ interface AnalysisGroupCardProps {
   analyticsEvent?: AnalyticsEvent
   'data-testid'?: string
   requestId?: string
+  footer?: ReactNode
 }
 
 export const AnalysisGroupCard = ({
@@ -33,6 +34,7 @@ export const AnalysisGroupCard = ({
   analyticsEvent,
   'data-testid': dataTestId,
   requestId,
+  footer,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -114,13 +116,17 @@ export const AnalysisGroupCard = ({
       {/* Expanded content */}
       <Collapse in={isOpen}>
         <Box sx={{ padding: '4px 12px 16px' }}>
-          <Stack gap={2}>
+          <Stack gap={1}>
             {visibleResults.map((result, index) => {
               const isPrimary = index === 0
               const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
 
               if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
                 return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
+              }
+
+              if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
+                return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
               }
 
               return (
@@ -133,6 +139,8 @@ export const AnalysisGroupCard = ({
                 />
               )
             })}
+
+            {footer}
           </Stack>
         </Box>
       </Collapse>

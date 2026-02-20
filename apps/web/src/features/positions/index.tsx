@@ -9,14 +9,13 @@ import React from 'react'
 import PositionsUnavailable from './components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@/features/positions/components/PositionsSkeleton'
-import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
+import { PortfolioFeature } from '@/features/portfolio'
+import { useLoadFeature } from '@/features/__core__'
 
-export const Positions = () => {
+const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
+  const portfolio = useLoadFeature(PortfolioFeature)
 
   if (isLoading || (!error && !protocols)) {
     return <PositionsSkeleton />
@@ -34,10 +33,10 @@ export const Positions = () => {
         <TotalAssetValue
           fiatTotal={positionsFiatTotal}
           title="Total positions value"
-          action={isPortfolioEndpointEnabled ? <PortfolioRefreshHint entryPoint="Positions" /> : undefined}
+          action={<portfolio.PortfolioRefreshHint entryPoint="Positions" />}
         />
 
-        {!isPortfolioEndpointEnabled && (
+        {portfolio.$isDisabled && (
           <Typography variant="caption" sx={{ color: 'text.secondary' }} mt={2}>
             Position balances are not included in the total asset value.
           </Typography>

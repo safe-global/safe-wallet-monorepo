@@ -13,7 +13,7 @@ import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { Methods } from '@safe-global/safe-apps-sdk'
 import type { SafeSettings } from '@safe-global/safe-apps-sdk'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getTransactionDetails } from '@/utils/transactions'
 import { Interface, getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -25,11 +25,9 @@ import { useAppSelector } from '@/store'
 import { selectOnChainSigning } from '@/store/settingsSlice'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
-import useAllSafes, { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { useGetHref } from '@/features/myAccounts/hooks/useGetHref'
-import { wcPopupStore } from '@/features/walletconnect/components'
-import { wcChainSwitchStore } from '@/features/walletconnect/components/WcChainSwitchModal/store'
-import walletConnectInstance from '@/features/walletconnect/services/walletConnectInstance'
+import { useAllSafes, useGetHref, type SafeItem } from '@/hooks/safes'
+import { useLoadFeature } from '@/features/__core__'
+import { WalletConnectFeature } from '@/features/walletconnect'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -41,6 +39,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
   const allSafes = useAllSafes()
   const getHref = useGetHref(router)
   const pendingTxs = useRef<Record<string, string>>({})
+  const walletConnect = useLoadFeature(WalletConnectFeature)
 
   const onChainSigning = useAppSelector(selectOnChainSigning)
   const [settings, setSettings] = useState<SafeSettings>({
@@ -184,20 +183,20 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
           : undefined
 
         if (matchingSafe) {
-          await walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
+          await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
           await router.push(getHref(targetChain, matchingSafe.address))
           return null
         }
 
         return await new Promise<null>((resolve, reject) => {
           let settled = false
-          const previousPopupOpen = wcPopupStore.getStore() ?? false
+          const previousPopupOpen = walletConnect?.wcPopupStore.getStore() ?? false
 
           const closeRequestIfActive = () => {
             if (settled) return false
             settled = true
-            wcChainSwitchStore.setStore(undefined)
-            wcPopupStore.setStore(previousPopupOpen)
+            walletConnect?.wcChainSwitchStore.setStore(undefined)
+            walletConnect?.wcPopupStore.setStore(previousPopupOpen)
             return true
           }
 
@@ -214,7 +213,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
             if (settled) return
 
             try {
-              await walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
+              await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
             } catch (error) {
               closeRequestIfActive()
               reject(error as Error)
@@ -231,8 +230,8 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
             }
           }
 
-          wcPopupStore.setStore(true)
-          wcChainSwitchStore.setStore({
+          walletConnect?.wcPopupStore.setStore(true)
+          walletConnect?.wcChainSwitchStore.setStore({
             appInfo,
             chain: targetChain as any,
             safes: safesOnTargetChain,
@@ -299,6 +298,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
     web3ReadOnly,
     allSafes,
     getHref,
+    walletConnect,
   ])
 }
 

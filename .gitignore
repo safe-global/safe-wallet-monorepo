@@ -75,6 +75,9 @@ certificates
 **/storybook-static/
 *storybook.log
 
+# visual regression (baselines stored on separate branches)
+**/__visual_snapshots__/
+
 # os
 THUMBS_DB
 thumbs.db
@@ -100,3 +103,13 @@ apps/web/src/types/contracts/*
 
 # expo-plugins/notifications-service-ios
 /expo-plugins/notification-service-ios/dist/*
+
+
+# tx-builder
+apps/tx-builder/build/*
+apps/tx-builder/vite.config.js
+apps/tx-builder/vite.config.d.ts
+
+# claude-workflows
+todos/*
+docs/

@@ -9,19 +9,40 @@ import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { trackEvent } from '@/services/analytics'
 import { EXPLORE_POSSIBLE_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEvent, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { EURCV_ASSET_ID } from '@/config/eurcv'
 import css from './styles.module.css'
 
 export type ExplorePossibleApp = {
   id: string
   title: string
+  subtitle?: string
+  badge?: string
   iconUrl: string
   link: string | UrlObject
 }
 
 const EXPLORE_POSSIBLE_CONFIG = [
+  {
+    id: 'earn',
+    title: '',
+    badge: '',
+    subtitle: 'Earn boosted APY on stablecoins',
+    iconUrl: {
+      light: '/images/explore-possible/earn-large.svg',
+      dark: '/images/explore-possible/earn-large-dark.svg',
+    },
+    getLink: (safeQuery: string | string[] | undefined) => ({
+      pathname: AppRoutes.earn,
+      query: {
+        safe: safeQuery,
+        asset_id: EURCV_ASSET_ID,
+      },
+    }),
+  },
   {
     id: 'swap',
     title: 'Swap tokens instantly',
@@ -72,6 +93,8 @@ const ExplorePossibleWidget = () => {
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
   const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
+  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
+
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLUListElement>(null)
@@ -83,14 +106,20 @@ const ExplorePossibleWidget = () => {
         if (config.id === 'swap' && isSwapEnabled !== true) {
           return false
         }
+        // Filter out earn if EURCV boost feature flag is disabled
+        if (config.id === 'earn' && isEurcvBoostEnabled !== true) {
+          return false
+        }
         return true
       }).map((config) => ({
         id: config.id,
         title: config.title,
+        subtitle: 'subtitle' in config ? config.subtitle : undefined,
+        badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
-        link: config.getLink(router.query.safe, txBuilderApp?.link),
+        link: config.getLink(router.query.safe, txBuilderApp.link),
       })),
-    [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled],
+    [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )
 
   const updateScrollState = () => {
@@ -136,12 +165,21 @@ const ExplorePossibleWidget = () => {
     })
   }
 
-  const handleAppClick = (appId: string) => {
+  const handleAppClick = (appId: string, title: string) => {
     trackEvent(EXPLORE_POSSIBLE_EVENTS.EXPLORE_POSSIBLE_CLICKED, { id: appId })
+    trackEvent(EXPLORE_POSSIBLE_EVENTS.HORIZONTAL_CARD_CLICKED, { label: title })
+
+    // Additional Mixpanel tracking for EURCV Boost Earn card
+    if (appId === 'earn') {
+      trackEvent(
+        { action: MixpanelEvent.EURCV_BOOST_EXPLORE_CLICKED, category: 'overview' },
+        { [MixpanelEventParams.SOURCE]: 'explore_widget' },
+      )
+    }
   }
 
   return (
-    <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
+    <Card sx={{ px: 3, pt: 2.5, pb: 1.5 }} component="section">
       <div style={{ position: 'relative' }}>
         {/* Gradient fade on the right */}
         <div
@@ -191,17 +229,23 @@ const ExplorePossibleWidget = () => {
               <Link
                 href={app.link}
                 className={css.cardLink}
-                onClick={() => handleAppClick(app.id)}
-                aria-label={app.title}
+                onClick={() => handleAppClick(app.id, app.title)}
+                aria-label={app.subtitle ? `${app.title} ${app.badge} ${app.subtitle}` : app.title}
               >
-                <div className={css.card}>
+                <div className={`${css.card} ${app.id === 'earn' ? css.earnCard : ''}`}>
                   {/* Icon */}
                   <div className={css.iconContainer}>
                     <img src={app.iconUrl} alt={`${app.title} icon`} className={css.icon} />
                   </div>
 
-                  {/* Title */}
-                  <p className={css.title}>{app.title}</p>
+                  {/* Title with optional badge and subtitle */}
+                  <div className={css.titleContainer}>
+                    <p className={css.title}>
+                      {app.title}
+                      {app.badge && <span className={css.badge}>{app.badge}</span>}
+                    </p>
+                    {app.subtitle && <p className={css.subtitle}>{app.subtitle}</p>}
+                  </div>
                 </div>
               </Link>
             </li>

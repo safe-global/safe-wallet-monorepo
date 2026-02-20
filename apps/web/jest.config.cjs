@@ -1,3 +1,14 @@
+const path = require('path')
+const fs = require('fs')
+
+// Set environment variables before modules are loaded
+if (!process.env.NEXT_PUBLIC_APP_VERSION || !process.env.NEXT_PUBLIC_APP_HOMEPAGE) {
+  const packageJsonPath = path.join(__dirname, 'package.json')
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+  process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
+  process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
+}
+
 const nextJest = require('next/jest')
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
@@ -17,6 +28,7 @@ const customJestConfig = {
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
+    '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
   },
   // https://github.com/mswjs/jest-fixed-jsdom
   // without this environment it is basically impossible to run tests with msw

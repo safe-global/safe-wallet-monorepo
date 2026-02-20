@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as file from '../pages/import_export.pages.js'
 import * as constants from '../../support/constants.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'

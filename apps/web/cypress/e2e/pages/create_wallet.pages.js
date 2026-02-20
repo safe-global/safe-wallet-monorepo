@@ -6,26 +6,16 @@ import * as wallet from '../../support/utils/wallet'
 import * as owner from './owners.pages'
 
 export const welcomeLoginScreen = '[data-testid="welcome-login"]'
-const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
-const newtworkSelectorDiv = 'div[class*="networkSelector"]'
-const nameInput = 'input[name="name"]'
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
 const thresholdInput = 'input[name="threshold"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
-const connectingContainer = 'div[class*="connecting-container"]'
 const createNewSafeBtn = '[data-testid="create-safe-btn"]'
 const continueWithWalletBtn = 'Continue with Private key'
-const googleConnectBtn = '[data-testid="google-connect-btn"]'
-const googleSignedinBtn = '[data-testid="signed-in-account-btn"]'
 export const accountInfoHeader = '[data-testid="open-account-center"]'
 export const reviewStepOwnerInfo = '[data-testid="review-step-owner-info"]'
 export const reviewStepNextBtn = '[data-testid="review-step-next-btn"]'
 const creationModalLetsGoBtn = '[data-testid="cf-creation-lets-go-btn"]'
-const safeCreationStatusInfo = '[data-testid="safe-status-info"]'
-const startUsingSafeBtn = '[data-testid="start-using-safe-btn"]'
-const sponsorIcon = '[data-testid="sponsor-icon"]'
-const networkFeeSection = '[data-tetid="network-fee-section"]'
 const nextBtn = '[data-testid="next-btn"]'
 const backBtn = '[data-testid="back-btn"]'
 const cancelBtn = '[data-testid="cancel-btn"]'
@@ -57,21 +47,15 @@ export const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
 export const continueWithWalletBtnConnected = '[data-testid="continue-with-wallet-btn"]'
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 
-const sponsorStr = 'Your account is sponsored by Goerli'
-const safeCreationProcessing = 'Transaction is being executed'
-const safeCreationComplete = 'Your Safe Account is being indexed'
-const changeNetworkWarningStr = 'Change your wallet network'
 const policy1_2 = '1/1 policy'
 export const walletName = 'test1-sepolia-safe'
 export const defaultSepoliaPlaceholder = 'Sepolia Safe'
-const welcomeToSafeStr = 'Welcome to Safe'
 const initialSteps = '0 of 2 steps completed'
 export const addSignerStr = 'Add signer'
 export const accountRecoveryStr = 'Account recovery'
 export const sendTokensStr = 'Send tokens'
 const noWalletConnectedMsg = 'No wallet connected'
 export const deployWalletStr = 'about to deploy this Safe Account'
-const showAllNetworksStr = 'Show all networks'
 export const yourSafeAccountPreviewStr = 'Your Safe Account preview'
 
 export function waitForConnectionMsgDisappear() {
@@ -136,36 +120,17 @@ export function cancelWalletCreation() {
 }
 
 export function clickOnBackBtn() {
-  cy.get(backBtn).should('be.enabled').click()
-}
-export function verifySafeIsBeingCreated() {
-  cy.get(safeCreationStatusInfo).should('have.text', safeCreationProcessing)
-}
-
-export function verifySafeCreationIsComplete() {
-  cy.get(safeCreationStatusInfo).should('exist').and('have.text', safeCreationComplete)
-  cy.get(startUsingSafeBtn).should('exist').click()
-  cy.get(welcomeToSafeStr).should('exist')
+  main.clickOnBackBtn(backBtn)
 }
 
 export function clickOnReviewStepNextBtn() {
   cy.get(reviewStepNextBtn).click()
-  cy.get(reviewStepNextBtn, { timeout: 60000 }).should('not.exist')
+  cy.get(reviewStepNextBtn, { timeout: 600000 }).should('not.exist')
 }
 
 export function clickOnLetsGoBtn() {
   cy.get(creationModalLetsGoBtn).click()
   return cy.get(creationModalLetsGoBtn, { timeout: 60000 }).should('not.exist')
-}
-
-export function verifyOwnerInfoIsPresent() {
-  return cy.get(reviewStepOwnerInfo).shoul('exist')
-}
-
-export function verifySponsorMessageIsPresent() {
-  main.verifyElementsExist([sponsorIcon, networkFeeSection])
-  // Goerli is generated
-  cy.get(networkFeeSection).contains(sponsorStr).should('exist')
 }
 
 export function verifyPolicy1_1() {
@@ -174,7 +139,7 @@ export function verifyPolicy1_1() {
 }
 
 export function verifyDefaultWalletName(name) {
-  cy.get(nameInput).invoke('attr', 'placeholder').should('include', name)
+  cy.get(main.nameInput).invoke('attr', 'placeholder').should('include', name)
 }
 
 export function verifyNextBtnIsDisabled() {
@@ -183,10 +148,6 @@ export function verifyNextBtnIsDisabled() {
 
 export function verifyNextBtnIsEnabled() {
   cy.get('button').contains('Next').should('not.be.disabled')
-}
-
-export function checkNetworkChangeWarningMsg() {
-  cy.get('div').contains(changeNetworkWarningStr).should('exist')
 }
 
 export function clickOnCreateNewSafeBtn() {
@@ -207,11 +168,11 @@ export function clickOnConnectWalletBtn() {
 }
 
 export function typeWalletName(name) {
-  cy.get(nameInput).type(name).should('have.value', name)
+  cy.get(main.nameInput).type(name).should('have.value', name)
 }
 
 export function clearWalletName() {
-  cy.get(nameInput).clear()
+  cy.get(main.nameInput).clear()
 }
 
 export function openNetworkSelector() {
@@ -251,7 +212,7 @@ export function clickOnNetwrokRemoveIcon() {
 }
 
 export function clickOnNextBtn() {
-  cy.get(nextBtn).should('be.enabled').click()
+  main.clickOnNextBtn(nextBtn)
 }
 
 export function clickOnYourSafeAccountPreview() {

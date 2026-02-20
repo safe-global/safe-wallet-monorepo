@@ -1,11 +1,10 @@
 import { useCallback, useContext, useEffect } from 'react'
 import { ErrorBoundary } from '@sentry/react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
 import useWcUri from '../../hooks/useWcUri'
 import WcHeaderWidget from '../WcHeaderWidget'
 import WcSessionManager from '../WcSessionManager'
-import { WalletConnectProvider } from '../../WalletConnectContext'
 
 const WalletConnectWidget = () => {
   const { walletConnect, error, open, setOpen, sessions } = useContext(WalletConnectContext)

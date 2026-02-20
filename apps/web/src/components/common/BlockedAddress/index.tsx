@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import Disclaimer from '@/components/common/Disclaimer'
 import { AppRoutes } from '@/config/routes'
 
-export const BlockedAddress = ({
+const BlockedAddress = ({
   address,
   featureTitle,
   onClose,

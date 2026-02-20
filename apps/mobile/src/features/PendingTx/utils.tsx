@@ -156,31 +156,37 @@ export const renderItem = ({
   return null
 }
 
-export const keyExtractor = (item: PendingTransactionItems | TransactionQueuedItem[], index: number) => {
+export const keyExtractor = (
+  item: PendingTransactionItems | TransactionQueuedItem[],
+  index: number,
+  section?: { title: string },
+) => {
+  const sectionPrefix = section?.title ? `${section.title}_` : ''
+
   if (Array.isArray(item)) {
     const txGroupHash = getBulkGroupTxHash(item)
     if (txGroupHash) {
-      return txGroupHash + index
+      return sectionPrefix + txGroupHash + index
     }
 
     if (isTransactionListItem(item[0]) && isMultisigExecutionInfo(item[0].transaction.executionInfo)) {
-      return getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
+      return sectionPrefix + getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
     }
 
     if (isTransactionListItem(item[0])) {
-      return getTxHash(item[0]) + index
+      return sectionPrefix + getTxHash(item[0]) + index
     }
 
-    return String(index)
+    return sectionPrefix + String(index)
   }
 
   if (isTransactionListItem(item) && isMultisigExecutionInfo(item.transaction.executionInfo)) {
-    return item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted
+    return sectionPrefix + item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted + index
   }
 
   if (isTransactionListItem(item)) {
-    return item.transaction.id
+    return sectionPrefix + item.transaction.id + index
   }
 
-  return String(item)
+  return sectionPrefix + String(item) + index
 }

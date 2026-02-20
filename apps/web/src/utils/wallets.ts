@@ -1,10 +1,11 @@
 import type { EthersError } from '@/utils/ethers-utils'
 import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { WALLET_KEYS } from '@/hooks/wallets/consts'
-import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
+// Inlined to avoid importing from protocol-kit which has heavy dependencies
+const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
-import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module'
+import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type JsonRpcProvider } from 'ethers'
 
 const WALLETCONNECT = 'WalletConnect'
@@ -82,7 +83,7 @@ export const isSmartContractWallet = memoize(
 export const isWalletUnlocked = async (walletName: string): Promise<boolean | undefined> => {
   if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
 
-  const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion']
+  const METAMASK_LIKE = ['MetaMask', 'Rabby Wallet', 'Zerion', 'Ambire']
 
   // Only MetaMask exposes a method to check if the wallet is unlocked
   if (METAMASK_LIKE.includes(walletName)) {

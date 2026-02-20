@@ -2,8 +2,8 @@ import React from 'react'
 import type {
   AnalysisResult,
   MaliciousOrModerateThreatAnalysisResult,
-  Severity,
 } from '@safe-global/utils/features/safe-shield/types'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
 import { Text, View } from 'tamagui'
 import { AddressListItem } from './AddressListItem'
@@ -13,7 +13,8 @@ import { RootState } from '@/src/store'
 import { selectChainById } from '@/src/store/chains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { useAnalysisAddress } from '@/src/features/SafeShield/hooks/useAnalysisAddress'
-import { AnalysisPaper } from '../../../AnalysisPaper'
+import { safeShieldStatusColors } from '../../../../theme'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
@@ -24,8 +25,18 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const { handleOpenExplorer, handleCopyToClipboard, copiedIndex } = useAnalysisAddress()
+  const { isDark } = useTheme()
 
-  const issueBackgroundColor = severity ? '$errorLight' : 'transparent'
+  const getIssueBackgroundColor = (severity?: Severity): string => {
+    if (!severity) {
+      return 'transparent'
+    }
+
+    const colors = safeShieldStatusColors[isDark ? 'dark' : 'light']
+    return colors[severity]?.background || 'transparent'
+  }
+
+  const issueBackgroundColor = getIssueBackgroundColor(severity)
 
   if (!('issues' in result)) {
     return null
@@ -45,7 +56,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
   return (
     <>
       {sortedIssues.flatMap(({ severity, issues }) =>
-        issues.map((issue, index) => {
+        issues.map((issue) => {
           const globalIndex = issueCounter++
           const explorerLink =
             issue.address && activeChain?.blockExplorerUriTemplate
@@ -53,9 +64,14 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
               : undefined
 
           return (
-            <View key={`${severity}-${index}`}>
-              <AnalysisPaper spaced={Boolean(explorerLink)}>
-                {issue.address && (
+            <View
+              key={`${severity}-${globalIndex}`}
+              backgroundColor="$backgroundPaper"
+              borderRadius="$4"
+              overflow="hidden"
+            >
+              {issue.address && (
+                <View padding="$2">
                   <AddressListItem
                     index={globalIndex}
                     copiedIndex={copiedIndex}
@@ -64,15 +80,17 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                     onOpenExplorer={handleOpenExplorer}
                     address={issue.address}
                   />
-                )}
+                </View>
+              )}
 
-                {/* Show description if there is no address as a fallback */}
-                {!issue.address && issue.description && (
+              {/* Show description if there is no address as a fallback */}
+              {!issue.address && issue.description && (
+                <View padding="$2">
                   <Text fontSize="$2" lineHeight={14} color="$colorLight">
                     {issue.description}
                   </Text>
-                )}
-              </AnalysisPaper>
+                </View>
+              )}
 
               {issue.address && (
                 <View
@@ -82,13 +100,7 @@ export function AnalysisIssuesDisplay({ result, severity }: AnalysisIssuesDispla
                   borderBottomLeftRadius={'$4'}
                   borderBottomRightRadius={'$4'}
                 >
-                  <Text
-                    fontSize={'$2'}
-                    lineHeight={14}
-                    color={issue.address ? '$color' : '$colorLight'}
-                    fontFamily="$body"
-                    fontWeight="400"
-                  >
+                  <Text fontSize={'$2'} lineHeight={14} color="$colorLight" fontFamily="$body" fontWeight="400">
                     {issue.description}
                   </Text>
                 </View>

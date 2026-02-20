@@ -1,6 +1,6 @@
 import ExternalLink from '@/components/common/ExternalLink'
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
-import { SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
+import { SafeCreationEvent } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { Box, Typography } from '@mui/material'

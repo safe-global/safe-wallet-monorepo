@@ -4,21 +4,24 @@ import { useContext } from 'react'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
-import { WalletConnectContext } from '../WalletConnectContext'
+import { WalletConnectContext, WalletConnectProvider } from '../components/WalletConnectContext'
+import { WCLoadingState } from '../types'
+import { wcPopupStore } from '../store/wcPopupStore'
 import WalletConnectWallet from '../services/WalletConnectWallet'
-import { WalletConnectProvider, WCLoadingState } from '../WalletConnectContext'
 import { safeInfoSlice } from '@/store/safeInfoSlice'
 import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
-import { wcPopupStore } from '@/features/walletconnect/components'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
-jest.mock('@/features/walletconnect/components', () => ({ wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() } }))
+jest.mock('../store/wcPopupStore', () => ({
+  wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() },
+  openWalletConnect: jest.fn(),
+}))
 
 const TestComponent = () => {
   const { walletConnect, error, loading, sessions, sessionProposal, open } = useContext(WalletConnectContext)

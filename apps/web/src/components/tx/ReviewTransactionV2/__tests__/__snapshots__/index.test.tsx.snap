@@ -205,7 +205,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Safe Utils
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                               Transaction Decoder
                               <svg
                                 aria-hidden="true"
-                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                                class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon css-tqxw8e-MuiSvgIcon-root"
                                 data-testid="OpenInNewRoundedIcon"
                                 focusable="false"
                                 viewBox="0 0 24 24"
@@ -640,7 +640,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
             data-mui-internal-clone-element="true"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-1hp2ejb-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-2zc3nx-MuiButtonBase-root-MuiButton-root"
               data-testid="continue-sign-btn"
               disabled=""
               tabindex="-1"

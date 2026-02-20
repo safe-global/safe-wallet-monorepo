@@ -49,6 +49,7 @@ export const AssetRowContent = ({
                 target="_blank"
                 rel="noreferrer"
                 title={explorerLink.title}
+                variant="body1"
                 sx={{
                   fontWeight: 'bold',
                   color: 'text.primary',
@@ -63,7 +64,7 @@ export const AssetRowContent = ({
                 {item.tokenInfo.name}
               </Link>
             ) : (
-              <Typography component="span" fontWeight="bold">
+              <Typography component="span" variant="body1" fontWeight="bold">
                 {item.tokenInfo.name}
               </Typography>
             )}
@@ -83,7 +84,13 @@ export const AssetRowContent = ({
               />
             </Typography>
           )}
-          <Typography variant="body2" color="primary.light" className={css.desktopSymbol} sx={{ fontSize: '13px' }}>
+          <Typography
+            variant="body2"
+            color="primary.light"
+            className={css.desktopSymbol}
+            sx={{ fontSize: '13px' }}
+            data-testid="token-symbol"
+          >
             {item.tokenInfo.symbol}
           </Typography>
         </Stack>

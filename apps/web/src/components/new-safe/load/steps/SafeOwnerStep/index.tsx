@@ -9,7 +9,7 @@ import useChainId from '@/hooks/useChainId'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { OwnerRow } from '@/components/new-safe/OwnerRow'
+import OwnerRow from '@/components/new-safe/OwnerRow'
 
 enum Field {
   owners = 'owners',
@@ -73,10 +73,10 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
         <Divider />
         <Box className={layoutCss.row}>
           <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button variant="outlined" size="small" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
+            <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
               Back
             </Button>
-            <Button type="submit" variant="contained" size="stretched" disabled={!isValid}>
+            <Button type="submit" variant="contained" size="large" disabled={!isValid}>
               Next
             </Button>
           </Box>

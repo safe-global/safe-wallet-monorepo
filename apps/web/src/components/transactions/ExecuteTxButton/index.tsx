@@ -56,13 +56,14 @@ const ExecuteTxButton = ({
         <Tooltip title={isOk && !isNext ? 'You must execute the transaction with the lowest nonce first' : ''}>
           <span>
             <Button
+              data-testid="execute-tx-btn"
               onClick={onClick}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
               variant="contained"
               disabled={!isOk || isDisabled}
-              size={compact ? 'small' : 'stretched'}
-              sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
+              size={compact ? 'small' : 'large'}
+              sx={{ minWidth: '106.5px' }}
             >
               Execute
             </Button>

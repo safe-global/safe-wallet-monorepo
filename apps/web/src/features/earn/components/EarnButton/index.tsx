@@ -1,31 +1,22 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import useSpendingLimit from '@/hooks/useSpendingLimit'
+import { useSpendingLimit } from '@/features/spending-limits'
 import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
-import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import EarnIcon from '@/public/images/common/earn.svg'
-import { EARN_EVENTS, type EARN_LABELS } from '@/services/analytics/events/earn'
+import { EARN_EVENTS } from '@/services/analytics/events/earn'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
+import type { EarnButtonProps } from '../../types'
 
-const EarnButton = ({
-  tokenInfo,
-  trackingLabel,
-  compact = true,
-  onlyIcon = false,
-}: {
-  tokenInfo: Balance['tokenInfo']
-  trackingLabel: EARN_LABELS
-  compact?: boolean
-  onlyIcon?: boolean
-}): ReactElement => {
+const EarnButton = (props: EarnButtonProps): ReactElement => {
+  const { tokenInfo, trackingLabel, compact = true, onlyIcon = false } = props
   const spendingLimit = useSpendingLimit(tokenInfo)
   const chain = useCurrentChain()
   const router = useRouter()
@@ -71,7 +62,7 @@ const EarnButton = ({
               aria-label="Earn"
               variant={compact ? 'text' : 'contained'}
               color={compact ? 'info' : 'background.paper'}
-              size={compact ? 'small' : 'compact'}
+              size="small"
               disableElevation
               startIcon={<EarnIcon />}
               onClick={onEarnClick}

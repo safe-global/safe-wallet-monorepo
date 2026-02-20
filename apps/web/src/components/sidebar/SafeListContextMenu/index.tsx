@@ -18,11 +18,12 @@ import { SvgIcon } from '@mui/material'
 import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
-import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSafeOnNewChain'
+import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
+import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -47,6 +48,7 @@ const SafeListContextMenu = ({
   addNetwork,
   rename,
   undeployedSafe,
+  hideNestedSafes = false,
   onClose,
 }: {
   name: string
@@ -55,22 +57,29 @@ const SafeListContextMenu = ({
   addNetwork: boolean
   rename: boolean
   undeployedSafe: boolean
+  hideNestedSafes?: boolean
   onClose?: () => void
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: address },
-    { skip: !isNestedSafesEnabled || !address || !anchorEl },
+    { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
+  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
+  const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
+    useNestedSafesVisibility(nestedSafesForChain, chainId)
+
   const trackingLabel =
     router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+    e.stopPropagation()
+    e.preventDefault()
     setAnchorEl(e.currentTarget)
   }
 
@@ -78,40 +87,55 @@ const SafeListContextMenu = ({
     setAnchorEl(null)
   }
 
-  const handleOpenModal = (type: keyof typeof open, event: AnalyticsEvent) => () => {
-    if (type !== ModalType.NESTED_SAFES) {
-      handleCloseContextMenu()
-    }
-    setOpen((prev) => ({ ...prev, [type]: true }))
+  const handleOpenModal =
+    (type: keyof typeof open, event: AnalyticsEvent) => (e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>) => {
+      e.stopPropagation()
+      e.preventDefault()
+      if (type !== ModalType.NESTED_SAFES) {
+        handleCloseContextMenu()
+      }
+      if (type === ModalType.NESTED_SAFES) {
+        startFiltering()
+      }
+      setOpen((prev) => ({ ...prev, [type]: true }))
 
-    trackEvent({ ...event, label: trackingLabel })
-  }
+      trackEvent({ ...event, label: trackingLabel })
+    }
 
   const handleCloseModal = () => {
     setOpen(defaultOpen)
   }
-
-  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
 
   return (
     <>
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        {isNestedSafesEnabled && !undeployedSafe && nestedSafesForChain && nestedSafesForChain.length > 0 && (
-          <MenuItem
-            onClick={handleOpenModal(ModalType.NESTED_SAFES, {
-              ...NESTED_SAFE_EVENTS.OPEN_LIST,
-              label: NESTED_SAFE_LABELS.sidebar,
-            })}
-          >
-            <ListItemIcon>
-              <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
-            </ListItemIcon>
-            <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
-          </MenuItem>
-        )}
+      <ContextMenu
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={handleCloseContextMenu}
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
+      >
+        {isNestedSafesEnabled &&
+          !hideNestedSafes &&
+          !undeployedSafe &&
+          nestedSafesForChain &&
+          nestedSafesForChain.length > 0 && (
+            <MenuItem
+              onClick={handleOpenModal(ModalType.NESTED_SAFES, {
+                ...NESTED_SAFE_EVENTS.OPEN_LIST,
+                label: NESTED_SAFE_LABELS.sidebar,
+              })}
+            >
+              <ListItemIcon>
+                <SvgIcon component={NestedSafesIcon} inheritViewBox fontSize="small" color="success" />
+              </ListItemIcon>
+              <ListItemText data-testid="nested-safes-btn">Nested Safes</ListItemText>
+            </MenuItem>
+          )}
 
         {rename && (
           <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
@@ -148,7 +172,11 @@ const SafeListContextMenu = ({
             handleCloseModal()
             onClose?.()
           }}
-          nestedSafes={nestedSafesForChain}
+          rawNestedSafes={nestedSafesForChain}
+          allSafesWithStatus={allSafesWithStatus}
+          visibleSafes={visibleSafes}
+          hasCompletedCuration={hasCompletedCuration}
+          isLoading={isLoading}
           hideCreationButton
         />
       )}

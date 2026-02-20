@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
-import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '@/features/walletconnect/constants'
+import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
 
 export const isPairingUri = (uri: string): boolean => {
   return uri.startsWith('wc:')
@@ -48,10 +48,6 @@ export const isUnsupportedChain = (session: SessionTypes.Struct, chainId: string
 // Bridge enforces the same address on destination chain
 export const isBlockedBridge = (origin: string) => {
   return BlockedBridges.some((bridge) => origin.includes(bridge))
-}
-
-export const isSafePassApp = (origin: string) => {
-  return origin.includes('community.safe.global')
 }
 
 // Bridge defaults to same address on destination chain but allows changing it

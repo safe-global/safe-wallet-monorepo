@@ -5,20 +5,20 @@ exports[`./ChoiceButton.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <button
-      class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+      class="MuiButtonBase-root txButton mui-style-1i1o7bi-MuiButtonBase-root"
       data-testid="choice-btn"
       tabindex="0"
       type="button"
     >
       <div
-        class="iconBg MuiBox-root css-5dt5vx"
+        class="iconBg MuiBox-root mui-style-5dt5vx"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
           data-testid="SendIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -29,22 +29,22 @@ exports[`./ChoiceButton.stories Default 1`] = `
         </svg>
       </div>
       <div
-        class="MuiBox-root css-e3zcym"
+        class="MuiBox-root mui-style-e3zcym"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
         >
           Send tokens
         </p>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
         >
           Send tokens to another address
         </p>
       </div>
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
         data-testid="ChevronRightRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -63,21 +63,21 @@ exports[`./ChoiceButton.stories Disabled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <button
-      class="MuiButtonBase-root Mui-disabled txButton css-1i1o7bi-MuiButtonBase-root"
+      class="MuiButtonBase-root Mui-disabled txButton mui-style-1i1o7bi-MuiButtonBase-root"
       data-testid="choice-btn"
       disabled=""
       tabindex="-1"
       type="button"
     >
       <div
-        class="iconBg MuiBox-root css-5dt5vx"
+        class="iconBg MuiBox-root mui-style-5dt5vx"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
           data-testid="SendIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -88,22 +88,22 @@ exports[`./ChoiceButton.stories Disabled 1`] = `
         </svg>
       </div>
       <div
-        class="MuiBox-root css-e3zcym"
+        class="MuiBox-root mui-style-e3zcym"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
         >
           Send tokens
         </p>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
         >
           Send tokens to another address
         </p>
       </div>
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
         data-testid="ChevronRightRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -122,20 +122,20 @@ exports[`./ChoiceButton.stories NoDescription 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <button
-      class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+      class="MuiButtonBase-root txButton mui-style-1i1o7bi-MuiButtonBase-root"
       data-testid="choice-btn"
       tabindex="0"
       type="button"
     >
       <div
-        class="iconBg MuiBox-root css-5dt5vx"
+        class="iconBg MuiBox-root mui-style-5dt5vx"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
           data-testid="AccountBalanceWalletIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -146,17 +146,17 @@ exports[`./ChoiceButton.stories NoDescription 1`] = `
         </svg>
       </div>
       <div
-        class="MuiBox-root css-e3zcym"
+        class="MuiBox-root mui-style-e3zcym"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
         >
           Connect wallet
         </p>
       </div>
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
         data-testid="ChevronRightRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -175,20 +175,20 @@ exports[`./ChoiceButton.stories WithChip 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <button
-      class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+      class="MuiButtonBase-root txButton mui-style-1i1o7bi-MuiButtonBase-root"
       data-testid="choice-btn"
       tabindex="0"
       type="button"
     >
       <div
-        class="iconBg MuiBox-root css-5dt5vx"
+        class="iconBg MuiBox-root mui-style-5dt5vx"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
           data-testid="SwapHorizIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -199,22 +199,22 @@ exports[`./ChoiceButton.stories WithChip 1`] = `
         </svg>
       </div>
       <div
-        class="MuiBox-root css-e3zcym"
+        class="MuiBox-root mui-style-e3zcym"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
         >
           Swap tokens
         </p>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
         >
           Exchange one token for another
         </p>
       </div>
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
         data-testid="ChevronRightRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -224,7 +224,7 @@ exports[`./ChoiceButton.stories WithChip 1`] = `
         />
       </svg>
       <div
-        class="chip MuiBox-root css-0"
+        class="chip MuiBox-root mui-style-0"
       >
         New
       </div>
@@ -238,20 +238,20 @@ exports[`./ChoiceButton.stories WithIconColor 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1v5z18m"
+    class="MuiBox-root mui-style-1v5z18m"
   >
     <button
-      class="MuiButtonBase-root txButton css-1i1o7bi-MuiButtonBase-root"
+      class="MuiButtonBase-root txButton mui-style-1i1o7bi-MuiButtonBase-root"
       data-testid="choice-btn"
       tabindex="0"
       type="button"
     >
       <div
-        class="iconBg MuiBox-root css-v8z29f"
+        class="iconBg MuiBox-root mui-style-v8z29f"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeSmall css-1926wg9-MuiSvgIcon-root-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeSmall mui-style-1926wg9-MuiSvgIcon-root-MuiSvgIcon-root"
           data-testid="AddIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -262,22 +262,22 @@ exports[`./ChoiceButton.stories WithIconColor 1`] = `
         </svg>
       </div>
       <div
-        class="MuiBox-root css-e3zcym"
+        class="MuiBox-root mui-style-e3zcym"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
         >
           Add funds
         </p>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
         >
           Deposit funds into your Safe
         </p>
       </div>
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium css-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-18fnruk-MuiSvgIcon-root-MuiSvgIcon-root"
         data-testid="ChevronRightRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"

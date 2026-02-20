@@ -1,9 +1,8 @@
-import { CowSwapWidget } from '@cowprotocol/widget-react'
-import { type CowSwapWidgetParams, TradeType } from '@cowprotocol/widget-lib'
-import type { OnTradeParamsPayload } from '@cowprotocol/events'
-import { type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
+import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
 import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, useTheme } from '@mui/material'
+import { CowSwapWidget } from '@cowprotocol/widget-react'
 import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
@@ -85,6 +84,7 @@ const SwapWidget = ({ sell }: Params) => {
   const { isConsentAccepted, onAccept } = useSwapConsent()
   const feeEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_FEE_ENABLED)
   const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
+  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
@@ -107,6 +107,7 @@ const SwapWidget = ({ sell }: Params) => {
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,
+    disableCrossChainSwap: true,
     hideLogo: true,
     hideNetworkSelector: true,
     sounds: {
@@ -225,7 +226,9 @@ const SwapWidget = ({ sell }: Params) => {
         handler: (newTradeParams: OnTradeParamsPayload) => {
           const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
 
-          const newFeeBps = feeEnabled ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled) : 0
+          const newFeeBps = feeEnabled
+            ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled)
+            : 0
 
           setParams((params) => ({
             ...params,
@@ -250,7 +253,7 @@ const SwapWidget = ({ sell }: Params) => {
         },
       },
     ]
-  }, [dispatch, feeEnabled, nativeCowSwapFeeV2Enabled])
+  }, [dispatch, feeEnabled, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled])
 
   useEffect(() => {
     setParams((params) => ({

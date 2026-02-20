@@ -1,5 +1,7 @@
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import { stableCoinAddresses } from '@/features/swap/helpers/data/stablecoins'
+import { EURCV_ADDRESS } from '@/config/eurcv'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const FEE_PERCENTAGE_BPS = {
   REGULAR: {
@@ -55,8 +57,15 @@ const getLowerCaseStableCoinAddresses = () => {
 export const calculateFeePercentageInBps = (
   orderParams: OnTradeParamsPayload,
   nativeCowSwapFeeV2Enabled: boolean = false,
+  isEurcvBoostEnabled: boolean = false,
 ) => {
   const { sellToken, buyToken, buyTokenFiatAmount, sellTokenFiatAmount, orderKind } = orderParams
+
+  // Zero fee when buying EURCV with EURCV_BOOST feature enabled
+  if (isEurcvBoostEnabled && sameAddress(buyToken?.address, EURCV_ADDRESS)) {
+    return 0
+  }
+
   const stableCoins = getLowerCaseStableCoinAddresses()
   const isStableCoin = stableCoins[sellToken?.address?.toLowerCase()] && stableCoins[buyToken?.address.toLowerCase()]
 

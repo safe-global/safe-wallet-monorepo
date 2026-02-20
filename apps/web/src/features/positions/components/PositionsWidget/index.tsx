@@ -2,18 +2,7 @@ import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '@/features/positions/hooks/usePositionsFiatTotal'
 import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Chip,
-  Divider,
-  Stack,
-  Tooltip,
-  Typography,
-  Skeleton,
-} from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Stack, Typography, Skeleton } from '@mui/material'
 import { WidgetCard } from '@/components/dashboard/styled'
 import css from './styles.module.css'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -44,31 +33,6 @@ const PositionsWidget = () => {
     [safe],
   )
 
-  const betaChip = (
-    <Tooltip
-      title="Experimental. Data may be missing or outdated."
-      placement="top"
-      arrow
-      slotProps={{
-        tooltip: {
-          sx: {
-            maxWidth: { xs: '250px', sm: 'none' },
-          },
-        },
-      }}
-    >
-      <Chip
-        label="Beta"
-        size="small"
-        sx={{
-          backgroundColor: 'background.lightGrey',
-          letterSpacing: '0.4px',
-          borderRadius: '4px',
-        }}
-      />
-    </Tooltip>
-  )
-
   const viewAllWrapper = (children: ReactElement) => (
     <Track
       {...POSITIONS_EVENTS.POSITIONS_VIEW_ALL_CLICKED}
@@ -83,7 +47,7 @@ const PositionsWidget = () => {
 
   if (isLoading) {
     return (
-      <WidgetCard title="Top positions" titleExtra={betaChip} testId="positions-widget">
+      <WidgetCard title="Top positions" testId="positions-widget">
         <Box>
           {Array(2)
             .fill(0)
@@ -158,7 +122,6 @@ const PositionsWidget = () => {
   return (
     <WidgetCard
       title="Top positions"
-      titleExtra={betaChip}
       viewAllUrl={protocols.length > 0 ? viewAllUrl : undefined}
       viewAllWrapper={viewAllWrapper}
       testId="positions-widget"

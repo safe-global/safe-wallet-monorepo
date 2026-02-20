@@ -7,8 +7,8 @@ import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsHypernativeGuardHook from '../useIsHypernativeGuard'
 import * as useIsHypernativeFeatureHook from '../useIsHypernativeFeature'
-import * as useIsOutreachSafeHook from '@/features/targetedFeatures/hooks/useIsOutreachSafe'
-import { HYPERNATIVE_OUTREACH_ID } from '../../constants'
+import * as useIsOutreachSafeHook from '@/features/targeted-features'
+import { HYPERNATIVE_OUTREACH_ID, HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '../../constants'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 describe('useBannerVisibility', () => {
@@ -16,6 +16,7 @@ describe('useBannerVisibility', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
   })
 
   describe('when useBannerStorage returns false', () => {
@@ -154,6 +155,31 @@ describe('useBannerVisibility', () => {
       expect(result.current).toEqual({
         showBanner: false,
         loading: false,
+      })
+    })
+  })
+
+  describe('when outreach targeting is loading', () => {
+    it('should return loading: true and hide banners until targeting resolves', () => {
+      jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+      jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+      jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+      jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+        balances: { fiatTotal: '2000000', items: [] },
+        loaded: true,
+        loading: false,
+      })
+      jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+        isHypernativeGuard: false,
+        loading: false,
+      })
+      jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: true })
+
+      const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
+
+      expect(result.current).toEqual({
+        showBanner: false,
+        loading: true,
       })
     })
   })
@@ -781,7 +807,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -808,7 +834,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -817,7 +843,7 @@ describe('useBannerVisibility', () => {
           loading: false,
         })
 
-        expect(useIsOutreachSafeHook.useIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID)
+        expect(useIsOutreachSafeHook.useIsOutreachSafe).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID, { skip: false })
       })
 
       it('should show banner for NoBalanceCheck type when Safe is targeted', () => {
@@ -834,7 +860,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.NoBalanceCheck))
 
@@ -858,7 +884,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false })
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Settings))
 
@@ -882,7 +908,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -906,7 +932,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: true, // Guard installed
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -930,7 +956,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -954,7 +980,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -980,7 +1006,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false) // Safe is NOT targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false }) // Safe is NOT targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -1004,7 +1030,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false) // Safe is NOT targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false }) // Safe is NOT targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -1031,7 +1057,7 @@ describe('useBannerVisibility', () => {
           loading: false,
         })
         // API error - returns false (useIsOutreachSafe handles errors gracefully)
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -1056,7 +1082,7 @@ describe('useBannerVisibility', () => {
           loading: false,
         })
         // Timeout - returns false
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -1082,11 +1108,14 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        const useIsOutreachSafeSpy = jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true)
+        const useIsOutreachSafeSpy = jest
+          .spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe')
+          .mockReturnValue({ isTargeted: true, loading: false })
 
         renderHook(() => useBannerVisibility(BannerType.Promo))
 
-        expect(useIsOutreachSafeSpy).toHaveBeenCalledWith(HYPERNATIVE_OUTREACH_ID)
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: false })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: true })
       })
 
       it('should NOT show banner for previous campaigns (different outreachId)', () => {
@@ -1104,7 +1133,7 @@ describe('useBannerVisibility', () => {
           loading: false,
         })
         // Previous campaign (outreachId: 2) - should not affect Hypernative banners
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false)
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false })
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.Promo))
 
@@ -1130,7 +1159,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
 
@@ -1154,7 +1183,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: true,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(true) // Safe is targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: true, loading: false }) // Safe is targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
 
@@ -1162,6 +1191,43 @@ describe('useBannerVisibility', () => {
           showBanner: true,
           loading: false,
         })
+      })
+
+      it('should show button when Safe is allowlisted even if promo targeting fails', () => {
+        jest.spyOn(useIsHypernativeFeatureHook, 'useIsHypernativeFeature').mockReturnValue(true)
+        jest.spyOn(useBannerStorageHook, 'useBannerStorage').mockReturnValue(true)
+        jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
+        jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
+        jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
+          balances: { fiatTotal: '0.5', items: [] },
+          loaded: true,
+          loading: false,
+        })
+        jest.spyOn(useIsHypernativeGuardHook, 'useIsHypernativeGuard').mockReturnValue({
+          isHypernativeGuard: false,
+          loading: false,
+        })
+        const useIsOutreachSafeSpy = jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe')
+        useIsOutreachSafeSpy.mockImplementation((outreachId, opts) => {
+          if (outreachId === HYPERNATIVE_OUTREACH_ID) {
+            expect(opts).toEqual({ skip: true })
+            return { isTargeted: false, loading: false }
+          }
+          if (outreachId === HYPERNATIVE_ALLOWLIST_OUTREACH_ID) {
+            expect(opts).toEqual({ skip: false })
+            return { isTargeted: true, loading: false }
+          }
+          return { isTargeted: false, loading: false }
+        })
+
+        const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
+
+        expect(result.current).toEqual({
+          showBanner: true,
+          loading: false,
+        })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(1, HYPERNATIVE_OUTREACH_ID, { skip: true })
+        expect(useIsOutreachSafeSpy).toHaveBeenNthCalledWith(2, HYPERNATIVE_ALLOWLIST_OUTREACH_ID, { skip: false })
       })
 
       it('should NOT show button when Safe is not targeted, balance is insufficient, and no guard', () => {
@@ -1178,7 +1244,7 @@ describe('useBannerVisibility', () => {
           isHypernativeGuard: false,
           loading: false,
         })
-        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue(false) // Safe is NOT targeted
+        jest.spyOn(useIsOutreachSafeHook, 'useIsOutreachSafe').mockReturnValue({ isTargeted: false, loading: false }) // Safe is NOT targeted
 
         const { result } = renderHook(() => useBannerVisibility(BannerType.TxReportButton))
 

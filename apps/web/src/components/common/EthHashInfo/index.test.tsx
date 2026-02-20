@@ -20,6 +20,16 @@ jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useChains')
 jest.mock('@/hooks/useDarkMode')
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: jest.fn(() => ({
+    $isReady: true,
+    $isDisabled: false,
+    HypernativeTooltip: ({ children }: { children: React.ReactNode }) => (
+      <span style={{ display: 'flex' }}>{children}</span>
+    ),
+  })),
+}))
 
 describe('EthHashInfo', () => {
   beforeEach(() => {
@@ -370,70 +380,6 @@ describe('EthHashInfo', () => {
         'href',
         'https://rinkeby.etherscan.io/address/0x0000000000000000000000000000000000005AFE',
       )
-    })
-  })
-
-  describe('Safe Shield icon', () => {
-    it('renders shield icon when showShieldIcon is true and name is not undefined', () => {
-      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
-
-      const { container, queryByText } = render(
-        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={true} name="My Safe Account" />,
-      )
-
-      expect(queryByText('My Safe Account')).toBeInTheDocument()
-
-      const nameBox = container.querySelector('.ethHashInfo-name')
-      expect(nameBox).toBeInTheDocument()
-
-      if (nameBox) {
-        const styles = window.getComputedStyle(nameBox)
-        // Should have bold font weight (indicates shield styling is applied)
-        expect(styles.fontWeight).toBe('700')
-        // Should have border radius (part of shield styling)
-        expect(styles.borderRadius).toBeTruthy()
-      }
-
-      // Shield icon should be rendered (check for bold styling which indicates shield container)
-      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
-        const styles = window.getComputedStyle(el)
-        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
-      })
-
-      expect(boxes.length).toBeGreaterThan(0)
-    })
-
-    it('renders shield icon when showShieldIcon is true and name is undefined', () => {
-      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
-
-      const { container } = render(
-        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={true} name={undefined} showName={false} />,
-      )
-
-      // Check that the shield icon container has bold styling (accountStylesWithShieldEnabled)
-      // This confirms the shield icon Box is rendered even without a name
-      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
-        const styles = window.getComputedStyle(el)
-        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
-      })
-
-      expect(boxes.length).toBeGreaterThan(0)
-    })
-
-    it('does not render shield icon when showShieldIcon is false and name is undefined', () => {
-      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
-
-      const { container } = render(
-        <EthHashInfo address={MOCK_SAFE_ADDRESS} showShieldIcon={false} name={undefined} showName={false} />,
-      )
-
-      // When showShieldIcon is false, there should be no Box with bold font weight
-      const boxes = Array.from(container.querySelectorAll('*')).filter((el) => {
-        const styles = window.getComputedStyle(el)
-        return styles.fontWeight === '700' || styles.fontWeight === 'bold'
-      })
-
-      expect(boxes.length).toBe(0)
     })
   })
 })

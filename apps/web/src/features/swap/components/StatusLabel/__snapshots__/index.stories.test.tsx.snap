@@ -5,21 +5,21 @@ exports[`./index.stories Cancelled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-4kcw4c-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1im6wh6-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Cancelled
@@ -35,21 +35,21 @@ exports[`./index.stories Expired 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a204je-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-a204je-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Expired
@@ -65,21 +65,21 @@ exports[`./index.stories Filled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Filled
@@ -95,21 +95,21 @@ exports[`./index.stories Open 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Open
@@ -125,21 +125,21 @@ exports[`./index.stories PartiallyFilled 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-a6ps16-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Partially filled
@@ -155,21 +155,21 @@ exports[`./index.stories Pending 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault css-1f2uoeu-MuiChip-root"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
     >
       <span
-        class="MuiChip-label MuiChip-labelSmall css-qmwq9b-MuiChip-label"
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiTypography-root MuiTypography-caption css-lkspku-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
             focusable="false"
           />
           Execution needed

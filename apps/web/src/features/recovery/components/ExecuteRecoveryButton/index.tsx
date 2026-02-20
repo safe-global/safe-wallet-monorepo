@@ -10,7 +10,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
 
-export function ExecuteRecoveryButton({
+export default function ExecuteRecoveryButton({
   recovery,
   compact = false,
 }: {
@@ -51,8 +51,8 @@ export function ExecuteRecoveryButton({
                 onClick={onClick}
                 variant="contained"
                 disabled={!isOk || isDisabled}
-                sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
-                size={compact ? 'small' : 'stretched'}
+                sx={{ minWidth: '106.5px' }}
+                size={compact ? 'small' : 'large'}
               >
                 Execute
               </Button>

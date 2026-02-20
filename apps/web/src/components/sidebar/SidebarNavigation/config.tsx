@@ -7,14 +7,23 @@ import TransactionIcon from '@/public/images/sidebar/transactions.svg'
 import ABIcon from '@/public/images/sidebar/address-book.svg'
 import AppsIcon from '@/public/images/apps/apps-icon.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import ApiIcon from '@/public/images/sidebar/api.svg'
+import { Chip } from '@/components/common/Chip'
 import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
 import { SvgIcon } from '@mui/material'
-import { Chip } from '@/components/common/Chip'
+import { DEVELOPER_PORTAL_URL } from '@/config/constants'
 
-export type NavItem = { label: string; icon?: ReactElement; href: string; tag?: ReactElement; disabled?: boolean }
+export type NavItem = {
+  label: string
+  icon?: ReactElement
+  href: string
+  tag?: ReactElement
+  disabled?: boolean
+  externalUrl?: string
+}
 
 export const navItems: NavItem[] = [
   { label: 'Home', icon: <SvgIcon component={HomeIcon} inheritViewBox />, href: AppRoutes.home },
@@ -40,6 +49,13 @@ export const navItems: NavItem[] = [
     icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
     href: AppRoutes.settings.setup,
   },
+  {
+    label: 'API',
+    icon: <SvgIcon component={ApiIcon} inheritViewBox />,
+    href: '',
+    externalUrl: DEVELOPER_PORTAL_URL,
+    tag: <Chip sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
+  },
 ]
 
 export const transactionNavItems = [
@@ -50,24 +66,7 @@ export const transactionNavItems = [
 
 export const balancesNavItems = [
   { label: 'Tokens', href: AppRoutes.balances.index },
-  {
-    label: 'Positions',
-    href: AppRoutes.balances.positions,
-    tag: (
-      <Chip
-        label="Beta"
-        sx={{
-          backgroundColor: 'background.lightGrey',
-          letterSpacing: '0.4px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontStyle: 'regular',
-          textTransform: 'none',
-          fontWeight: '400 !important',
-        }}
-      />
-    ),
-  },
+  { label: 'Positions', href: AppRoutes.balances.positions },
   { label: 'NFTs', href: AppRoutes.balances.nfts },
 ]
 

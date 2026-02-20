@@ -26,9 +26,10 @@ import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store
 import { trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -173,6 +174,8 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
+  const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
+  const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
 
   const isCreation = !txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
@@ -246,7 +249,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitDisabled || isSubmitLoading,
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
     setIsSubmitDisabled,
 
     submitError,

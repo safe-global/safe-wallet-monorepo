@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./EurcvBoostBanner.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+    >
+      <img
+        alt="EURCV"
+        class="bannerImage"
+        data-nimg="1"
+        decoding="async"
+        height="95"
+        loading="lazy"
+        src="/images/eurcv-boost/eurcv.svg"
+        style="color: transparent;"
+        width="95"
+      />
+      <div
+        class="bannerContent MuiBox-root mui-style-0"
+      >
+        <h4
+          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        >
+          EURCV is now available
+        </h4>
+        <p
+          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
+        >
+          Stake EURCV and earn boosted APY on deposits.
+           
+          <a
+            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-1spsnlm-MuiTypography-root-MuiLink-root"
+            href="https://help.safe.global/en/articles/322149-defi-lending-in-safe-wallet"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Learn more
+          </a>
+        </p>
+        <button
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic bannerCtaText mui-style-1wse3e8-MuiButtonBase-root-MuiButton-root"
+          tabindex="0"
+          type="button"
+        >
+          Start earning
+          <span
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-pctag4-MuiButton-endIcon"
+          >
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+              data-testid="ChevronRightIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+              />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+    <button
+      aria-label="close"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
+        data-testid="CloseIcon"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

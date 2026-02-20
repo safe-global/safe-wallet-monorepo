@@ -6,6 +6,7 @@
   flex-direction: column;
   background-color: var(--color-background-paper);
   width: 230px;
+  border-right: 1px solid var(--color-background-main);
 }
 
 .scroll {
@@ -37,6 +38,30 @@
   align-items: center;
   padding: 10px;
   min-height: 100px;
+}
+
+.drawerButton {
+  position: absolute !important;
+  z-index: 2;
+  color: var(--color-text-primary);
+  padding: 8px 0;
+  right: 0;
+  transform: translateX(50%);
+  margin-top: 30px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  cursor: pointer;
+  background-color: var(--color-background-main);
+}
+
+.drawerButton:hover {
+  background-color: var(--color-secondary-background);
+}
+
+.drawerButton svg {
+  transform: translateX(-25%);
 }
 
 @media (max-width: 899.95px) {

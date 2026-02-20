@@ -75,13 +75,15 @@ Here's the list of all the environment variables:
 | `NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING`      | FCM vapid key on staging                                                                                                                                                                      |
 | `NEXT_PUBLIC_PROD_MIXPANEL_TOKEN`             | [Mixpanel](https://mixpanel.com) token for production analytics tracking                                                                                                                      |
 | `NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN`          | Mixpanel token for staging analytics tracking                                                                                                                                                 |
-| `NEXT_PUBLIC_HUBSPOT_CONFIG`                  | HubSpot configuration for marketing integrations                                                                                                                                              |
-| `NEXT_PUBLIC_HYPERNATIVE_CALENDLY`            | Calendly URL for Hypernative scheduling                                                                                                                                                       |
 | `NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID`    | Hypernative outreach ID for production                                                                                                                                                        |
 | `NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID` | Hypernative outreach ID for staging                                                                                                                                                           |
 | `NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS`            | Ecosystem ID address                                                                                                                                                                          |
 | `NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT`      | Maximum number of Safe accounts allowed in Spaces                                                                                                                                             |
 | `NEXT_PUBLIC_IS_BEHIND_IAP`                   | Set to `true` when the app is behind an Identity-Aware Proxy                                                                                                                                  |
+| `NEXT_PUBLIC_HYPERNATIVE_API_BASE_URL`        | [Hypernative](https://hypernative.io) API base URL for threat analysis. Production: `https://api.hypernative.xyz`                                                                             |
+| `NEXT_PUBLIC_HYPERNATIVE_CLIENT_ID`           | Hypernative OAuth client ID. Defaults to `SAFE_WALLET_WEB` for production                                                                                                                     |
+| `NEXT_PUBLIC_HYPERNATIVE_REDIRECT_URI`        | Custom OAuth redirect URI (optional). If not set, dynamically generated as `{origin}/hypernative/oauth-callback`                                                                              |
+| `NEXT_PUBLIC_HN_MOCK_AUTH`                    | Enable mock authentication mode for Hypernative (set to `true` for local development without real OAuth). Simplifies testing by bypassing popup flow                                          |
 
 If you don't provide some of the variables, the corresponding features will be disabled in the UI.
 
@@ -159,6 +161,8 @@ Serve the static files:
 yarn workspace @safe-global/web serve
 ```
 
+**Interactive mode:**
+
 Launch the Cypress UI:
 
 ```
@@ -166,6 +170,27 @@ yarn workspace @safe-global/web cypress:open
 ```
 
 You can then choose which e2e tests to run.
+
+**Headless mode:**
+
+Run all tests in headless mode:
+
+```
+yarn workspace @safe-global/web cypress:run
+```
+
+Run a specific test file in headless mode with Chrome:
+
+```
+npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/example.cy.js"
+```
+
+Run multiple test files:
+
+```
+npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/*.cy.js"
+```
+
 Some tests will require signer private keys, please include them in your .env file
 
 ## Component template

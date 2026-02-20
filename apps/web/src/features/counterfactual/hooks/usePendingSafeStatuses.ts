@@ -1,40 +1,24 @@
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
-import {
-  safeCreationDispatch,
-  SafeCreationEvent,
-  safeCreationSubscribe,
-} from '@/features/counterfactual/services/safeCreationEvents'
-import {
-  removeUndeployedSafe,
-  selectUndeployedSafes,
-  updateUndeployedSafeStatus,
-} from '@/features/counterfactual/store/undeployedSafesSlice'
+import { safeCreationDispatch, SafeCreationEvent, safeCreationSubscribe } from '../services/safeCreationEvents'
+import { removeUndeployedSafe, selectUndeployedSafes, updateUndeployedSafeStatus } from '../store/undeployedSafesSlice'
 import {
   checkSafeActionViaRelay,
   checkSafeActivation,
   extractCounterfactualSafeSetup,
-} from '@/features/counterfactual/utils'
+} from '../services/safeDeployment'
+import { safeCreationPendingStatuses } from './safeCreationPendingStatuses'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { CREATE_SAFE_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
-
-export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {
-  [SafeCreationEvent.AWAITING_EXECUTION]: PendingSafeStatus.AWAITING_EXECUTION,
-  [SafeCreationEvent.PROCESSING]: PendingSafeStatus.PROCESSING,
-  [SafeCreationEvent.RELAYING]: PendingSafeStatus.RELAYING,
-  [SafeCreationEvent.SUCCESS]: null,
-  [SafeCreationEvent.INDEXED]: null,
-  [SafeCreationEvent.FAILED]: null,
-  [SafeCreationEvent.REVERTED]: null,
-}
 
 const usePendingSafeMonitor = (): void => {
   const undeployedSafesByChain = useAppSelector(selectUndeployedSafes)
@@ -165,13 +149,24 @@ const usePendingSafeStatus = (): void => {
             trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
           }
 
-          pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
+          const isCurrentSafe = creationChainId === chainId && sameAddress(detail.safeAddress, safeAddress || '')
+
+          if (isCurrentSafe) {
+            pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
+              safeCreationDispatch(SafeCreationEvent.INDEXED, {
+                groupKey: detail.groupKey,
+                safeAddress: detail.safeAddress,
+                chainId: creationChainId,
+              })
+            })
+          } else {
+            // Avoid spamming CGW when many networks are created at once.
             safeCreationDispatch(SafeCreationEvent.INDEXED, {
               groupKey: detail.groupKey,
               safeAddress: detail.safeAddress,
               chainId: creationChainId,
             })
-          })
+          }
           return
         }
 

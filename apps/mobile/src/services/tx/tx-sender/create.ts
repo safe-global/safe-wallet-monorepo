@@ -26,6 +26,9 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
   if (nonce !== undefined) {
     txParams = { ...txParams, nonce }
   }
+  if (Number.isNaN(txParams.safeTxGas) || txParams.safeTxGas === 'NaN') {
+    txParams = { ...txParams, safeTxGas: '0' }
+  }
   return safeSDK.createTransaction({ transactions: [txParams] })
 }
 

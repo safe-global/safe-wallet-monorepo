@@ -8,10 +8,9 @@ import { getNetworkLink } from '@/components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
 import { hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { hasMultiChainCreationFeatures } from '../../utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
-import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 
 const SafeCreationNetworkInput = ({
   name,
@@ -23,7 +22,6 @@ const SafeCreationNetworkInput = ({
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
-  const { currentSafeApp } = useSafeApps()
 
   const {
     formState: { errors },
@@ -35,10 +33,10 @@ const SafeCreationNetworkInput = ({
   const updateCurrentNetwork = useCallback(
     (chains: Chain[]) => {
       if (chains.length !== 1) return
-      const networkLink = getNetworkLink(router, safeAddress, chains[0], currentSafeApp)
+      const networkLink = getNetworkLink(router, safeAddress, chains[0])
       router.replace(networkLink)
     },
-    [router, safeAddress, currentSafeApp],
+    [router, safeAddress],
   )
 
   const isOptionDisabled = useCallback(

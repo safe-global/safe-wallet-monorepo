@@ -1,4 +1,4 @@
-name: Storybook Screenshots
+name: Web Storybook Screenshots
 
 on:
   workflow_run:
@@ -12,8 +12,6 @@ permissions:
 
 jobs:
   screenshot:
-    # Only run on PRs from the same repository (not forks) and when the deployment succeeded
-    # This prevents untrusted code from forks being executed with elevated permissions
     if: >
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
@@ -25,13 +23,10 @@ jobs:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
-      - uses: ./.github/actions/yarn
-
       - name: Install Playwright
         run: |
-          # Install playwright locally in .github/scripts so node can find it
           cd .github/scripts
-          npm init -y
+          npm init -y 2>/dev/null || true
           npm install playwright
           npx playwright install --with-deps chromium
 
@@ -39,7 +34,6 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          # Use env var to prevent code injection via branch name
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
           PR_NUMBER=$(gh pr view "$BRANCH_NAME" --json number -q .number 2>/dev/null || echo "")
@@ -47,30 +41,21 @@ jobs:
 
       - name: Exit if no PR found
         if: steps.pr.outputs.number == ''
-        env:
-          # Use env var to prevent code injection via branch name
-          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "No PR found for branch $BRANCH_NAME"
+          echo "No PR found"
           exit 0
 
       - name: Get changed story files
         id: changed-stories
         run: |
-          # Get the base branch (usually dev or main)
           BASE_SHA=${{ github.event.workflow_run.pull_requests[0].base.sha }}
           HEAD_SHA=${{ github.event.workflow_run.head_sha }}
 
-          # Get all changed files in web app (excluding test files for now)
+          # Get all changed files in web app
           ALL_CHANGED=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' | grep -v '\.test\.' || true)
-
-          # Get changed story test files and snapshot files separately
-          STORY_TEST_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*\.stories\.test\.(tsx?|jsx?)$' || true)
-          SNAPSHOT_FILES=$(git diff --name-only $BASE_SHA $HEAD_SHA | grep -E '^apps/web/src/.*__snapshots__/.*\.stories\.test\.(tsx?|jsx?)\.snap$' || true)
 
           STORY_FILES=""
 
-          # Process regular component and story files
           for file in $ALL_CHANGED; do
             # If it's already a story file, include it
             if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
@@ -82,54 +67,13 @@ jobs:
             dir=$(dirname "$file")
             base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
 
-            # Check for story file with same name in same directory
-            found=false
             for ext in stories.tsx story.tsx stories.ts story.ts; do
               story_file="$dir/$base.$ext"
               if [ -f "$story_file" ]; then
                 STORY_FILES="$STORY_FILES$story_file"$'\n'
-                found=true
                 break
               fi
             done
-
-            # If not found, check in common subdirectories (components/, stories/, __stories__/)
-            if [ "$found" = false ]; then
-              for subdir in components stories __stories__; do
-                for ext in stories.tsx story.tsx stories.ts story.ts; do
-                  story_file="$dir/$subdir/$base.$ext"
-                  if [ -f "$story_file" ]; then
-                    STORY_FILES="$STORY_FILES$story_file"$'\n'
-                    found=true
-                    break 2
-                  fi
-                done
-              done
-            fi
-          done
-
-          # Process story test files - find corresponding .stories.tsx files
-          for file in $STORY_TEST_FILES; do
-            # Convert MyComponent.stories.test.tsx -> MyComponent.stories.tsx
-            story_file=$(echo "$file" | sed -E 's/\.stories\.test\.(tsx?)$/.stories.\1/')
-            if [ -f "$story_file" ]; then
-              STORY_FILES="$STORY_FILES$story_file"$'\n'
-              echo "Found story file from test file: $story_file"
-            fi
-          done
-
-          # Process snapshot files - extract corresponding .stories.tsx files
-          for file in $SNAPSHOT_FILES; do
-            # Convert apps/web/src/features/safe-shield/__snapshots__/SafeShield.stories.test.tsx.snap
-            # -> apps/web/src/features/safe-shield/SafeShield.stories.tsx
-            dir=$(dirname "$file")
-            parent_dir=$(dirname "$dir")
-            base=$(basename "$file" | sed -E 's/\.stories\.test\.(tsx?)\.snap$/.stories.\1/')
-            story_file="$parent_dir/$base"
-            if [ -f "$story_file" ]; then
-              STORY_FILES="$STORY_FILES$story_file"$'\n'
-              echo "Found story file from snapshot: $story_file"
-            fi
           done
 
           # Remove duplicates and empty lines
@@ -140,9 +84,8 @@ jobs:
             echo "No story files found for changed components"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "Story files to capture:"
+            echo "Story files with changes:"
             echo "$STORY_FILES"
-            # Store as multiline output
             echo "files<<EOF" >> $GITHUB_OUTPUT
             echo "$STORY_FILES" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
@@ -152,7 +95,6 @@ jobs:
         if: steps.changed-stories.outputs.has_changes == 'true'
         id: branch
         env:
-          # Use env var to prevent code injection via branch name
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
           NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
@@ -163,76 +105,48 @@ jobs:
         if: steps.changed-stories.outputs.has_changes == 'true'
         id: story-urls
         run: |
-          node ./.github/scripts/generate-story-urls.js
+          node ./.github/scripts/generate-web-story-urls.js
         env:
           CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
-          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
 
       - name: Take screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
         run: |
-          node ./.github/scripts/capture-screenshots.js
+          node ./.github/scripts/capture-web-storybook-screenshots.js
         env:
-          STORY_URLS: ${{ steps.story-urls.outputs.urls }}
-          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
           NODE_PATH: ./.github/scripts/node_modules
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
 
       - name: Upload screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
         uses: actions/upload-artifact@v6
         with:
-          name: storybook-screenshots
-          path: screenshots/
+          name: web-storybook-screenshots
+          path: web-storybook-screenshots/
           retention-days: 5
 
       - name: Upload screenshots to branch
-        if: steps.changed-stories.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
-
-          SCREENSHOT_DIR="storybook-screenshots/${{ steps.pr.outputs.number }}"
-
-          cd /tmp
-          rm -rf screenshots-storage
-
-          if git clone --depth 1 --branch storybook-screenshots-storage https://github.com/${{ github.repository }}.git screenshots-storage; then
-            echo "Cloned existing storage branch"
-            cd screenshots-storage
-          else
-            echo "Storage branch doesn't exist, creating it"
-            git clone --depth 1 https://github.com/${{ github.repository }}.git screenshots-storage
-            cd screenshots-storage
-            git checkout --orphan storybook-screenshots-storage
-            git rm -rf . 2>/dev/null || true
-            echo "# Storybook Screenshots Storage" > README.md
-            git add README.md
-            git commit -m "Initialize storybook-screenshots-storage branch"
-          fi
-
-          mkdir -p "$SCREENSHOT_DIR"
-          cp $GITHUB_WORKSPACE/screenshots/*.png "$SCREENSHOT_DIR/" 2>/dev/null || true
-
-          git add "$SCREENSHOT_DIR"
-          if git commit -m "Add screenshots for PR #${{ steps.pr.outputs.number }}"; then
-            git push origin storybook-screenshots-storage
-          else
-            echo "No changes to commit"
-          fi
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: ${{ steps.branch.outputs.normalized }}-screenshots
+          source_dir: web-storybook-screenshots
+          target_dir: web-storybook-screenshots/${{ steps.pr.outputs.number }}
+          file_pattern: '*.png'
+          commit_message: 'Add web storybook screenshots for PR #${{ steps.pr.outputs.number }}'
+          readme_title: 'Web Storybook Screenshots Storage'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post PR comment with screenshots
-        if: steps.changed-stories.outputs.has_changes == 'true'
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
         uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
 
-            // Read screenshot directory
-            const screenshotDir = 'screenshots';
+            const screenshotDir = 'web-storybook-screenshots';
             if (!fs.existsSync(screenshotDir)) {
               console.log('No screenshots directory found');
               return;
@@ -247,12 +161,9 @@ jobs:
 
             const prNumber = ${{ steps.pr.outputs.number }};
             const repo = context.repo;
-            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/storybook-screenshots-storage/storybook-screenshots/${prNumber}`;
-
-            // Build comment body
-            let body = '## 📸 Storybook Component Screenshots\n\n';
-            body += `Found ${screenshots.length} screenshot(s) for changed components in this PR.\n\n`;
-            body += `**Storybook Preview:** https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook/\n\n`;
+            const screenshotBranch = `${{ steps.branch.outputs.normalized }}-screenshots`;
+            const baseUrl = `https://raw.githubusercontent.com/${repo.owner}/${repo.repo}/${screenshotBranch}/web-storybook-screenshots/${prNumber}`;
+            const storybookUrl = `https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook`;
 
             // Group screenshots by component
             const components = {};
@@ -267,8 +178,10 @@ jobs:
               }
             }
 
-            // Add screenshots to comment with proper URLs
-            // Show inline if < 10 screenshots, otherwise use collapsible details
+            let body = '## 📸 Storybook Component Screenshots\n\n';
+            body += `Found ${screenshots.length} screenshot(s) for components modified in this PR.\n\n`;
+            body += `**[View Storybook](${storybookUrl})**\n\n`;
+
             const useCollapsible = screenshots.length >= 10;
 
             for (const [componentName, stories] of Object.entries(components)) {
@@ -287,9 +200,8 @@ jobs:
             }
 
             body += '\n---\n';
-            body += '*Screenshots are automatically captured from changed story files.*';
+            body += '*Screenshots captured from deployed Storybook preview.*';
 
-            // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: repo.owner,
               repo: repo.repo,
@@ -297,11 +209,10 @@ jobs:
             });
 
             const botComment = comments.find(comment =>
-              comment.user.type === 'Bot' &&
+              comment.user?.type === 'Bot' &&
               comment.body.includes('📸 Storybook Component Screenshots')
             );
 
-            // Create or update comment
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: repo.owner,
@@ -318,7 +229,7 @@ jobs:
               });
             }
 
-      - name: Post no changes comment
+      - name: Delete comment if no changes
         if: steps.changed-stories.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
         uses: actions/github-script@v8
         with:
@@ -330,11 +241,10 @@ jobs:
             });
 
             const botComment = comments.find(comment =>
-              comment.user.type === 'Bot' &&
+              comment.user?.type === 'Bot' &&
               comment.body.includes('📸 Storybook Component Screenshots')
             );
 
-            // Delete the comment if no stories changed
             if (botComment) {
               await github.rest.issues.deleteComment({
                 owner: context.repo.owner,

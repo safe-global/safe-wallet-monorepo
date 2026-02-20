@@ -1,5 +1,5 @@
-import ActivateAccountButton from '@/features/counterfactual/ActivateAccountButton'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe, CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement, useContext } from 'react'
 import Button from '@mui/material/Button'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
@@ -10,6 +10,7 @@ import { NewTxFlow } from '@/components/tx-flow/flows'
 const NewTxButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const { ActivateAccountButton } = useLoadFeature(CounterfactualFeature)
 
   const onClick = () => {
     setTxFlow(<NewTxFlow />, undefined, false)
@@ -30,11 +31,10 @@ const NewTxButton = (): ReactElement => {
           data-testid="new-tx-btn"
           onClick={onClick}
           variant="contained"
-          size="small"
+          size="medium"
           disabled={!isOk}
           fullWidth
           disableElevation
-          sx={{ py: 1.3 }}
         >
           New transaction
         </Button>

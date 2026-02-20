@@ -93,7 +93,6 @@ interface RpcRequest {
 export enum RpcErrorCode {
   INVALID_PARAMS = -32602,
   USER_REJECTED = 4001,
-  UNSUPPORTED_METHOD = 4200,
   UNSUPPORTED_CHAIN = 4901,
 }
 
@@ -350,7 +349,7 @@ export class SafeWalletProvider {
     const { safeTxHash, txHash } = await this.sdk.send(
       {
         txs: [tx],
-        params: { safeTxGas: Number(tx.gas) },
+        params: { safeTxGas: Number(tx.gas ?? 0) },
       },
       appInfo,
     )

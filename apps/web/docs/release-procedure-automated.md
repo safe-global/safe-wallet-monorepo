@@ -76,10 +76,12 @@ GitHub → Actions → "🚀 Start Web Release"
 - ✅ Builds production assets
 - ✅ Uploads to S3
 - ✅ Prepares production deployment
-- ✅ Back-merges main to dev automatically
-- ✅ Sends Slack notification to `#topic-wallet-releases`
+- ✅ Creates back-merge PR (main → dev) for manual review
+- ✅ Sends Slack notification to `#topic-wallet-releases` with back-merge PR link
 
-**Result:** Release published, ready for production deployment, and dev branch synced (~5-10 minutes)
+**Result:** Release published, ready for production deployment, and back-merge PR ready for review (~5-10 minutes)
+
+> **Note:** Due to commit signing restrictions, the back-merge cannot be pushed directly to `dev`. A PR is created automatically and linked in the Slack notification. Please review and merge the back-merge PR to keep `dev` in sync with `main`.
 
 ---
 
@@ -100,7 +102,7 @@ To enable notifications:
 Notifications will be sent for:
 
 - Release started
-- Production deployment completed with back-merge status (to `#topic-wallet-releases` channel)
+- Production deployment completed with back-merge PR link (to `#topic-wallet-releases` channel)
 
 ---
 
@@ -124,12 +126,13 @@ Notifications will be sent for:
 │   main       │  ← Production-ready
 └──────┬───────┘
        │
-       │ (Auto: Tag, Release, Build, Upload to S3 & Back-merge)
+       │ (Auto: Tag, Release, Build, Upload to S3 & Back-merge PR)
        │
        ├─────────────────┐
        ▼                 ▼
    Production 🎉    ┌──────────────┐
-                    │   dev        │  ← Auto-synced
+                    │ Back-merge   │  ← PR created (manual merge)
+                    │ PR → dev     │
                     └──────────────┘
 ```
 
@@ -152,18 +155,20 @@ Notifications will be sent for:
 
 ### Back-merge conflicts
 
-**Problem:** Cannot automatically merge main to dev
+**Problem:** Back-merge PR has conflicts
 **Solution:**
 
-- The automated back-merge will fail if there are conflicts
-- Manually resolve by running:
+- A back-merge PR is automatically created after each release
+- If there are conflicts, the PR will be marked with "(CONFLICTS)" in the title
+- Resolve conflicts by merging `main` into the back-merge branch:
   ```bash
-  git checkout dev
-  git pull origin dev
-  git merge main
+  git fetch origin
+  git checkout backmerge/main-to-dev-vX.Y.Z
+  git merge origin/main
   # Resolve conflicts
-  git push origin dev
+  git push
   ```
+- Then merge the PR on GitHub
 
 ### Workflow not appearing
 

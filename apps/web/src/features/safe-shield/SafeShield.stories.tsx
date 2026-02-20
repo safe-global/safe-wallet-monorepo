@@ -6,15 +6,19 @@ import {
   ContractAnalysisBuilder,
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
+import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
-const meta = {
+// Seed faker for deterministic visual regression tests
+faker.seed(456)
+
+const meta: Meta<typeof SafeShieldDisplay> = {
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
-    (Story) => (
-      <StoreDecorator initialState={{}}>
+    (Story, context) => (
+      <StoreDecorator initialState={{}} context={context}>
         <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
           <Box sx={{ width: 320 }}>
             <Story />
@@ -24,7 +28,7 @@ const meta = {
     ),
   ],
   tags: ['autodocs'],
-} satisfies Meta<typeof SafeShieldDisplay>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -61,6 +65,7 @@ export const ModerateThreat: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
 }
 
@@ -72,6 +77,7 @@ export const FailedThreatAnalysis: Story = {
       .threat(FullAnalysisBuilder.failedThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when threat analysis fails' } } },
 }
 
@@ -83,6 +89,7 @@ export const OwnershipChange: Story = {
       .threat(FullAnalysisBuilder.ownershipChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe ownership' } } },
 }
 
@@ -94,6 +101,7 @@ export const ModulesChange: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
 }
 
@@ -105,6 +113,7 @@ export const MastercopyChange: Story = {
       .threat(FullAnalysisBuilder.masterCopyChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
 }
 
@@ -115,6 +124,7 @@ export const UnverifiedContract: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing an unverified contract' } } },
 }
 
@@ -126,6 +136,7 @@ export const UnableToVerifyContract: Story = {
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: { description: { story: 'SafeShieldWidget when unable to verify a contract due to verification failure' } },
   },
@@ -133,7 +144,11 @@ export const UnableToVerifyContract: Story = {
 
 // Contract loading state
 export const Loading: Story = {
-  args: { recipient: [undefined, undefined, true], contract: [undefined, undefined, true] },
+  args: {
+    recipient: [undefined, undefined, true],
+    contract: [undefined, undefined, true],
+    threat: [undefined, undefined, true],
+  },
   parameters: {
     docs: {
       description: {
@@ -149,6 +164,19 @@ export const Empty: Story = {
   parameters: { docs: { description: { story: 'SafeShieldWidget when no transaction is available to analyze' } } },
 }
 
+// Unofficial fallback handler
+export const UnofficialFallbackHandler: Story = {
+  args: {
+    ...FullAnalysisBuilder.unofficialFallbackHandlerContract(contractAddress)
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when transaction sets an unofficial fallback handler' } },
+  },
+}
+
 // Multiple results for the same contract with different severity
 export const MultipleIssues: Story = {
   args: {
@@ -162,6 +190,7 @@ export const MultipleIssues: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
@@ -184,10 +213,134 @@ export const MultipleCounterparties: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
+  tags: ['!chromatic'],
   parameters: {
     docs: {
       description: {
         story: 'SafeShieldWidget displaying multiple results for the same contract with different severity',
+      },
+    },
+  },
+}
+
+export const ThreatAnalysisWithError: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(ThreatAnalysisBuilder.failedThreatWithError())
+      .build(),
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget displaying threat analysis failure with error details dropdown. Click "Show details" to view the error message.',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in
+export const HypernativeGuardActive: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .threat(FullAnalysisBuilder.customChecksPassed().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - not logged in
+export const HypernativeNotLoggedIn: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: false,
+      isTokenExpired: false,
+      initiateLogin: () => {
+        console.log('Initiate login clicked')
+      },
+      logout: () => {
+        console.log('Logout clicked')
+      },
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story: 'SafeShieldWidget when Hypernative guard is enabled and user is not authenticated',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with malicious result
+export const HypernativeMaliciousThreat: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(
+        FullAnalysisBuilder.maliciousThreat().customCheck(ThreatAnalysisBuilder.customChecksPassed()).build().threat,
+      )
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
+      },
+    },
+  },
+}
+
+// Hypernative guard - logged in with custom check failed result
+export const HypernativeCustomCheckFailed: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.customCheckFailed().build().threat)
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a custom check failed result',
       },
     },
   },

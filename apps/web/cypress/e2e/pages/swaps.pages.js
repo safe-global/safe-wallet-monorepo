@@ -20,7 +20,6 @@ export const dashboardSwapBtn = '[data-testid="overview-swap-btn"]'
 export const customRecipient = 'div[id="recipient"]'
 const recipientToggle = 'button[id="toggle-recipient-mode-button"]'
 const twapsAddressToggle = 'button[class*="Toggle__Wrapper"]'
-const orderTypeMenuItem = 'div[class*="MenuItem"]'
 const explorerBtn = '[data-testid="explorer-btn"]'
 const limitPriceFld = '[data-testid="limit-price"]'
 const expiryFld = '[data-testid="expiry"]'
@@ -46,7 +45,6 @@ const tokenItem = 'div[class*="TokenDetails"]'
 const limitStrBtn = 'Limit'
 const swapStrBtn = 'Swap'
 const twapStrBtn = 'TWAP'
-const confirmSwapStr = 'Confirm Swap'
 const swapAnywayStrBtn = 'Swap anyway'
 const acceptStrBtn = 'Accept'
 const maxStrBtn = 'Max'
@@ -56,17 +54,11 @@ const buyAmountStr = 'Buy amount'
 const filledStr = 'Filled'
 const partDuration = 'Part duration'
 const totalDurationStr = 'Total duration'
-const oneHr = '1 Hour'
-const halfHr = '30m'
 const sellperPartStr = 'Sell per part'
 const sellperPartStr2 = 'Sell amount'
-const buyperPartStr = 'Buy per part'
-const priceProtectionStr = 'Price protection'
 const orderSplit = 'Order will be split in'
 const orderDetailsStr = 'Order details'
 const unlockTwapOrdersStrBtn = 'Unlock TWAP orders'
-const settingsModalTitle = 'Advanced Order Settings'
-const customRecipientStr = 'Custom Recipient'
 const recipientWarningMsg = 'Order recipient address differs from order owner!'
 const selectTokenStr = 'Select a token'
 
@@ -78,7 +70,6 @@ const getInsufficientBalanceStr = (token) => `Insufficient ${token} balance`
 const sellAmountIsSmallStr = 'Sell amount too small'
 
 const swapBtnStr = /Confirm Swap|Swap|Confirm (Approve COW and Swap)|Confirm/
-const orderSubmittedStr = 'Order Submitted'
 const orderIdStr = 'Order ID'
 const cowOrdersUrl = 'https://explorer.cow.fi/orders'
 
@@ -116,11 +107,6 @@ export const orderTypes = {
   limit: 'Limit',
 }
 
-const swapOrders = '**/api/v1/orders/*'
-const surplus = '**/users/*/total_surplus'
-const nativePrice = '**/native_price'
-const quote = '**/quote/*'
-
 export const limitOrderSafe = 'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551'
 
 export const swapTxs = {
@@ -155,14 +141,10 @@ export const tokenBlockLabels = {
   buy: 'Buy exactly',
 }
 
-export function verifySwapBtnIsVisible() {
-  cy.get(assetsSwapBtn).should('be.visible')
-}
-
 export function verifyAssetsPageSwapButtonsCount(count) {
   cy.get(assets.tableContainer)
     .find(addressbook.tableRow)
-    .find(assets.actionColumnCell)
+    .find(assets.assetsTableActionsCell)
     .find(assetsSwapBtn)
     .should('have.length', count)
 }
@@ -197,10 +179,6 @@ export function clickOnAssetSwapBtn(index) {
   cy.get(assetsSwapBtn).filter(':visible').eq(index).click()
 }
 
-export function verifyOrderSubmittedConfirmation() {
-  cy.get('div').contains(orderSubmittedStr).should('exist')
-}
-
 export function clickOnSettingsBtn() {
   cy.get(settingsBtn).click()
 }
@@ -224,29 +202,6 @@ export function enterRecipient(address) {
 
 export function setSlippage(value) {
   cy.contains('button', 'Auto').next('button').find('input').clear().type(value)
-}
-export function waitForOrdersCallToComplete() {
-  cy.intercept('GET', swapOrders).as('Orders')
-  cy.wait('@Orders')
-}
-
-export function waitForSurplusCallToComplete() {
-  cy.intercept('GET', surplus).as('Surplus')
-  cy.wait('@Surplus')
-}
-
-export function waitFornativePriceCallToComplete() {
-  cy.intercept('GET', nativePrice).as('Price')
-  cy.wait('@Price')
-}
-
-export function waitForQuoteCallToComplete() {
-  cy.intercept('GET', quote).as('Quote')
-  cy.wait('@Quote')
-}
-
-export function clickOnConfirmSwapBtn() {
-  cy.get('button').contains(confirmSwapStr).click()
 }
 
 export function clickOnExceeFeeChkbox() {
@@ -436,11 +391,6 @@ export function isInputGreaterZero(inputSelector) {
       const n = parseFloat(val)
       return n > 0
     })
-}
-
-export function selectOrderType(type) {
-  cy.get('a').contains(swapStr).click()
-  cy.get(orderTypeMenuItem).contains(type).click()
 }
 
 export function createRegex(pattern, placeholder) {

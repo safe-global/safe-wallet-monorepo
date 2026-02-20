@@ -139,4 +139,16 @@ describe('AnalysisGroup', () => {
     // Should render multiple analysis displays
     expect(getByText(/Low activity/i)).toBeTruthy()
   })
+
+  it('should render FallbackHandlerItem for unofficial fallback handler', () => {
+    const fallbackHandlerAddress = faker.finance.ethereumAddress()
+    const contractResult = ContractAnalysisBuilder.unofficialFallbackHandlerContract(fallbackHandlerAddress).build()[0]
+
+    if (!contractResult) {
+      return
+    }
+
+    const { getByText } = render(<AnalysisGroup data={contractResult} />, { initialStore })
+    expect(getByText(/Verify the fallback handler is trusted and secure before proceeding/i)).toBeTruthy()
+  })
 })

@@ -4,7 +4,7 @@ import { useTheme } from 'tamagui'
 
 export const useSignersActions = (disableImport: boolean) => {
   const theme = useTheme()
-  const color = theme.color?.get()
+  const color = theme.color.get()
   const actions = useMemo(
     () => [
       {

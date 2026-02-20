@@ -20,10 +20,10 @@ describe('Sidebar added sidebar tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.wait(2000)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set2)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    cy.wait(2000)
   })
 
   it('Verify the safe added are listed in the sidebar', () => {

@@ -5,7 +5,7 @@ exports[`./TokenIcon.stories CustomFallback 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="26"
@@ -37,7 +37,7 @@ exports[`./TokenIcon.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="26"
@@ -69,7 +69,7 @@ exports[`./TokenIcon.stories Fallback 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="26"
@@ -101,7 +101,7 @@ exports[`./TokenIcon.stories LargeSize 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="48"
@@ -133,7 +133,7 @@ exports[`./TokenIcon.stories NoRadius 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="26"
@@ -165,7 +165,7 @@ exports[`./TokenIcon.stories SmallSize 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-olq4e8"
+    class="MuiBox-root mui-style-olq4e8"
   >
     <iframe
       height="16"
@@ -197,7 +197,7 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiBox-root css-1ysxw4w"
+    class="MuiBox-root mui-style-1ysxw4w"
   >
     <iframe
       height="26"
@@ -224,9 +224,17 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
       class="chainIcon"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="indicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="17.333342000000002"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="17.333342000000002"
+        />
+      </span>
     </div>
   </div>
 </div>

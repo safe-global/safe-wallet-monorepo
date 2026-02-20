@@ -145,7 +145,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
           <OnlyOwner placement="top">
             {(isOk) => (
               <Button
-                variant="contained"
+                variant="outlined"
                 onClick={onClick}
                 size="small"
                 startIcon={

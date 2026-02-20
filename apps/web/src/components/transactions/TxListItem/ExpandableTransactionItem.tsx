@@ -18,7 +18,7 @@ type ExpandableTransactionItemProps = {
   txDetails?: TransactionDetails
 }
 
-export const ExpandableTransactionItem = ({
+const ExpandableTransactionItem = ({
   isConflictGroup = false,
   isBulkGroup = false,
   item,

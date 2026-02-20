@@ -28,8 +28,7 @@ import * as ls from './localstorage_data'
   However, in cypress the cookie banner state is evaluated after the banner has been dismissed not before
   which displays the terms banner even though it shouldn't so we need to globally hide it in our tests.
  */
-const { addCompareSnapshotCommand } = require('cypress-visual-regression/dist/command')
-addCompareSnapshotCommand()
+import '@chromatic-com/cypress/support'
 
 const beamer = JSON.parse(Cypress.env('BEAMER_DATA_E2E') || '{}')
 const productID = beamer.PRODUCT_ID
@@ -71,6 +70,7 @@ beforeEach(() => {
   cy.clearAllSessionStorage()
   cy.clearLocalStorage()
   cy.clearCookies()
+
   cy.window().then((window) => {
     const getDate = () => new Date().toISOString()
     const beamerKey1 = `_BEAMER_FIRST_VISIT_${productID}`
@@ -89,4 +89,15 @@ beforeEach(() => {
     window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })
+})
+
+// After each visual test, toggle dark mode and take a second Chromatic snapshot
+afterEach(() => {
+  const isVisualTest = Cypress.spec.relative.includes('/visual/')
+  if (!isVisualTest) return
+
+  cy.document().then((doc) => {
+    doc.documentElement.setAttribute('data-theme', 'dark')
+  })
+  cy.takeSnapshot('dark')
 })

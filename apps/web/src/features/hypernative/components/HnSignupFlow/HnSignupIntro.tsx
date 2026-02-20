@@ -14,15 +14,15 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
   const features = [
     {
       title: 'Automatic blocking',
-      description: 'Stops malicious or policy-violating transactions before they execute.',
+      description: "Automatically prevents malicious or non-compliant transactions before they're executed",
     },
     {
       title: 'Custom security rules',
-      description: 'Define your own policies based on a wide range of parameters to prevent unwanted transactions.',
+      description: 'Create tailored policies using granular parameters to stop unwanted transactions.',
     },
     {
       title: 'Seamless integration',
-      description: 'Operates directly within your Safe transaction flow - no extra steps required.',
+      description: 'Works natively within your Safe workflow. No extra steps required.',
     },
   ]
 
@@ -66,7 +66,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             {...HYPERNATIVE_EVENTS.GUARDIAN_FORM_STARTED}
           >
             <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
-              Get started
+              See how it works
             </Button>
           </Track>
           <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>

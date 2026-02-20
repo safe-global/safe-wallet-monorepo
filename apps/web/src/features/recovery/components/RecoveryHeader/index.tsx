@@ -1,4 +1,3 @@
-import { Grid } from '@mui/material'
 import { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -7,11 +6,10 @@ import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
 import madProps from '@/utils/mad-props'
 import { RecoveryProposalCard } from '@/features/recovery/components/RecoveryCards/RecoveryProposalCard'
 import { RecoveryInProgressCard } from '@/features/recovery/components/RecoveryCards/RecoveryInProgressCard'
-import { WidgetContainer, WidgetBody } from '@/components/dashboard/styled'
 import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function InternalRecoveryHeader({
+function InternalRecoveryHeader({
   isProposalInProgress,
   isRecoverer,
   queue,
@@ -22,21 +20,16 @@ export function InternalRecoveryHeader({
 }): ReactElement | null {
   const next = queue[0]
 
-  const modal = next ? (
-    <RecoveryInProgressCard orientation="horizontal" recovery={next} />
-  ) : isRecoverer && !isProposalInProgress ? (
-    <RecoveryProposalCard orientation="horizontal" />
-  ) : null
-
-  if (modal) {
-    return (
-      <Grid item xs={12}>
-        <WidgetContainer>
-          <WidgetBody>{modal}</WidgetBody>
-        </WidgetContainer>
-      </Grid>
-    )
+  // Return the recovery card directly without wrappers so it's counted
+  // as a direct child in the ActionRequiredPanel
+  if (next) {
+    return <RecoveryInProgressCard orientation="horizontal" recovery={next} />
   }
+
+  if (isRecoverer && !isProposalInProgress) {
+    return <RecoveryProposalCard orientation="horizontal" />
+  }
+
   return null
 }
 
@@ -68,5 +61,8 @@ const RecoveryHeader = madProps(InternalRecoveryHeader, {
   isRecoverer: useIsRecoverer,
   queue: useRecoveryQueue,
 })
+
+// Export for tests
+export { InternalRecoveryHeader }
 
 export default RecoveryHeader

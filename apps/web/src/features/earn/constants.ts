@@ -19,6 +19,7 @@ export const EligibleEarnTokens: Record<string, string[]> = {
     '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // USDC
     '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0', // wstETH
     '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // WBTC
+    '0x5f7827fdeb7c20b443265fc2f40845b715385ff2', // EURCV
   ],
   '8453': [
     '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
@@ -34,6 +35,7 @@ export const VaultAPYs: Record<string, Record<string, number>> = {
     '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 3.78,
     '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0': 0.68,
     '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599': 0.34,
+    '0x5f7827fdeb7c20b443265fc2f40845b715385ff2': 9.5, // EURCV
   },
   '8453': {
     '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': 5.6,
@@ -41,6 +43,6 @@ export const VaultAPYs: Record<string, Record<string, number>> = {
   },
 }
 
-export const ApproximateAPY = 0.081
+export const ApproximateAPY = 0.095
 export const APYDisclaimer =
   '* based on historic averages of USD stablecoin and ETH Morpho vaults. Yields are variable and subject to change. Past performance is not a guarantee of future returns. The Kiln DeFi, Morpho Borrow and Vault products and features described herein are not offered or controlled by Safe Labs GmbH, Safe Ecosystem Foundation, and/or its affiliates.'

@@ -163,7 +163,7 @@ export function ledgerModule(): WalletInit {
               const { keccak256 } = await import('ethers')
               const txHash = keccak256(transaction.unsignedSerialized)
 
-              const { showLedgerHashComparison, hideLedgerHashComparison } = await import('@/features/ledger/store')
+              const { showLedgerHashComparison, hideLedgerHashComparison } = await import('@/features/ledger')
               showLedgerHashComparison(txHash)
 
               try {

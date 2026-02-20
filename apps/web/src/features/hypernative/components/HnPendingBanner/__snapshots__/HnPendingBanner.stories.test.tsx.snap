@@ -5,35 +5,35 @@ exports[`./HnPendingBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1qhe4wj-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1qhe4wj-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiStack-root content css-14ed0e9-MuiStack-root"
+        class="MuiStack-root content mui-style-14ed0e9-MuiStack-root"
       >
         <div
-          class="iconContainer MuiBox-root css-0"
+          class="iconContainer MuiBox-root mui-style-0"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon css-1dhtbeh-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon mui-style-1dhtbeh-MuiSvgIcon-root"
             focusable="false"
           />
         </div>
         <div
-          class="textContainer MuiBox-root css-0"
+          class="textContainer MuiBox-root mui-style-0"
         >
           <h6
-            class="MuiTypography-root MuiTypography-subtitle1 title css-yjg58m-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-subtitle1 title mui-style-yjg58m-MuiTypography-root"
           >
             Guardian setup in progress
           </h6>
           <p
-            class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 description mui-style-17vdyq3-MuiTypography-root"
           >
             We've received your request and will follow up with next steps.
           </p>
@@ -41,13 +41,13 @@ exports[`./HnPendingBanner.stories Default 1`] = `
       </div>
       <button
         aria-label="close"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
           data-testid="CloseIcon"
           focusable="false"
           viewBox="0 0 24 24"
@@ -67,35 +67,35 @@ exports[`./HnPendingBanner.stories NonDismissable 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1qhe4wj-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1qhe4wj-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiStack-root content css-14ed0e9-MuiStack-root"
+        class="MuiStack-root content mui-style-14ed0e9-MuiStack-root"
       >
         <div
-          class="iconContainer MuiBox-root css-0"
+          class="iconContainer MuiBox-root mui-style-0"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon css-1dhtbeh-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium icon mui-style-1dhtbeh-MuiSvgIcon-root"
             focusable="false"
           />
         </div>
         <div
-          class="textContainer MuiBox-root css-0"
+          class="textContainer MuiBox-root mui-style-0"
         >
           <h6
-            class="MuiTypography-root MuiTypography-subtitle1 title css-yjg58m-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-subtitle1 title mui-style-yjg58m-MuiTypography-root"
           >
             Guardian setup in progress
           </h6>
           <p
-            class="MuiTypography-root MuiTypography-body2 description css-17vdyq3-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 description mui-style-17vdyq3-MuiTypography-root"
           >
             We've received your request and will follow up with next steps.
           </p>

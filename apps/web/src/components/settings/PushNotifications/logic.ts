@@ -4,7 +4,7 @@ import { getBytes, keccak256, toUtf8Bytes, type BrowserProvider } from 'ethers'
 import { getToken, getMessaging } from 'firebase/messaging'
 
 import { FIREBASE_VAPID_KEY, initializeFirebaseApp } from '@/services/push-notifications/firebase'
-import packageJson from '../../../../package.json'
+import { APP_VERSION } from '@/config/version'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -123,7 +123,7 @@ export const getRegisterDevicePayload = async ({
     buildNumber: BUILD_NUMBER,
     bundle: BUNDLE,
     deviceType: DeviceType.WEB,
-    version: packageJson.version,
+    version: APP_VERSION,
     timestamp,
     safeRegistrations,
   }

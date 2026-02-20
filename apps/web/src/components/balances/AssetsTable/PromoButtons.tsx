@@ -1,11 +1,11 @@
 import React, { type ReactElement } from 'react'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import StakeButton from '@/features/stake/components/StakeButton'
-import EarnButton from '@/features/earn/components/EarnButton'
+import { StakeFeature } from '@/features/stake'
+import { useLoadFeature } from '@/features/__core__'
+import { EarnButton, isEligibleEarnToken } from '@/features/earn'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import { isEligibleEarnToken } from '@/features/earn/utils'
 
 interface PromoButtonsProps {
   tokenInfo: Balance['tokenInfo']
@@ -20,6 +20,7 @@ export const PromoButtons = ({
   isStakingPromoEnabled,
   isEarnPromoEnabled,
 }: PromoButtonsProps): ReactElement | null => {
+  const stake = useLoadFeature(StakeFeature)
   const showStakeButton = isStakingPromoEnabled && tokenInfo.type === TokenType.NATIVE_TOKEN
   const showEarnButton = isEarnPromoEnabled && isEligibleEarnToken(chainId, tokenInfo.address)
 
@@ -29,7 +30,7 @@ export const PromoButtons = ({
 
   return (
     <>
-      {showStakeButton && <StakeButton tokenInfo={tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />}
+      {showStakeButton && <stake.StakeButton tokenInfo={tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />}
       {showEarnButton && <EarnButton tokenInfo={tokenInfo} trackingLabel={EARN_LABELS.asset} onlyIcon />}
     </>
   )

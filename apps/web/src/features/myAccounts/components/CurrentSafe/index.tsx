@@ -1,64 +1,41 @@
 import { Box, Typography } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllSafeItems } from '../../hooks/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
-import SingleAccountItem from '../AccountItems/SingleAccountItem'
+import { SafeListItem } from '../SafesList/SafeListItem'
 
-function CurrentSafeList({
-  safeAddress,
-  chainId,
-  isReadOnly,
-  onLinkClick,
-}: {
-  safeAddress: string
-  chainId: string
-  isReadOnly: boolean
-  onLinkClick?: () => void
-}) {
+function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
+  const { safe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
-  const safeName = addressBook[safeAddress]
+
+  const safeInList = useMemo(
+    () => (safeAddress ? allSafes?.find((s) => sameAddress(s.address, safeAddress)) : undefined),
+    [allSafes, safeAddress],
+  )
 
   const safeItem = useMemo(
     () => ({
-      chainId,
+      chainId: safe.chainId,
       address: safeAddress,
-      isReadOnly,
+      isReadOnly: !safeInList,
       isPinned: false,
       lastVisited: -1,
-      name: safeName,
+      name: addressBook[safeAddress],
     }),
-    [chainId, safeAddress, isReadOnly, safeName],
+    [safe.chainId, safeAddress, safeInList, addressBook],
   )
+
+  if (!safeAddress || safeInList?.isPinned) return null
 
   return (
     <Box data-testid="current-safe-section" mb={3}>
       <Typography variant="h5" fontWeight={700} mb={2}>
         Current Safe Account
       </Typography>
-
-      <SingleAccountItem onLinkClick={onLinkClick} safeItem={safeItem} />
+      <SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />
     </Box>
-  )
-}
-
-function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
-  const { safe, safeAddress } = useSafeInfo()
-
-  const safeInList = useMemo(
-    () => (safeAddress ? allSafes?.find((s) => sameAddress(s.address, safeAddress)) : undefined),
-    [allSafes, safeAddress],
-  )
-  if (!safeAddress || safeInList?.isPinned) return null
-
-  return (
-    <CurrentSafeList
-      onLinkClick={onLinkClick}
-      safeAddress={safeAddress}
-      chainId={safe.chainId}
-      isReadOnly={!safeInList}
-    />
   )
 }
 

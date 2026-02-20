@@ -5,12 +5,12 @@ exports[`./HnSecurityReportBtn.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1qhe4wj-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1qhe4wj-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <a
       aria-label="Review security report on Hypernative"
-      class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiButtonBase-root MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth css-1sflogz-MuiTypography-root-MuiLink-root-MuiButtonBase-root-MuiButton-root"
+      class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways MuiButtonBase-root MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth MuiButton-root MuiButton-neutral MuiButton-neutralPrimary MuiButton-sizeMedium MuiButton-neutralSizeMedium MuiButton-colorPrimary MuiButton-fullWidth mui-style-zs31lt-MuiTypography-root-MuiLink-root-MuiButtonBase-root-MuiButton-root"
       data-mui-internal-clone-element="true"
       href="https://app.hypernative.xyz/guardian/alert?chain=evm%3A1&safe=0x123&tx=0x456&referrer=safe"
       rel="noreferrer noopener"
@@ -18,17 +18,17 @@ exports[`./HnSecurityReportBtn.stories Default 1`] = `
       target="_blank"
     >
       <span
-        class="MuiBox-root css-u9xrjn"
+        class="MuiBox-root mui-style-u9xrjn"
       >
         <mock-icon
           aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium hypernativeIcon css-1dhtbeh-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium hypernativeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
           focusable="false"
         />
         Review security report
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
           data-testid="OpenInNewRoundedIcon"
           focusable="false"
           viewBox="0 0 24 24"

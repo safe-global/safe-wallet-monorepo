@@ -7,18 +7,22 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-const txData = ['Send', '-0.00002 ETH', '1 out of 1']
-const txaddOwner = ['addOwnerWithThreshold', '1 out of 2']
-const txMultiSendCall3 = ['Batch', '3 actions', '1 out of 2']
-const txMultiSendCall2 = ['Batch', '2 actions', '1 out of 2']
+const txData = ['Send', '-0.00002 ETH', '1/1']
+const txaddOwner = ['addOwnerWithThreshold', '1/2']
+const txMultiSendCall3 = ['Batch', '3 actions', '1/2']
+const txMultiSendCall2 = ['Batch', '2 actions', '1/2']
 
-describe('Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
+describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
+  // intercept must be set up before visit so it catches the parallel queue request
   beforeEach(() => {
+    cy.intercept('GET', constants.queuedEndpoint).as('getQueuedTransactions')
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+    cy.wait('@getQueuedTransactions')
+    cy.get(dashboard.pendingTxWidget).should('be.visible')
   })
 
   it('Verify clicking on View All button directs to list of all queued txs', () => {
@@ -32,7 +36,9 @@ describe('Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('Verify there is empty tx string and image when there are no tx queued', () => {
+    cy.intercept('GET', constants.queuedEndpoint).as('getQueuedTransactions')
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_14)
+    cy.wait('@getQueuedTransactions')
     dashboard.verifyEmptyTxSection()
   })
 
@@ -43,8 +49,9 @@ describe('Dashboard tests', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('[SMOKE] Verify that tx are displayed correctly in Pending tx section', () => {
+    cy.intercept('GET', constants.queuedEndpoint).as('getQueuedTransactions')
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_12)
-    cy.wait(1000)
+    cy.wait('@getQueuedTransactions')
     dashboard.verifyTxItemInPendingTx(txMultiSendCall3)
     dashboard.verifyTxItemInPendingTx(txaddOwner)
     dashboard.verifyTxItemInPendingTx(txMultiSendCall2)

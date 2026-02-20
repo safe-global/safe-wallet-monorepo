@@ -1,4 +1,4 @@
-import type { AllSafeItems } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes'
 import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useEffect } from 'react'
 import { trackEvent } from '@/services/analytics'

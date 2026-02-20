@@ -5,7 +5,7 @@ export const trimTrailingSlash = (url: string): string => {
 export const isSameUrl = (url1: string, url2: string): boolean => {
   return trimTrailingSlash(url1) === trimTrailingSlash(url2)
 }
-export const prefixedAddressRe = /[a-z0-9-]+\:0x[a-f0-9]{40}/i
+const _prefixedAddressRe = /[a-z0-9-]+\:0x[a-f0-9]{40}/i
 const invalidProtocolRegex = /^(\W*)(javascript|data|vbscript)/im
 const ctrlCharactersRegex = /[\u0000-\u001F\u007F-\u009F\u2000-\u200D\uFEFF]/gim
 const urlSchemeRegex = /^([^:]+):/gm
@@ -51,5 +51,16 @@ export const stripUrlParams = (url: string): string => {
     return `${urlObj.origin}${urlObj.pathname}`
   } catch (e) {
     return url
+  }
+}
+
+// Safely encode a URI by first decoding it to avoid double-encoding
+// e.g., "image_%281%29.png" should not become "image_%25281%2529.png"
+export const safeEncodeURI = (url: string): string => {
+  try {
+    return encodeURI(decodeURI(url))
+  } catch {
+    // If decodeURI fails (malformed URI), just encode the original
+    return encodeURI(url)
   }
 }

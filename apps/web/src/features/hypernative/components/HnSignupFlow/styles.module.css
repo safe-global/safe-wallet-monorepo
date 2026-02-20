@@ -17,16 +17,6 @@
   background-color: var(--color-background-default);
 }
 
-.formColumn {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: var(--space-4) var(--space-5) var(--space-1) var(--space-6);
-  background-color: var(--color-static-primary);
-  max-height: 100%;
-  overflow-y: auto;
-}
-
 .calendlyColumn {
   display: flex;
   flex-direction: column;
@@ -41,42 +31,84 @@
   width: 100%;
 }
 
-.formWrapper {
-  margin: 0 auto;
-  width: 100%;
-  min-height: 620px;
-}
-
 .calendlyWrapper {
   margin: 0 auto;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-.calendlyContainer {
-  flex: 1;
-  min-height: 0;
+.calendlyHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: var(--space-4);
+  background: var(--color-static-primary);
+  pointer-events: none;
+  visibility: visible;
+  opacity: 1;
 }
 
-.formTitle {
+.calendlyTitle {
+  padding: var(--space-3) var(--space-1);
+  font-weight: 700;
+  font-size: 24px;
   color: var(--color-static-main);
-  margin-bottom: var(--space-2);
 }
 
-.formSubtitle {
-  color: var(--color-static-light);
-  margin-bottom: var(--space-4) !important;
+@media (max-width: 400px) {
+  .calendlyHeader {
+    padding: var(--space-4);
+  }
+
+  .calendlyTitle {
+    font-size: 14px;
+    padding: 0;
+  }
 }
 
-.cancelButtonWrapper {
-  z-index: 1;
-  margin-top: -86px;
+/* Hardcoded values to make the new header hide Calendly branding on different screen sizes*/
+@media (min-width: 401px) and (max-width: 919px) {
+  .calendlyTitle {
+    font-size: 16px;
+    padding-block: var(--space-1);
+  }
 }
 
-.cancelButton {
-  color: var(--color-static-main) !important;
+.calendlyWidget {
+  min-width: 310px;
+  height: 700px;
+}
+
+.calendlyWidgetWithHeader {
+  margin-top: var(--space-1);
+}
+
+.calendlySkeletonOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 150px;
+  padding-inline: var(--space-5);
+  z-index: 999;
+  background-color: var(--color-static-primary);
+  pointer-events: none;
+}
+
+@media (min-width: 920px) {
+  .calendlyWidget {
+    min-width: 660px;
+    height: 700px;
+    /* Compensate for the custom header + customized CSS for the desktop version: */
+    margin-top: calc(-1 * var(--space-9));
+    margin-left: -16px;
+  }
 }
 
 .header {
@@ -196,4 +228,35 @@
 
 .featureIcon {
   color: var(--color-success-main);
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-4);
+  padding: var(--space-12) var(--space-6);
+  height: 100%;
+  text-align: center;
+}
+
+.errorTitle {
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-static-main);
+  margin-bottom: var(--space-1);
+}
+
+.errorMessage {
+  color: var(--color-text-secondary);
+  max-width: 400px;
+  margin-bottom: var(--space-4) !important;
+}
+
+.reloadButton {
+  background-color: var(--color-static-main);
+  color: var(--color-static-primary);
+  max-width: fit-content;
+  align-self: center;
+  padding-inline: var(--space-2);
 }

@@ -31,7 +31,9 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
   const onboard = useOnboard()
   const router = useRouter()
   const hasRedirected = useRef(false)
-  const [shouldShowContent, setShouldShowContent] = useState(false)
+  // Initialize to true for SSR/SSG - content should be pre-rendered
+  // Client-side useEffect will handle redirects if terms not accepted
+  const [shouldShowContent, setShouldShowContent] = useState(true)
 
   async function disconnectWalletsEIP2255(wallet: WalletState): Promise<void> {
     try {
@@ -94,6 +96,9 @@ export const useSafeLabsTerms = (): UseSafeLabsTermsReturnType => {
       hasRedirected.current = false
       return
     }
+
+    // Hide content and redirect to terms page
+    setShouldShowContent(false)
 
     if (!hasRedirected.current) {
       hasRedirected.current = true

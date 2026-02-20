@@ -4,9 +4,10 @@ import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts'
 import Safe, { type ContractNetworksConfig } from '@safe-global/protocol-kit'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
-import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/utils'
+import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/services'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
 import {
@@ -91,6 +92,13 @@ export const initSafeSDK = async ({
   if (isLegacyVersion(safeVersion)) {
     isL1SafeSingleton = true
   }
+
+  contractNetworks = getCanonicalMultiSendContractNetworks({
+    implementationAddress: implementation,
+    chainId,
+    safeVersion,
+    contractNetworks,
+  })
 
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {

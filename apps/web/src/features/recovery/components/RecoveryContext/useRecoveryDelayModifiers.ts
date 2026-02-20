@@ -4,8 +4,9 @@ import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getRecoveryDelayModifiers } from '@/features/recovery/services/delay-modifier'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+// NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 

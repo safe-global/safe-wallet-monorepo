@@ -5,15 +5,14 @@ import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/coll
 import { trackEvent } from '@/services/analytics'
 import useCollectibles from '@/hooks/useCollectibles'
 
-jest.mock('@/services/datadog', () => ({
-  useDatadog: jest.fn(),
+jest.mock('@/services/observability', () => ({
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
-    log: jest.fn(),
     warn: jest.fn(),
   },
+  captureException: jest.fn(),
 }))
 
 jest.mock('@/services/analytics', () => ({

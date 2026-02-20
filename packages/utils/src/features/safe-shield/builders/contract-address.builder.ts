@@ -1,4 +1,10 @@
-import { StatusGroup, type AnalysisResult, type StatusGroupType, CommonSharedStatus } from '../types'
+import {
+  StatusGroup,
+  type AnalysisResult,
+  type StatusGroupType,
+  CommonSharedStatus,
+  type FallbackHandlerAnalysisResult,
+} from '../types'
 import type { ContractAnalysisBuilder } from './contract-analysis.builder'
 
 export const DEFAULT_INFO = {
@@ -41,6 +47,14 @@ export class ContractAddressBuilder {
       this.parent['contract'][this.address] = DEFAULT_INFO
     }
     this.parent['contract'][this.address][StatusGroup.DELEGATECALL] = results
+    return this
+  }
+
+  fallbackHandler(results: FallbackHandlerAnalysisResult[]): this {
+    if (!this.parent['contract'][this.address]) {
+      this.parent['contract'][this.address] = DEFAULT_INFO
+    }
+    this.parent['contract'][this.address][StatusGroup.FALLBACK_HANDLER] = results
     return this
   }
 

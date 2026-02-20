@@ -1,18 +1,19 @@
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { getUndeployedSafeInfo } from '@/features/counterfactual/utils'
+import { selectUndeployedSafe } from '@/features/counterfactual/store'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import { useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useChainId } from '../useChainId'
+import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 
-export const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
+const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const address = useSafeAddressFromUrl()
   const chainId = useChainId()
   const chain = useCurrentChain()
@@ -20,15 +21,16 @@ export const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const isStoredSafeValid = safe.chainId === chainId && safe.address.value === address
   const cache = isStoredSafeValid ? safe : undefined
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
+  const { getUndeployedSafeInfo, $isReady } = useLoadFeature(CounterfactualFeature)
 
   const [undeployedData, undeployedError] = useAsync<ExtendedSafeInfo | undefined>(async () => {
-    if (!undeployedSafe || !chain) return
+    if (!undeployedSafe || !chain || !$isReady) return
     /**
      * This is the one place where we can't check for `safe.deployed` as we want to update that value
      * when the local storage is cleared, so we have to check undeployedSafe
      */
     return getUndeployedSafeInfo(undeployedSafe, address, chain)
-  }, [undeployedSafe, address, chain])
+  }, [undeployedSafe, address, chain, $isReady, getUndeployedSafeInfo])
 
   const {
     currentData: cgwData,

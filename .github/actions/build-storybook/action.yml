@@ -12,5 +12,3 @@ runs:
     - name: Build Storybook
       shell: bash
       run: yarn workspace @safe-global/web build-storybook -o ./out/storybook
-      env:
-        NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_HUBSPOT_CONFIG }}

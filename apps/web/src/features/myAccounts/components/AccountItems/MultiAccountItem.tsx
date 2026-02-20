@@ -1,219 +1,72 @@
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
-import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
-import type { SafeListProps } from '@/features/myAccounts/components/SafesList'
+import type { SafeListProps } from '../SafesList'
 import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
-import { showNotification } from '@/store/notificationsSlice'
-import SingleAccountItem from '@/features/myAccounts/components/AccountItems/SingleAccountItem'
+import { AccountItem } from '../AccountItem'
+import { useSafeItemData } from '../../hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useCallback, useMemo, useState } from 'react'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Divider,
-  IconButton,
-  ListItemButton,
-  Skeleton,
-  SvgIcon,
-  Tooltip,
-  Typography,
-} from '@mui/material'
-import SafeIcon from '@/components/common/SafeIcon'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import { useAppDispatch, useAppSelector } from '@/store'
+import { useState } from 'react'
+import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import css from './styles.module.css'
-import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
-import { useRouter } from 'next/router'
-import FiatValue from '@/components/common/FiatValue'
-import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
+import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
-import { isPredictedSafeProps } from '@/features/counterfactual/utils'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
-import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import useWallet from '@/hooks/wallets/useWallet'
-import { selectCurrency } from '@/store/settingsSlice'
-import useChains from '@/hooks/useChains'
-import BookmarkIcon from '@/public/images/apps/bookmark.svg'
-import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
-import { addOrUpdateSafe, pinSafe, selectAllAddedSafes, unpinSafe } from '@/store/addedSafesSlice'
-import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { getComparator } from '@/features/myAccounts/utils/utils'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
-export const MultichainIndicator = ({ safes }: { safes: SafeItem[] }) => {
-  return (
-    <Box className={css.multiChains}>
-      <Tooltip
-        title={
-          <Box data-testid="multichain-tooltip">
-            <Typography fontSize="14px">Multichain account on:</Typography>
-            {safes.map((safeItem) => (
-              <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-                <ChainIndicator chainId={safeItem.chainId} />
-              </Box>
-            ))}
-          </Box>
-        }
-        arrow
-      >
-        <Box>
-          <NetworkLogosList networks={safes} showHasMore />
-        </Box>
-      </Tooltip>
-    </Box>
-  )
-}
-
-function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem) {
-  const { address, safes, isPinned, name } = multiSafeAccountItem
-
-  const router = useRouter()
-  const isWelcomePage = router.pathname === AppRoutes.welcome.accounts
-  const isSpaceRoute = useIsSpaceRoute()
-  const safeAddress = useSafeAddress()
-  const isCurrentSafe = sameAddress(safeAddress, address)
-
-  const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = useMemo(() => getComparator(orderBy), [orderBy])
-  const sortedSafes = useMemo(() => [...safes].sort(sortComparator), [safes, sortComparator])
-
-  const undeployedSafes = useAppSelector(selectUndeployedSafes)
-  const deployedSafes = useMemo(
-    () => sortedSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
-    [sortedSafes, undeployedSafes],
-  )
-
-  const currency = useAppSelector(selectCurrency)
-  const { address: walletAddress } = useWallet() || {}
-
-  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery({ currency, walletAddress, safes: deployedSafes })
-
-  const safeSetups = useMemo(
-    () => getSafeSetups(sortedSafes, safeOverviews ?? [], undeployedSafes),
-    [safeOverviews, sortedSafes, undeployedSafes],
-  )
-  const sharedSetup = useMemo(() => getSharedSetup(safeSetups), [safeSetups])
-
-  const totalFiatValue = useMemo(
-    () => safeOverviews?.reduce((sum, overview) => sum + Number(overview.fiatTotal), 0),
-    [safeOverviews],
-  )
-
-  const { configs: chains } = useChains()
-  const hasReplayableSafe = useMemo(() => {
-    return sortedSafes.some((safeItem) => {
-      const undeployedSafe = undeployedSafes[safeItem.chainId]?.[safeItem.address]
-      const chain = chains.find((chain) => chain.chainId === safeItem.chainId)
-      const addNetworkFeatureEnabled = hasMultiChainAddNetworkFeature(chain)
-      // Replayable if deployed or new counterfactual safe and the chain supports add network
-      return (!undeployedSafe || !isPredictedSafeProps(undeployedSafe.props)) && addNetworkFeatureEnabled
+function MultiChainSubItem({
+  safeItem,
+  safeOverview,
+  onLinkClick,
+}: {
+  safeItem: SafeItem
+  safeOverview?: SafeOverview
+  onLinkClick?: () => void
+}) {
+  const { chain, href, threshold, owners, elementRef, trackingLabel, isCurrentSafe, undeployedSafe, isActivating } =
+    useSafeItemData(safeItem, {
+      safeOverview,
     })
-  }, [chains, sortedSafes, undeployedSafes])
 
-  const isReadOnly = useMemo(() => sortedSafes.every((safe) => safe.isReadOnly), [sortedSafes])
+  const hasQueuedItems =
+    !safeItem.isReadOnly &&
+    safeOverview &&
+    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
-  const deployedChainIds = useMemo(() => sortedSafes.map((safe) => safe.chainId), [sortedSafes])
-
-  return {
-    address,
-    name,
-    sortedSafes,
-    safeOverviews,
-    sharedSetup,
-    totalFiatValue,
-    hasReplayableSafe,
-    isPinned,
-    isCurrentSafe,
-    isReadOnly,
-    isWelcomePage,
-    deployedChainIds,
-    isSpaceRoute,
-  }
-}
-
-function usePinActions(
-  address: string,
-  name: string | undefined,
-  safes: SafeItem[],
-  safeOverviews: SafeOverview[] | undefined,
-) {
-  const dispatch = useAppDispatch()
-  const allAddedSafes = useAppSelector(selectAllAddedSafes)
-
-  const findOverview = useCallback(
-    (item: SafeItem) => {
-      return safeOverviews?.find(
-        (overview) => item.chainId === overview.chainId && sameAddress(overview.address.value, item.address),
-      )
-    },
-    [safeOverviews],
+  return (
+    <AccountItem.Link
+      href={href}
+      onLinkClick={onLinkClick}
+      trackingLabel={trackingLabel}
+      elementRef={elementRef}
+      isCurrentSafe={isCurrentSafe}
+    >
+      <AccountItem.Icon
+        address={safeItem.address}
+        chainId={safeItem.chainId}
+        threshold={threshold}
+        owners={owners.length}
+        isMultiChainItem
+      />
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} chainName={chain?.chainName}>
+        <AccountItem.StatusChip
+          undeployedSafe={!!undeployedSafe}
+          isActivating={isActivating}
+          isReadOnly={safeItem.isReadOnly}
+        />
+        {hasQueuedItems && (
+          <AccountItem.QueueActions
+            safeAddress={safeOverview.address.value}
+            chainShortName={chain?.shortName || ''}
+            queued={safeOverview.queued ?? 0}
+            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+          />
+        )}
+      </AccountItem.Info>
+      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+    </AccountItem.Link>
   )
-
-  const addToPinnedList = useCallback(() => {
-    const isGroupAdded = safes.every((safe) => allAddedSafes[safe.chainId]?.[safe.address])
-    if (isGroupAdded) {
-      for (const safe of safes) {
-        dispatch(pinSafe({ chainId: safe.chainId, address: safe.address }))
-      }
-    } else {
-      for (const safe of safes) {
-        const overview = findOverview(safe)
-        dispatch(
-          addOrUpdateSafe({
-            safe: {
-              ...defaultSafeInfo,
-              chainId: safe.chainId,
-              address: { value: address },
-              owners: overview ? overview.owners : defaultSafeInfo.owners,
-              threshold: overview ? overview.threshold : defaultSafeInfo.threshold,
-            },
-          }),
-        )
-        dispatch(pinSafe({ chainId: safe.chainId, address: safe.address }))
-      }
-    }
-
-    dispatch(
-      showNotification({
-        title: 'Pinned multi-chain Safe',
-        message: name ?? shortenAddress(address),
-        groupKey: `pin-safe-success-${address}`,
-        variant: 'success',
-      }),
-    )
-
-    trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
-  }, [name, safes, allAddedSafes, dispatch, findOverview, address])
-
-  const removeFromPinnedList = useCallback(() => {
-    for (const safe of safes) {
-      dispatch(unpinSafe({ chainId: safe.chainId, address: safe.address }))
-    }
-
-    dispatch(
-      showNotification({
-        title: 'Unpinned multi-chain Safe',
-        message: name ?? shortenAddress(address),
-        groupKey: `unpin-safe-success-${address}`,
-        variant: 'success',
-      }),
-    )
-
-    trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
-  }, [dispatch, name, address, safes])
-
-  return { addToPinnedList, removeFromPinnedList }
 }
 
 type MultiAccountItemProps = {
@@ -232,14 +85,12 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
     sharedSetup,
     totalFiatValue,
     hasReplayableSafe,
-    isPinned,
     isCurrentSafe,
     isReadOnly,
     isWelcomePage,
     deployedChainIds,
     isSpaceRoute,
   } = useMultiAccountItemData(multiSafeAccountItem)
-  const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
 
   const [expanded, setExpanded] = useState(isCurrentSafe)
   const trackingLabel = isWelcomePage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
@@ -254,103 +105,77 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
   }
 
   return (
-    <ListItemButton
+    <Box
       data-testid="safe-list-item"
-      selected={isCurrentSafe}
       className={classnames(css.multiListItem, css.listItem, { [css.currentListItem]: isCurrentSafe })}
-      sx={{ p: 0 }}
     >
       <Accordion data-testid="multichain-item-summary" expanded={expanded} sx={{ border: 'none' }}>
         <AccordionSummary
           onClick={toggleExpand}
           sx={{
-            pl: 0,
+            p: 0,
             '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
             '&.Mui-expanded': { backgroundColor: 'transparent !important' },
           }}
           component="div"
         >
-          <Box className={classnames(css.multiSafeLink, css.safeLink)} width="100%">
-            <Box sx={{ pr: 2.5 }} data-testid="group-safe-icon">
-              <SafeIcon address={address} owners={sharedSetup?.owners.length} threshold={sharedSetup?.threshold} />
-            </Box>
-
-            <Typography variant="body2" component="div" data-testid="group-address" className={css.safeAddress}>
-              <EthHashInfo
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <AccountItem.Content data-testid="multichain-content">
+              <AccountItem.Icon
                 address={address}
+                chainId={sortedSafes[0]?.chainId ?? '1'}
+                threshold={sharedSetup?.threshold}
+                owners={sharedSetup?.owners.length}
+                data-testid="group-safe-icon"
+              />
+              <AccountItem.Info
+                address={address}
+                chainId={sortedSafes[0]?.chainId ?? '1'}
                 name={multiSafeAccountItem.name}
-                addressBookNameSource={isSpaceSafe ? ContactSource.space : ContactSource.local}
-                showName={isSpaceSafe ? !!multiSafeAccountItem.name : true}
-                shortAddress
                 showPrefix={false}
-                showAvatar={false}
-                copyPrefix={false}
-                copyAddress={false}
+                addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
+                data-testid="group-address"
               />
-            </Typography>
-            <MultichainIndicator safes={sortedSafes} />
-            <Typography
-              data-testid="group-balance"
-              variant="body2"
-              sx={{
-                fontWeight: 'bold',
-                textAlign: 'right',
-                pl: 2,
-              }}
-            >
-              {totalFiatValue !== undefined ? (
-                <FiatValue value={totalFiatValue} />
-              ) : (
-                <Skeleton variant="text" sx={{ ml: 'auto' }} />
+              <AccountItem.ChainBadge safes={sortedSafes} />
+              <AccountItem.Balance
+                fiatTotal={totalFiatValue}
+                isLoading={totalFiatValue === undefined}
+                data-testid="group-balance"
+              />
+              {!isSpaceSafe && (
+                <AccountItem.PinButton safeItems={sortedSafes} safeOverviews={safeOverviews} name={name} />
               )}
-            </Typography>
+              {isSpaceSafe ? (
+                <>
+                  <Box width="40px" />
+                  <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                </>
+              ) : (
+                <MultiAccountContextMenu
+                  name={multiSafeAccountItem.name ?? ''}
+                  address={address}
+                  chainIds={deployedChainIds}
+                  addNetwork={hasReplayableSafe}
+                />
+              )}
+            </AccountItem.Content>
           </Box>
-
-          {!isSpaceSafe && (
-            <IconButton
-              data-testid="bookmark-icon"
-              edge="end"
-              size="medium"
-              sx={{ mx: 1 }}
-              onClick={(event) => {
-                event.stopPropagation()
-                isPinned ? removeFromPinnedList() : addToPinnedList()
-              }}
-            >
-              <SvgIcon
-                component={isPinned ? BookmarkedIcon : BookmarkIcon}
-                inheritViewBox
-                color={isPinned ? 'primary' : undefined}
-                fontSize="small"
-              />
-            </IconButton>
-          )}
-
-          {isSpaceSafe ? (
-            <>
-              <Box width="40px" /> {/* Spacer for the send button */}
-              <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
-            </>
-          ) : (
-            <MultiAccountContextMenu
-              name={multiSafeAccountItem.name ?? ''}
-              address={address}
-              chainIds={deployedChainIds}
-              addNetwork={hasReplayableSafe}
-            />
-          )}
         </AccordionSummary>
         <AccordionDetails sx={{ padding: '0px 12px' }}>
           <Box data-testid="subacounts-container">
-            {sortedSafes.map((safeItem) => (
-              <SingleAccountItem
-                onLinkClick={onLinkClick}
-                safeItem={safeItem}
-                key={`${safeItem.chainId}:${safeItem.address}`}
-                isMultiChainItem
-                isSpaceSafe={isSpaceSafe}
-              />
-            ))}
+            {sortedSafes.map((safeItem) => {
+              const overview = safeOverviews?.find(
+                (o) => o.chainId === safeItem.chainId && sameAddress(o.address.value, safeItem.address),
+              )
+              return (
+                <MultiChainSubItem
+                  key={`${safeItem.chainId}:${safeItem.address}`}
+                  safeItem={safeItem}
+                  safeOverview={overview}
+                  onLinkClick={onLinkClick}
+                />
+              )
+            })}
           </Box>
           {!isReadOnly && hasReplayableSafe && !isSpaceSafe && (
             <>
@@ -374,7 +199,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
           )}
         </AccordionDetails>
       </Accordion>
-    </ListItemButton>
+    </Box>
   )
 }
 

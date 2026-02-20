@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
@@ -73,6 +72,7 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
       createtx.clickOnConfirmTransactionBtn()
       createtx.clickOnContinueSignTransactionBtn()
+      createtx.selectComboButtonOption('sign')
       createtx.clickOnSignTransactionBtn()
       navigation.clickOnWalletExpandMoreIcon()
       navigation.clickOnDisconnectBtn()

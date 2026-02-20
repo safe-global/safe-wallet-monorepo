@@ -9,6 +9,7 @@ import {
   type SetStateAction,
 } from 'react'
 import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
+import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -16,9 +17,11 @@ import {
   type ContractAnalysisResults,
   type ThreatAnalysisResults,
   type RecipientAnalysisResults,
+  type SafeAnalysisResult,
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
+import { useAuthToken } from '@/features/hypernative'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -30,6 +33,9 @@ type SafeShieldContextType = {
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
+  // Safe-level analysis (untrusted Safe check)
+  safeAnalysis: SafeAnalysisResult | null
+  addToTrustedList: () => void
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -41,31 +47,36 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const recipientOnlyAnalysis = useRecipientAnalysis(recipientAddresses)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx)
-  const threat = useThreatAnalysis(safeTx)
+  const [{ token: hypernativeAuthToken }] = useAuthToken()
+  const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
+  const [threatAnalysisResult] = threat
 
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
 
+  // Safe-level analysis: untrusted Safe check
+  const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
+
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
-    const [threatAnalysisResult] = threat || []
-
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
-    const needsRiskConfirmation = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+    const hasCriticalThreat = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+    // Include Safe-level analysis in risk confirmation
+    const needsRiskConfirmation = hasCriticalThreat || safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threat])
+  }, [threatAnalysisResult, safeAnalysis])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis])
 
   return (
     <SafeShieldContext.Provider
@@ -79,6 +90,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
+        safeAnalysis,
+        addToTrustedList,
       }}
     >
       {children}

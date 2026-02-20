@@ -1,4 +1,4 @@
-import { useWeb3 } from '@/hooks/wallets/web3'
+import { useWeb3 } from '@/hooks/wallets/web3ReadOnly'
 import { useAuthVerifyV1Mutation, useLazyAuthGetNonceV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCallback } from 'react'
 import { getSignableMessage } from './utils'

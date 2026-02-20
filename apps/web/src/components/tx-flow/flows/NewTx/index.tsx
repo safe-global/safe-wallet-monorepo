@@ -3,17 +3,17 @@ import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components
 import { Container, Grid, Paper, Typography } from '@mui/material'
 import { TxModalContext } from '../../'
 import TokenTransferFlow from '../TokenTransfer'
-import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
-import HnMiniTxBanner from '@/features/hypernative/components/HnMiniTxBanner'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 
 const NewTxFlow = () => {
-  const txBuilder = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
+  const hn = useLoadFeature(HypernativeFeature)
 
   const onTokensClick = useCallback(() => {
     setTxFlow(<TokenTransferFlow />)
@@ -76,26 +76,22 @@ const NewTxFlow = () => {
                 Manage assets
               </Typography>
 
-              <HnMiniTxBanner />
+              <hn.HnMiniTxBanner />
 
               <SendTokensButton onClick={onTokensClick} />
               <MakeASwapButton />
 
-              {txBuilder?.app && (
-                <>
-                  <Typography
-                    variant="h4"
-                    className={css.type}
-                    sx={{
-                      mt: 3,
-                    }}
-                  >
-                    Interact with contracts
-                  </Typography>
+              <Typography
+                variant="h4"
+                className={css.type}
+                sx={{
+                  mt: 3,
+                }}
+              >
+                Interact with contracts
+              </Typography>
 
-                  <TxBuilderButton />
-                </>
-              )}
+              <TxBuilderButton />
             </Grid>
           </Grid>
         </Grid>

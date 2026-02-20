@@ -5,12 +5,12 @@ exports[`./HnBanner.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1o21zae-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1o21zae-MuiPaper-root-MuiCard-root"
     role="button"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
+      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
     >
       <img
         alt="Guardian badge"
@@ -24,15 +24,15 @@ exports[`./HnBanner.stories Default 1`] = `
         width="95"
       />
       <div
-        class="bannerContent MuiBox-root css-0"
+        class="bannerContent MuiBox-root mui-style-0"
       >
         <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1smelnd-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1smelnd-MuiTypography-root"
         >
-          Strengthen your Safe
+          Enforce enterprise-grade security
         </h4>
         <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-6sro4l-MuiTypography-root"
         >
           Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
            
@@ -44,17 +44,17 @@ exports[`./HnBanner.stories Default 1`] = `
           .
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary bannerCtaText css-926e8y-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary bannerCtaText mui-style-pt4u5h-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
           Learn more
           <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-pctag4-MuiButton-endIcon"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
               data-testid="ArrowForwardIcon"
               focusable="false"
               viewBox="0 0 24 24"
@@ -69,13 +69,13 @@ exports[`./HnBanner.stories Default 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon css-1tabcwi-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1tabcwi-MuiSvgIcon-root"
         data-testid="CloseIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -94,12 +94,12 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1o21zae-MuiPaper-root-MuiCard-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1o21zae-MuiPaper-root-MuiCard-root"
     role="button"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
+      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
     >
       <img
         alt="Guardian badge"
@@ -113,15 +113,15 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
         width="95"
       />
       <div
-        class="bannerContent MuiBox-root css-0"
+        class="bannerContent MuiBox-root mui-style-0"
       >
         <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1smelnd-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1smelnd-MuiTypography-root"
         >
-          Strengthen your Safe
+          Enforce enterprise-grade security
         </h4>
         <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-6sro4l-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-6sro4l-MuiTypography-root"
         >
           Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
            
@@ -133,17 +133,17 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
           .
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorPrimary bannerCtaText css-926e8y-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary bannerCtaText mui-style-pt4u5h-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
           Learn more
           <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact css-ioep0k-MuiButton-endIcon"
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-pctag4-MuiButton-endIcon"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
               data-testid="ArrowForwardIcon"
               focusable="false"
               viewBox="0 0 24 24"

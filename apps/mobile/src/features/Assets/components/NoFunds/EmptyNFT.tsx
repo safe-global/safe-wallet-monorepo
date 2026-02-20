@@ -5,7 +5,7 @@ import { useTheme } from 'tamagui'
 function EmptyNft() {
   const theme = useTheme()
 
-  const color = theme.background?.get()
+  const color = theme.background.get()
 
   return (
     <Svg width="101" height="100" viewBox="0 0 101 100" fill="none">

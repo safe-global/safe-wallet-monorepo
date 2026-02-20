@@ -5,6 +5,7 @@ import {
   StatusGroupType,
   type ContractAnalysisResults,
   ContractDetails,
+  type FallbackHandlerAnalysisResult,
 } from '../types'
 import { ContractAddressBuilder, DEFAULT_INFO } from './contract-address.builder'
 import { ContractAnalysisResultBuilder } from './contract-analysis-result.builder'
@@ -15,6 +16,7 @@ export class ContractAnalysisBuilder {
       [StatusGroup.CONTRACT_VERIFICATION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>[]
       [StatusGroup.CONTRACT_INTERACTION]?: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_INTERACTION>>[]
       [StatusGroup.DELEGATECALL]?: AnalysisResult<StatusGroupType<StatusGroup.DELEGATECALL>>[]
+      [StatusGroup.FALLBACK_HANDLER]?: FallbackHandlerAnalysisResult[]
     } & ContractDetails
   } = {}
 
@@ -73,6 +75,15 @@ export class ContractAnalysisBuilder {
     return new ContractAnalysisBuilder()
       .addAddress(address)
       .failed(ContractAnalysisResultBuilder.failed().build())
+      .done()
+  }
+
+  static unofficialFallbackHandlerContract(
+    address: string = '0x0000000000000000000000000000000000000006',
+  ): ContractAnalysisBuilder {
+    return new ContractAnalysisBuilder()
+      .addAddress(address)
+      .fallbackHandler([ContractAnalysisResultBuilder.unofficialFallbackHandler().build()])
       .done()
   }
 }

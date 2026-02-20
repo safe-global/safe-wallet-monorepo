@@ -1,8 +1,8 @@
-import * as constants from '../../support/constants'
-import * as main from '../pages/main.page'
-import * as owner from '../pages/owners.pages'
-import * as recovery from '../pages/recovery.pages'
-import * as tx from '../pages/transactions.page'
+import * as constants from '../../support/constants.js'
+import * as main from '../pages/main.page.js'
+import * as owner from '../pages/owners.pages.js'
+import * as recovery from '../pages/recovery.pages.js'
+import * as tx from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createtx from '../pages/create_tx.pages.js'
@@ -23,7 +23,7 @@ describe('Recovery happy path tests 1', () => {
   })
 
   // Check that recovery can be setup and removed
-  it('Recovery setup happy path 1', () => {
+  it('Verify that recovery can be setup and removed', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     recovery.clearRecoverers()

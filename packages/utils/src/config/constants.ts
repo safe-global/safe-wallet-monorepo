@@ -6,6 +6,11 @@ export const BLOCKAID_API =
   process.env.NEXT_PUBLIC_BLOCKAID_API || process.env.EXPO_PUBLIC_BLOCKAID_API || 'https://client.blockaid.io'
 export const BLOCKAID_CLIENT_ID =
   process.env.NEXT_PUBLIC_BLOCKAID_CLIENT_ID || process.env.EXPO_PUBLIC_BLOCKAID_CLIENT_ID || ''
+// Risk mitigation (Hypernative)
+export const HYPERNATIVE_API_BASE_URL =
+  process.env.NEXT_PUBLIC_HYPERNATIVE_API_BASE_URL ||
+  process.env.EXPO_PUBLIC_HYPERNATIVE_API_BASE_URL ||
+  'https://api.hypernative.xyz'
 // Access keys
 export const INFURA_TOKEN = process.env.NEXT_PUBLIC_INFURA_TOKEN || process.env.EXPO_PUBLIC_INFURA_TOKEN || ''
 // Safe Apps
@@ -30,7 +35,7 @@ export const HelpCenterArticle = {
   CONFLICTING_TRANSACTIONS: `${HELP_CENTER_URL}/en/articles/40839-why-are-transactions-with-the-same-nonce-conflicting-with-each-other`,
   FALLBACK_HANDLER: `${HELP_CENTER_URL}/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe`,
   MOBILE_SAFE: `${HELP_CENTER_URL}/en/articles/40801-connect-to-web-with-mobile-safe`,
-  RECOVERY: `${HELP_CENTER_URL}/en/articles/110656-account-recovery-in-safe-wallet`,
+  RECOVERY: `${HELP_CENTER_URL}/en/articles/110656-account-recovery-with-safe-recoveryhub`,
   RELAYING: `${HELP_CENTER_URL}/en/articles/59203-what-is-gas-fee-sponsoring`,
   SAFE_SETUP: `${HELP_CENTER_URL}/en/articles/40835-what-safe-setup-should-i-use`,
   SIGNED_MESSAGES: `${HELP_CENTER_URL}/en/articles/40783-what-are-signed-messages`,
@@ -44,6 +49,7 @@ export const HelpCenterArticle = {
   VERIFY_TX_DETAILS: `${HELP_CENTER_URL}/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet`,
   BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/en/articles/359254-new-mobile-apps-bulk-import-of-old-app-data-ios-only`,
   SAFE_SHIELD: `${HELP_CENTER_URL}/en/articles/461021-understanding-safe-shield-transaction-checks`,
+  ADDRESS_POISONING: `${HELP_CENTER_URL}/en/articles/180783-what-is-address-poisoning-and-how-does-safe-wallet-battle-it`,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',

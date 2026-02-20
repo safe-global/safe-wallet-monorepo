@@ -1,0 +1,66 @@
+name: Web Chromatic E2E
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    env:
+      VISUAL_REGRESSION_BUILD: 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    name: Cypress Visual tests
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4, 5]
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/cypress
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          spec: 'cypress/e2e/visual/**/*.cy.js'
+          group: 'Chromatic E2E'
+          tag: 'chromatic-e2e'
+          chromatic: 'true'
+          container-index: ${{ matrix.containers }}
+
+  chromatic:
+    needs: [e2e]
+    if: '!cancelled()'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: chromatic-archives-*
+          merge-multiple: true
+          path: apps/web/cypress/downloads
+
+      - name: Run Chromatic
+        uses: chromaui/action@latest
+        with:
+          cypress: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN_SMOKE_TESTS }}
+          workingDir: apps/web
+        env:
+          CHROMATIC_ARCHIVE_LOCATION: ./cypress/downloads

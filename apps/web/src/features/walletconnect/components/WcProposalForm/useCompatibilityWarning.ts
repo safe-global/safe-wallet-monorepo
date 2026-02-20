@@ -4,7 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { capitalize } from '@safe-global/utils/utils/formatters'
-import { getPeerName, isBlockedBridge, isWarnedBridge } from '@/features/walletconnect/services/utils'
+import { getPeerName, isBlockedBridge, isWarnedBridge } from '../../services/utils'
 import { BRAND_NAME } from '@/config/constants'
 
 const NAME_FALLBACK = 'this dApp'

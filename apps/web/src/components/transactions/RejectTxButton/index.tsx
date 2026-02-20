@@ -41,7 +41,7 @@ const RejectTxButton = ({
             onClick={openReplacementModal}
             variant="danger"
             disabled={!isOk || isDisabled}
-            size="stretched"
+            size="large"
           >
             Reject
           </Button>

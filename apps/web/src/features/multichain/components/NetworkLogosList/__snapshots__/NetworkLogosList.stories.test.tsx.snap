@@ -5,28 +5,56 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root css-0"
+      class="networks MuiBox-root mui-style-0"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Polygon Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
     </div>
   </div>
 </div>
@@ -37,30 +65,58 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root css-0"
+      class="networks MuiBox-root mui-style-0"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Polygon Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
       <div
-        class="moreChainsIndicator MuiBox-root css-0"
+        class="moreChainsIndicator MuiBox-root mui-style-0"
       >
         +
         2
@@ -75,32 +131,66 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root css-0"
+      class="networks MuiBox-root mui-style-0"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Polygon Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <mock-icon
+          aria-hidden=""
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-156krn5-MuiSvgIcon-root"
+          focusable="false"
+        />
+      </span>
     </div>
   </div>
 </div>
@@ -111,16 +201,24 @@ exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root css-0"
+      class="networks MuiBox-root mui-style-0"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="24"
+        />
+      </span>
     </div>
   </div>
 </div>
@@ -131,20 +229,36 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="networks MuiBox-root css-0"
+      class="networks MuiBox-root mui-style-0"
     >
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Ethereum Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+          width="24"
+        />
+      </span>
       <span
-        class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-18ae3nr-MuiSkeleton-root"
-        style="width: 100%; height: 22px;"
-      />
+        class="inlineIndicator withLogo onlyLogo"
+        data-testid="chain-logo"
+      >
+        <img
+          alt="Polygon Logo"
+          height="24"
+          loading="lazy"
+          src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+          width="24"
+        />
+      </span>
     </div>
   </div>
 </div>

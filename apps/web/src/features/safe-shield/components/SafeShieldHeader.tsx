@@ -1,16 +1,13 @@
-import { useMemo, type ReactElement } from 'react'
-import { Box, Typography, Stack, SvgIcon } from '@mui/material'
-import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
+import { type ReactElement } from 'react'
+import { Box, Typography, Stack } from '@mui/material'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
+  Severity,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
-import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
-import type { SafeTransaction } from '@safe-global/types-kit'
-import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
 
 const headerVisibilityDelay = 500
@@ -19,34 +16,30 @@ export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
   threat = [{}, undefined, false],
-  safeTx,
+  overallStatus,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
-  safeTx?: SafeTransaction
+  overallStatus?: { severity: Severity; title: string }
 }): ReactElement => {
-  const [recipientResults, recipientError, recipientLoading = false] = recipient
-  const [contractResults, contractError, contractLoading = false] = contract
-  const [threatResults, threatError, threatLoading = false] = threat
-  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const [_recipientResults, recipientError, recipientLoading = false] = recipient
+  const [_contractResults, contractError, contractLoading = false] = contract
+  const [_threatResults, threatError, threatLoading = false] = threat
 
   const loading = recipientLoading || contractLoading || threatLoading
   const error = recipientError || contractError || threatError
   const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
-  const status = useMemo(
-    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError),
-    [recipientResults, contractResults, threatResults, hasSimulationError],
-  )
-
   const headerBgColor =
-    !status || !status?.severity || isLoadingVisible
+    !overallStatus || !overallStatus?.severity || isLoadingVisible
       ? 'var(--color-background-default)'
-      : SEVERITY_COLORS[status.severity].background
+      : SEVERITY_COLORS[overallStatus.severity].background
 
   const headerTextColor =
-    !status || !status?.severity || isLoadingVisible ? 'text.secondary' : SEVERITY_COLORS[status.severity].main
+    !overallStatus || !overallStatus?.severity || isLoadingVisible
+      ? 'text.secondary'
+      : SEVERITY_COLORS[overallStatus.severity].main
 
   return (
     <Box padding="4px 4px 0px">
@@ -66,12 +59,14 @@ export const SafeShieldHeader = ({
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
             Analyzing...
           </Typography>
-        ) : status ? (
+        ) : overallStatus ? (
           <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
-            {status.title}
+            {overallStatus.title}
           </Typography>
         ) : (
-          <SvgIcon component={SafeShieldLogo} inheritViewBox sx={{ width: 14, height: 14 }} />
+          <Typography variant="overline" color={headerTextColor} fontWeight={700} lineHeight="16px">
+            Copilot
+          </Typography>
         )}
       </Stack>
     </Box>

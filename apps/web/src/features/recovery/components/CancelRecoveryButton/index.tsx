@@ -17,7 +17,7 @@ import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function CancelRecoveryButton({
+export default function CancelRecoveryButton({
   recovery,
   compact = false,
 }: {
@@ -67,7 +67,7 @@ export function CancelRecoveryButton({
             onClick={onClick}
             variant="danger"
             disabled={isDisabled}
-            size={compact ? 'small' : 'stretched'}
+            size={compact ? 'small' : 'large'}
           >
             Cancel
           </Button>

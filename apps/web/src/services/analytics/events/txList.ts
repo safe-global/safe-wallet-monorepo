@@ -4,7 +4,6 @@ const TX_LIST_CATEGORY = 'tx-list'
 
 export enum CopyDeeplinkLabels {
   shareBlock = 'share-block',
-  button = 'button',
 }
 
 export const TX_LIST_EVENTS = {

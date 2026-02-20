@@ -22,6 +22,9 @@ export enum MixpanelEvent {
   SECURITY_REPORT_CLICKED = 'Security Report Clicked',
   GUARDIAN_BANNER_DISMISSED = 'Guardian Banner Dismissed',
   EXPLORE_POSSIBLE_CLICKED = 'Explore Possible Clicked',
+  EURCV_BOOST_EXPLORE_CLICKED = 'EURCV Boost Explore Clicked',
+  EURCV_BOOST_BANNER_CLICKED = 'EURCV Boost Banner Clicked',
+  EURCV_BOOST_BANNER_DISMISSED = 'EURCV Boost Banner Dismissed',
   TRANSACTION_STARTED = 'Transaction Started',
   TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
   TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
@@ -32,6 +35,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
+  TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
 }
 
 export enum MixpanelUserProperty {

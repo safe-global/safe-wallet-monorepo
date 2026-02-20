@@ -24,6 +24,11 @@ export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
 export function clickOnTxByIndex(index) {
+  // Wait for hydration to set the correct safe query param in the link href
+  cy.get(pendingTxItem)
+    .eq(index)
+    .should('have.attr', 'href')
+    .and('match', /safe=.{3,}/)
   cy.get(pendingTxItem).eq(index).click()
   cy.get(singleTxDetailsHeader).should('be.visible')
 }
@@ -129,7 +134,7 @@ export function verifyTxQueueWidget() {
       'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
     ).should('exist')
 
-    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1 out of 1').should('exist')
+    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
 
     cy.contains(
       `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,

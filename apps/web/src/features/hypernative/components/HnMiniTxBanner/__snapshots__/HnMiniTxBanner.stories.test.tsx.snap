@@ -8,11 +8,11 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
     data-track="hypernative: Guardian Form Viewed"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-1869usn-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiStack-root bannerStack css-1hyf038-MuiStack-root"
+        class="MuiStack-root bannerStack mui-style-1hyf038-MuiStack-root"
       >
         <img
           alt="Guardian badge"
@@ -26,29 +26,29 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
           width="32"
         />
         <div
-          class="bannerContent MuiBox-root css-0"
+          class="bannerContent MuiBox-root mui-style-0"
         >
           <p
-            class="MuiTypography-root MuiTypography-body2 bannerTitle css-17vdyq3-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 bannerTitle mui-style-17vdyq3-MuiTypography-root"
           >
-            Strengthen your Safe
+            Enforce enterprise-grade security
           </p>
           <span
-            class="MuiTypography-root MuiTypography-caption bannerDescription css-19nflmw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-caption bannerDescription mui-style-19nflmw-MuiTypography-root"
           >
-            Monitor and block risky transactions
+            Learn more
           </span>
         </div>
       </div>
       <button
         aria-label="close"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall closeIcon css-1yr0wav-MuiSvgIcon-root"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall closeIcon mui-style-1yr0wav-MuiSvgIcon-root"
           data-testid="CloseIcon"
           focusable="false"
           viewBox="0 0 24 24"

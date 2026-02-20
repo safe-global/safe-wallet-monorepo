@@ -2,27 +2,30 @@ import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/t
 import { useEffect, useState } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../useSafeInfo'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
 
 export const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const { chainId, txQueuedTag, txHistoryTag } = safe
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
+  const { txQueuedTag, txHistoryTag } = safe
   const [updatedTxId, setUpdatedTxId] = useState<string>('')
   // N.B. we reload when txQueuedTag/txHistoryTag/updatedTxId changes as txQueuedTag alone is not enough
   const reloadTag = (txQueuedTag ?? '') + (txHistoryTag ?? '') + updatedTxId
 
   // Re-fetch when chainId/address, or txQueueTag change
-  const [data, error, loading] = useAsync<QueuedItemPage>(
+  const [data, error, loadingQueueItems] = useAsync<QueuedItemPage>(
     () => {
-      if (!safeLoaded) return
-      if (!safe.deployed) return Promise.resolve({ results: [] })
+      if (!effectiveChainId || !effectiveAddress) return
+      // For undeployed safes, return empty once safe info confirms not deployed
+      if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTransactionQueue(chainId, safeAddress)
+      return getTransactionQueue(effectiveChainId, effectiveAddress)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [safeLoaded, chainId, safeAddress, reloadTag, safe.deployed],
+    [effectiveChainId, effectiveAddress, reloadTag, safeLoaded, safe.deployed],
     false,
   )
 
@@ -46,7 +49,7 @@ export const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
     logError(Errors._603, error.message)
   }, [error])
 
-  return [data, error, loading]
+  return [data, error, loadingQueueItems]
 }
 
 export default useLoadTxQueue

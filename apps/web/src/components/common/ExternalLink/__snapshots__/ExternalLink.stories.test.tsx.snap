@@ -5,19 +5,19 @@ exports[`./ExternalLink.stories ButtonMode 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-vi2kll-MuiButtonBase-root-MuiButton-root"
+    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-876fro-MuiButtonBase-root-MuiButton-root"
     href="https://safe.global"
     rel="noreferrer noopener"
     tabindex="0"
     target="_blank"
   >
     <span
-      class="MuiBox-root css-u9xrjn"
+      class="MuiBox-root mui-style-u9xrjn"
     >
       Open Documentation
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
         data-testid="OpenInNewRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -36,18 +36,18 @@ exports[`./ExternalLink.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
     href="https://safe.global"
     rel="noreferrer noopener"
     target="_blank"
   >
     <span
-      class="MuiBox-root css-u9xrjn"
+      class="MuiBox-root mui-style-u9xrjn"
     >
       Visit Safe Global
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
         data-testid="OpenInNewRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -74,18 +74,18 @@ exports[`./ExternalLink.stories NoChildren 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
     href="https://safe.global"
     rel="noreferrer noopener"
     target="_blank"
   >
     <span
-      class="MuiBox-root css-u9xrjn"
+      class="MuiBox-root mui-style-u9xrjn"
     >
       https://safe.global
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
         data-testid="OpenInNewRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -104,18 +104,18 @@ exports[`./ExternalLink.stories WithCustomStyling 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-thoo61-MuiTypography-root-MuiLink-root"
+    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-thoo61-MuiTypography-root-MuiLink-root"
     href="https://etherscan.io"
     rel="noreferrer noopener"
     target="_blank"
   >
     <span
-      class="MuiBox-root css-u9xrjn"
+      class="MuiBox-root mui-style-u9xrjn"
     >
       View on Etherscan
       <svg
         aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
         data-testid="OpenInNewRoundedIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -134,13 +134,13 @@ exports[`./ExternalLink.stories WithoutIcon 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-r9pq5a-MuiTypography-root-MuiLink-root"
+    class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
     href="https://safe.global"
     rel="noreferrer noopener"
     target="_blank"
   >
     <span
-      class="MuiBox-root css-u9xrjn"
+      class="MuiBox-root mui-style-u9xrjn"
     >
       Visit Safe Global
     </span>

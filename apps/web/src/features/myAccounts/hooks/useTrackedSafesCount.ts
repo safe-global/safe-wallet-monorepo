@@ -3,10 +3,7 @@ import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { type SafeItem } from './useAllSafes'
-import type { AllSafeItemsGrouped } from './useAllSafesGrouped'
-import { type MultiChainSafeItem } from './useAllSafesGrouped'
-import { isMultiChainSafeItem } from '@/features/multichain/utils/utils'
+import { type SafeItem, type MultiChainSafeItem, type AllSafeItemsGrouped, isMultiChainSafeItem } from '@/hooks/safes'
 
 let isOwnedSafesTracked = false
 let isPinnedSafesTracked = false

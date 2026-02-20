@@ -80,7 +80,7 @@ describe('chains retry functionality', () => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             return HttpResponse.json({
               results: page1Chains,
               next: `${GATEWAY_URL}/v1/chains?cursor=page2`,
@@ -229,7 +229,7 @@ describe('chains retry functionality', () => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             page1Attempts++
             if (page1Attempts < 2) {
               return HttpResponse.error()
@@ -268,7 +268,7 @@ describe('chains retry functionality', () => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             return HttpResponse.json({
               results: [mockChains[0]],
               next: `${GATEWAY_URL}/v1/chains?cursor=page2`,

@@ -23,12 +23,19 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
         },
       }}
     >
-      <Box position="absolute" top={16} right={16} zIndex={1}>
+      <Box
+        position="absolute"
+        top={16}
+        zIndex={1}
+        sx={{
+          right: 16,
+        }}
+      >
         <IconButton
           aria-label="close"
           onClick={onClose}
           sx={{
-            color: 'var(--color-static-primary)',
+            color: ['var(--color-static-text-secondary)', 'var(--color-static-primary)'],
           }}
         >
           <Close />

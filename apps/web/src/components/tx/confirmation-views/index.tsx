@@ -31,14 +31,12 @@ import UpdateSafe from './UpdateSafe'
 import { MigrateToL2Information } from './MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
-import VaultDepositConfirmation from 'src/features/earn/components/VaultDepositConfirmation'
-import VaultRedeemConfirmation from '@/features/earn/components/VaultRedeemConfirmation'
+import { VaultDepositConfirmation, VaultRedeemConfirmation } from '@/features/earn'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useChainId from '@/hooks/useChainId'
 import { ManageSigners } from './ManageSigners'
-import { TransactionWarnings } from '../TransactionWarnings'
 import { Box } from '@mui/material'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import BridgeTransaction from './BridgeTransaction'
@@ -131,7 +129,6 @@ const ConfirmationView = ({
 
   return (
     <>
-      <TransactionWarnings txData={details?.txData ?? undefined} />
       {withDecodedData &&
         (ConfirmationViewComponent ||
           (details && showTxDetails && (

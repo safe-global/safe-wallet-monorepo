@@ -18,9 +18,8 @@ import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabl
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
-import PortfolioRefreshHint from '@/features/portfolio/components/PortfolioRefreshHint'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { PortfolioFeature } from '@/features/portfolio'
+import { useLoadFeature } from '@/features/__core__'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -28,7 +27,7 @@ const Overview = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
+  const portfolio = useLoadFeature(PortfolioFeature)
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
@@ -48,9 +47,9 @@ const Overview = (): ReactElement => {
 
   return (
     <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
-      {isPortfolioEndpointEnabled && (
+      {!portfolio.$isDisabled && (
         <Box display="flex" justifyContent="flex-end" mb={-3}>
-          <PortfolioRefreshHint entryPoint="Dashboard" />
+          <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
         </Box>
       )}
       <Box>
@@ -76,11 +75,10 @@ const Overview = (): ReactElement => {
                     {(isOk) => (
                       <Button
                         onClick={handleOnSend}
-                        size="compact"
+                        size="medium"
                         variant="contained"
                         disableElevation
                         startIcon={<ArrowIconNW fontSize="small" />}
-                        sx={{ height: '42px' }}
                         fullWidth
                         disabled={!isOk}
                       >
@@ -98,12 +96,11 @@ const Overview = (): ReactElement => {
                       const btn = (
                         <Button
                           data-testid="overview-swap-btn"
-                          size="compact"
+                          size="medium"
                           variant="contained"
                           color="background"
                           disableElevation
                           startIcon={<SwapIcon fontSize="small" />}
-                          sx={{ height: '42px' }}
                           fullWidth
                           disabled={!isOk}
                         >
@@ -131,12 +128,11 @@ const Overview = (): ReactElement => {
                 <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
                   <QrCodeButton>
                     <Button
-                      size="compact"
+                      size="medium"
                       variant="contained"
                       color="background"
                       disableElevation
                       startIcon={<ArrowIconSE fontSize="small" />}
-                      sx={{ height: '42px' }}
                       fullWidth
                     >
                       Receive

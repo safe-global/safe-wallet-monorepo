@@ -12,13 +12,13 @@ exports[`./index.stories Default 1`] = `
   >
     <button
       aria-label="Copy to clipboard"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >
       <mock-icon
         aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
+        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
         data-testid="copy-btn-icon"
         focusable="false"
       />

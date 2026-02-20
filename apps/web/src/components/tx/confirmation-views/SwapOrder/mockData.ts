@@ -6,13 +6,19 @@ import type {
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+// Seed faker for deterministic values in stories
+faker.seed(123)
+
+// Fixed timestamp for deterministic tests: Dec 24, 2024
+const FIXED_TIMESTAMP = 1735000000
+
 export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   type: TransactionInfoType.SWAP_ORDER,
   humanDescription: null,
   uid: faker.string.uuid(),
   kind: 'sell',
   orderClass: 'market',
-  validUntil: Math.floor(Date.now() / 1000) + 3600,
+  validUntil: FIXED_TIMESTAMP + 3600,
   sellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
   buyAmount: faker.number.bigInt({ min: 2000000000000000000n, max: 20000000000000000000n }).toString(),
   executedSellAmount: '0',
@@ -56,10 +62,10 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
   type: TransactionInfoType.TWAP_ORDER,
   humanDescription: null,
   kind: 'sell',
-  validUntil: Math.floor(Date.now() / 1000) + 86400,
+  validUntil: FIXED_TIMESTAMP + 86400,
   startTime: {
     startType: 'AT_EPOCH',
-    epoch: Math.floor(Date.now() / 1000),
+    epoch: FIXED_TIMESTAMP,
   },
   durationOfPart: {
     durationType: 'AUTO',

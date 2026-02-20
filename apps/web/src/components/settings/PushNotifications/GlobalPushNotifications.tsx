@@ -1,5 +1,5 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import {
   Box,
   Grid,
@@ -37,7 +37,7 @@ import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermis
 import { Permission } from '@/permissions/config'
 
 import css from './styles.module.css'
-import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import { useAllOwnedSafes } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectAllAddedSafes, type AddedSafesState } from '@/store/addedSafesSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'

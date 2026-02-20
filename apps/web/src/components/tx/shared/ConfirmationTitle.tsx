@@ -5,7 +5,6 @@ import css from './styles.module.css'
 export enum ConfirmationTitleTypes {
   sign = 'confirm',
   execute = 'execute',
-  propose = 'propose',
 }
 
 const ConfirmationTitle = ({ isCreation, variant }: { isCreation?: boolean; variant: ConfirmationTitleTypes }) => {

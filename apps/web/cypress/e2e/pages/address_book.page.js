@@ -2,35 +2,32 @@ import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import staticSafes from '../../fixtures/safes/static.js'
 
+// Re-export common selectors from main.page.js for backward compatibility
+export const tableContainer = main.tableContainer
+export const tableRow = main.tableRow
+
 export const addressBookRecipient = '[data-testid="address-book-recipient"]'
 const beameriFrameContainer = '#beamerOverlay .iframeCointaner'
 const beamerInput = 'input[id="beamer"]'
-const nameInput = 'input[name="name"]'
-const addressInput = 'input[name="address"]'
 const exportModalBtn = '[data-testid="export-modal-btn"]'
 export const editEntryBtn = 'button[aria-label="Edit entry"]'
 export const deleteEntryBtn = 'button[aria-label="Delete entry"]'
 export const deleteEntryModalBtnSection = '.MuiDialogActions-root'
-export const tableContainer = '[data-testid="table-container"]'
-export const tableRow = '[data-testid="table-row"]'
 const importBtn = '[data-testid="import-btn"]'
-const cancelImportBtn = '[data-testid="cancel-btn"]'
 const uploadErrorMsg = '[data-testid="error-message"]'
 const modalSummaryMessage = '[data-testid="summary-message"]'
 const saveBtn = '[data-testid="save-btn"]'
 const divInput = '[data-testid="name-input"]'
 const exportSummary = '[data-testid="export-summary"]'
 const sendBtn = '[data-testid="send-btn"]'
-const nextPageBtn = 'button[aria-label="Go to next page"]'
-const previousPageBtn = 'button[aria-label="Go to previous page"]'
 export const entryDialog = '[data-testid="entry-dialog"]'
 
 //TODO Move to specific component
 const moreActionIcon = '[data-testid="MoreHorizIcon"]'
 
-export const acceptSelection = 'Save settings'
+export const acceptSelection = main.acceptSelectionStr
 export const addressBook = 'Address book'
-const createEntryBtn = 'Create entry'
+const createEntryBtn = 'New entry'
 export const delteEntryModaldeleteBtn = 'Delete'
 const exportBtn = 'Export'
 // const saveBtn = 'Save'
@@ -64,11 +61,11 @@ export const entries = [
 ]
 
 export function clickOnNextPageBtn() {
-  cy.get(nextPageBtn).click()
+  cy.get(main.nextPageBtn).click()
 }
 
 export function clickOnPrevPageBtn() {
-  cy.get(previousPageBtn).click()
+  cy.get(main.previousPageBtn).click()
 }
 
 export function verifyCountOfSafes(count) {
@@ -152,7 +149,7 @@ export function clickOnImportFileBtn() {
 }
 
 export function importCSVFile(file) {
-  cy.get('[type="file"]').attachFile(file)
+  cy.get('[type="file"]').selectFile(`cypress/fixtures/${file}`, { force: true })
 }
 
 export function clickOnImportBtn() {
@@ -176,11 +173,11 @@ export function clickOnCreateEntryBtn() {
 }
 
 export function typeInName(name) {
-  cy.get(nameInput).type(name)
+  cy.get(main.nameInput).type(name)
 }
 
 export function typeInAddress(address) {
-  cy.get(addressInput).type(address)
+  cy.get(main.addressInput).type(address)
 }
 
 export function clickOnSaveEntryBtn() {
@@ -204,7 +201,7 @@ export function clickOnEditEntryBtn() {
 }
 
 export function typeInNameInput(name) {
-  cy.get(nameInput).clear().type(name).should('have.value', name)
+  cy.get(main.nameInput).clear().type(name).should('have.value', name)
 }
 
 export function verifyNameWasChanged(name, editedName) {
@@ -242,7 +239,7 @@ export function verifyBeameriFrameExists() {
 }
 
 export function verifyEmptyOwnerNameNotAllowed() {
-  cy.get(nameInput).clear()
+  cy.get(main.nameInput).clear()
   main.verifyElementsStatus([saveBtn], constants.enabledStates.disabled)
   cy.get(divInput).contains(mandatoryNameStr)
 }

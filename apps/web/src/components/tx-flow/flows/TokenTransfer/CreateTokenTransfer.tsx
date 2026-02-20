@@ -24,7 +24,7 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '.'
+} from './types'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
@@ -42,9 +42,12 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/components/NoFeeCampaignTransactionCard'
-import useNoFeeCampaignEligibility from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
-import useIsNoFeeCampaignEnabled from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
+import {
+  NoFeeCampaignFeature,
+  useNoFeeCampaignEligibility,
+  useIsNoFeeCampaignEnabled,
+} from '@/features/no-fee-campaign'
+import { useLoadFeature } from '@/features/__core__'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 
@@ -81,7 +84,8 @@ export type CreateTokenTransferProps = {
   txNonce?: number
 }
 
-export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
+  const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
@@ -113,7 +117,9 @@ export const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): Reac
         data?.recipients.map(({ tokenAddress, ...rest }) => ({
           ...rest,
           [TokenTransferFields.tokenAddress]:
-            canCreateSpendingLimitTx && !canCreateStandardTx ? balancesItems[0]?.tokenInfo.address : tokenAddress,
+            canCreateSpendingLimitTx && !canCreateStandardTx
+              ? tokenAddress || balancesItems[0]?.tokenInfo.address
+              : tokenAddress,
         })) || [],
     },
     mode: 'onChange',

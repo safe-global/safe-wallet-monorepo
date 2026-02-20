@@ -4,7 +4,7 @@ import { StyleSheet, ViewStyle } from 'react-native'
 
 export const AbsoluteLinearGradient = ({ colors, style }: { colors?: [string, string]; style?: ViewStyle }) => {
   const theme = useTheme()
-  const colorsToUse: [string, string] = colors || [theme.success?.get(), 'transparent']
+  const colorsToUse: [string, string] = colors || [theme.success.get(), 'transparent']
 
   return <ExpoLinearGradient colors={colorsToUse} style={[styles.background, style]} />
 }

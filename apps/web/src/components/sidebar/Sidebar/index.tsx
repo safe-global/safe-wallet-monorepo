@@ -1,5 +1,6 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import { Box, Divider, Drawer } from '@mui/material'
+import ChevronRight from '@mui/icons-material/ChevronRight'
 
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
@@ -8,10 +9,12 @@ import SidebarFooter from '@/components/sidebar/SidebarFooter'
 
 import css from './styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import MyAccounts from '@/features/myAccounts'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 
 const Sidebar = (): ReactElement => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+  const { MyAccounts } = useLoadFeature(MyAccountsFeature)
 
   const onDrawerToggle = useCallback(() => {
     setIsDrawerOpen((isOpen) => {
@@ -30,6 +33,11 @@ const Sidebar = (): ReactElement => {
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
         <ChainIndicator showLogo={false} onlyLogo />
+
+        {/* Open the safes list */}
+        <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
+          <ChevronRight />
+        </button>
 
         {/* Address, balance, copy button, etc */}
         <SidebarHeader onDrawerToggle={onDrawerToggle} isDrawerOpen={isDrawerOpen} />

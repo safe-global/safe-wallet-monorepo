@@ -6,13 +6,19 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
+// Seed faker for deterministic values in stories
+faker.seed(456)
+
+// Fixed timestamp for deterministic tests: Dec 24, 2024
+const FIXED_TIMESTAMP = 1735000000
+
 export const mockStakingDepositTxInfo: NativeStakingDepositTransactionInfo = {
   type: TransactionInfoType.NATIVE_STAKING_DEPOSIT,
   humanDescription: null,
   status: 'NOT_STAKED',
-  estimatedEntryTime: Math.floor(Date.now() / 1000) + 86400,
-  estimatedExitTime: Math.floor(Date.now() / 1000) + 604800,
-  estimatedWithdrawalTime: Math.floor(Date.now() / 1000) + 691200,
+  estimatedEntryTime: FIXED_TIMESTAMP + 86400,
+  estimatedExitTime: FIXED_TIMESTAMP + 604800,
+  estimatedWithdrawalTime: FIXED_TIMESTAMP + 691200,
   fee: 100000000000000,
   monthlyNrr: 40,
   annualNrr: 480,
@@ -41,8 +47,8 @@ export const mockStakingExitTxInfo: NativeStakingValidatorsExitTransactionInfo =
   type: TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT,
   humanDescription: null,
   status: 'ACTIVE',
-  estimatedExitTime: Math.floor(Date.now() / 1000) + 604800,
-  estimatedWithdrawalTime: Math.floor(Date.now() / 1000) + 691200,
+  estimatedExitTime: FIXED_TIMESTAMP + 604800,
+  estimatedWithdrawalTime: FIXED_TIMESTAMP + 691200,
   numValidators: 1,
   value: '32000000000000000000',
   tokenInfo: {

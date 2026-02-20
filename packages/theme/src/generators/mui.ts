@@ -34,6 +34,61 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
         lightGrey: colors.background.secondary,
         ...(isDarkMode ? {} : { paper: '#FFFFFF', default: '#F4F4F4' }),
       },
+      // Restore original web colors for error, info, success, and warning
+      // Mobile uses different color values from the unified palette
+      ...(isDarkMode
+        ? {
+            error: {
+              dark: '#AC2C3B',
+              main: '#FF5F72',
+              light: '#FFB4BD',
+              background: '#2F2527',
+            },
+            success: {
+              dark: '#388E3C',
+              main: '#00B460',
+              light: '#81C784',
+              background: '#1F2920',
+            },
+            info: {
+              dark: '#52BFDC',
+              main: '#5FDDFF',
+              light: '#B7F0FF',
+              background: '#19252C',
+            },
+            warning: {
+              dark: '#C04C32',
+              main: '#FF8061',
+              light: '#FFBC9F',
+              background: '#2F2318',
+            },
+          }
+        : {
+            error: {
+              dark: '#AC2C3B',
+              main: '#FF5F72',
+              light: '#FFB4BD',
+              background: '#FFE6EA',
+            },
+            success: {
+              dark: '#028D4C',
+              main: '#00B460',
+              light: '#D3F2E4',
+              background: '#EFFAF1',
+            },
+            info: {
+              dark: '#52BFDC',
+              main: '#5FDDFF',
+              light: '#D7F6FF',
+              background: '#EFFCFF',
+            },
+            warning: {
+              dark: '#C04C32',
+              main: '#FF8061',
+              light: '#FFBC9F',
+              background: '#FFF1E0',
+            },
+          }),
     },
     spacing: spacingWebBase, // 8px base for spacing function
     shape: { borderRadius: defaultRadius },
@@ -98,7 +153,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       },
       MuiButton: {
         variants: [
+          // Primary CTA variant for hero buttons and prominent actions
+          { props: { size: 'xlarge' }, style: { fontSize: '16px', padding: '16px 24px', height: '58px' } },
+          // @deprecated Use size="medium" instead. Compact variant is redundant now that medium is correctly sized at 36px.
           { props: { size: 'compact' }, style: { padding: '8px 16px' } },
+          // @deprecated Use size="large" instead. Stretched variant will be removed in a future version.
           { props: { size: 'stretched' }, style: { padding: '12px 48px' } },
           {
             props: { color: 'background.paper' },
@@ -140,8 +199,9 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
           },
         ],
         styleOverrides: {
-          sizeSmall: { fontSize: '14px', padding: '8px 24px' },
-          sizeMedium: { fontSize: '16px', padding: '12px 24px' },
+          sizeSmall: { fontSize: '13px', padding: '6px 24px', height: '32px' },
+          sizeMedium: { fontSize: '14px', padding: '8px 24px', height: '36px' },
+          sizeLarge: { fontSize: '14px', padding: '12px 24px', height: '42px' },
           root: ({ theme }) => ({
             borderRadius: theme.shape.borderRadius,
             fontWeight: 'bold',
@@ -150,8 +210,11 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             textTransform: 'none',
             '&:hover': { boxShadow: 'none' },
           }),
-          outlined: { border: '2px solid', '&:hover': { border: '2px solid' } },
-          sizeLarge: { fontSize: '16px' },
+          outlined: {
+            border: '1.5px solid',
+            fontWeight: '600',
+            '&:hover': { border: '1.5px solid' },
+          },
         },
       },
       MuiAccordion: {

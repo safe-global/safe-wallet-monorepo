@@ -40,10 +40,10 @@ const AddFundsToGetStarted = () => {
         <SvgIcon component={FiatIcon} inheritViewBox fontSize="small" />
       </Box>
       <Box>
-        <Typography fontWeight="bold" color="text.primary">
+        <Typography fontWeight="bold" color="static.main">
           Add funds to get started
         </Typography>
-        <Typography variant="body2" color="info.dark">
+        <Typography variant="body2" color="primary.light">
           Onramp crypto or send tokens directly to your address from a different wallet.{' '}
         </Typography>
       </Box>

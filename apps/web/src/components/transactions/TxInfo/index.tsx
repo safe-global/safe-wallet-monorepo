@@ -29,13 +29,10 @@ import {
 import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SwapTx } from '@/features/swap/components/SwapTxInfo/SwapTx'
-import StakingTxExitInfo from '@/features/stake/components/StakingTxExitInfo'
-import StakingTxWithdrawInfo from '@/features/stake/components/StakingTxWithdrawInfo'
+import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
 import { Box } from '@mui/material'
 import css from './styles.module.css'
-import StakingTxDepositInfo from '@/features/stake/components/StakingTxDepositInfo'
-import VaultDepositTxInfo from '@/features/earn/components/VaultDepositTxInfo'
-import VaultRedeemTxInfo from '@/features/earn/components/VaultRedeemTxInfo'
+import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
 
 export const TransferTx = ({
   info,

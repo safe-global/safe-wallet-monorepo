@@ -54,8 +54,7 @@ export const notificationsSlice = createSlice({
   },
 })
 
-export const { closeNotification, closeByGroupKey, deleteNotification, deleteAllNotifications, readNotification } =
-  notificationsSlice.actions
+export const { closeNotification, deleteAllNotifications, readNotification } = notificationsSlice.actions
 
 export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>): AppThunk<string> => {
   return (dispatch) => {

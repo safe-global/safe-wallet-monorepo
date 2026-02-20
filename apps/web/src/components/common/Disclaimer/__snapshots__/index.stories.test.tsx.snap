@@ -8,45 +8,45 @@ exports[`./index.stories BlockedAddress 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiStack-root css-1ogap9g-MuiStack-root"
+        class="MuiStack-root mui-style-1ogap9g-MuiStack-root"
       >
         <p
-          class="MuiTypography-root MuiTypography-body1 css-10q7br5-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body1 mui-style-10q7br5-MuiTypography-root"
         >
           0xD3a484faEa53313eF85b5916C9302a3E304ae622
         </p>
         <div
-          class="iconCircle MuiBox-root css-0"
+          class="iconCircle MuiBox-root mui-style-0"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
             focusable="false"
           />
         </div>
         <h3
-          class="MuiTypography-root MuiTypography-h3 css-w6xv8j-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h3 mui-style-w6xv8j-MuiTypography-root"
         >
           Blocked Address
         </h3>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
         >
           This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
         </p>
         <hr
-          class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
+          class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
         />
       </div>
       <div
-        class="MuiBox-root css-fbqrg1"
+        class="MuiBox-root mui-style-fbqrg1"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-svj0yx-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-111u2p4-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
@@ -66,28 +66,28 @@ exports[`./index.stories LegalDisclaimer 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiStack-root css-1ogap9g-MuiStack-root"
+        class="MuiStack-root mui-style-1ogap9g-MuiStack-root"
       >
         <div
-          class="iconCircle MuiBox-root css-0"
+          class="iconCircle MuiBox-root mui-style-0"
         >
           <mock-icon
             aria-hidden=""
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1dhtbeh-MuiSvgIcon-root"
             focusable="false"
           />
         </div>
         <h3
-          class="MuiTypography-root MuiTypography-h3 css-w6xv8j-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-h3 mui-style-w6xv8j-MuiTypography-root"
         >
           Legal Disclaimer
         </h3>
         <p
-          class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+          class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
         >
           <div
             class="disclaimerContainer"
@@ -96,7 +96,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
               class="disclaimerInner"
             >
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1hsdx29-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 mui-style-1hsdx29-MuiTypography-root"
               >
                 You are now accessing 
                 third-party apps
@@ -106,7 +106,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
                 , which is at your own risk.
               </p>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-1hsdx29-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 mui-style-1hsdx29-MuiTypography-root"
               >
                 You must read our Terms, which contain more detailed provisions binding on you relating to the
                  
@@ -114,23 +114,23 @@ exports[`./index.stories LegalDisclaimer 1`] = `
                 .
               </p>
               <p
-                class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
               >
                 I have read and understood the
                  
                 <a
-                  class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-ey0kse-MuiTypography-root-MuiLink-root"
+                  class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ey0kse-MuiTypography-root-MuiLink-root"
                   href="/terms"
                   rel="noreferrer noopener"
                   target="_blank"
                 >
                   <span
-                    class="MuiBox-root css-u9xrjn"
+                    class="MuiBox-root mui-style-u9xrjn"
                   >
                     Terms
                     <svg
                       aria-hidden="true"
-                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall external-link-icon mui-style-tqxw8e-MuiSvgIcon-root"
                       data-testid="OpenInNewRoundedIcon"
                       focusable="false"
                       viewBox="0 0 24 24"
@@ -148,14 +148,14 @@ exports[`./index.stories LegalDisclaimer 1`] = `
           </div>
         </p>
         <hr
-          class="MuiDivider-root MuiDivider-fullWidth css-1facvfi-MuiDivider-root"
+          class="MuiDivider-root MuiDivider-fullWidth mui-style-1facvfi-MuiDivider-root"
         />
       </div>
       <div
-        class="MuiBox-root css-fbqrg1"
+        class="MuiBox-root mui-style-fbqrg1"
       >
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-svj0yx-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary mui-style-111u2p4-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >

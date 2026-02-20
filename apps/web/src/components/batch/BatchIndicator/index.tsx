@@ -15,9 +15,10 @@ const BatchIndicator = ({ onClick }: { onClick?: () => void }) => {
           title="Batch"
           onClick={onClick}
           sx={{
-            p: 2,
+            p: '10px',
             '&:hover': {
               backgroundColor: 'background.light',
+              borderRadius: '6px',
             },
           }}
         >

@@ -6,9 +6,7 @@ type Environment = 'development' | 'production' | 'test' | 'cypress'
 export const APP_ENV = process.env.NODE_ENV as Environment
 export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = APP_ENV === 'development'
-export const IS_TEST_UNIT = APP_ENV === 'test'
 export const IS_TEST_E2E = APP_ENV === 'cypress'
-export const IS_TEST = IS_TEST_UNIT || IS_TEST_E2E
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
 // default chain ID's as provided to the environment
@@ -36,10 +34,58 @@ export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
 export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
 
+// Datadog RUM
+export const DATADOG_RUM_APPLICATION_ID = process.env.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID || ''
+export const DATADOG_RUM_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN || ''
+export const DATADOG_RUM_SITE = process.env.NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu'
+export const DATADOG_RUM_SERVICE = process.env.NEXT_PUBLIC_DATADOG_RUM_SERVICE || 'safe-wallet-web'
+export const DATADOG_RUM_ENV = process.env.NEXT_PUBLIC_DATADOG_RUM_ENV || 'development'
+const parsedSessionSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE)
+export const DATADOG_RUM_SESSION_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE !== undefined && !Number.isNaN(parsedSessionSampleRate)
+    ? parsedSessionSampleRate
+    : 10
+
+const parsedTraceSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE)
+export const DATADOG_RUM_TRACE_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE !== undefined && !Number.isNaN(parsedTraceSampleRate)
+    ? parsedTraceSampleRate
+    : 20
+
+const parsedLogsSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE)
+export const DATADOG_LOGS_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE !== undefined && !Number.isNaN(parsedLogsSampleRate)
+    ? parsedLogsSampleRate
+    : 100
+
+const parsedSessionReplaySampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE)
+export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
+  process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE !== undefined &&
+  !Number.isNaN(parsedSessionReplaySampleRate)
+    ? parsedSessionReplaySampleRate
+    : 0
+
+export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
+export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
+
+const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+  if (value === undefined) return defaultValue
+  return value === 'true'
+}
+
+export const DATADOG_RUM_TRACK_USER_INTERACTIONS = parseBoolean(
+  process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_USER_INTERACTIONS,
+  true,
+)
+export const DATADOG_RUM_TRACK_RESOURCES = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_RESOURCES, true)
+export const DATADOG_RUM_TRACK_LONG_TASKS = parseBoolean(process.env.NEXT_PUBLIC_DATADOG_RUM_TRACK_LONG_TASKS, true)
+
+type DatadogPrivacyLevel = 'mask' | 'mask-user-input' | 'allow'
+export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADOG_RUM_DEFAULT_PRIVACY_LEVEL ||
+  'mask') as DatadogPrivacyLevel
+
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
-export const TREZOR_APP_URL = 'app.safe.global'
-export const TREZOR_EMAIL = 'support@safe.global'
 
 // Safe Token
 export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
@@ -51,6 +97,9 @@ export const SAFE_LOCKING_ADDRESS: { [chainId: string]: string } = {
   [chains.eth]: '0x0a7CB434f96f65972D46A5c1A64a9654dC9959b2',
   [chains.sep]: '0xb161ccb96b9b817F9bDf0048F212725128779DE9',
 }
+
+export const DEVELOPER_PORTAL_URL =
+  process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
 
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
@@ -83,21 +132,15 @@ export enum SafeAppsName {
   TRANSACTION_BUILDER = 'Transaction Builder',
 }
 
-export const RECOVERY_FEEDBACK_FORM =
-  'https://noteforms.com/forms/safe-feedback-form-hk16ds?notionforms=1&utm_source=notionforms'
-
 // Legal
 export const IS_OFFICIAL_HOST = process.env.NEXT_PUBLIC_IS_OFFICIAL_HOST === 'true'
-export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000/
+export const OFFICIAL_HOSTS = /app\.safe\.global|.+\.5afe\.dev|localhost:3000|localhost:4000|localhost:6006/
 export const IPFS_HOSTS = /app\.safe\.eth\.limo|app\.5afedev\.eth\.limo/
 export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || (IS_OFFICIAL_HOST ? 'Safe{Wallet}' : 'Wallet fork')
 export const BRAND_LOGO = process.env.NEXT_PUBLIC_BRAND_LOGO || ''
 
-export const REDEFINE_ARTICLE = 'https://safe.mirror.xyz/rInLWZwD_sf7enjoFerj6FIzCYmVMGrrV8Nhg4THdwI'
-
 export const CHAINALYSIS_OFAC_CONTRACT = '0x40c57923924b5c5c5455c48d93317139addac8fb'
 
-export const SAFE_PASS_URL = 'community.safe.global'
 export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
@@ -107,6 +150,11 @@ export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PRO
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
   process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID ?? `${11}`,
 )
-
+export const PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${7}`,
+)
+export const STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
+  process.env.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID ?? `${15}`,
+)
 // Deployment specifics
 export const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'

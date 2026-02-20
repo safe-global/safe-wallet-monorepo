@@ -19,7 +19,7 @@ import { useEffect } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useSafeSetupHints } from '../OwnerPolicyStep/useSafeSetupHints'
 import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
-import SafeCreationNetworkInput from '@/features/multichain/components/SafeCreationNetworkInput'
+import { SafeCreationNetworkInput } from '@/features/multichain'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
@@ -154,10 +154,10 @@ function SetNameStep({
         <Divider />
         <Box className={layoutCss.row}>
           <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-            <Button data-testid="cancel-btn" variant="outlined" onClick={onCancel} size="small">
+            <Button data-testid="cancel-btn" variant="outlined" onClick={onCancel} size="large">
               Cancel
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="stretched" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
               Next
             </Button>
           </Box>

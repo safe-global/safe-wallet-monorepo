@@ -1,7 +1,14 @@
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
-import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import {
+  safeCreationDispatch,
+  SafeCreationEvent,
+  replayCounterfactualSafeDeployment,
+  activateReplayedSafe,
+} from '@/features/counterfactual/services'
+import { PayNowPayLater } from '@/features/counterfactual/components'
+import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
+import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
@@ -18,8 +25,6 @@ import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCre
 import ReviewRow from '@/components/new-safe/ReviewRow'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
-import PayNowPayLater from '@/features/counterfactual/PayNowPayLater'
-import { CF_TX_GROUP_KEY, replayCounterfactualSafeDeployment } from '@/features/counterfactual/utils'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useGasPrice from '@/hooks/useGasPrice'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
@@ -46,12 +51,11 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NetworkWarning from '../../NetworkWarning'
-import useAllSafes from '@/features/myAccounts/hooks/useAllSafes'
+import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
@@ -361,6 +365,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             onSubmitCallback(undefined, txHash)
           },
           true,
+          activateReplayedSafe,
         )
       }
     } catch (_err) {
@@ -521,7 +526,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Button
             data-testid="back-btn"
             variant="outlined"
-            size="small"
+            size="large"
             onClick={handleBack}
             startIcon={<ArrowBackIcon fontSize="small" />}
           >
@@ -531,7 +536,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             data-testid="review-step-next-btn"
             onClick={handleCreateSafeClick}
             variant="contained"
-            size="stretched"
+            size="large"
             disabled={isDisabled}
           >
             {isCreating ? <CircularProgress size={18} /> : 'Create account'}

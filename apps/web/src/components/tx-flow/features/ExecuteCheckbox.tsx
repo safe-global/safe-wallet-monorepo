@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { SlotName, withSlot } from '../slots'
 import ExecuteCheckbox from '@/components/tx/ExecuteCheckbox'
 
@@ -11,7 +11,7 @@ const useShouldRegisterSlot = () => {
   return (canExecute || canExecuteThroughRole) && !onlyExecute && !isCounterfactualSafe && !isProposing
 }
 
-const ExecuteCheckboxSlot = withSlot({
+const _ExecuteCheckboxSlot = withSlot({
   Component: () => {
     const { setShouldExecute } = useContext(TxFlowContext)
     return <ExecuteCheckbox onChange={setShouldExecute} />
@@ -20,5 +20,3 @@ const ExecuteCheckboxSlot = withSlot({
   id: 'executeCheckbox',
   useSlotCondition: useShouldRegisterSlot,
 })
-
-export default ExecuteCheckboxSlot
