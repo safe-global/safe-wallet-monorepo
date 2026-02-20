@@ -59,9 +59,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         <div className={css.spaceSelectorText}>
           {spaceName ? (
             <Tooltip>
-              <TooltipTrigger>
-                <span className={css.spaceSelectorName}>{displayName}</span>
-              </TooltipTrigger>
+              <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
               <TooltipContent side="top">{spaceName}</TooltipContent>
             </Tooltip>
           ) : (
