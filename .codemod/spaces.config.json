@@ -1,0 +1,326 @@
+{
+  "featureName": "spaces",
+  "featureFlag": "SPACES",
+  "publicAPI": {
+    "components": [
+      "AddManually",
+      "SafesList",
+      "AddAccounts",
+      "MemberInfoForm",
+      "AddMemberModal",
+      "RoleMenuItem",
+      "AddAccountsCard",
+      "AggregatedBalance",
+      "DashboardMembersList",
+      "AddressBookCard",
+      "MembersCard",
+      "SpacesCTACard",
+      "SpaceDashboard",
+      "InitialsAvatar",
+      "AcceptButton",
+      "AcceptInviteDialog",
+      "DeclineButton",
+      "DeclineInviteDialog",
+      "PreviewInvite",
+      "SpaceListInvite",
+      "SpaceMembers",
+      "EditMemberDialog",
+      "MemberName",
+      "RemoveMemberDialog",
+      "MembersList",
+      "RemoveMemberButton",
+      "EmptySafeAccounts",
+      "RemoveSafeDialog",
+      "SendTransactionButton",
+      "SpaceSafeContextMenu",
+      "SpaceSafeAccounts",
+      "SearchInput",
+      "SignInButton",
+      "AddContact",
+      "DeleteContactDialog",
+      "EditContactDialog",
+      "EmptyAddressBook",
+      "ContactsList",
+      "ImportAddressBookDialog",
+      "ImportAddressBook",
+      "SpaceAddressBookActions",
+      "SpaceAddressBookTable",
+      "SpaceAddressBook",
+      "SpaceBreadcrumbs",
+      "SpaceContextMenu",
+      "SpaceCard",
+      "SpaceSummary",
+      "SpaceCreationModal",
+      "SpaceInfoModal",
+      "DeleteSpaceDialog",
+      "LeaveSpaceDialog",
+      "UpdateSpaceDialog",
+      "UpdateSpaceForm",
+      "SpaceSettings",
+      "SpaceSidebar",
+      "React",
+      "SpaceSidebarSelector",
+      "SpacesList",
+      "UserSettings"
+    ],
+    "hooks": [
+      "useContactSearch",
+      "useAddressBookSearch",
+      "useCurrentSpaceId",
+      "useFeatureFlagRedirect",
+      "useGetSpaceAddressBook",
+      "useAdminCount",
+      "useIsLastActiveAdmin",
+      "useIsQualifiedSafe",
+      "useMembersSearch",
+      "useSpaceMembersByStatus",
+      "useCurrentMembership",
+      "useIsActiceMember",
+      "useIsAdmin",
+      "useIsInvited",
+      "useSpaceSafes",
+      "useTrackSpace"
+    ],
+    "services": [
+      "getSafeId",
+      "getDeterministicColor",
+      "flattenAddressBook",
+      "createContactItems",
+      "getSelectedAddresses",
+      "getContactId",
+      "navItems",
+      "isAdmin",
+      "isActiveAdmin",
+      "isUnauthorized",
+      "filterSpacesByStatus",
+      "getNonDeclinedSpaces"
+    ],
+    "types": ["AuthState", "LoadingState", "SignedOutState", "UnauthorizedState", "mapSpaceContactsToAddressBookState"],
+    "constants": []
+  },
+  "structure": {
+    "hasComponentsFolder": true,
+    "hasHooksFolder": true,
+    "hasServicesFolder": false,
+    "hasStoreFolder": false,
+    "hasUtilsFolder": false,
+    "hasContextsFolder": false,
+    "hasTypesFile": false,
+    "hasConstantsFile": false,
+    "hasReadme": false
+  },
+  "consumers": [
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/components/address-book/AddressBookHeader/index.tsx",
+      "imports": [
+        {
+          "name": "useCurrentSpaceId",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useCurrentSpaceId",
+          "isDefault": false,
+          "isTypeOnly": false
+        },
+        {
+          "name": "useIsAdmin",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useSpaceMembers",
+          "isDefault": false,
+          "isTypeOnly": false
+        },
+        {
+          "name": "useIsQualifiedSafe",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useIsQualifiedSafe",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/components/common/Breadcrumbs/index.tsx",
+      "imports": [
+        {
+          "name": "SpaceBreadcrumbs",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SpaceBreadcrumbs",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/features/myAccounts/components/AccountItems/MultiAccountItem.tsx",
+      "imports": [
+        {
+          "name": "SpaceSafeContextMenu",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/features/myAccounts/components/SafesList/SafeListItem.tsx",
+      "imports": [
+        {
+          "name": "SpaceSafeContextMenu",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "SendTransactionButton",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SafeAccounts/SendTransactionButton",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/hooks/useAllAddressBooks.ts",
+      "imports": [
+        {
+          "name": "useGetSpaceAddressBook",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useGetSpaceAddressBook",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/hooks/useIsSpaceRoute.ts",
+      "imports": [
+        {
+          "name": "useCurrentSpaceId",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useCurrentSpaceId",
+          "isDefault": false,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/spaces/address-book.tsx",
+      "imports": [
+        {
+          "name": "AuthState",
+          "type": "type",
+          "importPath": "@/features/spaces/components/AuthState",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "SpaceAddressBook",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SpaceAddressBook",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/spaces/index.tsx",
+      "imports": [
+        {
+          "name": "SpaceDashboard",
+          "type": "component",
+          "importPath": "@/features/spaces/components/Dashboard",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "AuthState",
+          "type": "type",
+          "importPath": "@/features/spaces/components/AuthState",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/spaces/members.tsx",
+      "imports": [
+        {
+          "name": "SpaceMembers",
+          "type": "component",
+          "importPath": "@/features/spaces/components/Members",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "AuthState",
+          "type": "type",
+          "importPath": "@/features/spaces/components/AuthState",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/spaces/safe-accounts.tsx",
+      "imports": [
+        {
+          "name": "SpaceSafeAccounts",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SafeAccounts",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "AuthState",
+          "type": "type",
+          "importPath": "@/features/spaces/components/AuthState",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/spaces/settings.tsx",
+      "imports": [
+        {
+          "name": "AuthState",
+          "type": "type",
+          "importPath": "@/features/spaces/components/AuthState",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/user-settings.tsx",
+      "imports": [
+        {
+          "name": "UserSettings",
+          "type": "component",
+          "importPath": "@/features/spaces/components/UserSettings",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    },
+    {
+      "filePath": "/Library/WebServer/safe/safe-wallet-monorepo/apps/web/src/pages/welcome/spaces.tsx",
+      "imports": [
+        {
+          "name": "SpacesList",
+          "type": "component",
+          "importPath": "@/features/spaces/components/SpacesList",
+          "isDefault": true,
+          "isTypeOnly": false
+        },
+        {
+          "name": "useFeatureFlagRedirect",
+          "type": "hook",
+          "importPath": "@/features/spaces/hooks/useFeatureFlagRedirect",
+          "isDefault": true,
+          "isTypeOnly": false
+        }
+      ]
+    }
+  ]
+}

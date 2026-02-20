@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { ContactItem } from '@/features/spaces/components/SpaceAddressBook/Import/ContactsList'
+import type { ContactItem } from './Import/ContactsList'
 
 /**
  * Custom hook to filter the address book by a search query.

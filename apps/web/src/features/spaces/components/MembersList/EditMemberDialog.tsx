@@ -1,13 +1,13 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
 import { type Member, useMembersUpdateRoleV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import MemberInfoForm from '@/features/spaces/components/AddMemberModal/MemberInfoForm'
+import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
 
 type MemberField = {
   name: string
