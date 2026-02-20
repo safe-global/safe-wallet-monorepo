@@ -2,259 +2,267 @@
 
 exports[`./SettingsChange.stories AddOwner 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container mui-style-zpxm0u-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-1950vt0-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Add owner
-      </p>
       <div
-        class="container"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container mui-style-zpxm0u-MuiPaper-root"
+        style="--Paper-shadow: none;"
       >
-        <div
-          class="avatarContainer"
-          style="width: 32px; height: 32px;"
+        <p
+          class="MuiTypography-root MuiTypography-body1 mui-style-1950vt0-MuiTypography-root"
         >
-          <div
-            class="icon"
-            style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMzI1IDQ4JSAyMiUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgyNDAgOTklIDQ5JSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgxNTUgOTUlIDU5JSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xeiIvPjwvc3ZnPg==); width: 32px; height: 32px;"
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
+            focusable="false"
           />
-        </div>
+          Add owner
+        </p>
         <div
-          class="MuiBox-root mui-style-1lchl8k"
+          class="container"
         >
           <div
-            class="ethHashInfo-name MuiBox-root mui-style-171onha"
-            title="Nevinha"
+            class="avatarContainer"
+            style="width: 32px; height: 32px;"
           >
             <div
-              class="MuiBox-root mui-style-1o4wo1x"
-            >
-              Nevinha
-            </div>
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMzI1IDQ4JSAyMiUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgyNDAgOTklIDQ5JSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgxNTUgOTUlIDU5JSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xeiIvPjwvc3ZnPg==); width: 32px; height: 32px;"
+            />
           </div>
           <div
-            class="addressContainer"
+            class="MuiBox-root mui-style-1lchl8k"
           >
             <div
-              class="MuiBox-root mui-style-b5p5gz"
+              class="ethHashInfo-name MuiBox-root mui-style-171onha"
+              title="Nevinha"
             >
+              <div
+                class="MuiBox-root mui-style-1o4wo1x"
+              >
+                Nevinha
+              </div>
+            </div>
+            <div
+              class="addressContainer"
+            >
+              <div
+                class="MuiBox-root mui-style-b5p5gz"
+              >
+                <span
+                  aria-label="Copy to clipboard"
+                  class=""
+                  data-mui-internal-clone-element="true"
+                  style="cursor: pointer;"
+                >
+                  <b>
+                    rin
+                    :
+                  </b>
+                  <span>
+                    0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+                  </span>
+                </span>
+              </div>
               <span
                 aria-label="Copy to clipboard"
                 class=""
                 data-mui-internal-clone-element="true"
                 style="cursor: pointer;"
               >
-                <b>
-                  rin
-                  :
-                </b>
-                <span>
-                  0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
-                </span>
+                <button
+                  aria-label="Copy to clipboard"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                  tabindex="0"
+                  type="button"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                    data-testid="copy-btn-icon"
+                    focusable="false"
+                  />
+                </button>
               </span>
-            </div>
-            <span
-              aria-label="Copy to clipboard"
-              class=""
-              data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
-            >
-              <button
-                aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-                tabindex="0"
-                type="button"
+              <div
+                class="MuiBox-root mui-style-yjghm1"
               >
-                <mock-icon
-                  aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
-                  data-testid="copy-btn-icon"
-                  focusable="false"
-                />
-              </button>
-            </span>
-            <div
-              class="MuiBox-root mui-style-yjghm1"
-            >
-              <a
-                aria-label="View on rinkeby.etherscan.io"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
-                data-mui-internal-clone-element="true"
-                data-testid="explorer-btn"
-                href="https://rinkeby.etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
-                rel="noreferrer"
-                tabindex="0"
-                target="_blank"
-              >
-                <mock-icon
-                  aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                  focusable="false"
-                />
-              </a>
+                <a
+                  aria-label="View on rinkeby.etherscan.io"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                  data-mui-internal-clone-element="true"
+                  data-testid="explorer-btn"
+                  href="https://rinkeby.etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+                  rel="noreferrer"
+                  tabindex="0"
+                  target="_blank"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                    focusable="false"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
-    />
-    <div
-      class="MuiBox-root mui-style-0"
-    >
-      <p
-        class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
+      />
+      <div
+        class="MuiBox-root mui-style-0"
       >
-        Any transaction requires the confirmation of:
-      </p>
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-      >
-        <b>
-          1
-        </b>
-         out of
-         
-        <b>
-          1
-           signer
-        </b>
-      </p>
+        <p
+          class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
+        >
+          Any transaction requires the confirmation of:
+        </p>
+        <p
+          class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+        >
+          <b>
+            1
+          </b>
+           out of
+           
+          <b>
+            1
+             signer
+          </b>
+        </p>
+      </div>
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
+      />
     </div>
-    <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
-    />
   </div>
 </div>
 `;
 
 exports[`./SettingsChange.stories SwapOwner 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="shadcn-scope"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    style="background-color: rgb(255, 255, 255); padding: 1rem;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1nt2i3f-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-qzqzle-MuiTypography-root"
-      >
-        <mock-icon
-          aria-hidden=""
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
-          focusable="false"
-        />
-        Previous signer
-      </p>
       <div
-        class="container"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1nt2i3f-MuiPaper-root"
+        style="--Paper-shadow: none;"
       >
-        <div
-          class="avatarContainer"
-          style="width: 40px; height: 40px;"
+        <p
+          class="MuiTypography-root MuiTypography-body1 mui-style-qzqzle-MuiTypography-root"
         >
-          <span
-            class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-            style="width: 40px; height: 40px;"
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-1hr8a3z-MuiSvgIcon-root"
+            focusable="false"
           />
-        </div>
+          Previous signer
+        </p>
         <div
-          class="MuiBox-root mui-style-1lchl8k"
+          class="container"
         >
           <div
-            class="ethHashInfo-name MuiBox-root mui-style-171onha"
-            title="Bob"
+            class="avatarContainer"
+            style="width: 40px; height: 40px;"
           >
-            <div
-              class="MuiBox-root mui-style-1o4wo1x"
-            >
-              Bob
-            </div>
+            <span
+              class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
+              style="width: 40px; height: 40px;"
+            />
           </div>
           <div
-            class="addressContainer"
+            class="MuiBox-root mui-style-1lchl8k"
           >
             <div
-              class="MuiBox-root mui-style-b5p5gz"
+              class="ethHashInfo-name MuiBox-root mui-style-171onha"
+              title="Bob"
             >
+              <div
+                class="MuiBox-root mui-style-1o4wo1x"
+              >
+                Bob
+              </div>
+            </div>
+            <div
+              class="addressContainer"
+            >
+              <div
+                class="MuiBox-root mui-style-b5p5gz"
+              >
+                <span
+                  aria-label="Copy to clipboard"
+                  class=""
+                  data-mui-internal-clone-element="true"
+                  style="cursor: pointer;"
+                >
+                  <span>
+                    0x00000000
+                  </span>
+                </span>
+              </div>
               <span
                 aria-label="Copy to clipboard"
                 class=""
                 data-mui-internal-clone-element="true"
                 style="cursor: pointer;"
               >
-                <span>
-                  0x00000000
-                </span>
+                <button
+                  aria-label="Copy to clipboard"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                  tabindex="0"
+                  type="button"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                    data-testid="copy-btn-icon"
+                    focusable="false"
+                  />
+                </button>
               </span>
-            </div>
-            <span
-              aria-label="Copy to clipboard"
-              class=""
-              data-mui-internal-clone-element="true"
-              style="cursor: pointer;"
-            >
-              <button
-                aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
-                tabindex="0"
-                type="button"
+              <div
+                class="MuiBox-root mui-style-yjghm1"
               >
-                <mock-icon
-                  aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
-                  data-testid="copy-btn-icon"
-                  focusable="false"
-                />
-              </button>
-            </span>
-            <div
-              class="MuiBox-root mui-style-yjghm1"
-            >
-              <a
-                aria-label="View on rinkeby.etherscan.io"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
-                data-mui-internal-clone-element="true"
-                data-testid="explorer-btn"
-                href="https://rinkeby.etherscan.io/address/0x00000000"
-                rel="noreferrer"
-                tabindex="0"
-                target="_blank"
-              >
-                <mock-icon
-                  aria-hidden=""
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                  focusable="false"
-                />
-              </a>
+                <a
+                  aria-label="View on rinkeby.etherscan.io"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                  data-mui-internal-clone-element="true"
+                  data-testid="explorer-btn"
+                  href="https://rinkeby.etherscan.io/address/0x00000000"
+                  rel="noreferrer"
+                  tabindex="0"
+                  target="_blank"
+                >
+                  <mock-icon
+                    aria-hidden=""
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                    focusable="false"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <hr
+        class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
+      />
     </div>
-    <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider mui-style-1facvfi-MuiDivider-root"
-    />
   </div>
 </div>
 `;

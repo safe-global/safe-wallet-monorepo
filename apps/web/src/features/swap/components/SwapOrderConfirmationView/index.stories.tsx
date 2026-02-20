@@ -4,6 +4,7 @@ import CowOrderConfirmationView from './index'
 import { Paper } from '@mui/material'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
+import { RouterDecorator } from '@/stories/routerDecorator'
 
 // Fixed settlement contract address for deterministic tests
 const FIXED_SETTLEMENT_CONTRACT = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
@@ -34,9 +35,11 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
-            <Story />
-          </Paper>
+          <RouterDecorator>
+            <Paper sx={{ padding: 2 }}>
+              <Story />
+            </Paper>
+          </RouterDecorator>
         </StoreDecorator>
       )
     },
