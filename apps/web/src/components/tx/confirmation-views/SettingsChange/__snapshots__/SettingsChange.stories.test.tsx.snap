@@ -30,7 +30,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
           style="width: 32px; height: 32px;"
         >
           <span
-            class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+            class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
             style="width: 32px; height: 32px;"
           />
         </div>

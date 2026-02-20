@@ -15,7 +15,7 @@ exports[`./index.stories Default 1`] = `
         class="avatarContainer"
       >
         <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
           style="width: 40px; height: 40px;"
         />
       </div>
@@ -62,7 +62,7 @@ exports[`./index.stories WithAvatar 1`] = `
         style="width: 30px; height: 30px;"
       >
         <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
           style="width: 30px; height: 30px;"
         />
       </div>
@@ -118,7 +118,7 @@ exports[`./index.stories WithName 1`] = `
         class="avatarContainer"
       >
         <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
           style="width: 40px; height: 40px;"
         />
       </div>
@@ -174,7 +174,7 @@ exports[`./index.stories WithOnlyName 1`] = `
         class="avatarContainer"
       >
         <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
           style="width: 40px; height: 40px;"
         />
       </div>

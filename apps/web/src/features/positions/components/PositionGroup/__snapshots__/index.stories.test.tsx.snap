@@ -66,11 +66,7 @@ exports[`./index.stories Default 1`] = `
               </tr>
             </thead>
             <tbody
-<<<<<<< HEAD
-              class="MuiTableBody-root css-hvwm6q-MuiTableBody-root"
-=======
               class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
->>>>>>> origin/dev
             >
               <tr
                 class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"

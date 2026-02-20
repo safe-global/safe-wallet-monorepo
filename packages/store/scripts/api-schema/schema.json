@@ -19,9 +19,7 @@
           }
         },
         "summary": "Get application information",
-        "tags": [
-          "about"
-        ]
+        "tags": ["about"]
       }
     },
     "/v1/auth/nonce": {
@@ -42,9 +40,7 @@
           }
         },
         "summary": "Get authentication nonce",
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/v1/auth/verify": {
@@ -75,9 +71,7 @@
           }
         },
         "summary": "Verify authentication",
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/v1/auth/logout": {
@@ -91,9 +85,7 @@
           }
         },
         "summary": "Logout user",
-        "tags": [
-          "auth"
-        ]
+        "tags": ["auth"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
@@ -164,9 +156,7 @@
           }
         },
         "summary": "Get Safe balances",
-        "tags": [
-          "balances"
-        ]
+        "tags": ["balances"]
       }
     },
     "/v1/balances/supported-fiat-codes": {
@@ -190,9 +180,7 @@
           }
         },
         "summary": "Get supported fiat currencies",
-        "tags": [
-          "balances"
-        ]
+        "tags": ["balances"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/positions/{fiatCode}": {
@@ -259,9 +247,7 @@
             }
           }
         },
-        "tags": [
-          "positions"
-        ]
+        "tags": ["positions"]
       }
     },
     "/v1/portfolio/{address}": {
@@ -346,9 +332,7 @@
           }
         },
         "summary": "Get portfolio",
-        "tags": [
-          "portfolio"
-        ]
+        "tags": ["portfolio"]
       },
       "delete": {
         "description": "Clears the cached portfolio data for a specific address",
@@ -370,9 +354,7 @@
           }
         },
         "summary": "Clear portfolio cache",
-        "tags": [
-          "portfolio"
-        ]
+        "tags": ["portfolio"]
       }
     },
     "/v1/chains": {
@@ -403,9 +385,7 @@
           }
         },
         "summary": "Get supported chains",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}": {
@@ -437,9 +417,7 @@
           }
         },
         "summary": "Get chain details",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about": {
@@ -471,9 +449,7 @@
           }
         },
         "summary": "Get chain information",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/backbone": {
@@ -505,9 +481,7 @@
           }
         },
         "summary": "Get chain backbone information",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/master-copies": {
@@ -542,9 +516,7 @@
           }
         },
         "summary": "Get Safe master copy contracts",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/about/indexing": {
@@ -576,9 +548,7 @@
           }
         },
         "summary": "Get chain indexing status",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v1/chains/{chainId}/gas-price": {
@@ -608,9 +578,7 @@
           }
         },
         "summary": "Get gas price from oracle",
-        "tags": [
-          "chains"
-        ]
+        "tags": ["chains"]
       }
     },
     "/v2/chains/{chainId}/safes/{safeAddress}/collectibles": {
@@ -670,9 +638,7 @@
             }
           }
         },
-        "tags": [
-          "collectibles"
-        ]
+        "tags": ["collectibles"]
       }
     },
     "/v1/community/campaigns": {
@@ -700,9 +666,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}": {
@@ -730,9 +694,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/activities": {
@@ -769,9 +731,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/leaderboard": {
@@ -807,9 +767,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/campaigns/{resourceId}/leaderboard/{safeAddress}": {
@@ -845,9 +803,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/eligibility": {
@@ -876,9 +832,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/leaderboard": {
@@ -906,9 +860,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/{safeAddress}/rank": {
@@ -936,9 +888,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/community/locking/{safeAddress}/history": {
@@ -974,9 +924,7 @@
             }
           }
         },
-        "tags": [
-          "community"
-        ]
+        "tags": ["community"]
       }
     },
     "/v1/chains/{chainId}/contracts/{contractAddress}": {
@@ -1017,9 +965,7 @@
           }
         },
         "summary": "Get contract information",
-        "tags": [
-          "contracts"
-        ]
+        "tags": ["contracts"]
       }
     },
     "/v1/chains/{chainId}/data-decoder": {
@@ -1062,9 +1008,7 @@
           }
         },
         "summary": "Decode transaction data",
-        "tags": [
-          "data-decoded"
-        ]
+        "tags": ["data-decoded"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
@@ -1103,9 +1047,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "recovery"
-        ]
+        "tags": ["recovery"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}": {
@@ -1142,9 +1084,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "recovery"
-        ]
+        "tags": ["recovery"]
       }
     },
     "/v2/chains/{chainId}/safes/{address}/multisig-transactions/estimations": {
@@ -1199,9 +1139,7 @@
           }
         },
         "summary": "Estimate multisig transaction gas",
-        "tags": [
-          "estimations"
-        ]
+        "tags": ["estimations"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}": {
@@ -1245,9 +1183,7 @@
           }
         },
         "summary": "Get message by hash",
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/messages": {
@@ -1300,9 +1236,7 @@
           }
         },
         "summary": "Get messages for Safe",
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       },
       "post": {
         "description": "Creates a new message for a Safe. The message must be properly formatted and signed according to EIP-191 or EIP-712 standards.",
@@ -1348,9 +1282,7 @@
           }
         },
         "summary": "Create message",
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/chains/{chainId}/messages/{messageHash}/signatures": {
@@ -1401,9 +1333,7 @@
           }
         },
         "summary": "Add message signature",
-        "tags": [
-          "messages"
-        ]
+        "tags": ["messages"]
       }
     },
     "/v1/users": {
@@ -1430,9 +1360,7 @@
           }
         },
         "summary": "Get user with wallets",
-        "tags": [
-          "users"
-        ]
+        "tags": ["users"]
       },
       "delete": {
         "description": "Deletes the authenticated user and all associated data including wallets and account information.",
@@ -1450,9 +1378,7 @@
           }
         },
         "summary": "Delete user",
-        "tags": [
-          "users"
-        ]
+        "tags": ["users"]
       }
     },
     "/v1/users/wallet": {
@@ -1479,9 +1405,7 @@
           }
         },
         "summary": "Create user with wallet",
-        "tags": [
-          "users"
-        ]
+        "tags": ["users"]
       }
     },
     "/v1/users/wallet/add": {
@@ -1522,9 +1446,7 @@
           }
         },
         "summary": "Add wallet to user",
-        "tags": [
-          "users"
-        ]
+        "tags": ["users"]
       }
     },
     "/v1/users/wallet/{walletAddress}": {
@@ -1557,9 +1479,7 @@
           }
         },
         "summary": "Remove wallet from user",
-        "tags": [
-          "users"
-        ]
+        "tags": ["users"]
       }
     },
     "/v1/spaces/{spaceId}/address-book": {
@@ -1600,9 +1520,7 @@
           }
         },
         "summary": "Get space address book",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "put": {
         "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses.",
@@ -1655,9 +1573,7 @@
           }
         },
         "summary": "Update space address book",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/address-book/{address}": {
@@ -1697,9 +1613,7 @@
           }
         },
         "summary": "Delete address book entry",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces": {
@@ -1740,9 +1654,7 @@
           }
         },
         "summary": "Create space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "get": {
         "description": "Retrieves all spaces that the authenticated user is a member of or has been invited to, including the count of Safes in each space.",
@@ -1773,9 +1685,7 @@
           }
         },
         "summary": "Get user spaces",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/create-with-user": {
@@ -1813,9 +1723,7 @@
           }
         },
         "summary": "Create space with user",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{id}": {
@@ -1856,9 +1764,7 @@
           }
         },
         "summary": "Get space by ID",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "patch": {
         "description": "Updates space information such as name. Only space admins can update space details.",
@@ -1908,9 +1814,7 @@
           }
         },
         "summary": "Update space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "delete": {
         "description": "Deletes a space and all its associated data. Only space admins can delete spaces.",
@@ -1942,9 +1846,7 @@
           }
         },
         "summary": "Delete space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/safes": {
@@ -1989,9 +1891,7 @@
           }
         },
         "summary": "Add Safes to space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "get": {
         "description": "Retrieves all Safes associated with a specific space, including their chain information and metadata.",
@@ -2030,9 +1930,7 @@
           }
         },
         "summary": "Get space Safes",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "delete": {
         "description": "Removes one or more Safe addresses from a space. This stops the space from managing these Safes.",
@@ -2075,9 +1973,7 @@
           }
         },
         "summary": "Remove Safes from space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/invite": {
@@ -2132,9 +2028,7 @@
           }
         },
         "summary": "Invite users to space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/accept": {
@@ -2179,9 +2073,7 @@
           }
         },
         "summary": "Accept space invitation",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/decline": {
@@ -2215,9 +2107,7 @@
           }
         },
         "summary": "Decline space invitation",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members": {
@@ -2255,9 +2145,7 @@
           }
         },
         "summary": "Get space members",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       },
       "delete": {
         "description": "Remove own membership from a space.",
@@ -2290,9 +2178,7 @@
           }
         },
         "summary": "Leave a space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/{userId}/role": {
@@ -2350,9 +2236,7 @@
           }
         },
         "summary": "Update member role",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/alias": {
@@ -2391,9 +2275,7 @@
           }
         },
         "summary": "Update member alias",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/spaces/{spaceId}/members/{userId}": {
@@ -2440,9 +2322,7 @@
           }
         },
         "summary": "Remove member from space",
-        "tags": [
-          "spaces"
-        ]
+        "tags": ["spaces"]
       }
     },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
@@ -2483,9 +2363,7 @@
           }
         },
         "summary": "Get Safes by owner",
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v2/owners/{ownerAddress}/safes": {
@@ -2517,12 +2395,8 @@
                     }
                   },
                   "example": {
-                    "1": [
-                      "0x1234567890123456789012345678901234567890"
-                    ],
-                    "5": [
-                      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
-                    ]
+                    "1": ["0x1234567890123456789012345678901234567890"],
+                    "5": ["0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"]
                   }
                 }
               }
@@ -2530,9 +2404,7 @@
           }
         },
         "summary": "Get all Safes by owner",
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v3/owners/{ownerAddress}/safes": {
@@ -2564,12 +2436,8 @@
                     }
                   },
                   "example": {
-                    "1": [
-                      "0x1234567890123456789012345678901234567890"
-                    ],
-                    "5": [
-                      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
-                    ]
+                    "1": ["0x1234567890123456789012345678901234567890"],
+                    "5": ["0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"]
                   }
                 }
               }
@@ -2577,9 +2445,7 @@
           }
         },
         "summary": "Get all Safes by owner",
-        "tags": [
-          "owners"
-        ]
+        "tags": ["owners"]
       }
     },
     "/v1/chains/{chainId}/relay": {
@@ -2628,9 +2494,7 @@
           }
         },
         "summary": "Relay transaction",
-        "tags": [
-          "relay"
-        ]
+        "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
@@ -2671,9 +2535,7 @@
           }
         },
         "summary": "Get remaining relays",
-        "tags": [
-          "relay"
-        ]
+        "tags": ["relay"]
       }
     },
     "/v1/chains/{chainId}/safe-apps": {
@@ -2726,9 +2588,7 @@
           }
         },
         "summary": "Get Safe Apps",
-        "tags": [
-          "safe-apps"
-        ]
+        "tags": ["safe-apps"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}": {
@@ -2772,9 +2632,7 @@
           }
         },
         "summary": "Get Safe information",
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/nonces": {
@@ -2818,9 +2676,7 @@
           }
         },
         "summary": "Get Safe nonces",
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v1/safes": {
@@ -2894,9 +2750,7 @@
           }
         },
         "summary": "Get Safe overview",
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v2/safes": {
@@ -2960,9 +2814,7 @@
           }
         },
         "summary": "Get Safe overview (v2)",
-        "tags": [
-          "safes"
-        ]
+        "tags": ["safes"]
       }
     },
     "/v1/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
@@ -3012,9 +2864,7 @@
           }
         },
         "summary": "Analyze recipient address",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
@@ -3066,9 +2916,7 @@
           }
         },
         "summary": "Analyze transaction counterparties",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/chains/{chainId}/security/{safeAddress}/threat-analysis": {
@@ -3119,9 +2967,7 @@
           }
         },
         "summary": "Analyze transaction threat",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/chains/{chainId}/security/{safeAddress}/report-false-result": {
@@ -3173,9 +3019,7 @@
           }
         },
         "summary": "Report false Blockaid scan result",
-        "tags": [
-          "safe-shield"
-        ]
+        "tags": ["safe-shield"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}": {
@@ -3222,9 +3066,7 @@
             "description": "Safe not targeted."
           }
         },
-        "tags": [
-          "targeted-messaging"
-        ]
+        "tags": ["targeted-messaging"]
       }
     },
     "/v1/targeted-messaging/outreaches/{outreachId}/chains/{chainId}/safes/{safeAddress}/signers/{signerAddress}/submissions": {
@@ -3276,9 +3118,7 @@
             }
           }
         },
-        "tags": [
-          "targeted-messaging"
-        ]
+        "tags": ["targeted-messaging"]
       },
       "post": {
         "operationId": "targetedMessagingCreateSubmissionV1",
@@ -3338,9 +3178,7 @@
             }
           }
         },
-        "tags": [
-          "targeted-messaging"
-        ]
+        "tags": ["targeted-messaging"]
       }
     },
     "/v1/chains/{chainId}/transactions/{id}": {
@@ -3385,9 +3223,7 @@
           }
         },
         "summary": "Get transaction details",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/multisig-transactions/{safeTxHash}/raw": {
@@ -3425,9 +3261,7 @@
           }
         },
         "summary": "Deprecated",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions/raw": {
@@ -3673,9 +3507,7 @@
           }
         },
         "summary": "Deprecated",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/multisig-transactions": {
@@ -3779,9 +3611,7 @@
           }
         },
         "summary": "Get multisig transactions",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}": {
@@ -3832,9 +3662,7 @@
           }
         },
         "summary": "Delete transaction",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/module-transactions": {
@@ -3911,9 +3739,7 @@
           }
         },
         "summary": "Get module transactions",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeTxHash}/confirmations": {
@@ -3971,9 +3797,7 @@
           }
         },
         "summary": "Add transaction confirmation",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/incoming-transfers": {
@@ -4077,9 +3901,7 @@
           }
         },
         "summary": "Get incoming transfers",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/preview": {
@@ -4137,9 +3959,7 @@
           }
         },
         "summary": "Preview transaction",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/queued": {
@@ -4198,9 +4018,7 @@
           }
         },
         "summary": "Get transaction queue",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/history": {
@@ -4287,9 +4105,7 @@
           }
         },
         "summary": "Get transaction history",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/transactions/{safeAddress}/propose": {
@@ -4344,9 +4160,7 @@
           }
         },
         "summary": "Propose transaction",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/transactions/creation": {
@@ -4390,9 +4204,7 @@
           }
         },
         "summary": "Get Safe creation transaction",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/creation/raw": {
@@ -4430,9 +4242,7 @@
           }
         },
         "summary": "Deprecated",
-        "tags": [
-          "transactions"
-        ]
+        "tags": ["transactions"]
       }
     },
     "/v1/export/chains/{chainId}/{safeAddress}": {
@@ -4479,9 +4289,7 @@
             }
           }
         },
-        "tags": [
-          "export"
-        ]
+        "tags": ["export"]
       }
     },
     "/v1/export/{jobId}/status": {
@@ -4519,9 +4327,7 @@
             }
           }
         },
-        "tags": [
-          "export"
-        ]
+        "tags": ["export"]
       }
     },
     "/v1/chains/{chainId}/delegates": {
@@ -4599,9 +4405,7 @@
           }
         },
         "summary": "Get delegates (deprecated)",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       },
       "post": {
         "deprecated": true,
@@ -4639,9 +4443,7 @@
           }
         },
         "summary": "Create delegate (deprecated)",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/delegates/{delegateAddress}": {
@@ -4690,9 +4492,7 @@
           }
         },
         "summary": "Delete delegate (deprecated)",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
@@ -4750,9 +4550,7 @@
           }
         },
         "summary": "Delete Safe delegate (deprecated)",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates": {
@@ -4829,9 +4627,7 @@
           }
         },
         "summary": "Get delegates",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       },
       "post": {
         "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
@@ -4868,9 +4664,7 @@
           }
         },
         "summary": "Create delegate",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v2/chains/{chainId}/delegates/{delegateAddress}": {
@@ -4918,9 +4712,7 @@
           }
         },
         "summary": "Delete delegate",
-        "tags": [
-          "delegates"
-        ]
+        "tags": ["delegates"]
       }
     },
     "/v1/register/notifications": {
@@ -4949,9 +4741,7 @@
           }
         },
         "summary": "Register device for notifications (deprecated)",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}": {
@@ -4987,9 +4777,7 @@
           }
         },
         "summary": "Unregister device (deprecated)",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v1/chains/{chainId}/notifications/devices/{uuid}/safes/{safeAddress}": {
@@ -5034,9 +4822,7 @@
           }
         },
         "summary": "Unregister Safe from device (deprecated)",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/register/notifications": {
@@ -5078,9 +4864,7 @@
           }
         },
         "summary": "Register device for notifications",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}/safes/{safeAddress}": {
@@ -5140,9 +4924,7 @@
           }
         },
         "summary": "Get Safe subscription",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       },
       "delete": {
         "description": "Removes all notification subscriptions for a specific Safe on a device.",
@@ -5187,9 +4969,7 @@
           }
         },
         "summary": "Delete Safe subscription",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/notifications/subscriptions": {
@@ -5216,9 +4996,7 @@
           }
         },
         "summary": "Delete all subscriptions of a device",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     },
     "/v2/chains/{chainId}/notifications/devices/{deviceUuid}": {
@@ -5256,9 +5034,7 @@
           }
         },
         "summary": "Delete device",
-        "tags": [
-          "notifications"
-        ]
+        "tags": ["notifications"]
       }
     }
   },
@@ -5287,9 +5063,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "AuthNonce": {
         "type": "object",
@@ -5298,9 +5072,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "nonce"
-        ]
+        "required": ["nonce"]
       },
       "SiweDto": {
         "type": "object",
@@ -5312,10 +5084,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "message",
-          "signature"
-        ]
+        "required": ["message", "signature"]
       },
       "NativeToken": {
         "type": "object",
@@ -5337,19 +5106,10 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_TOKEN"
-            ]
+            "enum": ["NATIVE_TOKEN"]
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type"]
       },
       "Erc20Token": {
         "type": "object",
@@ -5371,19 +5131,10 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC20"
-            ]
+            "enum": ["ERC20"]
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type"]
       },
       "Erc721Token": {
         "type": "object",
@@ -5405,19 +5156,10 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721"
-            ]
+            "enum": ["ERC721"]
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type"]
       },
       "Balance": {
         "type": "object",
@@ -5449,12 +5191,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "balance",
-          "fiatBalance",
-          "fiatConversion",
-          "tokenInfo"
-        ]
+        "required": ["balance", "fiatBalance", "fiatConversion", "tokenInfo"]
       },
       "Balances": {
         "type": "object",
@@ -5473,10 +5210,7 @@
             }
           }
         },
-        "required": [
-          "fiatTotal",
-          "items"
-        ]
+        "required": ["fiatTotal", "items"]
       },
       "Position": {
         "type": "object",
@@ -5509,28 +5243,11 @@
           },
           "position_type": {
             "type": "string",
-            "enum": [
-              "deposit",
-              "loan",
-              "locked",
-              "staked",
-              "reward",
-              "wallet",
-              "airdrop",
-              "margin",
-              "unknown"
-            ],
+            "enum": ["deposit", "loan", "locked", "staked", "reward", "wallet", "airdrop", "margin", "unknown"],
             "nullable": true
           }
         },
-        "required": [
-          "balance",
-          "fiatBalance",
-          "fiatConversion",
-          "tokenInfo",
-          "fiatBalance24hChange",
-          "position_type"
-        ]
+        "required": ["balance", "fiatBalance", "fiatConversion", "tokenInfo", "fiatBalance24hChange", "position_type"]
       },
       "PositionGroup": {
         "type": "object",
@@ -5549,10 +5266,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "items"
-        ]
+        "required": ["name", "items"]
       },
       "ProtocolIcon": {
         "type": "object",
@@ -5562,9 +5276,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "url"
-        ]
+        "required": ["url"]
       },
       "ProtocolMetadata": {
         "type": "object",
@@ -5576,10 +5288,7 @@
             "$ref": "#/components/schemas/ProtocolIcon"
           }
         },
-        "required": [
-          "name",
-          "icon"
-        ]
+        "required": ["name", "icon"]
       },
       "Protocol": {
         "type": "object",
@@ -5604,12 +5313,7 @@
             }
           }
         },
-        "required": [
-          "protocol",
-          "protocol_metadata",
-          "fiatTotal",
-          "items"
-        ]
+        "required": ["protocol", "protocol_metadata", "fiatTotal", "items"]
       },
       "PortfolioNativeToken": {
         "type": "object",
@@ -5631,9 +5335,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_TOKEN"
-            ]
+            "enum": ["NATIVE_TOKEN"]
           },
           "chainId": {
             "type": "string",
@@ -5644,16 +5346,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "PortfolioErc20Token": {
         "type": "object",
@@ -5675,9 +5368,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC20"
-            ]
+            "enum": ["ERC20"]
           },
           "chainId": {
             "type": "string",
@@ -5688,16 +5379,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "PortfolioErc721Token": {
         "type": "object",
@@ -5719,9 +5401,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721"
-            ]
+            "enum": ["ERC721"]
           },
           "chainId": {
             "type": "string",
@@ -5732,16 +5412,7 @@
             "description": "Whether the token is trusted (spam filter)"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "type",
-          "chainId",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "logoUri", "name", "symbol", "type", "chainId", "trusted"]
       },
       "TokenBalance": {
         "type": "object",
@@ -5783,10 +5454,7 @@
             "example": "-0.0431"
           }
         },
-        "required": [
-          "tokenInfo",
-          "balance"
-        ]
+        "required": ["tokenInfo", "balance"]
       },
       "AppPosition": {
         "type": "object",
@@ -5842,13 +5510,7 @@
             "example": "-0.0431"
           }
         },
-        "required": [
-          "key",
-          "type",
-          "name",
-          "tokenInfo",
-          "balance"
-        ]
+        "required": ["key", "type", "name", "tokenInfo", "balance"]
       },
       "AppPositionGroup": {
         "type": "object",
@@ -5865,10 +5527,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "items"
-        ]
+        "required": ["name", "items"]
       },
       "AppBalanceAppInfo": {
         "type": "object",
@@ -5888,9 +5547,7 @@
             "description": "Application URL (HTTPS)"
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "AppBalance": {
         "type": "object",
@@ -5917,11 +5574,7 @@
             }
           }
         },
-        "required": [
-          "appInfo",
-          "balanceFiat",
-          "groups"
-        ]
+        "required": ["appInfo", "balanceFiat", "groups"]
       },
       "Portfolio": {
         "type": "object",
@@ -5972,9 +5625,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "oracle"
-            ]
+            "enum": ["oracle"]
           },
           "gasParameter": {
             "type": "string"
@@ -5986,39 +5637,27 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "gasParameter",
-          "gweiFactor",
-          "uri"
-        ]
+        "required": ["type", "gasParameter", "gweiFactor", "uri"]
       },
       "GasPriceFixed": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "fixed"
-            ]
+            "enum": ["fixed"]
           },
           "weiValue": {
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "weiValue"
-        ]
+        "required": ["type", "weiValue"]
       },
       "GasPriceFixedEIP1559": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "fixed1559"
-            ]
+            "enum": ["fixed1559"]
           },
           "maxFeePerGas": {
             "type": "string"
@@ -6027,11 +5666,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "maxFeePerGas",
-          "maxPriorityFeePerGas"
-        ]
+        "required": ["type", "maxFeePerGas", "maxPriorityFeePerGas"]
       },
       "NativeCurrency": {
         "type": "object",
@@ -6049,12 +5684,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol"
-        ]
+        "required": ["decimals", "logoUri", "name", "symbol"]
       },
       "BlockExplorerUriTemplate": {
         "type": "object",
@@ -6069,11 +5699,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "api",
-          "txHash"
-        ]
+        "required": ["address", "api", "txHash"]
       },
       "BalancesProvider": {
         "type": "object",
@@ -6086,10 +5712,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "chainName",
-          "enabled"
-        ]
+        "required": ["chainName", "enabled"]
       },
       "ContractAddresses": {
         "type": "object",
@@ -6137,20 +5760,13 @@
         "properties": {
           "authentication": {
             "type": "string",
-            "enum": [
-              "API_KEY_PATH",
-              "NO_AUTHENTICATION",
-              "UNKNOWN"
-            ]
+            "enum": ["API_KEY_PATH", "NO_AUTHENTICATION", "UNKNOWN"]
           },
           "value": {
             "type": "string"
           }
         },
-        "required": [
-          "authentication",
-          "value"
-        ]
+        "required": ["authentication", "value"]
       },
       "Theme": {
         "type": "object",
@@ -6162,10 +5778,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "backgroundColor",
-          "textColor"
-        ]
+        "required": ["backgroundColor", "textColor"]
       },
       "Chain": {
         "type": "object",
@@ -6307,9 +5920,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "AboutChain": {
         "type": "object",
@@ -6327,12 +5938,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "transactionServiceBaseUri",
-          "name",
-          "version",
-          "buildNumber"
-        ]
+        "required": ["transactionServiceBaseUri", "name", "version", "buildNumber"]
       },
       "Backbone": {
         "type": "object",
@@ -6361,14 +5967,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "api_version",
-          "host",
-          "name",
-          "secure",
-          "settings",
-          "version"
-        ]
+        "required": ["api_version", "host", "name", "secure", "settings", "version"]
       },
       "MasterCopy": {
         "type": "object",
@@ -6380,10 +5979,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "version"
-        ]
+        "required": ["address", "version"]
       },
       "IndexingStatus": {
         "type": "object",
@@ -6469,14 +6065,7 @@
             "example": "0.5,0.6,0.7"
           }
         },
-        "required": [
-          "LastBlock",
-          "SafeGasPrice",
-          "ProposeGasPrice",
-          "FastGasPrice",
-          "suggestBaseFee",
-          "gasUsedRatio"
-        ]
+        "required": ["LastBlock", "SafeGasPrice", "ProposeGasPrice", "FastGasPrice", "suggestBaseFee", "gasUsedRatio"]
       },
       "GasPriceResponse": {
         "type": "object",
@@ -6500,11 +6089,7 @@
             ]
           }
         },
-        "required": [
-          "status",
-          "message",
-          "result"
-        ]
+        "required": ["status", "message", "result"]
       },
       "Collectible": {
         "type": "object",
@@ -6545,13 +6130,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "address",
-          "tokenName",
-          "tokenSymbol",
-          "logoUri",
-          "id"
-        ]
+        "required": ["address", "tokenName", "tokenSymbol", "logoUri", "id"]
       },
       "CollectiblePage": {
         "type": "object",
@@ -6575,9 +6154,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "ActivityMetadata": {
         "type": "object",
@@ -6592,11 +6169,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "name",
-          "description",
-          "maxPoints"
-        ]
+        "required": ["name", "description", "maxPoints"]
       },
       "Campaign": {
         "type": "object",
@@ -6651,14 +6224,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "resourceId",
-          "name",
-          "description",
-          "startDate",
-          "endDate",
-          "isPromoted"
-        ]
+        "required": ["resourceId", "name", "description", "startDate", "endDate", "isPromoted"]
       },
       "CampaignPage": {
         "type": "object",
@@ -6682,9 +6248,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CampaignRank": {
         "type": "object",
@@ -6705,13 +6269,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "holder",
-          "position",
-          "boost",
-          "totalPoints",
-          "totalBoostedPoints"
-        ]
+        "required": ["holder", "position", "boost", "totalPoints", "totalBoostedPoints"]
       },
       "CampaignRankPage": {
         "type": "object",
@@ -6735,9 +6293,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "EligibilityRequest": {
         "type": "object",
@@ -6749,10 +6305,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "requestId",
-          "sealedData"
-        ]
+        "required": ["requestId", "sealedData"]
       },
       "Eligibility": {
         "type": "object",
@@ -6767,11 +6320,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "requestId",
-          "isAllowed",
-          "isVpn"
-        ]
+        "required": ["requestId", "isAllowed", "isVpn"]
       },
       "LockingRank": {
         "type": "object",
@@ -6792,13 +6341,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "holder",
-          "position",
-          "lockedAmount",
-          "unlockedAmount",
-          "withdrawnAmount"
-        ]
+        "required": ["holder", "position", "lockedAmount", "unlockedAmount", "withdrawnAmount"]
       },
       "LockingRankPage": {
         "type": "object",
@@ -6822,18 +6365,14 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "LockEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "LOCKED"
-            ]
+            "enum": ["LOCKED"]
           },
           "executionDate": {
             "type": "string"
@@ -6851,23 +6390,14 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex"]
       },
       "UnlockEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "UNLOCKED"
-            ]
+            "enum": ["UNLOCKED"]
           },
           "executionDate": {
             "type": "string"
@@ -6888,24 +6418,14 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex",
-          "unlockIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex", "unlockIndex"]
       },
       "WithdrawEventItem": {
         "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
-            "enum": [
-              "WITHDRAWN"
-            ]
+            "enum": ["WITHDRAWN"]
           },
           "executionDate": {
             "type": "string"
@@ -6926,15 +6446,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventType",
-          "executionDate",
-          "transactionHash",
-          "holder",
-          "amount",
-          "logIndex",
-          "unlockIndex"
-        ]
+        "required": ["eventType", "executionDate", "transactionHash", "holder", "amount", "logIndex", "unlockIndex"]
       },
       "LockingEventPage": {
         "type": "object",
@@ -6968,9 +6480,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "Contract": {
         "type": "object",
@@ -6995,13 +6505,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "address",
-          "name",
-          "displayName",
-          "logoUri",
-          "trustedForDelegateCall"
-        ]
+        "required": ["address", "name", "displayName", "logoUri", "trustedForDelegateCall"]
       },
       "TransactionDataDto": {
         "type": "object",
@@ -7015,16 +6519,11 @@
             "description": "The target Ethereum address"
           }
         },
-        "required": [
-          "data"
-        ]
+        "required": ["data"]
       },
       "Operation": {
         "type": "number",
-        "enum": [
-          0,
-          1
-        ],
+        "enum": [0, 1],
         "description": "Operation type: 0 for CALL, 1 for DELEGATE"
       },
       "BaseDataDecoded": {
@@ -7040,9 +6539,7 @@
             }
           }
         },
-        "required": [
-          "method"
-        ]
+        "required": ["method"]
       },
       "MultiSend": {
         "type": "object",
@@ -7071,12 +6568,7 @@
             "pattern": "^0x[0-9a-fA-F]*$"
           }
         },
-        "required": [
-          "operation",
-          "value",
-          "to",
-          "data"
-        ]
+        "required": ["operation", "value", "to", "data"]
       },
       "DataDecodedParameter": {
         "type": "object",
@@ -7118,11 +6610,7 @@
             ]
           }
         },
-        "required": [
-          "name",
-          "type",
-          "value"
-        ]
+        "required": ["name", "type", "value"]
       },
       "DataDecoded": {
         "type": "object",
@@ -7139,19 +6627,11 @@
           },
           "accuracy": {
             "type": "string",
-            "enum": [
-              "FULL_MATCH",
-              "PARTIAL_MATCH",
-              "ONLY_FUNCTION_MATCH",
-              "NO_MATCH",
-              "UNKNOWN"
-            ],
+            "enum": ["FULL_MATCH", "PARTIAL_MATCH", "ONLY_FUNCTION_MATCH", "NO_MATCH", "UNKNOWN"],
             "default": "UNKNOWN"
           }
         },
-        "required": [
-          "method"
-        ]
+        "required": ["method"]
       },
       "AddRecoveryModuleDto": {
         "type": "object",
@@ -7160,9 +6640,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "moduleAddress"
-        ]
+        "required": ["moduleAddress"]
       },
       "GetEstimationDto": {
         "type": "object",
@@ -7186,11 +6664,7 @@
             ]
           }
         },
-        "required": [
-          "to",
-          "value",
-          "operation"
-        ]
+        "required": ["to", "value", "operation"]
       },
       "EstimationResponse": {
         "type": "object",
@@ -7205,11 +6679,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "currentNonce",
-          "recommendedNonce",
-          "safeTxGas"
-        ]
+        "required": ["currentNonce", "recommendedNonce", "safeTxGas"]
       },
       "TypedDataParameter": {
         "type": "object",
@@ -7221,10 +6691,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "type"
-        ]
+        "required": ["name", "type"]
       },
       "TypedDataDomain": {
         "type": "object",
@@ -7269,12 +6736,7 @@
             "additionalProperties": true
           }
         },
-        "required": [
-          "domain",
-          "primaryType",
-          "types",
-          "message"
-        ]
+        "required": ["domain", "primaryType", "types", "message"]
       },
       "AddressInfo": {
         "type": "object",
@@ -7291,9 +6753,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "value"
-        ]
+        "required": ["value"]
       },
       "MessageConfirmation": {
         "type": "object",
@@ -7305,10 +6765,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "owner",
-          "signature"
-        ]
+        "required": ["owner", "signature"]
       },
       "Message": {
         "type": "object",
@@ -7318,10 +6775,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "NEEDS_CONFIRMATION",
-              "CONFIRMED"
-            ]
+            "enum": ["NEEDS_CONFIRMATION", "CONFIRMED"]
           },
           "logoUri": {
             "type": "string",
@@ -7391,10 +6845,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "NEEDS_CONFIRMATION",
-              "CONFIRMED"
-            ]
+            "enum": ["NEEDS_CONFIRMATION", "CONFIRMED"]
           },
           "logoUri": {
             "type": "string",
@@ -7445,9 +6896,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "MESSAGE"
-            ]
+            "enum": ["MESSAGE"]
           }
         },
         "required": [
@@ -7468,18 +6917,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "DATE_LABEL"
-            ]
+            "enum": ["DATE_LABEL"]
           },
           "timestamp": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "timestamp"
-        ]
+        "required": ["type", "timestamp"]
       },
       "MessagePage": {
         "type": "object",
@@ -7510,9 +6954,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CreateMessageDto": {
         "type": "object",
@@ -7540,10 +6982,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "message",
-          "signature"
-        ]
+        "required": ["message", "signature"]
       },
       "UpdateMessageSignatureDto": {
         "type": "object",
@@ -7552,9 +6991,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "UserWallet": {
         "type": "object",
@@ -7566,10 +7003,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "address"
-        ]
+        "required": ["id", "address"]
       },
       "UserWithWallets": {
         "type": "object",
@@ -7579,10 +7013,7 @@
           },
           "status": {
             "type": "number",
-            "enum": [
-              0,
-              1
-            ]
+            "enum": [0, 1]
           },
           "wallets": {
             "type": "array",
@@ -7591,11 +7022,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "status",
-          "wallets"
-        ]
+        "required": ["id", "status", "wallets"]
       },
       "CreatedUserWithWallet": {
         "type": "object",
@@ -7604,9 +7031,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "WalletAddedToUser": {
         "type": "object",
@@ -7615,9 +7040,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "SpaceAddressBookItemDto": {
         "type": "object",
@@ -7641,13 +7064,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "address",
-          "chainIds",
-          "createdBy",
-          "lastUpdatedBy"
-        ]
+        "required": ["name", "address", "chainIds", "createdBy", "lastUpdatedBy"]
       },
       "SpaceAddressBookDto": {
         "type": "object",
@@ -7662,10 +7079,7 @@
             }
           }
         },
-        "required": [
-          "spaceId",
-          "data"
-        ]
+        "required": ["spaceId", "data"]
       },
       "AddressBookItem": {
         "type": "object",
@@ -7683,11 +7097,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "address",
-          "chainIds"
-        ]
+        "required": ["name", "address", "chainIds"]
       },
       "UpsertAddressBookItemsDto": {
         "type": "object",
@@ -7699,9 +7109,7 @@
             }
           }
         },
-        "required": [
-          "items"
-        ]
+        "required": ["items"]
       },
       "CreateSpaceDto": {
         "type": "object",
@@ -7710,9 +7118,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "CreateSpaceResponse": {
         "type": "object",
@@ -7724,10 +7130,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "name",
-          "id"
-        ]
+        "required": ["name", "id"]
       },
       "UserDto": {
         "type": "object",
@@ -7736,19 +7139,14 @@
             "type": "number"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "MemberDto": {
         "type": "object",
         "properties": {
           "role": {
             "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
+            "enum": ["ADMIN", "MEMBER"]
           },
           "name": {
             "type": "string"
@@ -7758,23 +7156,13 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
           },
           "user": {
             "$ref": "#/components/schemas/UserDto"
           }
         },
-        "required": [
-          "role",
-          "name",
-          "invitedBy",
-          "status",
-          "user"
-        ]
+        "required": ["role", "name", "invitedBy", "status", "user"]
       },
       "GetSpaceResponse": {
         "type": "object",
@@ -7797,12 +7185,7 @@
             "example": 5
           }
         },
-        "required": [
-          "id",
-          "name",
-          "members",
-          "safeCount"
-        ]
+        "required": ["id", "name", "members", "safeCount"]
       },
       "UpdateSpaceDto": {
         "type": "object",
@@ -7812,9 +7195,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE"
-            ]
+            "enum": ["ACTIVE"]
           }
         }
       },
@@ -7825,9 +7206,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "id"
-        ]
+        "required": ["id"]
       },
       "SpaceSafeDto": {
         "type": "object",
@@ -7839,10 +7218,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "chainId",
-          "address"
-        ]
+        "required": ["chainId", "address"]
       },
       "CreateSpaceSafesDto": {
         "type": "object",
@@ -7854,9 +7230,7 @@
             }
           }
         },
-        "required": [
-          "safes"
-        ]
+        "required": ["safes"]
       },
       "GetSpaceSafeResponse": {
         "type": "object",
@@ -7870,15 +7244,11 @@
               }
             },
             "example": {
-              "{chainId}": [
-                "0x..."
-              ]
+              "{chainId}": ["0x..."]
             }
           }
         },
-        "required": [
-          "safes"
-        ]
+        "required": ["safes"]
       },
       "DeleteSpaceSafesDto": {
         "type": "object",
@@ -7890,9 +7260,7 @@
             }
           }
         },
-        "required": [
-          "safes"
-        ]
+        "required": ["safes"]
       },
       "InviteUserDto": {
         "type": "object",
@@ -7907,17 +7275,10 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
+            "enum": ["ADMIN", "MEMBER"]
           }
         },
-        "required": [
-          "address",
-          "name",
-          "role"
-        ]
+        "required": ["address", "name", "role"]
       },
       "InviteUsersDto": {
         "type": "object",
@@ -7929,9 +7290,7 @@
             }
           }
         },
-        "required": [
-          "users"
-        ]
+        "required": ["users"]
       },
       "Invitation": {
         "type": "object",
@@ -7947,31 +7306,18 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
+            "enum": ["ADMIN", "MEMBER"]
           },
           "status": {
             "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
           },
           "invitedBy": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": [
-          "userId",
-          "name",
-          "spaceId",
-          "role",
-          "status"
-        ]
+        "required": ["userId", "name", "spaceId", "role", "status"]
       },
       "AcceptInviteDto": {
         "type": "object",
@@ -7982,9 +7328,7 @@
             "maxLength": 30
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "MemberUser": {
         "type": "object",
@@ -7994,16 +7338,10 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "PENDING",
-              "ACTIVE"
-            ]
+            "enum": ["PENDING", "ACTIVE"]
           }
         },
-        "required": [
-          "id",
-          "status"
-        ]
+        "required": ["id", "status"]
       },
       "Member": {
         "type": "object",
@@ -8013,18 +7351,11 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
+            "enum": ["ADMIN", "MEMBER"]
           },
           "status": {
             "type": "string",
-            "enum": [
-              "INVITED",
-              "ACTIVE",
-              "DECLINED"
-            ]
+            "enum": ["INVITED", "ACTIVE", "DECLINED"]
           },
           "name": {
             "type": "string"
@@ -8049,15 +7380,7 @@
             "$ref": "#/components/schemas/MemberUser"
           }
         },
-        "required": [
-          "id",
-          "role",
-          "status",
-          "name",
-          "createdAt",
-          "updatedAt",
-          "user"
-        ]
+        "required": ["id", "role", "status", "name", "createdAt", "updatedAt", "user"]
       },
       "MembersDto": {
         "type": "object",
@@ -8069,24 +7392,17 @@
             }
           }
         },
-        "required": [
-          "members"
-        ]
+        "required": ["members"]
       },
       "UpdateRoleDto": {
         "type": "object",
         "properties": {
           "role": {
             "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
+            "enum": ["ADMIN", "MEMBER"]
           }
         },
-        "required": [
-          "role"
-        ]
+        "required": ["role"]
       },
       "UpdateMemberAliasDto": {
         "type": "object",
@@ -8096,9 +7412,7 @@
             "description": "The new alias for the member"
           }
         },
-        "required": [
-          "alias"
-        ]
+        "required": ["alias"]
       },
       "SafeList": {
         "type": "object",
@@ -8110,9 +7424,7 @@
             }
           }
         },
-        "required": [
-          "safes"
-        ]
+        "required": ["safes"]
       },
       "RelayDto": {
         "type": "object",
@@ -8132,11 +7444,7 @@
             "description": "If specified, a gas buffer of 150k will be added on top of the expected gas usage for the transaction.\n      This is for the <a href=\"https://docs.gelato.network/developer-services/relay/quick-start/optional-parameters\" target=\"_blank\">\n      Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain."
           }
         },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
+        "required": ["version", "to", "data"]
       },
       "Relay": {
         "type": "object",
@@ -8145,9 +7453,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "taskId"
-        ]
+        "required": ["taskId"]
       },
       "RelaysRemaining": {
         "type": "object",
@@ -8159,10 +7465,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "remaining",
-          "limit"
-        ]
+        "required": ["remaining", "limit"]
       },
       "SafeAppProvider": {
         "type": "object",
@@ -8174,10 +7477,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "url",
-          "name"
-        ]
+        "required": ["url", "name"]
       },
       "SafeAppAccessControl": {
         "type": "object",
@@ -8193,31 +7493,20 @@
             }
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "SafeAppSocialProfile": {
         "type": "object",
         "properties": {
           "platform": {
             "type": "string",
-            "enum": [
-              "DISCORD",
-              "GITHUB",
-              "TWITTER",
-              "TELEGRAM",
-              "UNKNOWN"
-            ]
+            "enum": ["DISCORD", "GITHUB", "TWITTER", "TELEGRAM", "UNKNOWN"]
           },
           "url": {
             "type": "string"
           }
         },
-        "required": [
-          "platform",
-          "url"
-        ]
+        "required": ["platform", "url"]
       },
       "SafeApp": {
         "type": "object",
@@ -8347,11 +7636,7 @@
           },
           "implementationVersionState": {
             "type": "string",
-            "enum": [
-              "UP_TO_DATE",
-              "OUTDATED",
-              "UNKNOWN"
-            ]
+            "enum": ["UP_TO_DATE", "OUTDATED", "UNKNOWN"]
           },
           "collectiblesTag": {
             "type": "string",
@@ -8390,10 +7675,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "currentNonce",
-          "recommendedNonce"
-        ]
+        "required": ["currentNonce", "recommendedNonce"]
       },
       "SafeOverview": {
         "type": "object",
@@ -8424,14 +7706,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
-        ]
+        "required": ["address", "chainId", "threshold", "owners", "fiatTotal", "queued"]
       },
       "SingleRecipientAnalysisResultDto": {
         "type": "object",
@@ -8439,22 +7714,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Recipient interaction status code",
-            "enum": [
-              "NEW_RECIPIENT",
-              "RECURRING_RECIPIENT",
-              "LOW_ACTIVITY",
-              "FAILED"
-            ],
+            "enum": ["NEW_RECIPIENT", "RECURRING_RECIPIENT", "LOW_ACTIVITY", "FAILED"],
             "example": "NEW_RECIPIENT"
           },
           "title": {
@@ -8470,12 +7735,7 @@
             "description": "Error message for failed analysis"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "SingleRecipientAnalysisDto": {
         "type": "object",
@@ -8516,10 +7776,7 @@
             "example": false
           }
         },
-        "required": [
-          "RECIPIENT_INTERACTION",
-          "isSafe"
-        ]
+        "required": ["RECIPIENT_INTERACTION", "isSafe"]
       },
       "CounterpartyAnalysisRequestDto": {
         "type": "object",
@@ -8538,19 +7795,11 @@
           },
           "operation": {
             "type": "number",
-            "enum": [
-              0,
-              1
-            ],
+            "enum": [0, 1],
             "description": "Operation type: 0 for CALL, 1 for DELEGATECALL."
           }
         },
-        "required": [
-          "to",
-          "value",
-          "data",
-          "operation"
-        ]
+        "required": ["to", "value", "data", "operation"]
       },
       "RecipientResultDto": {
         "type": "object",
@@ -8558,12 +7807,7 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
@@ -8597,12 +7841,7 @@
             "description": "Target chain ID for bridge operations. Only present for BridgeStatus."
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "RecipientAnalysisDto": {
         "type": "object",
@@ -8659,9 +7898,7 @@
             }
           }
         },
-        "required": [
-          "isSafe"
-        ]
+        "required": ["isSafe"]
       },
       "ContractAnalysisResultDto": {
         "type": "object",
@@ -8669,12 +7906,7 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
@@ -8705,12 +7937,7 @@
             "description": "Error message for failed analysis"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "FallbackHandlerInfoDto": {
         "type": "object",
@@ -8728,9 +7955,7 @@
             "description": "Logo URL for the fallback handler contract"
           }
         },
-        "required": [
-          "address"
-        ]
+        "required": ["address"]
       },
       "FallbackHandlerAnalysisResultDto": {
         "type": "object",
@@ -8738,19 +7963,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Status code for unofficial fallback handler",
-            "enum": [
-              "UNOFFICIAL_FALLBACK_HANDLER"
-            ],
+            "enum": ["UNOFFICIAL_FALLBACK_HANDLER"],
             "example": "VERIFIED"
           },
           "title": {
@@ -8774,12 +7992,7 @@
             ]
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "ContractAnalysisDto": {
         "type": "object",
@@ -8904,10 +8117,7 @@
             }
           }
         },
-        "required": [
-          "recipient",
-          "contract"
-        ]
+        "required": ["recipient", "contract"]
       },
       "ThreatAnalysisRequestDto": {
         "type": "object",
@@ -8929,10 +8139,7 @@
             "description": "Optional origin identifier for the request"
           }
         },
-        "required": [
-          "data",
-          "walletAddress"
-        ]
+        "required": ["data", "walletAddress"]
       },
       "ThreatAnalysisResultDto": {
         "type": "object",
@@ -8940,21 +8147,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "enum": [
-              "NO_THREAT",
-              "OWNERSHIP_CHANGE",
-              "MODULE_CHANGE"
-            ]
+            "enum": ["NO_THREAT", "OWNERSHIP_CHANGE", "MODULE_CHANGE"]
           },
           "title": {
             "type": "string",
@@ -8969,12 +8167,7 @@
             "description": "Error message for failed analysis"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "MasterCopyChangeThreatAnalysisResultDto": {
         "type": "object",
@@ -8982,19 +8175,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "enum": [
-              "MASTERCOPY_CHANGE"
-            ]
+            "enum": ["MASTERCOPY_CHANGE"]
           },
           "title": {
             "type": "string",
@@ -9017,14 +8203,7 @@
             "description": "Address of the new master copy/implementation contract"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description",
-          "before",
-          "after"
-        ]
+        "required": ["severity", "type", "title", "description", "before", "after"]
       },
       "ThreatIssueDto": {
         "type": "object",
@@ -9038,9 +8217,7 @@
             "description": "Issue description"
           }
         },
-        "required": [
-          "description"
-        ]
+        "required": ["description"]
       },
       "MaliciousOrModerateThreatAnalysisResultDto": {
         "type": "object",
@@ -9048,20 +8225,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "enum": [
-              "MALICIOUS",
-              "MODERATE"
-            ]
+            "enum": ["MALICIOUS", "MODERATE"]
           },
           "title": {
             "type": "string",
@@ -9099,12 +8268,7 @@
             }
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "FailedThreatAnalysisResultDto": {
         "type": "object",
@@ -9112,19 +8276,12 @@
           "severity": {
             "type": "string",
             "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
+            "enum": ["OK", "INFO", "WARN", "CRITICAL"]
           },
           "type": {
             "type": "string",
             "description": "Threat status code",
-            "enum": [
-              "FAILED"
-            ]
+            "enum": ["FAILED"]
           },
           "title": {
             "type": "string",
@@ -9139,12 +8296,7 @@
             "description": "Error message for failed analysis"
           }
         },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
+        "required": ["severity", "type", "title", "description"]
       },
       "NativeAssetDetailsDto": {
         "type": "object",
@@ -9161,14 +8313,10 @@
           "type": {
             "type": "string",
             "description": "Asset type",
-            "enum": [
-              "NATIVE"
-            ]
+            "enum": ["NATIVE"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "TokenAssetDetailsDto": {
         "type": "object",
@@ -9185,21 +8333,14 @@
           "type": {
             "type": "string",
             "description": "Asset type",
-            "enum": [
-              "ERC20",
-              "ERC721",
-              "ERC1155"
-            ]
+            "enum": ["ERC20", "ERC721", "ERC1155"]
           },
           "address": {
             "type": "string",
             "description": "Token contract address"
           }
         },
-        "required": [
-          "type",
-          "address"
-        ]
+        "required": ["type", "address"]
       },
       "FungibleDiffDto": {
         "type": "object",
@@ -9220,9 +8361,7 @@
             "example": 42
           }
         },
-        "required": [
-          "token_id"
-        ]
+        "required": ["token_id"]
       },
       "BalanceChangeDto": {
         "type": "object",
@@ -9277,11 +8416,7 @@
             ]
           }
         },
-        "required": [
-          "asset",
-          "in",
-          "out"
-        ]
+        "required": ["asset", "in", "out"]
       },
       "ThreatAnalysisResponseDto": {
         "type": "object",
@@ -9353,10 +8488,7 @@
         "properties": {
           "event": {
             "type": "string",
-            "enum": [
-              "FALSE_POSITIVE",
-              "FALSE_NEGATIVE"
-            ],
+            "enum": ["FALSE_POSITIVE", "FALSE_NEGATIVE"],
             "description": "Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged"
           },
           "request_id": {
@@ -9371,11 +8503,7 @@
             "example": "This transaction was incorrectly flagged as malicious"
           }
         },
-        "required": [
-          "event",
-          "request_id",
-          "details"
-        ]
+        "required": ["event", "request_id", "details"]
       },
       "ReportFalseResultResponseDto": {
         "type": "object",
@@ -9386,9 +8514,7 @@
             "example": true
           }
         },
-        "required": [
-          "success"
-        ]
+        "required": ["success"]
       },
       "TargetedSafe": {
         "type": "object",
@@ -9400,10 +8526,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "outreachId",
-          "address"
-        ]
+        "required": ["outreachId", "address"]
       },
       "Submission": {
         "type": "object",
@@ -9423,11 +8546,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "outreachId",
-          "targetedSafeId",
-          "signerAddress"
-        ]
+        "required": ["outreachId", "targetedSafeId", "signerAddress"]
       },
       "CreateSubmissionDto": {
         "type": "object",
@@ -9436,9 +8555,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "completed"
-        ]
+        "required": ["completed"]
       },
       "TransactionInfo": {
         "type": "object",
@@ -9468,18 +8585,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "CreationTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Creation"
-            ]
+            "enum": ["Creation"]
           },
           "humanDescription": {
             "type": "string",
@@ -9507,20 +8620,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "creator",
-          "transactionHash"
-        ]
+        "required": ["type", "creator", "transactionHash"]
       },
       "CustomTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Custom"
-            ]
+            "enum": ["Custom"]
           },
           "humanDescription": {
             "type": "string",
@@ -9544,21 +8651,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "to",
-          "dataSize",
-          "isCancellation"
-        ]
+        "required": ["type", "to", "dataSize", "isCancellation"]
       },
       "MultiSendTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Custom"
-            ]
+            "enum": ["Custom"]
           },
           "humanDescription": {
             "type": "string",
@@ -9579,31 +8679,20 @@
           },
           "methodName": {
             "type": "string",
-            "enum": [
-              "multiSend"
-            ]
+            "enum": ["multiSend"]
           },
           "actionCount": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "to",
-          "dataSize",
-          "isCancellation",
-          "methodName",
-          "actionCount"
-        ]
+        "required": ["type", "to", "dataSize", "isCancellation", "methodName", "actionCount"]
       },
       "AddOwner": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ADD_OWNER"
-            ]
+            "enum": ["ADD_OWNER"]
           },
           "owner": {
             "$ref": "#/components/schemas/AddressInfo"
@@ -9612,106 +8701,76 @@
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "owner",
-          "threshold"
-        ]
+        "required": ["type", "owner", "threshold"]
       },
       "ChangeMasterCopy": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "CHANGE_MASTER_COPY"
-            ]
+            "enum": ["CHANGE_MASTER_COPY"]
           },
           "implementation": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "implementation"
-        ]
+        "required": ["type", "implementation"]
       },
       "ChangeThreshold": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "CHANGE_THRESHOLD"
-            ]
+            "enum": ["CHANGE_THRESHOLD"]
           },
           "threshold": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "threshold"
-        ]
+        "required": ["type", "threshold"]
       },
       "DeleteGuard": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "DELETE_GUARD"
-            ]
+            "enum": ["DELETE_GUARD"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "DisableModule": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "DISABLE_MODULE"
-            ]
+            "enum": ["DISABLE_MODULE"]
           },
           "module": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "module"
-        ]
+        "required": ["type", "module"]
       },
       "EnableModule": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ENABLE_MODULE"
-            ]
+            "enum": ["ENABLE_MODULE"]
           },
           "module": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "module"
-        ]
+        "required": ["type", "module"]
       },
       "RemoveOwner": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "REMOVE_OWNER"
-            ]
+            "enum": ["REMOVE_OWNER"]
           },
           "owner": {
             "$ref": "#/components/schemas/AddressInfo"
@@ -9720,47 +8779,33 @@
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "owner",
-          "threshold"
-        ]
+        "required": ["type", "owner", "threshold"]
       },
       "SetFallbackHandler": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SET_FALLBACK_HANDLER"
-            ]
+            "enum": ["SET_FALLBACK_HANDLER"]
           },
           "handler": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "handler"
-        ]
+        "required": ["type", "handler"]
       },
       "SetGuard": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SET_GUARD"
-            ]
+            "enum": ["SET_GUARD"]
           },
           "guard": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "guard"
-        ]
+        "required": ["type", "guard"]
       },
       "SettingsChange": {
         "type": "object",
@@ -9781,18 +8826,14 @@
             ]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "SwapOwner": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SWAP_OWNER"
-            ]
+            "enum": ["SWAP_OWNER"]
           },
           "oldOwner": {
             "$ref": "#/components/schemas/AddressInfo"
@@ -9801,20 +8842,14 @@
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "oldOwner",
-          "newOwner"
-        ]
+        "required": ["type", "oldOwner", "newOwner"]
       },
       "SettingsChangeTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SettingsChange"
-            ]
+            "enum": ["SettingsChange"]
           },
           "humanDescription": {
             "type": "string",
@@ -9858,20 +8893,14 @@
             ]
           }
         },
-        "required": [
-          "type",
-          "dataDecoded",
-          "settingsInfo"
-        ]
+        "required": ["type", "dataDecoded", "settingsInfo"]
       },
       "Erc20Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ERC20"
-            ]
+            "enum": ["ERC20"]
           },
           "tokenAddress": {
             "type": "string"
@@ -9903,21 +8932,14 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "type",
-          "tokenAddress",
-          "value",
-          "imitation"
-        ]
+        "required": ["type", "tokenAddress", "value", "imitation"]
       },
       "Erc721Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "ERC721"
-            ]
+            "enum": ["ERC721"]
           },
           "tokenAddress": {
             "type": "string"
@@ -9942,54 +8964,38 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "tokenAddress",
-          "tokenId"
-        ]
+        "required": ["type", "tokenAddress", "tokenId"]
       },
       "NativeCoinTransfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_COIN"
-            ]
+            "enum": ["NATIVE_COIN"]
           },
           "value": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "Transfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NATIVE_COIN",
-              "ERC20",
-              "ERC721"
-            ]
+            "enum": ["NATIVE_COIN", "ERC20", "ERC721"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "TransferTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Transfer"
-            ]
+            "enum": ["Transfer"]
           },
           "humanDescription": {
             "type": "string",
@@ -10003,11 +9009,7 @@
           },
           "direction": {
             "type": "string",
-            "enum": [
-              "INCOMING",
-              "OUTGOING",
-              "UNKNOWN"
-            ]
+            "enum": ["INCOMING", "OUTGOING", "UNKNOWN"]
           },
           "transferInfo": {
             "oneOf": [
@@ -10028,13 +9030,7 @@
             ]
           }
         },
-        "required": [
-          "type",
-          "sender",
-          "recipient",
-          "direction",
-          "transferInfo"
-        ]
+        "required": ["type", "sender", "recipient", "direction", "transferInfo"]
       },
       "BridgeFee": {
         "type": "object",
@@ -10049,11 +9045,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "tokenAddress",
-          "integratorFee",
-          "lifiFee"
-        ]
+        "required": ["tokenAddress", "integratorFee", "lifiFee"]
       },
       "TokenInfo": {
         "type": "object",
@@ -10084,22 +9076,14 @@
             "description": "The token trusted status"
           }
         },
-        "required": [
-          "address",
-          "decimals",
-          "name",
-          "symbol",
-          "trusted"
-        ]
+        "required": ["address", "decimals", "name", "symbol", "trusted"]
       },
       "BridgeAndSwapTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SwapAndBridge"
-            ]
+            "enum": ["SwapAndBridge"]
           },
           "humanDescription": {
             "type": "string",
@@ -10117,15 +9101,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "NOT_FOUND",
-              "INVALID",
-              "PENDING",
-              "DONE",
-              "FAILED",
-              "UNKNOWN",
-              "AWAITING_EXECUTION"
-            ]
+            "enum": ["NOT_FOUND", "INVALID", "PENDING", "DONE", "FAILED", "UNKNOWN", "AWAITING_EXECUTION"]
           },
           "substatus": {
             "type": "string",
@@ -10195,9 +9171,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SwapOrder"
-            ]
+            "enum": ["SwapOrder"]
           },
           "humanDescription": {
             "type": "string",
@@ -10209,31 +9183,15 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "orderClass": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "validUntil": {
             "type": "number",
@@ -10325,9 +9283,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "Swap"
-            ]
+            "enum": ["Swap"]
           },
           "humanDescription": {
             "type": "string",
@@ -10361,25 +9317,14 @@
             "nullable": true
           }
         },
-        "required": [
-          "type",
-          "recipient",
-          "fees",
-          "fromToken",
-          "fromAmount",
-          "toToken",
-          "toAmount",
-          "lifiExplorerUrl"
-        ]
+        "required": ["type", "recipient", "fees", "fromToken", "fromAmount", "toToken", "toAmount", "lifiExplorerUrl"]
       },
       "SwapTransferTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "SwapTransfer"
-            ]
+            "enum": ["SwapTransfer"]
           },
           "humanDescription": {
             "type": "string",
@@ -10418,31 +9363,15 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "orderClass": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "validUntil": {
             "type": "number",
@@ -10538,73 +9467,53 @@
         "properties": {
           "durationType": {
             "type": "string",
-            "enum": [
-              "AUTO"
-            ]
+            "enum": ["AUTO"]
           }
         },
-        "required": [
-          "durationType"
-        ]
+        "required": ["durationType"]
       },
       "DurationLimit": {
         "type": "object",
         "properties": {
           "durationType": {
             "type": "string",
-            "enum": [
-              "LIMIT_DURATION"
-            ]
+            "enum": ["LIMIT_DURATION"]
           },
           "duration": {
             "type": "string"
           }
         },
-        "required": [
-          "durationType",
-          "duration"
-        ]
+        "required": ["durationType", "duration"]
       },
       "StartTimeAtMining": {
         "type": "object",
         "properties": {
           "startType": {
             "type": "string",
-            "enum": [
-              "AT_MINING_TIME"
-            ]
+            "enum": ["AT_MINING_TIME"]
           }
         },
-        "required": [
-          "startType"
-        ]
+        "required": ["startType"]
       },
       "StartTimeAtEpoch": {
         "type": "object",
         "properties": {
           "startType": {
             "type": "string",
-            "enum": [
-              "AT_EPOCH"
-            ]
+            "enum": ["AT_EPOCH"]
           },
           "epoch": {
             "type": "number"
           }
         },
-        "required": [
-          "startType",
-          "epoch"
-        ]
+        "required": ["startType", "epoch"]
       },
       "TwapOrderTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TwapOrder"
-            ]
+            "enum": ["TwapOrder"]
           },
           "humanDescription": {
             "type": "string",
@@ -10613,31 +9522,15 @@
           "status": {
             "type": "string",
             "description": "The TWAP status",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
+            "enum": ["presignaturePending", "open", "fulfilled", "cancelled", "expired", "unknown"]
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
+            "enum": ["buy", "sell", "unknown"]
           },
           "class": {
             "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
+            "enum": ["market", "limit", "liquidity", "unknown"]
           },
           "activeOrderUid": {
             "type": "string",
@@ -10771,9 +9664,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingDeposit"
-            ]
+            "enum": ["NativeStakingDeposit"]
           },
           "humanDescription": {
             "type": "string",
@@ -10863,9 +9754,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingValidatorsExit"
-            ]
+            "enum": ["NativeStakingValidatorsExit"]
           },
           "humanDescription": {
             "type": "string",
@@ -10922,9 +9811,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "NativeStakingWithdraw"
-            ]
+            "enum": ["NativeStakingWithdraw"]
           },
           "humanDescription": {
             "type": "string",
@@ -10943,12 +9830,7 @@
             }
           }
         },
-        "required": [
-          "type",
-          "value",
-          "tokenInfo",
-          "validators"
-        ]
+        "required": ["type", "value", "tokenInfo", "validators"]
       },
       "VaultInfo": {
         "type": "object",
@@ -10970,12 +9852,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "address",
-          "name",
-          "description",
-          "logoUri"
-        ]
+        "required": ["address", "name", "description", "logoUri"]
       },
       "VaultExtraReward": {
         "type": "object",
@@ -10993,21 +9870,14 @@
             "type": "string"
           }
         },
-        "required": [
-          "tokenInfo",
-          "nrr",
-          "claimable",
-          "claimableNext"
-        ]
+        "required": ["tokenInfo", "nrr", "claimable", "claimableNext"]
       },
       "VaultDepositTransactionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "VaultDeposit"
-            ]
+            "enum": ["VaultDeposit"]
           },
           "humanDescription": {
             "type": "string",
@@ -11066,9 +9936,7 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "VaultRedeem"
-            ]
+            "enum": ["VaultRedeem"]
           },
           "humanDescription": {
             "type": "string",
@@ -11173,10 +10041,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "to",
-          "operation"
-        ]
+        "required": ["to", "operation"]
       },
       "MultisigConfirmationDetails": {
         "type": "object",
@@ -11192,19 +10057,14 @@
             "type": "number"
           }
         },
-        "required": [
-          "signer",
-          "submittedAt"
-        ]
+        "required": ["signer", "submittedAt"]
       },
       "MultisigExecutionDetails": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
+            "enum": ["MULTISIG"]
           },
           "submittedAt": {
             "type": "number"
@@ -11315,18 +10175,13 @@
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MODULE"
-            ]
+            "enum": ["MODULE"]
           },
           "address": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "address"
-        ]
+        "required": ["type", "address"]
       },
       "SafeAppInfo": {
         "type": "object",
@@ -11342,10 +10197,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name",
-          "url"
-        ]
+        "required": ["name", "url"]
       },
       "TransactionDetails": {
         "type": "object",
@@ -11416,13 +10268,7 @@
           },
           "txStatus": {
             "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
+            "enum": ["SUCCESS", "FAILED", "CANCELLED", "AWAITING_CONFIRMATIONS", "AWAITING_EXECUTION"]
           },
           "txData": {
             "nullable": true,
@@ -11460,12 +10306,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "txInfo",
-          "safeAddress",
-          "txId",
-          "txStatus"
-        ]
+        "required": ["txInfo", "safeAddress", "txId", "txStatus"]
       },
       "TXSMultisigTransaction": {
         "type": "object",
@@ -11622,36 +10463,27 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "ModuleExecutionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MODULE"
-            ]
+            "enum": ["MODULE"]
           },
           "address": {
             "$ref": "#/components/schemas/AddressInfo"
           }
         },
-        "required": [
-          "type",
-          "address"
-        ]
+        "required": ["type", "address"]
       },
       "MultisigExecutionInfo": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
+            "enum": ["MULTISIG"]
           },
           "nonce": {
             "type": "number"
@@ -11670,12 +10502,7 @@
             }
           }
         },
-        "required": [
-          "type",
-          "nonce",
-          "confirmationsRequired",
-          "confirmationsSubmitted"
-        ]
+        "required": ["type", "nonce", "confirmationsRequired", "confirmationsSubmitted"]
       },
       "Transaction": {
         "type": "object",
@@ -11746,13 +10573,7 @@
           },
           "txStatus": {
             "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
+            "enum": ["SUCCESS", "FAILED", "CANCELLED", "AWAITING_CONFIRMATIONS", "AWAITING_EXECUTION"]
           },
           "executionInfo": {
             "oneOf": [
@@ -11778,39 +10599,24 @@
             "nullable": true
           }
         },
-        "required": [
-          "txInfo",
-          "id",
-          "timestamp",
-          "txStatus"
-        ]
+        "required": ["txInfo", "id", "timestamp", "txStatus"]
       },
       "MultisigTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
+            "enum": ["None", "HasNext", "End"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "MultisigTransactionPage": {
         "type": "object",
@@ -11834,9 +10640,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "DeleteTransactionDto": {
         "type": "object",
@@ -11845,34 +10649,24 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "ModuleTransaction": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "ModuleTransactionPage": {
         "type": "object",
@@ -11896,9 +10690,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "AddConfirmationDto": {
         "type": "object",
@@ -11907,34 +10699,24 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "IncomingTransfer": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "IncomingTransferPage": {
         "type": "object",
@@ -11958,9 +10740,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "PreviewTransactionDto": {
         "type": "object",
@@ -11984,11 +10764,7 @@
             ]
           }
         },
-        "required": [
-          "to",
-          "value",
-          "operation"
-        ]
+        "required": ["to", "value", "operation"]
       },
       "TransactionPreview": {
         "type": "object",
@@ -12051,73 +10827,50 @@
             "$ref": "#/components/schemas/TransactionData"
           }
         },
-        "required": [
-          "txInfo",
-          "txData"
-        ]
+        "required": ["txInfo", "txData"]
       },
       "ConflictHeaderQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "CONFLICT_HEADER"
-            ]
+            "enum": ["CONFLICT_HEADER"]
           },
           "nonce": {
             "type": "number"
           }
         },
-        "required": [
-          "type",
-          "nonce"
-        ]
+        "required": ["type", "nonce"]
       },
       "LabelQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "LABEL"
-            ]
+            "enum": ["LABEL"]
           },
           "label": {
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "label"
-        ]
+        "required": ["type", "label"]
       },
       "TransactionQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
+            "enum": ["None", "HasNext", "End"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "QueuedItemPage": {
         "type": "object",
@@ -12151,34 +10904,24 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "TransactionItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
+            "enum": ["TRANSACTION"]
           },
           "transaction": {
             "$ref": "#/components/schemas/Transaction"
           },
           "conflictType": {
             "type": "string",
-            "enum": [
-              "None"
-            ]
+            "enum": ["None"]
           }
         },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
+        "required": ["type", "transaction", "conflictType"]
       },
       "TransactionItemPage": {
         "type": "object",
@@ -12209,9 +10952,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "ProposeTransactionDto": {
         "type": "object",
@@ -12318,12 +11059,7 @@
             ]
           }
         },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress"
-        ]
+        "required": ["created", "creator", "transactionHash", "factoryAddress"]
       },
       "TXSCreationTransaction": {
         "type": "object",
@@ -12351,15 +11087,7 @@
             "type": "object"
           }
         },
-        "required": [
-          "created",
-          "creator",
-          "transactionHash",
-          "factoryAddress",
-          "masterCopy",
-          "setupData",
-          "saltNonce"
-        ]
+        "required": ["created", "creator", "transactionHash", "factoryAddress", "masterCopy", "setupData", "saltNonce"]
       },
       "TransactionExportDto": {
         "type": "object",
@@ -12462,9 +11190,7 @@
             "description": "Error message"
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "Delegate": {
         "type": "object",
@@ -12483,11 +11209,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "label"
-        ]
+        "required": ["delegate", "delegator", "label"]
       },
       "DelegatePage": {
         "type": "object",
@@ -12511,9 +11233,7 @@
             }
           }
         },
-        "required": [
-          "results"
-        ]
+        "required": ["results"]
       },
       "CreateDelegateDto": {
         "type": "object",
@@ -12535,12 +11255,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "signature",
-          "label"
-        ]
+        "required": ["delegate", "delegator", "signature", "label"]
       },
       "DeleteDelegateDto": {
         "type": "object",
@@ -12555,11 +11270,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "delegator",
-          "signature"
-        ]
+        "required": ["delegate", "delegator", "signature"]
       },
       "DeleteSafeDelegateDto": {
         "type": "object",
@@ -12574,11 +11285,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "delegate",
-          "safe",
-          "signature"
-        ]
+        "required": ["delegate", "safe", "signature"]
       },
       "DeleteDelegateV2Dto": {
         "type": "object",
@@ -12595,9 +11302,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "signature"
-        ]
+        "required": ["signature"]
       },
       "SafeRegistration": {
         "type": "object",
@@ -12618,11 +11323,7 @@
             }
           }
         },
-        "required": [
-          "chainId",
-          "safes",
-          "signatures"
-        ]
+        "required": ["chainId", "safes", "signatures"]
       },
       "RegisterDeviceDto": {
         "type": "object",
@@ -12657,14 +11358,7 @@
             }
           }
         },
-        "required": [
-          "cloudMessagingToken",
-          "buildNumber",
-          "bundle",
-          "deviceType",
-          "version",
-          "safeRegistrations"
-        ]
+        "required": ["cloudMessagingToken", "buildNumber", "bundle", "deviceType", "version", "safeRegistrations"]
       },
       "NotificationTypeEnum": {
         "type": "string",
@@ -12694,19 +11388,11 @@
             }
           }
         },
-        "required": [
-          "chainId",
-          "address",
-          "notificationTypes"
-        ]
+        "required": ["chainId", "address", "notificationTypes"]
       },
       "DeviceType": {
         "type": "string",
-        "enum": [
-          "ANDROID",
-          "IOS",
-          "WEB"
-        ]
+        "enum": ["ANDROID", "IOS", "WEB"]
       },
       "UpsertSubscriptionsDto": {
         "type": "object",
@@ -12732,11 +11418,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "cloudMessagingToken",
-          "safes",
-          "deviceType"
-        ]
+        "required": ["cloudMessagingToken", "safes", "deviceType"]
       },
       "NotificationTypeResponseDto": {
         "type": "object",
@@ -12750,9 +11432,7 @@
             ]
           }
         },
-        "required": [
-          "name"
-        ]
+        "required": ["name"]
       },
       "DeleteAllSubscriptionItemDto": {
         "type": "object",
@@ -12772,11 +11452,7 @@
             "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
-        "required": [
-          "chainId",
-          "deviceUuid",
-          "safeAddress"
-        ]
+        "required": ["chainId", "deviceUuid", "safeAddress"]
       },
       "DeleteAllSubscriptionsDto": {
         "type": "object",
@@ -12790,9 +11466,7 @@
             }
           }
         },
-        "required": [
-          "subscriptions"
-        ]
+        "required": ["subscriptions"]
       }
     }
   }

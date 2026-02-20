@@ -16,7 +16,7 @@ exports[`./index.stories Default 1`] = `
         style="width: 40px; height: 40px;"
       >
         <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
           style="width: 40px; height: 40px;"
         />
       </div>

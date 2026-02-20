@@ -357,15 +357,9 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-<<<<<<< HEAD
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
                   style="width: 24px; height: 24px;"
-=======
-                <div
-                  class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjUwIDg5JSA3NSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDggNjglIDMxJSkiIGQ9Ik0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCg3NiA2OSUgNjclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
->>>>>>> origin/dev
                 />
               </div>
               <div
@@ -447,15 +441,9 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-<<<<<<< HEAD
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
                   style="width: 24px; height: 24px;"
-=======
-                <div
-                  class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTc0IDcwJSA2MCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgyNSA4MSUgNDAlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTIsNGgxdjFoLTF6TTUsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDIwOSA5MCUgMjclKSIgZD0iTTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
->>>>>>> origin/dev
                 />
               </div>
               <div
@@ -899,15 +887,9 @@ exports[`./index.stories Default 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-<<<<<<< HEAD
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
                   style="width: 24px; height: 24px;"
-=======
-                <div
-                  class="icon"
-                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjUwIDg5JSA3NSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDggNjglIDMxJSkiIGQ9Ik0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCg3NiA2OSUgNjclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
->>>>>>> origin/dev
                 />
               </div>
               <div

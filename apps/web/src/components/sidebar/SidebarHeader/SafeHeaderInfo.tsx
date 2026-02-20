@@ -1,9 +1,6 @@
 import { type ReactElement } from 'react'
 import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
-import ButtonBase from '@mui/material/ButtonBase'
-import Box from '@mui/material/Box'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafeIcon from '@/components/common/SafeIcon'
