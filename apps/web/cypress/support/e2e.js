@@ -70,6 +70,7 @@ beforeEach(() => {
   cy.clearAllSessionStorage()
   cy.clearLocalStorage()
   cy.clearCookies()
+
   cy.window().then((window) => {
     const getDate = () => new Date().toISOString()
     const beamerKey1 = `_BEAMER_FIRST_VISIT_${productID}`
@@ -88,4 +89,15 @@ beforeEach(() => {
     window.sessionStorage.setItem(outreachWindowKey, Date.now())
     cy.wrap(window.localStorage).invoke('getItem', cookiesKey).should('equal', ls.cookies.acceptedCookies)
   })
+})
+
+// After each visual test, toggle dark mode and take a second Chromatic snapshot
+afterEach(() => {
+  const isVisualTest = Cypress.spec.relative.includes('/visual/')
+  if (!isVisualTest) return
+
+  cy.document().then((doc) => {
+    doc.documentElement.setAttribute('data-theme', 'dark')
+  })
+  cy.takeSnapshot('dark')
 })

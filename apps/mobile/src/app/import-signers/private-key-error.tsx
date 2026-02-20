@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function App() {
   const theme = useTheme()
-  const colors: [string, string] = [theme.errorDark?.get(), 'transparent']
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
   const { bottom } = useSafeAreaInsets()
   return (
     <View style={{ flex: 1 }} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>

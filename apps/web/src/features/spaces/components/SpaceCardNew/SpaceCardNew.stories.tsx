@@ -19,44 +19,26 @@ type Story = StoryObj<typeof meta>
 const mockSpace: GetSpaceResponse = {
   id: 1,
   name: 'Space Name',
-  status: 'ACTIVE',
+  safeCount: 5,
   members: [
     {
-      id: 1,
       name: 'Admin User',
       invitedBy: 'system',
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
-      user: {
-        id: 1,
-        status: 'ACTIVE',
-      },
+      user: { id: 1 },
       role: MemberRole.ADMIN,
       status: MemberStatus.ACTIVE,
     },
     {
-      id: 2,
       name: 'Member One',
       invitedBy: 'admin@example.com',
-      createdAt: '2024-01-02T00:00:00Z',
-      updatedAt: '2024-01-02T00:00:00Z',
-      user: {
-        id: 2,
-        status: 'ACTIVE',
-      },
+      user: { id: 2 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
     },
     {
-      id: 3,
       name: 'Member Two',
       invitedBy: 'admin@example.com',
-      createdAt: '2024-01-03T00:00:00Z',
-      updatedAt: '2024-01-03T00:00:00Z',
-      user: {
-        id: 3,
-        status: 'ACTIVE',
-      },
+      user: { id: 3 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
     },

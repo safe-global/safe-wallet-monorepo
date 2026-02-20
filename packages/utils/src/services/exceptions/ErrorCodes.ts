@@ -71,6 +71,7 @@ enum ErrorCodes {
   _817 = '817: Error sending a transaction through nested Safe provider',
   _818 = '818: Error validating transaction data',
   _819 = '819: Error adding a transaction to the batch',
+  _820 = '820: Error signing or submitting delegation',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

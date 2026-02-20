@@ -34,7 +34,6 @@ const injectedRtkApi = api
             currency: queryArg.currency,
             safes: queryArg.safes,
             trusted: queryArg.trusted,
-            exclude_spam: queryArg.excludeSpam,
             wallet_address: queryArg.walletAddress,
           },
         }),
@@ -77,12 +76,10 @@ export type SafesGetSafeOverviewV2ApiResponse =
 export type SafesGetSafeOverviewV2ApiArg = {
   /** Fiat currency code for balance conversion (e.g., USD, EUR) */
   currency: string
-  /** Comma-separated list of Safe addresses in CAIP-10 format (chainId:address) */
+  /** Comma-separated list of Safe addresses in chainId:address format */
   safes: string
-  /** If true, only includes trusted tokens in balance calculations */
+  /** If true, only includes trusted tokens in balance calculations. */
   trusted?: boolean
-  /** If true, excludes spam tokens from balance calculations */
-  excludeSpam?: boolean
   /** Optional wallet address to filter Safes where this address is an owner */
   walletAddress?: string
 }

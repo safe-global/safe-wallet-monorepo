@@ -98,6 +98,9 @@ export const SAFE_LOCKING_ADDRESS: { [chainId: string]: string } = {
   [chains.sep]: '0xb161ccb96b9b817F9bDf0048F212725128779DE9',
 }
 
+export const DEVELOPER_PORTAL_URL =
+  process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
+
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
 export const SAFE_APPS_SDK_DOCS_URL =

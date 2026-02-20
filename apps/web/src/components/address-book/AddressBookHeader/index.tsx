@@ -17,11 +17,9 @@ import mapProps from '@/utils/mad-props'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import MUILink from '@mui/material/Link'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId, useIsAdmin, useIsQualifiedSafe } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 const HeaderButton = ({
   icon,

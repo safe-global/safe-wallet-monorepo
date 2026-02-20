@@ -48,7 +48,10 @@ declare module '@mui/material/SvgIcon' {
 
 declare module '@mui/material/Button' {
   interface ButtonPropsSizeOverrides {
+    xlarge: true
+    // @deprecated - Remove in next major version
     stretched: true
+    // @deprecated - Remove in next major version
     compact: true
   }
 

@@ -1,15 +1,15 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import css from '@/features/spaces/components/AddAccounts/styles.module.css'
+import css from '../../AddAccounts/styles.module.css'
 import { Box, Checkbox, List, ListItem, Tooltip } from '@mui/material'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
-import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
-import { getSelectedAddresses, getContactId } from '@/features/spaces/components/SpaceAddressBook/utils'
+import type { ImportContactsFormValues } from './ImportAddressBookDialog'
+import { getSelectedAddresses, getContactId } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useGetSpaceAddressBook } from '@/features/spaces'
 
 export type ContactItem = {
   chainId: string
