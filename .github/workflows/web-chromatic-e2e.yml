@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/web/**'
       - 'packages/**'
+      - '.github/workflows/web-chromatic-e2e.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
