@@ -3,10 +3,9 @@ import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { TxHistoryList } from './TxHistoryList'
 import { HistoryTransactionItems } from '@safe-global/store/gateway/types'
 
-// Mock react-native-collapsible-tab-view to use regular FlatList
-jest.mock('react-native-collapsible-tab-view', () => {
+jest.mock('@shopify/flash-list', () => {
   const { FlatList } = require('react-native')
-  return { Tabs: { FlashList: FlatList } }
+  return { FlashList: FlatList }
 })
 
 describe('TxHistoryList', () => {

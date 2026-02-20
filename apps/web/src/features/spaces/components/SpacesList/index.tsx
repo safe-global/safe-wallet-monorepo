@@ -1,8 +1,8 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
-import SpaceCreationModal from '@/features/spaces/components/SpaceCreationModal'
-import SignInButton from '@/features/spaces/components/SignInButton'
+import SpaceCreationModal from '../SpaceCreationModal'
+import SignInButton from '../SignInButton'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -12,7 +12,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import SpaceListInvite from '../InviteBanner'
 import { useState } from 'react'
 import css from './styles.module.css'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberStatus } from '@/features/spaces'
 import useWallet from '@/hooks/wallets/useWallet'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -129,7 +129,7 @@ const SpacesList = () => {
             {activeSpaces.length > 0 ? (
               activeSpaces.map((space) => (
                 <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} />
+                  <SpaceCard space={space} currentUserId={currentUser?.id} />
                 </Grid2>
               ))
             ) : (

@@ -9,10 +9,12 @@ concurrency:
 
 jobs:
   e2e:
+    env:
+      VISUAL_REGRESSION_BUILD: 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     continue-on-error: true
-    name: Cypress Visual and Smoke tests
+    name: Cypress Visual tests
     permissions:
       contents: read
 
@@ -29,7 +31,7 @@ jobs:
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: 'cypress/e2e/smoke/**/*.cy.js'
+          spec: 'cypress/e2e/visual/**/*.cy.js'
           group: 'Chromatic E2E'
           tag: 'chromatic-e2e'
           chromatic: 'true'
@@ -37,7 +39,7 @@ jobs:
 
   chromatic:
     needs: [e2e]
-    if: "!cancelled()"
+    if: '!cancelled()'
     runs-on: ubuntu-latest
     permissions:
       contents: read

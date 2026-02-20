@@ -1,4 +1,4 @@
-import AddAccounts from '@/features/spaces/components/AddAccounts'
+import AddAccounts from '../AddAccounts'
 import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'

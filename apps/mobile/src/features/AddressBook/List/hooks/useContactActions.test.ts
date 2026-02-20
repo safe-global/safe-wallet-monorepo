@@ -7,6 +7,9 @@ jest.mock('tamagui', () => ({
     color: {
       get: () => '#000000',
     },
+    error: {
+      get: () => '#FF5F72',
+    },
   }),
 }))
 
@@ -42,10 +45,10 @@ describe('useContactActions', () => {
       expect(result.current[1].attributes).toEqual({ destructive: true })
     })
 
-    it('should set delete image color to red', () => {
+    it('should set delete image color to error theme color', () => {
       const { result } = renderHook(() => useContactActions())
 
-      expect(result.current[1].imageColor).toBe('red')
+      expect(result.current[1].imageColor).toBe('#FF5F72')
     })
   })
 

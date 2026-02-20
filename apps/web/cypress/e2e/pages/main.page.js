@@ -29,6 +29,24 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/** Waits for the page to settle before Chromatic captures the screenshot. */
+export function awaitVisualStability() {
+  cy.wait(constants.VISUAL_SETTLE_TIME)
+}
+
+/** Intercepts the chain config API and injects a feature flag if not already present. */
+export function enableChainFeature(featureName) {
+  cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+    req.continue((res) => {
+      if (res.body && res.body.features) {
+        if (!res.body.features.includes(featureName)) {
+          res.body.features.push(featureName)
+        }
+      }
+    })
+  })
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }

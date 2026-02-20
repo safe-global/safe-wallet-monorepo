@@ -1,7 +1,7 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'
-import { useRouter } from 'next/router'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import dynamic from 'next/dynamic'
 import { getLatestTransactions } from '@/utils/tx-list'
 import { Box, Typography, Card, Stack, Paper, Skeleton } from '@mui/material'
@@ -79,7 +79,6 @@ export function _getTransactionsToDisplay({
 }
 
 const PendingTxsList = (): ReactElement | null => {
-  const router = useRouter()
   const { page, loading } = useTxQueue()
   const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
@@ -101,12 +100,14 @@ const PendingTxsList = (): ReactElement | null => {
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = loading || safeLoading || isInitialState
 
+  const safeQueryParam = useSafeQueryParam()
+
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: router.query.safe },
+      query: { safe: safeQueryParam },
     }),
-    [router.query.safe],
+    [safeQueryParam],
   )
 
   if (isLoading) return <PendingTxsSkeleton />
@@ -114,7 +115,7 @@ const PendingTxsList = (): ReactElement | null => {
   return (
     <Card
       data-testid="pending-tx-widget"
-      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
       component="section"
     >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>

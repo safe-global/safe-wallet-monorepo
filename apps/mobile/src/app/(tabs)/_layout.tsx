@@ -9,9 +9,9 @@ import TransactionHeader from '@/src/features/TxHistory/components/TransactionHe
 export default function TabLayout() {
   const theme = useTheme()
 
-  const activeTintColor = React.useMemo(() => theme.color?.get(), [theme])
-  const inactiveTintColor = React.useMemo(() => theme.borderMain?.get(), [theme])
-  const borderTopColor = React.useMemo(() => theme.borderLight?.get(), [theme])
+  const activeTintColor = React.useMemo(() => theme.color.get(), [theme])
+  const inactiveTintColor = React.useMemo(() => theme.borderMain.get(), [theme])
+  const borderTopColor = React.useMemo(() => theme.borderLight.get(), [theme])
 
   const screenOptions = React.useMemo(
     () => ({

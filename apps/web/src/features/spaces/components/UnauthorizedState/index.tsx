@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material'
-import css from '@/features/spaces/components/Dashboard/styles.module.css'
+import css from '../Dashboard/styles.module.css'
 import Button from '@mui/material/Button'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'

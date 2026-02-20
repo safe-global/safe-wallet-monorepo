@@ -20,6 +20,7 @@ apps/mobile/resources/
 
 # Web
 apps/web/.next
+apps/web/cypress/downloads
 apps/web/.swc
 apps/web/out
 apps/web/public
