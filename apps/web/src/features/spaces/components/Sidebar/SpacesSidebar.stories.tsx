@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
-import { SidebarProvider, SidebarInset, Sidebar } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
+import { SidebarTopBar } from './SidebarTopBar'
+import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
 
 const mockSpaceId = '1'
@@ -100,23 +102,14 @@ const SidebarWrapper = ({ children }: { children: React.ReactNode }) => (
       } as React.CSSProperties
     }
   >
-    <div className="flex min-h-screen w-full">
-      <Sidebar collapsible="icon" variant="sidebar" className="!border-r-0">
+    <div className="flex min-h-screen w-full p-4">
+      <Sidebar collapsible="icon" variant="sidebar" className="!border-r-0 rounded-lg border">
+        <SidebarHeader>
+          <SidebarTopBar />
+        </SidebarHeader>
         {children}
+        <SidebarCommonFooter />
       </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-2 border-b px-4">
-          <span className="font-semibold">Example Spaces Content Area</span>
-        </header>
-        <main className="flex-1 p-4">
-          <div className="rounded-lg border bg-card p-6">
-            <h2 className="text-2xl font-bold mb-4">Example Spaces Dashboard</h2>
-            <p className="text-muted-foreground">
-              Example content area for the Spaces view - not a part of the sidebar.
-            </p>
-          </div>
-        </main>
-      </SidebarInset>
     </div>
   </SidebarProvider>
 )
