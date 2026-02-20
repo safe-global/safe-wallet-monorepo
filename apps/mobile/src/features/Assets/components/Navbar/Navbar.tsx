@@ -70,9 +70,11 @@ export const Navbar = () => {
             }}
             hitSlop={4}
           />
-          <Text color={'$colorSecondary'} fontSize={'$3'} paddingLeft={'$10'}>
-            {shortenAddress(activeSafe.address)}
-          </Text>
+          {contact && (
+            <Text color={'$colorSecondary'} fontSize={'$3'} paddingLeft={'$10'}>
+              {shortenAddress(activeSafe.address)}
+            </Text>
+          )}
         </View>
 
         <Pressable hitSlop={10} onPress={() => router.push('/networks-sheet')}>
