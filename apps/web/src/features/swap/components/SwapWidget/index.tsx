@@ -10,41 +10,26 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
 import { useAppDispatch, useAppSelector } from '@/store'
 
-import css from './styles.module.css'
+import css from '../../styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import BlockedAddress from '@/components/common/BlockedAddress'
-import useSwapConsent from './useSwapConsent'
+import useSwapConsent from '../../useSwapConsent'
 import Disclaimer from '@/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
-import { selectSwapParams, setSwapParams, type SwapState } from './store/swapParamsSlice'
+import { selectSwapParams, setSwapParams } from '../../store/swapParamsSlice'
 import { setSwapOrder } from '@/store/swapOrderSlice'
 import useChainId from '@/hooks/useChainId'
-import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
-import { id } from 'ethers'
-import {
-  LIMIT_ORDER_TITLE,
-  SWAP_TITLE,
-  SWAP_ORDER_TITLE,
-  TWAP_ORDER_TITLE,
-  SWAP_FEE_RECIPIENT,
-} from '@/features/swap/constants'
-import { calculateFeePercentageInBps } from '@/features/swap/helpers/fee'
-import { UiOrderTypeToOrderType } from '@/features/swap/helpers/utils'
+import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
+import { calculateFeePercentageInBps } from '../../helpers/fee'
+import { UiOrderTypeToOrderType } from '../../helpers/utils'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
-import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-
-const PRE_SIGN_SIGHASH = id('setPreSignature(bytes,bool)').slice(0, 10)
-const WRAP_SIGHASH = id('deposit()').slice(0, 10)
-const UNWRAP_SIGHASH = id('withdraw(uint256)').slice(0, 10)
-const CREATE_WITH_CONTEXT_SIGHASH = id('createWithContext((address,bytes32,bytes),address,bytes,bool)').slice(0, 10)
-const CANCEL_ORDER_SIGHASH = id('invalidateOrder(bytes)').slice(0, 10)
 
 type Params = {
   sell?: {
@@ -52,24 +37,6 @@ type Params = {
     asset: string
     amount: string
   }
-}
-
-export const getSwapTitle = (tradeType: SwapState['tradeType'], txs: BaseTransaction[] | undefined) => {
-  const hashToLabel = {
-    [PRE_SIGN_SIGHASH]: tradeType === 'limit' ? LIMIT_ORDER_TITLE : SWAP_ORDER_TITLE,
-    [APPROVAL_SIGNATURE_HASH]: 'Approve',
-    [WRAP_SIGHASH]: 'Wrap',
-    [UNWRAP_SIGHASH]: 'Unwrap',
-    [CREATE_WITH_CONTEXT_SIGHASH]: TWAP_ORDER_TITLE,
-    [CANCEL_ORDER_SIGHASH]: 'Cancel Order',
-  }
-
-  const swapTitle = txs
-    ?.map((tx) => hashToLabel[tx.data.slice(0, 10)])
-    .filter(Boolean)
-    .join(' and ')
-
-  return swapTitle
 }
 
 const SwapWidget = ({ sell }: Params) => {

@@ -16,7 +16,8 @@ const adjustEthAddress = (address: string) => {
   return address
 }
 
-const SwapWidgetNoSSR = dynamic(() => import('@/features/swap'), { ssr: false })
+// SSR-disabled dynamic imports for swap widgets (requires browser APIs)
+const SwapWidgetNoSSR = dynamic(() => import('@/features/swap/components/SwapWidget'), { ssr: false })
 const FallbackSwapWidgetNoSSR = dynamic(() => import('@/features/swap/components/FallbackSwapWidget'), { ssr: false })
 
 const SwapPage: NextPage = () => {
