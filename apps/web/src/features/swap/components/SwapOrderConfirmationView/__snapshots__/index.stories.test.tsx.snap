@@ -5,14 +5,14 @@ exports[`./index.stories CustomRecipient 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root mui-style-1qh2y1i-MuiStack-root"
+      class="MuiStack-root css-1qh2y1i-MuiStack-root"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
       >
         <b>
           Order details
@@ -22,91 +22,16 @@ exports[`./index.stories CustomRecipient 1`] = `
         class="amount"
       >
         <div
-          class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          class="MuiStack-root css-niqf4j-MuiStack-root"
         >
           <div
-            class="MuiStack-root mui-style-p24gtu-MuiStack-root"
+            class="MuiStack-root css-p24gtu-MuiStack-root"
           >
             <div
-              class="MuiBox-root mui-style-wvnvdm"
+              class="MuiBox-root css-wvnvdm"
             >
               <div
-                class="MuiBox-root mui-style-olq4e8"
-              >
-                <iframe
-                  height="40"
-                  loading="lazy"
-                  referrerpolicy="strict-origin"
-                  sandbox="allow-scripts"
-                  srcdoc="
-    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
-      <script>
-        document.querySelector('img').onerror = (e) => {
-          e.target.onerror = null
-          e.target.src = "/images/common/token-placeholder.svg"
-        }
-      </script>
-    </body>
-  "
-                  style="pointer-events: none; border: 0px; display: block;"
-                  tabindex="-1"
-                  title="USDC"
-                  width="40"
-                />
-              </div>
-            </div>
-            <div
-              class="MuiBox-root mui-style-1rr4qq7"
-              data-testid="block-label"
-            >
-              <p
-                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-              >
-                Sell
-              </p>
-              <div
-                class="MuiTypography-root MuiTypography-h4 mui-style-csh7nj-MuiTypography-root"
-              >
-                <span
-                  aria-label="10 USDC"
-                  class="container"
-                  data-mui-internal-clone-element="true"
-                >
-                  <b
-                    class="tokenText"
-                  >
-                    10
-                     
-                    USDC
-                  </b>
-                </span>
-              </div>
-            </div>
-            <div
-              class="MuiStack-root mui-style-1nxlmhd-MuiStack-root"
-            >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
-                data-testid="EastRoundedIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
-                />
-              </svg>
-            </div>
-          </div>
-          <div
-            class="MuiStack-root mui-style-p24gtu-MuiStack-root"
-          >
-            <div
-              class="MuiBox-root mui-style-wvnvdm"
-            >
-              <div
-                class="MuiBox-root mui-style-olq4e8"
+                class="MuiBox-root css-olq4e8"
               >
                 <iframe
                   height="40"
@@ -126,34 +51,109 @@ exports[`./index.stories CustomRecipient 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="NPR"
+                  title="AUD"
                   width="40"
                 />
               </div>
             </div>
             <div
-              class="MuiBox-root mui-style-1rr4qq7"
+              class="MuiBox-root css-1rr4qq7"
               data-testid="block-label"
             >
               <p
-                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
               >
-                For at least
+                Sell
               </p>
               <div
-                class="MuiTypography-root MuiTypography-h4 mui-style-csh7nj-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0 NPR"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0
+                    10
                      
-                    NPR
+                    AUD
+                  </b>
+                </span>
+              </div>
+            </div>
+            <div
+              class="MuiStack-root css-1nxlmhd-MuiStack-root"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+                data-testid="EastRoundedIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="MuiStack-root css-p24gtu-MuiStack-root"
+          >
+            <div
+              class="MuiBox-root css-wvnvdm"
+            >
+              <div
+                class="MuiBox-root css-olq4e8"
+              >
+                <iframe
+                  height="40"
+                  loading="lazy"
+                  referrerpolicy="strict-origin"
+                  sandbox="allow-scripts"
+                  srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                  style="pointer-events: none; border: 0px; display: block;"
+                  tabindex="-1"
+                  title="SGD"
+                  width="40"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-1rr4qq7"
+              data-testid="block-label"
+            >
+              <p
+                class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+              >
+                For at least
+              </p>
+              <div
+                class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
+              >
+                <span
+                  aria-label="0.00000005 SGD"
+                  class="container"
+                  data-mui-internal-clone-element="true"
+                >
+                  <b
+                    class="tokenText"
+                  >
+                    &lt; 0.00001
+                     
+                    SGD
                   </b>
                 </span>
               </div>
@@ -162,89 +162,89 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="limit-price"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Limit price
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            NPR
+            SGD
              = 
-            0
+            200M
              
-            USDC
+            AUD
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid=""
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Expiry
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             Dec 24, 2024 - 12:54:40 AM
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="order-id"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Order ID
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiStack-root mui-style-m69qwo-MuiStack-root"
+              class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                170e4a48
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -254,24 +254,24 @@ exports[`./index.stories CustomRecipient 1`] = `
               >
                 <button
                   aria-label="Copy to clipboard"
-                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
                   tabindex="0"
                   type="button"
                 >
                   <mock-icon
                     aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
                     data-testid="copy-btn-icon"
                     focusable="false"
                   />
                 </button>
               </span>
               <div
-                class="MuiBox-root mui-style-yjghm1"
+                class="MuiBox-root css-yjghm1"
               >
                 <a
                   aria-label=""
-                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
                   data-mui-internal-clone-element="true"
                   data-testid="explorer-btn"
                   href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
@@ -281,7 +281,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                 >
                   <mock-icon
                     aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
                     focusable="false"
                   />
                 </a>
@@ -291,16 +291,16 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="widget-fee"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Widget fee
              
@@ -310,18 +310,18 @@ exports[`./index.stories CustomRecipient 1`] = `
             >
               <mock-icon
                 aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-1nezs5b-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
                 focusable="false"
               />
             </span>
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             0.5
              %
@@ -329,26 +329,26 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="interact-wth"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Interact with
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
               class="container"
@@ -357,19 +357,19 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-                  style="width: 24px; height: 24px;"
+                <div
+                  class="icon"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjA0IDQzJSAzMCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDAgOTQlIDY1JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyODcgNjElIDQ5JSkiIGQ9Ik0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
-                class="inline MuiBox-root mui-style-1lchl8k"
+                class="inline MuiBox-root css-1lchl8k"
               >
                 <div
                   class="addressContainer inline"
                 >
                   <div
-                    class="MuiBox-root mui-style-b5p5gz"
+                    class="MuiBox-root css-b5p5gz"
                   >
                     <span
                       aria-label="Copy to clipboard"
@@ -377,35 +377,14 @@ exports[`./index.stories CustomRecipient 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
-                      <b>
-                        rin
-                        :
-                      </b>
                       <span>
-                        0x9008D19f58AAbD9eD0D60971565AA8510560ab41
+                        0xd7e3ecc2d0f014d7bc4ce699ececb0ae4188c0ee
                       </span>
                     </span>
                   </div>
                   <div
-                    class="MuiBox-root mui-style-yjghm1"
-                  >
-                    <a
-                      aria-label="View on rinkeby.etherscan.io"
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
-                      data-mui-internal-clone-element="true"
-                      data-testid="explorer-btn"
-                      href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
-                      rel="noreferrer"
-                      tabindex="0"
-                      target="_blank"
-                    >
-                      <mock-icon
-                        aria-hidden=""
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                        focusable="false"
-                      />
-                    </a>
-                  </div>
+                    class="MuiBox-root css-yjghm1"
+                  />
                 </div>
               </div>
             </div>
@@ -413,26 +392,26 @@ exports[`./index.stories CustomRecipient 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="recipient"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Recipient
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
               class="container"
@@ -441,19 +420,19 @@ exports[`./index.stories CustomRecipient 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-                  style="width: 24px; height: 24px;"
+                <div
+                  class="icon"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjQzIDkyJSA0MCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgxNzEgNzYlIDY2JSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgzMzcgOTMlIDgzJSkiIGQ9Ik0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
                 />
               </div>
               <div
-                class="MuiBox-root mui-style-1lchl8k"
+                class="MuiBox-root css-1lchl8k"
               >
                 <div
                   class="addressContainer"
                 >
                   <div
-                    class="MuiBox-root mui-style-b5p5gz"
+                    class="MuiBox-root css-b5p5gz"
                   >
                     <span
                       aria-label="Copy to clipboard"
@@ -461,35 +440,14 @@ exports[`./index.stories CustomRecipient 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
-                      <b>
-                        rin
-                        :
-                      </b>
                       <span>
-                        0x1234...7890
+                        0x9f94...dff9
                       </span>
                     </span>
                   </div>
                   <div
-                    class="MuiBox-root mui-style-yjghm1"
-                  >
-                    <a
-                      aria-label="View on rinkeby.etherscan.io"
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
-                      data-mui-internal-clone-element="true"
-                      data-testid="explorer-btn"
-                      href="https://rinkeby.etherscan.io/address/0x1234567890123456789012345678901234567890"
-                      rel="noreferrer"
-                      tabindex="0"
-                      target="_blank"
-                    >
-                      <mock-icon
-                        aria-hidden=""
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                        focusable="false"
-                      />
-                    </a>
-                  </div>
+                    class="MuiBox-root css-yjghm1"
+                  />
                 </div>
               </div>
             </div>
@@ -498,24 +456,24 @@ exports[`./index.stories CustomRecipient 1`] = `
       </div>
       <div>
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard mui-style-1wi6bbj-MuiPaper-root-MuiAlert-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard css-1c4n4y0-MuiPaper-root-MuiAlert-root"
           data-testid="recipient-alert"
           role="alert"
           style="--Paper-shadow: none;"
         >
           <div
-            class="MuiAlert-icon mui-style-vab54s-MuiAlert-icon"
+            class="MuiAlert-icon css-vab54s-MuiAlert-icon"
           >
             mock-icon
           </div>
           <div
-            class="MuiAlert-message mui-style-zioonp-MuiAlert-message"
+            class="MuiAlert-message css-zioonp-MuiAlert-message"
           >
             <p
-              class="MuiTypography-root MuiTypography-body2 mui-style-17vdyq3-MuiTypography-root"
+              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
             >
               <span
-                class="MuiTypography-root MuiTypography-body1 mui-style-w5uidf-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
               >
                 Order recipient address differs from order owner.
               </span>
@@ -535,14 +493,14 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1xulk7h-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiStack-root mui-style-1qh2y1i-MuiStack-root"
+      class="MuiStack-root css-1qh2y1i-MuiStack-root"
     >
       <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+        class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
       >
         <b>
           Order details
@@ -552,91 +510,16 @@ exports[`./index.stories Default 1`] = `
         class="amount"
       >
         <div
-          class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          class="MuiStack-root css-niqf4j-MuiStack-root"
         >
           <div
-            class="MuiStack-root mui-style-p24gtu-MuiStack-root"
+            class="MuiStack-root css-p24gtu-MuiStack-root"
           >
             <div
-              class="MuiBox-root mui-style-wvnvdm"
+              class="MuiBox-root css-wvnvdm"
             >
               <div
-                class="MuiBox-root mui-style-olq4e8"
-              >
-                <iframe
-                  height="40"
-                  loading="lazy"
-                  referrerpolicy="strict-origin"
-                  sandbox="allow-scripts"
-                  srcdoc="
-    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
-      <script>
-        document.querySelector('img').onerror = (e) => {
-          e.target.onerror = null
-          e.target.src = "/images/common/token-placeholder.svg"
-        }
-      </script>
-    </body>
-  "
-                  style="pointer-events: none; border: 0px; display: block;"
-                  tabindex="-1"
-                  title="USDC"
-                  width="40"
-                />
-              </div>
-            </div>
-            <div
-              class="MuiBox-root mui-style-1rr4qq7"
-              data-testid="block-label"
-            >
-              <p
-                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-              >
-                Sell
-              </p>
-              <div
-                class="MuiTypography-root MuiTypography-h4 mui-style-csh7nj-MuiTypography-root"
-              >
-                <span
-                  aria-label="10 USDC"
-                  class="container"
-                  data-mui-internal-clone-element="true"
-                >
-                  <b
-                    class="tokenText"
-                  >
-                    10
-                     
-                    USDC
-                  </b>
-                </span>
-              </div>
-            </div>
-            <div
-              class="MuiStack-root mui-style-1nxlmhd-MuiStack-root"
-            >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
-                data-testid="EastRoundedIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
-                />
-              </svg>
-            </div>
-          </div>
-          <div
-            class="MuiStack-root mui-style-p24gtu-MuiStack-root"
-          >
-            <div
-              class="MuiBox-root mui-style-wvnvdm"
-            >
-              <div
-                class="MuiBox-root mui-style-olq4e8"
+                class="MuiBox-root css-olq4e8"
               >
                 <iframe
                   height="40"
@@ -656,34 +539,109 @@ exports[`./index.stories Default 1`] = `
   "
                   style="pointer-events: none; border: 0px; display: block;"
                   tabindex="-1"
-                  title="NPR"
+                  title="AUD"
                   width="40"
                 />
               </div>
             </div>
             <div
-              class="MuiBox-root mui-style-1rr4qq7"
+              class="MuiBox-root css-1rr4qq7"
               data-testid="block-label"
             >
               <p
-                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
               >
-                For at least
+                Sell
               </p>
               <div
-                class="MuiTypography-root MuiTypography-h4 mui-style-csh7nj-MuiTypography-root"
+                class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
               >
                 <span
-                  aria-label="0 NPR"
+                  aria-label="10 AUD"
                   class="container"
                   data-mui-internal-clone-element="true"
                 >
                   <b
                     class="tokenText"
                   >
-                    0
+                    10
                      
-                    NPR
+                    AUD
+                  </b>
+                </span>
+              </div>
+            </div>
+            <div
+              class="MuiStack-root css-1nxlmhd-MuiStack-root"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-15tzxj8-MuiSvgIcon-root-MuiSvgIcon-root"
+                data-testid="EastRoundedIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M14.29 5.71c-.39.39-.39 1.02 0 1.41L18.17 11H3c-.55 0-1 .45-1 1s.45 1 1 1h15.18l-3.88 3.88c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l5.59-5.59c.39-.39.39-1.02 0-1.41l-5.6-5.58c-.38-.39-1.02-.39-1.41 0"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="MuiStack-root css-p24gtu-MuiStack-root"
+          >
+            <div
+              class="MuiBox-root css-wvnvdm"
+            >
+              <div
+                class="MuiBox-root css-olq4e8"
+              >
+                <iframe
+                  height="40"
+                  loading="lazy"
+                  referrerpolicy="strict-origin"
+                  sandbox="allow-scripts"
+                  srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                  style="pointer-events: none; border: 0px; display: block;"
+                  tabindex="-1"
+                  title="SGD"
+                  width="40"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-1rr4qq7"
+              data-testid="block-label"
+            >
+              <p
+                class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
+              >
+                For at least
+              </p>
+              <div
+                class="MuiTypography-root MuiTypography-h4 css-csh7nj-MuiTypography-root"
+              >
+                <span
+                  aria-label="0.00000005 SGD"
+                  class="container"
+                  data-mui-internal-clone-element="true"
+                >
+                  <b
+                    class="tokenText"
+                  >
+                    &lt; 0.00001
+                     
+                    SGD
                   </b>
                 </span>
               </div>
@@ -692,89 +650,89 @@ exports[`./index.stories Default 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="limit-price"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Limit price
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             1 
-            NPR
+            SGD
              = 
-            0
+            200M
              
-            USDC
+            AUD
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid=""
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Expiry
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             Dec 24, 2024 - 12:54:40 AM
           </div>
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="order-id"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Order ID
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
-              class="MuiStack-root mui-style-m69qwo-MuiStack-root"
+              class="MuiStack-root css-m69qwo-MuiStack-root"
             >
               <span>
-                170e4a48
+                9156d47f
               </span>
               <span
                 aria-label="Copy to clipboard"
@@ -784,24 +742,24 @@ exports[`./index.stories Default 1`] = `
               >
                 <button
                   aria-label="Copy to clipboard"
-                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
                   tabindex="0"
                   type="button"
                 >
                   <mock-icon
                     aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
                     data-testid="copy-btn-icon"
                     focusable="false"
                   />
                 </button>
               </span>
               <div
-                class="MuiBox-root mui-style-yjghm1"
+                class="MuiBox-root css-yjghm1"
               >
                 <a
                   aria-label=""
-                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                  class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
                   data-mui-internal-clone-element="true"
                   data-testid="explorer-btn"
                   href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
@@ -811,7 +769,7 @@ exports[`./index.stories Default 1`] = `
                 >
                   <mock-icon
                     aria-hidden=""
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-tqxw8e-MuiSvgIcon-root"
                     focusable="false"
                   />
                 </a>
@@ -821,16 +779,16 @@ exports[`./index.stories Default 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="widget-fee"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Widget fee
              
@@ -840,18 +798,18 @@ exports[`./index.stories Default 1`] = `
             >
               <mock-icon
                 aria-hidden=""
-                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-1nezs5b-MuiSvgIcon-root"
+                class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-1nezs5b-MuiSvgIcon-root"
                 focusable="false"
               />
             </span>
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             0.5
              %
@@ -859,26 +817,26 @@ exports[`./index.stories Default 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+        class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
         data-testid="interact-wth"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
           data-testid="tx-row-title"
           style="word-break: break-word;"
         >
           <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
           >
             Interact with
           </span>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
           data-testid="tx-data-row"
         >
           <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+            class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
           >
             <div
               class="container"
@@ -887,19 +845,19 @@ exports[`./index.stories Default 1`] = `
                 class="avatarContainer"
                 style="width: 24px; height: 24px;"
               >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-                  style="width: 24px; height: 24px;"
+                <div
+                  class="icon"
+                  style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woOTkgNzMlIDQzJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDIwOCA2NiUgNDklKSIgZD0iTTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDI3NSA3MyUgMzklKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
                 />
               </div>
               <div
-                class="inline MuiBox-root mui-style-1lchl8k"
+                class="inline MuiBox-root css-1lchl8k"
               >
                 <div
                   class="addressContainer inline"
                 >
                   <div
-                    class="MuiBox-root mui-style-b5p5gz"
+                    class="MuiBox-root css-b5p5gz"
                   >
                     <span
                       aria-label="Copy to clipboard"
@@ -907,35 +865,14 @@ exports[`./index.stories Default 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
-                      <b>
-                        rin
-                        :
-                      </b>
                       <span>
-                        0x9008D19f58AAbD9eD0D60971565AA8510560ab41
+                        0xb9b9a37c49f5ee2ab61525bd06fbd0af82af7bb4
                       </span>
                     </span>
                   </div>
                   <div
-                    class="MuiBox-root mui-style-yjghm1"
-                  >
-                    <a
-                      aria-label="View on rinkeby.etherscan.io"
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
-                      data-mui-internal-clone-element="true"
-                      data-testid="explorer-btn"
-                      href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
-                      rel="noreferrer"
-                      tabindex="0"
-                      target="_blank"
-                    >
-                      <mock-icon
-                        aria-hidden=""
-                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-                        focusable="false"
-                      />
-                    </a>
-                  </div>
+                    class="MuiBox-root css-yjghm1"
+                  />
                 </div>
               </div>
             </div>
