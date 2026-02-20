@@ -11,18 +11,17 @@
  * IMPORTANT: Hooks are NOT in the contract - exported directly from index.ts
  */
 
-import type SwapWidget from './components/SwapWidget'
+import type { ComponentType } from 'react'
 import type SwapButton from './components/SwapButton'
 import type SwapOrder from './components/SwapOrder'
 import type SwapOrderConfirmation from './components/SwapOrderConfirmationView'
 import type StatusLabel from './components/StatusLabel'
 import type SwapTokens from './components/SwapTokens'
-import type FallbackSwapWidget from './components/FallbackSwapWidget'
 
 export interface SwapContract {
-  // Main Widgets (PascalCase → stub renders null)
-  SwapWidget: typeof SwapWidget
-  FallbackSwapWidget: typeof FallbackSwapWidget
+  // Main Widgets - dynamic() loaded separately from CowSwap SDK
+  SwapWidget: ComponentType<{ sell?: { asset: string; amount: string } }>
+  FallbackSwapWidget: ComponentType<{ fromToken?: string }>
 
   // UI Components (PascalCase → stub renders null)
   SwapButton: typeof SwapButton

@@ -57,6 +57,3 @@ export * from './constants'
 // ─────────────────────────────────────────────────────────────────
 
 export { getOrderClass, getSwapTitle, TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from './helpers/utils'
-
-// FallbackSwapWidget constant (used by analytics)
-export { SWAP_WIDGET_URL } from './components/FallbackSwapWidget'
