@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Typography } from '@mui/material'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { type ContactSource } from '@/hooks/useAllAddressBooks'
 import css from '../AccountItems/styles.module.css'
 
@@ -58,7 +58,7 @@ function AccountItemInfo({
             {chainName}
           </Typography>
         ) : (
-          <EthHashInfo
+          <NamedAddressInfo
             address={address}
             name={name}
             showName={addressBookNameSource ? !!name : true}

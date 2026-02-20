@@ -5,8 +5,6 @@ import {
   ContactSource,
   type ExtendedContact,
 } from '@/hooks/useAllAddressBooks'
-import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import * as currentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
 
 let signedIn = false
 let chainId = '1'
@@ -15,7 +13,13 @@ let localAddressBook: Record<string, string> = {}
 let remoteContacts: ExtendedContact[] = []
 
 jest.mock('@/store', () => ({
-  useAppSelector: (selector: (state: unknown) => unknown) => selector({}),
+  useAppSelector: (selector: (state: unknown) => unknown) =>
+    typeof selector === 'function' ? selector({}) : undefined,
+}))
+
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: jest.fn(),
+  useGetSpaceAddressBook: jest.fn(),
 }))
 
 jest.mock('@/store/authSlice', () => ({
@@ -31,17 +35,14 @@ jest.mock('@/hooks/useAddressBook', () => () => localAddressBook)
 
 jest.mock('@/hooks/useChainId', () => () => chainId)
 
+// Import the mocked hooks
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {
     beforeEach(() => {
-      jest.spyOn(spacesQueries, 'useAddressBooksGetAddressBookItemsV1Query').mockImplementation(() => ({
-        currentData: {
-          data: remoteContacts,
-        },
-        refetch: jest.fn(),
-      }))
-
-      jest.spyOn(currentSpaceIdHook, 'useCurrentSpaceId').mockReturnValue(currentSpaceId)
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(currentSpaceId)
+      ;(useGetSpaceAddressBook as jest.Mock).mockImplementation(() => remoteContacts)
     })
 
     afterEach(() => {
@@ -117,10 +118,16 @@ describe('useAllAddressBooks', () => {
   })
 
   describe('useAddressBookItem', () => {
+    beforeEach(() => {
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(currentSpaceId)
+      ;(useGetSpaceAddressBook as jest.Mock).mockImplementation(() => remoteContacts)
+    })
+
     afterEach(() => {
       remoteContacts = []
       localAddressBook = {}
       signedIn = false
+      jest.clearAllMocks()
     })
 
     it('returns the matching contact by address + chainId', () => {

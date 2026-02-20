@@ -50,7 +50,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
       data-testid="action-required-panel"
       sx={{
         border: 0,
-        px: 1.5,
+        px: { xs: 3, lg: 1.5 },
         pt: 2.5,
         pb: isExpanded ? 2.5 : 1.5,
         height: 1,

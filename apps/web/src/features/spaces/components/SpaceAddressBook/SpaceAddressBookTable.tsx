@@ -6,7 +6,7 @@ import { Box, Chip, Stack, Tooltip } from '@mui/material'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import SpaceAddressBookActions from '@/features/spaces/components/SpaceAddressBook/SpaceAddressBookActions'
+import SpaceAddressBookActions from './SpaceAddressBookActions'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 

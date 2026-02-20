@@ -8,7 +8,7 @@ exports[`./index.stories DarkMode 1`] = `
     class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-18ctci2-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -144,7 +144,7 @@ exports[`./index.stories Default 1`] = `
     class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-18ctci2-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -280,7 +280,7 @@ exports[`./index.stories LightMode 1`] = `
     class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-18ctci2-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -416,7 +416,7 @@ exports[`./index.stories NarrowViewport 1`] = `
     class="MuiBox-root mui-style-9whsf3"
   >
     <section
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-6i93q8-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-18ctci2-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
