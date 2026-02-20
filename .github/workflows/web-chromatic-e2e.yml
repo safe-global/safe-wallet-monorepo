@@ -2,6 +2,10 @@ name: Web Chromatic E2E
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -64,3 +68,6 @@ jobs:
           workingDir: apps/web
         env:
           CHROMATIC_ARCHIVE_LOCATION: ./cypress/downloads
+          CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CHROMATIC_BRANCH: ${{ github.head_ref || github.ref_name }}
+          CHROMATIC_SLUG: ${{ github.repository }}
