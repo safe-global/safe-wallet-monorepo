@@ -15,19 +15,19 @@ interface AssetsHeaderProps {
 export function AssetsHeader({ amount, isLoading, onPendingTransactionsPress, hasMore }: AssetsHeaderProps) {
   return (
     <StyledAssetsHeader>
-      <BalanceContainer />
-
       <ReadOnlyContainer />
 
-      <View marginTop="$4">
-        {amount > 0 && (
+      <BalanceContainer />
+
+      {amount > 0 && (
+        <View marginTop="$4">
           <PendingTransactions
             isLoading={isLoading}
             onPress={onPendingTransactionsPress}
             number={`${amount}${hasMore ? '+' : ''}`}
           />
-        )}
-      </View>
+        </View>
+      )}
     </StyledAssetsHeader>
   )
 }
