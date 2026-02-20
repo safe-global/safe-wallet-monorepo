@@ -1,0 +1,150 @@
+import { render, screen } from '@testing-library/react'
+import { Home, FileText, Users, Shield } from 'lucide-react'
+import { SpacesSidebarVariant } from '../variants/SpacesSidebarVariant'
+import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from '../types'
+
+// Mock sidebar UI components
+jest.mock('@/components/ui/sidebar', () => ({
+  SidebarContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarGroupLabel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarGroupContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
+  SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp }: any) => (
+    <button data-active={isActive} disabled={disabled} className={className} {...(renderProp ? { as: 'a' } : {})}>
+      {children}
+    </button>
+  ),
+}))
+
+// Mock Next.js Link component
+jest.mock('next/link', () => {
+  const Link = ({ children, href }: any) => <a href={href}>{children}</a>
+  Link.displayName = 'Link'
+  return Link
+})
+
+// Mock SpaceSelectorDropdown
+jest.mock('../variants/SpaceSelectorDropdown', () => ({
+  SpaceSelectorDropdown: ({ selectedSpace, spaces }: any) => (
+    <div>
+      Selected: {selectedSpace?.name} | Spaces: {spaces?.length}
+    </div>
+  ),
+}))
+
+describe('SpacesSidebarVariant', () => {
+  const mockSpace: SpaceItem = {
+    id: 1,
+    name: 'Test Space',
+  }
+
+  const mockSpaces: SpaceItem[] = [
+    { id: 1, name: 'Space 1' },
+    { id: 2, name: 'Space 2' },
+  ]
+
+  const mockMainNavItems: ResolvedSidebarItem[] = [
+    {
+      icon: Home,
+      label: 'Home',
+      href: '/home',
+      badge: 0,
+      isActive: true,
+      disabled: false,
+      link: { pathname: '/home', query: { spaceId: '1' } },
+    },
+    {
+      icon: FileText,
+      label: 'Transactions',
+      href: '/transactions',
+      badge: 5,
+      isActive: false,
+      disabled: false,
+      link: { pathname: '/transactions', query: { spaceId: '1' } },
+    },
+  ]
+
+  const mockSetupGroup: ResolvedSidebarGroup = {
+    label: 'Setup',
+    items: [
+      {
+        icon: Users,
+        label: 'Team',
+        href: '/team',
+        badge: 0,
+        isActive: false,
+        disabled: false,
+        link: { pathname: '/team', query: { spaceId: '1' } },
+      },
+      {
+        icon: Shield,
+        label: 'Security',
+        href: '/security',
+        badge: 0,
+        isActive: false,
+        disabled: true,
+        link: { pathname: '/security', query: { spaceId: '1' } },
+      },
+    ],
+  }
+
+  it('renders space selector dropdown', () => {
+    render(
+      <SpacesSidebarVariant
+        mainNavItems={mockMainNavItems}
+        setupGroup={mockSetupGroup}
+        selectedSpace={mockSpace}
+        spaces={mockSpaces}
+      />,
+    )
+
+    expect(screen.getByText(/Selected:/)).toBeInTheDocument()
+  })
+
+  it('renders all navigation items with labels', () => {
+    render(
+      <SpacesSidebarVariant
+        mainNavItems={mockMainNavItems}
+        setupGroup={mockSetupGroup}
+        selectedSpace={mockSpace}
+        spaces={mockSpaces}
+      />,
+    )
+
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByText('Transactions')).toBeInTheDocument()
+    expect(screen.getByText('Setup')).toBeInTheDocument()
+    expect(screen.getByText('Team')).toBeInTheDocument()
+    expect(screen.getByText('Security')).toBeInTheDocument()
+  })
+
+  it('renders badge for items with non-zero badge count', () => {
+    render(
+      <SpacesSidebarVariant
+        mainNavItems={mockMainNavItems}
+        setupGroup={mockSetupGroup}
+        selectedSpace={mockSpace}
+        spaces={mockSpaces}
+      />,
+    )
+
+    expect(screen.getByText('5')).toBeInTheDocument()
+  })
+
+  it('disables items marked as disabled', () => {
+    const { container } = render(
+      <SpacesSidebarVariant
+        mainNavItems={mockMainNavItems}
+        setupGroup={mockSetupGroup}
+        selectedSpace={mockSpace}
+        spaces={mockSpaces}
+      />,
+    )
+
+    const buttons = container.querySelectorAll('button')
+    const securityButton = Array.from(buttons).find((btn) => btn.textContent?.includes('Security'))
+    expect(securityButton).toHaveAttribute('disabled')
+  })
+})
