@@ -31,7 +31,6 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: ArrowRightLeft,
     label: 'Transactions',
     href: AppRoutes.spaces.transactions,
-    badge: 1,
   },
   {
     icon: WalletCards,
@@ -78,7 +77,6 @@ export const safeMainNavigation: SidebarItemConfig[] = [
     icon: ArrowRightLeft,
     label: 'Transactions',
     href: '/transactions',
-    badge: 1,
   },
   {
     icon: Coins,
