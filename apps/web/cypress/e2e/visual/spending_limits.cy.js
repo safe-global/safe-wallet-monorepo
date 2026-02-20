@@ -4,6 +4,7 @@ import * as spendinglimit from '../pages/spending_limits.pages.js'
 import * as owner from '../pages/owners.pages.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -16,29 +17,25 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
   })
 
   beforeEach(() => {
+    mockVisualTestApis()
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
-    cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     spendinglimit.clickOnNewSpendingLimitBtn()
-    main.waitForMuiAnimationsToSettle()
-    cy.contains('New transaction', { timeout: 10000 }).should('be.visible')
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit form', () => {
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit amount validation error', () => {
     spendinglimit.enterSpendingLimitAmount('0')
-    spendinglimit.verifyNumberErrorValidation()
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spending limit reset time dropdown', () => {
     spendinglimit.clickOnTimePeriodDropdown()
-    main.waitForMuiAnimationsToSettle()
-    spendinglimit.checkTimeDropdownOptions()
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

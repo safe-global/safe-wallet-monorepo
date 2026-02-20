@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -16,10 +17,14 @@ describe(
       staticSafes = await getSafes(CATEGORIES.static)
     })
 
+    beforeEach(() => {
+      mockVisualTestApis()
+    })
+
     it('[VISUAL] Screenshot executed transaction detail page', () => {
       cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + executedTx)
       cy.contains('Transaction details', { timeout: 30000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

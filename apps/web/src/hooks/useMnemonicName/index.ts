@@ -7,6 +7,10 @@ const adjectives: string[] = adjectivesDict.trim().split(/\s+/)
 export const capitalize = (word: string) => (word.length > 0 ? `${word.charAt(0).toUpperCase()}${word.slice(1)}` : word)
 
 const getRandomItem = <T>(arr: T[]): T => {
+  // Return deterministic value in visual regression builds to prevent Chromatic diffs
+  if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
+    return arr[0]
+  }
   return arr[Math.floor(arr.length * Math.random())]
 }
 
