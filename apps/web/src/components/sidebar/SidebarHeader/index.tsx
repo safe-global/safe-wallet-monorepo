@@ -29,12 +29,7 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import SafeHeaderInfo from './SafeHeaderInfo'
 
-type SidebarHeaderProps = {
-  onDrawerToggle: () => void
-  isDrawerOpen: boolean
-}
-
-const SafeHeader = ({ onDrawerToggle, isDrawerOpen }: SidebarHeaderProps): ReactElement => {
+const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()

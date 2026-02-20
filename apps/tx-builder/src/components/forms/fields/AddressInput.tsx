@@ -68,7 +68,7 @@ function AddressInput({
         onChangeAddress(checksumValidAddress(resolvedAddress))
         // we update the input value
         updateInputValue(resolvedAddress)
-      } catch (e) {
+      } catch (_e) {
         onChangeAddress(address)
       } finally {
         setIsLoadingENSResolution(false)

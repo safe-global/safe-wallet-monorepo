@@ -40,7 +40,7 @@ const Sidebar = (): ReactElement => {
         </button>
 
         {/* Address, balance, copy button, etc */}
-        <SidebarHeader onDrawerToggle={onDrawerToggle} isDrawerOpen={isDrawerOpen} />
+        <SidebarHeader />
 
         {/* Nav menu */}
         <SidebarNavigation />
