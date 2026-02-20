@@ -86,6 +86,7 @@ const SwapWidget = ({ sell }: Params) => {
   const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
+  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi'
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
   const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
@@ -103,7 +104,7 @@ const SwapWidget = ({ sell }: Params) => {
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
     chainId,
-    baseUrl: useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi',
+    baseUrl: cowSwapBaseUrl,
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,
@@ -155,7 +156,7 @@ const SwapWidget = ({ sell }: Params) => {
   const appData: SafeAppData = useMemo(
     () => ({
       id: 1,
-      url: 'https://app.safe.global',
+      url: cowSwapBaseUrl,
       name: SWAP_TITLE,
       iconUrl: darkMode ? './images/common/safe-swap-dark.svg' : './images/common/safe-swap.svg',
       description: 'Safe Apps',
@@ -166,7 +167,7 @@ const SwapWidget = ({ sell }: Params) => {
       socialProfiles: [],
       featured: false,
     }),
-    [darkMode],
+    [darkMode, cowSwapBaseUrl],
   )
 
   const listeners = useMemo<CowEventListeners>(() => {
