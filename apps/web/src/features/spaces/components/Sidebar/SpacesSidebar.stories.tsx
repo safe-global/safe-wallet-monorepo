@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
-import { SidebarProvider, SidebarInset, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
+import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
