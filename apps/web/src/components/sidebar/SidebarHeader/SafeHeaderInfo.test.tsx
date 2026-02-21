@@ -81,7 +81,7 @@ describe('SafeHeaderInfo', () => {
         resolving: false,
       })
 
-      const { container } = render(<SafeHeaderInfo />)
+      const { container } = render(<SafeHeaderInfo onDrawerToggle={jest.fn()} />)
 
       // Check that the shield icon is rendered
       // The HypernativeTooltip wraps the SvgIcon in a span with display: flex
@@ -106,7 +106,7 @@ describe('SafeHeaderInfo', () => {
         resolving: false,
       })
 
-      const { container } = render(<SafeHeaderInfo />)
+      const { container } = render(<SafeHeaderInfo onDrawerToggle={jest.fn()} />)
 
       const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
         const styles = window.getComputedStyle(span)
@@ -129,7 +129,7 @@ describe('SafeHeaderInfo', () => {
         resolving: false,
       })
 
-      const { container } = render(<SafeHeaderInfo />)
+      const { container } = render(<SafeHeaderInfo onDrawerToggle={jest.fn()} />)
 
       // When isHypernativeGuard is false, the shield icon should not be rendered
       const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {

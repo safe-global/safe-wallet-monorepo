@@ -16,8 +16,8 @@ import CopyIconBold from '@/public/images/sidebar/copy-bold.svg'
 import LinkIconBold from '@/public/images/sidebar/link-bold.svg'
 
 import { selectSettings } from '@/store/settingsSlice'
-import { useCurrentChain } from '@/hooks/useChains'
-import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { getBlockExplorerLink, FEATURES } from '@safe-global/utils/utils/chains'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -39,6 +39,8 @@ const SafeHeader = ({ onDrawerToggle }: SidebarHeaderProps): ReactElement => {
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
   const { CounterfactualStatusButton } = useLoadFeature(CounterfactualFeature)
+
+  const shouldShowNestedSafes = useHasFeature(FEATURES.NESTED_SAFES) && safe.deployed
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 
@@ -82,13 +84,15 @@ const SafeHeader = ({ onDrawerToggle }: SidebarHeaderProps): ReactElement => {
             <ExplorerButton {...blockExplorerLink} className={css.iconButton} icon={LinkIconBold} />
           </Track>
 
-          <Track
-            {...NESTED_SAFE_EVENTS.OPEN_LIST}
-            label={NESTED_SAFE_LABELS.header}
-            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}
-          >
-            <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
-          </Track>
+          {shouldShowNestedSafes && (
+            <Track
+              {...NESTED_SAFE_EVENTS.OPEN_LIST}
+              label={NESTED_SAFE_LABELS.header}
+              mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}
+            >
+              <NestedSafesButton chainId={safe.chainId} safeAddress={safe.address.value} />
+            </Track>
+          )}
 
           <CounterfactualStatusButton />
 
