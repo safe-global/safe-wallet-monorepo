@@ -6,8 +6,15 @@ export const ATTENTION_PANEL_EVENTS = {
     action: 'Migrate unsupported mastercopy',
     category: ATTENTION_PANEL_CATEGORY,
   },
+
   GET_CLI_MASTERCOPY: {
     action: 'Get CLI for unsupported mastercopy',
+    category: ATTENTION_PANEL_CATEGORY,
+  },
+
+  // Outdated Mastercopy
+  UPDATE_OUTDATED_MASTERCOPY: {
+    action: 'Update outdated mastercopy',
     category: ATTENTION_PANEL_CATEGORY,
   },
 
