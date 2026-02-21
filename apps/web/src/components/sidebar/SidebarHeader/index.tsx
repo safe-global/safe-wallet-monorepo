@@ -3,10 +3,12 @@ import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement } from 'react'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
+import { SvgIcon } from '@mui/material'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NewTxButton from '@/components/sidebar/NewTxButton'
 import { useAppSelector } from '@/store'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
 
 import css from './styles.module.css'
 import QrIconBold from '@/public/images/sidebar/qr-bold.svg'
@@ -18,10 +20,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import QrCodeButton from '../QrCodeButton'
 import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import { SvgIcon } from '@mui/material'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
@@ -29,7 +29,11 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import SafeHeaderInfo from './SafeHeaderInfo'
 
-const SafeHeader = (): ReactElement => {
+type SidebarHeaderProps = {
+  onDrawerToggle: () => void
+}
+
+const SafeHeader = ({ onDrawerToggle }: SidebarHeaderProps): ReactElement => {
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
@@ -43,7 +47,7 @@ const SafeHeader = (): ReactElement => {
   return (
     <div className={css.container}>
       <div className={css.info}>
-        <SafeHeaderInfo />
+        <SafeHeaderInfo onDrawerToggle={onDrawerToggle} />
 
         <div className={css.iconButtons}>
           <Track
@@ -92,7 +96,9 @@ const SafeHeader = (): ReactElement => {
         </div>
       </div>
 
-      <NewTxButton />
+      <div className={css.newTxButtonWrapper}>
+        <NewTxButton />
+      </div>
     </div>
   )
 }

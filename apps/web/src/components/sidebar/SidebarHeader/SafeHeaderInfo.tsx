@@ -1,6 +1,8 @@
 import { type ReactElement } from 'react'
 import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
+import { SvgIcon } from '@mui/material'
+import ChevronRight from '@mui/icons-material/KeyboardArrowRight'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafeIcon from '@/components/common/SafeIcon'
@@ -16,7 +18,11 @@ import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 
-const SafeHeaderInfo = (): ReactElement => {
+type SafeHeaderInfoProps = {
+  onDrawerToggle: () => void
+}
+
+const SafeHeaderInfo = ({ onDrawerToggle }: SafeHeaderInfoProps): ReactElement => {
   const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
@@ -26,51 +32,62 @@ const SafeHeaderInfo = (): ReactElement => {
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (
-    <div data-testid="safe-header-info" className={css.safe}>
-      <div data-testid="safe-icon">
-        {safeAddress ? (
-          <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
-        ) : (
-          <Skeleton variant="circular" width={40} height={40} />
-        )}
-      </div>
-
-      <div className={css.address}>
-        {safeAddress ? (
-          <EthHashInfo
-            address={safeAddress}
-            shortAddress
-            showAvatar={false}
-            name={ens}
-            badgeTooltip={isHypernativeGuard ? <SafeHeaderHnTooltip /> : undefined}
-          />
-        ) : (
-          <Typography variant="body2">
-            <Skeleton variant="text" width={86} />
-            <Skeleton variant="text" width={120} />
-          </Typography>
-        )}
-
-        <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
-          {safe.deployed ? (
-            balances.fiatTotal ? (
-              <>
-                <FiatValue value={balances.fiatTotal} />
-                {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
-              </>
-            ) : (
-              <Skeleton variant="text" width={60} />
-            )
+    <button
+      className={css.safeHeaderButton}
+      onClick={onDrawerToggle}
+      aria-label="Open account list"
+      data-testid="safe-header-info"
+    >
+      <div className={css.safe}>
+        <div data-testid="safe-icon">
+          {safeAddress ? (
+            <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
           ) : (
-            <TokenAmount
-              value={balances.items[0]?.balance}
-              decimals={balances.items[0]?.tokenInfo.decimals}
-              tokenSymbol={balances.items[0]?.tokenInfo.symbol}
-            />
+            <Skeleton variant="circular" width={40} height={40} />
           )}
-        </Typography>
+        </div>
+
+        <div className={css.address}>
+          {safeAddress ? (
+            <EthHashInfo
+              address={safeAddress}
+              shortAddress
+              showAvatar={false}
+              name={ens}
+              badgeTooltip={isHypernativeGuard ? <SafeHeaderHnTooltip /> : undefined}
+              hasExplorer={false}
+              copyAddress={false}
+            />
+          ) : (
+            <Typography variant="body2">
+              <Skeleton variant="text" width={86} />
+              <Skeleton variant="text" width={120} />
+            </Typography>
+          )}
+
+          <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
+            {safe.deployed ? (
+              balances.fiatTotal ? (
+                <>
+                  <FiatValue value={balances.fiatTotal} />
+                  {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
+                </>
+              ) : (
+                <Skeleton variant="text" width={60} />
+              )
+            ) : (
+              <TokenAmount
+                value={balances.items[0]?.balance}
+                decimals={balances.items[0]?.tokenInfo.decimals}
+                tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+              />
+            )}
+          </Typography>
+        </div>
       </div>
-    </div>
+
+      <SvgIcon className={css.chevron} component={ChevronRight} fontSize="small" />
+    </button>
   )
 }
 

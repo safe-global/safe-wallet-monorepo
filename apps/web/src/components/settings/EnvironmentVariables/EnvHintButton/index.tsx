@@ -20,13 +20,7 @@ const EnvHintButton = () => {
   return (
     <Link href={{ pathname: AppRoutes.settings.environmentVariables, query: router.query }} passHref legacyBehavior>
       <Tooltip title="Default environment has been changed" placement="top" arrow>
-        <IconButton
-          className={css.button}
-          size="small"
-          color="warning"
-          sx={{ justifySelf: 'flex-end', marginLeft: { sm: '0', md: 'auto' } }}
-          disableRipple
-        >
+        <IconButton className={css.button} size="small" color="warning" disableRipple>
           <SvgIcon component={AlertIcon} inheritViewBox fontSize="small" />
         </IconButton>
       </Tooltip>

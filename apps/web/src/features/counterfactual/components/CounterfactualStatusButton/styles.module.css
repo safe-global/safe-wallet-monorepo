@@ -4,8 +4,7 @@
   width: 32px;
   height: 32px;
   background: var(--color-warning-background);
-  justify-self: flex-end;
-  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .statusButton.processing {

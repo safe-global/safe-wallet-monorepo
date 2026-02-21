@@ -372,7 +372,7 @@ export function verifyAccountListSafeData(data) {
 }
 
 export function clickOnOpenSidebarBtn() {
-  cy.get(openSafesIcon).click()
+  cy.get(sidebarSafeHeader).click()
 }
 
 // Expands all safes in the sidebar

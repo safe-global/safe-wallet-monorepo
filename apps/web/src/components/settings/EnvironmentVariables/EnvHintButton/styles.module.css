@@ -4,4 +4,5 @@
   width: 32px;
   height: 32px;
   background: var(--color-warning-background);
+  flex-shrink: 0;
 }
