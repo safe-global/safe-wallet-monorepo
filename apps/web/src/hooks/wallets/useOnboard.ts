@@ -151,9 +151,11 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
   if (lastWalletLabel) {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
-    connectWallet(onboard, {
-      autoSelect: { label: lastWalletLabel, disableModals: isUnlocked === true },
-    })
+    if (isUnlocked !== false) {
+      connectWallet(onboard, {
+        autoSelect: { label: lastWalletLabel, disableModals: isUnlocked === true },
+      })
+    }
   }
 }
 
