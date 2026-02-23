@@ -115,7 +115,7 @@ const PendingTxsList = (): ReactElement | null => {
   return (
     <Card
       data-testid="pending-tx-widget"
-      sx={{ border: 0, px: 1.5, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
+      sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5, height: 1, width: 1 }}
       component="section"
     >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>

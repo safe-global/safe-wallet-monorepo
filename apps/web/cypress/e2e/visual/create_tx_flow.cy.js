@@ -3,6 +3,7 @@ import * as main from '../pages/main.page.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -18,35 +19,33 @@ describe(
     })
 
     beforeEach(() => {
+      mockVisualTestApis()
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
       wallet.connectSigner(signer)
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
-      main.waitForMuiAnimationsToSettle()
-      cy.contains('Recipient address', { timeout: 10000 }).should('be.visible')
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form initial state', () => {
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form with filled recipient and amount', () => {
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
-      createtx.clickOnTokenselectorAndSelectSepoliaEth()
+      createtx.clickOnTokenselectorAndSelectToken('Ether')
       createtx.setMaxAmount()
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 10000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
-      createtx.verifyRandomStringAddress('Lorem Ipsum')
-      main.verifySkeletonsGone()
+      createtx.typeRecipientAddress('Lorem Ipsum')
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot send form with nonce warning', () => {
       createtx.changeNonce(0)
-      createtx.verifyTooltipMessage(constants.nonceTooltipMsg.lowerThanCurrent)
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

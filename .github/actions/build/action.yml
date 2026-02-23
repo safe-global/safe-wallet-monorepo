@@ -24,12 +24,8 @@ runs:
     - name: Set environment variables
       shell: bash
       run: |
-        if [ "$VISUAL_REGRESSION_BUILD" = "true" ]; then
-          echo "NEXT_PUBLIC_COMMIT_HASH=vistest" >> $GITHUB_ENV
-        else
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
-        fi
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
 
         # Datadog RUM env:
         # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets

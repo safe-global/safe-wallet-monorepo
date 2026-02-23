@@ -115,7 +115,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to staging
@@ -170,7 +170,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to production S3

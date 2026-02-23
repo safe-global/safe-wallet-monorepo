@@ -7,7 +7,9 @@ import CsvTxExportModal from './index'
 import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
 jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
   MixpanelEventParams: {
     DATE_RANGE: 'Date Range',
   },

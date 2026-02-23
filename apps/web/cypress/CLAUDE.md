@@ -34,26 +34,21 @@ All visual tests in `e2e/visual/`. Chromatic captures light + dark mode automati
 ### Structure
 
 ```js
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
+
 describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => { staticSafes = await getSafes(CATEGORIES.static) })
+
+  beforeEach(() => {
+    mockVisualTestApis()  // Mock CGW APIs for deterministic screenshots
+  })
 
   it('[VISUAL] Screenshot description', () => {
     cy.visit(...)
     cy.contains('expected text', { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()  // ALWAYS last line (unless explicitly skipped with comment)
+    main.awaitVisualStability()  // ALWAYS last line (unless explicitly skipped with comment)
   })
 })
-```
-
-### Animation settling
-
-`main.waitForMuiAnimationsToSettle()` — call after any click/toggle that triggers MUI animation (button ripple, modal slide-in, accordion expand, dropdown open). Without this, screenshots capture mid-animation state causing flaky Chromatic diffs.
-
-```js
-owner.clickOnAddSignerBtn()
-main.waitForMuiAnimationsToSettle() // ripple + modal transition
-cy.contains('Add new signer', { timeout: 10000 }).should('be.visible')
-main.verifySkeletonsGone()
 ```
 
 ### Wallet tests
@@ -62,15 +57,25 @@ Use `wallet.connectSigner(signer)` in `beforeEach`, not in individual `it` block
 
 ### Key utilities
 
-| Utility                          | Location                        | Purpose                                 |
-| -------------------------------- | ------------------------------- | --------------------------------------- |
-| `verifySkeletonsGone()`          | `pages/main.page.js`            | Wait for all MUI skeletons to disappear |
-| `waitForMuiAnimationsToSettle()` | `pages/main.page.js`            | 1s settle after MUI animations          |
-| `addToLocalStorage()`            | `pages/main.page.js`            | Set data before first visit             |
-| `addToAppLocalStorage()`         | `pages/main.page.js`            | Set data after visit (needs reload)     |
-| `connectSigner()`                | `support/utils/wallet.js`       | Connect wallet in tests                 |
-| `getSafes()`                     | `support/safes/safesHandler.js` | Get safe addresses                      |
-| `VISUAL_VIEWPORT`                | `support/constants.js`          | Viewport config for visual tests        |
+| Utility                  | Location                        | Purpose                                       |
+| ------------------------ | ------------------------------- | --------------------------------------------- |
+| `awaitVisualStability()` | `pages/main.page.js`            | Wait for skeletons + settle before screenshot |
+| `addToLocalStorage()`    | `pages/main.page.js`            | Set data before first visit                   |
+| `addToAppLocalStorage()` | `pages/main.page.js`            | Set data after visit (needs reload)           |
+| `connectSigner()`        | `support/utils/wallet.js`       | Connect wallet in tests                       |
+| `getSafes()`             | `support/safes/safesHandler.js` | Get safe addresses                            |
+| `VISUAL_VIEWPORT`        | `support/constants.js`          | Viewport config for visual tests              |
+| `mockVisualTestApis()`   | `support/visual-mocks.js`       | Mock CGW APIs for deterministic visuals       |
+
+### API mocking for visual tests
+
+All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky Chromatic diffs caused by changing token prices, balances, and fiat values.
+
+- Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
+- Uses the `safe-token-holder` scenario for balances/portfolio/positions
+- Mocks tx queue and history as empty by default
+- Tests that need specific data (e.g., `tx_queue.cy.js` with pending transactions) call their own `cy.intercept()` AFTER `mockVisualTestApis()` to override (Cypress last-registered-wins)
+- Safe info, chain config, and nonces are NOT mocked (stable for static test safes)
 
 ## Selectors
 

@@ -3,6 +3,7 @@ import * as main from '../pages/main.page.js'
 import * as batch from '../pages/batches.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -14,25 +15,24 @@ describe(
       staticSafes = await getSafes(CATEGORIES.static)
     })
 
+    beforeEach(() => {
+      mockVisualTestApis()
+    })
+
     it('[VISUAL] Screenshot empty batch list', () => {
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
+      main.awaitVisualStability()
       batch.openBatchtransactionsModal()
-      main.waitForMuiAnimationsToSettle()
-      cy.contains(batch.addInitialTransactionStr, { timeout: 10000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot batch list with transaction', () => {
       main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1)
       cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      cy.contains(constants.tokenNames.sepoliaEther, { timeout: 30000 }).should('be.visible')
+      main.awaitVisualStability()
       cy.reload()
-      batch.verifyBatchIconCount(1)
       batch.clickOnBatchCounter()
-      main.waitForMuiAnimationsToSettle()
-      cy.contains(batch.batchedTransactionsStr, { timeout: 10000 }).should('be.visible')
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )
