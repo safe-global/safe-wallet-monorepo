@@ -19,7 +19,7 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
   const fiatChange = calculateProtocolFiatChange(protocol)
 
   return (
-    <View paddingHorizontal="$2" width="100%" backgroundColor="$backgroundSheet">
+    <View paddingHorizontal="$2" width="100%" backgroundColor="$backgroundSheet" testID="protocol-detail-header">
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"

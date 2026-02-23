@@ -23,13 +23,14 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
   const formattedPercentage = formatPercentage(percentageRatio)
   const formattedFiatTotal = formatCurrency(fiatTotal, currency)
   const fiatChange = calculateProtocolFiatChange(protocol)
+  const protocolSlug = protocol.protocol.toLowerCase().replace(/\s+/g, '-')
 
   const handlePress = () => {
     router.push({ pathname: '/protocol-detail-sheet', params: { protocolId: protocol.protocol } })
   }
 
   return (
-    <Pressable onPress={handlePress} testID={`protocol-section-${protocol.protocol}`}>
+    <Pressable onPress={handlePress} testID={`protocol-section-${protocolSlug}`} collapsable={false}>
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
@@ -59,7 +60,14 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
               borderRadius="$2"
               flexShrink={0}
             >
-              <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
+              <Text
+                fontSize={11}
+                color="$color"
+                fontWeight={400}
+                lineHeight={16}
+                letterSpacing={1}
+                testID={`protocol-${protocolSlug}-percentage`}
+              >
                 {formattedPercentage}
               </Text>
             </View>
@@ -67,7 +75,13 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
         </View>
         <View flexDirection="row" alignItems="center" gap="$2" flexShrink={0}>
           <View alignItems="flex-end">
-            <Text fontSize="$4" fontWeight={600} color="$color" lineHeight={20}>
+            <Text
+              fontSize="$4"
+              fontWeight={600}
+              color="$color"
+              lineHeight={20}
+              testID={`protocol-${protocolSlug}-fiat-total`}
+            >
               {formattedFiatTotal}
             </Text>
             {fiatChange !== null && (
