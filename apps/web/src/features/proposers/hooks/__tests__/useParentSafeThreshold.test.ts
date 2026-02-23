@@ -1,5 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { useParentSafeThreshold } from '../useParentSafeThreshold'
+import * as useNestedSafeOwnersModule from '@/hooks/useNestedSafeOwners'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { faker } from '@faker-js/faker'
@@ -19,14 +20,33 @@ describe('useParentSafeThreshold', () => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue(chainId)
   })
 
-  it('should return undefined values when no safe address is provided', () => {
+  it('should return undefined values when no nested safe owners exist', () => {
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue(null)
     jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
       data: undefined,
       isLoading: false,
       refetch: jest.fn(),
     } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
 
-    const { result } = renderHook(() => useParentSafeThreshold(undefined))
+    const { result } = renderHook(() => useParentSafeThreshold())
+
+    expect(result.current).toEqual({
+      threshold: undefined,
+      owners: undefined,
+      parentSafeAddress: undefined,
+      isLoading: false,
+    })
+  })
+
+  it('should return undefined values when nested safe owners is empty', () => {
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue([])
+    jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
+
+    const { result } = renderHook(() => useParentSafeThreshold())
 
     expect(result.current).toEqual({
       threshold: undefined,
@@ -37,13 +57,14 @@ describe('useParentSafeThreshold', () => {
   })
 
   it('should return isLoading=true while loading', () => {
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue([parentSafeAddress])
     jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
       data: undefined,
       isLoading: true,
       refetch: jest.fn(),
     } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
 
-    const { result } = renderHook(() => useParentSafeThreshold(parentSafeAddress))
+    const { result } = renderHook(() => useParentSafeThreshold())
 
     expect(result.current).toEqual({
       threshold: undefined,
@@ -54,6 +75,7 @@ describe('useParentSafeThreshold', () => {
   })
 
   it('should return threshold and owners when parent safe data is available', () => {
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue([parentSafeAddress])
     jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
       data: {
         threshold: 2,
@@ -75,7 +97,7 @@ describe('useParentSafeThreshold', () => {
       refetch: jest.fn(),
     } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
 
-    const { result } = renderHook(() => useParentSafeThreshold(parentSafeAddress))
+    const { result } = renderHook(() => useParentSafeThreshold())
 
     expect(result.current).toEqual({
       threshold: 2,
@@ -85,7 +107,9 @@ describe('useParentSafeThreshold', () => {
     })
   })
 
-  it('should query with the provided safe address', () => {
+  it('should use first owner as parent safe address', () => {
+    const secondParentSafe = checksumAddress(faker.finance.ethereumAddress())
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue([parentSafeAddress, secondParentSafe])
     const mockQuery = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
       data: {
         threshold: 1,
@@ -107,20 +131,21 @@ describe('useParentSafeThreshold', () => {
       refetch: jest.fn(),
     } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
 
-    const { result } = renderHook(() => useParentSafeThreshold(parentSafeAddress))
+    const { result } = renderHook(() => useParentSafeThreshold())
 
     expect(result.current.parentSafeAddress).toBe(parentSafeAddress)
     expect(mockQuery).toHaveBeenCalledWith({ chainId, safeAddress: parentSafeAddress }, { skip: false })
   })
 
-  it('should skip query when no safe address is provided', () => {
+  it('should skip query when no parent safe address', () => {
+    jest.spyOn(useNestedSafeOwnersModule, 'useNestedSafeOwners').mockReturnValue(null)
     const mockQuery = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query').mockReturnValue({
       data: undefined,
       isLoading: false,
       refetch: jest.fn(),
     } as ReturnType<typeof safesQueries.useSafesGetSafeV1Query>)
 
-    renderHook(() => useParentSafeThreshold(undefined))
+    renderHook(() => useParentSafeThreshold())
 
     expect(mockQuery).toHaveBeenCalledWith({ chainId, safeAddress: '' }, { skip: true })
   })

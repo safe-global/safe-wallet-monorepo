@@ -9,27 +9,18 @@ import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { BrowserProvider, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
-import type { RelayTaskStatus } from '@safe-global/utils/services/RelayTxWatcher'
-import * as RelayTxWatcherModule from '@safe-global/utils/services/RelayTxWatcher'
-
-// Mock getBaseUrl to return a test CGW base URL
-jest.mock('@safe-global/store/gateway/cgwClient', () => ({
-  ...jest.requireActual('@safe-global/store/gateway/cgwClient'),
-  getBaseUrl: () => 'https://test-cgw.example.com',
-}))
-
-// Mock getRelayTxStatus from the shared package
-jest.mock('@safe-global/utils/services/RelayTxWatcher', () => {
-  const actual = jest.requireActual('@safe-global/utils/services/RelayTxWatcher')
-  return {
-    ...actual,
-    getRelayTxStatus: jest.fn(),
-  }
-})
 
 const { waitForTx, waitForRelayedTx } = txMonitor
 
 const provider = new BrowserProvider(MockEip1193Provider) as unknown as JsonRpcProvider
+
+const setupFetchStub = (data: any) => () => {
+  return Promise.resolve({
+    json: () => Promise.resolve(data),
+    status: 200,
+    ok: true,
+  })
+}
 
 describe('txMonitor', () => {
   const simpleTxWatcherInstance = SimpleTxWatcher.getInstance()
@@ -102,18 +93,15 @@ describe('txMonitor', () => {
     const chainId = '1'
     const safeAddress = toBeHex('0x1', 20)
 
-    const mockGetRelayTxStatus = RelayTxWatcherModule.getRelayTxStatus as jest.MockedFunction<
-      typeof RelayTxWatcherModule.getRelayTxStatus
-    >
-
-    it('emits a PROCESSED event if status is 200 (Included)', async () => {
-      const mockResponse: RelayTaskStatus = {
-        status: 200,
-        receipt: {
-          transactionHash: '0xdef',
+    it("emits a PROCESSED event if taskStatus 'ExecSuccess'", async () => {
+      const mockData = {
+        task: {
+          taskState: 'ExecSuccess',
         },
       }
-      mockGetRelayTxStatus.mockResolvedValue(mockResponse)
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
+
+      const mockFetch = jest.spyOn(global, 'fetch')
 
       waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
@@ -122,13 +110,12 @@ describe('txMonitor', () => {
       })
 
       await waitFor(() => {
-        expect(mockGetRelayTxStatus).toHaveBeenCalledTimes(1)
+        expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(txDispatchSpy).toHaveBeenCalledWith('PROCESSED', {
           txId: '0x2',
           safeAddress,
           nonce: 1,
           chainId,
-          txHash: '0xdef',
         })
       })
 
@@ -140,14 +127,15 @@ describe('txMonitor', () => {
       expect(txDispatchSpy).not.toHaveBeenCalled()
     })
 
-    it('emits a REVERTED event if status is 500 (Reverted)', async () => {
-      const mockResponse: RelayTaskStatus = {
-        status: 500,
-        receipt: {
-          transactionHash: '0xdef',
+    it("emits a REVERTED event if taskStatus 'ExecReverted'", async () => {
+      const mockData = {
+        task: {
+          taskState: 'ExecReverted',
         },
       }
-      mockGetRelayTxStatus.mockResolvedValue(mockResponse)
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
+
+      const mockFetch = jest.spyOn(global, 'fetch')
 
       waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
@@ -156,11 +144,11 @@ describe('txMonitor', () => {
       })
 
       await waitFor(() => {
-        expect(mockGetRelayTxStatus).toHaveBeenCalledTimes(1)
+        expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(txDispatchSpy).toHaveBeenCalledWith('REVERTED', {
           nonce: 1,
           txId: '0x2',
-          error: new Error('Relayed transaction reverted by EVM.'),
+          error: new Error(`Relayed transaction reverted by EVM.`),
           chainId,
           safeAddress,
         })
@@ -174,11 +162,15 @@ describe('txMonitor', () => {
       expect(txDispatchSpy).not.toHaveBeenCalled()
     })
 
-    it('emits a FAILED event if status is 400 (Rejected)', async () => {
-      const mockResponse: RelayTaskStatus = {
-        status: 400,
+    it("emits a FAILED event if taskStatus 'Blacklisted'", async () => {
+      const mockData = {
+        task: {
+          taskState: 'Blacklisted',
+        },
       }
-      mockGetRelayTxStatus.mockResolvedValue(mockResponse)
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
+
+      const mockFetch = jest.spyOn(global, 'fetch')
 
       waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
@@ -187,11 +179,11 @@ describe('txMonitor', () => {
       })
 
       await waitFor(() => {
-        expect(mockGetRelayTxStatus).toHaveBeenCalledTimes(1)
+        expect(mockFetch).toHaveBeenCalledTimes(1)
         expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', {
           nonce: 1,
           txId: '0x2',
-          error: new Error('Relayed transaction was rejected by relay provider.'),
+          error: new Error(`Relayed transaction was blacklisted by relay provider.`),
           chainId,
           safeAddress,
         })
@@ -205,11 +197,15 @@ describe('txMonitor', () => {
       expect(txDispatchSpy).not.toHaveBeenCalled()
     })
 
-    it('keeps polling if status is 100 (Pending)', async () => {
-      const mockResponse: RelayTaskStatus = {
-        status: 100,
+    it("emits a FAILED event if taskStatus 'Cancelled'", async () => {
+      const mockData = {
+        task: {
+          taskState: 'Cancelled',
+        },
       }
-      mockGetRelayTxStatus.mockResolvedValue(mockResponse)
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
+
+      const mockFetch = jest.spyOn(global, 'fetch')
 
       waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
@@ -218,18 +214,66 @@ describe('txMonitor', () => {
       })
 
       await waitFor(() => {
-        expect(mockGetRelayTxStatus).toHaveBeenCalledTimes(1)
+        expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', {
+          nonce: 1,
+          txId: '0x2',
+          error: new Error(`Relayed transaction was cancelled by relay provider.`),
+          chainId,
+          safeAddress,
+        })
       })
 
-      // Should NOT have dispatched any terminal event
+      // The relay timeout should have been cancelled
+      txDispatchSpy.mockClear()
+      act(() => {
+        jest.advanceTimersByTime(3 * 60_000 + 1)
+      })
+      expect(txDispatchSpy).not.toHaveBeenCalled()
+    })
+
+    it("emits a FAILED event if taskStatus 'NotFound'", async () => {
+      const mockData = {
+        task: {
+          taskState: 'NotFound',
+        },
+      }
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
+
+      const mockFetch = jest.spyOn(global, 'fetch')
+
+      waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
+
+      act(() => {
+        jest.advanceTimersByTime(15_000 + 1)
+      })
+
+      await waitFor(() => {
+        expect(mockFetch).toHaveBeenCalledTimes(1)
+        expect(txDispatchSpy).toHaveBeenCalledWith('FAILED', {
+          nonce: 1,
+          txId: '0x2',
+          error: new Error(`Relayed transaction was not found.`),
+          chainId,
+          safeAddress,
+        })
+      })
+
+      // The relay timeout should have been cancelled
+      txDispatchSpy.mockClear()
+      act(() => {
+        jest.advanceTimersByTime(3 * 60_000 + 1)
+      })
       expect(txDispatchSpy).not.toHaveBeenCalled()
     })
 
     it('emits a FAILED event if the tx relaying timed out', async () => {
-      const mockResponse: RelayTaskStatus = {
-        status: 110,
+      const mockData = {
+        task: {
+          taskState: 'WaitingForConfirmation',
+        },
       }
-      mockGetRelayTxStatus.mockResolvedValue(mockResponse)
+      global.fetch = jest.fn().mockImplementation(setupFetchStub(mockData))
 
       waitForRelayedTx('0x1', ['0x2'], chainId, safeAddress, 1)
 
