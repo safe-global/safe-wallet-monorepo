@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { RenderItemParams } from 'react-native-draggable-flatlist'
 import { AccountItem } from '../AccountItem'
 import { SafesSliceItem } from '@/src/store/safesSlice'
@@ -9,7 +9,6 @@ import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useSafeOverviewService } from '@/src/hooks/services/useSafeOverviewService'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { sumFiatTotals } from '@/src/utils/balance'
 
 interface MyAccountsContainerProps {
   item: { address: Address; info: SafesSliceItem }
@@ -39,14 +38,12 @@ export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccou
     onClose()
   }
 
-  const fiatTotal = useMemo(() => sumFiatTotals(chainsIds.map((id) => item.info[id].fiatTotal)), [chainsIds, item.info])
-
   return (
     <AccountItem
       drag={drag}
       account={{
         ...item.info[chainsIds[0]],
-        fiatTotal,
+        fiatTotal: chainsIds.reduce((acc, id) => acc + parseFloat(item.info[id].fiatTotal), 0).toString(),
       }}
       isDragging={isDragging}
       chains={filteredChains}

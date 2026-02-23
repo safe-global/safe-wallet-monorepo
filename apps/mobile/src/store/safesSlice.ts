@@ -31,28 +31,27 @@ const safesSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const handleOverviewFulfilled = (state: SafesSlice, data: SafeOverview[]) => {
+    builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
+      const data = action.payload
       if (!data?.length) {
         return
       }
 
+      // Process each safe in the response individually
       for (const safeOverview of data) {
         const address = safeOverview.address.value as Address
 
         if (!state[address]) {
-          continue
+          continue // Skip if safe doesn't exist in state
         }
 
         const current = state[address] || {}
+        // Update the specific chain for this safe
         state[address] = {
           ...current,
           [safeOverview.chainId]: safeOverview,
         }
       }
-    }
-
-    builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
-      handleOverviewFulfilled(state, action.payload)
     })
   },
 })

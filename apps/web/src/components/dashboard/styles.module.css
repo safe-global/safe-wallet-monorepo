@@ -49,8 +49,7 @@
 
 @media (max-width: 1199.98px) {
   .rightCol {
-    grid-row: 2;
-    gap: var(--space-3);
+    grid-row: 4;
   }
 }
 

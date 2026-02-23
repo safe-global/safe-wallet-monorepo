@@ -41,6 +41,7 @@ export const useImportSafe = () => {
             safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
             currency,
             trusted: true,
+            excludeSpam: true,
           },
           false,
         )

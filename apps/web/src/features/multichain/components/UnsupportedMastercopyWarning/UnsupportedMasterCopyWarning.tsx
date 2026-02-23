@@ -37,17 +37,13 @@ export const UnsupportedMastercopyWarning = () => {
   return (
     <ActionCard
       severity="warning"
-      title="This Safe is running an unsupported version "
-      content={
-        canMigrate
-          ? 'and may miss security fixes and improvements. You should migrate it to a compatible version.'
-          : 'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
-      }
+      title="This Safe is running an outdated version "
+      content="and may miss security fixes and improvements."
       action={
         canMigrate
-          ? { label: 'Migrate', onClick: openUpgradeModal }
+          ? { label: 'Update version', onClick: openUpgradeModal }
           : {
-              label: 'Get CLI',
+              label: 'Use CLI',
               href: CLI_LINK,
               target: '_blank',
               rel: 'noopener noreferrer',
