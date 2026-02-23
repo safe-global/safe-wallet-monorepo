@@ -90,24 +90,27 @@ const useAppCommunicator = (
   useEffect(() => {
     let communicatorInstance: AppCommunicator
 
-    const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement | null>, app?: SafeAppData) => {
-      communicatorInstance = new AppCommunicator(iframeRef, {
+    const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement | null>, app: SafeAppData) => {
+      let allowedOrigin: string
+      try {
+        allowedOrigin = new URL(app.url).origin
+      } catch {
+        return
+      }
+
+      communicatorInstance = new AppCommunicator(iframeRef, allowedOrigin, {
         onMessage: (msg) => {
           if (!msg.data) return
 
-          const isCustomApp = app && app.id < 1
+          const isCustomApp = app.id < 1
 
-          trackSafeAppEvent(
-            { ...SAFE_APPS_EVENTS.SAFE_APP_SDK_METHOD_CALL },
-            isCustomApp ? app?.url : app?.name || '',
-            {
-              sdkEventData: {
-                method: msg.data.method,
-                ethMethod: (msg.data.params as any)?.call,
-                version: msg.data.env.sdkVersion,
-              },
+          trackSafeAppEvent({ ...SAFE_APPS_EVENTS.SAFE_APP_SDK_METHOD_CALL }, isCustomApp ? app.url : app.name || '', {
+            sdkEventData: {
+              method: msg.data.method,
+              ethMethod: (msg.data.params as any)?.call,
+              version: msg.data.env.sdkVersion,
             },
-          )
+          })
         },
         onError: (error) => {
           logError(Errors._901, error.message)
