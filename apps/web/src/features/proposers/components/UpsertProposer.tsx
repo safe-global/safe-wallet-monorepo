@@ -10,7 +10,7 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
+import { useDelegatorSelection } from '@/features/proposers/hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '@/features/proposers/services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -35,6 +35,8 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  SvgIcon,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import {
@@ -47,8 +49,9 @@ import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
-import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import SignerSelector from '@/components/common/SignerSelector'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import SignatureIcon from '@/public/images/transactions/signature.svg'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type UpsertProposerProps = {
@@ -79,9 +82,19 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const wallet = useWallet()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
-  const isNestedSafeOwner = useIsNestedSafeOwner()
-  const nestedSafeOwners = useNestedSafeOwners()
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold()
+
+  const isEditing = !!proposer
+
+  const {
+    delegatorOptions,
+    setSelectedDelegator,
+    effectiveDelegator,
+    parentSafeAddress,
+    parentThreshold,
+    parentOwners,
+    isMultiSigRequired,
+    canEdit,
+  } = useDelegatorSelection(proposer)
 
   const methods = useForm<ProposerEntry>({
     defaultValues: {
@@ -102,8 +115,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const { handleSubmit, formState } = methods
 
-  const isMultiSigRequired = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
-
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
 
@@ -113,7 +124,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     try {
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
-      const parentSafeAddress = isNestedSafeOwner && nestedSafeOwners ? nestedSafeOwners[0] : undefined
 
       let signature: string
       let delegator: string
@@ -193,11 +203,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     )
     onClose()
   }
-
-  const isEditing = !!proposer
-  const canEdit =
-    wallet?.address === proposer?.delegator ||
-    (isNestedSafeOwner && nestedSafeOwners?.includes(proposer?.delegator ?? ''))
 
   if (multiSigInitiated) {
     return (
@@ -308,6 +313,29 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
             )}
 
             <NetworkWarning action="sign" />
+
+            {!isEditing && delegatorOptions.length > 1 && (
+              <Box mt={2}>
+                <Typography variant="h5" display="flex" gap={1} alignItems="center" mb={1}>
+                  <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
+                  Delegate as
+                  <Tooltip
+                    title="Your connected wallet controls multiple Safe Accounts that are owners of this Safe. Select which account to create the proposer under."
+                    arrow
+                    placement="top"
+                  >
+                    <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
+                  </Tooltip>
+                </Typography>
+
+                <SignerSelector
+                  options={delegatorOptions}
+                  value={effectiveDelegator}
+                  onChange={setSelectedDelegator}
+                  label="Delegator account"
+                />
+              </Box>
+            )}
           </DialogContent>
 
           <Divider />

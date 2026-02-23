@@ -2,8 +2,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import UpsertProposer from '@/features/proposers/components/UpsertProposer'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import EditIcon from '@/public/images/common/edit.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { IconButton, SvgIcon, Tooltip } from '@mui/material'
@@ -13,11 +13,11 @@ import React, { useState } from 'react'
 const EditProposerDialog = ({ proposer }: { proposer: Delegate }) => {
   const [open, setOpen] = useState<boolean>(false)
   const wallet = useWallet()
-  const isNestedSafeOwner = useIsNestedSafeOwner()
   const nestedSafeOwners = useNestedSafeOwners()
 
   const canEdit =
-    wallet?.address === proposer.delegator || (isNestedSafeOwner && nestedSafeOwners?.includes(proposer.delegator))
+    sameAddress(wallet?.address, proposer.delegator) ||
+    (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false)
 
   return (
     <>
