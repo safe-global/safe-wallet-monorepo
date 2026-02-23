@@ -16,6 +16,9 @@ import type { SpaceSelectorProps } from '../types'
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
 
+const getBadgeAriaLabel = (label: string, count: number): string =>
+  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
+
 export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
   return (
@@ -54,7 +57,9 @@ export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelect
                 </SidebarMenuButton>
                 {item.badge !== undefined && item.badge > 0 && (
                   <>
-                    <span className={css.transactionsBadge}>{item.badge}</span>
+                    <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
+                      {item.badge}
+                    </span>
                     <span className={css.transactionsBadgeDot} aria-hidden />
                   </>
                 )}

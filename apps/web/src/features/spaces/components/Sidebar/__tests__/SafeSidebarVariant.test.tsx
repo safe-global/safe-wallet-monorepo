@@ -41,7 +41,7 @@ jest.mock('../config', () => ({
       label: 'Transactions',
       href: '/transactions',
       isActive: false,
-      badge: 0,
+      badge: 2,
     },
   ],
   safeDefiGroup: {
@@ -89,6 +89,7 @@ describe('SafeSidebarVariant', () => {
 
     expect(screen.getByText('Overview')).toBeInTheDocument()
     expect(screen.getAllByText('Transactions').length).toBeGreaterThan(0)
+    expect(screen.getByLabelText('2 Transactions notifications')).toBeInTheDocument()
     expect(screen.getByText('Defi')).toBeInTheDocument()
     expect(screen.getAllByText('Swap').length).toBeGreaterThan(0)
   })

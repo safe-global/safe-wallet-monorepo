@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useId, useState, type ReactElement } from 'react'
 import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
@@ -29,9 +29,12 @@ interface SpaceSelectorDropdownProps {
 
 export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelectorDropdownProps): ReactElement => {
   const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
+  const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
   const displayName = truncateSpaceName(spaceName, SPACE_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
+  const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
 
   const handleSelectSpace = (spaceId: number) => {
     router.push({
@@ -51,8 +54,19 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<SidebarMenuButton size="lg" className={css.spaceSelector} />}>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger
+        render={
+          <SidebarMenuButton
+            size="lg"
+            className={css.spaceSelector}
+            aria-label={triggerAriaLabel}
+            aria-expanded={isOpen}
+            aria-haspopup="menu"
+            aria-controls={menuId}
+          />
+        }
+      >
         <Avatar className={css.spaceSelectorAvatar}>
           <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
         </Avatar>
@@ -67,13 +81,13 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           )}
           <span className={css.spaceSelectorSubtitle}>Space</span>
         </div>
-        <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
+        <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1" aria-hidden>
           <ChevronUp className="size-4" />
           <ChevronDown className="size-4" />
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="bottom" align="start" className={css.spaceSelectorDropdownContent}>
+      <DropdownMenuContent id={menuId} side="bottom" align="start" className={css.spaceSelectorDropdownContent}>
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>

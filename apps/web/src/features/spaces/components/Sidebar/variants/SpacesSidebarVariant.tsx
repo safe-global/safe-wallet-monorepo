@@ -18,6 +18,9 @@ interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   setupGroup: ResolvedSidebarGroup
 }
 
+const getBadgeAriaLabel = (label: string, count: number): string =>
+  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
+
 const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
   <SidebarMenuItem key={item.href} className="relative">
     <SidebarMenuButton
@@ -33,7 +36,9 @@ const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
     </SidebarMenuButton>
     {item.badge !== undefined && item.badge > 0 && (
       <>
-        <span className={css.transactionsBadge}>{item.badge}</span>
+        <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
+          {item.badge}
+        </span>
         <span className={css.transactionsBadgeDot} aria-hidden />
       </>
     )}

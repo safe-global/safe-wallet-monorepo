@@ -132,6 +132,7 @@ describe('SpacesSidebarVariant', () => {
     )
 
     expect(screen.getByText('5')).toBeInTheDocument()
+    expect(screen.getByLabelText('5 Transactions notifications')).toBeInTheDocument()
   })
 
   it('disables items marked as disabled', () => {
