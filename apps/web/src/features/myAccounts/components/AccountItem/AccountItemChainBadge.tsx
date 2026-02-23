@@ -8,9 +8,10 @@ export interface AccountItemChainBadgeProps {
   chainId?: string
   /** Multi-chain mode - renders network logos with tooltip */
   safes?: SafeItem[]
+  imageSize?: number
 }
 
-function AccountItemChainBadge({ chainId, safes }: AccountItemChainBadgeProps) {
+function AccountItemChainBadge({ chainId, safes, imageSize = 24 }: AccountItemChainBadgeProps) {
   // Multi-chain mode: render NetworkLogosList with tooltip
   if (safes && safes.length > 0) {
     return (
@@ -24,7 +25,7 @@ function AccountItemChainBadge({ chainId, safes }: AccountItemChainBadgeProps) {
               <p className="text-sm">Multichain account on:</p>
               {safes.map((safeItem) => (
                 <div key={safeItem.chainId} className="py-1">
-                  <ChainIndicator chainId={safeItem.chainId} />
+                  <ChainIndicator imageSize={imageSize} chainId={safeItem.chainId} />
                 </div>
               ))}
             </div>

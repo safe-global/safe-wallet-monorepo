@@ -30,6 +30,11 @@ const MOCK_ACCOUNTS: Account[] = [
     safes: [mockSafeItem('1'), mockSafeItem('100'), mockSafeItem('8453')],
     fiatTotal: '39950000',
     owners: '3/5',
+    subAccounts: [
+      { chainId: '1', fiatTotal: '20000000', href: '/home?safe=eth:0x8675309a19b' },
+      { chainId: '100', fiatTotal: '15000000', href: '/home?safe=gno:0x8675309a19b' },
+      { chainId: '8453', fiatTotal: '4950000', href: '/home?safe=base:0x8675309a19b' },
+    ],
   },
   {
     id: '3',
@@ -40,6 +45,10 @@ const MOCK_ACCOUNTS: Account[] = [
     fiatTotal: '39950000',
     owners: '3/5',
     highlighted: true,
+    subAccounts: [
+      { chainId: '100', fiatTotal: '25000000', href: '/home?safe=gno:0x8675309a19b' },
+      { chainId: '137', fiatTotal: '14950000', href: '/home?safe=matic:0x8675309a19b' },
+    ],
   },
 ]
 

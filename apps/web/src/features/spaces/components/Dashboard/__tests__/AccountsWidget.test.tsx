@@ -22,6 +22,10 @@ const mockAccounts: Account[] = [
     safes: [mockSafeItem('1', '0x8675309a19b'), mockSafeItem('137', '0x8675309a19b')],
     fiatTotal: '39950000',
     owners: '3/5',
+    subAccounts: [
+      { chainId: '1', fiatTotal: '20000000', href: '/home?safe=eth:0x8675309a19b' },
+      { chainId: '137', fiatTotal: '19950000', href: '/home?safe=matic:0x8675309a19b' },
+    ],
   },
   {
     id: '2',
@@ -140,15 +144,58 @@ describe('AccountsWidget', () => {
     expect(screen.queryByLabelText(/39,950,000/)).not.toBeInTheDocument()
   })
 
-  it('navigates to the safe home when an account is clicked', async () => {
+  it('navigates to the safe home when a single-chain account is clicked', async () => {
+    const mockPush = jest.fn()
+    render(<AccountsWidget accounts={[mockAccounts[1]]} />, {
+      routerProps: { push: mockPush },
+    })
+
+    const item = screen.getByRole('button', { name: /Treasury/i })
+    await userEvent.click(item)
+
+    expect(mockPush).toHaveBeenCalledWith('/home?safe=eth:0xabcdef01')
+  })
+
+  it('expands a multi-chain account to show sub-items on click', async () => {
+    render(<AccountsWidget accounts={[mockAccounts[0]]} />)
+
+    // Sub-items should not be visible initially
+    expect(screen.queryByText('Ethereum')).not.toBeInTheDocument()
+
+    // Click the multi-chain account trigger
+    const trigger = screen.getByRole('button', { name: /My account/i })
+    await userEvent.click(trigger)
+
+    // Sub-items should now be visible
+    expect(screen.getByText('Ethereum')).toBeInTheDocument()
+    expect(screen.getByText('Polygon')).toBeInTheDocument()
+  })
+
+  it('does not show expand behavior for single-chain accounts', () => {
+    render(<AccountsWidget accounts={[mockAccounts[1]]} />)
+
+    // Single-chain accounts should not have a collapsible trigger with chevron
+    const trigger = screen.getByRole('button', { name: /Treasury/i })
+    expect(trigger).toBeInTheDocument()
+
+    // Should not have the collapsible data-slot
+    expect(screen.queryByTestId('collapsible')).not.toBeInTheDocument()
+  })
+
+  it('navigates to chain-specific safe when a sub-item is clicked', async () => {
     const mockPush = jest.fn()
     render(<AccountsWidget accounts={[mockAccounts[0]]} />, {
       routerProps: { push: mockPush },
     })
 
-    const item = screen.getByRole('button', { name: /My account/i })
-    await userEvent.click(item)
+    // Expand the multi-chain account
+    const trigger = screen.getByRole('button', { name: /My account/i })
+    await userEvent.click(trigger)
 
-    expect(mockPush).toHaveBeenCalledWith('/home?safe=eth:0x8675309a19b')
+    // Click a sub-item
+    const subItems = screen.getAllByTestId('chain-logo')
+    await userEvent.click(subItems[subItems.length - 1])
+
+    expect(mockPush).toHaveBeenCalled()
   })
 })

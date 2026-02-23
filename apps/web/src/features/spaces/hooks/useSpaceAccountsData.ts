@@ -18,6 +18,12 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AppRoutes } from '@/config/routes'
 
+interface SubAccount {
+  chainId: string
+  fiatTotal?: string
+  href: string
+}
+
 interface Account {
   id: string
   name: string
@@ -27,6 +33,7 @@ interface Account {
   fiatTotal?: string
   owners: string
   highlighted?: boolean
+  subAccounts?: SubAccount[]
 }
 
 const getSafeHref = (chain: Chain | undefined, address: string): string => {
@@ -49,6 +56,16 @@ const formatMultichainAccount = (
   const firstChain = chainMap.get(safe.safes[0]?.chainId)
   const name = safe.name || shortenAddress(safe.address)
 
+  const subAccounts: SubAccount[] = safe.safes.map((s) => {
+    const chain = chainMap.get(s.chainId)
+    const overview = safeOverviews.find((o) => o.chainId === s.chainId)
+    return {
+      chainId: s.chainId,
+      fiatTotal: overview?.fiatTotal,
+      href: getSafeHref(chain, safe.address),
+    }
+  })
+
   return {
     id: safe.address,
     name,
@@ -57,6 +74,7 @@ const formatMultichainAccount = (
     safes: safe.safes,
     fiatTotal: safeOverviews.length > 0 ? totalFiat.toString() : undefined,
     owners: firstOverview ? `${firstOverview.threshold}/${firstOverview.owners.length}` : '',
+    subAccounts,
   }
 }
 
@@ -108,4 +126,4 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
 }
 
 export default useSpaceAccountsData
-export type { Account }
+export type { Account, SubAccount }
