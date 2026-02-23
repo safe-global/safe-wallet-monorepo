@@ -10,7 +10,7 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
+import { useDelegatorSelection } from '@/features/proposers/hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '@/features/proposers/services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -49,8 +49,6 @@ import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
@@ -84,40 +82,19 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const wallet = useWallet()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
-  const nestedSafeOwners = useNestedSafeOwners()
 
   const isEditing = !!proposer
 
-  // For edit mode, the delegator is fixed to proposer.delegator.
-  // For add mode, compute available delegator options (EOA + nested Safes).
-  const isDirectOwner = safe.owners.some((owner) => sameAddress(owner.value, wallet?.address))
-
-  const delegatorOptions = useMemo(() => {
-    if (isEditing) return []
-    const options: string[] = []
-    if (isDirectOwner && wallet?.address) options.push(wallet.address)
-    if (nestedSafeOwners) options.push(...nestedSafeOwners)
-    return options
-  }, [isEditing, isDirectOwner, wallet?.address, nestedSafeOwners])
-
-  // For add mode, track user-selected delegator. Default: EOA if direct owner, else first nested Safe.
-  const [selectedDelegator, setSelectedDelegator] = useState<string | undefined>(undefined)
-
-  // Determine the effective delegator address
-  const effectiveDelegator = useMemo(() => {
-    if (isEditing) {
-      // Edit: always use the recorded delegator
-      return proposer?.delegator
-    }
-    // Add: use user selection or default
-    return selectedDelegator ?? delegatorOptions[0]
-  }, [isEditing, proposer?.delegator, selectedDelegator, delegatorOptions])
-
-  // Determine if the effective delegator is a nested Safe (for EIP-1271 signing path)
-  const isNestedDelegator = nestedSafeOwners?.some((addr) => sameAddress(addr, effectiveDelegator)) ?? false
-  const parentSafeAddress = isNestedDelegator ? effectiveDelegator : undefined
-
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold(parentSafeAddress)
+  const {
+    delegatorOptions,
+    setSelectedDelegator,
+    effectiveDelegator,
+    parentSafeAddress,
+    parentThreshold,
+    parentOwners,
+    isMultiSigRequired,
+    canEdit,
+  } = useDelegatorSelection(proposer)
 
   const methods = useForm<ProposerEntry>({
     defaultValues: {
@@ -137,8 +114,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   )
 
   const { handleSubmit, formState } = methods
-
-  const isMultiSigRequired = isNestedDelegator && parentThreshold !== undefined && parentThreshold > 1
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -228,10 +203,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     )
     onClose()
   }
-
-  const canEdit =
-    sameAddress(wallet?.address, proposer?.delegator) ||
-    (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer?.delegator)) ?? false)
 
   if (multiSigInitiated) {
     return (
