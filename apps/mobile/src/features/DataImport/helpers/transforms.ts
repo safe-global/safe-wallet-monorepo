@@ -208,6 +208,7 @@ export const fetchAndStoreSafeOverviews = async (
           safes: chunk,
           currency,
           trusted: true,
+          excludeSpam: true,
         }),
       ).unwrap()
 

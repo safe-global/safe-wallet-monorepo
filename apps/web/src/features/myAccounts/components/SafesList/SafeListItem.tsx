@@ -3,8 +3,8 @@ import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
+import SendTransactionButton from '@/features/spaces/components/SafeAccounts/SendTransactionButton'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
@@ -13,7 +13,6 @@ export interface SafeListItemProps {
 }
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
-  const spaces = useLoadFeature(SpacesFeature)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -77,8 +76,8 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
       {!isSpaceSafe && <AccountItem.PinButton safeItem={safeItem} threshold={threshold} owners={owners} name={name} />}
       {isSpaceSafe ? (
         <>
-          {safeOverview && <spaces.SendTransactionButton safe={safeOverview} />}
-          <spaces.SpaceSafeContextMenu safeItem={safeItem} />
+          {safeOverview && <SendTransactionButton safe={safeOverview} />}
+          <SpaceSafeContextMenu safeItem={safeItem} />
         </>
       ) : (
         <AccountItem.ContextMenu

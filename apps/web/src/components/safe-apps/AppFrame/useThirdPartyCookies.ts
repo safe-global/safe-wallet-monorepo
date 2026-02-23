@@ -23,15 +23,11 @@ type ThirdPartyCookiesType = {
   setThirdPartyCookiesDisabled: (value: boolean) => void
 }
 
-const COOKIE_CHECK_ORIGIN = new URL(SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL).origin
-
 const useThirdPartyCookies = (): ThirdPartyCookiesType => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [thirdPartyCookiesDisabled, setThirdPartyCookiesDisabled] = useState<boolean>(false)
 
   const messageHandler = useCallback((event: MessageEvent) => {
-    if (event.origin !== COOKIE_CHECK_ORIGIN) return
-
     const data = event.data
 
     try {
@@ -53,7 +49,7 @@ const useThirdPartyCookies = (): ThirdPartyCookiesType => {
     window.addEventListener('message', messageHandler)
 
     const iframeElement: HTMLIFrameElement = createIframe(SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL, () =>
-      iframeElement?.contentWindow?.postMessage({ test: 'cookie' }, COOKIE_CHECK_ORIGIN),
+      iframeElement?.contentWindow?.postMessage({ test: 'cookie' }, '*'),
     )
 
     iframeRef.current = iframeElement

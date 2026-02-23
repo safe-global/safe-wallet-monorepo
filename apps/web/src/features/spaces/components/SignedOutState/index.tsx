@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material'
-import css from '../Dashboard/styles.module.css'
-import SignInButton from '../SignInButton'
+import css from '@/features/spaces/components/Dashboard/styles.module.css'
+import SignInButton from '@/features/spaces/components/SignInButton'
 
 const SignedOutState = () => {
   return (

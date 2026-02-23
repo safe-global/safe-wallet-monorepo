@@ -32,7 +32,6 @@ export const usePositions = (): UsePositionsResult => {
     isPortfolioEndpointEnabled,
   )
 
-  // Positions endpoint (fallback when portfolio endpoint is not available)
   const {
     data: positionsData,
     error: positionsError,
@@ -52,11 +51,8 @@ export const usePositions = (): UsePositionsResult => {
     },
   )
 
-  // Portfolio endpoint for positions data (5-minute polling, independent from balance display).
-  // The balance hook polls the same endpoint at 15s for totals. When both are mounted,
-  // RTK Query uses the shortest interval (15s). When only positions is active, it polls at 5m.
   const {
-    currentData: portfolioData,
+    data: portfolioData,
     error: portfolioError,
     isLoading: portfolioLoading,
     isFetching: portfolioFetching,
@@ -67,7 +63,7 @@ export const usePositions = (): UsePositionsResult => {
       : {
           address: activeSafe.address,
           chainIds: activeSafe.chainId,
-          fiatCode: currency.toUpperCase(),
+          fiatCode: currency,
         },
     {
       pollingInterval: POSITIONS_POLLING_INTERVAL,
@@ -87,14 +83,14 @@ export const usePositions = (): UsePositionsResult => {
     [
       shouldUsePortfolioEndpoint,
       portfolioData?.positionBalances,
-      portfolioError,
-      portfolioLoading,
-      portfolioFetching,
-      portfolioRefetch,
       positionsData,
+      portfolioError,
       positionsError,
+      portfolioLoading,
       positionsLoading,
+      portfolioFetching,
       positionsFetching,
+      portfolioRefetch,
       positionsRefetch,
     ],
   )

@@ -1,14 +1,13 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import SpaceSafeAccounts from '@/features/spaces/components/SafeAccounts'
+import AuthState from '@/features/spaces/components/AuthState'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 
 export default function SpaceAccountsPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  const spaces = useLoadFeature(SpacesFeature)
-  useFeatureFlagRedirect()
 
   if (!router.isReady || !spaceId || typeof spaceId !== 'string') return null
 
@@ -19,7 +18,11 @@ export default function SpaceAccountsPage() {
       </Head>
 
       <main>
-        <spaces.SpaceSafeAccountsPage spaceId={spaceId} />
+        <AuthState spaceId={spaceId}>
+          <AddressBookSourceProvider source="spaceOnly">
+            <SpaceSafeAccounts />
+          </AddressBookSourceProvider>
+        </AuthState>
       </main>
     </>
   )

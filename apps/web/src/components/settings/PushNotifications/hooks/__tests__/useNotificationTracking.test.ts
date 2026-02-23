@@ -9,11 +9,9 @@ import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useNotificationTracking } from '../useNotificationTracking'
 
-jest.mock('@/services/analytics', () =>
-  (
-    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
-  ).createAnalyticsMock(),
-)
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
 
 describe('useNotificationTracking', () => {
   beforeEach(() => {

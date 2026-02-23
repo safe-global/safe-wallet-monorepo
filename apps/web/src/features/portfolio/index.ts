@@ -10,11 +10,12 @@
  * ## Usage
  *
  * ```typescript
- * import { PortfolioFeature } from '@/features/portfolio'
+ * import { PortfolioFeature, usePortfolioBalances } from '@/features/portfolio'
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
  *   const feature = useLoadFeature(PortfolioFeature)
+ *   const [balances] = usePortfolioBalances()
  *
  *   // No null check needed - always returns an object
  *   // Components render null when not ready (proxy stub)
@@ -55,4 +56,5 @@ export const PortfolioFeature = createFeatureHandle<PortfolioContract>('portfoli
 export type { PortfolioContract } from './contract'
 
 // Hooks exported directly (always loaded, not lazy) to avoid Rules of Hooks violations
+export { default as usePortfolioBalances } from './hooks/usePortfolioBalances'
 export { default as usePortfolioRefetchOnTxHistory } from './hooks/usePortfolioRefetchOnTxHistory'

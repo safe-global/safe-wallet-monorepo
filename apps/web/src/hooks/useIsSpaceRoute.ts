@@ -1,7 +1,6 @@
 import { usePathname } from 'next/navigation'
 import { AppRoutes } from '@/config/routes'
-import { useAppSelector } from '@/store'
-import { lastUsedSpace } from '@/store/authSlice'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 
 const SPACES_ROUTES = [
   AppRoutes.spaces.index,
@@ -14,7 +13,7 @@ const SPACES_ROUTES = [
 export const useIsSpaceRoute = (): boolean => {
   const clientPathname = usePathname()
   const route = clientPathname || ''
-  const spaceId = useAppSelector(lastUsedSpace)
+  const spaceId = useCurrentSpaceId()
 
   return SPACES_ROUTES.includes(route) && !!spaceId
 }

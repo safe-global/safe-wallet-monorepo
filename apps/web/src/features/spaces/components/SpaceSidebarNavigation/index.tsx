@@ -8,7 +8,8 @@ import {
   SidebarListItemIcon,
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
-import { useCurrentSpaceId, useIsActiceMember } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useIsActiceMember } from '@/features/spaces/hooks/useSpaceMembers'
 import { navItems } from './config'
 
 const Navigation = (): ReactElement => {
