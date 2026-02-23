@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sidebar'
 import css from '../styles.module.css'
 import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
+import { getSidebarItemTestId } from '../utils'
 import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
@@ -27,6 +28,7 @@ const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
       size="lg"
       isActive={item.isActive}
       disabled={item.disabled}
+      data-testid={getSidebarItemTestId(item.label)}
       className={css.sidebarInteractive}
       // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
       render={!item.disabled ? <Link href={item.link} /> : undefined}

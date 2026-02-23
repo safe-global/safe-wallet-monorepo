@@ -11,8 +11,8 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, tooltip, className }: any) => (
-    <button data-active={isActive} data-tooltip={tooltip} className={className}>
+  SidebarMenuButton: ({ children, isActive, tooltip, className, ...props }: any) => (
+    <button data-active={isActive} data-tooltip={tooltip} className={className} {...props}>
       {children}
     </button>
   ),
@@ -88,7 +88,7 @@ describe('SafeSidebarVariant', () => {
     render(<SafeSidebarVariant spaceName="Test Safe" spaceInitial="T" selectedSpace={mockSpace} />)
 
     expect(screen.getByText('Overview')).toBeInTheDocument()
-    expect(screen.getAllByText('Transactions').length).toBeGreaterThan(0)
+    expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
     expect(screen.getByLabelText('2 Transactions notifications')).toBeInTheDocument()
     expect(screen.getByText('Defi')).toBeInTheDocument()
     expect(screen.getAllByText('Swap').length).toBeGreaterThan(0)

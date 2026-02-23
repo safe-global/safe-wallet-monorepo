@@ -12,8 +12,14 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp }: any) => (
-    <button data-active={isActive} disabled={disabled} className={className} {...(renderProp ? { as: 'a' } : {})}>
+  SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp, ...props }: any) => (
+    <button
+      data-active={isActive}
+      disabled={disabled}
+      className={className}
+      {...props}
+      {...(renderProp ? { as: 'a' } : {})}
+    >
       {children}
     </button>
   ),
@@ -115,7 +121,7 @@ describe('SpacesSidebarVariant', () => {
     )
 
     expect(screen.getByText('Home')).toBeInTheDocument()
-    expect(screen.getByText('Transactions')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
     expect(screen.getByText('Setup')).toBeInTheDocument()
     expect(screen.getByText('Team')).toBeInTheDocument()
     expect(screen.getByText('Security')).toBeInTheDocument()

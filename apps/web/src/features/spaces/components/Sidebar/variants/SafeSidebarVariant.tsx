@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { icons, safeMainNavigation, safeDefiGroup } from '../config'
 import css from '../styles.module.css'
 import type { SpaceSelectorProps } from '../types'
+import { getSidebarItemTestId } from '../utils'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
@@ -50,6 +51,7 @@ export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelect
                   size="lg"
                   isActive={item.isActive}
                   tooltip={item.label}
+                  data-testid={getSidebarItemTestId(item.label)}
                   className={css.sidebarInteractive}
                 >
                   <item.icon />
