@@ -16,11 +16,9 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
+import { truncateSpaceName } from '../utils'
 
 const SPACE_NAME_MAX_LENGTH = 15
-
-const truncateSpaceName = (name: string, maxLength: number): string =>
-  name.length > maxLength ? `${name.slice(0, maxLength)}...` : name
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
