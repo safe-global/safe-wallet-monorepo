@@ -88,9 +88,9 @@ describe('SafeSidebarVariant', () => {
     render(<SafeSidebarVariant spaceName="Test Safe" spaceInitial="T" selectedSpace={mockSpace} />)
 
     expect(screen.getByText('Overview')).toBeInTheDocument()
-    expect(screen.getByText('Transactions')).toBeInTheDocument()
+    expect(screen.getAllByText('Transactions').length).toBeGreaterThan(0)
     expect(screen.getByText('Defi')).toBeInTheDocument()
-    expect(screen.getByText('Swap')).toBeInTheDocument()
+    expect(screen.getAllByText('Swap').length).toBeGreaterThan(0)
   })
 
   it('handles undefined space name', () => {

@@ -105,7 +105,7 @@ describe('EnhancedSidebar', () => {
         selectedSpace: mockSelectedSpace,
         spaces: mockSpaces,
       }),
-      expect.anything(),
+      undefined,
     )
   })
 })
