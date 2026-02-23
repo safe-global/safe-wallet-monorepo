@@ -9,8 +9,7 @@ import { CF_TX_GROUP_KEY } from '../constants'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getSafeSDKWithSigner, getUncheckedSigner, tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
-import { getRelayTxStatus, RelayStatus } from '@safe-global/utils/services/RelayTxWatcher'
-import { getBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { getRelayTxStatus, TaskState } from '@/services/tx/txMonitor'
 import type { AppDispatch } from '@/store'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
@@ -212,27 +211,17 @@ export const checkSafeActivation = async (
 export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, type: PayMethod, chainId: string) => {
   const TIMEOUT_TIME = 2 * 60 * 1000 // 2 minutes
 
-  const baseUrl = getBaseUrl()
-  if (!baseUrl) {
-    safeCreationDispatch(SafeCreationEvent.FAILED, {
-      groupKey: CF_TX_GROUP_KEY,
-      error: new Error('CGW base URL not configured'),
-      safeAddress,
-    })
-    return
-  }
-
   let intervalId: NodeJS.Timeout
   let failAfterTimeoutId: NodeJS.Timeout
 
   intervalId = setInterval(async () => {
-    const relayStatus = await getRelayTxStatus(baseUrl, chainId, taskId)
+    const status = await getRelayTxStatus(taskId)
 
-    // Request failed or not found yet
-    if (!relayStatus) return
+    // 404
+    if (!status) return
 
-    switch (relayStatus.status) {
-      case RelayStatus.Included:
+    switch (status.task.taskState) {
+      case TaskState.ExecSuccess:
         safeCreationDispatch(SafeCreationEvent.SUCCESS, {
           groupKey: CF_TX_GROUP_KEY,
           safeAddress,
@@ -240,8 +229,10 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
           chainId,
         })
         break
-      case RelayStatus.Reverted:
-      case RelayStatus.Rejected:
+      case TaskState.ExecReverted:
+      case TaskState.Blacklisted:
+      case TaskState.Cancelled:
+      case TaskState.NotFound:
         safeCreationDispatch(SafeCreationEvent.FAILED, {
           groupKey: CF_TX_GROUP_KEY,
           error: new Error('Transaction failed'),
@@ -249,7 +240,7 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
         })
         break
       default:
-        // Pending or Submitted — keep polling
+        // Don't clear interval as we're still waiting for the tx to be relayed
         return
     }
 
