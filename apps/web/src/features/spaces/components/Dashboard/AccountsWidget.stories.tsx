@@ -1,37 +1,43 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import type { SafeItem } from '@/hooks/safes'
 import { AccountsWidget } from './AccountsWidget'
 import type { Account } from './AccountsWidget'
+
+const mockSafeItem = (chainId: string): SafeItem => ({
+  chainId,
+  address: '0x8675309a19b',
+  isReadOnly: false,
+  isPinned: false,
+  lastVisited: 0,
+  name: undefined,
+})
 
 const MOCK_ACCOUNTS: Account[] = [
   {
     id: '1',
     name: 'My account',
     address: '0x8675...a19b',
-    networks: [{ name: 'Ethereum', logoUrl: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png' }],
-    balance: '$39.95M',
+    href: '/home?safe=eth:0x8675309a19b',
+    safes: [mockSafeItem('1')],
+    fiatTotal: '39950000',
     owners: '3/5',
   },
   {
     id: '2',
     name: 'Treasury',
     address: '0x8675...a19b',
-    networks: [
-      { name: 'Ethereum', logoUrl: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png' },
-      { name: 'Gnosis Chain', logoUrl: 'https://safe-transaction-assets.safe.global/chains/100/chain_logo.png' },
-      { name: 'Base', logoUrl: 'https://safe-transaction-assets.safe.global/chains/8453/chain_logo.png' },
-    ],
-    balance: '$39.95M',
+    href: '/home?safe=eth:0x8675309a19b',
+    safes: [mockSafeItem('1'), mockSafeItem('100'), mockSafeItem('8453')],
+    fiatTotal: '39950000',
     owners: '3/5',
   },
   {
     id: '3',
     name: 'Name',
     address: '0x8675...a19b',
-    networks: [
-      { name: 'Gnosis Chain', logoUrl: 'https://safe-transaction-assets.safe.global/chains/100/chain_logo.png' },
-      { name: 'Polygon', logoUrl: 'https://safe-transaction-assets.safe.global/chains/137/chain_logo.png' },
-    ],
-    balance: '$39.95M',
+    href: '/home?safe=gno:0x8675309a19b',
+    safes: [mockSafeItem('100'), mockSafeItem('137')],
+    fiatTotal: '39950000',
     owners: '3/5',
     highlighted: true,
   },

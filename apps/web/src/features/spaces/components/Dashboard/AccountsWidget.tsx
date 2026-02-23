@@ -1,31 +1,17 @@
-import type { ReactElement } from 'react'
-import { Plus, UserRound } from 'lucide-react'
+import type { ReactElement, ReactNode } from 'react'
+import { UserRound } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage, AvatarGroup } from '@/components/ui/avatar'
-
-interface AccountNetwork {
-  name: string
-  logoUrl: string
-}
-
-interface Account {
-  id: string
-  name: string
-  address: string
-  networks: AccountNetwork[]
-  balance: string
-  owners: string
-  highlighted?: boolean
-}
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
 
 interface AccountsWidgetProps {
   accounts: Account[]
   loading?: boolean
   remainingCount?: number
-  onAddAccount?: () => void
   onViewAll?: () => void
+  action?: ReactNode
 }
 
 const SKELETON_COUNT = 3
@@ -36,19 +22,11 @@ const AccountsWidget = ({
   accounts,
   loading = false,
   remainingCount,
-  onAddAccount,
   onViewAll,
+  action,
 }: AccountsWidgetProps): ReactElement => {
   return (
-    <SafeWidget
-      title="Accounts"
-      action={
-        <Button className="px-5 rounded-md" variant="outline" size="sm" onClick={onAddAccount}>
-          <Plus className="size-4" />
-          Add account
-        </Button>
-      }
-    >
+    <SafeWidget title="Accounts" action={action}>
       {loading
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
         : accounts.map((account) => (
@@ -56,6 +34,7 @@ const AccountsWidget = ({
               key={account.id}
               label={account.name}
               info={account.address}
+              href={account.href}
               highlighted={account.highlighted}
               startNode={
                 <Avatar>
@@ -64,21 +43,10 @@ const AccountsWidget = ({
                   </AvatarFallback>
                 </Avatar>
               }
-              featuredNode={
-                account.networks.length > 0 ? (
-                  <AvatarGroup>
-                    {account.networks.map((network) => (
-                      <Avatar key={network.name} size="xs">
-                        <AvatarImage src={network.logoUrl} alt={network.name} />
-                        <AvatarFallback>{network.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </AvatarGroup>
-                ) : undefined
-              }
+              featuredNode={<AccountItem.ChainBadge safes={account.safes} />}
               actionNode={
                 <>
-                  <span className="text-sm font-medium text-muted-foreground">{account.balance}</span>
+                  <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
                   <Badge variant="secondary">
                     <UserRound className="size-3" />
                     {account.owners}
@@ -95,5 +63,6 @@ const AccountsWidget = ({
 }
 
 export { AccountsWidget }
-export type { AccountsWidgetProps, Account, AccountNetwork }
+export type { AccountsWidgetProps }
+export type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
 export default AccountsWidget

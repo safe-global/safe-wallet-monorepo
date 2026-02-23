@@ -1,9 +1,11 @@
 import type { ReactElement, ReactNode } from 'react'
+import { useRouter } from 'next/router'
 import { cn } from '@/utils/cn'
 
 interface WidgetItemProps {
   label: string
   info: string
+  href?: string
   startNode?: ReactNode
   featuredNode?: ReactNode
   actionNode?: ReactNode
@@ -14,17 +16,27 @@ interface WidgetItemProps {
 const WidgetItem = ({
   label,
   info,
+  href,
   startNode,
   featuredNode,
   actionNode,
   highlighted = false,
   className,
 }: WidgetItemProps): ReactElement => {
+  const router = useRouter()
+
+  const handleClick = href ? () => router.push(href) : undefined
+
   return (
     <div
       data-slot="widget-item"
+      role={href ? 'button' : undefined}
+      tabIndex={href ? 0 : undefined}
+      onClick={handleClick}
+      onKeyDown={href ? (e) => e.key === 'Enter' && handleClick?.() : undefined}
       className={cn(
-        'flex items-center justify-between rounded-xl py-4 pl-4 pr-6',
+        'flex items-center justify-between rounded-sm py-4 pl-4 pr-6',
+        href && 'cursor-pointer transition-colors hover:bg-muted/50',
         highlighted && 'bg-background',
         className,
       )}

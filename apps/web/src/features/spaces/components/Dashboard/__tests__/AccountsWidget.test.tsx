@@ -1,0 +1,154 @@
+import { render, screen } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import type { SafeItem } from '@/hooks/safes'
+import type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
+import AccountsWidget from '../AccountsWidget'
+
+const mockSafeItem = (chainId: string, address: string): SafeItem => ({
+  chainId,
+  address,
+  isReadOnly: false,
+  isPinned: false,
+  lastVisited: 0,
+  name: undefined,
+})
+
+const mockAccounts: Account[] = [
+  {
+    id: '1',
+    name: 'My account',
+    address: '0x8675...a19b',
+    href: '/home?safe=eth:0x8675309a19b',
+    safes: [mockSafeItem('1', '0x8675309a19b'), mockSafeItem('137', '0x8675309a19b')],
+    fiatTotal: '39950000',
+    owners: '3/5',
+  },
+  {
+    id: '2',
+    name: 'Treasury',
+    address: '0xabcd...ef01',
+    href: '/home?safe=eth:0xabcdef01',
+    safes: [mockSafeItem('1', '0xabcdef01')],
+    fiatTotal: '1200000',
+    owners: '2/3',
+  },
+  {
+    id: '3',
+    name: 'Vault',
+    address: '0x1234...5678',
+    href: '/home?safe=eth:0x12345678',
+    safes: [mockSafeItem('1', '0x12345678')],
+    fiatTotal: '500000',
+    owners: '1/1',
+  },
+]
+
+describe('AccountsWidget', () => {
+  it('renders the widget title', () => {
+    render(<AccountsWidget accounts={[]} />)
+
+    expect(screen.getByText('Accounts')).toBeInTheDocument()
+  })
+
+  it('renders account items with name, address, and owners', () => {
+    render(<AccountsWidget accounts={mockAccounts} />)
+
+    expect(screen.getByText('My account')).toBeInTheDocument()
+    expect(screen.getByText('0x8675...a19b')).toBeInTheDocument()
+    expect(screen.getByText('3/5')).toBeInTheDocument()
+
+    expect(screen.getByText('Treasury')).toBeInTheDocument()
+    expect(screen.getByText('0xabcd...ef01')).toBeInTheDocument()
+
+    expect(screen.getByText('Vault')).toBeInTheDocument()
+  })
+
+  it('renders avatar initials for each account', () => {
+    render(<AccountsWidget accounts={mockAccounts} />)
+
+    expect(screen.getByText('M')).toBeInTheDocument()
+    expect(screen.getByText('T')).toBeInTheDocument()
+    expect(screen.getByText('V')).toBeInTheDocument()
+  })
+
+  it('renders chain badges for accounts', () => {
+    render(<AccountsWidget accounts={[mockAccounts[0]]} />)
+
+    expect(screen.getByAltText('Ethereum Logo')).toBeInTheDocument()
+    expect(screen.getByAltText('Polygon Logo')).toBeInTheDocument()
+  })
+
+  it('renders skeletons when loading', () => {
+    const { container } = render(<AccountsWidget accounts={[]} loading />)
+
+    expect(screen.queryByText('My account')).not.toBeInTheDocument()
+
+    const skeletons = container.querySelectorAll('[data-slot="skeleton"]')
+    expect(skeletons.length).toBeGreaterThan(0)
+  })
+
+  it('renders the footer with remaining count', () => {
+    render(<AccountsWidget accounts={mockAccounts} remainingCount={14} />)
+
+    expect(screen.getByText('View all accounts')).toBeInTheDocument()
+  })
+
+  it('does not render the footer when remainingCount is undefined', () => {
+    render(<AccountsWidget accounts={mockAccounts} />)
+
+    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+  })
+
+  it('does not render the footer when loading', () => {
+    render(<AccountsWidget accounts={[]} loading remainingCount={14} />)
+
+    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+  })
+
+  it('calls onViewAll when footer is clicked', async () => {
+    const onViewAll = jest.fn()
+    render(<AccountsWidget accounts={mockAccounts} remainingCount={14} onViewAll={onViewAll} />)
+
+    await userEvent.click(screen.getByText('View all accounts'))
+
+    expect(onViewAll).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders a custom action node', () => {
+    render(<AccountsWidget accounts={[]} action={<button>Custom action</button>} />)
+
+    expect(screen.getByText('Custom action')).toBeInTheDocument()
+  })
+
+  it('renders an empty list when no accounts are provided', () => {
+    render(<AccountsWidget accounts={[]} />)
+
+    expect(screen.getByText('Accounts')).toBeInTheDocument()
+    expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+  })
+
+  it('renders AccountItem.Balance with fiatTotal', () => {
+    render(<AccountsWidget accounts={[mockAccounts[0]]} />)
+
+    expect(screen.getByLabelText('$ 39,950,000.00')).toBeInTheDocument()
+  })
+
+  it('does not render balance when fiatTotal is undefined', () => {
+    const accountWithoutBalance: Account[] = [{ ...mockAccounts[0], fiatTotal: undefined }]
+    render(<AccountsWidget accounts={accountWithoutBalance} />)
+
+    expect(screen.queryByLabelText(/39,950,000/)).not.toBeInTheDocument()
+  })
+
+  it('navigates to the safe home when an account is clicked', async () => {
+    const mockPush = jest.fn()
+    render(<AccountsWidget accounts={[mockAccounts[0]]} />, {
+      routerProps: { push: mockPush },
+    })
+
+    const item = screen.getByRole('button', { name: /My account/i })
+    await userEvent.click(item)
+
+    expect(mockPush).toHaveBeenCalledWith('/home?safe=eth:0x8675309a19b')
+  })
+})

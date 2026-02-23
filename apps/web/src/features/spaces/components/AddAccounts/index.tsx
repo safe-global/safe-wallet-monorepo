@@ -21,7 +21,6 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   Alert,
   Box,
-  Button,
   Card,
   Container,
   DialogActions,
@@ -40,6 +39,8 @@ import Track from '@/components/common/Track'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { showNotification } from '@/store/notificationsSlice'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -167,14 +168,9 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button
-            data-testid="add-space-account-button"
-            variant="contained"
-            onClick={() => setOpen(true)}
-            disabled={!isAdmin}
-            sx={{ whiteSpace: 'nowrap' }}
-          >
-            Add accounts
+          <Button variant="outline" size="sm" disabled={!isAdmin} onClick={() => setOpen(true)}>
+            <Plus className="size-4" />
+            Add account
           </Button>
         </Box>
       </Tooltip>
