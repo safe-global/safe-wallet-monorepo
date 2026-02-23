@@ -51,7 +51,7 @@ export function useAddressName(address?: string, name?: string | null, customAva
   )
 }
 
-const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps) => {
+const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps & { showName?: boolean }) => {
   const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
 
   return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />

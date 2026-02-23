@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -13,6 +14,7 @@ describe(
     })
 
     beforeEach(() => {
+      mockVisualTestApis()
       cy.fixture('pending_tx/pending_tx_order.json').then((mockData) => {
         cy.intercept('GET', constants.queuedEndpoint, mockData).as('getQueuedTransactions')
         cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)
@@ -22,13 +24,12 @@ describe(
     })
 
     it('[VISUAL] Screenshot queue page with pending transactions', () => {
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot expanded queued transaction details', () => {
       cy.contains('Batch').first().click()
-      main.waitForMuiAnimationsToSettle()
-      main.verifySkeletonsGone()
+      main.awaitVisualStability()
     })
   },
 )

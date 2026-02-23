@@ -1,6 +1,6 @@
 import { useChain } from '@/hooks/useChains'
 import { Card, Grid2, Skeleton, Stack, Typography } from '@mui/material'
-import css from '@/features/spaces/components/Dashboard/styles.module.css'
+import css from './styles.module.css'
 import FiatValue from '@/components/common/FiatValue'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'

@@ -2,12 +2,17 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as nfts from '../pages/nfts.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
 describe('[VISUAL] NFTs page screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  beforeEach(() => {
+    mockVisualTestApis()
   })
 
   it('[VISUAL] Screenshot NFTs page with items', () => {
@@ -17,6 +22,6 @@ describe('[VISUAL] NFTs page screenshots', { defaultCommandTimeout: 60000, ...co
     })
     cy.wait('@getCollectibles')
     nfts.waitForNftItems(1)
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

@@ -9,6 +9,7 @@ import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
 /**
  * OAuth callback page for Hypernative authentication
@@ -111,6 +112,9 @@ const HypernativeOAuthCallback: NextPage = () => {
 
         // Step 8: Update UI state
         setStatus('success')
+
+        // Step 8.5: Track successful authentication
+        trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_CONNECTED)
 
         // Step 9: Close popup after short delay (allow postMessage to be delivered)
         setTimeout(() => {

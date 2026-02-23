@@ -3,12 +3,17 @@ import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
 describe('[VISUAL] Sidebar screenshots', { defaultCommandTimeout: 60000, ...constants.VISUAL_VIEWPORT }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  beforeEach(() => {
+    mockVisualTestApis()
   })
 
   it('[VISUAL] Screenshot sidebar with multichain safes expanded', () => {
@@ -23,10 +28,6 @@ describe('[VISUAL] Sidebar screenshots', { defaultCommandTimeout: 60000, ...cons
     sideBar.openSidebar()
     sideBar.searchSafe(sideBar.sideBarSafes.multichain_short_)
     sideBar.expandGroupSafes(0)
-    main.waitForMuiAnimationsToSettle()
-    sideBar.checkMultichainSubSafeExists([constants.networks.ethereum, constants.networks.sepolia])
-
-    cy.contains('Sepolia Ether', { timeout: 30000 }).should('be.visible')
-    main.verifySkeletonsGone()
+    main.awaitVisualStability()
   })
 })

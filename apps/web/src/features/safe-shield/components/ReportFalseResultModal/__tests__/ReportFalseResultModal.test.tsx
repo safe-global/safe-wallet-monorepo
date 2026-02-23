@@ -1,6 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { ReportFalseResultModal } from '../ReportFalseResultModal'
 import { faker } from '@faker-js/faker'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 
 const mockReportFalseResult = jest.fn()
 jest.mock('@/features/safe-shield/hooks/useReportFalseResult', () => ({
@@ -10,9 +12,11 @@ jest.mock('@/features/safe-shield/hooks/useReportFalseResult', () => ({
   }),
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 describe('ReportFalseResultModal', () => {
   const mockRequestId = faker.string.uuid()
@@ -122,6 +126,44 @@ describe('ReportFalseResultModal', () => {
       })
 
       expect(mockOnClose).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Analytics Tracking', () => {
+    it('should track REPORT_SUBMITTED when submit is clicked regardless of API success', async () => {
+      mockReportFalseResult.mockResolvedValueOnce(true)
+
+      render(<ReportFalseResultModal {...defaultProps} />)
+
+      fireEvent.change(screen.getByLabelText(/Details/), { target: { value: 'Details' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Submit report' }))
+
+      await waitFor(() => {
+        expect(trackEvent).toHaveBeenCalledWith(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
+      })
+    })
+
+    it('should track REPORT_SUBMITTED even when API fails', async () => {
+      mockReportFalseResult.mockResolvedValueOnce(false)
+
+      render(<ReportFalseResultModal {...defaultProps} />)
+
+      fireEvent.change(screen.getByLabelText(/Details/), { target: { value: 'Details' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Submit report' }))
+
+      await waitFor(() => {
+        expect(trackEvent).toHaveBeenCalledWith(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
+      })
+    })
+
+    it('should not track REPORT_SUBMITTED when form is invalid', () => {
+      render(<ReportFalseResultModal {...defaultProps} />)
+
+      // Details is empty, so form is invalid and button is disabled
+      // Clicking disabled button should not trigger tracking
+      fireEvent.click(screen.getByRole('button', { name: 'Submit report' }))
+
+      expect(trackEvent).not.toHaveBeenCalledWith(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
     })
   })
 

@@ -5,6 +5,9 @@ import SafeShieldLogo from '@/public/images/safe-shield/safe-shield-logo-no-text
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { HypernativeTooltip } from '../HypernativeTooltip'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
 export interface HnInfoCardProps {
   hypernativeAuth?: HypernativeAuthStatus
@@ -58,7 +61,12 @@ export const HnInfoCard = ({ hypernativeAuth, showActiveStatus = true }: HnInfoC
             </Typography>
             <Button
               variant="outlined"
-              onClick={initiateLogin}
+              onClick={() => {
+                trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
+                  [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Copilot,
+                })
+                initiateLogin()
+              }}
               size="small"
               sx={{ width: 'fit-content', py: 0.5, px: 2 }}
               endIcon={<SvgIcon component={OpenInNewRoundedIcon} fontSize="small" />}
