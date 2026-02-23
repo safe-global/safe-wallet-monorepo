@@ -1,15 +1,16 @@
 import { render, screen } from '@testing-library/react'
 import { Home, FileText, Users, Shield } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../variants/SpacesSidebarVariant'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from '../types'
 
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
-  SidebarContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SidebarGroup: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SidebarGroupLabel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SidebarGroupContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  SidebarMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
   SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp }: any) => (
     <button data-active={isActive} disabled={disabled} className={className} {...(renderProp ? { as: 'a' } : {})}>

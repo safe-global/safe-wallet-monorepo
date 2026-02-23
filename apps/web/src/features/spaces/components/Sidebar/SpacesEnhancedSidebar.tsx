@@ -1,4 +1,4 @@
-import React, { type ReactElement } from 'react'
+import type { CSSProperties, ReactElement } from 'react'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from './index'
 import { useAppSelector } from '@/store'
@@ -40,7 +40,7 @@ export const SpacesEnhancedSidebar = ({
       style={
         {
           '--sidebar-width': spacesSidebarWidth,
-        } as React.CSSProperties
+        } as CSSProperties
       }
     >
       <EnhancedSidebar

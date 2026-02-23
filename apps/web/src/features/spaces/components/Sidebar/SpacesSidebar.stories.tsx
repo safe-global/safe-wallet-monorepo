@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import type { CSSProperties, ReactNode } from 'react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
 import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
@@ -93,13 +94,13 @@ const selectedSpace = mockSpaces[0]
 
 const SPACES_SIDEBAR_WIDTH = 'min(230px, 100%)'
 
-const SidebarWrapper = ({ children }: { children: React.ReactNode }) => (
+const SidebarWrapper = ({ children }: { children: ReactNode }) => (
   <SidebarProvider
     defaultOpen
     style={
       {
         '--sidebar-width': SPACES_SIDEBAR_WIDTH,
-      } as React.CSSProperties
+      } as CSSProperties
     }
   >
     <div className="flex min-h-screen w-full p-4">

@@ -1,15 +1,16 @@
 import { render, screen } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
-  SidebarFooter: ({ children, 'data-testid': testId }: { children: React.ReactNode; 'data-testid'?: string }) => (
+  SidebarFooter: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
-  SidebarMenu: ({ children, 'data-testid': testId }: { children: React.ReactNode; 'data-testid'?: string }) => (
+  SidebarMenu: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
-  SidebarMenuItem: ({ children, 'data-testid': testId }: { children: React.ReactNode; 'data-testid'?: string }) => (
+  SidebarMenuItem: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
   SidebarMenuButton: ({ children, render: renderProp, className, 'data-testid': testId }: any) => (
