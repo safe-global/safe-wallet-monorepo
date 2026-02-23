@@ -79,6 +79,7 @@
 }
 
 @theme inline {
+  /* Override Tailwind's default system font stack with the Safe{Wallet} app font */
   --font-sans: 'DM Sans', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
