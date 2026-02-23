@@ -35,6 +35,8 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  SvgIcon,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import {
@@ -47,8 +49,11 @@ import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import SignerSelector from '@/components/common/SignerSelector'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import SignatureIcon from '@/public/images/transactions/signature.svg'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type UpsertProposerProps = {
@@ -79,9 +84,40 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const wallet = useWallet()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
-  const isNestedSafeOwner = useIsNestedSafeOwner()
   const nestedSafeOwners = useNestedSafeOwners()
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold()
+
+  const isEditing = !!proposer
+
+  // For edit mode, the delegator is fixed to proposer.delegator.
+  // For add mode, compute available delegator options (EOA + nested Safes).
+  const isDirectOwner = safe.owners.some((owner) => sameAddress(owner.value, wallet?.address))
+
+  const delegatorOptions = useMemo(() => {
+    if (isEditing) return []
+    const options: string[] = []
+    if (isDirectOwner && wallet?.address) options.push(wallet.address)
+    if (nestedSafeOwners) options.push(...nestedSafeOwners)
+    return options
+  }, [isEditing, isDirectOwner, wallet?.address, nestedSafeOwners])
+
+  // For add mode, track user-selected delegator. Default: EOA if direct owner, else first nested Safe.
+  const [selectedDelegator, setSelectedDelegator] = useState<string | undefined>(undefined)
+
+  // Determine the effective delegator address
+  const effectiveDelegator = useMemo(() => {
+    if (isEditing) {
+      // Edit: always use the recorded delegator
+      return proposer?.delegator
+    }
+    // Add: use user selection or default
+    return selectedDelegator ?? delegatorOptions[0]
+  }, [isEditing, proposer?.delegator, selectedDelegator, delegatorOptions])
+
+  // Determine if the effective delegator is a nested Safe (for EIP-1271 signing path)
+  const isNestedDelegator = nestedSafeOwners?.some((addr) => sameAddress(addr, effectiveDelegator)) ?? false
+  const parentSafeAddress = isNestedDelegator ? effectiveDelegator : undefined
+
+  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold(parentSafeAddress)
 
   const methods = useForm<ProposerEntry>({
     defaultValues: {
@@ -102,7 +138,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const { handleSubmit, formState } = methods
 
-  const isMultiSigRequired = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
+  const isMultiSigRequired = isNestedDelegator && parentThreshold !== undefined && parentThreshold > 1
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -113,7 +149,6 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     try {
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
-      const parentSafeAddress = isNestedSafeOwner && nestedSafeOwners ? nestedSafeOwners[0] : undefined
 
       let signature: string
       let delegator: string
@@ -194,10 +229,9 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     onClose()
   }
 
-  const isEditing = !!proposer
   const canEdit =
-    wallet?.address === proposer?.delegator ||
-    (isNestedSafeOwner && nestedSafeOwners?.includes(proposer?.delegator ?? ''))
+    sameAddress(wallet?.address, proposer?.delegator) ||
+    (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer?.delegator)) ?? false)
 
   if (multiSigInitiated) {
     return (
@@ -308,6 +342,29 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
             )}
 
             <NetworkWarning action="sign" />
+
+            {!isEditing && delegatorOptions.length > 1 && (
+              <Box mt={2}>
+                <Typography variant="h5" display="flex" gap={1} alignItems="center" mb={1}>
+                  <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
+                  Delegate as
+                  <Tooltip
+                    title="Your connected wallet controls multiple Safe Accounts that are owners of this Safe. Select which account to create the proposer under."
+                    arrow
+                    placement="top"
+                  >
+                    <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
+                  </Tooltip>
+                </Typography>
+
+                <SignerSelector
+                  options={delegatorOptions}
+                  value={effectiveDelegator}
+                  onChange={setSelectedDelegator}
+                  label="Delegator account"
+                />
+              </Box>
+            )}
           </DialogContent>
 
           <Divider />

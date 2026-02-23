@@ -10,6 +10,7 @@ import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafe
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import AddIcon from '@/public/images/common/add.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { Box, Button, Grid, Paper, SvgIcon, Typography } from '@mui/material'
@@ -45,7 +46,8 @@ const ProposersList = () => {
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
   const isNestedSafeOwner = useIsNestedSafeOwner()
-  const { threshold: parentThreshold } = useParentSafeThreshold()
+  const nestedSafeOwners = useNestedSafeOwners()
+  const { threshold: parentThreshold } = useParentSafeThreshold(nestedSafeOwners?.[0])
   const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
   const rows = useMemo(() => {
