@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { SafeItem } from '@/hooks/safes'
+import { StoreDecorator } from '@/stories/storeDecorator'
 import { AccountsWidget } from './AccountsWidget'
 import type { Account } from './AccountsWidget'
 
@@ -57,11 +58,13 @@ const meta: Meta<typeof AccountsWidget> = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <div style={{ backgroundColor: 'var(--color-background-default, #f4f4f4)', padding: '2rem' }}>
-        <div style={{ maxWidth: '560px' }}>
-          <Story />
+      <StoreDecorator initialState={{ settings: { currency: 'usd' } }}>
+        <div style={{ backgroundColor: 'var(--color-background-default, #f4f4f4)', padding: '2rem' }}>
+          <div style={{ maxWidth: '560px' }}>
+            <Story />
+          </div>
         </div>
-      </div>
+      </StoreDecorator>
     ),
   ],
 }
