@@ -244,7 +244,7 @@ const AddAccounts = () => {
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button
                       data-testid="add-accounts-button"
-                      variant="contained"
+                      variant="default"
                       disabled={selectedSafesLength === 0}
                       type="submit"
                     >
