@@ -59,12 +59,13 @@ describe('AccountsWidget', () => {
 
     expect(screen.getByText('My account')).toBeInTheDocument()
     expect(screen.getByText('0x8675...a19b')).toBeInTheDocument()
-    expect(screen.getByText('3/5')).toBeInTheDocument()
 
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('0xabcd...ef01')).toBeInTheDocument()
+    expect(screen.getByText('2/3')).toBeInTheDocument()
 
     expect(screen.getByText('Vault')).toBeInTheDocument()
+    expect(screen.getByText('1/1')).toBeInTheDocument()
   })
 
   it('renders avatar initials for each account', () => {
