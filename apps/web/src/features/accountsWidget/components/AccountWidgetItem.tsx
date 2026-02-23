@@ -4,7 +4,7 @@ import { UserRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import { AccountItemContent } from './AccountItemContent'
-import type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
+import type { Account } from '../types'
 
 interface AccountWidgetItemProps {
   account: Account

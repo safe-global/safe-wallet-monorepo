@@ -19,8 +19,8 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
 import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
-import AccountsWidget from '@/features/spaces/components/Dashboard/AccountsWidget'
-import useSpaceAccountsData from '@/features/spaces/hooks/useSpaceAccountsData'
+import { AccountsWidgetFeature, useSpaceAccountsData } from '@/features/accountsWidget'
+import { useLoadFeature } from '@/features/__core__'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 
@@ -46,6 +46,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 3
 
 const SpaceDashboard = () => {
+  const { AccountsWidget } = useLoadFeature(AccountsWidgetFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()

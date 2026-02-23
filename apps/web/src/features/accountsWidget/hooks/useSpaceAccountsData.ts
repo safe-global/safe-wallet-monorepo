@@ -17,24 +17,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AppRoutes } from '@/config/routes'
-
-interface SubAccount {
-  chainId: string
-  fiatTotal?: string
-  href: string
-}
-
-interface Account {
-  id: string
-  name: string
-  address: string
-  href: string
-  safes: SafeItem[]
-  fiatTotal?: string
-  owners: string
-  highlighted?: boolean
-  subAccounts?: SubAccount[]
-}
+import type { Account, SubAccount } from '../types'
 
 const getSafeHref = (chain: Chain | undefined, address: string): string => {
   const shortName = chain?.shortName ?? ''
@@ -126,4 +109,3 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
 }
 
 export default useSpaceAccountsData
-export type { Account, SubAccount }

@@ -6,7 +6,7 @@ import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { cn } from '@/utils/cn'
 import { AccountItemContent } from './AccountItemContent'
-import type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
+import type { Account } from '../types'
 
 interface ExpandableAccountItemProps {
   account: Account

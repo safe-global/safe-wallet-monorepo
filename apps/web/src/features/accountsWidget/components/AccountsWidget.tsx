@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'
-import type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
+import type { Account } from '../types'
 
 interface AccountsWidgetProps {
   accounts: Account[]
@@ -41,5 +41,4 @@ const AccountsWidget = ({
 
 export { AccountsWidget }
 export type { AccountsWidgetProps }
-export type { Account } from '@/features/spaces/hooks/useSpaceAccountsData'
 export default AccountsWidget
