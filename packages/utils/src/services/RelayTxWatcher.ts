@@ -1,65 +1,80 @@
-export enum TaskState {
-  CheckPending = 'CheckPending',
-  ExecPending = 'ExecPending',
-  ExecSuccess = 'ExecSuccess',
-  ExecReverted = 'ExecReverted',
-  WaitingForConfirmation = 'WaitingForConfirmation',
-  Blacklisted = 'Blacklisted',
-  Cancelled = 'Cancelled',
-  NotFound = 'NotFound',
+/**
+ * Relay task status codes returned by the CGW proxy for Gelato Turbo Relayer.
+ *
+ * The CGW proxies Gelato's JSON-RPC `relayer_getStatus` endpoint at:
+ *   GET {CGW_BASE_URL}/v1/chains/{chainId}/relay/status/{taskId}
+ */
+export enum RelayStatus {
+  /** Task is queued, not yet submitted to chain */
+  Pending = 100,
+  /** Task has been submitted to chain, awaiting confirmation */
+  Submitted = 110,
+  /** Task successfully included on-chain */
+  Included = 200,
+  /** Task rejected (not submitted to chain) */
+  Rejected = 400,
+  /** Task was included but reverted on-chain */
+  Reverted = 500,
 }
 
-export type TransactionStatusResponse = {
-  chainId: number
-  taskId: string
-  taskState: TaskState
-  creationDate: string
-  lastCheckDate?: string
-  lastCheckMessage?: string
-  transactionHash?: string
-  blockNumber?: number
-  executionDate?: string
+export interface RelayTaskReceipt {
+  transactionHash: string
 }
 
-export type RelayResponse = {
-  task: TransactionStatusResponse
+export interface RelayTaskStatus {
+  status: RelayStatus
+  receipt?: RelayTaskReceipt
 }
 
-const TASK_STATUS_URL = 'https://relay.gelato.digital/tasks/status'
 const WAIT_FOR_RELAY_TIMEOUT = 3 * 60_000 // 3 minutes
 const POLL_INTERVAL = 5_000 // 5 seconds
 export const TIMEOUT_ERROR_CODE = 'TIMEOUT'
 
-const getTaskTrackingUrl = (taskId: string) => `${TASK_STATUS_URL}/${taskId}`
+/**
+ * Returns the CGW proxy URL for fetching relay task status.
+ */
+const getTaskTrackingUrl = (baseUrl: string, chainId: string, taskId: string) =>
+  `${baseUrl}/v1/chains/${chainId}/relay/status/${taskId}`
 
 /**
- * Fetches the status of a relay transaction from Gelato
- * @param taskId - The Gelato task ID
- * @returns Promise with the transaction status response or undefined if error
+ * Helper to check if a relay status is a terminal (final) state.
  */
-export const getRelayTxStatus = async (taskId: string): Promise<RelayResponse | undefined> => {
-  const url = getTaskTrackingUrl(taskId)
+export const isTerminalRelayStatus = (status: RelayStatus): boolean => {
+  return status === RelayStatus.Included || status === RelayStatus.Rejected || status === RelayStatus.Reverted
+}
+
+/**
+ * Fetches the status of a relay transaction via the CGW proxy.
+ *
+ * @param baseUrl - CGW base URL
+ * @param chainId - Chain ID where the relay transaction was submitted
+ * @param taskId - The Gelato task ID
+ * @returns Promise with the relay task status or undefined if error
+ */
+export const getRelayTxStatus = async (
+  baseUrl: string,
+  chainId: string,
+  taskId: string,
+): Promise<RelayTaskStatus | undefined> => {
+  const url = getTaskTrackingUrl(baseUrl, chainId, taskId)
 
   try {
-    const response = await fetch(url).then((res) => {
-      // 404s can happen if gelato is a bit slow with picking up the taskID
-      if (res.status !== 404 && res.ok) {
-        return res.json()
-      }
+    const response = await fetch(url)
 
-      return res.json().then((data) => {
-        throw new Error(`${res.status} - ${res.statusText}: ${data?.message}`)
-      })
-    })
-    return response
+    if (response.ok) {
+      return response.json()
+    }
+
+    const data = await response.json().catch(() => ({}))
+    throw new Error(`${response.status} - ${response.statusText}: ${data?.message ?? 'Unknown error'}`)
   } catch (error) {
     console.error('Error fetching relay status:', error)
-    return
+    return undefined
   }
 }
 
 /**
- * Singleton class for watching relay transactions via Gelato.
+ * Singleton class for watching relay transactions via the CGW proxy.
  *
  * Offers methods to:
  * - {@linkplain watchTaskId} to watch a relay task until completion
@@ -80,18 +95,22 @@ export class RelayTxWatcher {
   }
 
   /**
-   * Watches a relay task and polls Gelato API for status updates.
-   * The promise resolves when the task is successful and returns the transaction hash.
-   * The promise rejects if the task fails, is cancelled, or times out.
+   * Watches a relay task and polls the CGW proxy for status updates.
+   * The promise resolves when the task is successful and returns the task status (including receipt).
+   * The promise rejects if the task fails, is rejected, or times out.
    *
    * @param taskId - The Gelato task ID to watch
+   * @param chainId - Chain ID where the relay transaction was submitted
+   * @param baseUrl - CGW base URL
    * @param onUpdate - Optional callback that receives status updates
-   * @returns Promise that resolves with transaction hash when task completes successfully
+   * @returns Promise that resolves with RelayTaskStatus when task completes successfully
    */
   watchTaskId(
     taskId: string,
-    { onUpdate, onNextPoll }: { onUpdate?: (response: TransactionStatusResponse) => void; onNextPoll?: () => void },
-  ): Promise<TransactionStatusResponse> {
+    chainId: string,
+    baseUrl: string,
+    { onUpdate, onNextPoll }: { onUpdate?: (response: RelayTaskStatus) => void; onNextPoll?: () => void },
+  ): Promise<RelayTaskStatus> {
     return new Promise((resolve, reject) => {
       this.startTimes[taskId] = Date.now()
 
@@ -107,51 +126,48 @@ export class RelayTxWatcher {
           return
         }
 
-        const response = await getRelayTxStatus(taskId)
+        const response = await getRelayTxStatus(baseUrl, chainId, taskId)
 
         if (!response) {
           // Retry on error
-          // Call update callback if provided
-
           this.timers[taskId] = setTimeout(poll, POLL_INTERVAL)
-
           onNextPoll?.()
-
           return
         }
 
-        const { task } = response
-        onUpdate?.(task)
+        onUpdate?.(response)
 
         // Check if the task is in a terminal state
-        switch (task.taskState) {
-          case TaskState.ExecSuccess:
-          case TaskState.WaitingForConfirmation:
-            // Transaction executed successfully
-            if (task.transactionHash) {
+        switch (response.status) {
+          case RelayStatus.Included:
+            // Transaction included on-chain successfully
+            if (response.receipt?.transactionHash) {
               this.stopWatchingTaskId(taskId)
-              resolve(task)
+              resolve(response)
               return
             }
-            // Keep polling until we have the hash
+            // Keep polling until we have the receipt (should not happen for status 200, but be safe)
             break
 
-          case TaskState.ExecReverted:
-          case TaskState.Blacklisted:
-          case TaskState.Cancelled:
-            // Transaction failed
+          case RelayStatus.Reverted:
+            // Transaction was included but reverted
             this.stopWatchingTaskId(taskId)
-            reject(new Error(`Relay transaction failed: ${task.taskState}`))
+            reject(new Error('Relay transaction reverted on-chain'))
             return
 
-          case TaskState.CheckPending:
-          case TaskState.ExecPending:
-          case TaskState.NotFound:
+          case RelayStatus.Rejected:
+            // Transaction was rejected (not submitted)
+            this.stopWatchingTaskId(taskId)
+            reject(new Error('Relay transaction was rejected by relay provider'))
+            return
+
+          case RelayStatus.Pending:
+          case RelayStatus.Submitted:
             // Still processing, keep polling
             break
 
           default:
-            // Unknown state, keep polling
+            // Unknown status, keep polling
             break
         }
 
