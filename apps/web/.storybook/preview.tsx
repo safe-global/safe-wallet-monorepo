@@ -9,6 +9,7 @@ import { initialize, mswLoader } from 'msw-storybook-addon'
 
 import '../src/styles/globals.css'
 import '../src/styles/shadcn.css'
+import './shadcn-stories.css'
 import { ShadcnProvider } from '../src/components/ui/ShadcnProvider'
 
 // Create emotion cache once for Storybook (same as real app)

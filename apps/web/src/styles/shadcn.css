@@ -6,7 +6,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @source '../components/ui';
-@source '../components/ui/stories';
 
 /* CSS variables scoped to .shadcn-scope ONLY — never :root */
 .shadcn-scope {
