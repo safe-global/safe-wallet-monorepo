@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import { forwardRef, type ReactNode } from 'react'
 import { EnhancedSidebar } from '../index'
 import type { SpaceItem } from '../types'
 
@@ -85,8 +85,9 @@ describe('EnhancedSidebar', () => {
 
   it('passes props to variant component', () => {
     const { getSidebarVariant } = require('../variants')
-    const mockVariantComponent = jest.fn(() => <div>Variant</div>)
-    getSidebarVariant.mockReturnValue(mockVariantComponent)
+    const mockVariantRender = jest.fn((_props, _ref) => <div>Variant</div>)
+    const MockVariantComponent = forwardRef(mockVariantRender)
+    getSidebarVariant.mockReturnValue(MockVariantComponent)
 
     render(
       <EnhancedSidebar
@@ -98,14 +99,13 @@ describe('EnhancedSidebar', () => {
       />,
     )
 
-    expect(mockVariantComponent).toHaveBeenCalledWith(
+    expect(mockVariantRender.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({
         spaceName: 'My Space',
         spaceInitial: 'M',
         selectedSpace: mockSelectedSpace,
         spaces: mockSpaces,
       }),
-      undefined,
     )
   })
 })

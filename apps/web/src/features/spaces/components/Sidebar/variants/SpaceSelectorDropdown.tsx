@@ -14,11 +14,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
 import { truncateSpaceName } from '../utils'
-
-const SPACE_NAME_MAX_LENGTH = 15
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
@@ -30,7 +29,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
-  const displayName = truncateSpaceName(spaceName, SPACE_NAME_MAX_LENGTH)
+  const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
 
