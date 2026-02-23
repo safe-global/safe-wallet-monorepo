@@ -85,7 +85,11 @@ describe('EnhancedSidebar', () => {
 
   it('passes props to variant component', () => {
     const { getSidebarVariant } = require('../variants')
-    const mockVariantRender = jest.fn((_props, _ref) => <div>Variant</div>)
+    const mockVariantRender = jest.fn((props, ref) => {
+      void props
+      void ref
+      return <div>Variant</div>
+    })
     const MockVariantComponent = forwardRef(mockVariantRender)
     getSidebarVariant.mockReturnValue(MockVariantComponent)
 

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode } from 'react'
 import { SpaceSelectorDropdown } from '../variants/SpaceSelectorDropdown'
 
@@ -52,7 +53,7 @@ jest.mock('@/components/ui/tooltip', () => ({
 }))
 
 jest.mock('@/components/ui/dropdown-menu', () => {
-  const { createContext, useContext, useState, cloneElement } = jest.requireActual<typeof import('react')>('react')
+  const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
 
   type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }
   const Ctx = createContext<DropdownCtx | null>(null)
