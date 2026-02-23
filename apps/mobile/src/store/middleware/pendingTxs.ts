@@ -13,18 +13,37 @@ import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { selectChainById } from '../chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
-import { RelayTxWatcher } from '@safe-global/utils/services/RelayTxWatcher'
+import { RelayTxWatcher, TIMEOUT_ERROR_CODE } from '@safe-global/utils/services/RelayTxWatcher'
 import { REHYDRATE } from 'redux-persist'
 import { delay } from '@safe-global/utils/utils/helpers'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SimplePoller } from '@safe-global/utils/services/SimplePoller'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import logger from '@/src/utils/logger'
-import { TIMEOUT_ERROR_CODE } from '@safe-global/utils/services/RelayTxWatcher'
+import { getBaseUrl } from '@safe-global/store/gateway/cgwClient'
 
 const cleanUpPendingTx = (listenerApi: AppListenerEffectAPI, txId: string) => {
   listenerApi.dispatch(clearPendingTx({ txId }))
   listenerApi.dispatch(cgwApi.util.invalidateTags(['transactions']))
+}
+
+const handleRelayWatcherError = (
+  listenerApi: AppListenerEffectAPI,
+  txId: string,
+  taskId: string,
+  chainId: string,
+  err: unknown,
+) => {
+  const errorMessage = err instanceof Error ? err.message : String(err)
+  listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: errorMessage }))
+
+  if (err instanceof Error && err.cause === TIMEOUT_ERROR_CODE) {
+    setTimeout(() => {
+      cleanUpPendingTx(listenerApi, txId)
+    }, 1000)
+  }
+
+  logger.error('Relay watcher error', { txId, taskId, error: err })
 }
 
 /***
@@ -45,10 +64,19 @@ const cleanUpPendingTx = (listenerApi: AppListenerEffectAPI, txId: string) => {
  *
  */
 const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, taskId: string, chainId: string) => {
+  const baseUrl = getBaseUrl()
+  if (!baseUrl) {
+    logger.error('CGW base URL not configured for relay watcher', { txId, taskId })
+    listenerApi.dispatch(
+      setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: 'CGW base URL not configured' }),
+    )
+    return
+  }
+
   const instance = RelayTxWatcher.getInstance()
 
   instance
-    .watchTaskId(taskId, {
+    .watchTaskId(taskId, chainId, baseUrl, {
       onNextPoll: () => {
         const pendingTx = selectPendingTxById(listenerApi.getState(), txId)
 
@@ -57,26 +85,17 @@ const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, task
         }
       },
     })
-    .then((task) => {
-      // Transaction executed successfully, move to indexing
-      logger.info('Relay transaction completed', { txId, taskId, txHash: task.transactionHash })
+    .then((relayStatus) => {
+      const txHash = relayStatus.receipt?.transactionHash
+      logger.info('Relay transaction completed', { txId, taskId, txHash })
 
-      if (task.transactionHash && task.transactionHash !== '') {
-        listenerApi.dispatch(setRelayTxHash({ txId, txHash: task.transactionHash }))
+      if (txHash) {
+        listenerApi.dispatch(setRelayTxHash({ txId, txHash }))
         listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.INDEXING }))
       }
     })
     .catch((err) => {
-      const errorMessage = err instanceof Error ? err.message : String(err)
-      listenerApi.dispatch(setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: errorMessage }))
-
-      if (err.cause === TIMEOUT_ERROR_CODE) {
-        setTimeout(() => {
-          cleanUpPendingTx(listenerApi, txId)
-        }, 1000)
-      }
-
-      logger.error('Relay watcher error', { txId, taskId, error: err })
+      handleRelayWatcherError(listenerApi, txId, taskId, chainId, err)
     })
 }
 
