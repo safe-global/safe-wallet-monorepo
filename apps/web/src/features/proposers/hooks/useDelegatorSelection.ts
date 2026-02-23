@@ -37,6 +37,14 @@ export const resolveParentSafeAddress = (
   return isNested ? effectiveDelegator : undefined
 }
 
+export const isWalletDirectOwner = (owners: Array<{ value: string }>, walletAddress: string | undefined): boolean =>
+  owners.some((owner) => sameAddress(owner.value, walletAddress))
+
+export const checkMultiSigRequired = (
+  parentSafeAddress: string | undefined,
+  parentThreshold: number | undefined,
+): boolean => !!parentSafeAddress && parentThreshold !== undefined && parentThreshold > 1
+
 export const checkCanEdit = (
   walletAddress: string | undefined,
   proposerDelegator: string | undefined,
@@ -55,7 +63,7 @@ export const useDelegatorSelection = (proposer: Delegate | undefined) => {
   const { safe } = useSafeInfo()
   const nestedSafeOwners = useNestedSafeOwners()
   const isEditing = !!proposer
-  const isDirectOwner = safe.owners.some((owner) => sameAddress(owner.value, wallet?.address))
+  const isDirectOwner = isWalletDirectOwner(safe.owners, wallet?.address)
 
   const delegatorOptions = useMemo(
     () => buildDelegatorOptions(isEditing, isDirectOwner, wallet?.address, nestedSafeOwners),
@@ -71,7 +79,7 @@ export const useDelegatorSelection = (proposer: Delegate | undefined) => {
 
   const parentSafeAddress = resolveParentSafeAddress(nestedSafeOwners, effectiveDelegator)
   const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold(parentSafeAddress)
-  const isMultiSigRequired = !!parentSafeAddress && parentThreshold !== undefined && parentThreshold > 1
+  const isMultiSigRequired = checkMultiSigRequired(parentSafeAddress, parentThreshold)
   const canEdit = checkCanEdit(wallet?.address, proposer?.delegator, nestedSafeOwners)
 
   return {
