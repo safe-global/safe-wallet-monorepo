@@ -3,8 +3,8 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import useSafeCardData from '../hooks/useSafeCardData'
-import ChainLogo from './ChainLogo'
 import SafeAvatar from './SafeAvatar'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
@@ -20,7 +20,8 @@ interface SafeCardProps {
 const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
-  const { name, fiatValue, threshold, ownersCount, chainIds, elementRef } = useSafeCardData(safe)
+  const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
+  const safes = isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]
 
   const subSafeIds = isMultiChain ? (safe as MultiChainSafeItem).safes.map(getSafeId) : []
   const safeId = isMultiChain ? getMultiChainSafeId(safe as MultiChainSafeItem) : getSafeId(safe as SafeItem)
@@ -48,7 +49,7 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
         onToggle={handleMultiChainToggle}
         name={name}
         address={safe.address}
-        chainIds={chainIds}
+        safes={safes}
         fiatValue={fiatValue}
         threshold={threshold}
         ownersCount={ownersCount}
@@ -69,7 +70,7 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
           onCheckedChange={(checked) => field.onChange(checked)}
           name={name}
           address={safe.address}
-          chainIds={chainIds}
+          safes={safes}
           fiatValue={fiatValue}
           threshold={threshold}
           ownersCount={ownersCount}
@@ -87,7 +88,7 @@ interface SafeCardLayoutProps {
   onCheckedChange?: (checked: boolean) => void
   name: string | undefined
   address: string
-  chainIds: string[]
+  safes: SafeItem[]
   fiatValue: string | number | undefined
   threshold: number
   ownersCount: number
@@ -101,7 +102,7 @@ const SafeCardLayout = ({
   onCheckedChange,
   name,
   address,
-  chainIds,
+  safes,
   fiatValue,
   threshold,
   ownersCount,
@@ -131,19 +132,9 @@ const SafeCardLayout = ({
       </div>
     </div>
 
-    <div className="flex shrink-0 items-center">
-      {chainIds.length > 1 ? (
-        <div className="flex -space-x-2">
-          {chainIds.map((chainId) => (
-            <ChainLogo key={chainId} chainId={chainId} />
-          ))}
-        </div>
-      ) : (
-        <ChainLogo chainId={chainIds[0]} />
-      )}
-    </div>
+    <AccountItem.ChainBadge safes={safes} />
 
-    <div className="flex shrink-0 flex-col items-end gap-2">
+    <div className="flex shrink-0 flex-col min-w-16 items-end gap-2">
       <FiatBalance value={fiatValue} />
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>

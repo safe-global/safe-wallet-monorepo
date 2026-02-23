@@ -43,7 +43,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   )
 }
 
-const DASHBOARD_LIST_DISPLAY_LIMIT = 5
+const DASHBOARD_LIST_DISPLAY_LIMIT = 3
 
 const SpaceDashboard = () => {
   const { allSafes: safes } = useSpaceSafes()
@@ -79,7 +79,7 @@ const SpaceDashboard = () => {
           </Grid>
 
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 8 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <AccountsWidget
                 accounts={accounts}
                 loading={isOverviewLoading}
@@ -92,7 +92,7 @@ const SpaceDashboard = () => {
                 }
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h5">Members ({activeMembers.length})</Typography>

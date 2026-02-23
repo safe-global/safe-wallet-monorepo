@@ -51,7 +51,7 @@ const WidgetItem = ({
 
       {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
 
-      {actionNode && <div className="flex flex-col items-end gap-2">{actionNode}</div>}
+      {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
     </div>
   )
 }

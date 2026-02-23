@@ -25,7 +25,7 @@ const WidgetFooter = ({ count, text, className, onClick }: WidgetFooterProps): R
           </div>
         </div>
       )}
-      <span className="text-sm text-muted-foreground">{text}</span>
+      <span className={cn('text-sm text-muted-foreground', !count && 'ml-2')}>{text}</span>
     </div>
   )
 }
