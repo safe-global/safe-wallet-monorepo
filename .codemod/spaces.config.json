@@ -75,7 +75,7 @@
       "useMembersSearch",
       "useSpaceMembersByStatus",
       "useCurrentMembership",
-      "useIsActiceMember",
+      "useIsActiveMember",
       "useIsAdmin",
       "useIsInvited",
       "useSpaceSafes",
@@ -95,7 +95,13 @@
       "filterSpacesByStatus",
       "getNonDeclinedSpaces"
     ],
-    "types": ["AuthState", "LoadingState", "SignedOutState", "UnauthorizedState", "mapSpaceContactsToAddressBookState"],
+    "types": [
+      "AuthState",
+      "LoadingState",
+      "SignedOutState",
+      "UnauthorizedState",
+      "mapSpaceContactsToAddressBookState"
+    ],
     "constants": []
   },
   "structure": {

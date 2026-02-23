@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useIsActiceMember } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsActiveMember } from '@/features/spaces/hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../config'
 import { useResolvedSidebarNav } from '../hooks/useResolvedSidebarNav'
 import type { SpaceSelectorProps, SidebarItemConfig } from '../types'
@@ -13,7 +13,7 @@ export const SpacesSidebarContent = ({
   spaceInitial,
 }: SpaceSelectorProps): ReactElement => {
   const spaceId = useCurrentSpaceId()
-  const isActiveMember = useIsActiceMember(selectedSpace?.id)
+  const isActiveMember = useIsActiveMember(selectedSpace?.id)
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,

@@ -12,7 +12,7 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
 }))
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
-  useIsActiceMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
+  useIsActiveMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
 }))
 
 jest.mock('../hooks/useResolvedSidebarNav', () => ({
