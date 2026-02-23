@@ -19,7 +19,7 @@
   min-height: 40px;
   padding: 32px 8px;
   border-radius: 8px;
-  background-color: var(--general-secondary, #e5e7eb);
+  background-color: var(--sidebar-accent);
   cursor: pointer;
 }
 
@@ -37,6 +37,10 @@
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+}
+
+.backToSpaceChevron {
+  flex-shrink: 0;
 }
 
 .spaceSelectorAvatar {
@@ -99,6 +103,16 @@
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
 :global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
   display: none !important;
+}
+
+:global(.group[data-collapsible='icon']) .backToSpace {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+:global(.group[data-collapsible='icon']) .backToSpaceChevron {
+  display: none;
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {

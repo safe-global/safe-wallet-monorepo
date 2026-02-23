@@ -58,7 +58,7 @@ export const SafeSidebarVariant = ({
                   <span className={css.spaceSelectorName}>{spaceName}</span>
                   <span className={css.spaceSelectorSubtitle}>Space</span>
                 </div>
-                <icons.ChevronLeft className="ml-auto size-4 shrink-0" />
+                <icons.ChevronLeft className={`ml-auto size-4 shrink-0 ${css.backToSpaceChevron}`} />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
