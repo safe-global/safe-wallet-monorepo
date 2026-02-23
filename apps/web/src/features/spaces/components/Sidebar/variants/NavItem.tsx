@@ -13,7 +13,6 @@ export const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement =
       size="lg"
       isActive={item.isActive}
       disabled={item.disabled}
-      tooltip={item.label}
       className={css.sidebarInteractive}
       render={!item.disabled ? <Link href={item.link} /> : undefined}
       data-testid="sidebar-list-item"
