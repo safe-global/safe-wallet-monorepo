@@ -17,7 +17,7 @@ export interface SidebarGroupConfig {
 export interface ResolvedSidebarItem extends Omit<SidebarItemConfig, 'isActive' | 'activeMemberOnly'> {
   isActive: boolean
   disabled: boolean
-  link: { pathname: string; query: { spaceId: string | null } }
+  link: { pathname: string; query: { spaceId?: string | null; safe?: string } }
 }
 
 export interface ResolvedSidebarGroup {
@@ -35,4 +35,9 @@ export interface SpaceSelectorProps {
   spaceInitial?: string
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
+}
+
+export interface SafeSidebarVariantProps extends SpaceSelectorProps {
+  mainNavItems: ResolvedSidebarItem[]
+  defiGroup: ResolvedSidebarGroup
 }

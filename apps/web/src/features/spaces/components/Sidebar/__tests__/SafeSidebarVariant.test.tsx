@@ -1,7 +1,34 @@
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { SafeSidebarVariant } from '../variants/SafeSidebarVariant'
-import type { SpaceItem } from '../types'
+import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
+
+const mockUseCurrentSpaceId = jest.fn()
+
+// Mock Next.js router
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    query: {},
+  }),
+}))
+
+// Mock useCurrentSpaceId hook
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+// Mock NavItem component
+jest.mock('../variants/NavItem', () => ({
+  NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
+    <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
+      {item.label}
+      {item.badge !== undefined && item.badge > 0 && (
+        <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>
+      )}
+    </div>
+  ),
+}))
 
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
@@ -29,32 +56,6 @@ jest.mock('../config', () => ({
   icons: {
     ChevronLeft: () => <div>ChevronLeft</div>,
   },
-  safeMainNavigation: [
-    {
-      icon: () => <div>Wallet</div>,
-      label: 'Overview',
-      href: '/home',
-      isActive: false,
-    },
-    {
-      icon: () => <div>Transactions</div>,
-      label: 'Transactions',
-      href: '/transactions',
-      isActive: false,
-      badge: 2,
-    },
-  ],
-  safeDefiGroup: {
-    label: 'Defi',
-    items: [
-      {
-        icon: () => <div>Swap</div>,
-        label: 'Swap',
-        href: '/swap',
-        isActive: false,
-      },
-    ],
-  },
 }))
 
 describe('SafeSidebarVariant', () => {
@@ -63,8 +64,59 @@ describe('SafeSidebarVariant', () => {
     name: 'Test Safe',
   }
 
-  it('renders space selector with name and back button', () => {
-    render(<SafeSidebarVariant spaceName="My Safe Account" spaceInitial="M" selectedSpace={mockSpace} />)
+  const MockIcon = () => <div>Icon</div>
+
+  const mockMainNavItems: ResolvedSidebarItem[] = [
+    {
+      icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+      label: 'Overview',
+      href: '/home',
+      isActive: false,
+      disabled: false,
+      link: { pathname: '/home', query: { spaceId: null } },
+    },
+    {
+      icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+      label: 'Transactions',
+      href: '/transactions',
+      isActive: false,
+      disabled: false,
+      link: { pathname: '/transactions', query: { spaceId: null } },
+      badge: 2,
+    },
+  ]
+
+  const mockDefiGroup: ResolvedSidebarGroup = {
+    label: 'Defi',
+    items: [
+      {
+        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+        label: 'Swap',
+        href: '/swap',
+        isActive: false,
+        disabled: false,
+        link: { pathname: '/swap', query: { spaceId: null } },
+      },
+    ],
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseCurrentSpaceId.mockReturnValue(null)
+  })
+
+  it('renders space selector with name and back button when spaceId exists', () => {
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(
+      <SafeSidebarVariant
+        spaceName="My Safe Account"
+        spaceInitial="M"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('My Safe Account')).toBeInTheDocument()
     expect(screen.getByText('Space')).toBeInTheDocument()
@@ -73,19 +125,46 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('derives initial from space name when spaceInitial not provided', () => {
-    render(<SafeSidebarVariant spaceName="MySpace" selectedSpace={mockSpace} />)
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(
+      <SafeSidebarVariant
+        spaceName="MySpace"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('M')).toBeInTheDocument()
   })
 
   it('uses provided spaceInitial when available', () => {
-    render(<SafeSidebarVariant spaceName="MySpace" spaceInitial="X" selectedSpace={mockSpace} />)
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(
+      <SafeSidebarVariant
+        spaceName="MySpace"
+        spaceInitial="X"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('X')).toBeInTheDocument()
   })
 
   it('renders all navigation sections', () => {
-    render(<SafeSidebarVariant spaceName="Test Safe" spaceInitial="T" selectedSpace={mockSpace} />)
+    render(
+      <SafeSidebarVariant
+        spaceName="Test Safe"
+        spaceInitial="T"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('Overview')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
@@ -95,8 +174,31 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('handles undefined space name', () => {
-    render(<SafeSidebarVariant spaceInitial="U" selectedSpace={mockSpace} />)
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(
+      <SafeSidebarVariant
+        spaceInitial="U"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('U')).toBeInTheDocument()
+  })
+
+  it('does not render back to space button when no spaceId', () => {
+    render(
+      <SafeSidebarVariant
+        spaceName="My Safe Account"
+        spaceInitial="M"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
   })
 })

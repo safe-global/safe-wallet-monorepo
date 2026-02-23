@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import {
   SidebarContent,
   SidebarGroup,
@@ -9,84 +10,85 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { icons, safeMainNavigation, safeDefiGroup } from '../config'
+import { icons } from '../config'
 import css from '../styles.module.css'
-import type { SpaceSelectorProps } from '../types'
-import { getSidebarItemTestId } from '../utils'
+import type { SafeSidebarVariantProps } from '../types'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { AppRoutes } from '@/config/routes'
+import { NavItem } from './NavItem'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
 
-const getBadgeAriaLabel = (label: string, count: number): string =>
-  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
-
-export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
+export const SafeSidebarVariant = ({
+  spaceName = '',
+  spaceInitial,
+  mainNavItems,
+  defiGroup,
+}: SafeSidebarVariantProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
+  const spaceId = useCurrentSpaceId()
+  const router = useRouter()
+
+  const handleBackToSpace = () => {
+    if (spaceId) {
+      router.push({
+        pathname: AppRoutes.spaces.index,
+        query: { spaceId },
+      })
+    }
+  }
+
   return (
     <SidebarContent>
-      <SidebarGroup>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" tooltip="Back to Space" className={css.backToSpace}>
-              <Avatar className={css.spaceSelectorAvatar}>
-                <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
-              </Avatar>
-              <div className={css.spaceSelectorText}>
-                <span className={css.spaceSelectorName}>{spaceName}</span>
-                <span className={css.spaceSelectorSubtitle}>Space</span>
-              </div>
-              <icons.ChevronLeft className="ml-auto size-4 shrink-0" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
+      {spaceId && (
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                tooltip="Back to Space"
+                className={css.backToSpace}
+                onClick={handleBackToSpace}
+              >
+                <Avatar className={css.spaceSelectorAvatar}>
+                  <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+                </Avatar>
+                <div className={css.spaceSelectorText}>
+                  <span className={css.spaceSelectorName}>{spaceName}</span>
+                  <span className={css.spaceSelectorSubtitle}>Space</span>
+                </div>
+                <icons.ChevronLeft className="ml-auto size-4 shrink-0" />
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
 
       {/* Main Navigation */}
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            {safeMainNavigation.map((item) => (
-              <SidebarMenuItem key={item.href} className="relative">
-                <SidebarMenuButton
-                  size="lg"
-                  isActive={item.isActive}
-                  tooltip={item.label}
-                  data-testid={getSidebarItemTestId(item.label)}
-                  className={css.sidebarInteractive}
-                >
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <>
-                    <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
-                      {item.badge}
-                    </span>
-                    <span className={css.transactionsBadgeDot} aria-hidden />
-                  </>
-                )}
-              </SidebarMenuItem>
+            {mainNavItems.map((item) => (
+              <NavItem key={item.href} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
 
-      {/* Defi Group */}
-      <SidebarGroup>
-        <SidebarGroupLabel>{safeDefiGroup.label}</SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            {safeDefiGroup.items.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton size="lg" tooltip={item.label} className={css.sidebarInteractive}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      {/* DeFi Group - only show if has items */}
+      {defiGroup.items.length > 0 && (
+        <SidebarGroup>
+          <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {defiGroup.items.map((item) => (
+                <NavItem key={item.href} item={item} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      )}
     </SidebarContent>
   )
 }
