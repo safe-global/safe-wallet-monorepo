@@ -63,23 +63,37 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.expandActionRequiredPanel()
   })
 
-  it('Verify that unofficial mastercopy safe displays update version action in action required panel', () => {
-    cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_31)
+  // Mastercopy warnings (Action Required panel) — see specs/002-cypress-banner-actioncard-migration
+
+  it('Verify that Case #1 (outdated official mastercopy) shows Info card with Update CTA and opens upgrade flow', () => {
+    cy.visit(constants.homeUrl + staticSafes.ETH_STATIC_SAFE_OUTDATED_MASTERCOPY)
 
     dashboard.verifyActionRequiredCard({
-      messages: [dashboard.outdatedSafeWarningTitle, dashboard.outdatedSafeWarningContent],
-      actionLabel: dashboard.outdatedMastercopyActions.updateVersion,
+      messages: [dashboard.outdatedOfficialTitlePrefix, dashboard.outdatedOfficialContent],
+      actionLabel: dashboard.mastercopyActions.update,
     })
-    dashboard.clickActionInPanel(dashboard.outdatedMastercopyActions.updateVersion)
+    dashboard.clickActionInPanel(dashboard.mastercopyActions.update)
     dashboard.verifyMigrateSafeFlowOpened()
   })
 
-  it('Verify that unsupported mastercopy safe displays use CLI action when update is not available', () => {
+  it('Verify that Case #2 (unsupported migratable) shows Warning card with unsupported copy and Migrate CTA', () => {
+    cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_31)
+
+    dashboard.verifyActionRequiredCard({
+      messages: [dashboard.unsupportedMastercopyTitle, dashboard.unsupportedMigratableContent],
+      actionLabel: dashboard.mastercopyActions.migrate,
+    })
+    dashboard.clickActionInPanel(dashboard.mastercopyActions.migrate)
+    dashboard.verifyMigrateSafeFlowOpened()
+  })
+
+  it('Verify that Case #3 (unsupported not migratable) shows Warning card with Get CLI CTA opening CLI docs in new tab', () => {
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_32)
 
     dashboard.verifyActionRequiredCard({
-      messages: [dashboard.outdatedSafeWarningTitle, dashboard.outdatedSafeWarningContent],
-      actionLabel: dashboard.outdatedMastercopyActions.useCli,
+      messages: [dashboard.unsupportedMastercopyTitle, dashboard.unsupportedCliContent],
+      actionLabel: dashboard.mastercopyActions.getCli,
     })
+    dashboard.verifyGetCliLinkInPanel()
   })
 })

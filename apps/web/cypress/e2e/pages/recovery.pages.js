@@ -13,7 +13,8 @@ const warningSection = '[data-testid="warning-section"]'
 const termsCheckbox = 'input[type="checkbox"]'
 export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
 export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
-const startRecoveryBtn = '[data-testid="start-recovery-btn"]'
+const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
+const startRecoveryBtn = '[data-testid="start-recovery"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
 const recoveryExpirySelect = '[data-testid="recovery-expiry-select"]'
 const postponeRecoveryBtn = '[data-testid="postpone-recovery-btn"]'
@@ -24,7 +25,6 @@ const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryProposalHorizontal = '[data-testid="recovery-proposal-hr"]'
 const recoveryModalTitle = 'How does recovery work'
 
 export const recoveryOptions = {
@@ -173,9 +173,8 @@ export function clickOnRecoverLaterBtn() {
 }
 
 export function verifyRecoveryProposalModalState(option, horizontal = false) {
-  let modal = recoveryProposalModal
-  if (horizontal) modal = recoveryProposalHorizontal
-  cy.get(modal).should(option)
+  const selector = horizontal ? recoveryProposalCard : recoveryProposalModal
+  cy.get(selector).should(option)
 }
 
 export function verifyRecoveryModalDisplayed() {

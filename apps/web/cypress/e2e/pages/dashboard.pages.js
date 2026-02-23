@@ -24,19 +24,27 @@ export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
-export const outdatedSafeWarningTitle = 'This Safe is running an outdated version'
-export const outdatedSafeWarningContent = 'and may miss security fixes and improvements.'
-const updateVersionAction = 'Update version'
-const useCliAction = 'Use CLI'
+// Case #1 — Outdated official mastercopy (Info) → "Update"
+export const outdatedOfficialTitlePrefix = 'New Safe version is available'
+export const outdatedOfficialContent =
+  'Update now to take advantage of new features and the highest security standards available. You will need to confirm this update just like any other transaction.'
+export const mastercopyActions = {
+  update: 'Update',
+  migrate: 'Migrate',
+  getCli: 'Get CLI',
+}
+
+// Case #2 & #3 — Unsupported mastercopy (Warning)
+export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
+export const unsupportedMigratableContent =
+  'and may miss security fixes and improvements. You should migrate it to a compatible version.'
+export const unsupportedCliContent =
+  'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
+
 const migrateSafeSubtitle = 'Update Safe Account base contract'
 export const nonPinnedWarningTitle = 'Not in your trusted list'
 export const trustThisSafeButtonLabel = 'Trust this Safe'
 const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
-
-export const outdatedMastercopyActions = {
-  updateVersion: updateVersionAction,
-  useCli: useCliAction,
-}
 
 export function clickOnTxByIndex(index) {
   // Wait for hydration to set the correct safe query param in the link href
@@ -213,6 +221,15 @@ export function clickActionInPanel(actionLabel) {
 
 export function verifyMigrateSafeFlowOpened() {
   cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
+}
+
+const getCliLinkTestId = '[data-testid="get-cli-link"]'
+
+/** Verifies the "Get CLI" link is visible in the action required panel (Case #3). */
+export function verifyGetCliLinkInPanel() {
+  cy.get(actionRequiredPanel).within(() => {
+    cy.get(getCliLinkTestId, { timeout: 10000 }).should('be.visible')
+  })
 }
 
 export function verifyTrustDialogVisible() {

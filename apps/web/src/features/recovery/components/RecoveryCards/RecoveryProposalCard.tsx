@@ -52,7 +52,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
 
   const recoveryButton = (
     <Button
-      data-testid="start-recovery-btn"
+      data-testid="start-recovery"
       variant="contained"
       onClick={handleRecoverWithTracking}
       className={css.button}
@@ -75,6 +75,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
         action={{ label: 'Start recovery', onClick: handleRecover }}
         trackingEvent={RECOVERY_EVENTS.START_RECOVERY}
         testId="recovery-proposal-card"
+        actionTestId="start-recovery"
       />
     )
   }

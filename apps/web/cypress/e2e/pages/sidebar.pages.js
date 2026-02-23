@@ -122,7 +122,8 @@ export const undeployedSafe = 'Undeployed Sepolia'
 export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
-const signersNotConsistentMsg = 'Signers are not consistent'
+/** Message in action-required-panel when signers differ across chains (dashboard) */
+const differentSignersAcrossChainsMsg = 'Different signers across chains'
 const signersNotConsistentMsg2 = (network) => `Signers are different on these networks of this account:${network}`
 const signersNotConsistentMsg3 =
   'To manage your account easier and to prevent lose of funds, we recommend keeping the same signers'
@@ -697,10 +698,9 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
     })
 }
 
-export function checkInconsistentSignersMsgDisplayed(network) {
-  cy.contains(signersNotConsistentMsg).should('exist')
-  cy.contains(signersNotConsistentMsg2(network)).should('exist')
-  cy.contains(signersNotConsistentMsg3).should('exist')
+/** Verifies the "Different signers across chains" warning is displayed (e.g. in action-required-panel). */
+export function checkInconsistentSignersMsgDisplayed() {
+  cy.contains(differentSignersAcrossChainsMsg, { timeout: 15000 }).should('be.visible')
 }
 
 export function checkInconsistentSignersMsgDisplayedConfirmTxView(network) {
