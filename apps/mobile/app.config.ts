@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.6',
+  version: '1.0.7',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
