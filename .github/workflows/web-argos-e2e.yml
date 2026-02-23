@@ -1,0 +1,48 @@
+name: Web Argos E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    env:
+      VISUAL_REGRESSION_BUILD: 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    name: Cypress Visual tests (Argos)
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4, 5]
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/cypress
+        with:
+          secrets: ${{ toJSON(secrets) }}
+          spec: 'cypress/e2e/visual/**/*.cy.js'
+          group: 'Argos E2E'
+          tag: 'argos-e2e'
+          container-index: ${{ matrix.containers }}
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+          ARGOS_REFERENCE_BRANCH: feature/argos-ci-visual-regression
+          ARGOS_REFERENCE_COMMIT: ebb98b54ebae0b6bf3d26b9c64c0e44c432d83df
+          ARGOS_PARALLEL: 'true'
+          ARGOS_PARALLEL_TOTAL: '5'
+          ARGOS_PARALLEL_INDEX: ${{ matrix.containers }}
