@@ -1,29 +1,26 @@
-import MembersCard from './MembersCard'
-import SpacesCTACard from './SpacesCTACard'
-import AddressBookCard from './ImportAddressBookCard'
+import MembersCard from '@/features/spaces/components/Dashboard/MembersCard'
+import SpacesCTACard from '@/features/spaces/components/Dashboard/SpacesCTACard'
+import AddressBookCard from '@/features/spaces/components/Dashboard/ImportAddressBookCard'
 import { Card, Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useLoadFeature } from '@/features/__core__'
 import { flattenSafeItems } from '@/hooks/safes'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import {
-  useSpaceSafes,
-  useCurrentSpaceId,
-  useSpaceMembersByStatus,
-  useIsInvited,
-  useTrackSpace,
-} from '@/features/spaces'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import type { LinkProps } from 'next/link'
 import NextLink from 'next/link'
 import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import DashboardMembersList from './DashboardMembersList'
+import DashboardMembersList from '@/features/spaces/components/Dashboard/DashboardMembersList'
+import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import AggregatedBalance from './AggregatedBalances'
+import AggregatedBalance from '@/features/spaces/components/Dashboard/AggregatedBalances'
+import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (

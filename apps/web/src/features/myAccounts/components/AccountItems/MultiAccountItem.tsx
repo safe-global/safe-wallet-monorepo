@@ -1,9 +1,8 @@
 import type { SafeListProps } from '../SafesList'
+import SpaceSafeContextMenu from '@/features/spaces/components/SafeAccounts/SpaceSafeContextMenu'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Divider } from '@mui/material'
@@ -78,7 +77,6 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
-  const spaces = useLoadFeature(SpacesFeature)
   const {
     address,
     name,
@@ -150,7 +148,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               {isSpaceSafe ? (
                 <>
                   <Box width="40px" />
-                  <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                  <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
                 </>
               ) : (
                 <MultiAccountContextMenu

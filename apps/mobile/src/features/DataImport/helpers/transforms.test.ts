@@ -242,6 +242,7 @@ describe('Data import helpers', () => {
         safes: ['1:0x1', '137:0x2'],
         currency: 'USD',
         trusted: true,
+        excludeSpam: true,
       })
 
       expect(result).toEqual(new Set(['0x2', '0x3']))

@@ -6,7 +6,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import LinkIcon from '@/public/images/messages/link.svg'
 import css from './styles.module.css'
 import InfoBox from '@/components/safe-messages/InfoBox'
-import SignedOutState from '../SignedOutState'
+import SignedOutState from '@/features/spaces/components/SignedOutState'
 
 const UserSettings = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)

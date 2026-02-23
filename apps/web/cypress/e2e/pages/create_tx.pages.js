@@ -773,11 +773,6 @@ export function clickOnTokenselectorAndSelectSepoliaEth() {
   cy.get('ul[role="listbox"]').contains(constants.tokenNames.sepoliaEther).click()
 }
 
-export function clickOnTokenselectorAndSelectToken(tokenName) {
-  cy.get(tokenSelector).click()
-  cy.get('ul[role="listbox"]').contains(tokenName).click()
-}
-
 export function setMaxAmount() {
   cy.contains(maxAmountBtnStr).click()
 }

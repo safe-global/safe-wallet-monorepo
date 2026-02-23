@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 let staticSafes = []
 
@@ -13,10 +12,6 @@ describe(
       staticSafes = await getSafes(CATEGORIES.static)
     })
 
-    beforeEach(() => {
-      mockVisualTestApis()
-    })
-
     it('[VISUAL] Screenshot messages page', () => {
       cy.fixture('messages/messages.json').then((mockData) => {
         cy.intercept('GET', constants.messagesEndpoint, mockData).as('getMessages')
@@ -24,7 +19,7 @@ describe(
       })
       cy.wait('@getMessages')
       cy.contains('Sign', { timeout: 10000 }).should('be.visible')
-      main.awaitVisualStability()
+      main.verifySkeletonsGone()
     })
   },
 )

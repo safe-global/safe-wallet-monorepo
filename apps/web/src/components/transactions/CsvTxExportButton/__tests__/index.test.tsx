@@ -4,11 +4,9 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CsvTxExportButton from '../index'
 import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
-jest.mock('@/services/analytics', () =>
-  (
-    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
-  ).createAnalyticsMock(),
-)
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
 
 jest.mock('@/components/common/OnlyOwner', () => {
   return function MockOnlyOwner({ children }: { children: (isOk: boolean) => React.ReactNode }) {
