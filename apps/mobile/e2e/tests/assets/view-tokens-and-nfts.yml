@@ -44,7 +44,7 @@ tags:
 
 # Verify NFTs tab content appears
 - assertVisible:
-    id: 'tab-content-NFTs-1'
+    id: 'tab-content-NFTs-2'
 
 # Verify NFT is visible and there are no NFTs
 - assertVisible:
@@ -73,15 +73,15 @@ tags:
 
 # Verify "hide suspicious tokens" toggle appears
 - assertVisible:
-    id: 'toggle-hide-suspicious-tokens'
+    id: 'toggle-show-all-tokens'
 
 # Verify description text appears
 - assertVisible:
-    text: '(?i)choose which tokens.*'
+    text: 'Choose which tokens to display in your assets list.*'
 
 # Test toggling the suspicious tokens filter
 - tapOn:
-    id: 'toggle-hide-suspicious-tokens'
+    id: 'toggle-show-all-tokens'
 
 # Tap outside or dismiss the sheet by swiping down
 - swipe:
@@ -119,7 +119,7 @@ tags:
 
 # Verify NFTs tab content appears for Safe2
 - assertVisible:
-    id: 'tab-content-NFTs-1'
+    id: 'tab-content-NFTs-2'
 
 # Verify NFTs are loaded (not the empty state)
 # Safe2 should have NFTs, so we check for NFT items or collection names
