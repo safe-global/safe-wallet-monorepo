@@ -80,7 +80,7 @@ const SpaceDashboard = () => {
           </Grid>
 
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
               <AccountsWidget
                 accounts={accounts}
                 loading={isOverviewLoading}
