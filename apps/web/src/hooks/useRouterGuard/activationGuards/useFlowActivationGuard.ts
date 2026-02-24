@@ -7,7 +7,8 @@ import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { ParsedUrlQuery } from 'querystring'
+import type { GuardRule } from '../types'
+import { allow, evaluateGuard, redirect } from '../utils'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -30,44 +31,8 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.addressBook,
 ]
-
-// ---------------------------------------------------------------------------
-// Guard helpers
-// ---------------------------------------------------------------------------
-
-interface GuardResult {
-  success: boolean
-  redirectTo?: string
-}
-
-const allow = (): GuardResult => ({ success: true })
-const redirect = (redirectTo: string): GuardResult => ({ success: false, redirectTo })
-
-// ---------------------------------------------------------------------------
-// Guard context — all derived state the rules need to make decisions
-// ---------------------------------------------------------------------------
-
-interface GuardContext {
-  pathname: string
-  query: ParsedUrlQuery
-  isPublicRoute: boolean
-  isOnboardingRoute: boolean
-  isWalletReady: boolean
-  isConnected: boolean
-  isSiweAuthenticated: boolean
-  hasSpaces: boolean
-  isPartOfSpaceUrl: boolean
-}
-
-// ---------------------------------------------------------------------------
-// Guard rules — evaluated in order, first match wins
-// ---------------------------------------------------------------------------
-
-interface GuardRule {
-  match: (ctx: GuardContext) => boolean
-  action: (ctx: GuardContext) => GuardResult
-}
 
 const guardRules: GuardRule[] = [
   // Public and welcome routes are always accessible
@@ -86,6 +51,7 @@ const guardRules: GuardRule[] = [
   {
     match: ({ isConnected, isSiweAuthenticated }) => {
       const shouldRedirect = !isConnected || !isSiweAuthenticated
+      console.log('## data', { isConnected, isSiweAuthenticated })
       console.log('## shouldRedirect Not connected or not signed in with SIWE → welcome', shouldRedirect)
       return shouldRedirect
     },
@@ -126,19 +92,6 @@ const guardRules: GuardRule[] = [
   },
 ]
 
-/**
- * Runs the guard rules against the given context.
- * Returns the result of the first matching rule, or `allow()` if none match.
- */
-const evaluateGuard = (ctx: GuardContext): GuardResult => {
-  for (const rule of guardRules) {
-    if (rule.match(ctx)) {
-      return rule.action(ctx)
-    }
-  }
-  return allow()
-}
-
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -166,17 +119,20 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
     }
 
-    return evaluateGuard({
-      pathname,
-      query,
-      isPublicRoute: PUBLIC_ROUTES.some((route) => route.startsWith(pathname)),
-      isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
-      isWalletReady,
-      isConnected: !!wallet,
-      isSiweAuthenticated,
-      hasSpaces,
-      isPartOfSpaceUrl,
-    })
+    return evaluateGuard(
+      {
+        pathname,
+        query,
+        isPublicRoute: PUBLIC_ROUTES.some((route) => route.startsWith(pathname)),
+        isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
+        isWalletReady,
+        isConnected: !!wallet,
+        isSiweAuthenticated,
+        hasSpaces,
+        isPartOfSpaceUrl,
+      },
+      guardRules,
+    )
   }, [pathname, query, wallet, isWalletReady, isSiweAuthenticated, fetchSpaces])
 
   return {
