@@ -28,7 +28,7 @@ const DashboardHeader = ({
   onCustomize,
 }: DashboardHeaderProps) => {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 mb-10">
       <TotalValueElement value={value} />
       <HeaderActions
         onSend={onSend}
