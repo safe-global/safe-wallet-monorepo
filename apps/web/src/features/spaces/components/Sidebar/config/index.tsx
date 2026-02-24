@@ -71,22 +71,27 @@ export const safeMainNavigation: SidebarItemConfig[] = [
   {
     icon: Wallet,
     label: 'Overview',
-    href: '/home',
-  },
-  {
-    icon: ArrowRightLeft,
-    label: 'Transactions',
-    href: '/transactions',
+    href: AppRoutes.home,
   },
   {
     icon: Coins,
     label: 'Assets',
-    href: '/balances',
+    href: AppRoutes.balances.index,
+  },
+  {
+    icon: ArrowRightLeft,
+    label: 'Transactions',
+    href: AppRoutes.transactions.history,
+  },
+  {
+    icon: BookUser,
+    label: 'Address book',
+    href: AppRoutes.addressBook,
   },
   {
     icon: LayoutGrid,
     label: 'Apps',
-    href: '/apps',
+    href: AppRoutes.apps.index,
   },
 ]
 
@@ -96,22 +101,22 @@ export const safeDefiGroup: SidebarGroupConfig = {
     {
       icon: Repeat2,
       label: 'Swap',
-      href: '/swap',
+      href: AppRoutes.swap,
     },
     {
       icon: Orbit,
       label: 'Bridge',
-      href: '/bridge',
+      href: AppRoutes.bridge,
     },
     {
       icon: Database,
       label: 'Earn',
-      href: '/earn',
+      href: AppRoutes.earn,
     },
     {
       icon: TrendingUp,
       label: 'Stake',
-      href: '/stake',
+      href: AppRoutes.stake,
     },
   ],
 }

@@ -7,6 +7,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 interface SpacesEnhancedSidebarProps {
   /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
@@ -21,6 +22,7 @@ export const SpacesEnhancedSidebar = ({
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
+  const isSpaceRoute = useIsSpaceRoute()
 
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
@@ -32,6 +34,7 @@ export const SpacesEnhancedSidebar = ({
   const spaceInitial = spaceName.charAt(0).toUpperCase()
 
   const spacesSidebarWidth = 'min(230px, 100%)'
+  const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
 
   return (
     <SidebarProvider
@@ -44,7 +47,7 @@ export const SpacesEnhancedSidebar = ({
       }
     >
       <EnhancedSidebar
-        type="spaces"
+        type={sidebarType}
         spaceName={spaceName}
         spaceInitial={spaceInitial}
         selectedSpace={selectedSpace}

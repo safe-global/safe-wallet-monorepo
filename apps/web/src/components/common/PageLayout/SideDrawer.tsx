@@ -1,5 +1,4 @@
 import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'
@@ -8,7 +7,6 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRo
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 
 import classnames from 'classnames'
-import Sidebar from '@/components/sidebar/Sidebar'
 import css from './styles.module.css'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
@@ -22,7 +20,6 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
-  const isSpaceRoute = useIsSpaceRoute()
 
   const showSidebarToggle = isSafeAppRoute && !isSmallScreen
   // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
@@ -56,17 +53,13 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
-          // Temporary z-index to make the sidebar appear above the current header
-          ...(isSpaceRoute && { '& .MuiPaper-root': { zIndex: 9000 } }),
+          // z-index to make the sidebar appear above the current header
+          '& .MuiPaper-root': { zIndex: 9000 },
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          {isSpaceRoute ? (
-            <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
-          ) : (
-            <Sidebar />
-          )}
+          <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
         </aside>
       </Drawer>
 
