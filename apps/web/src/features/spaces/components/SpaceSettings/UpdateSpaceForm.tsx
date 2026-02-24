@@ -1,9 +1,9 @@
-import { Button, TextField } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
 import ErrorAlert from './ErrorAlert'
+import { Button, TextField } from '@mui/material'
+import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useIsAdmin } from '@/features/spaces'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)

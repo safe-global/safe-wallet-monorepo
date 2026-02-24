@@ -1,13 +1,15 @@
-import { Chip } from '@/components/common/Chip'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
-import OnlyOwner from '@/components/common/OnlyOwner'
+import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import UpsertProposer from '@/features/proposers/components/UpsertProposer'
 import DeleteProposerDialog from '@/features/proposers/components/DeleteProposerDialog'
 import EditProposerDialog from '@/features/proposers/components/EditProposerDialog'
+import PendingDelegationsList from '@/features/proposers/components/PendingDelegationsList'
+import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
+import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import AddIcon from '@/public/images/common/add.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { Box, Button, Grid, Paper, SvgIcon, Typography } from '@mui/material'
@@ -42,6 +44,9 @@ const ProposersList = () => {
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
+  const isNestedSafeOwner = useIsNestedSafeOwner()
+  const { threshold: parentThreshold } = useParentSafeThreshold()
+  const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
   const rows = useMemo(() => {
     if (!proposers.data) return []
@@ -93,16 +98,18 @@ const ProposersList = () => {
         <Grid container spacing={3}>
           <Grid item xs>
             <Typography fontWeight="bold" mb={2}>
-              Proposers <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />
+              Proposers
             </Typography>
             <Typography mb={2}>
               Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
               transactions first. <ExternalLink href={HelpCenterArticle.PROPOSERS}>Learn more</ExternalLink>
             </Typography>
 
+            {showPendingDelegations && <PendingDelegationsList />}
+
             {isEnabled && (
               <Box mb={2}>
-                <OnlyOwner>
+                <CheckWallet allowProposer={false}>
                   {(isOk) => (
                     <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
                       <Tooltip title={isUndeployedSafe ? SafeNotActivated : ''}>
@@ -113,7 +120,7 @@ const ProposersList = () => {
                             variant="text"
                             startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
                             disabled={!isOk || isUndeployedSafe}
-                            size="compact"
+                            size="medium"
                           >
                             Add proposer
                           </Button>
@@ -121,7 +128,7 @@ const ProposersList = () => {
                       </Tooltip>
                     </Track>
                   )}
-                </OnlyOwner>
+                </CheckWallet>
               </Box>
             )}
 

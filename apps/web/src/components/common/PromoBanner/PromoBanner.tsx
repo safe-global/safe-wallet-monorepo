@@ -139,7 +139,7 @@ const PromoBanner = ({
             <Button
               {...(endIcon && { endIcon })}
               variant={ctaVariant || 'outlined'}
-              size={ctaVariant === 'text' ? 'compact' : 'small'}
+              size="small"
               onClick={(e) => {
                 if (onBannerClick) {
                   e.stopPropagation()
@@ -166,7 +166,7 @@ const PromoBanner = ({
               <Button
                 {...(endIcon && { endIcon })}
                 variant="text"
-                size="compact"
+                size="medium"
                 className={css.bannerCtaText}
                 sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
                 color={customCtaColor ? undefined : 'static'}
@@ -178,7 +178,7 @@ const PromoBanner = ({
             <Button
               {...(endIcon && { endIcon })}
               variant="text"
-              size="compact"
+              size="medium"
               className={css.bannerCtaText}
               sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
               color={customCtaColor ? undefined : 'static'}

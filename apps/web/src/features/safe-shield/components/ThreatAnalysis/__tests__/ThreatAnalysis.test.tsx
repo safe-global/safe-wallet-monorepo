@@ -30,9 +30,19 @@ jest.mock('../AnalysisGroupCardDisabled', () => ({
   )),
 }))
 
+// Mock analytics
+jest.mock('@/services/analytics', () => ({
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+  SAFE_SHIELD_EVENTS: {
+    THREAT_ANALYZED: { action: 'Threat analyzed', category: 'safe-shield' },
+  },
+}))
+
 // Mock useLoadFeature to provide HnAnalysisGroupCard
 jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+  createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
     $isDisabled: false,

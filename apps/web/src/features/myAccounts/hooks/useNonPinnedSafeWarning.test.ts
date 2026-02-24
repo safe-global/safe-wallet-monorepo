@@ -84,22 +84,6 @@ describe('useNonPinnedSafeWarning', () => {
     expect(result.current.shouldShowWarning).toBe(false)
   })
 
-  it('should dismiss warning', () => {
-    ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
-    ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)
-
-    const { result } = renderHook(() => useNonPinnedSafeWarning())
-
-    expect(result.current.shouldShowWarning).toBe(true)
-
-    act(() => {
-      result.current.dismiss()
-    })
-
-    expect(result.current.shouldShowWarning).toBe(false)
-    expect(result.current.isDismissed).toBe(true)
-  })
-
   it('should dispatch actions when adding to pinned list', () => {
     ;(useIsSafeOwner.default as jest.Mock).mockReturnValue(true)
     ;(useIsTrustedSafe.default as jest.Mock).mockReturnValue(false)

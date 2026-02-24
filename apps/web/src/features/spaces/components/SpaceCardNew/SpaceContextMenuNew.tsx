@@ -54,7 +54,7 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
 
           <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
             <DropdownMenuItem
-              data-testid="remove-button-spaces"
+              data-testid="remove-button-spaces-new"
               onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
               onSelect={(e) => e.stopPropagation()}
               variant="destructive"

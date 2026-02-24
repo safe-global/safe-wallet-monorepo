@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react'
 import { View, getTokenValue } from 'tamagui'
-import { Tabs } from 'react-native-collapsible-tab-view'
+import { FlashList } from '@shopify/flash-list'
 import { RefreshControl } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
@@ -111,7 +111,7 @@ export function TxHistoryList({
 
   return (
     <View position="relative" flex={1}>
-      <Tabs.FlashList
+      <FlashList
         testID="tx-history-list"
         data={groupedTransactions}
         renderItem={renderItem}

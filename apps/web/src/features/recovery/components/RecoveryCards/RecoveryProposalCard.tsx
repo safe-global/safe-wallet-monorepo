@@ -7,43 +7,38 @@ import type { ReactElement } from 'react'
 
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@/components/common/ExternalLink'
+import { ActionCard } from '@/components/common/ActionCard'
 import { RecoverAccountFlow } from '@/components/tx-flow/flows'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import madProps from '@/utils/mad-props'
 import { TxModalContext } from '@/components/tx-flow'
 import type { TxModalContextType } from '@/components/tx-flow'
-import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import css from './styles.module.css'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 
 type Props =
   | {
       orientation?: 'vertical'
       onClose: () => void
-      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
   | {
       orientation: 'horizontal'
       onClose?: never
-      safe: SafeState
       setTxFlow: TxModalContextType['setTxFlow']
     }
 
-export function InternalRecoveryProposalCard({
-  orientation = 'vertical',
-  onClose,
-  safe,
-  setTxFlow,
-}: Props): ReactElement {
+export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose, setTxFlow }: Props): ReactElement {
   const isDarkMode = useDarkMode()
 
-  const onRecover = async () => {
+  const handleRecover = () => {
     onClose?.()
     setTxFlow(<RecoverAccountFlow />)
-    trackEvent({ ...RECOVERY_EVENTS.START_RECOVERY, label: orientation === 'vertical' ? 'pop-up' : 'dashboard' })
+  }
+
+  const handleRecoverWithTracking = () => {
+    trackEvent(RECOVERY_EVENTS.START_RECOVERY)
+    handleRecover()
   }
 
   const icon = (
@@ -52,65 +47,35 @@ export function InternalRecoveryProposalCard({
       alt="An arrow surrounding a circle containing a vault"
     />
   )
-  const title = 'Recover this Account'
-  const desc = `The connected wallet was chosen as a trusted Recoverer. You can help the owner${maybePlural(
-    safe.owners,
-  )} regain access by resetting the Account setup.`
-
-  const link = (
-    <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
-      <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-        Learn more
-      </ExternalLink>
-    </Track>
-  )
+  const title = 'Recover this account. '
+  const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button data-testid="start-recovery-btn" variant="contained" onClick={onRecover} className={css.button}>
+    <Button
+      data-testid="start-recovery-btn"
+      variant="contained"
+      onClick={handleRecoverWithTracking}
+      className={css.button}
+    >
       Start recovery
     </Button>
   )
 
   if (orientation === 'horizontal') {
     return (
-      <Card data-testid="recovery-proposal-hr" sx={{ py: 3, px: 4 }}>
-        <Grid
-          container
-          sx={{
-            display: 'flex',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 3,
-            flexDirection: { xs: 'column', md: 'row' },
-          }}
-        >
-          <Grid item>{icon}</Grid>
-
-          <Grid item xs>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              {title}
-            </Typography>
-
-            <Typography
-              sx={{
-                color: 'primary.light',
-                mb: 1,
-              }}
-            >
-              {desc}
-            </Typography>
-
-            <Typography>{link}</Typography>
-          </Grid>
-
-          {recoveryButton}
-        </Grid>
-      </Card>
+      <ActionCard
+        severity="info"
+        title={title}
+        content={desc}
+        learnMore={{
+          href: HelpCenterArticle.RECOVERY,
+          trackingEvent: RECOVERY_EVENTS.LEARN_MORE,
+          label: 'proposal-card',
+        }}
+        action={{ label: 'Start recovery', onClick: handleRecover }}
+        trackingEvent={RECOVERY_EVENTS.START_RECOVERY}
+        testId="recovery-proposal-card"
+      />
     )
   }
 
@@ -134,7 +99,11 @@ export function InternalRecoveryProposalCard({
         >
           {icon}
 
-          {link}
+          <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
+            <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+              Learn more
+            </ExternalLink>
+          </Track>
         </Grid>
 
         <Grid item xs={12}>
@@ -185,10 +154,8 @@ export function InternalRecoveryProposalCard({
 }
 
 // Appease TypeScript
-const InternalUseSafe = () => useSafeInfo().safe
 const InternalUseSetTxFlow = () => useContext(TxModalContext).setTxFlow
 
 export const RecoveryProposalCard = madProps(InternalRecoveryProposalCard, {
-  safe: InternalUseSafe,
   setTxFlow: InternalUseSetTxFlow,
 })

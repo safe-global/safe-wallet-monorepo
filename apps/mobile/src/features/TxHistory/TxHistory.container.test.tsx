@@ -16,9 +16,9 @@ jest.mock('@/src/store/hooks/activeSafe', () => ({
   useDefinedActiveSafe: () => mockSafeState.safe,
 }))
 
-jest.mock('react-native-collapsible-tab-view', () => {
+jest.mock('@shopify/flash-list', () => {
   const { FlatList } = require('react-native')
-  return { Tabs: { FlashList: FlatList } }
+  return { FlashList: FlatList }
 })
 
 const sender = faker.finance.ethereumAddress()

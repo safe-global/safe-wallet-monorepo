@@ -1,8 +1,8 @@
 import NameInput from '@/components/common/NameInput'
 import { Controller, useFormContext } from 'react-hook-form'
 import { MenuItem, Select, Stack } from '@mui/material'
-import { RoleMenuItem } from '@/features/spaces/components/AddMemberModal/index'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { RoleMenuItem } from './index'
+import { MemberRole } from '@/features/spaces'
 import css from './styles.module.css'
 
 const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {

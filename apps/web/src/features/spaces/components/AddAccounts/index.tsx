@@ -8,9 +8,9 @@ import {
   useSafesSearch,
   getComparator,
 } from '@/hooks/safes'
-import AddManually, { type AddManuallyFormValues } from '@/features/spaces/components/AddAccounts/AddManually'
-import SafesList, { getSafeId } from '@/features/spaces/components/AddAccounts/SafesList'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import AddManually, { type AddManuallyFormValues } from './AddManually'
+import SafesList, { getSafeId } from './SafesList'
+import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -21,7 +21,6 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   Alert,
   Box,
-  Button,
   Card,
   Container,
   DialogActions,
@@ -37,9 +36,9 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { showNotification } from '@/store/notificationsSlice'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -167,14 +166,9 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button
-            data-testid="add-space-account-button"
-            variant="contained"
-            onClick={() => setOpen(true)}
-            disabled={!isAdmin}
-            sx={{ whiteSpace: 'nowrap' }}
-          >
-            Add accounts
+          <Button variant="outline" size="sm" disabled={!isAdmin} onClick={() => setOpen(true)}>
+            <Plus className="size-4" />
+            Add account
           </Button>
         </Box>
       </Tooltip>
@@ -248,7 +242,7 @@ const AddAccounts = () => {
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button
                       data-testid="add-accounts-button"
-                      variant="contained"
+                      variant="default"
                       disabled={selectedSafesLength === 0}
                       type="submit"
                     >
