@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import CreateSpaceOnboarding from '@/components/onboarding/CreateSpaceOnboarding'
+import CreateSpaceOnboarding from '@/features/spaces/components/CreateSpaceOnboarding'
 
 const CreateSpacePage: NextPage = () => {
   return (

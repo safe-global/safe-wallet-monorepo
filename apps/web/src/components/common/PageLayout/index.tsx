@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
+import { AnimatePresence, motion } from 'motion/react'
 
 import Header from '@/components/common/Header'
 import css from './styles.module.css'
@@ -14,14 +15,31 @@ import { AppRoutes } from '@/config/routes'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
+const ONBOARDING_ROUTES = [
+  AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.selectSafes,
+  AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.addressBook,
+]
+
+const NO_HEADER_ROUTES = [
+  AppRoutes.safeLabsTerms,
+  AppRoutes.welcome.index,
+  AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.selectSafes,
+  AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.addressBook,
+  AppRoutes.spaces.createSpace,
+]
+
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
-  const isWelcomePage = pathname === AppRoutes.welcome.index
-  const hideHeader = isSafeLabsTermsPage || isWelcomePage
+  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
+  const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
@@ -52,7 +70,21 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && <Breadcrumbs />}
-            {children}
+            {isOnboardingRoute ? (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={pathname}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
+            ) : (
+              children
+            )}
           </SafeLoadingError>
         </div>
 

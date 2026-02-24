@@ -81,6 +81,7 @@ export const AppRoutes = {
     createSpace: '/welcome/create-space',
     selectSafes: '/welcome/select-safes',
     inviteMembers: '/welcome/invite-members',
+    addressBook: '/welcome/address-book',
   },
 }
 
