@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
-import { View, getTokenValue } from 'tamagui'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView } from 'react-native'
+import { Text, View, getTokenValue } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { RecipientInput } from './components/RecipientInput'
 import { RecipientSections } from './components/RecipientSections'
 import { AddToAddressBookModal } from './components/AddToAddressBookModal'
@@ -60,10 +61,27 @@ export function SelectRecipientContainer() {
             <RecipientInput
               value={address}
               onChangeText={handleAddressChange}
-              onQrPress={handleQrPress}
               validationState={validation.state}
               contactName={validation.contactName}
             />
+
+            <Pressable onPress={handleQrPress} testID="scan-qr-button">
+              <View flexDirection="row" alignItems="center" gap="$3" paddingVertical="$3" paddingHorizontal="$2">
+                <View
+                  width={40}
+                  height={40}
+                  borderRadius={20}
+                  backgroundColor="$backgroundSkeleton"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <SafeFontIcon name="qr-code" size={20} color="$color" />
+                </View>
+                <Text fontSize="$4" fontWeight={600} color="$color">
+                  Scan QR code
+                </Text>
+              </View>
+            </Pressable>
 
             {validation.state === 'unknown' && (
               <SafeButton

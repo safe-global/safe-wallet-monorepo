@@ -23,26 +23,44 @@ export function useRecipientSearch(query: string): {
   const allSafes = useAppSelector(selectAllSafes)
 
   const allOptions = useMemo(() => {
+    // Build a lookup of address book names so safes/signers
+    // can display their contact name when available.
+    const contactsByAddress = new Map<string, string>()
+    for (const c of contacts) {
+      if (c.chainIds.length === 0 || c.chainIds.includes(activeSafe.chainId)) {
+        contactsByAddress.set(c.value.toLowerCase(), c.name)
+      }
+    }
+
     const safeOptions: RecipientOption[] = Object.keys(allSafes)
       .filter((addr) => !sameAddress(addr, activeSafe.address))
       .map((addr) => ({
         address: addr,
-        name: 'My Safe',
+        name: contactsByAddress.get(addr.toLowerCase()) ?? 'My Safe',
         section: 'safes' as const,
       }))
 
-    const signerOptions: RecipientOption[] = Object.values(signersMap).map((s) => ({
-      address: s.value,
-      name: s.name ?? 'Signer',
-      section: 'signers' as const,
-    }))
+    // Deduplicate: exclude addresses already shown in safes
+    const safeAddresses = new Set(safeOptions.map((s) => s.address.toLowerCase()))
+
+    const signerOptions: RecipientOption[] = Object.values(signersMap)
+      .filter((s) => !safeAddresses.has(s.value.toLowerCase()))
+      .map((s) => ({
+        address: s.value,
+        name: contactsByAddress.get(s.value.toLowerCase()) ?? s.name ?? 'Signer',
+        section: 'signers' as const,
+      }))
+
+    // Deduplicate: exclude addresses already shown in safes or signers
+    const signerAddresses = new Set(signerOptions.map((s) => s.address.toLowerCase()))
 
     const contactOptions: RecipientOption[] = contacts
       .filter((c) => {
-        if (c.chainIds.length === 0) {
-          return true
+        if (c.chainIds.length > 0 && !c.chainIds.includes(activeSafe.chainId)) {
+          return false
         }
-        return c.chainIds.includes(activeSafe.chainId)
+        const lower = c.value.toLowerCase()
+        return !safeAddresses.has(lower) && !signerAddresses.has(lower)
       })
       .map((c) => ({
         address: c.value,
