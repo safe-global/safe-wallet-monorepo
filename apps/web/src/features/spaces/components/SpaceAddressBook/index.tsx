@@ -1,16 +1,14 @@
 import { Stack, Typography } from '@mui/material'
-import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsInvited, useIsAdmin, useAddressBookSearch, useGetSpaceAddressBook } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
-import EmptyAddressBook from '@/features/spaces/components/SpaceAddressBook/EmptyAddressBook'
+import EmptyAddressBook from './EmptyAddressBook'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
-import ImportAddressBook from '@/features/spaces/components/SpaceAddressBook/Import'
-import SearchInput from '@/features/spaces/components/SearchInput'
-import useAddressBookSearch from '@/features/spaces/hooks/useAddressBookSearch'
+import ImportAddressBook from './Import'
+import SearchInput from '../SearchInput'
 import { useState } from 'react'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')

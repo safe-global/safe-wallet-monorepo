@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import Link from 'next/link'
 import {
   SidebarContent,
   SidebarGroup,
@@ -9,34 +9,56 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { spacesMainNavigation, spacesSetupGroup } from '../config'
 import css from '../styles.module.css'
-import type { SpaceSelectorProps } from '../types'
+import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
+import { getSidebarItemTestId } from '../utils'
+import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 
-const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
-  initial ?? (name?.charAt(0) ?? '').toUpperCase()
+interface SpacesSidebarVariantProps extends SpaceSelectorProps {
+  mainNavItems: ResolvedSidebarItem[]
+  setupGroup: ResolvedSidebarGroup
+}
 
-export const SpacesSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
-  const initial = getSpaceInitial(spaceName, spaceInitial)
+const getBadgeAriaLabel = (label: string, count: number): string =>
+  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
+
+const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
+  <SidebarMenuItem key={item.href} className="relative">
+    <SidebarMenuButton
+      size="lg"
+      isActive={item.isActive}
+      disabled={item.disabled}
+      data-testid={getSidebarItemTestId(item.label)}
+      className={css.sidebarInteractive}
+      // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
+      render={!item.disabled ? <Link href={item.link} /> : undefined}
+    >
+      <item.icon />
+      <span>{item.label}</span>
+    </SidebarMenuButton>
+    {item.badge !== undefined && item.badge > 0 && (
+      <>
+        <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
+          {item.badge}
+        </span>
+        <span className={css.transactionsBadgeDot} aria-hidden />
+      </>
+    )}
+  </SidebarMenuItem>
+)
+
+export const SpacesSidebarVariant = ({
+  selectedSpace,
+  spaces,
+  mainNavItems,
+  setupGroup,
+}: SpacesSidebarVariantProps): ReactElement => {
   return (
     <SidebarContent>
       <SidebarGroup>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className={css.spaceSelector}>
-              <Avatar className={css.spaceSelectorAvatar}>
-                <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
-              </Avatar>
-              <div className={css.spaceSelectorText}>
-                <span className={css.spaceSelectorName}>{spaceName}</span>
-                <span className={css.spaceSelectorSubtitle}>Space</span>
-              </div>
-              <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1">
-                <ChevronUp className="size-4" />
-                <ChevronDown className="size-4" />
-              </div>
-            </SidebarMenuButton>
+            <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
@@ -45,19 +67,8 @@ export const SpacesSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSele
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
-            {spacesMainNavigation.map((item) => (
-              <SidebarMenuItem key={item.href} className="relative">
-                <SidebarMenuButton isActive={item.isActive} tooltip={item.label} className={css.sidebarInteractive}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <>
-                    <span className={css.transactionsBadge}>{item.badge}</span>
-                    <span className={css.transactionsBadgeDot} aria-hidden />
-                  </>
-                )}
-              </SidebarMenuItem>
+            {mainNavItems.map((item) => (
+              <NavItem key={item.href} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
@@ -65,16 +76,11 @@ export const SpacesSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSele
 
       {/* Setup Group */}
       <SidebarGroup>
-        <SidebarGroupLabel>{spacesSetupGroup.label}</SidebarGroupLabel>
+        <SidebarGroupLabel>{setupGroup.label}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            {spacesSetupGroup.items.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton tooltip={item.label} className={css.sidebarInteractive}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            {setupGroup.items.map((item) => (
+              <NavItem key={item.href} item={item} />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>

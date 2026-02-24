@@ -44,6 +44,7 @@ import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
 import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import '@/styles/shadcn.css'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.

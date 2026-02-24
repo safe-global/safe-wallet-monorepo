@@ -6,7 +6,7 @@ import { ImportErrorView } from './components/ImportErrorView'
 
 export default function ImportError() {
   const theme = useTheme()
-  const colors: [string, string] = [theme.errorDark?.get(), 'transparent']
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
   const insets = useSafeAreaInsets()
 
   return <ImportErrorView colors={colors} bottomInset={insets.bottom} onTryAgain={router.back} />

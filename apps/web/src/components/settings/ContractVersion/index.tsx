@@ -14,6 +14,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { Box } from '@/components/common/Mui'
 
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -52,33 +53,34 @@ export const ContractVersion = () => {
           <Skeleton width="60px" />
         )}
       </Typography>
+      <Box mt={2}>
+        {safeLoaded && safe.version && showUpdateDialog ? (
+          <Alert
+            sx={{ borderRadius: '2px', borderColor: '#B0FFC9' }}
+            icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
+          >
+            <AlertTitle sx={{ fontWeight: 700 }}>
+              New version is available: {latestSafeVersion} (
+              <ExternalLink href={safeMasterCopy?.deployerRepoUrl}>changelog</ExternalLink>)
+            </AlertTitle>
 
-      {safeLoaded && safe.version && showUpdateDialog ? (
-        <Alert
-          sx={{ mt: 2, borderRadius: '2px', borderColor: '#B0FFC9' }}
-          icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
-        >
-          <AlertTitle sx={{ fontWeight: 700 }}>
-            New version is available: {latestSafeVersion} (
-            <ExternalLink href={safeMasterCopy?.deployerRepoUrl}>changelog</ExternalLink>)
-          </AlertTitle>
+            <Typography mb={2}>
+              Update now to take advantage of new features and the highest security standards available. You will need
+              to confirm this update just like any other transaction.
+            </Typography>
 
-          <Typography mb={2}>
-            Update now to take advantage of new features and the highest security standards available. You will need to
-            confirm this update just like any other transaction.
-          </Typography>
-
-          <CheckWallet>
-            {(isOk) => (
-              <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
-                Update
-              </Button>
-            )}
-          </CheckWallet>
-        </Alert>
-      ) : (
-        <UnsupportedMastercopyWarning />
-      )}
+            <CheckWallet>
+              {(isOk) => (
+                <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
+                  Update
+                </Button>
+              )}
+            </CheckWallet>
+          </Alert>
+        ) : (
+          <UnsupportedMastercopyWarning />
+        )}
+      </Box>
     </>
   )
 }

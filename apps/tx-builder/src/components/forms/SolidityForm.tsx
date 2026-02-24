@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { DevTool } from '@hookform/devtools'
+
+const DevTool = lazy(() => import('@hookform/devtools').then((m) => ({ default: m.DevTool })))
 import { getAddress, parseEther } from 'ethers'
 
 import {
@@ -243,7 +244,12 @@ const SolidityForm = ({
       </form>
 
       {/* set up the dev tool only in dev env */}
-      {!isProdEnv() && <DevTool control={control} />}
+      {!isProdEnv() && (
+        <Suspense>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <DevTool control={control as any} />
+        </Suspense>
+      )}
     </>
   )
 }

@@ -66,9 +66,9 @@ export const SafeTabBar = ({
   rightNode,
 }: TabBarProps<TabName> & SafeTabBarProps) => {
   const theme = useTheme()
-  const activeColor = theme.color?.get() ?? '#000'
-  const inactiveColor = theme.colorSecondary?.get() ?? '#999'
-  const activeBorderColor = theme.primary?.get() ?? '#000'
+  const activeColor = theme.color.get() ?? '#000'
+  const inactiveColor = theme.colorSecondary.get() ?? '#999'
+  const activeBorderColor = theme.primary.get() ?? '#000'
 
   const rightNodes = rightNode
     ? tabNames.map((name, i) => ({ index: i, node: rightNode(name) })).filter(({ node }) => node != null)

@@ -9,11 +9,15 @@ const getLocationQuery = (): ParsedUrlQuery => {
   return parse(location.search.slice(1))
 }
 
-export const useSafeAddressFromUrl = (): string => {
+/** Returns the raw `safe` query param (e.g. "sep:0xAbc…") with a location.search fallback for SSG hydration */
+export const useSafeQueryParam = (): string => {
   const router = useRouter()
   const { safe = '' } = router?.query ?? {}
-  // Fall back to location.search when router.query is empty (SSG hydration)
-  const fullAddress = safe ? (Array.isArray(safe) ? safe[0] : safe) : getLocationQuery().safe?.toString() || ''
+  return safe ? (Array.isArray(safe) ? safe[0] : safe) : getLocationQuery().safe?.toString() || ''
+}
+
+export const useSafeAddressFromUrl = (): string => {
+  const fullAddress = useSafeQueryParam()
 
   const checksummedAddress = useMemo(() => {
     if (!fullAddress) return ''

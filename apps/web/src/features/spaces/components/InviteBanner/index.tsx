@@ -1,7 +1,7 @@
 import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
-import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
+import { MemberStatus } from '@/features/spaces'
 import InitialsAvatar from '../InitialsAvatar'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
@@ -13,7 +13,6 @@ import Track from '@/components/common/Track'
 import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 
@@ -22,10 +21,9 @@ type SpaceListInvite = {
 }
 
 const SpaceListInvite = ({ space }: SpaceListInvite) => {
-  const { id, name, members } = space
+  const { id, name, members, safeCount } = space
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const numberOfAccounts = useSpaceSafeCount(id)
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
 
   const invitedBy = space.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
@@ -72,7 +70,7 @@ const SpaceListInvite = ({ space }: SpaceListInvite) => {
                 </Box>
 
                 <Box>
-                  <SpaceSummary name={name} numberOfAccounts={numberOfAccounts} numberOfMembers={numberOfMembers} />
+                  <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} />
                 </Box>
               </Stack>
 

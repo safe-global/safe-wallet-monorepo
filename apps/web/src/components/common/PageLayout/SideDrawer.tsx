@@ -1,4 +1,4 @@
-import SpaceSidebar from 'src/features/spaces/components/SpaceSidebar'
+import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
@@ -45,8 +45,6 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
     }
   }, [onToggle, router, isSmallScreen])
 
-  const SidebarComponent = isSpaceRoute ? SpaceSidebar : Sidebar
-
   return (
     <>
       <Drawer
@@ -58,11 +56,17 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
+          // Temporary z-index to make the sidebar appear above the current header
+          ...(isSpaceRoute && { '& .MuiPaper-root': { zIndex: 9000 } }),
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          <SidebarComponent />
+          {isSpaceRoute ? (
+            <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
+          ) : (
+            <Sidebar />
+          )}
         </aside>
       </Drawer>
 

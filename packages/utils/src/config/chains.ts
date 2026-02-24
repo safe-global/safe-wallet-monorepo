@@ -17,4 +17,6 @@ const chains = networks.reduce<Chains>((result, { shortName, chainId }) => {
   return result
 }, {})
 
+export const ZKSYNC_ERA_CHAIN_ID = '324'
+
 export default chains

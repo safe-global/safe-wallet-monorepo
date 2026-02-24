@@ -12,9 +12,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { icons, safeMainNavigation, safeDefiGroup } from '../config'
 import css from '../styles.module.css'
 import type { SpaceSelectorProps } from '../types'
+import { getSidebarItemTestId } from '../utils'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
+
+const getBadgeAriaLabel = (label: string, count: number): string =>
+  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
 
 export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelectorProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
@@ -43,13 +47,21 @@ export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelect
           <SidebarMenu>
             {safeMainNavigation.map((item) => (
               <SidebarMenuItem key={item.href} className="relative">
-                <SidebarMenuButton isActive={item.isActive} tooltip={item.label} className={css.sidebarInteractive}>
+                <SidebarMenuButton
+                  size="lg"
+                  isActive={item.isActive}
+                  tooltip={item.label}
+                  data-testid={getSidebarItemTestId(item.label)}
+                  className={css.sidebarInteractive}
+                >
                   <item.icon />
                   <span>{item.label}</span>
                 </SidebarMenuButton>
                 {item.badge !== undefined && item.badge > 0 && (
                   <>
-                    <span className={css.transactionsBadge}>{item.badge}</span>
+                    <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
+                      {item.badge}
+                    </span>
                     <span className={css.transactionsBadgeDot} aria-hidden />
                   </>
                 )}
@@ -66,7 +78,7 @@ export const SafeSidebarVariant = ({ spaceName = '', spaceInitial }: SpaceSelect
           <SidebarMenu>
             {safeDefiGroup.items.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton tooltip={item.label} className={css.sidebarInteractive}>
+                <SidebarMenuButton size="lg" tooltip={item.label} className={css.sidebarInteractive}>
                   <item.icon />
                   <span>{item.label}</span>
                 </SidebarMenuButton>

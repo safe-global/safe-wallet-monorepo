@@ -1,0 +1,1 @@
+export const SPACE_SELECTOR_NAME_MAX_LENGTH = 15
