@@ -259,6 +259,7 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
             height="17.333342000000002"
             loading="lazy"
             src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+            style="min-width: 17.333342000000002px;"
             width="17.333342000000002"
           />
         </span>
