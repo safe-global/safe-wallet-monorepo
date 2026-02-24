@@ -3,9 +3,7 @@ import SpacesCTACard from './SpacesCTACard'
 import AddressBookCard from './ImportAddressBookCard'
 import { Card, Grid2, Stack, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
-import { useLoadFeature } from '@/features/__core__'
 import { flattenSafeItems } from '@/hooks/safes'
-import { MyAccountsFeature } from '@/features/myAccounts'
 import {
   useSpaceSafes,
   useCurrentSpaceId,
@@ -21,8 +19,12 @@ import { Link } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from './DashboardMembersList'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import { AccountsWidgetFeature, useSpaceAccountsData } from '@/features/accountsWidget'
+import { useLoadFeature } from '@/features/__core__'
+import AddAccounts from '@/features/spaces/components/AddAccounts'
+import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
@@ -44,19 +46,29 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   )
 }
 
-const DASHBOARD_LIST_DISPLAY_LIMIT = 5
+const DASHBOARD_LIST_DISPLAY_LIMIT = 3
 
 const SpaceDashboard = () => {
-  const { SafesList } = useLoadFeature(MyAccountsFeature)
+  const { AccountsWidget } = useLoadFeature(AccountsWidgetFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()
   useTrackSpace(safes, activeMembers)
+  const router = useRouter()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
+
+  const { accounts, isLoading: isOverviewLoading } = useSpaceAccountsData(safesToDisplay)
+  const remainingCount = Math.max(0, safeItems.length - DASHBOARD_LIST_DISPLAY_LIMIT)
+
+  const handleViewAll = () => {
+    if (spaceId) {
+      router.push({ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } })
+    }
+  }
 
   return (
     <>
@@ -71,20 +83,20 @@ const SpaceDashboard = () => {
           </Grid>
 
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Card data-testid="dashboard-safe-list" sx={{ p: 2 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h5">Safe Accounts ({safeItems.length})</Typography>
-                  {spaceId && (
-                    <Track {...SPACE_EVENTS.VIEW_ALL_ACCOUNTS}>
-                      <ViewAllLink url={{ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } }} />
-                    </Track>
-                  )}
-                </Stack>
-                <SafesList safes={safesToDisplay} isSpaceSafe />
-              </Card>
+            <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
+              <AccountsWidget
+                accounts={accounts}
+                loading={isOverviewLoading}
+                remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                onViewAll={handleViewAll}
+                action={
+                  <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+                    <AddAccounts />
+                  </Track>
+                }
+              />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card sx={{ p: 2 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
                   <Typography variant="h5">Members ({activeMembers.length})</Typography>
