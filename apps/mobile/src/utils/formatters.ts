@@ -43,8 +43,10 @@ export const getLimitPrice = (
 
 // Sanitize input to allow only numbers and decimal point
 export const sanitizeDecimalInput = (value: string) => {
+  // Normalize comma to period for locale compatibility
+  let sanitized = value.replace(/,/g, '.')
   // Remove all characters except digits and decimal point
-  let sanitized = value.replace(/[^\d.]/g, '')
+  sanitized = sanitized.replace(/[^\d.]/g, '')
   // Ensure only one decimal point
   const parts = sanitized.split('.')
   if (parts.length > 2) {
