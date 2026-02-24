@@ -129,6 +129,7 @@ function RootLayout() {
                           <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
                           <Stack.Screen name="signers" options={{ headerShown: false }} />
                           <Stack.Screen name="import-signers" options={{ headerShown: false }} />
+                          <Stack.Screen name="(send)" options={{ headerShown: false }} />
 
                           <Stack.Screen
                             name="safe-shield-details-sheet"
