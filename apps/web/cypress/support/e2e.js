@@ -23,8 +23,7 @@ import * as ls from './localstorage_data'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-// Visual regression plugins (Chromatic + Argos) — both are no-ops when their token is absent
-import '@chromatic-com/cypress/support'
+// Argos visual regression — no-op when ARGOS_TOKEN is absent
 import '@argos-ci/cypress/support'
 
 const beamer = JSON.parse(Cypress.env('BEAMER_DATA_E2E') || '{}')
@@ -89,7 +88,6 @@ beforeEach(() => {
 })
 
 // After each visual test, capture Argos screenshot.
-// Chromatic light snapshot is captured automatically by its plugin.
 const argosCSS = '* { scrollbar-width: none !important; } ::-webkit-scrollbar { display: none !important; }'
 
 afterEach(() => {

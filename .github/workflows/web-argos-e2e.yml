@@ -13,7 +13,6 @@ jobs:
       VISUAL_REGRESSION_BUILD: 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: true
     name: Cypress Visual tests (Argos)
     permissions:
       contents: read
@@ -28,15 +27,59 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Deterministic spec sharding: each container always runs the same specs,
+      # even on retry, so Argos receives consistent screenshots per shard.
+      - name: Compute spec shard
+        id: specs
+        shell: bash
+        run: |
+          ALL_SPECS=($(ls apps/web/cypress/e2e/visual/*.cy.js | sort))
+          TOTAL=${#ALL_SPECS[@]}
+          SHARD_INDEX=$(( ${{ matrix.containers }} - 1 ))
+          SHARD_TOTAL=5
+
+          SHARD_SPECS=()
+          for i in "${!ALL_SPECS[@]}"; do
+            if [ $(( i % SHARD_TOTAL )) -eq $SHARD_INDEX ]; then
+              SPEC="${ALL_SPECS[$i]#apps/web/}"
+              SHARD_SPECS+=("$SPEC")
+            fi
+          done
+
+          SPEC_LIST=$(IFS=,; echo "${SHARD_SPECS[*]}")
+          echo "specs=$SPEC_LIST" >> "$GITHUB_OUTPUT"
+          echo "Shard ${{ matrix.containers }}: ${#SHARD_SPECS[@]} specs out of $TOTAL total"
+
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: 'cypress/e2e/visual/**/*.cy.js'
+          spec: ${{ steps.specs.outputs.specs }}
           group: 'Argos E2E'
           tag: 'argos-e2e'
           container-index: ${{ matrix.containers }}
+          parallel: 'false'
+          record: 'false'
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
           ARGOS_PARALLEL: 'true'
-          ARGOS_PARALLEL_TOTAL: '5'
+          ARGOS_PARALLEL_TOTAL: '-1'
           ARGOS_PARALLEL_INDEX: ${{ matrix.containers }}
+          ARGOS_PARALLEL_NONCE: ${{ github.run_id }}
+
+  finalize-argos:
+    needs: [e2e]
+    if: '!cancelled()'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/yarn
+
+      - name: Finalize Argos build
+        run: npx @argos-ci/cli finalize
+        working-directory: apps/web
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+          ARGOS_PARALLEL_NONCE: ${{ github.run_id }}

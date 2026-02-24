@@ -9,7 +9,7 @@ cypress/
 ├── e2e/
 │   ├── pages/          # Page Object Model (*.pages.js, main.page.js)
 │   ├── smoke/          # Functional smoke tests (CI on every PR)
-│   ├── visual/         # Visual regression tests (Chromatic E2E, manual trigger only)
+│   ├── visual/         # Visual regression tests (Argos E2E)
 │   ├── regression/     # Feature tests
 │   ├── happypath/      # User journey tests
 │   └── safe-apps/      # Safe Apps tests
@@ -27,9 +27,9 @@ cypress/
 | Regression | `e2e/regression/` | On-demand                | `Verify that ...`         |
 | Happy path | `e2e/happypath/`  | On-demand                | `Verify that ...`         |
 
-## Visual regression tests (Chromatic E2E)
+## Visual regression tests (Argos E2E)
 
-All visual tests in `e2e/visual/`. Chromatic captures light + dark mode automatically (dark via `afterEach` hook in `support/e2e.js`).
+All visual tests in `e2e/visual/`. Argos captures screenshots via `afterEach` hook in `support/e2e.js`.
 
 ### Structure
 
@@ -69,7 +69,7 @@ Use `wallet.connectSigner(signer)` in `beforeEach`, not in individual `it` block
 
 ### API mocking for visual tests
 
-All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky Chromatic diffs caused by changing token prices, balances, and fiat values.
+All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW API endpoints with deterministic fixture data. This prevents flaky visual diffs caused by changing token prices, balances, and fiat values.
 
 - Fixtures are shared with Storybook MSW via symlink: `fixtures/msw → config/test/msw/fixtures`
 - Uses the `safe-token-holder` scenario for balances/portfolio/positions
