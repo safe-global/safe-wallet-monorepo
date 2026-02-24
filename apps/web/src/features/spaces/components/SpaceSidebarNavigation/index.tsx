@@ -8,13 +8,13 @@ import {
   SidebarListItemIcon,
   SidebarListItemText,
 } from '@/components/sidebar/SidebarList'
-import { useCurrentSpaceId, useIsActiceMember } from '@/features/spaces'
+import { useCurrentSpaceId, useIsActiveMember } from '@/features/spaces'
 import { navItems } from './config'
 
 const Navigation = (): ReactElement => {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const isActiveMember = useIsActiceMember()
+  const isActiveMember = useIsActiveMember()
 
   return (
     <SidebarList>

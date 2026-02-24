@@ -2,7 +2,7 @@ import { useAppSelector } from '@/store'
 import { Button, Card, Grid2, Stack, Tooltip, Typography } from '@mui/material'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
-import { useCurrentSpaceId, useIsAdmin, useIsInvited, useIsActiceMember } from '@/features/spaces'
+import { useCurrentSpaceId, useIsAdmin, useIsInvited, useIsActiveMember } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import DeleteSpaceDialog from './DeleteSpaceDialog'
@@ -23,7 +23,7 @@ const SpaceSettings = () => {
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const isInvited = useIsInvited()
   const isLastActiveAdmin = useIsLastActiveAdmin()
-  const isActiveMember = useIsActiceMember()
+  const isActiveMember = useIsActiveMember()
 
   return (
     <div>
