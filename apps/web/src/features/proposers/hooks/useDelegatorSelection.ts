@@ -78,7 +78,11 @@ export const useDelegatorSelection = (proposer: Delegate | undefined) => {
   )
 
   const parentSafeAddress = resolveParentSafeAddress(nestedSafeOwners, effectiveDelegator)
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold(parentSafeAddress)
+  const {
+    threshold: parentThreshold,
+    owners: parentOwners,
+    isLoading: isParentLoading,
+  } = useParentSafeThreshold(parentSafeAddress)
   const isMultiSigRequired = checkMultiSigRequired(parentSafeAddress, parentThreshold)
   const canEdit = checkCanEdit(wallet?.address, proposer?.delegator, nestedSafeOwners)
 
@@ -90,6 +94,7 @@ export const useDelegatorSelection = (proposer: Delegate | undefined) => {
     parentThreshold,
     parentOwners,
     isMultiSigRequired,
+    isParentLoading,
     canEdit,
   }
 }

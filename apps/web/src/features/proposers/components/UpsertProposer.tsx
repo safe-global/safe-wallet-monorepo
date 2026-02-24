@@ -93,6 +93,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     parentThreshold,
     parentOwners,
     isMultiSigRequired,
+    isParentLoading,
     canEdit,
   } = useDelegatorSelection(proposer)
 
@@ -353,7 +354,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                   variant="contained"
                   color="primary"
                   type="submit"
-                  disabled={!isOk || isLoading || (isEditing && !canEdit) || !formState.isValid}
+                  disabled={!isOk || isLoading || isParentLoading || (isEditing && !canEdit) || !formState.isValid}
                   sx={{ minWidth: '122px', minHeight: '36px' }}
                 >
                   {isLoading ? <CircularProgress size={20} /> : 'Continue'}

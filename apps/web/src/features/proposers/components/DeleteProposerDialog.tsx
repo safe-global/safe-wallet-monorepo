@@ -70,7 +70,11 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   // Determine if it's a nested Safe to decide the signing path.
   const isNestedDelegator = nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false
   const parentSafeAddress = isNestedDelegator ? proposer.delegator : undefined
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold(parentSafeAddress)
+  const {
+    threshold: parentThreshold,
+    owners: parentOwners,
+    isLoading: isParentLoading,
+  } = useParentSafeThreshold(parentSafeAddress)
 
   const isMultiSigRequired = isNestedDelegator && parentThreshold !== undefined && parentThreshold > 1
 
@@ -292,7 +296,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
                     size="small"
                     variant="danger"
                     onClick={onConfirm}
-                    disabled={!isOk || isLoading || !canDelete}
+                    disabled={!isOk || isLoading || isParentLoading || !canDelete}
                     sx={{
                       minWidth: '122px',
                       minHeight: '36px',
