@@ -1,6 +1,6 @@
+import { Skeleton } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useContext, useCallback } from 'react'
-import { Skeleton } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
@@ -11,6 +11,8 @@ import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { MoreVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
 
 const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
@@ -67,6 +69,12 @@ const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
       onSend={handleSend}
       onSwap={handleSwap}
       onBuildTransaction={handleBuildTransaction}
+      otherActions={
+        <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <MoreVertical className="size-4 text-foreground" />
+          Customize
+        </Button>
+      }
     />
   )
 }

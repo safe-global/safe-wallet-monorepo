@@ -1,11 +1,12 @@
-import { ArrowDownLeft, Repeat, ArrowUpRight, MoreVertical, SquareDashedBottomCode } from 'lucide-react'
+import { ArrowDownLeft, Repeat, ArrowUpRight, SquareDashedBottomCode } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
 /**
  * HeaderActions
  *
- * Action button group for dashboard header: Send, Receive, Swap, Build transaction, Customize.
+ * Action button group for dashboard header: Send, Receive, Swap, Build transaction.
+ * Accepts an optional `otherActions` slot for trailing actions (e.g. Customize, Manage Safe).
  * Part of Spaces Enterprise workspace design.
  *
  */
@@ -15,10 +16,10 @@ interface HeaderActionsProps {
   onReceive?: () => void
   onSwap?: () => void
   onBuildTransaction?: () => void
-  onCustomize?: () => void
+  otherActions?: React.ReactNode
 }
 
-const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, onCustomize }: HeaderActionsProps) => {
+const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherActions }: HeaderActionsProps) => {
   const outlineClassName = 'bg-transparent border-[#d4d4d4] hover:bg-muted/50'
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -40,10 +41,7 @@ const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, onCustom
           Build transaction
         </Button>
       </div>
-      <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onCustomize}>
-        <MoreVertical className="size-4 text-foreground" />
-        Customize
-      </Button>
+      {otherActions}
     </div>
   )
 }

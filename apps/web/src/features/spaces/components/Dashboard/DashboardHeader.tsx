@@ -16,7 +16,7 @@ interface DashboardHeaderProps {
   onReceive?: () => void
   onSwap?: () => void
   onBuildTransaction?: () => void
-  onCustomize?: () => void
+  otherActions?: React.ReactNode
 }
 
 const DashboardHeader = ({
@@ -25,7 +25,7 @@ const DashboardHeader = ({
   onReceive,
   onSwap,
   onBuildTransaction,
-  onCustomize,
+  otherActions,
 }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-6 mb-10">
@@ -35,7 +35,7 @@ const DashboardHeader = ({
         onReceive={onReceive}
         onSwap={onSwap}
         onBuildTransaction={onBuildTransaction}
-        onCustomize={onCustomize}
+        otherActions={otherActions}
       />
     </div>
   )

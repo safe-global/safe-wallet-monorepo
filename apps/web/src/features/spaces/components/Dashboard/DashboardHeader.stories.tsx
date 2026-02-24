@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { MoreVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { DashboardHeader } from './DashboardHeader'
 
 const meta = {
@@ -26,6 +28,11 @@ export const Default: Story = {
     onReceive: () => {},
     onSwap: () => {},
     onBuildTransaction: () => {},
-    onCustomize: () => {},
+    otherActions: (
+      <Button variant="ghost" size="sm" className="text-muted-foreground">
+        <MoreVertical className="size-4 text-foreground" />
+        Customize
+      </Button>
+    ),
   },
 }
