@@ -2,12 +2,11 @@ import { useAppSelector } from '@/store'
 import { Button, Card, Grid2, Stack, Tooltip, Typography } from '@mui/material'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId, useIsAdmin, useIsInvited, useIsActiveMember } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsAdmin, useIsInvited, useIsActiceMember } from '@/features/spaces/hooks/useSpaceMembers'
-import PreviewInvite from '@/features/spaces/components/InviteBanner/PreviewInvite'
-import DeleteSpaceDialog from '@/features/spaces/components/SpaceSettings/DeleteSpaceDialog'
-import UpdateSpaceForm from '@/features/spaces/components/SpaceSettings/UpdateSpaceForm'
+import PreviewInvite from '../InviteBanner/PreviewInvite'
+import DeleteSpaceDialog from './DeleteSpaceDialog'
+import UpdateSpaceForm from './UpdateSpaceForm'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -24,7 +23,7 @@ const SpaceSettings = () => {
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
   const isInvited = useIsInvited()
   const isLastActiveAdmin = useIsLastActiveAdmin()
-  const isActiveMember = useIsActiceMember()
+  const isActiveMember = useIsActiveMember()
 
   return (
     <div>

@@ -1,8 +1,12 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import type { GetSpaceResponse, SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import type {
+  GetSpaceResponse,
+  MemberDto,
+  SpaceAddressBookItemDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
 import type { AddressBookState } from '@/store/addressBookSlice'
 
 // TODO: Currently also checks for 404 because the /v1/spaces/<orgId> endpoint does not return 401
@@ -41,4 +45,15 @@ export const mapSpaceContactsToAddressBookState = (spaceContacts: SpaceAddressBo
   }
 
   return addressBooks
+}
+
+/**
+ * Check if a user is an active admin of a space based on the members array
+ * @param members - Array of members from GetSpaceResponse
+ * @param userId - The user ID to check
+ */
+export const isUserActiveAdmin = (members: MemberDto[], userId: number | undefined): boolean => {
+  if (!userId) return false
+  const membership = members.find((member) => member.user.id === userId)
+  return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE
 }

@@ -68,7 +68,7 @@ const SwapButton = ({
               data-testid="swap-btn"
               variant="contained"
               color={light ? 'background.paper' : 'primary'}
-              size="compact"
+              size="medium"
               startIcon={<SwapIcon />}
               disableElevation
               onClick={handleClick}

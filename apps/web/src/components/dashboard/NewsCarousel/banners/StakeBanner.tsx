@@ -34,7 +34,7 @@ export const StakeBanner = ({ onDismiss }: { onDismiss: () => void }) => {
               <Button
                 endIcon={<ChevronRightIcon fontSize="small" />}
                 variant="text"
-                size="compact"
+                size="medium"
                 sx={{ mt: 1, p: 0.5 }}
                 color="static"
               >

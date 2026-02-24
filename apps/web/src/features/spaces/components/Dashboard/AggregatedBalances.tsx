@@ -1,6 +1,6 @@
-import { Skeleton } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useContext, useCallback } from 'react'
+import { Skeleton } from '@mui/material'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'

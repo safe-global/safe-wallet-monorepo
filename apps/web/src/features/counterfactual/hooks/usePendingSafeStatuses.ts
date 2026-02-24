@@ -15,6 +15,7 @@ import { CREATE_SAFE_EVENTS, trackEvent, MixpanelEventParams } from '@/services/
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useRef } from 'react'
 import { isSmartContract } from '@/utils/wallets'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
@@ -148,13 +149,24 @@ const usePendingSafeStatus = (): void => {
             trackEvent(CREATE_SAFE_EVENTS.ACTIVATED_SAFE)
           }
 
-          pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
+          const isCurrentSafe = creationChainId === chainId && sameAddress(detail.safeAddress, safeAddress || '')
+
+          if (isCurrentSafe) {
+            pollSafeInfo(creationChainId, detail.safeAddress).finally(() => {
+              safeCreationDispatch(SafeCreationEvent.INDEXED, {
+                groupKey: detail.groupKey,
+                safeAddress: detail.safeAddress,
+                chainId: creationChainId,
+              })
+            })
+          } else {
+            // Avoid spamming CGW when many networks are created at once.
             safeCreationDispatch(SafeCreationEvent.INDEXED, {
               groupKey: detail.groupKey,
               safeAddress: detail.safeAddress,
               chainId: creationChainId,
             })
-          })
+          }
           return
         }
 

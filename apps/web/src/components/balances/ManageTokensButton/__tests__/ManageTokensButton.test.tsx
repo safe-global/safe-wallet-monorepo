@@ -9,7 +9,9 @@ import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
   ASSETS_EVENTS: {
     OPEN_TOKEN_LIST_MENU: { action: 'Open token list menu', category: 'assets' },
     SHOW_ALL_TOKENS: { action: 'Show all tokens', category: 'assets' },

@@ -25,6 +25,14 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Guardian Banner Dismissed',
     category: HYPERNATIVE_CATEGORY,
   },
+  HYPERNATIVE_LOGIN_CLICKED: {
+    action: 'Hypernative Login Clicked',
+    category: HYPERNATIVE_CATEGORY,
+  },
+  HYPERNATIVE_CONNECTED: {
+    action: 'Hypernative Connected',
+    category: HYPERNATIVE_CATEGORY,
+  },
 }
 
 export enum HYPERNATIVE_SOURCE {
@@ -34,4 +42,5 @@ export enum HYPERNATIVE_SOURCE {
   Tutorial = 'Tutorial',
   Queue = 'Queue',
   History = 'History',
+  Copilot = 'Copilot',
 }

@@ -1,7 +1,6 @@
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
 import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/features/spaces/components/InitialsAvatar'
@@ -38,9 +37,9 @@ export const SpaceSummaryNew = ({
 }
 
 const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLink?: boolean }) => {
-  const { id, name, members } = space
+  const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = useSpaceSafeCount(id)
+  const numberOfAccounts = safeCount
   const isAdmin = useIsAdmin(id)
 
   const logoColor = getDeterministicColor(name)
