@@ -5,14 +5,13 @@ import { RootState } from '@/src/store'
 import { selectAllChains, selectChainById } from '@/src/store/chains'
 import { switchActiveChain } from '@/src/store/activeSafeSlice'
 import { ChainItems } from '../Assets/components/Balance/ChainItems'
-import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { makeSafeId } from '@/src/utils/formatters'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
 
 export const NetworksSheetContainer = () => {
   const dispatch = useAppDispatch()
@@ -20,10 +19,10 @@ export const NetworksSheetContainer = () => {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const currency = useAppSelector(selectCurrency)
-  const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
+  const { data } = useSafeOverviewsQuery(
     {
       safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
-      currency: currency.toLowerCase(),
+      currency,
       trusted: true,
       excludeSpam: true,
     },

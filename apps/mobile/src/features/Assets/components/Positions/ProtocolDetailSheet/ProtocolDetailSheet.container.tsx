@@ -51,6 +51,7 @@ export const ProtocolDetailSheetContainer = () => {
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
       <BottomSheetScrollView
+        testID="protocol-detail-sheet"
         stickyHeaderIndices={[0]}
         contentContainerStyle={{
           paddingBottom: insets.bottom + getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
