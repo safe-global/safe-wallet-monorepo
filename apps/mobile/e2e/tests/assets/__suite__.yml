@@ -20,3 +20,8 @@ tags:
     file: ./change-currency.yml
     env:
       SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./view-positions.yml
+    env:
+      SKIP_CLEAN_START: 'true'

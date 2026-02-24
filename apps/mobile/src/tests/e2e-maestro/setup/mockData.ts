@@ -225,6 +225,22 @@ export const pendingTxSafeInfo6: SafeOverview = {
   threshold: 1,
 }
 
+// Positions test safe (Polygon) - has AAVE V3 positions
+export const positionsTestSafe: SafeInfo = {
+  address: '0xc1f4652866ddB3811adcd3418c13eF640e88E1f6',
+  chainId: '137',
+}
+
+export const positionsTestSafeInfo: SafeOverview = {
+  address: { value: '0xc1f4652866ddB3811adcd3418c13eF640e88E1f6', name: null, logoUri: null },
+  awaitingConfirmation: null,
+  chainId: positionsTestSafe.chainId,
+  fiatTotal: '0',
+  owners: [{ value: '0x0000000000000000000000000000000000000001', name: null, logoUri: null }],
+  queued: 0,
+  threshold: 1,
+}
+
 // Seed phrase import test account
 export const mockedSeedPhraseImportAccount: SafeInfo = {
   address: '0x4c425AceFf91aa4398183FE82e210C96dD9E92F8',
