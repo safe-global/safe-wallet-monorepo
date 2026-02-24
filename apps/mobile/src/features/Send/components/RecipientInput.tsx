@@ -25,9 +25,6 @@ const borderColors: Record<RecipientValidationState, string> = {
 export function RecipientInput({ value, onChangeText, onQrPress, validationState, contactName }: RecipientInputProps) {
   return (
     <View gap="$2">
-      <Text fontSize="$3" fontWeight={600} color="$color">
-        Recipient address
-      </Text>
       <View
         flexDirection="row"
         alignItems="center"
@@ -35,19 +32,24 @@ export function RecipientInput({ value, onChangeText, onQrPress, validationState
         borderColor={borderColors[validationState]}
         borderRadius="$3"
         paddingHorizontal="$3"
-        backgroundColor="$background"
+        backgroundColor="$backgroundSkeleton"
+        minHeight={48}
       >
+        <Text fontSize="$4" color="$colorSecondary" marginRight="$2">
+          To:
+        </Text>
         <Input
           flex={1}
           value={value}
           onChangeText={onChangeText}
-          placeholder="Enter address or paste"
+          placeholder="Wallet address or ENS"
           placeholderTextColor="$colorSecondary"
           autoCapitalize="none"
           autoCorrect={false}
-          fontSize="$3"
+          fontSize="$4"
           borderWidth={0}
           paddingHorizontal={0}
+          backgroundColor="transparent"
           testID="recipient-input"
         />
         <Pressable onPress={onQrPress} testID="qr-scan-button">

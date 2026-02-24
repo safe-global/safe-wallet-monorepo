@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { TextInput } from 'react-native'
+import { Pressable, TextInput } from 'react-native'
 import { Text, View, getTokenValue } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,6 +10,8 @@ import { selectCurrency } from '@/src/store/settingsSlice'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { useAmountInput } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
 import { isNativeToken } from './services/tokenTransferParams'
@@ -71,6 +73,8 @@ export function EnterAmountContainer() {
       ? `Should have 1 to ${decimals} decimals`
       : undefined
 
+  const formattedBalance = token ? formatVisualAmount(maxBalance, decimals) : undefined
+
   return (
     <View flex={1}>
       <View flex={1} justifyContent="center" alignItems="center" padding="$4">
@@ -81,25 +85,46 @@ export function EnterAmountContainer() {
           canToggle={fiatConversion.hasFiatPrice}
         />
 
-        <TokenPill symbol={token?.tokenInfo.symbol ?? ''} logoUri={token?.tokenInfo.logoUri} onMaxPress={setMax} />
+        <View flexDirection="row" alignItems="center" gap="$3">
+          <TokenPill
+            symbol={token?.tokenInfo.symbol ?? ''}
+            logoUri={token?.tokenInfo.logoUri}
+            balance={formattedBalance}
+            onMaxPress={setMax}
+          />
+          {fiatConversion.hasFiatPrice && (
+            <Pressable onPress={fiatConversion.toggleMode} testID="toggle-fiat-button">
+              <View
+                width={40}
+                height={40}
+                borderRadius={20}
+                backgroundColor="$backgroundSkeleton"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <SafeFontIcon name="transaction-swap" size={20} color="$color" />
+              </View>
+            </Pressable>
+          )}
+        </View>
 
         <TextInput
           value={rawInput}
           onChangeText={setRawInput}
           keyboardType="decimal-pad"
           style={{
-            fontSize: 24,
-            textAlign: 'center',
-            width: '100%',
-            marginTop: 24,
-            padding: 12,
+            fontSize: 1,
+            opacity: 0,
+            position: 'absolute',
+            width: 1,
+            height: 1,
           }}
-          placeholder="0"
+          autoFocus
           testID="amount-input"
         />
 
         {errorMessage && (
-          <Text color="$error" fontSize="$3" marginTop="$2" testID="amount-error">
+          <Text color="$error" fontSize="$3" marginTop="$3" testID="amount-error">
             {errorMessage}
           </Text>
         )}

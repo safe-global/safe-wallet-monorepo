@@ -4,8 +4,11 @@ import { FlashList } from '@shopify/flash-list'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '@/src/components/Alert'
+import { Identicon } from '@/src/components/Identicon'
+import { shortenAddress } from '@/src/utils/formatters'
 import { useTokenBalances } from '@/src/features/Assets/components/Tokens/useTokenBalances'
 import { TokenListItem } from './components/TokenListItem'
+import type { Address } from '@/src/types/address'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 export function SelectTokenContainer() {
   const router = useRouter()
@@ -63,6 +66,22 @@ export function SelectTokenContainer() {
 
   return (
     <View flex={1}>
+      <View
+        flexDirection="row"
+        alignItems="center"
+        gap="$3"
+        paddingHorizontal="$4"
+        paddingVertical="$3"
+        borderBottomWidth={1}
+        borderBottomColor="$borderLight"
+      >
+        <Identicon address={(recipientAddress ?? '') as Address} size={32} rounded />
+        <View flex={1}>
+          <Text fontSize="$3" color="$colorSecondary">
+            To: {recipientName ?? shortenAddress(recipientAddress ?? '', 6)}
+          </Text>
+        </View>
+      </View>
       <FlashList
         data={visibleItems}
         renderItem={renderItem}

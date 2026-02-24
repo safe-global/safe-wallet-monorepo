@@ -1,7 +1,9 @@
 import React from 'react'
 import { Pressable } from 'react-native'
 import { Text, View } from 'tamagui'
+import { Identicon } from '@/src/components/Identicon'
 import { shortenAddress } from '@/src/utils/formatters'
+import type { Address } from '@/src/types/address'
 import type { RecipientOption } from '../hooks/useRecipientSearch'
 
 interface RecipientSectionsProps {
@@ -30,18 +32,21 @@ function RecipientRow({
     <Pressable onPress={() => onSelect(option.address, option.name)} testID={`recipient-${option.address}`}>
       <View
         flexDirection="row"
-        justifyContent="space-between"
         alignItems="center"
+        gap="$3"
         paddingVertical="$3"
         paddingHorizontal="$2"
         borderBottomWidth={1}
         borderBottomColor="$borderLight"
       >
-        <View gap="$1">
-          <Text fontSize="$3" fontWeight={500} color="$color">
-            {option.name}
-          </Text>
-          <Text fontSize="$2" color="$colorSecondary">
+        <Identicon address={option.address as Address} size={40} rounded />
+        <View flex={1} gap="$1">
+          {option.name && (
+            <Text fontSize="$4" fontWeight={600} color="$color">
+              {option.name}
+            </Text>
+          )}
+          <Text fontSize="$3" color="$colorSecondary">
             {shortenAddress(option.address, 6)}
           </Text>
         </View>
@@ -54,11 +59,7 @@ export function RecipientSections({ safes, signers, addressBook, onSelect }: Rec
   const hasResults = safes.length > 0 || signers.length > 0 || addressBook.length > 0
 
   if (!hasResults) {
-    return (
-      <View padding="$4" alignItems="center">
-        <Text color="$colorSecondary">No matching contacts</Text>
-      </View>
-    )
+    return null
   }
 
   return (

@@ -13,11 +13,11 @@ export function AmountDisplay({ primaryDisplay, secondaryDisplay, onToggle, canT
   return (
     <Pressable onPress={canToggle ? onToggle : undefined}>
       <View alignItems="center" gap="$2" paddingVertical="$4">
-        <Text fontSize={36} fontWeight={700} color="$color" testID="primary-amount">
+        <Text fontSize={44} fontWeight={600} color="$color" testID="primary-amount">
           {primaryDisplay || '0'}
         </Text>
         {secondaryDisplay ? (
-          <Text fontSize="$4" color="$colorSecondary" testID="secondary-amount">
+          <Text fontSize={16} color="$colorSecondary" testID="secondary-amount">
             {secondaryDisplay}
           </Text>
         ) : null}

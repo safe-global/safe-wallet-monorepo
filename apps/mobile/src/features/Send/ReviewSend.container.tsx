@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeButton } from '@/src/components/SafeButton'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '@/src/components/Alert'
+import { Identicon } from '@/src/components/Identicon'
+import { TokenIcon } from '@/src/components/TokenIcon'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
@@ -16,6 +18,7 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { shortenAddress } from '@/src/utils/formatters'
 import { isNativeToken } from './services/tokenTransferParams'
+import type { Address } from '@/src/types/address'
 import logger from '@/src/utils/logger'
 
 export function ReviewSendContainer() {
@@ -45,11 +48,7 @@ export function ReviewSendContainer() {
 
   const decimals = token?.tokenInfo.decimals ?? 18
 
-  const {
-    preview,
-    isLoading,
-    error: buildError,
-  } = useBuildSendTransaction({
+  const { isLoading, error: buildError } = useBuildSendTransaction({
     recipientAddress,
     tokenAddress,
     amount,
@@ -119,37 +118,36 @@ export function ReviewSendContainer() {
     <View flex={1}>
       <ScrollView flex={1} contentContainerStyle={{ padding: 16 }}>
         <View gap="$4">
-          <View gap="$2">
+          <View gap="$3" backgroundColor="$backgroundSkeleton" borderRadius="$4" padding="$4">
             <Text fontSize="$3" color="$colorSecondary">
               Send
             </Text>
-            <Text fontSize="$6" fontWeight={600}>
-              {formattedAmount}
-            </Text>
-            {fiatValue && (
-              <Text fontSize="$4" color="$colorSecondary">
-                {fiatValue}
-              </Text>
-            )}
+            <View flexDirection="row" alignItems="center" gap="$3">
+              {token && <TokenIcon logoUri={token.tokenInfo.logoUri} size="$8" />}
+              <View flex={1}>
+                <Text fontSize="$6" fontWeight={600}>
+                  {formattedAmount}
+                </Text>
+                {fiatValue && (
+                  <Text fontSize="$4" color="$colorSecondary">
+                    {fiatValue}
+                  </Text>
+                )}
+              </View>
+            </View>
           </View>
 
-          <View gap="$2">
+          <View gap="$3" backgroundColor="$backgroundSkeleton" borderRadius="$4" padding="$4">
             <Text fontSize="$3" color="$colorSecondary">
               To
             </Text>
-            <Text fontSize="$4" fontWeight={500}>
-              {shortenAddress(recipientAddress, 8)}
-            </Text>
-          </View>
-
-          {preview?.txInfo && (
-            <View gap="$2">
-              <Text fontSize="$3" color="$colorSecondary">
-                Transaction type
+            <View flexDirection="row" alignItems="center" gap="$3">
+              <Identicon address={recipientAddress as Address} size={40} rounded />
+              <Text fontSize="$4" fontWeight={500}>
+                {shortenAddress(recipientAddress, 8)}
               </Text>
-              <Text fontSize="$4">{'type' in preview.txInfo ? preview.txInfo.type : 'Transfer'}</Text>
             </View>
-          )}
+          </View>
 
           {!activeSigner && (
             <Alert type="warning" message="No signer available. Import a signer to sign transactions." />

@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { Modal } from 'react-native'
 import { Input, Text, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
+import { Identicon } from '@/src/components/Identicon'
 import { useAppDispatch } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { upsertContact } from '@/src/store/addressBookSlice'
 import { shortenAddress } from '@/src/utils/formatters'
+import type { Address } from '@/src/types/address'
 
 interface AddToAddressBookModalProps {
   visible: boolean
@@ -49,10 +51,8 @@ export function AddToAddressBookModal({ visible, address, onClose, onSaved }: Ad
             Add to address book
           </Text>
 
-          <View gap="$2">
-            <Text fontSize="$3" color="$colorSecondary">
-              Address
-            </Text>
+          <View flexDirection="row" alignItems="center" gap="$3">
+            <Identicon address={address as Address} size={40} rounded />
             <Text fontSize="$3" color="$color">
               {shortenAddress(address, 8)}
             </Text>

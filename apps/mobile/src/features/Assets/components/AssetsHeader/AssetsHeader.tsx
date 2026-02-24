@@ -39,7 +39,7 @@ export function AssetsHeader({
       <BalanceContainer />
 
       {showSendButton && onSendPress && (
-        <XStack marginBottom="$4" gap="$3">
+        <XStack marginTop="$3" marginBottom="$4" justifyContent="center" gap="$3">
           <Pressable onPress={onSendPress} testID="send-button">
             <View
               flexDirection="row"
@@ -47,11 +47,11 @@ export function AssetsHeader({
               gap="$2"
               backgroundColor="$primary"
               borderRadius={24}
-              paddingHorizontal="$4"
-              paddingVertical="$2"
+              paddingHorizontal="$5"
+              paddingVertical="$3"
             >
-              <SafeFontIcon name="send-to" size={16} color="$primaryContainer" />
-              <Text fontSize="$3" fontWeight={600} color="$primaryContainer">
+              <SafeFontIcon name="send-to" size={18} color="$primaryContainer" />
+              <Text fontSize="$4" fontWeight={600} color="$primaryContainer">
                 Send
               </Text>
             </View>
