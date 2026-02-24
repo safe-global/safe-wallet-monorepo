@@ -15,7 +15,7 @@ interface RecipientSectionsProps {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <Text fontSize="$2" fontWeight={600} color="$colorSecondary" paddingVertical="$2" textTransform="uppercase">
+    <Text fontSize="$2" fontWeight={600} color="$colorSecondary" paddingVertical="$2">
       {title}
     </Text>
   )

@@ -31,6 +31,11 @@ export function SelectRecipientContainer() {
     setRecipientName(name)
   }, [])
 
+  const handleClear = useCallback(() => {
+    setAddress('')
+    setRecipientName(undefined)
+  }, [])
+
   const handleQrPress = useCallback(() => {
     // TODO: Integrate QR scanner via existing QrCamera component
   }, [])
@@ -53,6 +58,8 @@ export function SelectRecipientContainer() {
     setShowAddContact(false)
   }, [])
 
+  const isSelected = !!recipientName
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View flex={1}>
@@ -61,45 +68,51 @@ export function SelectRecipientContainer() {
             <RecipientInput
               value={address}
               onChangeText={handleAddressChange}
+              onClear={handleClear}
               validationState={validation.state}
               contactName={validation.contactName}
+              selectedName={recipientName}
             />
 
-            <Pressable onPress={handleQrPress} testID="scan-qr-button">
-              <View flexDirection="row" alignItems="center" gap="$3" paddingVertical="$3" paddingHorizontal="$2">
-                <View
-                  width={40}
-                  height={40}
-                  borderRadius={20}
-                  backgroundColor="$backgroundSkeleton"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <SafeFontIcon name="qr-code" size={20} color="$color" />
-                </View>
-                <Text fontSize="$4" fontWeight={600} color="$color">
-                  Scan QR code
-                </Text>
-              </View>
-            </Pressable>
+            {!isSelected && (
+              <>
+                <Pressable onPress={handleQrPress} testID="scan-qr-button">
+                  <View flexDirection="row" alignItems="center" gap="$3" paddingVertical="$3" paddingHorizontal="$2">
+                    <View
+                      width={40}
+                      height={40}
+                      borderRadius={20}
+                      backgroundColor="$backgroundSkeleton"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <SafeFontIcon name="qr-code" size={20} color="$color" />
+                    </View>
+                    <Text fontSize="$4" fontWeight={600} color="$color">
+                      Scan QR code
+                    </Text>
+                  </View>
+                </Pressable>
 
-            {validation.state === 'unknown' && (
-              <SafeButton
-                secondary
-                primary={false}
-                onPress={() => setShowAddContact(true)}
-                testID="add-to-address-book"
-              >
-                Add to address book
-              </SafeButton>
+                {validation.state === 'unknown' && (
+                  <SafeButton
+                    secondary
+                    primary={false}
+                    onPress={() => setShowAddContact(true)}
+                    testID="add-to-address-book"
+                  >
+                    Add to address book
+                  </SafeButton>
+                )}
+
+                <RecipientSections
+                  safes={searchResults.safes}
+                  signers={searchResults.signers}
+                  addressBook={searchResults.addressBook}
+                  onSelect={handleSelect}
+                />
+              </>
             )}
-
-            <RecipientSections
-              safes={searchResults.safes}
-              signers={searchResults.signers}
-              addressBook={searchResults.addressBook}
-              onSelect={handleSelect}
-            />
           </View>
         </ScrollView>
 
