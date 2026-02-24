@@ -10,7 +10,7 @@ interface SafeWidgetProps {
 
 const SafeWidgetRoot = ({ title, action, children, className }: SafeWidgetProps): ReactElement => {
   return (
-    <div data-slot="safe-widget" className={cn('flex flex-col gap-1 rounded-xl bg-card p-1', className)}>
+    <div data-slot="safe-widget" className={cn('flex flex-col gap-1 rounded-sm bg-card p-1', className)}>
       <div className="flex items-center justify-between pb-2 pr-2 pt-6">
         <div className="flex items-center px-4">
           <h4 className="text-xl leading-6 font-semibold text-foreground">{title}</h4>
