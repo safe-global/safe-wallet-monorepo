@@ -12,29 +12,28 @@ interface TokenPillProps {
 
 export function TokenPill({ symbol, logoUri, balance, onMaxPress }: TokenPillProps) {
   return (
-    <View flexDirection="row" alignItems="center" gap="$3" marginTop="$4">
-      <View
-        flexDirection="row"
-        alignItems="center"
-        gap="$2"
-        backgroundColor="$backgroundSkeleton"
-        borderRadius={24}
-        paddingHorizontal="$3"
-        paddingVertical="$2"
-      >
-        {logoUri && (
-          <Image
-            source={{ uri: logoUri }}
-            style={{ width: 28, height: 28, borderRadius: 14 }}
-            cachePolicy="memory-disk"
-          />
-        )}
-        <Text fontSize="$4" fontWeight={600} color="$color">
-          {balance ? `${balance} ${symbol}` : symbol}
-        </Text>
-      </View>
+    <View
+      flexDirection="row"
+      alignItems="center"
+      backgroundColor="$backgroundSkeleton"
+      borderRadius={199}
+      paddingLeft={4}
+      paddingRight={12}
+      height={48}
+      gap="$3"
+    >
+      {logoUri && (
+        <Image
+          source={{ uri: logoUri }}
+          style={{ width: 28, height: 28, borderRadius: 14 }}
+          cachePolicy="memory-disk"
+        />
+      )}
+      <Text fontSize={16} color="$color">
+        {balance ? `${balance} ${symbol}` : symbol}
+      </Text>
       <Pressable onPress={onMaxPress} testID="max-button">
-        <Text fontSize="$4" fontWeight={600} color="$primary">
+        <Text fontSize={16} color="$primary">
           MAX
         </Text>
       </Pressable>

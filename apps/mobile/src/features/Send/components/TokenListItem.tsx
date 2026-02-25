@@ -30,6 +30,7 @@ export const TokenListItem = memo(function TokenListItem({ item, currency, onPre
         name={tokenInfo.name}
         logoUri={tokenInfo.logoUri}
         description={formattedAmount}
+        transparent={false}
         rightNode={
           <View alignItems="flex-end">
             <Text fontSize="$4" fontWeight={600} color="$color">

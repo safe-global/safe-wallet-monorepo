@@ -7,7 +7,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const AssetsHeaderContainer = () => {
   const { amount, hasMore, isLoading } = usePendingTxs()
-  const hasSendTransfers = useHasFeature(FEATURES.SEND_TRANSFERS)
+  const hasSendTransfers = true
 
   const onPendingTransactionsPress = useCallback(() => {
     router.push('/pending-transactions')
