@@ -19,7 +19,7 @@ export const EnhancedSidebar = ({
 }: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
-    <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" variant="sidebar" className="border-r-0 group-data-[side=left]:border-r-0">
       <SidebarHeader>
         <SidebarTopBar />
       </SidebarHeader>
