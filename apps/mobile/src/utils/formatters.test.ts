@@ -28,10 +28,28 @@ describe('splitCurrencyParts', () => {
     })
   })
 
-  it('parses symbol and whole when there are no decimals', () => {
-    expect(splitCurrencyParts('$ 500')).toEqual({
+  it('handles comma as decimal separator (de-DE locale)', () => {
+    expect(splitCurrencyParts('1.234,56 €')).toEqual({
+      symbol: '',
+      whole: '1.234',
+      decimals: ',56',
+      endCurrency: ' €',
+    })
+  })
+
+  it('handles comma decimal with leading symbol (fr-FR style)', () => {
+    expect(splitCurrencyParts('$ 380,52')).toEqual({
       symbol: '$ ',
-      whole: '500',
+      whole: '380',
+      decimals: ',52',
+      endCurrency: '',
+    })
+  })
+
+  it('returns whole string as fallback when there are no decimals', () => {
+    expect(splitCurrencyParts('$ 500')).toEqual({
+      symbol: '',
+      whole: '$ 500',
       decimals: '',
       endCurrency: '',
     })

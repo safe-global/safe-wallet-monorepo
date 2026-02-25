@@ -76,11 +76,14 @@ interface CurrencyParts {
 }
 
 /**
- * Split a formatted currency string (e.g. "$ 380.52") into parts so the
- * decimal portion can be styled independently.
+ * Split a formatted currency string (e.g. "$ 380.52" or "380,52 €") into
+ * parts so the decimal portion can be styled independently.
+ *
+ * Uses [.,]\d+ to match the decimal separator, which handles both "." (en)
+ * and "," (de/fr) locales since Intl.NumberFormat uses the device locale.
  */
 export const splitCurrencyParts = (formatted: string): CurrencyParts => {
-  const match = formatted.match(/^(\D+)?(.+?)(\.\d+)?(\D+)?$/)
+  const match = formatted.match(/^(\D+)?(.+)([.,]\d+)(\D+)?$/)
 
   if (!match) {
     return { symbol: '', whole: formatted, decimals: '', endCurrency: '' }
@@ -89,7 +92,7 @@ export const splitCurrencyParts = (formatted: string): CurrencyParts => {
   return {
     symbol: match[1] ?? '',
     whole: match[2],
-    decimals: match[3] ?? '',
+    decimals: match[3],
     endCurrency: match[4] ?? '',
   }
 }
