@@ -1,15 +1,14 @@
 import { type ReactElement, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowUpRight, ChevronRight } from 'lucide-react'
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import useTxQueue from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { AppRoutes } from '@/config/routes'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { getTxStatus, getTxLabel, formatTxDate } from '../../utils'
 
 const MAX_TXS = 3
 
@@ -18,33 +17,6 @@ const TxIcon = (): ReactElement => (
     <ArrowUpRight className="size-5 text-foreground" />
   </div>
 )
-
-function getTxStatus(tx: TransactionQueuedItem): string {
-  if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) return ''
-
-  const { confirmationsSubmitted, confirmationsRequired } = tx.transaction.executionInfo
-  if (confirmationsSubmitted >= confirmationsRequired) {
-    return 'Execution needed'
-  }
-
-  const missing = confirmationsRequired - confirmationsSubmitted
-  return `${missing} signature${missing > 1 ? 's' : ''} needed`
-}
-
-function getTxLabel(tx: TransactionQueuedItem): string {
-  const { txInfo } = tx.transaction
-  if ('humanDescription' in txInfo && txInfo.humanDescription) {
-    return txInfo.humanDescription
-  }
-  if ('methodName' in txInfo && txInfo.methodName) {
-    return txInfo.methodName
-  }
-  return txInfo.type
-}
-
-function formatTxDate(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
 
 const PendingTxList = (): ReactElement => {
   const router = useRouter()
