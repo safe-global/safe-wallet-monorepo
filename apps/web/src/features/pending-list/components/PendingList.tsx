@@ -89,9 +89,7 @@ const PendingList = (): ReactElement => {
               label={getTxLabel(tx)}
               info={formatTxDate(tx.transaction.timestamp)}
               startNode={<TxIcon />}
-              actionNode={
-                <Badge variant="secondary">{getTxStatus(tx)}</Badge>
-              }
+              actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
             />
           ))}
       {!isLoading && remainingCount !== undefined && (
