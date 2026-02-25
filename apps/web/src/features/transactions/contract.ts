@@ -1,5 +1,5 @@
 import type PendingList from './components/PendingList'
 
-export interface PendingListContract {
+export interface TransactionsContract {
   PendingList: typeof PendingList
 }

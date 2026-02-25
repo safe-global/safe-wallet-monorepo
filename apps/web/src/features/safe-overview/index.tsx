@@ -1,12 +1,12 @@
 import { type ReactElement } from 'react'
 import AccountHeader from './components/AccountHeader'
-import { AssetsListFeature } from '@/features/assets-list'
-import { PendingListFeature } from '@/features/pending-list'
+import { AssetsFeature } from '@/features/assets'
+import { TransactionsFeature } from '@/features/transactions'
 import { useLoadFeature } from '@/features/__core__'
 
 const SafeOverview = (): ReactElement => {
-  const { AssetsList } = useLoadFeature(AssetsListFeature)
-  const { PendingList } = useLoadFeature(PendingListFeature)
+  const { AssetsList } = useLoadFeature(AssetsFeature)
+  const { PendingList } = useLoadFeature(TransactionsFeature)
 
   return (
     <>
