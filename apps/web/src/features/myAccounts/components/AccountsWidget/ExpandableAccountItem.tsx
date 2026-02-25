@@ -2,11 +2,11 @@ import { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '../AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { cn } from '@/utils/cn'
 import { AccountItemContent } from './AccountItemContent'
-import type { Account } from '../types'
+import type { Account } from './types'
 
 interface ExpandableAccountItemProps {
   account: Account

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { SafeItem } from '@/hooks/safes'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { AccountsWidget } from './AccountsWidget'
-import type { Account } from '../types'
+import type { Account } from './types'
 
 const mockSafeItem = (chainId: string): SafeItem => ({
   chainId,

@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
-import type { Account } from '../types'
+import { AccountItem } from '../AccountItem'
+import type { Account } from './types'
 
 const getInitial = (name: string): string => name.charAt(0).toUpperCase()
 

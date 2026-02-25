@@ -2,9 +2,9 @@ import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { UserRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '../AccountItem'
 import { AccountItemContent } from './AccountItemContent'
-import type { Account } from '../types'
+import type { Account } from './types'
 
 interface AccountWidgetItemProps {
   account: Account
