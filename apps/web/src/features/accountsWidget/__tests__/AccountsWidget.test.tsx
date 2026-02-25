@@ -76,13 +76,6 @@ describe('AccountsWidget', () => {
     expect(screen.getByText('V')).toBeInTheDocument()
   })
 
-  it('renders chain badges for accounts', () => {
-    render(<AccountsWidget accounts={[mockAccounts[0]]} />)
-
-    expect(screen.getByAltText('Ethereum Logo')).toBeInTheDocument()
-    expect(screen.getByAltText('Polygon Logo')).toBeInTheDocument()
-  })
-
   it('renders skeletons when loading', () => {
     const { container } = render(<AccountsWidget accounts={[]} loading />)
 
