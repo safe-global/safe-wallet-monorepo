@@ -3,8 +3,11 @@ import * as main from '../pages/main.page'
 import * as safe from '../pages/load_safe.pages'
 import * as createwallet from '../pages/create_wallet.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const testSafeName = 'Test safe name'
 
@@ -14,6 +17,7 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.loadNewSafeSepoliaUrl)
   })
 

@@ -14,12 +14,12 @@ describe('[SMOKE] Replace Owners tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
 
   it('[SMOKE] Verify that "Replace" icon is visible', () => {
-    wallet.connectSigner(signer)
     owner.verifyReplaceBtnIsEnabled()
   })
 
@@ -29,7 +29,6 @@ describe('[SMOKE] Replace Owners tests', () => {
   })
 
   it('[SMOKE] Verify that the owner replacement form is opened', () => {
-    wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     owner.openReplaceOwnerWindow(0)
   })

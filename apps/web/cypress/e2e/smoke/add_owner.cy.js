@@ -15,6 +15,7 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.wait('@History', { timeout: 20000 })
@@ -23,7 +24,6 @@ describe('[SMOKE] Add Owners tests', () => {
 
   // TODO: Check if this test is covered with unit tests
   it('[SMOKE] Verify relevant error messages are displayed in Address input', () => {
-    wallet.connectSigner(signer)
     owner.openManageSignersWindow()
     owner.clickOnAddSignerBtn()
 
@@ -45,7 +45,6 @@ describe('[SMOKE] Add Owners tests', () => {
   })
 
   it('[SMOKE] Verify the presence of "Manage Signers" button', () => {
-    wallet.connectSigner(signer)
     owner.verifyManageSignersBtnIsEnabled()
   })
 

@@ -10,7 +10,7 @@ import * as owner from './owners.pages'
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
-const newTransactionBtnStr = 'New transaction'
+const sendButtonDashboard = '[data-testid="send-button-dashboard"]'
 const recepientInput = 'input[name="recipients.0.recipient"]'
 const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
 const tokenAddressInput = 'input[name="recipients.0.tokenAddress"]'
@@ -715,16 +715,14 @@ export function verifyTransactionActionsVisibility(option) {
 }
 
 export function clickOnNewtransactionBtn() {
-  // Assert that "New transaction" button is visible
-  cy.contains(newTransactionBtnStr, {
+  cy.get(sendButtonDashboard, {
     timeout: 60_000, // `lastWallet` takes a while initialize in CI
   })
     .should('be.visible')
     .and('not.be.disabled')
+    .click()
 
-  // Open the new transaction modal
-  cy.contains(newTransactionBtnStr).click()
-  cy.contains('h1', newTransactionBtnStr).should('be.visible')
+  cy.get(sendTokensBtn).should('be.visible')
 }
 
 export function typeRecipientAddress(address) {

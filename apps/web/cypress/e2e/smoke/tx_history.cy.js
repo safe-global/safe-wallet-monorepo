@@ -2,8 +2,11 @@ import * as constants from '../../support/constants'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const typeOnchainRejection = data.type.onchainRejection
 const typeBatch = data.type.batchNativeTransfer
@@ -20,6 +23,7 @@ describe('[SMOKE] Tx history tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.intercept('GET', constants.transactionHistoryEndpoint, { fixture: 'history/history_tx_1.json' }).as('getHistory')
     cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
     cy.wait('@getHistory')

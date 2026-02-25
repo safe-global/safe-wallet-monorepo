@@ -1,8 +1,11 @@
 import * as constants from '../../support/constants'
 import * as nfts from '../pages/nfts.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const nftsName = 'CatFactory'
 const nftsAddress = '0x373B...866c'
@@ -14,6 +17,7 @@ describe('[SMOKE] NFTs tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.fixture('nfts/nfts.json').then((mockData) => {
       cy.intercept('GET', constants.collectiblesEndpoint, mockData).as('getNfts')
     })

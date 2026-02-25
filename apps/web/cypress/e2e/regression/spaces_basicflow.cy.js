@@ -44,6 +44,11 @@ describe('Spaces basic flow tests', () => {
   it('Verify an account can be added manually', () => {
     const spaceName = 'Space_' + Math.random().toString(36).substring(2, 12)
 
+    // reuse this --> mv to page object:
+    // !! ensure all data-testId are kept
+    // either mv to fixtures or to the safes object
+    // TODO extend this suite
+    // update this
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
     space.deleteAllSpaces()

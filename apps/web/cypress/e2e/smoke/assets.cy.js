@@ -3,8 +3,11 @@ import * as main from '../../e2e/pages/main.page'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as ls from '../../support/localstorage_data.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('[SMOKE] Assets tests', () => {
   const fiatRegex = assets.fiatRegex
@@ -14,6 +17,7 @@ describe('[SMOKE] Assets tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
   })
 

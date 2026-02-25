@@ -2,8 +2,11 @@ import * as constants from '../../support/constants'
 import * as dashboard from '../pages/dashboard.pages'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const txData = ['Send', '-0.00002 ETH', '1/1']
 const txaddOwner = ['addOwnerWithThreshold', '1/2']
@@ -16,6 +19,7 @@ describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
   })
 

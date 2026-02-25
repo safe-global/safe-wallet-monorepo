@@ -17,8 +17,8 @@ describe('[SMOKE] Create transactions tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
-    wallet.connectSigner(signer)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
   })

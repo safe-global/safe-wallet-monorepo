@@ -3,8 +3,11 @@ import * as main from '../pages/main.page.js'
 import * as createTx from '../pages/create_tx.pages.js'
 import * as msg_data from '../../fixtures/txmessages_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const typeMessagesGeneral = msg_data.type.general
 const typeMessagesOffchain = msg_data.type.offChain
@@ -15,6 +18,7 @@ describe('[SMOKE] Offchain Messages tests', () => {
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.fixture('messages/messages.json').then((mockData) => {
       cy.intercept('GET', constants.messagesEndpoint, mockData).as('getMessages')
     })

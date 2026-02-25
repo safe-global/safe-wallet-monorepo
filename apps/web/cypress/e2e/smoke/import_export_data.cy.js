@@ -4,8 +4,11 @@ import * as constants from '../../support/constants'
 import * as ls from '../../support/localstorage_data.js'
 import * as sideBar from '../pages/sidebar.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, () => {
   before(async () => {
@@ -13,6 +16,7 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.dataSettingsUrl)
   })
 

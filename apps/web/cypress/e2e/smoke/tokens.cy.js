@@ -3,14 +3,18 @@ import * as main from '../pages/main.page'
 import * as assets from '../pages/assets.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as ls from '../../support/localstorage_data.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 let staticSafes = []
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('[SMOKE] Tokens tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     main.addToLocalStorage(
       constants.localStorageKeys.SAFE_v2__tokenlist_onboarding,
       ls.cookies.acceptedTokenListOnboarding,

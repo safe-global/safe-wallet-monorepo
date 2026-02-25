@@ -20,6 +20,7 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
   })
 
   beforeEach(() => {
+    wallet.ensureSiweSession(signer)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
   })
 
@@ -45,7 +46,6 @@ describe('[SMOKE] Batch transaction tests', { defaultCommandTimeout: 30000 }, ()
       .then(() => main.isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry0))
       .then(() => {
         cy.reload()
-        wallet.connectSigner(signer)
         batch.clickOnBatchCounter()
         batch.clickOnConfirmBatchBtn()
         batch.verifyBatchTransactionsCount(2)

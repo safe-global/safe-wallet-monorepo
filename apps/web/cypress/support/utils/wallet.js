@@ -4,6 +4,7 @@ const onboardv2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
+const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
 
 const privateKeyStr = 'Private key'
 
@@ -75,5 +76,17 @@ export function connectSigner(signer) {
 
   enterPrivateKey().then(() => {
     main.closeOutreachPopup()
+  })
+}
+
+export function ensureSiweSession(signer) {
+  cy.visit('/welcome')
+  connectSigner(signer)
+
+  cy.get('body').then(($body) => {
+    if ($body.find(continueWithWalletBtn).length > 0) {
+      cy.get(continueWithWalletBtn).should('be.visible').click()
+      cy.location('pathname', { timeout: 30000 }).should('not.eq', '/welcome')
+    }
   })
 }
