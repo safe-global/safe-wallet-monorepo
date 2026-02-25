@@ -1,8 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import {
-  safeParseUnits,
-  safeFormatUnits,
-} from '@safe-global/utils/utils/formatters'
+import { safeParseUnits, safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { sanitizeDecimalInput } from '@/src/utils/formatters'
 
 interface UseAmountInputResult {
@@ -27,16 +24,13 @@ const getDecimalCount = (value: string): number => {
 export function useAmountInput(): UseAmountInputResult {
   const [rawInput, setRawInputState] = useState('')
 
-  const setRawInput = useCallback(
-    (value: string, maxDecimals: number) => {
-      const sanitized = sanitizeDecimalInput(value)
-      if (getDecimalCount(sanitized) > maxDecimals) {
-        return
-      }
-      setRawInputState(sanitized)
-    },
-    [],
-  )
+  const setRawInput = useCallback((value: string, maxDecimals: number) => {
+    const sanitized = sanitizeDecimalInput(value)
+    if (getDecimalCount(sanitized) > maxDecimals) {
+      return
+    }
+    setRawInputState(sanitized)
+  }, [])
 
   const setMax = useCallback((value: string) => {
     setRawInputState(value)
@@ -45,10 +39,7 @@ export function useAmountInput(): UseAmountInputResult {
   return { rawInput, setRawInput, setMax }
 }
 
-const validateDecimalLength = (
-  value: string,
-  maxDecimals: number,
-): boolean => {
+const validateDecimalLength = (value: string, maxDecimals: number): boolean => {
   const parts = value.split('.')
   if (parts.length < 2) {
     return true
@@ -101,9 +92,7 @@ export function useTokenAmountValidation({
   }, [tokenAmount, decimals, maxBalance, isZero, exceedsDecimals])
 
   const isValid = useMemo(() => {
-    return (
-      !!tokenAmount && !isZero && !exceedsBalance && !exceedsDecimals
-    )
+    return !!tokenAmount && !isZero && !exceedsBalance && !exceedsDecimals
   }, [tokenAmount, isZero, exceedsBalance, exceedsDecimals])
 
   return { isZero, exceedsBalance, exceedsDecimals, isValid }

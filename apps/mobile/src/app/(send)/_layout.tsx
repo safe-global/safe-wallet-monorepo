@@ -23,9 +23,9 @@ export default function SendLayout() {
       })}
     >
       <Stack.Screen name="recipient" options={{ title: 'Send' }} />
+      <Stack.Screen name="scan-qr" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="token" options={{ title: 'Select token' }} />
       <Stack.Screen name="amount" options={{ title: 'Enter amount' }} />
-      <Stack.Screen name="review" options={{ title: 'Review' }} />
     </Stack>
   )
 }

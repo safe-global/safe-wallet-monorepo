@@ -1,4 +1,4 @@
-import { createSendTransaction } from './createSendTransaction'
+import { proposeSendTransaction } from './proposeSendTransaction'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { createTx } from '@/src/services/tx/tx-sender/create'
 import proposeNewTransaction from '@/src/services/tx/proposeNewTransaction'
@@ -10,12 +10,11 @@ jest.mock('@/src/services/tx/proposeNewTransaction')
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-describe('createSendTransaction', () => {
+describe('proposeSendTransaction', () => {
   const mockDispatch = jest.fn()
 
   const mockSafeSDK = {
     getChainId: jest.fn().mockResolvedValue(BigInt(1)),
-    signTransaction: jest.fn(),
     getTransactionHash: jest.fn(),
   }
 
@@ -35,15 +34,15 @@ describe('createSendTransaction', () => {
     dispatch: mockDispatch,
   }
 
-  it('validates, builds, signs, and proposes a native token transfer', async () => {
+  it('builds and proposes a native token transfer without signing', async () => {
     const mockTx = createMockSafeTx()
-    const signedTx = createMockSafeTx()
     ;(createTx as jest.Mock).mockResolvedValue(mockTx)
-    mockSafeSDK.signTransaction.mockResolvedValue(signedTx)
     mockSafeSDK.getTransactionHash.mockResolvedValue('0xhash123')
-    ;(proposeNewTransaction as jest.Mock).mockResolvedValue({ txId: 'tx-123' })
+    ;(proposeNewTransaction as jest.Mock).mockResolvedValue({
+      txId: 'tx-123',
+    })
 
-    const result = await createSendTransaction(defaultParams)
+    const result = await proposeSendTransaction(defaultParams)
 
     expect(createTx).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -51,12 +50,12 @@ describe('createSendTransaction', () => {
         data: '0x',
       }),
     )
-    expect(mockSafeSDK.signTransaction).toHaveBeenCalledWith(mockTx)
+    expect(mockSafeSDK.getTransactionHash).toHaveBeenCalledWith(mockTx)
     expect(proposeNewTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         chainId: '1',
         safeTxHash: '0xhash123',
-        signedTx,
+        signedTx: mockTx,
         dispatch: mockDispatch,
       }),
     )
@@ -66,13 +65,13 @@ describe('createSendTransaction', () => {
   it('builds an ERC-20 transfer with correct encoding', async () => {
     const tokenAddress = generateChecksummedAddress()
     const mockTx = createMockSafeTx()
-    const signedTx = createMockSafeTx()
     ;(createTx as jest.Mock).mockResolvedValue(mockTx)
-    mockSafeSDK.signTransaction.mockResolvedValue(signedTx)
     mockSafeSDK.getTransactionHash.mockResolvedValue('0xhash')
-    ;(proposeNewTransaction as jest.Mock).mockResolvedValue({ txId: 'tx-456' })
+    ;(proposeNewTransaction as jest.Mock).mockResolvedValue({
+      txId: 'tx-456',
+    })
 
-    await createSendTransaction({
+    await proposeSendTransaction({
       ...defaultParams,
       tokenAddress,
       amount: '100',
@@ -87,9 +86,22 @@ describe('createSendTransaction', () => {
     )
   })
 
+  it('does not call signTransaction', async () => {
+    const mockTx = createMockSafeTx()
+    ;(createTx as jest.Mock).mockResolvedValue(mockTx)
+    mockSafeSDK.getTransactionHash.mockResolvedValue('0xhash')
+    ;(proposeNewTransaction as jest.Mock).mockResolvedValue({
+      txId: 'tx-789',
+    })
+
+    await proposeSendTransaction(defaultParams)
+
+    expect(mockSafeSDK).not.toHaveProperty('signTransaction')
+  })
+
   it('throws on invalid recipient address', async () => {
     await expect(
-      createSendTransaction({
+      proposeSendTransaction({
         ...defaultParams,
         recipient: 'not-an-address',
       }),
@@ -98,7 +110,7 @@ describe('createSendTransaction', () => {
 
   it('throws on invalid token address', async () => {
     await expect(
-      createSendTransaction({
+      proposeSendTransaction({
         ...defaultParams,
         tokenAddress: 'bad-token',
       }),
@@ -107,7 +119,7 @@ describe('createSendTransaction', () => {
 
   it('throws when safeParseUnits returns undefined', async () => {
     await expect(
-      createSendTransaction({
+      proposeSendTransaction({
         ...defaultParams,
         amount: 'not-a-number',
       }),
@@ -119,7 +131,7 @@ describe('createSendTransaction', () => {
     ;(createTx as jest.Mock).mockResolvedValue(mockTx)
     ;(getSafeSDK as jest.Mock).mockReturnValue(null)
 
-    await expect(createSendTransaction(defaultParams)).rejects.toThrow('Safe SDK is not initialized')
+    await expect(proposeSendTransaction(defaultParams)).rejects.toThrow('Safe SDK is not initialized')
   })
 
   it('throws on chain mismatch', async () => {
@@ -127,6 +139,6 @@ describe('createSendTransaction', () => {
     ;(createTx as jest.Mock).mockResolvedValue(mockTx)
     mockSafeSDK.getChainId.mockResolvedValue(BigInt(137))
 
-    await expect(createSendTransaction(defaultParams)).rejects.toThrow('Chain mismatch')
+    await expect(proposeSendTransaction(defaultParams)).rejects.toThrow('Chain mismatch')
   })
 })

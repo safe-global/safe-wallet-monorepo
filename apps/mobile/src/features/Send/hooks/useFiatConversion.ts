@@ -69,10 +69,7 @@ export function useFiatConversion({
   const hasFiatPrice = !!fiatRate && parseFloat(fiatRate) > 0
   const rate = hasFiatPrice ? parseFloat(fiatRate) : 0
 
-  const currencySymbol = useMemo(
-    () => getCurrencySymbol(currency),
-    [currency],
-  )
+  const currencySymbol = useMemo(() => getCurrencySymbol(currency), [currency])
 
   const tokenAmount = useMemo(() => {
     if (!rawInput) {
@@ -83,10 +80,7 @@ export function useFiatConversion({
       if (fiatNum === 0 || rate === 0) {
         return ''
       }
-      return truncateDecimals(
-        (fiatNum / rate).toString(),
-        decimals,
-      )
+      return truncateDecimals((fiatNum / rate).toString(), decimals)
     }
     return rawInput
   }, [rawInput, isFiatMode, hasFiatPrice, rate, decimals])

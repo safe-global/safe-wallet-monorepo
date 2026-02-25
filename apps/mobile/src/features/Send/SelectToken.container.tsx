@@ -82,48 +82,42 @@ export function SelectTokenContainer() {
             <View
               flexDirection="row"
               alignItems="center"
-              justifyContent="space-between"
               backgroundColor="$backgroundSkeleton"
               borderRadius={8}
-              paddingLeft="$4"
-              paddingRight="$2"
+              paddingHorizontal="$4"
               height={64}
+              gap="$2"
             >
-              <View flexDirection="row" alignItems="baseline" gap="$2">
-                <Text fontSize="$4" color="$colorSecondary">
-                  To:
+              <Text fontSize="$4" color="$colorSecondary">
+                To:
+              </Text>
+              {recipientName ? (
+                <View gap={2}>
+                  <Text fontSize="$4" fontWeight={600} color="$color">
+                    {recipientName}
+                  </Text>
+                  <Text fontSize="$3" color="$colorSecondary">
+                    {shortenAddress(recipientAddress ?? '', 4)}
+                  </Text>
+                </View>
+              ) : (
+                <Text fontSize="$4" color="$color">
+                  {shortenAddress(recipientAddress ?? '', 6)}
                 </Text>
-                <Text fontSize="$5" color="$color">
-                  {recipientName ?? shortenAddress(recipientAddress ?? '', 6)}
-                </Text>
-              </View>
-              <SafeFontIcon name="chevron-right" size={20} color="$colorSecondary" />
+              )}
             </View>
           </Pressable>
         </View>
 
-        <View
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="space-between"
-          paddingRight="$1"
-        >
+        <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingRight="$1">
           <View flexDirection="row" alignItems="center" gap="$2">
             <SafeFontIcon name="token" size={16} color="$colorSecondary" />
             <Text fontSize="$4" color="$colorSecondary">
               Select token:
             </Text>
           </View>
-          <Pressable
-            hitSlop={8}
-            onPress={handleManageTokens}
-            testID="manage-tokens-button"
-          >
-            <SafeFontIcon
-              name="options-horizontal"
-              size={16}
-              color="$colorSecondary"
-            />
+          <Pressable hitSlop={8} onPress={handleManageTokens} testID="manage-tokens-button">
+            <SafeFontIcon name="options-horizontal" size={16} color="$colorSecondary" />
           </Pressable>
         </View>
       </View>

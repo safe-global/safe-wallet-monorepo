@@ -34,10 +34,8 @@ function RecipientRow({
         flexDirection="row"
         alignItems="center"
         gap="$3"
-        paddingVertical="$3"
-        paddingHorizontal="$2"
-        borderBottomWidth={1}
-        borderBottomColor="$borderLight"
+        padding="$3"
+        borderRadius={8}
       >
         <Identicon address={option.address as Address} size={40} rounded />
         <View flex={1} gap="$1">

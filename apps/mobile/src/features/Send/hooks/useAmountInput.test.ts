@@ -1,8 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native'
-import {
-  useAmountInput,
-  useTokenAmountValidation,
-} from './useAmountInput'
+import { useAmountInput, useTokenAmountValidation } from './useAmountInput'
 
 describe('useAmountInput', () => {
   it('initializes with empty state', () => {
@@ -64,25 +61,19 @@ describe('useTokenAmountValidation', () => {
   }
 
   it('marks empty input as zero and invalid', () => {
-    const { result } = renderHook(() =>
-      useTokenAmountValidation(defaultArgs),
-    )
+    const { result } = renderHook(() => useTokenAmountValidation(defaultArgs))
     expect(result.current.isZero).toBe(true)
     expect(result.current.isValid).toBe(false)
   })
 
   it('validates a valid amount', () => {
-    const { result } = renderHook(() =>
-      useTokenAmountValidation({ ...defaultArgs, tokenAmount: '0.5' }),
-    )
+    const { result } = renderHook(() => useTokenAmountValidation({ ...defaultArgs, tokenAmount: '0.5' }))
     expect(result.current.isValid).toBe(true)
     expect(result.current.exceedsBalance).toBe(false)
   })
 
   it('detects exceeds balance', () => {
-    const { result } = renderHook(() =>
-      useTokenAmountValidation({ ...defaultArgs, tokenAmount: '2' }),
-    )
+    const { result } = renderHook(() => useTokenAmountValidation({ ...defaultArgs, tokenAmount: '2' }))
     expect(result.current.exceedsBalance).toBe(true)
     expect(result.current.isValid).toBe(false)
   })
@@ -111,9 +102,7 @@ describe('useTokenAmountValidation', () => {
   })
 
   it('marks zero input as invalid', () => {
-    const { result } = renderHook(() =>
-      useTokenAmountValidation({ ...defaultArgs, tokenAmount: '0' }),
-    )
+    const { result } = renderHook(() => useTokenAmountValidation({ ...defaultArgs, tokenAmount: '0' }))
     expect(result.current.isZero).toBe(true)
     expect(result.current.isValid).toBe(false)
   })

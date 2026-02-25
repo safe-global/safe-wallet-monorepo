@@ -1,24 +1,22 @@
 import { isAddress, getAddress } from 'ethers'
-import { safeParseUnits } from '@safe-global/utils/utils/formatters'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { createTx } from '@/src/services/tx/tx-sender/create'
 import proposeNewTransaction from '@/src/services/tx/proposeNewTransaction'
-import { createErc20TransferParams } from './tokenTransferParams'
+import { createTokenTransferParams } from './tokenTransferParams'
 import type { SendTransactionParams } from '../types'
 import type { AppDispatch } from '@/src/store'
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
-
-interface CreateSendTransactionArgs extends SendTransactionParams {
+interface ProposeSendTransactionArgs extends SendTransactionParams {
   dispatch: AppDispatch
 }
 
 /**
- * Validates inputs, builds a SafeTransaction, signs it, and proposes to CGW.
- * Returns the transaction details ID on success.
+ * Validates inputs, builds an unsigned SafeTransaction, and proposes
+ * it to CGW without signing. Returns the transaction ID.
+ *
+ * The user will sign via the existing confirm-transaction flow.
  */
-export const createSendTransaction = async ({
+export const proposeSendTransaction = async ({
   recipient,
   tokenAddress,
   amount,
@@ -27,7 +25,7 @@ export const createSendTransaction = async ({
   safeAddress,
   sender,
   dispatch,
-}: CreateSendTransactionArgs): Promise<string> => {
+}: ProposeSendTransactionArgs): Promise<string> => {
   if (!isAddress(recipient)) {
     throw new Error(`Invalid recipient address: ${recipient}`)
   }
@@ -35,15 +33,7 @@ export const createSendTransaction = async ({
     throw new Error(`Invalid token address: ${tokenAddress}`)
   }
 
-  const parsedAmount = safeParseUnits(amount, decimals)
-  if (parsedAmount === undefined) {
-    throw new Error(`Failed to parse amount "${amount}" with ${decimals} decimals`)
-  }
-
-  const isNative = sameAddress(tokenAddress, ZERO_ADDRESS)
-  const txData = isNative
-    ? { to: getAddress(recipient), value: parsedAmount.toString(), data: '0x' }
-    : createErc20TransferParams(getAddress(recipient), getAddress(tokenAddress), parsedAmount.toString())
+  const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
 
   const safeTx = await createTx(txData)
 
@@ -57,14 +47,13 @@ export const createSendTransaction = async ({
     throw new Error(`Chain mismatch: SDK on chain ${sdkChainId}, expected ${chainId}`)
   }
 
-  const signedTx = await safeSDK.signTransaction(safeTx)
-  const safeTxHash = await safeSDK.getTransactionHash(signedTx)
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   const txDetails = await proposeNewTransaction({
     chainId,
     safeAddress,
     sender,
-    signedTx,
+    signedTx: safeTx,
     safeTxHash,
     dispatch,
   })

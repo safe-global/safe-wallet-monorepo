@@ -13,12 +13,7 @@ interface AmountDisplayProps {
   canToggle: boolean
 }
 
-export function AmountDisplay({
-  primaryDisplay,
-  secondaryDisplay,
-  onToggle,
-  canToggle,
-}: AmountDisplayProps) {
+export function AmountDisplay({ primaryDisplay, secondaryDisplay, onToggle, canToggle }: AmountDisplayProps) {
   const display = primaryDisplay
 
   const fontSize = useMemo(() => {
@@ -46,11 +41,7 @@ export function AmountDisplay({
           {display}
         </Text>
         {secondaryDisplay ? (
-          <Text
-            fontSize={16}
-            color="$colorSecondary"
-            testID="secondary-amount"
-          >
+          <Text fontSize={16} color="$colorSecondary" testID="secondary-amount">
             {secondaryDisplay}
           </Text>
         ) : null}

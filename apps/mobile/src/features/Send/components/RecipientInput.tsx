@@ -50,6 +50,7 @@ export function RecipientInput({
   }, [onChangeText])
 
   const isSelected = !!selectedName && validationState !== 'empty' && validationState !== 'typing'
+  const hasAddress = validationState !== 'empty' && validationState !== 'typing'
   const label = labelConfig[validationState]
 
   return (
@@ -76,10 +77,9 @@ export function RecipientInput({
         alignItems="center"
         borderWidth={1}
         borderColor={borderColors[validationState]}
-        borderRadius={12}
-        backgroundColor="$backgroundSkeleton"
-        paddingHorizontal="$4"
-        minHeight={56}
+        borderRadius={8}
+        padding="$4"
+        minHeight={64}
       >
         {isSelected ? (
           <>
@@ -100,36 +100,57 @@ export function RecipientInput({
           </>
         ) : (
           <>
-            <View flex={1} flexDirection="row" alignItems="baseline" gap="$2">
+            <View flex={1} flexDirection="row" alignItems="center" gap="$2">
               <Text fontSize="$4" color="$colorSecondary">
                 To:
               </Text>
-              <Input
-                flex={1}
-                value={value}
-                onChangeText={onChangeText}
-                placeholder="Wallet address or ENS"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                autoCapitalize="none"
-                autoCorrect={false}
-                fontSize="$4"
-                borderWidth={0}
-                paddingHorizontal={0}
-                backgroundColor="transparent"
-                testID="recipient-input"
-              />
-            </View>
-            <Pressable onPress={handlePaste} testID="paste-button">
-              <View backgroundColor="$borderLight" borderRadius={100} paddingHorizontal="$3" paddingVertical="$1">
-                <Text fontSize="$3" fontWeight={600} color="$color">
-                  Paste
+              {hasAddress ? (
+                <Text fontSize="$4" color="$color" flex={1}>
+                  {value}
                 </Text>
-              </View>
-            </Pressable>
+              ) : (
+                <Input
+                  flex={1}
+                  value={value}
+                  onChangeText={onChangeText}
+                  placeholder="Wallet address or ENS"
+                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  fontSize="$4"
+                  borderWidth={0}
+                  padding={0}
+                  height="auto"
+                  backgroundColor="transparent"
+                  testID="recipient-input"
+                />
+              )}
+            </View>
+            {hasAddress ? (
+              <Pressable onPress={onClear} hitSlop={12} testID="clear-recipient-button">
+                <SafeFontIcon name="close" size={16} color="$colorSecondary" />
+              </Pressable>
+            ) : (
+              <Pressable onPress={handlePaste} testID="paste-button">
+                <View
+                  borderWidth={1}
+                  borderColor="$borderLight"
+                  borderRadius={100}
+                  paddingHorizontal="$2"
+                  paddingVertical="$0.5"
+                >
+                  <Text fontSize="$4" color="$colorSecondary">
+                    Paste
+                  </Text>
+                </View>
+              </Pressable>
+            )}
           </>
         )}
       </View>
-      {!isSelected && <RecipientValidationBadge state={validationState} contactName={contactName} />}
+      {!isSelected && !hasAddress && (
+        <RecipientValidationBadge state={validationState} contactName={contactName} />
+      )}
     </View>
   )
 }
