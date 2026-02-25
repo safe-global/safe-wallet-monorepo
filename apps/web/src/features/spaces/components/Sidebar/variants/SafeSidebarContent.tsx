@@ -52,6 +52,13 @@ export const SafeSidebarContent = ({
     return !isRouteEnabled(item.href, chain)
   }
 
+  const isItemActive = (item: SidebarItemConfig, pathname: string) => {
+    if (item.href === AppRoutes.transactions.history) {
+      return pathname === AppRoutes.transactions.history || pathname === AppRoutes.transactions.queue
+    }
+    return pathname === item.href
+  }
+
   // Filter visible items by geoblocking and chain features
   const visibleMainNavigation = useMemo(() => {
     return safeMainNavigation.filter((item) => {
@@ -85,6 +92,7 @@ export const SafeSidebarContent = ({
   const { mainNavItems, setupGroup } = useResolvedSidebarNav(mainNavWithBadges, visibleDefiGroup, {
     getLink,
     isItemDisabled,
+    isItemActive,
   })
 
   return (
