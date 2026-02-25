@@ -4,7 +4,7 @@ import { Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { Logo } from '@/src/components/Logo'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -21,7 +21,7 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
   const { protocol_metadata, fiatTotal } = protocol
   const percentageRatio = calculateProtocolPercentage(fiatTotal, totalFiatValue)
   const formattedPercentage = formatPercentage(percentageRatio)
-  const formattedFiatTotal = formatCurrency(fiatTotal, currency)
+  const formattedFiatTotal = formatCurrencyPrecise(fiatTotal, currency)
   const fiatChange = calculateProtocolFiatChange(protocol)
   const protocolSlug = protocol.protocol.toLowerCase().replace(/\s+/g, '-')
 
