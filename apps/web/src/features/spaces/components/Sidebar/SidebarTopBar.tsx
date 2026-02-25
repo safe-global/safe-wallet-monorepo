@@ -28,7 +28,10 @@ export const SidebarTopBar = (): ReactElement => {
           data-testid="logo-image"
         />
       </div>
-      <SidebarTrigger className="shrink-0 cursor-pointer" data-testid="sidebar-trigger" />
+      <SidebarTrigger
+        className="shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+        data-testid="sidebar-trigger"
+      />
     </div>
   )
 }

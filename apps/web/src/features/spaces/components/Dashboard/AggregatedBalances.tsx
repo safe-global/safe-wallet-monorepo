@@ -1,6 +1,6 @@
 import { Skeleton } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useContext, useCallback } from 'react'
+import { useContext, useCallback, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
@@ -14,6 +14,7 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
+import QrModal from '@/components/sidebar/QrCodeButton/QrModal'
 
 const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
   const currency = useAppSelector(selectCurrency)
@@ -22,6 +23,7 @@ const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
   const { setTxFlow } = useContext(TxModalContext)
   const firstSafe = safeItems[0]
   const chain = useChain(firstSafe?.chainId ?? '')
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false)
 
   const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
   const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0
@@ -63,19 +65,34 @@ const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
     router.push({ ...txBuilderLink, query: { ...query, safe: safeQueryParam } })
   }
 
+  const handleReceive = async () => {
+    if (!safeQueryParam) return
+    await setActiveSafe()
+    setIsReceiveModalOpen(true)
+  }
+
+  const handleReceiveClose = async () => {
+    setIsReceiveModalOpen(false)
+    await resetActiveSafe()
+  }
+
   return (
-    <DashboardHeader
-      value={formattedValue}
-      onSend={handleSend}
-      onSwap={handleSwap}
-      onBuildTransaction={handleBuildTransaction}
-      otherActions={
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
-          <MoreVertical className="size-4 text-foreground" />
-          Customize
-        </Button>
-      }
-    />
+    <>
+      <DashboardHeader
+        value={formattedValue}
+        onSend={handleSend}
+        onReceive={handleReceive}
+        onSwap={handleSwap}
+        onBuildTransaction={handleBuildTransaction}
+        otherActions={
+          <Button variant="ghost" size="sm" className="text-muted-foreground">
+            <MoreVertical className="size-4 text-foreground" />
+            Customize
+          </Button>
+        }
+      />
+      {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
+    </>
   )
 }
 
