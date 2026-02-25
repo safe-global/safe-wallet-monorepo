@@ -1,8 +1,9 @@
 import React from 'react'
 import { Text, View } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
+import { splitCurrencyParts } from '@/src/utils/formatters'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculateProtocolFiatChange } from './utils'
 
@@ -15,8 +16,10 @@ interface ProtocolDetailSheetHeaderProps {
 export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency }: ProtocolDetailSheetHeaderProps) => {
   const { protocol_metadata, fiatTotal } = protocol
   const formattedPercentage = formatPercentage(percentageRatio)
-  const formattedFiatTotal = formatCurrency(fiatTotal, currency)
+  const formattedFiatTotal = formatCurrencyPrecise(fiatTotal, currency)
   const fiatChange = calculateProtocolFiatChange(protocol)
+
+  const { symbol, whole, decimals, endCurrency } = splitCurrencyParts(formattedFiatTotal)
 
   return (
     <View paddingHorizontal="$2" width="100%" backgroundColor="$backgroundSheet" testID="protocol-detail-header">
@@ -54,9 +57,22 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
           </View>
         </View>
         <View alignItems="flex-end" flexShrink={0}>
-          <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26}>
-            {formattedFiatTotal}
-          </Text>
+          <View flexDirection="row">
+            <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26}>
+              {symbol}
+              {whole}
+            </Text>
+            {decimals !== '' && (
+              <Text fontSize={20} fontWeight={600} color="$colorSecondary" lineHeight={26}>
+                {decimals}
+              </Text>
+            )}
+            {endCurrency !== '' && (
+              <Text fontSize={20} fontWeight={600} color="$color" lineHeight={26}>
+                {endCurrency}
+              </Text>
+            )}
+          </View>
           {fiatChange !== null && (
             <Text
               fontSize="$4"

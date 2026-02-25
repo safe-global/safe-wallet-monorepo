@@ -53,6 +53,12 @@ const UnsupportedMastercopyWarning = dynamic(() =>
   })),
 )
 
+const OutdatedMastercopyWarning = dynamic(() =>
+  import('./components/OutdatedMastercopyWarning/OutdatedMastercopyWarning').then((mod) => ({
+    default: mod.OutdatedMastercopyWarning,
+  })),
+)
+
 export {
   CreateSafeOnNewChain,
   CreateSafeOnSpecificChain,
@@ -62,4 +68,5 @@ export {
   InconsistentSignerSetupWarning,
   ChainIndicatorList,
   UnsupportedMastercopyWarning,
+  OutdatedMastercopyWarning,
 }
