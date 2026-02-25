@@ -67,3 +67,29 @@ const calculateRatio = (a: Quantity, b: Quantity) => {
 }
 
 export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
+
+interface CurrencyParts {
+  symbol: string
+  whole: string
+  decimals: string
+  endCurrency: string
+}
+
+/**
+ * Split a formatted currency string (e.g. "$ 380.52") into parts so the
+ * decimal portion can be styled independently.
+ */
+export const splitCurrencyParts = (formatted: string): CurrencyParts => {
+  const match = formatted.match(/^(\D+)?(.+?)(\.\d+)?(\D+)?$/)
+
+  if (!match) {
+    return { symbol: '', whole: formatted, decimals: '', endCurrency: '' }
+  }
+
+  return {
+    symbol: match[1] ?? '',
+    whole: match[2],
+    decimals: match[3] ?? '',
+    endCurrency: match[4] ?? '',
+  }
+}
