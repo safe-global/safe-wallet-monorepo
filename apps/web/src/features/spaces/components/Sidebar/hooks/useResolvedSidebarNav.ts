@@ -4,6 +4,7 @@ import type { SidebarItemConfig, SidebarGroupConfig, ResolvedSidebarItem, Resolv
 interface NavResolverOptions {
   getLink: (item: SidebarItemConfig) => ResolvedSidebarItem['link']
   isItemDisabled?: (item: SidebarItemConfig) => boolean
+  isItemActive?: (item: SidebarItemConfig, pathname: string) => boolean
 }
 
 const resolveItem = (item: SidebarItemConfig, pathname: string, options: NavResolverOptions): ResolvedSidebarItem => ({
@@ -11,7 +12,7 @@ const resolveItem = (item: SidebarItemConfig, pathname: string, options: NavReso
   label: item.label,
   href: item.href,
   badge: item.badge,
-  isActive: pathname === item.href,
+  isActive: options.isItemActive?.(item, pathname) ?? pathname === item.href,
   disabled: options.isItemDisabled?.(item) ?? false,
   link: options.getLink(item),
 })

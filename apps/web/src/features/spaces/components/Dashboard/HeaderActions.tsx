@@ -20,7 +20,7 @@ interface HeaderActionsProps {
 }
 
 const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherActions }: HeaderActionsProps) => {
-  const outlineClassName = 'bg-transparent border-[#d4d4d4] hover:bg-muted/50'
+  const outlineClassName = 'bg-transparent !border-[var(--color-border-light)] hover:bg-muted/50'
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
