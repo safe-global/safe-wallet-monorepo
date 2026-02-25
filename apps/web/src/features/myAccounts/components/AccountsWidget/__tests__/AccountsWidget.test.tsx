@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
-import AccountsWidget from '../components/AccountsWidget'
+import AccountsWidget from '../AccountsWidget'
 
 const mockSafeItem = (chainId: string, address: string): SafeItem => ({
   chainId,

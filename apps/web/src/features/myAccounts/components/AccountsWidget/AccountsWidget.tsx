@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'
-import type { Account } from '../types'
+import type { Account } from './types'
 
 interface AccountsWidgetProps {
   accounts: Account[]

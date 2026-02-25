@@ -21,7 +21,7 @@ import DashboardMembersList from './DashboardMembersList'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { AccountsWidgetFeature, useSpaceAccountsData } from '@/features/accountsWidget'
+import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
@@ -49,7 +49,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 3
 
 const SpaceDashboard = () => {
-  const { AccountsWidget } = useLoadFeature(AccountsWidgetFeature)
+  const { AccountsWidget } = useLoadFeature(MyAccountsFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()

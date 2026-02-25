@@ -17,7 +17,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AppRoutes } from '@/config/routes'
-import type { Account, SubAccount } from '../types'
+import type { Account, SubAccount } from '../components/AccountsWidget/types'
 
 const getSafeHref = (chain: Chain | undefined, address: string): string => {
   const shortName = chain?.shortName ?? ''

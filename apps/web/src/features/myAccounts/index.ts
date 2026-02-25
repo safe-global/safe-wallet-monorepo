@@ -45,6 +45,9 @@ export { useVisitedSafes } from './hooks/useVisitedSafes'
 export { default as useHasSafes } from './hooks/useHasSafes'
 export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
 
+// Space accounts data
+export { default as useSpaceAccountsData } from './hooks/useSpaceAccountsData'
+
 // Address safety hooks
 export { default as useSafeSelectionModal } from './hooks/useSafeSelectionModal'
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
