@@ -46,7 +46,7 @@ function formatTxDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const PendingList = (): ReactElement => {
+const PendingTxList = (): ReactElement => {
   const router = useRouter()
   const { page, loading } = useTxQueue()
   const { safeLoaded, safeLoading } = useSafeInfo()
@@ -99,4 +99,4 @@ const PendingList = (): ReactElement => {
   )
 }
 
-export default PendingList
+export default PendingTxList

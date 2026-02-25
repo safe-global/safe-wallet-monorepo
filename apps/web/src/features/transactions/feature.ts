@@ -1,4 +1,4 @@
 import type { TransactionsContract } from './contract'
-import PendingList from './components/PendingList'
+import PendingTxList from './components/PendingTxList'
 
-export default { PendingList } satisfies TransactionsContract
+export default { PendingTxList } satisfies TransactionsContract

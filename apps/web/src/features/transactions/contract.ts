@@ -1,5 +1,5 @@
-import type PendingList from './components/PendingList'
+import type PendingTxList from './components/PendingTxList'
 
 export interface TransactionsContract {
-  PendingList: typeof PendingList
+  PendingTxList: typeof PendingTxList
 }

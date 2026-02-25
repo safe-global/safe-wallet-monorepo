@@ -6,7 +6,7 @@ import { useLoadFeature } from '@/features/__core__'
 
 const SafeOverview = (): ReactElement => {
   const { AssetsList } = useLoadFeature(AssetsFeature)
-  const { PendingList } = useLoadFeature(TransactionsFeature)
+  const { PendingTxList } = useLoadFeature(TransactionsFeature)
 
   return (
     <>
@@ -14,7 +14,7 @@ const SafeOverview = (): ReactElement => {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <AssetsList />
-        <PendingList />
+        <PendingTxList />
       </div>
     </>
   )
