@@ -1,4 +1,4 @@
-/** @deprecated Use features/pending-list instead */
+/** @deprecated Use features/transactions instead */
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import React, { type ReactElement } from 'react'
 import { useMemo } from 'react'

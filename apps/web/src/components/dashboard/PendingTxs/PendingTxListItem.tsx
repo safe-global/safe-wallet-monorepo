@@ -1,4 +1,4 @@
-/** @deprecated Use features/pending-list instead */
+/** @deprecated Use features/transactions instead */
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NextLink from 'next/link'
 import type { ReactElement } from 'react'
