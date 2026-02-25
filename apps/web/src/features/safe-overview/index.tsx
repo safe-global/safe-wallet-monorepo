@@ -13,7 +13,7 @@ import { useLoadFeature } from '@/features/__core__'
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 
 const SafeOverview = (): ReactElement => {
-  const { NonPinnedWarningBanner } = useLoadFeature(MyAccountsFeature)
+  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const { AssetsList } = useLoadFeature(AssetsListFeature)
   const { PendingList } = useLoadFeature(PendingListFeature)
   const supportsRecovery = useIsRecoverySupported()
@@ -32,7 +32,7 @@ const SafeOverview = (): ReactElement => {
         </Grid>
 
         <Grid item xs={12} className={css.hideIfEmpty} sx={{ '& > div': { m: 0 } }}>
-          <NonPinnedWarningBanner />
+          <NonPinnedWarning />
         </Grid>
       </Grid>
 
