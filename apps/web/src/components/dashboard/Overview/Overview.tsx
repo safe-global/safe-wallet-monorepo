@@ -21,7 +21,7 @@ import OverviewSkeleton from './OverviewSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__'
 
-/** @deprecated Use SafeAccountHeader instead */
+/** @deprecated Use features/safe-overview instead */
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()

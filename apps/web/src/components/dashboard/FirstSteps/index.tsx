@@ -10,6 +10,7 @@ import { selectUndeployedSafe } from '@/features/counterfactual/store'
 import { isReplayedSafeProps } from '@/features/counterfactual/services'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
+/** @deprecated Use features/safe-overview instead */
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'

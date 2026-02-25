@@ -1,3 +1,4 @@
+/** @deprecated Use features/pending-list instead */
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'

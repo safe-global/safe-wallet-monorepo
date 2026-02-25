@@ -1,3 +1,4 @@
+/** @deprecated Use features/safe-overview instead */
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
