@@ -54,10 +54,9 @@ const mockIsSmartContract = jest.requireMock('@/utils/wallets').isSmartContract 
 
 describe('usePendingSafeStatuses', () => {
   const chainId = '1'
-  const currentSafeAddress = '0x1111111111111111111111111111111111111111'
-  const otherSafeAddress = '0x2222222222222222222222222222222222222222'
+  const safeAddress = '0x1111111111111111111111111111111111111111'
 
-  const setupMocks = (safeAddress: string) => {
+  const setupMocks = () => {
     mockUseChainId.mockReturnValue(chainId)
     mockUseCurrentChain.mockReturnValue({ chainId, chainName: 'Ethereum' })
     mockUseSafeInfo.mockReturnValue({
@@ -78,8 +77,8 @@ describe('usePendingSafeStatuses', () => {
     ;(pollSafeInfo as jest.Mock).mockResolvedValue(undefined)
   })
 
-  it('polls CGW only for the current safe on SUCCESS', async () => {
-    setupMocks(currentSafeAddress)
+  it('polls CGW and dispatches INDEXED on SUCCESS', async () => {
+    setupMocks()
 
     const subscriptions: Record<string, (detail: unknown) => void> = {}
     ;(safeCreationSubscribe as jest.Mock).mockImplementation((event, callback) => {
@@ -91,44 +90,16 @@ describe('usePendingSafeStatuses', () => {
 
     subscriptions[SafeCreationEvent.SUCCESS]?.({
       groupKey: 'group',
-      safeAddress: currentSafeAddress,
+      safeAddress,
       chainId,
       type: PayMethod.PayLater,
     })
 
     await waitFor(() => {
-      expect(pollSafeInfo).toHaveBeenCalledWith(chainId, currentSafeAddress)
+      expect(pollSafeInfo).toHaveBeenCalledWith(chainId, safeAddress)
       expect(safeCreationDispatch).toHaveBeenCalledWith(SafeCreationEvent.INDEXED, {
         groupKey: 'group',
-        safeAddress: currentSafeAddress,
-        chainId,
-      })
-    })
-  })
-
-  it('skips CGW polling for non-current safes on SUCCESS', async () => {
-    setupMocks(currentSafeAddress)
-
-    const subscriptions: Record<string, (detail: unknown) => void> = {}
-    ;(safeCreationSubscribe as jest.Mock).mockImplementation((event, callback) => {
-      subscriptions[event] = callback
-      return jest.fn()
-    })
-
-    renderHook(() => usePendingSafeStatus(), { initialReduxState: { undeployedSafes: {} } })
-
-    subscriptions[SafeCreationEvent.SUCCESS]?.({
-      groupKey: 'group',
-      safeAddress: otherSafeAddress,
-      chainId,
-      type: PayMethod.PayLater,
-    })
-
-    await waitFor(() => {
-      expect(pollSafeInfo).not.toHaveBeenCalled()
-      expect(safeCreationDispatch).toHaveBeenCalledWith(SafeCreationEvent.INDEXED, {
-        groupKey: 'group',
-        safeAddress: otherSafeAddress,
+        safeAddress,
         chainId,
       })
     })
