@@ -39,6 +39,25 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/gas-price` }),
         providesTags: ['chains'],
       }),
+      chainsGetChainsV2: build.query<ChainsGetChainsV2ApiResponse, ChainsGetChainsV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
+      chainsGetChainV2: build.query<ChainsGetChainV2ApiResponse, ChainsGetChainV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains/${queryArg.chainId}`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -78,6 +97,21 @@ export type ChainsGetIndexingStatusV1ApiArg = {
 export type ChainsGetGasPriceV1ApiResponse = /** status 200  */ GasPriceResponse
 export type ChainsGetGasPriceV1ApiArg = {
   chainId: string
+}
+export type ChainsGetChainsV2ApiResponse =
+  /** status 200 Paginated list of supported chains with service-scoped features */ ChainPage
+export type ChainsGetChainsV2ApiArg = {
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type ChainsGetChainV2ApiResponse = /** status 200 Chain details with service-scoped features */ Chain
+export type ChainsGetChainV2ApiArg = {
+  /** Chain ID of the blockchain network */
+  chainId: string
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
 }
 export type NativeCurrency = {
   decimals: number
@@ -227,4 +261,8 @@ export const {
   useLazyChainsGetIndexingStatusV1Query,
   useChainsGetGasPriceV1Query,
   useLazyChainsGetGasPriceV1Query,
+  useChainsGetChainsV2Query,
+  useLazyChainsGetChainsV2Query,
+  useChainsGetChainV2Query,
+  useLazyChainsGetChainV2Query,
 } = injectedRtkApi

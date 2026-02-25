@@ -613,6 +613,93 @@
         ]
       }
     },
+    "/v2/chains": {
+      "get": {
+        "description": "Retrieves a paginated list of all blockchain networks supported by the Safe infrastructure, with features scoped to the service key.",
+        "operationId": "chainsGetChainsV2",
+        "parameters": [
+          {
+            "name": "serviceKey",
+            "required": true,
+            "in": "query",
+            "description": "Service key for scoping chain features (e.g., WALLET_WEB, MOBILE)",
+            "schema": {
+              "example": "WALLET_WEB",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of supported chains with service-scoped features",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChainPage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get supported chains (v2)",
+        "tags": [
+          "chains"
+        ]
+      }
+    },
+    "/v2/chains/{chainId}": {
+      "get": {
+        "description": "Retrieves detailed information about a specific blockchain network, with features scoped to the service key.",
+        "operationId": "chainsGetChainV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID of the blockchain network",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "serviceKey",
+            "required": true,
+            "in": "query",
+            "description": "Service key for scoping chain features (e.g., WALLET_WEB, MOBILE)",
+            "schema": {
+              "example": "WALLET_WEB",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chain details with service-scoped features",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chain"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get chain details (v2)",
+        "tags": [
+          "chains"
+        ]
+      }
+    },
     "/v2/chains/{chainId}/safes/{safeAddress}/collectibles": {
       "get": {
         "operationId": "collectiblesGetCollectiblesV2",
