@@ -1,3 +1,6 @@
+/* @deprecated Use features/safe-overview instead */
+/* @usedBy features/no-fee-campaign/components/NoFeeCampaignBanner/styles.module.css (CSS composes) */
+
 .banner {
   position: relative;
   padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);

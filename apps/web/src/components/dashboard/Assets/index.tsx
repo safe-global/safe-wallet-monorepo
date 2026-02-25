@@ -1,3 +1,4 @@
+/** @deprecated Use features/assets-list instead */
 import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'

@@ -1,3 +1,4 @@
+/** @deprecated Use features/safe-overview instead */
 import { Card, Box, Stack, Typography, Skeleton } from '@mui/material'
 import { type ReactElement } from 'react'
 
