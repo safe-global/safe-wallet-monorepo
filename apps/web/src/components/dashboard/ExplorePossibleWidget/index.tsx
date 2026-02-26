@@ -1,4 +1,3 @@
-/** @deprecated Use features/safe-overview instead */
 import { Card, IconButton } from '@mui/material'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeftRounded'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRightRounded'

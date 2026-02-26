@@ -1,4 +1,3 @@
-/** @deprecated Use features/safe-overview instead */
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'

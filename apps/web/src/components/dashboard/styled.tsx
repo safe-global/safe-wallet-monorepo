@@ -1,5 +1,4 @@
 /**
- * @deprecated Use features/safe-overview instead
  * @usedBy features/positions/components/PositionsWidget/index.tsx (WidgetCard)
  * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
  */

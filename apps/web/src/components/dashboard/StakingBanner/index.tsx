@@ -1,5 +1,4 @@
 /**
- * @deprecated Use features/safe-overview instead
  * @usedBy pages/balances/index.tsx (StakingBanner, useIsStakingBannerVisible)
  */
 import { Typography, Card, SvgIcon, Button, Box, Stack, Link } from '@mui/material'
