@@ -1,5 +1,6 @@
 import type { FetchArgs, BaseQueryApi } from '@reduxjs/toolkit/query/react'
 import * as cgwClient from './cgwClient'
+import { faker } from '@faker-js/faker'
 
 describe('dynamicBaseQuery', () => {
   const api: BaseQueryApi = {
@@ -69,7 +70,7 @@ describe('dynamicBaseQuery', () => {
   it.each([
     '/v1/auth',
     '/v2/register/notifications',
-    `/v2/chains/1/notifications/devices/${crypto.randomUUID()}/safes/0x0000000000000000000000000000000000000000`,
+    `/v2/chains/1/notifications/devices/${faker.string.uuid()}/safes/0x0000000000000000000000000000000000000000`,
     '/v2/chains/1/notifications/devices/0x0000000000000000000000000000000000000000',
   ])('calls rawBaseQuery with credentials for %s', async (url) => {
     const mockRawBaseQuery = jest.spyOn(cgwClient, 'rawBaseQuery')
