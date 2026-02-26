@@ -55,16 +55,18 @@ const PendingTxList = (): ReactElement => {
     >
       {isLoading
         ? Array.from({ length: MAX_TXS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : queuedTxs.map((tx) => (
-            <SafeWidget.Item
-              key={tx.transaction.id}
-              href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
-              label={getTxLabel(tx)}
-              info={formatTxDate(tx.transaction.timestamp)}
-              startNode={<TxIcon />}
-              actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
-            />
-          ))}
+        : queuedTxs.length === 0
+          ? <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
+          : queuedTxs.map((tx) => (
+              <SafeWidget.Item
+                key={tx.transaction.id}
+                href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
+                label={getTxLabel(tx)}
+                info={formatTxDate(tx.transaction.timestamp)}
+                startNode={<TxIcon />}
+                actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
+              />
+            ))}
       {!isLoading && queuedTxs.length > 0 && (
         <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={handleViewAll} />
       )}
