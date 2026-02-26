@@ -65,7 +65,7 @@ const PendingTxList = (): ReactElement => {
               actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
             />
           ))}
-      {!isLoading && remainingCount !== undefined && (
+      {!isLoading && queuedTxs.length > 0 && (
         <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={handleViewAll} />
       )}
     </SafeWidget>

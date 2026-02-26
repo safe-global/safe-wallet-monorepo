@@ -71,7 +71,7 @@ const AssetsList = (): ReactElement => {
               }
             />
           ))}
-      {!isLoading && remainingCount !== undefined && (
+      {!isLoading && (
         <SafeWidget.Footer count={remainingCount} text="View all assets" onClick={handleViewAll} />
       )}
     </SafeWidget>
