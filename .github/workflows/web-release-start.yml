@@ -156,7 +156,7 @@ jobs:
       - name: Commit version bump
         run: |
           git add apps/web/package.json
-          git commit -m "${{ steps.version.outputs.version }}"
+          git commit -S -m "${{ steps.version.outputs.version }}"
           git push origin release
           echo "✅ Version committed"
 
