@@ -58,6 +58,7 @@ const PendingTxList = (): ReactElement => {
         : queuedTxs.map((tx) => (
             <SafeWidget.Item
               key={tx.transaction.id}
+              href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
               label={getTxLabel(tx)}
               info={formatTxDate(tx.transaction.timestamp)}
               startNode={<TxIcon />}
