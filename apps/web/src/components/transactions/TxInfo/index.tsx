@@ -7,7 +7,7 @@ import type {
   SettingsChangeTransaction,
   TransferTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import TokenAmount from '@/components/common/TokenAmount'
 import {
   isOrderTxInfo,
@@ -33,6 +33,11 @@ import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from '
 import { Box } from '@mui/material'
 import css from './styles.module.css'
 import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
+import useChainId from '@/hooks/useChainId'
+import { useAppSelector } from '@/store'
+import { selectCustomAbisByChain } from '@/store/customAbiSlice'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import useCustomAbiDecoding from '@/hooks/useCustomAbiDecoding'
 
 export const TransferTx = ({
   info,
@@ -94,8 +99,27 @@ export const TransferTx = ({
   return <></>
 }
 
-const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
-  return <Box className={css.txInfo}>{info.methodName}</Box>
+const useCustomMethodName = (info: CustomTransactionInfo, txId?: string): string | null | undefined => {
+  const chainId = useChainId()
+  const customAbis = useAppSelector((state) => selectCustomAbisByChain(state, chainId))
+  const toAddress = info.to.value
+  const hasCustomAbi = !!customAbis[toAddress]
+  const shouldFetch = !info.methodName && hasCustomAbi && !!txId
+
+  const { data: txDetails } = useTransactionsGetTransactionByIdV1Query(
+    { chainId, id: txId || '' },
+    { skip: !shouldFetch },
+  )
+
+  const hexData = shouldFetch ? txDetails?.txData?.hexData : undefined
+  const customDecoded = useCustomAbiDecoding(hexData ?? null, toAddress)
+
+  return useMemo(() => info.methodName || customDecoded?.method || null, [info.methodName, customDecoded?.method])
+}
+
+const CustomTx = ({ info, txId }: { info: CustomTransactionInfo; txId?: string }): ReactElement => {
+  const methodName = useCustomMethodName(info, txId)
+  return <Box className={css.txInfo}>{methodName}</Box>
 }
 
 const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
@@ -124,7 +148,16 @@ const MigrationToL2Tx = (): ReactElement => {
   return <>Migrate base contract</>
 }
 
-const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; withLogo?: boolean }): ReactElement => {
+const TxInfo = ({
+  info,
+  txId,
+  ...rest
+}: {
+  info: TransactionInfo
+  txId?: string
+  omitSign?: boolean
+  withLogo?: boolean
+}): ReactElement => {
   if (isSettingsChangeTxInfo(info)) {
     return <SettingsChangeTx info={info} />
   }
@@ -170,7 +203,7 @@ const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; 
   }
 
   if (isCustomTxInfo(info)) {
-    return <CustomTx info={info} />
+    return <CustomTx info={info} txId={txId} />
   }
 
   return <></>

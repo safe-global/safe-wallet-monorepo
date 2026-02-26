@@ -89,7 +89,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       </Box>
 
       <Box data-testid="tx-info" gridArea="info">
-        <TxInfo info={tx.txInfo} />
+        <TxInfo info={tx.txInfo} txId={tx.id} />
       </Box>
 
       <Box data-testid="tx-date" className={css.date} gridArea="date">

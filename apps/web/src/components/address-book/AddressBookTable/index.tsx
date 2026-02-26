@@ -10,6 +10,7 @@ import ImportDialog from '@/components/address-book/ImportDialog'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import SendIcon from '@/public/images/common/arrow-up-right.svg'
+import DataObjectIcon from '@mui/icons-material/DataObject'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import RemoveDialog from '@/components/address-book/RemoveDialog'
@@ -28,6 +29,10 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import madProps from '@/utils/mad-props'
+import useChainId from '@/hooks/useChainId'
+import { useAppSelector } from '@/store'
+import { selectCustomAbisByChain } from '@/store/customAbiSlice'
+import CustomAbiDialog from '@/components/settings/CustomAbis/CustomAbiDialog'
 
 const headCells = [
   { id: 'name', label: 'Name' },
@@ -58,6 +63,9 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const [searchQuery, setSearchQuery] = useState('')
   const [defaultValues, setDefaultValues] = useState<AddressEntry | undefined>(undefined)
+  const [abiDialogAddress, setAbiDialogAddress] = useState<{ address: string; name: string } | null>(null)
+  const chainId = useChainId()
+  const customAbis = useAppSelector((state) => selectCustomAbisByChain(state, chainId))
 
   const handleOpenModal = (type: keyof typeof open) => () => {
     setOpen((prev) => ({ ...prev, [type]: true }))
@@ -91,6 +99,12 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
 
   const renderActionButtons = (address: string, name: string) => (
     <>
+      <Tooltip title={customAbis[address] ? 'Edit custom ABI' : 'Add custom ABI'} placement="top">
+        <IconButton onClick={() => setAbiDialogAddress({ address, name })} className={css.iconButton}>
+          <DataObjectIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
       <Track {...ADDRESS_BOOK_EVENTS.EDIT_ENTRY}>
         <Tooltip title="Edit entry" placement="top">
           <IconButton
@@ -213,6 +227,14 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
       )}
 
       {open[ModalType.REMOVE] && <RemoveDialog handleClose={handleClose} address={defaultValues?.address || ''} />}
+
+      {abiDialogAddress && (
+        <CustomAbiDialog
+          onClose={() => setAbiDialogAddress(null)}
+          defaultAddress={abiDialogAddress.address}
+          defaultName={abiDialogAddress.name}
+        />
+      )}
     </>
   )
 }

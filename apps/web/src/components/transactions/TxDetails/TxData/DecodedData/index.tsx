@@ -9,6 +9,7 @@ import MethodCall from './MethodCall'
 import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
 import { DelegateCallWarning, UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useSetsUntrustedFallbackHandler } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import useCustomAbiDecoding from '@/hooks/useCustomAbiDecoding'
 
 interface Props {
   txData: TransactionDetails['txData']
@@ -25,6 +26,9 @@ const DecodedData = ({
 }: Props): ReactElement | null => {
   const nativeTokenInfo = useNativeTokenInfo()
   const setsUntrustedFallbackHandler = useSetsUntrustedFallbackHandler(txData)
+  const customDecoded = useCustomAbiDecoding(txData?.hexData, txData?.to?.value)
+  const effectiveDecoded = txData?.dataDecoded ?? customDecoded
+  const isCustomDecoded = !txData?.dataDecoded && !!customDecoded
 
   // nothing to render
   if (!txData) {
@@ -43,7 +47,7 @@ const DecodedData = ({
 
   const amountInWei = txData.value ?? '0'
   const toAddress = toInfo?.value || txData.to?.value
-  const method = txData.dataDecoded?.method || ''
+  const method = effectiveDecoded?.method || ''
   const addressInfo = txData.addressInfoIndex?.[toAddress]
   const name = addressInfo?.name || toInfo?.name || txData.to?.name
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
@@ -61,8 +65,15 @@ const DecodedData = ({
 
       {amountInWei !== '0' && <SendAmountBlock title="Value" amountInWei={amountInWei} tokenInfo={nativeTokenInfo} />}
 
-      {txData.dataDecoded ? (
-        <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
+      {effectiveDecoded ? (
+        <>
+          {isCustomDecoded && (
+            <Typography variant="caption" color="text.secondary">
+              Decoded with custom ABI
+            </Typography>
+          )}
+          <MethodDetails data={effectiveDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
+        </>
       ) : txData.hexData ? (
         <Typography data-testid="hexData" variant="body2" component="div">
           <HexEncodedData title="Data" hexData={txData.hexData} />
