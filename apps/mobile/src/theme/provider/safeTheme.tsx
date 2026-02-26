@@ -15,13 +15,14 @@ interface SafeThemeProviderProps {
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
-  const { colorScheme, isDark } = useTheme()
+  const { colorScheme, isDark, themePreference } = useTheme()
 
   // Sync native iOS appearance with the app theme so native components
-  // (RefreshControl, context menus, etc.) match the app's color scheme
+  // (RefreshControl, context menus, etc.) match the app's color scheme.
+  // In auto mode, pass null to let the OS control the appearance.
   useEffect(() => {
-    Appearance.setColorScheme(colorScheme ?? null)
-  }, [colorScheme])
+    Appearance.setColorScheme(themePreference === 'auto' ? null : (colorScheme ?? null))
+  }, [colorScheme, themePreference])
 
   const themeProvider = isStorybookEnv ? (
     <View

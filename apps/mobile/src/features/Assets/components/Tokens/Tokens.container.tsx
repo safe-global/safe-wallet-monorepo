@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { ListRenderItem, RefreshControl } from 'react-native'
 import { getTokenValue } from 'tamagui'
 
@@ -13,15 +13,8 @@ import { useTokenBalances } from './useTokenBalances'
 export function TokensContainer() {
   const { visibleItems, currency, isFetching, error, isLoading, hasItems, allFilteredByDust, refetch } =
     useTokenBalances()
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const onRefresh = useCallback(async () => {
-    setIsRefreshing(true)
-    try {
-      await refetch()
-    } finally {
-      setIsRefreshing(false)
-    }
+  const onRefresh = useCallback(() => {
+    refetch()
   }, [refetch])
 
   const renderItem: ListRenderItem<Balance> = useCallback(
@@ -63,7 +56,7 @@ export function TokensContainer() {
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
       style={{ marginTop: getTokenValue('$2') }}
-      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+      refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefresh} />}
     />
   )
 }
