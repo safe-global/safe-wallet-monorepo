@@ -78,7 +78,7 @@ const AccountHeader = (): ReactElement => {
         otherActions={
           <Button
             variant="outline"
-            className="border-[#d4d4d4] bg-transparent hover:bg-muted/50"
+            className="!border-[var(--color-border-light)] bg-transparent hover:bg-muted/50"
             onClick={handleManageSafe}
           >
             <Settings className="size-4" />
