@@ -1,3 +1,4 @@
+/** @deprecated Use features/transactions instead */
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
