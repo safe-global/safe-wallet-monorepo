@@ -44,6 +44,7 @@ export const AppRoutes = {
     modules: '/settings/modules',
     index: '/settings',
     environmentVariables: '/settings/environment-variables',
+
     data: '/settings/data',
     cookies: '/settings/cookies',
     appearance: '/settings/appearance',

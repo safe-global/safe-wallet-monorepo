@@ -35,6 +35,7 @@ export type EthHashInfoProps = {
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
   badgeTooltip?: ReactNode
+  nameExtra?: ReactNode
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -59,6 +60,7 @@ const SrcEthHashInfo = ({
   addressBookNameSource,
   highlight4bytes = false,
   badgeTooltip,
+  nameExtra,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -121,6 +123,8 @@ const SrcEthHashInfo = ({
             <Box overflow="hidden" textOverflow="ellipsis">
               {name}
             </Box>
+
+            {nameExtra}
 
             {badgeTooltip
               ? badgeTooltip

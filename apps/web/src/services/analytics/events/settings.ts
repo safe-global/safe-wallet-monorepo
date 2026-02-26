@@ -142,6 +142,16 @@ export const SETTINGS_EVENTS = {
       category: SETTINGS_CATEGORY,
     },
   },
+  CUSTOM_ABIS: {
+    ADD: {
+      action: 'Add custom ABI',
+      category: SETTINGS_CATEGORY,
+    },
+    REMOVE: {
+      action: 'Remove custom ABI',
+      category: SETTINGS_CATEGORY,
+    },
+  },
   ENV_VARIABLES: {
     SAVE: {
       action: 'Environment variables changed',

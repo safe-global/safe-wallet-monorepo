@@ -7,6 +7,7 @@ import type { ReactElement } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useAppDispatch } from '@/store'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
+import { removeCustomAbi } from '@/store/customAbiSlice'
 import useChainId from '@/hooks/useChainId'
 import useAddressBook from '@/hooks/useAddressBook'
 
@@ -19,6 +20,7 @@ const RemoveDialog = ({ handleClose, address }: { handleClose: () => void; addre
 
   const handleConfirm = () => {
     dispatch(removeAddressBookEntry({ chainId, address }))
+    dispatch(removeCustomAbi({ chainId, address }))
     handleClose()
   }
 

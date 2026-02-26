@@ -68,6 +68,7 @@ const rootReducer = combineReducers({
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
+  [slices.customAbiSlice.name]: slices.customAbiSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
@@ -93,6 +94,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
+  slices.customAbiSlice.name,
 ]
 
 export const getPersistedState = () => {

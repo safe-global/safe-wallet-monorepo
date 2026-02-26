@@ -3,12 +3,17 @@ import EthHashInfo from '../EthHashInfo'
 import type { EthHashInfoProps } from '../EthHashInfo/SrcEthHashInfo'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { isAddress } from 'ethers'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 import { isSmartContract } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useAppSelector } from '@/store'
+import { selectCustomAbisByChain } from '@/store/customAbiSlice'
+import { IconButton, Tooltip } from '@mui/material'
+import DataObjectIcon from '@mui/icons-material/DataObject'
+import CustomAbiDialog from '@/components/settings/CustomAbis/CustomAbiDialog'
 
 const THIS_SAFE_ACCOUNT = 'This Safe Account'
 const UNVERIFIED_CONTRACT = 'Unverified contract'
@@ -52,9 +57,28 @@ export function useAddressName(address?: string, name?: string | null, customAva
 }
 
 const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps & { showName?: boolean }) => {
-  const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
+  const chainId = useChainId()
+  const { name: finalName, logoUri: finalAvatar, isUnverifiedContract } = useAddressName(address, name, customAvatar)
+  const customAbis = useAppSelector((state) => selectCustomAbisByChain(state, chainId))
+  const hasCustomAbi = !!address && !!customAbis[address]
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />
+  const showAddAbi = isUnverifiedContract && !hasCustomAbi && !!address
+
+  const abiButton = showAddAbi ? (
+    <Tooltip title="Add custom ABI" placement="top">
+      <IconButton size="small" onClick={() => setDialogOpen(true)} sx={{ p: 0.25 }}>
+        <DataObjectIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  ) : undefined
+
+  return (
+    <>
+      <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} nameExtra={abiButton} {...props} />
+      {dialogOpen && <CustomAbiDialog onClose={() => setDialogOpen(false)} defaultAddress={address} />}
+    </>
+  )
 }
 
 export default memo(NamedAddressInfo)

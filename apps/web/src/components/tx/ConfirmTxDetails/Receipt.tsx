@@ -16,6 +16,8 @@ import TxDetailsRow from './TxDetailsRow'
 import NameChip from './NameChip'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { JsonView } from './JsonView'
+import useCustomAbiDecoding from '@/hooks/useCustomAbiDecoding'
+import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 
 type ReceiptProps = {
   safeTxData: SafeTransaction['data']
@@ -35,6 +37,9 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
   const operation = Number(safeTxData.operation) as Operation
+  const customDecoded = useCustomAbiDecoding(safeTxData.data, safeTxData.to)
+  const effectiveDecoded = txData?.dataDecoded ?? customDecoded
+  const isCustomDecoded = !txData?.dataDecoded && !!customDecoded
 
   const ToWrapper = grid ? Box : Fragment
 
@@ -82,9 +87,24 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Data" grid={grid}>
-                  <Typography variant="body2" width={grid ? '70%' : undefined}>
-                    <HexEncodedData hexData={safeTxData.data} limit={140} />
-                  </Typography>
+                  <Box width={grid ? '70%' : undefined}>
+                    {effectiveDecoded && (
+                      <Box mb={1}>
+                        <Typography variant="body2" fontWeight={700} mb={0.5}>
+                          {effectiveDecoded.method}
+                        </Typography>
+                        {isCustomDecoded && (
+                          <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
+                            Decoded with custom ABI
+                          </Typography>
+                        )}
+                        <MethodDetails data={effectiveDecoded} />
+                      </Box>
+                    )}
+                    <Typography variant="body2">
+                      <HexEncodedData hexData={safeTxData.data} limit={140} />
+                    </Typography>
+                  </Box>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Operation" grid={grid}>

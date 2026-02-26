@@ -41,7 +41,7 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
           <Box>
             <Typography className={css.txDescription}>
               <TxTypeText tx={transaction} />
-              <TxInfo info={transaction.txInfo} />
+              <TxInfo info={transaction.txInfo} txId={transaction.id} />
             </Typography>
             <Typography variant="body2" color="primary.light">
               <DateTime value={transaction.timestamp} showDateTime={false} showTime={false} />
