@@ -2,6 +2,15 @@ name: Web Argos E2E
 
 on:
   workflow_dispatch:
+    inputs:
+      reference_branch:
+        description: 'Argos baseline branch (default: dev)'
+        required: false
+        type: string
+      reference_commit:
+        description: 'Argos baseline commit SHA (full 40-char hex)'
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -61,6 +70,8 @@ jobs:
           record: 'false'
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+          ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
+          ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
           ARGOS_PARALLEL: 'true'
           ARGOS_PARALLEL_TOTAL: '-1'
           ARGOS_PARALLEL_INDEX: ${{ matrix.containers }}
