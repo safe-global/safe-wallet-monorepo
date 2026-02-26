@@ -17,6 +17,7 @@ import * as path from 'path'
 
 const GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
 const FIXTURES_DIR = path.join(__dirname, '../fixtures')
+const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // Safe addresses for different scenarios
 const SAFES = {
@@ -51,7 +52,7 @@ const ENDPOINTS = {
     `/v1/chains/${chainId}/safes/${address}/balances/USD?trusted=false&exclude_spam=false`,
   positions: (address: string, chainId: string) => `/v1/chains/${chainId}/safes/${address}/positions/USD`,
   safe: (address: string, chainId: string) => `/v1/chains/${chainId}/safes/${address}`,
-  chains: () => `/v1/chains`,
+  chains: (serviceKey: string) => `/v2/chains?serviceKey=${serviceKey}`,
 }
 
 async function fetchJson(url: string): Promise<unknown> {
@@ -107,7 +108,7 @@ async function fetchChainFixtures(): Promise<void> {
   console.log('\nFetching chain configuration...')
 
   try {
-    const chainsUrl = `${GATEWAY_URL}${ENDPOINTS.chains()}`
+    const chainsUrl = `${GATEWAY_URL}${ENDPOINTS.chains(CONFIG_SERVICE_KEY)}`
     const chains = await fetchJson(chainsUrl)
     await saveFixture('chains/all.json', chains)
 

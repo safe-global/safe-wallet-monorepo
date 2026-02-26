@@ -3,7 +3,7 @@ import { chainsAdapter, apiSliceWithChainsConfig } from '@safe-global/store/gate
 import { Contract } from 'ethers'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { RootState } from '..'
-import { CHAINALYSIS_OFAC_CONTRACT } from '@/config/constants'
+import { CHAINALYSIS_OFAC_CONTRACT, CONFIG_SERVICE_KEY } from '@/config/constants'
 import chains from '@/config/chains'
 
 // Chainalysis contract ABI and address
@@ -49,14 +49,14 @@ export const ofacApi = createApi({
         if (!address) return createBadRequestError('No address provided')
 
         const state = getState() as RootState
-        let chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(state)
+        let chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(CONFIG_SERVICE_KEY)(state)
 
         // If chains aren't loaded yet, trigger the fetch and wait for it
         if (!chainsCache.data) {
-          await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+          await dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(CONFIG_SERVICE_KEY))
           // Re-select after fetch
           const updatedState = getState() as RootState
-          chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()(updatedState)
+          chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(CONFIG_SERVICE_KEY)(updatedState)
         }
 
         const chain = chainsCache.data

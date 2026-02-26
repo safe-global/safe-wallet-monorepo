@@ -9,7 +9,7 @@ import {
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import { useEffect } from 'react'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION } from '@/config/constants'
+import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
 import {
@@ -162,11 +162,11 @@ const getStaticChainsPreloadedState = (): Partial<RootState> | undefined => {
   return {
     [cgwClient.reducerPath]: {
       queries: {
-        'getChainsConfig(undefined)': {
+        [`getChainsConfig(${JSON.stringify(CONFIG_SERVICE_KEY)})`]: {
           status: 'fulfilled' as const,
           endpointName: 'getChainsConfig' as const,
           requestId: `static-chains-${Date.now()}`,
-          originalArgs: undefined,
+          originalArgs: CONFIG_SERVICE_KEY,
           startedTimeStamp: Date.now(),
           data: chainsAdapter.setAll(chainsInitialState, staticChainsData),
           fulfilledTimeStamp: Date.now(),
@@ -259,7 +259,7 @@ export const useInitStaticChains = () => {
 
   useEffect(() => {
     const result = dispatch(
-      apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }),
+      apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
     )
 
     return result.unsubscribe

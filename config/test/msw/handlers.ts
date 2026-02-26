@@ -116,7 +116,7 @@ export const handlers = (GATEWAY_URL: string) => [
   }),
 
   // Chains config endpoint for RTK Query initialization
-  http.get(`${GATEWAY_URL}/v1/chains`, () => {
+  http.get(`${GATEWAY_URL}/v2/chains`, () => {
     return HttpResponse.json({
       count: 3,
       next: null,
@@ -205,7 +205,7 @@ export const handlers = (GATEWAY_URL: string) => [
   }),
 
   // Individual chain endpoint
-  http.get<{ chainId: string }>(`${GATEWAY_URL}/v1/chains/:chainId`, ({ params }) => {
+  http.get<{ chainId: string }>(`${GATEWAY_URL}/v2/chains/:chainId`, ({ params }) => {
     const { chainId } = params
 
     // Mock data for common chains

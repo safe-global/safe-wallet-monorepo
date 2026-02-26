@@ -24,7 +24,8 @@ const retryingBaseQuery = retry(dynamicBaseQuery, {
 
 const getChainsConfigs = async (
   api: BaseQueryApi,
-  args: string | FetchArgs = { url: '/v1/chains', params: { cursor: 'limit=50&offset=0' } },
+  serviceKey: string,
+  args: string | FetchArgs = { url: '/v2/chains', params: { serviceKey: serviceKey, cursor: 'limit=50&offset=0' } },
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
   const response = await retryingBaseQuery(args, api, {})
@@ -39,7 +40,7 @@ const getChainsConfigs = async (
 
   if (data.next) {
     const nextUrl = new URL(data.next).pathname + new URL(data.next).search
-    return getChainsConfigs(api, nextUrl, nextResults)
+    return getChainsConfigs(api, serviceKey, nextUrl, nextResults)
   }
 
   return { data: chainsAdapter.setAll(initialState, nextResults) }
@@ -47,9 +48,9 @@ const getChainsConfigs = async (
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
   endpoints: (builder) => ({
-    getChainsConfig: builder.query<EntityState<ChainInfo, string>, void>({
-      queryFn: async (_arg, api) => {
-        return getChainsConfigs(api)
+    getChainsConfig: builder.query<EntityState<ChainInfo, string>, string>({
+      queryFn: async (serviceKey, api) => {
+        return getChainsConfigs(api, serviceKey)
       },
     }),
   }),
