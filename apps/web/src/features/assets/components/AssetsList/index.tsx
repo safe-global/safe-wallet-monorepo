@@ -42,6 +42,7 @@ const AssetsList = (): ReactElement => {
   return (
     <SafeWidget
       title="Assets"
+      onTitleClick={handleNavigate}
       action={
         <Button variant="ghost" size="icon-sm" onClick={handleNavigate}>
           <ChevronRight className="size-6" />
