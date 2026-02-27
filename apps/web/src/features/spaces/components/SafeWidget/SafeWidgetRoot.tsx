@@ -13,11 +13,7 @@ const SafeWidgetRoot = ({ title, onTitleClick, action, children, className }: Sa
   return (
     <div
       data-slot="safe-widget"
-      className={cn(
-        'flex h-full min-h-0 flex-col rounded-sm bg-card p-1',
-        onTitleClick && 'cursor-pointer',
-        className,
-      )}
+      className={cn('flex h-full min-h-0 flex-col rounded-sm bg-card p-1', onTitleClick && 'cursor-pointer', className)}
       onClick={onTitleClick}
     >
       <div className="flex shrink-0 items-center justify-between pb-2 pr-2 pt-6">
