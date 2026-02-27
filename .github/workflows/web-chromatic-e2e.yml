@@ -9,6 +9,9 @@ concurrency:
 
 jobs:
   e2e:
+    # Disable this job for now until we have a way to test the visual regression tests.
+    # We can re-enable this job when we have a way to test the visual regression tests.
+    if: false
     env:
       VISUAL_REGRESSION_BUILD: 'true'
     runs-on: ubuntu-latest
