@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as main from '../../e2e/pages/main.page'
 import * as createtx from '../../e2e/pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -10,6 +9,7 @@ const currentNonce = 5
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+const sendButtonDashboard = '[data-testid="send-button-dashboard"]'
 
 describe('[SMOKE] Create transactions tests', () => {
   before(async () => {
@@ -18,9 +18,8 @@ describe('[SMOKE] Create transactions tests', () => {
 
   beforeEach(() => {
     wallet.ensureSiweSession(signer)
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_10)
+    cy.get(sendButtonDashboard).should('be.visible').and('not.be.disabled').click()
   })
 
   it('[SMOKE] Verify MaxAmount button', () => {
