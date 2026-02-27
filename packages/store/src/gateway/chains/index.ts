@@ -57,6 +57,9 @@ export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
     }),
     getChainsConfigV2: builder.query<EntityState<ChainInfo, string>, string>({
       queryFn: async (serviceKey, api) => {
+        if (!serviceKey) {
+          return { error: { status: 'CUSTOM_ERROR', error: 'serviceKey is required' } as FetchBaseQueryError }
+        }
         return getChainsConfigs(api, '/v2/chains', serviceKey)
       },
     }),
