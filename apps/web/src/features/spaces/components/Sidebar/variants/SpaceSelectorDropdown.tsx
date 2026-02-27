@@ -57,6 +57,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           <SidebarMenuButton
             size="lg"
             className={css.spaceSelector}
+            data-testid="space-selector-dropdown"
             aria-label={triggerAriaLabel}
             aria-expanded={isOpen}
             aria-haspopup="menu"

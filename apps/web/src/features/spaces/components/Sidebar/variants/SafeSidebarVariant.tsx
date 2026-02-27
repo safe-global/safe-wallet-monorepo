@@ -49,6 +49,7 @@ export const SafeSidebarVariant = ({
                 size="lg"
                 tooltip="Back to Space"
                 className={css.backToSpace}
+                data-testid="back-to-space-btn"
                 onClick={handleBackToSpace}
               >
                 <Avatar className={css.spaceSelectorAvatar}>
