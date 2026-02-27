@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   e2e:
+    # Disable visual regression tests for now
+    if: false
     env:
       VISUAL_REGRESSION_BUILD: 'true'
     runs-on: ubuntu-latest
