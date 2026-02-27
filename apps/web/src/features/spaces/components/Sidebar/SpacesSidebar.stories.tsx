@@ -3,9 +3,11 @@ import type { CSSProperties, ReactNode } from 'react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings } from 'lucide-react'
 import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
+import { withMockProvider } from '@/storybook/preview'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
+import { SidebarSkeleton } from './SidebarSkeleton'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
 
 const mockSpaceId = '1'
@@ -104,7 +106,11 @@ const SidebarWrapper = ({ children }: { children: ReactNode }) => (
     }
   >
     <div className="flex min-h-screen w-full p-4">
-      <Sidebar collapsible="icon" variant="sidebar" className="!border-r-0 rounded-lg border">
+      <Sidebar
+        collapsible="icon"
+        variant="floating"
+        className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-[0_2px_8px_rgba(23,23,23,0.06)]"
+      >
         <SidebarHeader>
           <SidebarTopBar />
         </SidebarHeader>
@@ -118,6 +124,7 @@ const SidebarWrapper = ({ children }: { children: ReactNode }) => (
 const meta = {
   title: 'Features/Spaces/SpacesSidebar',
   component: SpacesSidebarVariant,
+  decorators: [withMockProvider()],
   parameters: {
     layout: 'fullscreen',
   },
@@ -175,4 +182,27 @@ export const TransactionsActive: Story = {
       </SidebarWrapper>
     ),
   ],
+}
+
+export const Skeleton: Story = {
+  args: {
+    mainNavItems: mockMainNavItems,
+    setupGroup: mockSetupGroup,
+    selectedSpace,
+    spaces: mockSpaces,
+  },
+  render: () => (
+    <SidebarProvider
+      defaultOpen
+      style={
+        {
+          '--sidebar-width': SPACES_SIDEBAR_WIDTH,
+        } as CSSProperties
+      }
+    >
+      <div className="flex min-h-screen w-full p-4">
+        <SidebarSkeleton />
+      </div>
+    </SidebarProvider>
+  ),
 }

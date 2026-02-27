@@ -1,3 +1,6 @@
+/* @deprecated Use features/transactions instead */
+/* @usedBy features/recovery/components/RecoveryType/index.tsx */
+
 .container {
   width: 100%;
   padding: 11px 16px;

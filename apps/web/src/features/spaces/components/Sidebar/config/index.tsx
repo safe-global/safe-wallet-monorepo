@@ -4,7 +4,6 @@ import {
   WalletCards,
   BookUser,
   UsersRound,
-  Shield,
   Settings,
   Wallet,
   Coins,
@@ -27,11 +26,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     label: 'Home',
     href: AppRoutes.spaces.index,
   },
-  {
-    icon: ArrowRightLeft,
-    label: 'Transactions',
-    href: AppRoutes.spaces.transactions,
-  },
+  // TODO: Activate when Spaces Transactions page is ready
+  // {
+  //   icon: ArrowRightLeft,
+  //   label: 'Transactions',
+  //   href: AppRoutes.spaces.transactions,
+  // },
   {
     icon: WalletCards,
     label: 'Accounts',
@@ -52,12 +52,13 @@ export const spacesSetupGroup: SidebarGroupConfig = {
       label: 'Team',
       href: AppRoutes.spaces.members,
     },
-    {
-      icon: Shield,
-      label: 'Security',
-      href: AppRoutes.spaces.security,
-      activeMemberOnly: true,
-    },
+    // TODO: Activate when Spaces Security page is ready
+    // {
+    //   icon: Shield,
+    //   label: 'Security',
+    //   href: AppRoutes.spaces.security,
+    //   activeMemberOnly: true,
+    // },
     {
       icon: Settings,
       label: 'Settings',

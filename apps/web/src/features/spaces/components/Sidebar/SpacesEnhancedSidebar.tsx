@@ -7,6 +7,8 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
+import { useSidebarHydrated } from './hooks/useSidebarHydrated'
+import { SidebarSkeleton } from './SidebarSkeleton'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 interface SpacesEnhancedSidebarProps {
@@ -20,6 +22,25 @@ export const SpacesEnhancedSidebar = ({
   isDrawerOpen,
   onDrawerClose,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
+  const isHydrated = useSidebarHydrated()
+  const spacesSidebarWidth = 'min(230px, 100%)'
+
+  return (
+    <SidebarProvider
+      openMobile={isDrawerOpen}
+      onOpenMobileChange={(open) => !open && onDrawerClose?.()}
+      style={
+        {
+          '--sidebar-width': spacesSidebarWidth,
+        } as CSSProperties
+      }
+    >
+      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
+    </SidebarProvider>
+  )
+}
+
+const HydratedSidebar = (): ReactElement => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
@@ -33,26 +54,15 @@ export const SpacesEnhancedSidebar = ({
   const spaceName = selectedSpace?.name ?? ''
   const spaceInitial = spaceName.charAt(0).toUpperCase()
 
-  const spacesSidebarWidth = 'min(230px, 100%)'
   const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
 
   return (
-    <SidebarProvider
-      openMobile={isDrawerOpen}
-      onOpenMobileChange={(open) => !open && onDrawerClose?.()}
-      style={
-        {
-          '--sidebar-width': spacesSidebarWidth,
-        } as CSSProperties
-      }
-    >
-      <EnhancedSidebar
-        type={sidebarType}
-        spaceName={spaceName}
-        spaceInitial={spaceInitial}
-        selectedSpace={selectedSpace}
-        spaces={nonDeclinedSpaces}
-      />
-    </SidebarProvider>
+    <EnhancedSidebar
+      type={sidebarType}
+      spaceName={spaceName}
+      spaceInitial={spaceInitial}
+      selectedSpace={selectedSpace}
+      spaces={nonDeclinedSpaces}
+    />
   )
 }
