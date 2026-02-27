@@ -140,11 +140,7 @@ export function SelectRecipientContainer() {
           </View>
         </ScrollView>
 
-        <View
-          paddingHorizontal="$4"
-          paddingTop="$3"
-          paddingBottom={Math.max(bottom, getTokenValue('$4'))}
-        >
+        <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
           <SafeButton onPress={handleContinue} disabled={!validation.canContinue} testID="continue-button">
             Continue
           </SafeButton>

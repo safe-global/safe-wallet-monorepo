@@ -2,7 +2,7 @@ import { CommonActions } from '@react-navigation/native'
 import { router } from 'expo-router'
 
 interface NavigationWithState {
-  getState(): { routes: Array<{ name: string }> } | undefined
+  getState(): { routes: { name: string }[] } | undefined
   dispatch(action: ReturnType<typeof CommonActions.reset>): void
 }
 
@@ -12,10 +12,7 @@ interface NavigationWithState {
  * the (send) group, we reset to [(tabs), confirm-transaction] so
  * that "back" goes to the dashboard instead of the completed send form.
  */
-export function dismissToConfirmTransaction(
-  navigation: NavigationWithState,
-  txId: string,
-) {
+export function dismissToConfirmTransaction(navigation: NavigationWithState, txId: string) {
   const state = navigation.getState()
   const hasSendFlow = state?.routes.some((r) => r.name === '(send)') ?? false
 

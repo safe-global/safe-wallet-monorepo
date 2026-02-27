@@ -74,9 +74,7 @@ export function ScanQrSendContainer() {
         onScan={onScan}
         onActivateCamera={handleActivateCamera}
         heading="Scan an address"
-        footer={
-          <Text textAlign="center">Scan an Ethereum wallet address to continue</Text>
-        }
+        footer={<Text textAlign="center">Scan an Ethereum wallet address to continue</Text>}
       />
       <ToastViewport multipleToasts={false} left={0} right={0} />
     </>

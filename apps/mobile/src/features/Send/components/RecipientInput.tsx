@@ -65,8 +65,8 @@ export function RecipientInput({
           </>
         ) : (
           <>
-            <SafeFontIcon name="send-to" size={16} color="$colorSecondary" />
-            <Text fontSize="$4" color="$colorSecondary">
+            <SafeFontIcon name="send-to" size={16} color="$color" />
+            <Text fontSize="$4" color="$color">
               Recipient
             </Text>
           </>
@@ -148,9 +148,7 @@ export function RecipientInput({
           </>
         )}
       </View>
-      {!isSelected && !hasAddress && (
-        <RecipientValidationBadge state={validationState} contactName={contactName} />
-      )}
+      {!isSelected && !hasAddress && <RecipientValidationBadge state={validationState} contactName={contactName} />}
     </View>
   )
 }

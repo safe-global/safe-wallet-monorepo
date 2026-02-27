@@ -1,13 +1,12 @@
 import usePendingTxs from '@/src/hooks/usePendingTxs'
+import { useHasSigner } from '@/src/hooks/useHasSigner'
 import { router } from 'expo-router'
 import { useCallback } from 'react'
 import { AssetsHeader } from './AssetsHeader'
-import { useHasFeature } from '@/src/hooks/useHasFeature'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export const AssetsHeaderContainer = () => {
   const { amount, hasMore, isLoading } = usePendingTxs()
-  const hasSendTransfers = true
+  const { hasSigner } = useHasSigner()
 
   const onPendingTransactionsPress = useCallback(() => {
     router.push('/pending-transactions')
@@ -17,14 +16,19 @@ export const AssetsHeaderContainer = () => {
     router.push('/(send)/recipient')
   }, [router])
 
+  const onReceivePress = useCallback(() => {
+    router.push('/share')
+  }, [router])
+
   return (
     <AssetsHeader
       isLoading={isLoading}
       hasMore={hasMore}
       amount={amount}
       onPendingTransactionsPress={onPendingTransactionsPress}
-      showSendButton={!!hasSendTransfers}
+      showSendButton={hasSigner}
       onSendPress={onSendPress}
+      onReceivePress={onReceivePress}
     />
   )
 }

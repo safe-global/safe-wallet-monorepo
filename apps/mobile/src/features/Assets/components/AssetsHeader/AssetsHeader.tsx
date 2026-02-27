@@ -14,6 +14,7 @@ interface AssetsHeaderProps {
   hasMore: boolean
   showSendButton?: boolean
   onSendPress?: () => void
+  onReceivePress?: () => void
 }
 
 export function AssetsHeader({
@@ -23,10 +24,52 @@ export function AssetsHeader({
   hasMore,
   showSendButton,
   onSendPress,
+  onReceivePress,
 }: AssetsHeaderProps) {
   return (
     <StyledAssetsHeader>
-      <View marginBottom="$8" marginTop="$4">
+      <ReadOnlyContainer marginTop="$4" marginBottom="$2" />
+
+      <BalanceContainer />
+
+      <XStack marginTop="$2" marginBottom="$4" justifyContent="center" gap="$2">
+        <Pressable onPress={onReceivePress} testID="receive-button">
+          <View
+            flexDirection="row"
+            alignItems="center"
+            gap="$1"
+            backgroundColor="$backgroundSkeleton"
+            borderRadius={8}
+            paddingHorizontal="$5"
+            paddingVertical="$3"
+          >
+            <SafeFontIcon name="qr-code" size={18} color="$color" />
+            <Text fontSize="$4" fontWeight={700} color="$color">
+              Receive
+            </Text>
+          </View>
+        </Pressable>
+        {showSendButton && (
+          <Pressable onPress={onSendPress} testID="send-button">
+            <View
+              flexDirection="row"
+              alignItems="center"
+              gap="$1"
+              backgroundColor="$backgroundSkeleton"
+              borderRadius={8}
+              paddingHorizontal="$5"
+              paddingVertical="$3"
+            >
+              <SafeFontIcon name="transaction-outgoing" size={18} color="$color" />
+              <Text fontSize="$4" fontWeight={700} color="$color">
+                Send
+              </Text>
+            </View>
+          </Pressable>
+        )}
+      </XStack>
+
+      <View marginBottom="$4" marginTop="$2">
         {amount > 0 && (
           <PendingTransactions
             isLoading={isLoading}
@@ -35,31 +78,6 @@ export function AssetsHeader({
           />
         )}
       </View>
-
-      <BalanceContainer />
-
-      {showSendButton && onSendPress && (
-        <XStack marginTop="$3" marginBottom="$4" justifyContent="center" gap="$3">
-          <Pressable onPress={onSendPress} testID="send-button">
-            <View
-              flexDirection="row"
-              alignItems="center"
-              gap="$2"
-              backgroundColor="$primary"
-              borderRadius={24}
-              paddingHorizontal="$5"
-              paddingVertical="$3"
-            >
-              <SafeFontIcon name="send-to" size={18} color="$primaryContainer" />
-              <Text fontSize="$4" fontWeight={600} color="$primaryContainer">
-                Send
-              </Text>
-            </View>
-          </Pressable>
-        </XStack>
-      )}
-
-      <ReadOnlyContainer />
     </StyledAssetsHeader>
   )
 }

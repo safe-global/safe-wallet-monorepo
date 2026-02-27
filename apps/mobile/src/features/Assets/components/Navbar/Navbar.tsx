@@ -1,23 +1,25 @@
 import React from 'react'
 import { Pressable } from 'react-native'
-import { Theme, XStack, getTokenValue } from 'tamagui'
+import { Circle, Theme, View, XStack, Text, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Identicon } from '@/src/components/Identicon'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { ThresholdBadge } from '@/src/components/ThresholdBadge'
+import { Image } from 'expo-image'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 import { shortenAddress } from '@/src/utils/formatters'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
-import { Link, useRouter } from 'expo-router'
-import { DropdownLabel } from '@/src/components/Dropdown/DropdownLabel'
+import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { RootState } from '@/src/store'
 import { useTheme } from '@/src/theme/hooks/useTheme'
+import { selectChainById } from '@/src/store/chains'
+import usePendingTxs from '@/src/hooks/usePendingTxs'
 
-const dropdownLabelProps = {
+const nameLabelProps = {
   fontSize: '$5',
   fontWeight: 600,
 } as const
@@ -32,6 +34,12 @@ export const Navbar = () => {
   const activeSafeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
   const chainSafe = activeSafeInfo ? activeSafeInfo[activeSafe.chainId] : undefined
 
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+
+  const { amount } = usePendingTxs()
+
+  const safeName = contact ? contact.name : shortenAddress(activeSafe.address)
+
   return (
     <Theme name="navbar">
       <XStack
@@ -42,10 +50,8 @@ export const Navbar = () => {
         paddingBottom={'$2'}
         backgroundColor={isDark ? '$background' : '$backgroundFocus'}
       >
-        <DropdownLabel
-          label={contact ? contact.name : shortenAddress(activeSafe.address)}
-          labelProps={dropdownLabelProps}
-          leftNode={
+        <Pressable onPress={() => router.push('/accounts-sheet')} hitSlop={4} testID="account-selector">
+          <XStack gap="$3" alignItems="center">
             <BadgeWrapper
               badge={
                 <ThresholdBadge
@@ -61,17 +67,58 @@ export const Navbar = () => {
             >
               <Identicon address={activeSafe.address} size={30} />
             </BadgeWrapper>
-          }
-          onPress={() => {
-            router.push('/accounts-sheet')
-          }}
-          hitSlop={4}
-        />
-        <Link href={'/share'} asChild>
-          <Pressable hitSlop={10}>
-            <SafeFontIcon name="qr-code-1" size={16} />
+            <View>
+              <XStack alignItems="center" gap="$1">
+                <Text
+                  fontSize={nameLabelProps.fontSize}
+                  fontWeight={nameLabelProps.fontWeight}
+                  numberOfLines={1}
+                  maxWidth={170}
+                >
+                  {safeName}
+                </Text>
+                <SafeFontIcon name="chevron-down" size={16} />
+              </XStack>
+              <Text fontSize="$4" color="$colorSecondary" numberOfLines={1}>
+                {shortenAddress(activeSafe.address)}
+              </Text>
+            </View>
+          </XStack>
+        </Pressable>
+
+        <XStack gap="$2" alignItems="center">
+          {amount > 0 && (
+            <Pressable onPress={() => router.push('/pending-transactions')} testID="navbar-pending-tx-badge">
+              <Circle size={40} backgroundColor="$backgroundSkeleton">
+                <View
+                  position="absolute"
+                  top={0}
+                  right={0}
+                  width={8}
+                  height={8}
+                  borderRadius={4}
+                  backgroundColor="$warning"
+                  zIndex={1}
+                />
+                <Text fontSize="$5" fontWeight={700} color="$color">
+                  {amount > 99 ? '99+' : amount}
+                </Text>
+              </Circle>
+            </Pressable>
+          )}
+
+          <Pressable onPress={() => router.push('/networks-sheet')} testID="navbar-network-selector">
+            <Circle size={40} backgroundColor="$backgroundSkeleton">
+              {activeChain?.chainLogoUri && (
+                <Image
+                  source={activeChain.chainLogoUri}
+                  style={{ width: 32, height: 32, borderRadius: 4 }}
+                  accessibilityLabel={activeChain.chainName}
+                />
+              )}
+            </Circle>
           </Pressable>
-        </Link>
+        </XStack>
       </XStack>
     </Theme>
   )

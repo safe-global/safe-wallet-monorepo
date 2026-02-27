@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
 import { Text, View, getTokenValue } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Alert } from '@/src/components/Alert'
@@ -15,8 +16,11 @@ import { shortenAddress } from '@/src/utils/formatters'
 import { formatVisualAmount, safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
+import { NonceBottomSheet } from './components/NonceBottomSheet'
+import { CustomNonceModal } from './components/CustomNonceModal'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
+import { useNonce } from './hooks/useNonce'
 import { isNativeToken } from './services/tokenTransferParams'
 import { proposeSendTransaction } from './services/proposeSendTransaction'
 import logger from '@/src/utils/logger'
@@ -25,6 +29,7 @@ export function EnterAmountContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
   const inputRef = useRef<TextInput>(null)
+  const nonceSheetRef = useRef<BottomSheetModal>(null)
   const params = useLocalSearchParams<{
     recipientAddress: string
     recipientName?: string
@@ -37,6 +42,23 @@ export function EnterAmountContainer() {
   const currency = useAppSelector(selectCurrency)
   const isSubmitting = useRef(false)
   const [submitError, setSubmitError] = useState<string>()
+  const [keyboardVisible, setKeyboardVisible] = useState(false)
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+    }
+  }, [])
+
+  // Nonce state
+  const { recommendedNonce, queuedNonces, fetchMore, isFetchingMore } = useNonce(activeSafe.chainId, activeSafe.address)
+  const [selectedNonce, setSelectedNonce] = useState<number | undefined>()
+  const [showCustomNonceModal, setShowCustomNonceModal] = useState(false)
+
+  const displayNonce = selectedNonce ?? recommendedNonce
 
   const { data: balancesData } = useBalancesGetBalancesV1Query({
     chainId: activeSafe.chainId,
@@ -96,6 +118,7 @@ export function EnterAmountContainer() {
         safeAddress: activeSafe.address,
         sender: activeSigner.value,
         dispatch,
+        nonce: selectedNonce,
       })
 
       router.push({
@@ -119,6 +142,7 @@ export function EnterAmountContainer() {
     activeSafe,
     dispatch,
     router,
+    selectedNonce,
   ])
 
   const handleMax = useCallback(() => {
@@ -138,11 +162,47 @@ export function EnterAmountContainer() {
     setMax(formatted)
   }, [maxBalance, decimals, fiatConversion.isFiatMode, fiatConversion.hasFiatPrice, token?.fiatConversion, setMax])
 
-  const errorMessage = exceedsBalance
-    ? 'Insufficient balance'
-    : exceedsDecimals
-      ? `Should have 1 to ${decimals} decimals`
-      : undefined
+  const handleOpenNonceSheet = useCallback(() => {
+    Keyboard.dismiss()
+    nonceSheetRef.current?.present()
+  }, [])
+
+  const refocusInput = useCallback(() => {
+    setTimeout(() => inputRef.current?.focus(), 300)
+  }, [])
+
+  const handleSelectNonce = useCallback(
+    (nonce: number) => {
+      setSelectedNonce(nonce === recommendedNonce ? undefined : nonce)
+      nonceSheetRef.current?.dismiss()
+      refocusInput()
+    },
+    [recommendedNonce, refocusInput],
+  )
+
+  const handleAddCustomNonce = useCallback(() => {
+    nonceSheetRef.current?.dismiss()
+    // Small delay to avoid bottom sheet and modal fighting
+    setTimeout(() => {
+      setShowCustomNonceModal(true)
+    }, 300)
+  }, [])
+
+  const handleSaveCustomNonce = useCallback(
+    (nonce: number) => {
+      setSelectedNonce(nonce === recommendedNonce ? undefined : nonce)
+      setShowCustomNonceModal(false)
+      refocusInput()
+    },
+    [recommendedNonce, refocusInput],
+  )
+
+  const handleCancelCustomNonce = useCallback(() => {
+    setShowCustomNonceModal(false)
+    refocusInput()
+  }, [refocusInput])
+
+  const inlineError = exceedsDecimals ? `Should have 1 to ${decimals} decimals` : undefined
 
   const formattedBalance = useMemo(() => {
     return token ? formatVisualAmount(maxBalance, decimals) : undefined
@@ -155,43 +215,70 @@ export function EnterAmountContainer() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false} keyboardShouldPersistTaps="handled">
-        {/* Recipient header */}
-        <View paddingHorizontal="$4" paddingTop="$3" gap="$2">
-          <View flexDirection="row" alignItems="center" gap="$2">
-            <SafeFontIcon name="send-to" size={16} color="$colorSecondary" />
-            <Text fontSize="$4" color="$colorSecondary">
-              Recipient
-            </Text>
-          </View>
-          <Pressable onPress={() => router.navigate('/(send)/recipient')} testID="recipient-summary">
-            <View
-              flexDirection="row"
-              alignItems="center"
-              backgroundColor="$backgroundSkeleton"
-              borderRadius={8}
-              paddingHorizontal="$4"
-              height={64}
-              gap="$2"
-            >
-              <Text fontSize="$4" color="$colorSecondary">
-                To:
+        {/* Recipient and Nonce header */}
+        <View paddingHorizontal="$4" paddingTop="$3" flexDirection="row" gap="$2">
+          {/* Recipient column */}
+          <View flex={1} gap="$2">
+            <View flexDirection="row" alignItems="center" gap="$2">
+              <SafeFontIcon name="send-to" size={16} color="$color" />
+              <Text fontSize="$4" color="$color">
+                Recipient
               </Text>
-              {recipientName ? (
-                <View gap={2}>
-                  <Text fontSize="$4" fontWeight={600} color="$color">
-                    {recipientName}
-                  </Text>
-                  <Text fontSize="$3" color="$colorSecondary">
-                    {shortenAddress(recipientAddress ?? '', 4)}
-                  </Text>
-                </View>
-              ) : (
-                <Text fontSize="$4" color="$color">
-                  {shortenAddress(recipientAddress ?? '', 6)}
-                </Text>
-              )}
             </View>
-          </Pressable>
+            <Pressable onPress={() => router.navigate('/(send)/recipient')} testID="recipient-summary">
+              <View
+                flexDirection="row"
+                alignItems="center"
+                backgroundColor="$backgroundSkeleton"
+                borderRadius={8}
+                paddingHorizontal="$4"
+                height={64}
+                gap="$2"
+              >
+                <Text fontSize="$4" color="$colorSecondary">
+                  To:
+                </Text>
+                {recipientName ? (
+                  <View gap={2}>
+                    <Text fontSize="$4" fontWeight={600} color="$color">
+                      {recipientName}
+                    </Text>
+                    <Text fontSize="$3" color="$colorSecondary">
+                      {shortenAddress(recipientAddress ?? '', 4)}
+                    </Text>
+                  </View>
+                ) : (
+                  <Text fontSize="$4" color="$color">
+                    {shortenAddress(recipientAddress ?? '', 6)}
+                  </Text>
+                )}
+              </View>
+            </Pressable>
+          </View>
+
+          {/* Nonce column */}
+          <View gap="$2" minWidth={100}>
+            <View flexDirection="row" alignItems="center" gap="$2">
+              <SafeFontIcon name="apps" size={16} color="$color" />
+              <Text fontSize="$4" color="$color">
+                Nonce
+              </Text>
+            </View>
+            <Pressable onPress={handleOpenNonceSheet} testID="nonce-display">
+              <View
+                alignItems="center"
+                justifyContent="center"
+                backgroundColor="$backgroundSkeleton"
+                borderRadius={8}
+                paddingHorizontal="$4"
+                height={64}
+              >
+                <Text fontSize="$4" color="$color">
+                  {displayNonce !== undefined ? `# ${displayNonce}` : '—'}
+                </Text>
+              </View>
+            </Pressable>
+          </View>
         </View>
 
         {/* Amount content area */}
@@ -221,7 +308,7 @@ export function EnterAmountContainer() {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <SafeFontIcon name="arrow-sort" size={16} color="$color" />
+                    <SafeFontIcon name="transactions" size={24} color="$color" />
                   </View>
                 </Pressable>
               )}
@@ -244,9 +331,9 @@ export function EnterAmountContainer() {
             />
 
             <View height={24} marginTop="$3" justifyContent="center">
-              {errorMessage && (
+              {inlineError && (
                 <Text color="$error" fontSize="$3" testID="amount-error">
-                  {errorMessage}
+                  {inlineError}
                 </Text>
               )}
             </View>
@@ -260,16 +347,44 @@ export function EnterAmountContainer() {
         </Pressable>
       </ScrollView>
 
-      {/* Review button — stays above keyboard */}
-      <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-        <SafeButton
-          onPress={handleReview}
-          disabled={!isValid || !activeSigner || isSubmitting.current}
-          testID="review-button"
-        >
-          Review & confirm
-        </SafeButton>
+      {/* Review button or insufficient balance alert — stays above keyboard */}
+      <View
+        paddingHorizontal="$4"
+        paddingTop="$3"
+        paddingBottom={keyboardVisible ? getTokenValue('$4') : Math.max(bottom, getTokenValue('$4'))}
+      >
+        {exceedsBalance ? (
+          <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
+        ) : (
+          <SafeButton
+            onPress={handleReview}
+            disabled={!isValid || !activeSigner || isSubmitting.current}
+            testID="review-button"
+          >
+            Review & confirm
+          </SafeButton>
+        )}
       </View>
+
+      {/* Nonce bottom sheet */}
+      <NonceBottomSheet
+        ref={nonceSheetRef}
+        recommendedNonce={recommendedNonce}
+        queuedNonces={queuedNonces}
+        selectedNonce={selectedNonce}
+        onSelectNonce={handleSelectNonce}
+        onAddCustomNonce={handleAddCustomNonce}
+        onEndReached={fetchMore}
+        isFetchingMore={isFetchingMore}
+      />
+
+      {/* Custom nonce modal */}
+      <CustomNonceModal
+        visible={showCustomNonceModal}
+        defaultNonce={String(displayNonce ?? '')}
+        onSave={handleSaveCustomNonce}
+        onCancel={handleCancelCustomNonce}
+      />
     </KeyboardAvoidingView>
   )
 }

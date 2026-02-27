@@ -8,6 +8,7 @@ import type { AppDispatch } from '@/src/store'
 
 interface ProposeSendTransactionArgs extends SendTransactionParams {
   dispatch: AppDispatch
+  nonce?: number
 }
 
 /**
@@ -25,6 +26,7 @@ export const proposeSendTransaction = async ({
   safeAddress,
   sender,
   dispatch,
+  nonce,
 }: ProposeSendTransactionArgs): Promise<string> => {
   if (!isAddress(recipient)) {
     throw new Error(`Invalid recipient address: ${recipient}`)
@@ -35,7 +37,7 @@ export const proposeSendTransaction = async ({
 
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
 
-  const safeTx = await createTx(txData)
+  const safeTx = await createTx(txData, nonce)
 
   const safeSDK = getSafeSDK()
   if (!safeSDK) {

@@ -30,13 +30,7 @@ function RecipientRow({
 }) {
   return (
     <Pressable onPress={() => onSelect(option.address, option.name)} testID={`recipient-${option.address}`}>
-      <View
-        flexDirection="row"
-        alignItems="center"
-        gap="$3"
-        padding="$3"
-        borderRadius={8}
-      >
+      <View flexDirection="row" alignItems="center" gap="$3" padding="$3" borderRadius={8}>
         <Identicon address={option.address as Address} size={40} rounded />
         <View flex={1} gap="$1">
           {option.name && (
