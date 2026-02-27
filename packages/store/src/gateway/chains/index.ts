@@ -24,8 +24,9 @@ const retryingBaseQuery = retry(dynamicBaseQuery, {
 
 const getChainsConfigs = async (
   api: BaseQueryApi,
-  serviceKey: string,
-  args: string | FetchArgs = { url: '/v2/chains', params: { serviceKey: serviceKey, cursor: 'limit=50&offset=0' } },
+  url: '/v1/chains' | '/v2/chains',
+  serviceKey: string | undefined,
+  args: string | FetchArgs = { url, params: { ...(serviceKey ? { serviceKey: serviceKey } : {}), cursor: 'limit=50&offset=0' } },
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
   const response = await retryingBaseQuery(args, api, {})
@@ -39,8 +40,9 @@ const getChainsConfigs = async (
   const nextResults = [...results, ...data.results]
 
   if (data.next) {
-    const nextUrl = new URL(data.next).pathname + new URL(data.next).search
-    return getChainsConfigs(api, serviceKey, nextUrl, nextResults)
+    const { pathname, search } = new URL(data.next)
+    const nextUrl = pathname + search
+    return getChainsConfigs(api, url, serviceKey, nextUrl, nextResults)
   }
 
   return { data: chainsAdapter.setAll(initialState, nextResults) }
@@ -48,13 +50,18 @@ const getChainsConfigs = async (
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
   endpoints: (builder) => ({
-    getChainsConfig: builder.query<EntityState<ChainInfo, string>, string>({
+    getChainsConfig: builder.query<EntityState<ChainInfo, string>, void>({
+      queryFn: async (_arg, api) => {
+        return getChainsConfigs(api, '/v1/chains', undefined)
+      },
+    }),
+    getChainsConfigV2: builder.query<EntityState<ChainInfo, string>, string>({
       queryFn: async (serviceKey, api) => {
-        return getChainsConfigs(api, serviceKey)
+        return getChainsConfigs(api, '/v2/chains', serviceKey)
       },
     }),
   }),
   overrideExisting: true,
 })
 
-export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig
+export const { useGetChainsConfigQuery, useGetChainsConfigV2Query } = apiSliceWithChainsConfig

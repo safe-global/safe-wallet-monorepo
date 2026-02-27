@@ -162,9 +162,9 @@ const getStaticChainsPreloadedState = (): Partial<RootState> | undefined => {
   return {
     [cgwClient.reducerPath]: {
       queries: {
-        [`getChainsConfig(${JSON.stringify(CONFIG_SERVICE_KEY)})`]: {
+        [`getChainsConfigV2(${JSON.stringify(CONFIG_SERVICE_KEY)})`]: {
           status: 'fulfilled' as const,
-          endpointName: 'getChainsConfig' as const,
+          endpointName: 'getChainsConfigV2' as const,
           requestId: `static-chains-${Date.now()}`,
           originalArgs: CONFIG_SERVICE_KEY,
           startedTimeStamp: Date.now(),
@@ -249,7 +249,7 @@ export const getStoreInstance = () => {
  * Trigger a background refetch of chain configurations so the app picks up any
  * changes since the build-time snapshot. The static chain data is already seeded
  * into the RTK Query cache via preloadedState in makeStore(), so
- * useGetChainsConfigQuery() returns data immediately on first render.
+ * useGetChainsConfigV2Query() returns data immediately on first render.
  *
  * When the runtime response arrives, RTK Query's structuralSharing preserves object
  * references if the data is identical, preventing unnecessary re-renders.
@@ -259,7 +259,7 @@ export const useInitStaticChains = () => {
 
   useEffect(() => {
     const result = dispatch(
-      apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
     )
 
     return result.unsubscribe

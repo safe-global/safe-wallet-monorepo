@@ -88,7 +88,7 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
       let link = undefined
       if (swapOrder.txId && safeInfo.data?.chainId && safeInfo.data?.address) {
         const state = listenerApi.getState()
-        const chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfig.select(CONFIG_SERVICE_KEY)(state)
+        const chainsCache = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(state)
 
         // Only create link if chains are already loaded (don't trigger fetch in listener)
         const chainInfo = chainsCache.data
