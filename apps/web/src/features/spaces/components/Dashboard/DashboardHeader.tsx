@@ -12,6 +12,7 @@ import { HeaderActions } from './HeaderActions'
 
 interface DashboardHeaderProps {
   value: string
+  loading?: boolean
   onSend?: () => void
   onReceive?: () => void
   onSwap?: () => void
@@ -21,6 +22,7 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({
   value,
+  loading,
   onSend,
   onReceive,
   onSwap,
@@ -29,7 +31,7 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-6 mb-10">
-      <TotalValueElement value={value} />
+      <TotalValueElement value={value} loading={loading} />
       <HeaderActions
         onSend={onSend}
         onReceive={onReceive}

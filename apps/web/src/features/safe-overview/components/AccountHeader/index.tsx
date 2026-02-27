@@ -71,6 +71,7 @@ const AccountHeader = (): ReactElement => {
     <>
       <DashboardHeader
         value={formattedValue}
+        loading={!balancesLoaded}
         onSend={!noAssets && safe.deployed ? handleSend : undefined}
         onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}
         onReceive={safe.deployed ? handleReceive : undefined}
