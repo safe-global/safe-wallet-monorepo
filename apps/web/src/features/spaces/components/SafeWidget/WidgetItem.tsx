@@ -5,6 +5,8 @@ import { cn } from '@/utils/cn'
 interface WidgetItemProps {
   label: string
   info: string
+  /** Optional second line (e.g. amount + recipient); can wrap so full text is visible. */
+  description?: string
   href?: string
   startNode?: ReactNode
   featuredNode?: ReactNode
@@ -16,6 +18,7 @@ interface WidgetItemProps {
 const WidgetItem = ({
   label,
   info,
+  description,
   href,
   startNode,
   featuredNode,
@@ -41,11 +44,16 @@ const WidgetItem = ({
         className,
       )}
     >
-      <div className="flex w-[220px] items-center gap-4">
+      <div className="flex min-w-0 w-[220px] items-center gap-4">
         {startNode}
-        <div className="flex flex-col gap-0.5">
-          <span className="text-base leading-6 font-medium text-foreground">{label}</span>
-          <span className="text-xs leading-4 text-muted-foreground">{info}</span>
+        <div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
+          <span className="overflow-hidden text-base leading-6 font-medium text-foreground whitespace-nowrap">
+            {label}
+          </span>
+          {description ? (
+            <span className="break-words text-sm leading-4 text-muted-foreground">{description}</span>
+          ) : null}
+          <span className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap">{info}</span>
         </div>
       </div>
 

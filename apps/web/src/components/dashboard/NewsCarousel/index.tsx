@@ -1,5 +1,4 @@
 /**
- * @deprecated Use features/safe-overview instead
  * @usedBy features/hypernative/components/HnBanner/HnBannerForCarousel.tsx (type NewsBannerProps)
  */
 import React, { createElement, useMemo, useRef, useState } from 'react'

@@ -6,7 +6,7 @@ import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -42,7 +42,7 @@ const AccountHeader = (): ReactElement => {
   const formattedValue = formatCurrencyPrecise(Number(balances.fiatTotal), currency)
 
   const handleSend = useCallback(() => {
-    setTxFlow(<NewTxFlow />, undefined, false)
+    setTxFlow(<TokenTransferFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
   }, [setTxFlow])
 
@@ -71,6 +71,7 @@ const AccountHeader = (): ReactElement => {
     <>
       <DashboardHeader
         value={formattedValue}
+        loading={!balancesLoaded}
         onSend={!noAssets && safe.deployed ? handleSend : undefined}
         onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}
         onReceive={safe.deployed ? handleReceive : undefined}
@@ -78,7 +79,7 @@ const AccountHeader = (): ReactElement => {
         otherActions={
           <Button
             variant="outline"
-            className="border-[#d4d4d4] bg-transparent hover:bg-muted/50"
+            className="!border-[var(--color-border-light)] bg-transparent hover:bg-muted/50"
             onClick={handleManageSafe}
           >
             <Settings className="size-4" />

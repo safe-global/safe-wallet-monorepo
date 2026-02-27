@@ -1,4 +1,3 @@
-/** @deprecated Use features/safe-overview instead */
 import { Typography, Card, Stack } from '@mui/material'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
