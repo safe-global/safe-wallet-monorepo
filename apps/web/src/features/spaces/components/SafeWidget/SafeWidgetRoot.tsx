@@ -7,12 +7,21 @@ interface SafeWidgetProps {
   action?: ReactNode
   children: ReactNode
   className?: string
+  'data-testid'?: string
 }
 
-const SafeWidgetRoot = ({ title, onTitleClick, action, children, className }: SafeWidgetProps): ReactElement => {
+const SafeWidgetRoot = ({
+  title,
+  onTitleClick,
+  action,
+  children,
+  className,
+  'data-testid': dataTestId,
+}: SafeWidgetProps): ReactElement => {
   return (
     <div
       data-slot="safe-widget"
+      data-testid={dataTestId}
       className={cn('flex h-full min-h-0 flex-col rounded-sm bg-card p-1', onTitleClick && 'cursor-pointer', className)}
       onClick={onTitleClick}
     >

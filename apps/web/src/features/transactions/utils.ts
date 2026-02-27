@@ -35,6 +35,8 @@ export function getTxLabel(tx: TransactionQueuedItem): string {
     label = txInfo.humanDescription
   } else if ('methodName' in txInfo && txInfo.methodName) {
     label = txInfo.methodName
+  } else if (txInfo.type === 'Transfer' && 'direction' in txInfo) {
+    label = txInfo.direction === 'OUTGOING' ? 'Send' : 'Received'
   } else {
     label = txInfo.type
   }

@@ -6,12 +6,20 @@ interface WidgetFooterProps {
   text: string
   className?: string
   onClick?: () => void
+  'data-testid'?: string
 }
 
-const WidgetFooter = ({ count, text, className, onClick }: WidgetFooterProps): ReactElement => {
+const WidgetFooter = ({
+  count,
+  text,
+  className,
+  onClick,
+  'data-testid': dataTestId,
+}: WidgetFooterProps): ReactElement => {
   return (
     <div
       data-slot="widget-footer"
+      data-testid={dataTestId}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}

@@ -13,6 +13,9 @@ interface WidgetItemProps {
   actionNode?: ReactNode
   highlighted?: boolean
   className?: string
+  'data-testid'?: string
+  /** Optional data-testid for the info line (e.g. date in Pending Tx widget). */
+  infoDataTestId?: string
 }
 
 const WidgetItem = ({
@@ -25,6 +28,8 @@ const WidgetItem = ({
   actionNode,
   highlighted = false,
   className,
+  'data-testid': dataTestId,
+  infoDataTestId,
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
@@ -33,6 +38,7 @@ const WidgetItem = ({
   return (
     <div
       data-slot="widget-item"
+      data-testid={dataTestId}
       role={href ? 'button' : undefined}
       tabIndex={href ? 0 : undefined}
       onClick={handleClick}
@@ -53,7 +59,12 @@ const WidgetItem = ({
           {description ? (
             <span className="break-words text-sm leading-4 text-muted-foreground">{description}</span>
           ) : null}
-          <span className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap">{info}</span>
+          <span
+            className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap"
+            data-testid={infoDataTestId}
+          >
+            {info}
+          </span>
         </div>
       </div>
 

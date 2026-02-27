@@ -47,6 +47,7 @@ const PendingTxList = (): ReactElement => {
   return (
     <SafeWidget
       title="Pending"
+      data-testid="pending-tx-widget"
       action={
         <Button variant="ghost" size="icon-sm" onClick={handleNavigate}>
           <ChevronRight className="size-6" />
@@ -56,7 +57,9 @@ const PendingTxList = (): ReactElement => {
       {isLoading ? (
         Array.from({ length: MAX_TXS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : queuedTxs.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
+        <p className="px-4 py-3 text-sm text-muted-foreground" data-testid="no-tx-text">
+          No pending transactions
+        </p>
       ) : (
         queuedTxs.map((tx) => {
           const { primary, secondary } = getTxLabelParts(tx)
@@ -67,14 +70,21 @@ const PendingTxList = (): ReactElement => {
               label={primary}
               description={secondary || undefined}
               info={formatTxDate(tx.transaction.timestamp)}
+              infoDataTestId="tx-date"
               startNode={<TxIcon />}
               actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
+              data-testid="tx-pending-item"
             />
           )
         })
       )}
       {!isLoading && queuedTxs.length > 0 && (
-        <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={handleViewAll} />
+        <SafeWidget.Footer
+          count={remainingCount}
+          text="View all pending transactions"
+          onClick={handleViewAll}
+          data-testid="view-all-link"
+        />
       )}
     </SafeWidget>
   )

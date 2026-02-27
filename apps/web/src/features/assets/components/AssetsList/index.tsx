@@ -42,6 +42,7 @@ const AssetsList = (): ReactElement => {
   return (
     <SafeWidget
       title="Assets"
+      data-testid="assets-widget"
       onTitleClick={handleNavigate}
       action={
         <Button variant="ghost" size="icon-sm" onClick={handleNavigate}>
@@ -52,13 +53,16 @@ const AssetsList = (): ReactElement => {
       {isLoading ? (
         Array.from({ length: MAX_ASSETS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : items.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-muted-foreground">No assets</p>
+        <p className="px-4 py-3 text-sm text-muted-foreground" data-testid="no-assets">
+          No assets
+        </p>
       ) : (
         items.map((item) => (
           <SafeWidget.Item
             key={item.tokenInfo.address}
             label={item.tokenInfo.name}
             info={`${formatVisualAmount(item.balance, item.tokenInfo.decimals)} ${item.tokenInfo.symbol}`}
+            data-testid="assets-item"
             startNode={
               <div className="flex size-10 shrink-0 items-center justify-center">
                 <TokenIcon

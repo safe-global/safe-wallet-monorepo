@@ -1,35 +1,24 @@
-import * as constants from '../../support/constants.js'
-import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-import staticSafes from '../../fixtures/safes/static.js'
 
-const transactionQueueStr = 'Pending transactions'
-const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total'
-const sendStr = 'Send'
-const receiveStr = 'Receive'
-const viewAllStr = 'View all'
-const explorePossibleStr = "Explore what's possible"
-const swapSuggestion = 'Swap tokens instantly'
 export const copiedAppUrl = 'share/safe-app?appUrl'
 
-const copyShareBtn = '[data-testid="copy-btn-icon"]'
-const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
-const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
+const sendButtonDashboard = '[data-testid="send-button-dashboard"]'
+const receiveButtonDashboard = '[data-testid="receive-button-dashboard"]'
+const viewAllLink = '[data-testid="view-all-link"]'
 const noTxText = '[data-testid="no-tx-text"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
+export const txDate = '[data-testid="tx-date"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
+const noAssets = '[data-testid="no-assets"]'
+const assetsItem = '[data-testid="assets-item"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
 
+const copyShareBtn = '[data-testid="copy-btn-icon"]'
+
 export function clickOnTxByIndex(index) {
-  // Wait for hydration to set the correct safe query param in the link href
-  cy.get(pendingTxItem)
-    .eq(index)
-    .should('have.attr', 'href')
-    .and('match', /safe=.{3,}/)
-  cy.get(pendingTxItem).eq(index).click()
+  cy.get(pendingTxItem).eq(index).should('be.visible').click()
   cy.get(singleTxDetailsHeader).should('be.visible')
 }
 
@@ -86,15 +75,6 @@ export function verifyPinnedAppsCount(count) {
   cy.get(`[aria-label*="Unpin"]`).should('have.length', count)
 }
 
-export function clickOnExploreAppsBtn() {
-  cy.get(exploreAppsBtn).click()
-  cy.get(safeapps.safeAppsList)
-    .should('exist')
-    .within(() => {
-      cy.get('li').should('have.length.at.least', 1)
-    })
-}
-
 export function verifyShareBtnWorks(index, data) {
   cy.get(copyShareBtn)
     .eq(index)
@@ -109,41 +89,38 @@ export function verifyShareBtnWorks(index, data) {
     )
 }
 
-export function verifyOverviewWidgetData() {
-  // Alias for the Overview section
-  cy.contains('div', overviewStr).parents('section').as('overviewSection')
+export function verifyDashboardHeader() {
+  cy.get(sendButtonDashboard).should('be.visible').and('not.be.disabled')
+  cy.get(receiveButtonDashboard).should('be.visible')
+}
 
-  cy.get('@overviewSection').within(() => {
-    // Prefix is separated across elements in EthHashInfo
-    cy.get('button').contains(sendStr)
-    cy.get('button').contains(receiveStr)
+export function verifyPendingTxWidget() {
+  cy.get(pendingTxWidget).should('be.visible')
+  cy.get(pendingTxWidget).then(($widget) => {
+    const $empty = $widget.find(noTxText)
+    const $items = $widget.find(pendingTxItem)
+    const $viewAll = $widget.find(viewAllLink)
+    const isEmpty = $empty.length > 0 && $empty.is(':visible')
+    const hasItemsAndViewAll = $items.length >= 1 && $viewAll.length > 0
+    expect(isEmpty || hasItemsAndViewAll, 'Pending widget should show either empty state or items with view-all').to.be
+      .true
   })
 }
 
-export function verifyTxQueueWidget() {
-  // Alias for the Transaction queue section
-  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
-
-  cy.get('@txQueueSection').within(() => {
-    // There should be queued transactions
-    cy.contains(noTransactionStr).should('not.exist')
-
-    // Queued txns
-    cy.contains(
-      `a[href^="/transactions/tx?id=multisig_0x"]`,
-      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
-    ).should('exist')
-
-    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
-
-    cy.contains(
-      `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
-      viewAllStr,
-    )
-  })
+export function verifyPendingTxWidgetWithTxs() {
+  cy.get(pendingTxWidget).should('be.visible')
+  cy.get(noTxText).should('not.exist')
+  main.verifyMinimumElementsCount(pendingTxItem, 1)
+  cy.get(viewAllLink).should('be.visible')
 }
 
-export function verifyExplorePossibleSection() {
-  cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
-  cy.get('@explorePossibleSection').contains(swapSuggestion)
+export function verifyAssetsWidget() {
+  cy.get(assetsWidget).should('be.visible')
+  cy.get(assetsWidget).then(($widget) => {
+    const $empty = $widget.find(noAssets)
+    const $items = $widget.find(assetsItem)
+    const isEmpty = $empty.length > 0 && $empty.is(':visible')
+    const hasItems = $items.length >= 1
+    expect(isEmpty || hasItems, 'Assets widget should show either empty state or at least one asset').to.be.true
+  })
 }

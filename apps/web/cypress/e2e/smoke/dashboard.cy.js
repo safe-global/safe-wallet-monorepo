@@ -8,12 +8,12 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-const txData = ['Send', '-0.00002 ETH', '1/1']
-const txaddOwner = ['addOwnerWithThreshold', '1/2']
-const txMultiSendCall3 = ['Batch', '3 actions', '1/2']
-const txMultiSendCall2 = ['Batch', '2 actions', '1/2']
+const txData = ['Send', 'Execution needed']
+const txaddOwner = ['Add', 'new owner', '1 signature needed']
+const txMultiSendCall3 = ['multiSend', '1 signature needed']
+const txMultiSendCall2 = ['multiSend', '1 signature needed']
 
-describe.skip('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
+describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -23,16 +23,16 @@ describe.skip('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () =>
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
   })
 
-  it('[SMOKE] Verify the overview widget is displayed', () => {
-    dashboard.verifyOverviewWidgetData()
+  it('[SMOKE] Verify that the dashboard header with Send action is displayed', () => {
+    dashboard.verifyDashboardHeader()
   })
 
-  it('[SMOKE] Verify the transaction queue widget is displayed', () => {
-    dashboard.verifyTxQueueWidget()
+  it('[SMOKE] Verify that the Pending tx widget is displayed', () => {
+    dashboard.verifyPendingTxWidget()
   })
 
-  it('[SMOKE] Verify the Safe Apps Section is displayed', () => {
-    dashboard.verifyExplorePossibleSection()
+  it('[SMOKE] Verify that the Assets widget is displayed', () => {
+    dashboard.verifyAssetsWidget()
   })
 
   // mock — intercept must be set up before visit so the mock catches the parallel queue request

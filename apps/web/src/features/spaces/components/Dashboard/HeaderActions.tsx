@@ -28,7 +28,12 @@ const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherAct
           <ArrowUpRight className="size-4 text-[#4ade80]" />
           Send
         </Button>
-        <Button variant="outline" className={outlineClassName} onClick={onReceive}>
+        <Button
+          variant="outline"
+          className={outlineClassName}
+          onClick={onReceive}
+          data-testid="receive-button-dashboard"
+        >
           <ArrowDownLeft className="size-4" />
           Receive
         </Button>
