@@ -49,31 +49,33 @@ const AssetsList = (): ReactElement => {
         </Button>
       }
     >
-      {isLoading
-        ? Array.from({ length: MAX_ASSETS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : items.length === 0
-          ? <p className="px-4 py-3 text-sm text-muted-foreground">No assets</p>
-          : items.map((item) => (
-              <SafeWidget.Item
-                key={item.tokenInfo.address}
-                label={item.tokenInfo.name}
-                info={`${formatVisualAmount(item.balance, item.tokenInfo.decimals)} ${item.tokenInfo.symbol}`}
-                startNode={
-                  <div className="flex size-10 shrink-0 items-center justify-center">
-                    <TokenIcon
-                      logoUri={item.tokenInfo.logoUri || undefined}
-                      tokenSymbol={item.tokenInfo.symbol}
-                      size={32}
-                    />
-                  </div>
-                }
-                actionNode={
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {formatCurrency(item.fiatBalance, currency)}
-                  </span>
-                }
-              />
-            ))}
+      {isLoading ? (
+        Array.from({ length: MAX_ASSETS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
+      ) : items.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-muted-foreground">No assets</p>
+      ) : (
+        items.map((item) => (
+          <SafeWidget.Item
+            key={item.tokenInfo.address}
+            label={item.tokenInfo.name}
+            info={`${formatVisualAmount(item.balance, item.tokenInfo.decimals)} ${item.tokenInfo.symbol}`}
+            startNode={
+              <div className="flex size-10 shrink-0 items-center justify-center">
+                <TokenIcon
+                  logoUri={item.tokenInfo.logoUri || undefined}
+                  tokenSymbol={item.tokenInfo.symbol}
+                  size={32}
+                />
+              </div>
+            }
+            actionNode={
+              <span className="text-sm font-medium text-muted-foreground">
+                {formatCurrency(item.fiatBalance, currency)}
+              </span>
+            }
+          />
+        ))
+      )}
       {!isLoading && items.length > 0 && (
         <SafeWidget.Footer count={remainingCount} text="View all assets" onClick={handleViewAll} />
       )}
