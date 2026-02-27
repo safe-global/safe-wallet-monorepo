@@ -13,7 +13,7 @@ const txaddOwner = ['Add', 'new owner', '1 signature needed']
 const txMultiSendCall3 = ['multiSend', '1 signature needed']
 const txMultiSendCall2 = ['multiSend', '1 signature needed']
 
-describe('[SMOKE] Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
+describe('[SMOKE] Dashboard tests - Safe Account dashboard', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
