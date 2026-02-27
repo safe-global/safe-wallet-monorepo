@@ -35,7 +35,11 @@ const getChainsConfigs = async (
     return { error: response.error }
   }
 
-  const data = response.data as { results: ChainInfo[]; next?: string }
+  const data = response.data as { results?: ChainInfo[]; next?: string }
+
+  if (!Array.isArray(data?.results)) {
+    return { error: { status: 'CUSTOM_ERROR', error: 'Invalid response: missing results array' } as FetchBaseQueryError }
+  }
 
   const nextResults = [...results, ...data.results]
 
