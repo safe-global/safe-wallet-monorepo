@@ -217,11 +217,12 @@ describe('useTotalBalances', () => {
     })
 
     it('should return counterfactual balances for undeployed safe with portfolio feature', () => {
+      const mockEmptyPortfolio = createMockEmptyPortfolio()
       const mockCfBalances: Balances = { fiatTotal: '500', items: [] }
 
       jest
         .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
-        .mockReturnValue(mockQueryResult({ currentData: createMockPortfolio() }))
+        .mockReturnValue(mockQueryResult({ currentData: mockEmptyPortfolio }))
 
       const { result } = renderHook(() =>
         useTotalBalances({
