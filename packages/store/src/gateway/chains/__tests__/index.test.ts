@@ -6,6 +6,7 @@ import { apiSliceWithChainsConfig } from '../index'
 import { setBaseUrl } from '../../cgwClient'
 
 const GATEWAY_URL = 'https://test-gateway.safe.global'
+const CONFIG_SERVICE_KEY = 'TEST'
 
 const mockChains = [
   createMockChain({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }),
@@ -60,7 +61,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.entities).toBeDefined()
@@ -95,7 +96,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(Object.keys(result.data?.entities ?? {}).length).toBe(3)
@@ -125,7 +126,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -153,7 +154,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -175,7 +176,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(attemptCount).toBe(1)
@@ -192,7 +193,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -210,7 +211,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -252,7 +253,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -280,7 +281,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -300,7 +301,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
 
@@ -324,7 +325,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('TEST'))
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.ids).toContain('999')
