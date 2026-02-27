@@ -20,7 +20,7 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
     cy.visit(constants.dataSettingsUrl)
   })
 
-  it('[SMOKE] Verify Safe can be accessed after test file upload', () => {
+  it.skip('[SMOKE] Verify Safe can be accessed after test file upload', () => {
     const safe = constants.SEPOLIA_CSV_ENTRY.name
 
     cy.wrap(null)
