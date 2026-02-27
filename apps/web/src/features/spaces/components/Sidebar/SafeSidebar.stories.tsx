@@ -1,6 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
+import type { ReactNode } from 'react'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { withMockProvider } from '@/storybook/preview'
 import { EnhancedSidebar } from './index'
+import { SidebarSkeleton } from './SidebarSkeleton'
+
+const SafeSidebarLayout = ({ children }: { children: ReactNode }) => (
+  <SidebarProvider defaultOpen>
+    <div className="flex min-h-screen w-full">
+      {children}
+      <SidebarInset />
+    </div>
+  </SidebarProvider>
+)
 
 const meta = {
   title: 'Features/Spaces/SafeSidebar',
@@ -18,44 +30,34 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     nextjs: {
-      appDirectory: true,
-      navigation: {
+      appDirectory: false,
+      router: {
         pathname: '/home',
         query: {
+          spaceId: '1',
           safe: 'eth:0x1234567890123456789012345678901234567890',
         },
       },
     },
   },
-  decorators: [
-    (_Story, context) => (
-      <SidebarProvider defaultOpen>
-        <div className="flex min-h-screen w-full">
-          <EnhancedSidebar
-            type={context.args.type}
-            spaceName={context.args.spaceName}
-            spaceInitial={context.args.spaceInitial}
-          />
-          <SidebarInset>
-            <header className="flex h-14 items-center gap-2 border-b px-4">
-              <span className="font-semibold">Example Safe Content Area</span>
-            </header>
-            <main className="flex-1 p-4">
-              <div className="rounded-lg border bg-card p-6">
-                <h2 className="text-2xl font-bold mb-4">Example Safe Overview</h2>
-                <p className="text-muted-foreground">
-                  Example content area for the Safe view - not a part of the sidebar.
-                </p>
-              </div>
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-    ),
-  ],
+  decorators: [withMockProvider()],
 } satisfies Meta<typeof EnhancedSidebar>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+export const Skeleton: Story = {
+  render: () => (
+    <SafeSidebarLayout>
+      <SidebarSkeleton />
+    </SafeSidebarLayout>
+  ),
+}
