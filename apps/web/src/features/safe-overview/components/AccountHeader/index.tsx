@@ -6,7 +6,7 @@ import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -42,7 +42,7 @@ const AccountHeader = (): ReactElement => {
   const formattedValue = formatCurrencyPrecise(Number(balances.fiatTotal), currency)
 
   const handleSend = useCallback(() => {
-    setTxFlow(<NewTxFlow />, undefined, false)
+    setTxFlow(<TokenTransferFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
   }, [setTxFlow])
 

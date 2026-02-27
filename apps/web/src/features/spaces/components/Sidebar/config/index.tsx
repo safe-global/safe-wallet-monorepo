@@ -4,7 +4,6 @@ import {
   WalletCards,
   BookUser,
   UsersRound,
-  Shield,
   Settings,
   Wallet,
   Coins,

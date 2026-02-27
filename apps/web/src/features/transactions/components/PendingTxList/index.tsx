@@ -8,7 +8,7 @@ import { AppRoutes } from '@/config/routes'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getTxStatus, getTxLabel, formatTxDate } from '../../utils'
+import { getTxStatus, getTxLabelParts, formatTxDate } from '../../utils'
 
 const MAX_TXS = 3
 
@@ -58,16 +58,20 @@ const PendingTxList = (): ReactElement => {
       ) : queuedTxs.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
       ) : (
-        queuedTxs.map((tx) => (
-          <SafeWidget.Item
-            key={tx.transaction.id}
-            href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
-            label={getTxLabel(tx)}
-            info={formatTxDate(tx.transaction.timestamp)}
-            startNode={<TxIcon />}
-            actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
-          />
-        ))
+        queuedTxs.map((tx) => {
+          const { primary, secondary } = getTxLabelParts(tx)
+          return (
+            <SafeWidget.Item
+              key={tx.transaction.id}
+              href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
+              label={primary}
+              description={secondary || undefined}
+              info={formatTxDate(tx.transaction.timestamp)}
+              startNode={<TxIcon />}
+              actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
+            />
+          )
+        })
       )}
       {!isLoading && queuedTxs.length > 0 && (
         <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={handleViewAll} />
