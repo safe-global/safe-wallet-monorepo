@@ -20,6 +20,93 @@ const defaultMasterCopies: MasterCopy[] = [
   },
 ]
 
+const chainsConfig = {
+  count: 3,
+  next: null,
+  previous: null,
+  results: [
+    {
+      chainId: '1',
+      chainName: 'Ethereum',
+      shortName: 'eth',
+      description: 'Ethereum Mainnet',
+      l2: false,
+      isTestnet: false,
+      zk: false,
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
+      transactionService: 'https://safe-transaction-mainnet.safe.global',
+      blockExplorerUriTemplate: {
+        address: 'https://etherscan.io/address/{{address}}',
+        txHash: 'https://etherscan.io/tx/{{txHash}}',
+        api: 'https://api.etherscan.io/api',
+      },
+      beaconChainExplorerUriTemplate: {},
+      disabledWallets: [],
+      balancesProvider: { chainName: 'ethereum', enabled: true },
+      contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
+      features: [],
+      gasPrice: [],
+      publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
+      rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
+      safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
+      theme: { backgroundColor: '#E8E7E6', textColor: '#001428' },
+    },
+    {
+      chainId: '137',
+      chainName: 'Polygon',
+      shortName: 'matic',
+      description: 'Polygon Mainnet',
+      l2: true,
+      isTestnet: false,
+      zk: false,
+      nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18, logoUri: '' },
+      transactionService: 'https://safe-transaction-polygon.safe.global',
+      blockExplorerUriTemplate: {
+        address: 'https://polygonscan.com/address/{{address}}',
+        txHash: 'https://polygonscan.com/tx/{{txHash}}',
+        api: 'https://api.polygonscan.com/api',
+      },
+      beaconChainExplorerUriTemplate: {},
+      disabledWallets: [],
+      balancesProvider: { chainName: 'polygon', enabled: true },
+      contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
+      features: [],
+      gasPrice: [],
+      publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
+      rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
+      safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
+      theme: { backgroundColor: '#8B5CF6', textColor: '#FFFFFF' },
+    },
+    {
+      chainId: '42161',
+      chainName: 'Arbitrum One',
+      shortName: 'arb1',
+      description: 'Arbitrum One',
+      l2: true,
+      isTestnet: false,
+      zk: false,
+      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
+      transactionService: 'https://safe-transaction-arbitrum.safe.global',
+      blockExplorerUriTemplate: {
+        address: 'https://arbiscan.io/address/{{address}}',
+        txHash: 'https://arbiscan.io/tx/{{txHash}}',
+        api: 'https://api.arbiscan.io/api',
+      },
+      beaconChainExplorerUriTemplate: {},
+      disabledWallets: [],
+      balancesProvider: { chainName: 'arbitrum', enabled: true },
+      contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
+      features: [],
+      gasPrice: [],
+      publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
+      rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
+      safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
+      theme: { backgroundColor: '#12AAFF', textColor: '#FFFFFF' },
+    },
+  ],
+}
+
+
 export const handlers = (GATEWAY_URL: string) => [
   http.get(`${GATEWAY_URL}/v1/auth/nonce`, () => {
     return HttpResponse.json({
@@ -115,93 +202,15 @@ export const handlers = (GATEWAY_URL: string) => [
     return HttpResponse.json(defaultMasterCopies)
   }),
 
-  // Chains config endpoint for RTK Query initialization
+
+  // Chains config endpoint for RTK Query initialization (v1 - used by mobile)
+  http.get(`${GATEWAY_URL}/v1/chains`, () => {
+    return HttpResponse.json(chainsConfig)
+  }),
+
+  // Chains config endpoint for RTK Query initialization (v2 - used by web)
   http.get(`${GATEWAY_URL}/v2/chains`, () => {
-    return HttpResponse.json({
-      count: 3,
-      next: null,
-      previous: null,
-      results: [
-        {
-          chainId: '1',
-          chainName: 'Ethereum',
-          shortName: 'eth',
-          description: 'Ethereum Mainnet',
-          l2: false,
-          isTestnet: false,
-          zk: false,
-          nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
-          transactionService: 'https://safe-transaction-mainnet.safe.global',
-          blockExplorerUriTemplate: {
-            address: 'https://etherscan.io/address/{{address}}',
-            txHash: 'https://etherscan.io/tx/{{txHash}}',
-            api: 'https://api.etherscan.io/api',
-          },
-          beaconChainExplorerUriTemplate: {},
-          disabledWallets: [],
-          balancesProvider: { chainName: 'ethereum', enabled: true },
-          contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
-          features: [],
-          gasPrice: [],
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://ethereum.publicnode.com' },
-          theme: { backgroundColor: '#E8E7E6', textColor: '#001428' },
-        },
-        {
-          chainId: '137',
-          chainName: 'Polygon',
-          shortName: 'matic',
-          description: 'Polygon Mainnet',
-          l2: true,
-          isTestnet: false,
-          zk: false,
-          nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18, logoUri: '' },
-          transactionService: 'https://safe-transaction-polygon.safe.global',
-          blockExplorerUriTemplate: {
-            address: 'https://polygonscan.com/address/{{address}}',
-            txHash: 'https://polygonscan.com/tx/{{txHash}}',
-            api: 'https://api.polygonscan.com/api',
-          },
-          beaconChainExplorerUriTemplate: {},
-          disabledWallets: [],
-          balancesProvider: { chainName: 'polygon', enabled: true },
-          contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
-          features: [],
-          gasPrice: [],
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://polygon-rpc.com' },
-          theme: { backgroundColor: '#8B5CF6', textColor: '#FFFFFF' },
-        },
-        {
-          chainId: '42161',
-          chainName: 'Arbitrum One',
-          shortName: 'arb1',
-          description: 'Arbitrum One',
-          l2: true,
-          isTestnet: false,
-          zk: false,
-          nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
-          transactionService: 'https://safe-transaction-arbitrum.safe.global',
-          blockExplorerUriTemplate: {
-            address: 'https://arbiscan.io/address/{{address}}',
-            txHash: 'https://arbiscan.io/tx/{{txHash}}',
-            api: 'https://api.arbiscan.io/api',
-          },
-          beaconChainExplorerUriTemplate: {},
-          disabledWallets: [],
-          balancesProvider: { chainName: 'arbitrum', enabled: true },
-          contractAddresses: { safeSingletonAddress: '0x', safeProxyFactoryAddress: '0x' },
-          features: [],
-          gasPrice: [],
-          publicRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
-          rpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
-          safeAppsRpcUri: { authentication: 'NO_AUTHENTICATION', value: 'https://arbitrum-one.publicnode.com' },
-          theme: { backgroundColor: '#12AAFF', textColor: '#FFFFFF' },
-        },
-      ],
-    })
+    return HttpResponse.json(chainsConfig)
   }),
 
   // Individual chain endpoint
