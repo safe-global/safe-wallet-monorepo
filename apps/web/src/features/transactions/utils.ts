@@ -1,16 +1,18 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 
 const MAX_DECIMALS = 4
 
 /**
  * Rounds decimal numbers in a string to a max number of decimal places (e.g. for compact labels).
+ * Uses shared formatAmountPrecise for consistent locale-aware formatting.
  */
 export function formatAmountsInLabel(text: string, maxDecimals = MAX_DECIMALS): string {
   return text.replace(/\d+\.\d+/g, (match) => {
     const num = parseFloat(match)
     if (Number.isNaN(num)) return match
-    return parseFloat(num.toFixed(maxDecimals)).toString()
+    return formatAmountPrecise(num, maxDecimals)
   })
 }
 
