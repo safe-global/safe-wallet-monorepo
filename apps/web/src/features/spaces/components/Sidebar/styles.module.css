@@ -8,17 +8,17 @@
 
 .sidebarInteractive {
   cursor: pointer;
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-sm);
 }
 
 .spaceSelector {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  min-height: 40px;
-  padding: 32px 8px;
-  border-radius: 8px;
+  min-height: var(--space-10);
+  padding: var(--space-8) var(--space-2);
+  border-radius: var(--radius-sm);
   background-color: var(--sidebar-accent);
   cursor: pointer;
 }
@@ -31,11 +31,11 @@
 .backToSpace {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
-  min-height: 40px;
-  padding: 32px 8px;
-  border-radius: 8px;
+  min-height: var(--space-10);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
@@ -44,15 +44,15 @@
 }
 
 .spaceSelectorAvatar {
-  width: 32px;
-  height: 32px;
+  width: var(--space-8);
+  height: var(--space-8);
   flex-shrink: 0;
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
 .spaceSelectorAvatarFallback {
-  border-radius: var(--rounded-md, 8px);
+  border-radius: var(--radius-sm);
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
@@ -60,14 +60,14 @@
 .spaceSelectorText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0_5);
   min-width: 0;
 }
 
 .spaceSelectorName {
   font-size: 14px;
   line-height: 20px;
-  color: var(--color-text-primary, #171717);
+  color: var(--foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -78,7 +78,7 @@
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
-  color: var(--color-text-secondary, #737373);
+  color: var(--muted-foreground);
 }
 
 .transactionsBadge {
@@ -89,15 +89,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: var(--space-5);
+  height: var(--space-5);
+  padding: 0 var(--space-1_5);
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 16px;
   color: var(--color-success-main, #166534);
   background-color: var(--color-success-background, #dcfce7);
-  border-radius: var(--rounded-lg, 12px);
+  border-radius: var(--radius-md);
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
@@ -127,12 +127,12 @@
 .transactionsBadgeDot {
   display: none;
   position: absolute;
-  top: 4px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
+  top: var(--space-2);
+  right: var(--space-0_5);
+  width: var(--space-2);
+  height: var(--space-2);
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: var(--green-400, #4ade80);
   flex-shrink: 0;
   pointer-events: none;
 }
@@ -142,9 +142,9 @@
 }
 
 .navItem {
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--rounded-md, 8px);
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
 }
 
 .navItemActive {
@@ -152,18 +152,18 @@
 }
 
 .groupLabel {
-  color: var(--sidebar-muted, #737373);
+  color: var(--muted-foreground);
   font-size: 12px;
   line-height: 16px;
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
 }
 
 .badge {
   background-color: var(--green-400, #4ade80);
-  border: 1px solid var(--white, white);
-  border-radius: var(--rounded-lg, 12px);
-  width: 8px;
-  height: 8px;
+  border: 1px solid var(--background);
+  border-radius: var(--radius-md);
+  width: var(--space-2);
+  height: var(--space-2);
 }
 
 .textSmall {
@@ -193,7 +193,7 @@
 .backButton {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .backButton:hover {
