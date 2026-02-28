@@ -46,7 +46,7 @@ export function HeaderNavigation({
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
 
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-[16px] bg-background p-[3px]')}>
+    <div className={cn('flex items-center gap-1.5 rounded-lg bg-background p-[3px]')}>
       {showSearch && (
         <Button
           variant="secondary"
@@ -72,7 +72,7 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute -right-0.5 -top-0.5 z-10 flex size-2 items-center justify-center rounded-full border border-white bg-[#4ADE80]"
+            className="absolute -right-0.5 -top-0.5 z-10 flex size-2 items-center justify-center rounded-full border border-background bg-[#4ADE80]"
             aria-label={`${messages} unread messages`}
           />
         )}
