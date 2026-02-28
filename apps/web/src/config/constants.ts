@@ -6,8 +6,8 @@ type Environment = 'development' | 'production' | 'test' | 'cypress'
 export const APP_ENV = process.env.NODE_ENV as Environment
 
 // Export the raw string so Terser cannot constant-fold the === 'true' comparison.
-// The placeholder __NEXT_PUBLIC_XXXXXXX__ must survive in the bundle for
-// runtime sed injection to work (see apps/web/scripts/docker/entrypoint.sh).
+// At runtime, entrypoint.sh patches the webpack process polyfill so that
+// process.env.NEXT_PUBLIC_IS_PRODUCTION resolves to the container env value.
 export const IS_PRODUCTION_STR = process.env.NEXT_PUBLIC_IS_PRODUCTION || ''
 export const IS_PRODUCTION = IS_PRODUCTION_STR === 'true'
 export const IS_DEV = APP_ENV === 'development'

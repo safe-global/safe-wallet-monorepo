@@ -11,8 +11,9 @@ WORKDIR /app
 COPY . .
 
 # Remove local .env files so NEXT_PUBLIC_* vars are NOT baked in at build time.
-# This ensures Next.js generates __NEXT_PUBLIC_*__ placeholders for all vars,
-# which the entrypoint.sh replaces with runtime values from the container's env.
+# Without these files, Next.js compiles process.env.NEXT_PUBLIC_* as runtime
+# accesses on the webpack process polyfill (module that sets process.env = {}).
+# The entrypoint.sh then patches that empty object with the container's env vars.
 RUN rm -f apps/web/.env apps/web/.env.local apps/web/.env.development.local apps/web/.env.production.local
 
 WORKDIR /app/apps/web
