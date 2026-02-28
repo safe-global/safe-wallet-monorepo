@@ -1,30 +1,62 @@
-FROM node:18-alpine
+# ==============================================================================
+# Stage 1: Build the static Next.js export
+# ==============================================================================
+FROM node:18-alpine AS builder
+
 RUN apk add --no-cache libc6-compat git python3 py3-pip make g++ libusb-dev eudev-dev linux-headers
 
-# Set working directory
 WORKDIR /app
 
-# Copy root
+# Copy entire monorepo (needed for workspace packages)
 COPY . .
 
-# Set working directory to the web app
-WORKDIR apps/web
+# Remove local .env files so NEXT_PUBLIC_* vars are NOT baked in at build time.
+# This ensures Next.js generates __NEXT_PUBLIC_*__ placeholders for all vars,
+# which the entrypoint.sh replaces with runtime values from the container's env.
+RUN rm -f apps/web/.env apps/web/.env.local apps/web/.env.development.local apps/web/.env.production.local
 
-# Enable corepack and configure yarn
+WORKDIR /app/apps/web
+
+# Enable corepack and install dependencies
 RUN corepack enable
 RUN yarn config set httpTimeout 300000
-
-# Run any custom post-install scripts
 RUN yarn install --immutable
 RUN yarn after-install
 
-# Set environment variables
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
+# Set production environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Expose the port
-EXPOSE 3000
+# ---------------------------------------------------------------------------
+# Skip the build-time chain pre-fetch so the image is gateway-agnostic.
+# Chains are fetched at runtime from the injected NEXT_PUBLIC_GATEWAY_URL_*.
+# Override with SKIP_FETCH_CHAINS=false and BUILD_GATEWAY_URL to pre-fetch.
+# ---------------------------------------------------------------------------
+ARG SKIP_FETCH_CHAINS=true
+ENV SKIP_FETCH_CHAINS=${SKIP_FETCH_CHAINS}
 
-# Command to start the application
-CMD ["yarn", "static-serve"]
+ARG BUILD_GATEWAY_URL=https://safe-client.safe.global
+ENV BUILD_GATEWAY_URL=${BUILD_GATEWAY_URL}
+
+# Build the static export (outputs to ./out/)
+RUN yarn build
+
+
+# ==============================================================================
+# Stage 2: Serve static files with nginx
+# ==============================================================================
+FROM nginx:alpine
+
+# Copy static build output
+COPY --from=builder /app/apps/web/out /usr/share/nginx/html
+
+# Copy nginx server config (replaces the default server block)
+COPY --from=builder /app/apps/web/scripts/docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy runtime environment variable injection entrypoint
+COPY --from=builder /app/apps/web/scripts/docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]

@@ -4,17 +4,22 @@ import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 type Environment = 'development' | 'production' | 'test' | 'cypress'
 
 export const APP_ENV = process.env.NODE_ENV as Environment
-export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
+
+// Export the raw string so Terser cannot constant-fold the === 'true' comparison.
+// The placeholder __NEXT_PUBLIC_XXXXXXX__ must survive in the bundle for
+// runtime sed injection to work (see apps/web/scripts/docker/entrypoint.sh).
+export const IS_PRODUCTION_STR = process.env.NEXT_PUBLIC_IS_PRODUCTION || ''
+export const IS_PRODUCTION = IS_PRODUCTION_STR === 'true'
 export const IS_DEV = APP_ENV === 'development'
 export const IS_TEST_E2E = APP_ENV === 'cypress'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
 
-// default chain ID's as provided to the environment
-export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains.sep)
-export const DEFAULT_MAINNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID ?? chains.eth)
-
 // default chain ID used in the application
-export const DEFAULT_CHAIN_ID = IS_PRODUCTION ? DEFAULT_MAINNET_CHAIN_ID : DEFAULT_TESTNET_CHAIN_ID
+export const DEFAULT_MAINNET_CHAIN_ID_STR = process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID || chains.eth
+export const DEFAULT_TESTNET_CHAIN_ID_STR = process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID || chains.sep
+export const DEFAULT_CHAIN_ID = IS_PRODUCTION
+  ? parseInt(DEFAULT_MAINNET_CHAIN_ID_STR, 10)
+  : parseInt(DEFAULT_TESTNET_CHAIN_ID_STR, 10)
 
 export const GATEWAY_URL_PRODUCTION =
   process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'

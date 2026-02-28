@@ -10,6 +10,18 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+// SKIP_FETCH_CHAINS skips the network fetch and writes an empty cache.
+// Use this for Docker builds where the gateway URL is only known at runtime —
+// the app will fetch chains dynamically from the injected gateway URL on first load.
+if (process.env.SKIP_FETCH_CHAINS === 'true') {
+  const outputDir = new URL('../src/config/__generated__/', import.meta.url).pathname
+  const outputFile = outputDir + 'chains.json'
+  fs.mkdirSync(outputDir, { recursive: true })
+  fs.writeFileSync(outputFile, '[]')
+  console.log('Skipping fetch-chains (SKIP_FETCH_CHAINS=true). Chains will be fetched at runtime.')
+  process.exit(0)
+}
+
 const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 const GATEWAY_URL_PRODUCTION = process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
