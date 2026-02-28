@@ -65,7 +65,7 @@ const createStoreWithChains = async (overrides?: Partial<RootState>): Promise<Te
     ...overrides,
   })
 
-  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE'))
 
   return store
 }

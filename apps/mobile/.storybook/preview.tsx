@@ -53,7 +53,7 @@ const createStorybookStore = () => {
       },
       [cgwClient.reducerPath]: {
         queries: {
-          'getChainsConfig(undefined)': {
+          'getChainsConfigV2("MOBILE")': {
             status: 'fulfilled',
             data: mockChainsState,
           },

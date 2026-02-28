@@ -13,7 +13,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('passes state through unchanged', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending', data: null },
+          'getChainsConfigV2("MOBILE")': { status: 'pending', data: null },
         },
         config: { online: true },
       }
@@ -28,7 +28,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('removes queries with pending status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending', startedTimeStamp: 123 },
+          'getChainsConfigV2("MOBILE")': { status: 'pending', startedTimeStamp: 123 },
         },
         config: { online: true },
       }
@@ -44,7 +44,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('preserves queries with fulfilled status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'fulfilled', data: { chains: [] } },
+          'getChainsConfigV2("MOBILE")': { status: 'fulfilled', data: { chains: [] } },
         },
         config: { online: true },
       }
@@ -57,7 +57,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('preserves queries with rejected status', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'rejected', error: 'Network error' },
+          'getChainsConfigV2("MOBILE")': { status: 'rejected', error: 'Network error' },
         },
       }
 
@@ -69,7 +69,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('filters only pending queries when mixed statuses exist', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': { status: 'pending' },
+          'getChainsConfigV2("MOBILE")': { status: 'pending' },
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
           'getSafeInfo("0x456")': { status: 'rejected', error: 'Error' },
         },
@@ -110,7 +110,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('handles queries with undefined entries', () => {
       const state = {
         queries: {
-          'getChainsConfig(undefined)': undefined,
+          'getChainsConfigV2("MOBILE")': undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       }
@@ -119,7 +119,7 @@ describe('sanitizePendingQueriesTransform', () => {
 
       expect(result).toEqual({
         queries: {
-          'getChainsConfig(undefined)': undefined,
+          'getChainsConfigV2("MOBILE")': undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       })

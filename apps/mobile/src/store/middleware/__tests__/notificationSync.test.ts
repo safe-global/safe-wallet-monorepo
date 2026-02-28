@@ -133,10 +133,10 @@ describe('notificationSyncMiddleware', () => {
       })
     })
 
-    it('should sync when real getChainsConfig fulfilled action is dispatched', async () => {
+    it('should sync when real getChainsConfigV2 fulfilled action is dispatched', async () => {
       // Mock the chains endpoint to return test data
       server.use(
-        http.get(`${TEST_GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${TEST_GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({
             count: 1,
             next: null,
@@ -184,23 +184,23 @@ describe('notificationSyncMiddleware', () => {
       )
 
       // Dispatch the real RTK Query thunk
-      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate() as unknown as Action)
+      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action)
 
       // The middleware should have been triggered by the fulfilled action
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
     })
 
-    it('should NOT sync when getChainsConfig fails', async () => {
+    it('should NOT sync when getChainsConfigV2 fails', async () => {
       // Mock the chains endpoint to return an error
       server.use(
-        http.get(`${TEST_GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${TEST_GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 })
         }),
       )
 
       // Dispatch the real RTK Query thunk
       const promise = testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate() as unknown as Action,
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
       )
 
       // Advance through all retry delays (5 retries with exponential backoff)
@@ -298,7 +298,7 @@ describe('notificationSyncMiddleware', () => {
     it('should process multiple relevant actions independently', async () => {
       // Mock a successful chains response for this test
       server.use(
-        http.get(`${TEST_GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${TEST_GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({
             count: 1,
             next: null,
@@ -326,7 +326,7 @@ describe('notificationSyncMiddleware', () => {
       testStore.dispatch(addressBookSlice.actions.removeContact('0x456'))
 
       // Dispatch RTK Query action
-      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate() as unknown as Action)
+      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action)
 
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(3)
     })

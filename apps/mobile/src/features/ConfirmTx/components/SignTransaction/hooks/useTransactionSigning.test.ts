@@ -105,7 +105,7 @@ const createMockState = (overrides?: Partial<RootState>): Partial<RootState> => 
     // Mock the cgwClient API slice state structure
     api: {
       queries: {
-        'getChainsConfig(undefined)': {
+        'getChainsConfigV2("MOBILE")': {
           status: 'fulfilled' as const,
           data: {
             results: [mockChain],

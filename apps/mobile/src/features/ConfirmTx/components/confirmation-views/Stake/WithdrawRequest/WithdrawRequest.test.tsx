@@ -73,7 +73,7 @@ describe('StakingWithdrawRequest', () => {
       },
     })
 
-    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE'))
   })
 
   it('renders correctly with withdraw request information', () => {

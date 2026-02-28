@@ -65,7 +65,7 @@ describe('Staking Utils', () => {
       },
     })
 
-    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE'))
   })
   describe('formatStakingDepositItems', () => {
     it('formats deposit information correctly with minimal txData', () => {
