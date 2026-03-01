@@ -17,9 +17,8 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import useNotificationsPopover from './hooks/useNotificationsPopover'
+import useNotificationsPopover, { NOTIFICATION_CENTER_LIMIT } from './hooks/useNotificationsPopover'
 
-const NOTIFICATION_CENTER_LIMIT = 4
 
 export type NotificationsPopoverRef = {
   handleClick: (event: MouseEvent<HTMLButtonElement>) => void
@@ -69,7 +68,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
       <Paper className={notificationCss.popoverContainer}>
         <div className={notificationCss.popoverHeader}>
           <div>
-            <Typography variant="h4" component="span" fontWeight={700}>
+            <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
               Notifications
             </Typography>
             {unreadCount > 0 && (
@@ -112,7 +111,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
 
           {hasPushNotifications && (
             <Link href={{ pathname: AppRoutes.settings.notifications, query: router.query }} passHref legacyBehavior>
-              <MuiLink className={notificationCss.settingsLink} variant="body2" onClick={onSettingsClick}>
+              <MuiLink data-testid="notifications-button" className={notificationCss.settingsLink} variant="body2" onClick={onSettingsClick}>
                 <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
               </MuiLink>
             </Link>

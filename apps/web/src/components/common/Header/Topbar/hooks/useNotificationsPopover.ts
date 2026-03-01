@@ -8,10 +8,12 @@ import {
   deleteAllNotifications,
 } from '@/store/notificationsSlice'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { useShowNotificationsRenewalMessage } from '@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage'
 
-const NOTIFICATION_CENTER_LIMIT = 4
+export const NOTIFICATION_CENTER_LIMIT = 4
 
 const useNotificationsPopover = () => {
+  useShowNotificationsRenewalMessage()
   const dispatch = useAppDispatch()
   const notifications = useAppSelector(selectNotifications)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
