@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import { Search, Bell, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
@@ -23,11 +24,11 @@ export interface HeaderNavigationProps {
   /**
    * Callback when notifications button is clicked
    */
-  onNotificationsClick?: () => void
+  onNotificationsClick?: (event: MouseEvent<HTMLButtonElement>) => void
   /**
    * Callback when wallet button is clicked
    */
-  onWalletClick?: () => void
+  onWalletClick?: (event: MouseEvent<HTMLButtonElement>) => void
 }
 
 /**
@@ -35,7 +36,7 @@ export interface HeaderNavigationProps {
  * for search, notifications, and wallet address.
  */
 export function HeaderNavigation({
-  walletAddress: walletAddress,
+  walletAddress,
   messages = 0,
   showSearch = false,
   onSearchClick,
@@ -46,7 +47,7 @@ export function HeaderNavigation({
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
 
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-[16px] bg-background p-[3px]')}>
+    <div className={cn('flex items-center gap-1.5 rounded-sm bg-background p-[3px]')}>
       {showSearch && (
         <Button
           variant="secondary"
@@ -62,12 +63,12 @@ export function HeaderNavigation({
       <div className="relative">
         <Button
           variant="secondary"
-          size="icon-sm"
+          size="icon-lg"
           onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0"
+          className="cursor-pointer shrink-0 rounded-sm"
           aria-label="Notifications"
         >
-          <Bell className="size-5" />
+          <Bell className="size-5 text-muted-foreground" />
         </Button>
 
         {messages > 0 && (
@@ -80,12 +81,12 @@ export function HeaderNavigation({
 
       <Button
         variant="secondary"
-        size="default"
+        size="lg"
         onClick={onWalletClick}
-        className="cursor-pointer gap-1.5 shrink-0 h-9"
+        className="cursor-pointer gap-1.5 shrink-0 rounded-sm "
         aria-label={`Wallet ${truncatedAddress}`}
       >
-        <Wallet className="size-5" />
+        <Wallet className="size-5 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
       </Button>
     </div>

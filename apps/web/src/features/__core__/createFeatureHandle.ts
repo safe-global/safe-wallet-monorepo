@@ -15,6 +15,7 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   portfolio: FEATURES.PORTFOLIO_ENDPOINT,
   'targeted-outreach': FEATURES.TARGETED_SURVEY,
   myAccounts: FEATURES.MY_ACCOUNTS,
+  wallet: FEATURES.SPACES,
 }
 
 /**

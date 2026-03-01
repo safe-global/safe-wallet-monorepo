@@ -2,7 +2,7 @@ import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
 
-import Header from '@/components/common/Header'
+import Topbar from '@/components/common/Header/Topbar'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
 import Footer from '../Footer'
@@ -10,7 +10,6 @@ import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
-import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { AppRoutes } from '@/config/routes'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
@@ -52,11 +51,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && (
-        <header className={css.header}>
-          <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-        </header>
-      )}
+      {!hideHeader && <Topbar />}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
@@ -69,7 +64,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {!hideHeader && <Breadcrumbs />}
+            {/* Disabled breadcrumbs for now */}
+            {/* {!hideHeader && <Breadcrumbs />}  */}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div
