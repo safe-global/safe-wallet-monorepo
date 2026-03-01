@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../variants/SpacesSidebarVariant'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from '../types'
 
-// Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -25,14 +24,12 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-// Mock Next.js Link component
 jest.mock('next/link', () => {
   const Link = ({ children, href }: any) => <a href={href}>{children}</a>
   Link.displayName = 'Link'
   return Link
 })
 
-// Mock SpaceSelectorDropdown
 jest.mock('../variants/SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ selectedSpace, spaces }: any) => (
     <div>
@@ -97,7 +94,7 @@ describe('SpacesSidebarVariant', () => {
     ],
   }
 
-  it('renders space selector dropdown', () => {
+  it('passes selectedSpace and spaces to the space selector dropdown', () => {
     render(
       <SpacesSidebarVariant
         mainNavItems={mockMainNavItems}
@@ -107,7 +104,7 @@ describe('SpacesSidebarVariant', () => {
       />,
     )
 
-    expect(screen.getByText(/Selected:/)).toBeInTheDocument()
+    expect(screen.getByText('Selected: Test Space | Spaces: 2')).toBeInTheDocument()
   })
 
   it('renders all navigation items with labels', () => {
@@ -142,7 +139,7 @@ describe('SpacesSidebarVariant', () => {
   })
 
   it('disables items marked as disabled', () => {
-    const { container } = render(
+    render(
       <SpacesSidebarVariant
         mainNavItems={mockMainNavItems}
         setupGroup={mockSetupGroup}
@@ -151,8 +148,6 @@ describe('SpacesSidebarVariant', () => {
       />,
     )
 
-    const buttons = container.querySelectorAll('button')
-    const securityButton = Array.from(buttons).find((btn) => btn.textContent?.includes('Security'))
-    expect(securityButton).toHaveAttribute('disabled')
+    expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
   })
 })

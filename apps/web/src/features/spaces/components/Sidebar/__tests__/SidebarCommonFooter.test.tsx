@@ -63,8 +63,11 @@ jest.mock('@/components/ui/field', () => ({
   ),
 }))
 
+let isProductionMock = true
 jest.mock('@/config/constants', () => ({
-  IS_PRODUCTION: true,
+  get IS_PRODUCTION() {
+    return isProductionMock
+  },
 }))
 
 // Mock icons
@@ -77,6 +80,7 @@ jest.mock('../config', () => ({
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    isProductionMock = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
     mockUseLocalStorage.mockReturnValue([false, jest.fn()])
@@ -105,5 +109,23 @@ describe('SidebarCommonFooter', () => {
 
     expect(screen.queryByText('Dark mode')).not.toBeInTheDocument()
     expect(screen.queryByText('Use prod CGW')).not.toBeInTheDocument()
+  })
+
+  describe('dev mode (IS_PRODUCTION = false)', () => {
+    beforeEach(() => {
+      isProductionMock = false
+    })
+
+    it('renders the Dark mode toggle', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByRole('checkbox', { name: /Dark mode/i })).toBeInTheDocument()
+    })
+
+    it('renders the Use prod CGW toggle', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.getByRole('checkbox', { name: /Use prod CGW/i })).toBeInTheDocument()
+    })
   })
 })

@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import { SpacesSidebarContent } from '../variants/SpacesSidebarContent'
 import type { SpaceItem } from '../types'
 
-// Mock hooks
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
@@ -19,7 +18,6 @@ jest.mock('../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-// Mock config
 jest.mock('../config', () => ({
   spacesMainNavigation: [
     {
@@ -51,7 +49,6 @@ jest.mock('../config', () => ({
   },
 }))
 
-// Mock SpacesSidebarVariant
 jest.mock('../variants/SpacesSidebarVariant', () => ({
   SpacesSidebarVariant: ({ mainNavItems, setupGroup }: any) => (
     <div>

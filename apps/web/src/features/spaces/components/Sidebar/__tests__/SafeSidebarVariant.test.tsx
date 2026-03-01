@@ -5,7 +5,6 @@ import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../ty
 
 const mockUseCurrentSpaceId = jest.fn()
 
-// Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: () => ({
     push: jest.fn(),
@@ -13,12 +12,10 @@ jest.mock('next/router', () => ({
   }),
 }))
 
-// Mock useCurrentSpaceId hook
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
-// Mock NavItem component
 jest.mock('../variants/NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
     <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
@@ -30,7 +27,6 @@ jest.mock('../variants/NavItem', () => ({
   ),
 }))
 
-// Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -45,13 +41,11 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-// Mock avatar components
 jest.mock('@/components/ui/avatar', () => ({
   Avatar: ({ children, className }: any) => <div className={className}>{children}</div>,
   AvatarFallback: ({ children, className }: any) => <div className={className}>{children}</div>,
 }))
 
-// Mock config
 jest.mock('../config', () => ({
   icons: {
     ChevronLeft: () => <div>ChevronLeft</div>,
