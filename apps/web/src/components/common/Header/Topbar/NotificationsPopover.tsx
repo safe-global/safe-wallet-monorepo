@@ -22,7 +22,6 @@ import useNotificationsPopover, { NOTIFICATION_CENTER_LIMIT } from './hooks/useN
 
 export type NotificationsPopoverRef = {
   handleClick: (event: MouseEvent<HTMLButtonElement>) => void
-  unreadCount: number
 }
 
 const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): ReactElement => {
@@ -45,7 +44,6 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
 
   useImperativeHandle(ref, () => ({
     handleClick,
-    unreadCount,
   }))
 
   const ExpandIcon = showAll ? ExpandLessIcon : ExpandMoreIcon
