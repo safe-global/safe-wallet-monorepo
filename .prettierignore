@@ -31,6 +31,9 @@ apps/web/src/config/__generated__/
 # Utils package
 packages/utils/src/types/contracts/**/*
 
+# Store package (auto-generated from CGW API)
+packages/store/scripts/api-schema/schema.json
+
 # Expo plugins
 expo-plugins/notification-service-ios/dist
 

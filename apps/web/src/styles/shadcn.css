@@ -1,21 +1,14 @@
-/**
- * shadcn/ui styles - ISOLATED for future migration
- *
- * These styles are NOT active in the main app yet.
- * They are only used for:
- * - Storybook stories in src/components/ui/stories/
- * - Future migration to shadcn design system
- *
- * DO NOT import this file in _app.tsx or globals.css
- */
+@import 'tailwindcss/theme.css';
+@import 'tailwindcss/utilities.css';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-/* Tailwind CSS base - scoped to .shadcn-scope */
-@import 'tailwindcss';
+@custom-variant dark (&:is(.dark *));
 
-/* shadcn light theme CSS variables */
-:root,
+@source '../components/ui';
+
+/* CSS variables scoped to .shadcn-scope ONLY — never :root */
 .shadcn-scope {
-  /* shadcn light theme - Synced from Figma */
   --background: #ffffff;
   --foreground: #0a0a0a;
   --card: #ffffff;
@@ -48,6 +41,8 @@
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #d4d4d4;
+  --z-sidebar: 9100;
+  --z-overlay: 9200;
 }
 
 /* shadcn dark theme CSS variables */
@@ -179,9 +174,132 @@ body[data-theme='dark'],
   /* Figma: rounded-full, radius-infinite */
 }
 
-/* shadcn base styles - scoped to .shadcn-scope */
+/*
+ * Scoped Tailwind Preflight
+ *
+ * Since we can't import tailwindcss/preflight.css globally (it would break MUI),
+ * we scope the relevant subset of preflight resets to .shadcn-scope.
+ * Derived from: node_modules/tailwindcss/preflight.css
+ *
+ * Intentionally omitted (document-level, handled by MUI CssBaseline):
+ *   - html/:host line-height, font-family, tap-highlight
+ *   - [hidden] display:none
+ */
 @layer base {
+  /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
+  .shadcn-scope,
+  .shadcn-scope *,
+  .shadcn-scope ::before,
+  .shadcn-scope ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border, currentColor);
+  }
+
   .shadcn-scope * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
+  }
+
+  /* Heading reset — shadcn uses h-tags in accordions, dialogs, sheets, etc. */
+  .shadcn-scope h1,
+  .shadcn-scope h2,
+  .shadcn-scope h3,
+  .shadcn-scope h4,
+  .shadcn-scope h5,
+  .shadcn-scope h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  /* Link reset */
+  .shadcn-scope a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  /* List reset */
+  .shadcn-scope ol,
+  .shadcn-scope ul,
+  .shadcn-scope menu {
+    list-style: none;
+  }
+
+  /* Replaced elements: block display + vertical alignment */
+  .shadcn-scope img,
+  .shadcn-scope svg,
+  .shadcn-scope video,
+  .shadcn-scope canvas,
+  .shadcn-scope audio,
+  .shadcn-scope iframe,
+  .shadcn-scope embed,
+  .shadcn-scope object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .shadcn-scope img,
+  .shadcn-scope video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Form element reset — fixes browser user-agent button/input defaults */
+  .shadcn-scope button,
+  .shadcn-scope input,
+  .shadcn-scope select,
+  .shadcn-scope optgroup,
+  .shadcn-scope textarea {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+
+  /* Button appearance fix for iOS Safari */
+  .shadcn-scope button,
+  .shadcn-scope input:where([type='button'], [type='reset'], [type='submit']) {
+    appearance: button;
+  }
+
+  /* Textarea resize */
+  .shadcn-scope textarea {
+    resize: vertical;
+  }
+
+  /* Placeholder styling */
+  .shadcn-scope ::placeholder {
+    opacity: 1;
+  }
+
+  @supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px) {
+    .shadcn-scope ::placeholder {
+      color: color-mix(in oklab, currentcolor 50%, transparent);
+    }
+  }
+
+  /* Table reset */
+  .shadcn-scope table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  /* HR reset */
+  .shadcn-scope hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  /* Summary display */
+  .shadcn-scope summary {
+    display: list-item;
   }
 }

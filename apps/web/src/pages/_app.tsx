@@ -14,6 +14,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
+import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
@@ -91,6 +92,7 @@ import { AddressBookSourceProvider } from '@/components/common/AddressBookSource
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -141,15 +143,17 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   }
 
   const content = (
-    <WalletProvider>
-      <GeoblockingProvider>
-        <TxModalProvider>
-          <AddressBookSourceProvider>
-            <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
-          </AddressBookSourceProvider>
-        </TxModalProvider>
-      </GeoblockingProvider>
-    </WalletProvider>
+    <ShadcnProvider dark={isDarkMode}>
+      <WalletProvider>
+        <GeoblockingProvider>
+          <TxModalProvider>
+            <AddressBookSourceProvider>
+              <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+            </AddressBookSourceProvider>
+          </TxModalProvider>
+        </GeoblockingProvider>
+      </WalletProvider>
+    </ShadcnProvider>
   )
 
   return (
