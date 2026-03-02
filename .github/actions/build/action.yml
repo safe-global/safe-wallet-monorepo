@@ -28,11 +28,13 @@ runs:
       run: |
         # Auto-export all NEXT_PUBLIC_* secrets.
         # New secrets with this prefix are picked up automatically.
+        # Uses heredoc delimiters to safely handle multi-line values
+        # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
         echo "$SECRETS_JSON" | jq -r '
           to_entries[]
           | select(.key | startswith("NEXT_PUBLIC_"))
           | select(.value != null and .value != "")
-          | "\(.key)=\(.value)"
+          | "\(.key)<<__EOF__\n\(.value)\n__EOF__"
         ' >> "$GITHUB_ENV"
 
     - name: Set environment variables
