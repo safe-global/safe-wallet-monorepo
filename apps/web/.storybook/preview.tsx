@@ -60,7 +60,7 @@ const ThemeSyncDecorator = (
   )
 }
 
-const isShadcnStory = (title: string | undefined) => title?.startsWith('UI/')
+const isShadcnStory = (title: string | undefined) => title?.startsWith('UI/') || title?.startsWith('Features/Spaces/')
 
 /** Safe{Wallet} viewport presets for responsive testing */
 const SAFE_VIEWPORTS = {
