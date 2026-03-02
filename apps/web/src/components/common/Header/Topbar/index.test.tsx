@@ -39,8 +39,6 @@ jest.mock(
     },
 )
 
-const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
-
 const createNotification = (overrides: Partial<Notification> = {}): Notification => ({
   id: Math.random().toString(32).slice(2),
   message: 'Test notification',
@@ -52,12 +50,12 @@ const createNotification = (overrides: Partial<Notification> = {}): Notification
   ...overrides,
 })
 
+const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
+
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseLoadFeature.mockReturnValue({
-      $isDisabled: true,
-      $isReady: false,
       WalletPopover: () => null,
     })
   })
