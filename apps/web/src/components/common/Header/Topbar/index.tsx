@@ -5,9 +5,15 @@ import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
+import { getTopbarVariant, type TopbarVariantType } from './variants'
 
 const Topbar = (): ReactElement => {
+  const isSpaceRoute = useIsSpaceRoute()
+  const topbarType: TopbarVariantType = isSpaceRoute ? 'spaces' : 'safe'
+  const LeftContent = getTopbarVariant(topbarType)
+
   const {
     wallet,
     open: walletOpen,
@@ -22,13 +28,17 @@ const Topbar = (): ReactElement => {
 
   return (
     <>
-      <header className="flex items-center p-6  pb-0 justify-end bg-secondary">
-        <HeaderNavigation
-          walletAddress={wallet?.address ?? ''}
-          messages={unreadCount}
-          onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
-          onWalletClick={handleWalletClick}
-        />
+      <header className="flex items-center p-6 pb-0 justify-between bg-secondary flex-wrap gap-y-4">
+        <LeftContent />
+        <div className="ml-auto">
+          <HeaderNavigation
+            walletAddress={wallet?.address ?? ''}
+            messages={unreadCount}
+            onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
+            onWalletClick={handleWalletClick}
+
+          />
+        </div>
       </header>
 
       <NotificationsPopover ref={notificationsRef} />

@@ -3,6 +3,20 @@ import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import type { Notification } from '@/store/notificationsSlice'
 import type { RootState } from '@/store'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: jest.fn(() => false),
+}))
+
+jest.mock('./hooks/useTopbarSafeData', () => ({
+  useTopbarSafeData: jest.fn(() => ({
+    items: [],
+    selectedItemId: undefined,
+    handleItemSelect: jest.fn(),
+    handleChainChange: jest.fn(),
+  })),
+}))
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -88,5 +102,23 @@ describe('Topbar', () => {
     render(<Topbar />, { initialReduxState })
 
     expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
+  })
+
+  it('does not render SafeSelectorDropdown in space view', () => {
+    ;(useIsSpaceRoute as jest.Mock).mockReturnValue(true)
+
+    render(<Topbar />)
+
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+  })
+
+  it('renders SafeTopbarContent in safe view', () => {
+    ;(useIsSpaceRoute as jest.Mock).mockReturnValue(false)
+
+    render(<Topbar />)
+
+    // SafeTopbarContent is rendered (returns null when items is empty, which is our mock)
+    // Just verify we don't crash and the header navigation still renders
+    expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
   })
 })

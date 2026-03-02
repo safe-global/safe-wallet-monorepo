@@ -51,8 +51,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && <Topbar />}
-
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
       <div
@@ -62,6 +60,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainNoHeader]: hideHeader,
         })}
       >
+        {!hideHeader && <Topbar />}
         <div className={css.content}>
           <SafeLoadingError>
             {/* Disabled breadcrumbs for now */}
