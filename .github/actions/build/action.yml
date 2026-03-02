@@ -35,12 +35,6 @@ runs:
           | "\(.key)=\(.value)"
         ' >> "$GITHUB_ENV"
 
-        # Remap: secret name differs from env var name the app expects
-        RELAY_PROD=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_SAFE_GELATO_RELAY_SERVICE_URL_PRODUCTION // empty')
-        RELAY_STAGING=$(echo "$SECRETS_JSON" | jq -r '.NEXT_PUBLIC_SAFE_GELATO_RELAY_SERVICE_URL_STAGING // empty')
-        [ -n "$RELAY_PROD" ] && echo "NEXT_PUBLIC_SAFE_RELAY_SERVICE_URL_PRODUCTION=$RELAY_PROD" >> "$GITHUB_ENV"
-        [ -n "$RELAY_STAGING" ] && echo "NEXT_PUBLIC_SAFE_RELAY_SERVICE_URL_STAGING=$RELAY_STAGING" >> "$GITHUB_ENV"
-
     - name: Set environment variables
       shell: bash
       run: |
