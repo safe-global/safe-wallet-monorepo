@@ -34,13 +34,14 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
   const handleSubmit = useCallback(async () => {
     if (!isFormValid) return
 
+    trackEvent(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
+
     const success = await reportFalseResult({
       request_id: requestId,
       details: details.trim(),
     })
 
     if (success) {
-      trackEvent(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
       onClose()
     }
   }, [isFormValid, requestId, details, reportFalseResult, onClose])

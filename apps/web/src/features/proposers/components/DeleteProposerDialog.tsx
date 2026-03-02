@@ -45,8 +45,8 @@ import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type DeleteProposerProps = {
@@ -64,11 +64,19 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   const [deleteDelegateV1] = useDelegatesDeleteDelegateV1Mutation()
   const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
   const dispatch = useAppDispatch()
-  const isNestedSafeOwner = useIsNestedSafeOwner()
   const nestedSafeOwners = useNestedSafeOwners()
-  const { threshold: parentThreshold, owners: parentOwners } = useParentSafeThreshold()
 
-  const isMultiSigRequired = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
+  // For delete, the delegator is always the original creator (proposer.delegator).
+  // Determine if it's a nested Safe to decide the signing path.
+  const isNestedDelegator = nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false
+  const parentSafeAddress = isNestedDelegator ? proposer.delegator : undefined
+  const {
+    threshold: parentThreshold,
+    owners: parentOwners,
+    isLoading: isParentLoading,
+  } = useParentSafeThreshold(parentSafeAddress)
+
+  const isMultiSigRequired = isNestedDelegator && parentThreshold !== undefined && parentThreshold > 1
 
   const onConfirm = async () => {
     setError(undefined)
@@ -83,7 +91,6 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
     try {
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
-      const parentSafeAddress = isNestedSafeOwner && nestedSafeOwners ? nestedSafeOwners[0] : undefined
 
       if (parentSafeAddress && isMultiSigRequired) {
         // Multi-sig flow: create off-chain message on parent Safe for signature collection
@@ -171,9 +178,9 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   }
 
   const canDelete =
-    wallet?.address === proposer.delegate ||
-    wallet?.address === proposer.delegator ||
-    (isNestedSafeOwner && nestedSafeOwners?.includes(proposer.delegator))
+    sameAddress(wallet?.address, proposer.delegate) ||
+    sameAddress(wallet?.address, proposer.delegator) ||
+    (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false)
 
   return (
     <>
@@ -289,7 +296,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
                     size="small"
                     variant="danger"
                     onClick={onConfirm}
-                    disabled={!isOk || isLoading || !canDelete}
+                    disabled={!isOk || isLoading || isParentLoading || !canDelete}
                     sx={{
                       minWidth: '122px',
                       minHeight: '36px',

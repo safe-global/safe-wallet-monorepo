@@ -1,7 +1,7 @@
 import ImportIcon from '@/public/images/common/import.svg'
 import { Button } from '@mui/material'
 import { useState } from 'react'
-import ImportAddressBookDialog from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
+import ImportAddressBookDialog from './ImportAddressBookDialog'
 
 const ImportAddressBook = () => {
   const [open, setOpen] = useState(false)

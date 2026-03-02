@@ -1,10 +1,5 @@
 import { cgwClient } from '../cgwClient'
-import {
-  SafesGetSafeOverviewV1ApiArg,
-  SafesGetSafeOverviewV1ApiResponse,
-  SafesGetSafeOverviewV2ApiArg,
-  SafesGetSafeOverviewV2ApiResponse,
-} from '../AUTO_GENERATED/safes'
+import { SafesGetSafeOverviewV2ApiArg, SafesGetSafeOverviewV2ApiResponse } from '../AUTO_GENERATED/safes'
 import { addTagTypes } from '../AUTO_GENERATED/safes'
 
 function chunkArray<T>(array: T[], size: number): T[][] {
@@ -17,7 +12,6 @@ function chunkArray<T>(array: T[], size: number): T[][] {
 
 const MAX_SAFES_PER_REQUEST = 10
 
-// V1 endpoint (default - used by mobile)
 export const additionalSafesRtkApi = cgwClient
   .enhanceEndpoints({
     addTagTypes,
@@ -25,60 +19,6 @@ export const additionalSafesRtkApi = cgwClient
   .injectEndpoints({
     endpoints: (build) => ({
       safesGetOverviewForMany: build.query<
-        SafesGetSafeOverviewV1ApiResponse,
-        Omit<SafesGetSafeOverviewV1ApiArg, 'safes'> & { safes: string[] }
-      >({
-        async queryFn(args, _api, _extraOptions, fetchWithBaseQuery) {
-          const { safes, currency, trusted, excludeSpam, walletAddress } = args
-          const chunkedSafes = chunkArray(safes, MAX_SAFES_PER_REQUEST)
-
-          let combinedData: SafesGetSafeOverviewV1ApiResponse = []
-
-          // Fetch each chunk
-          for (const chunk of chunkedSafes) {
-            const chunkArg: SafesGetSafeOverviewV1ApiArg = {
-              currency,
-              safes: chunk.join(','), // convert the chunk back to comma-separated
-              trusted,
-              excludeSpam,
-              walletAddress,
-            }
-
-            // Call the v1 endpoint
-            const result = await fetchWithBaseQuery({
-              url: '/v1/safes',
-              params: {
-                currency: chunkArg.currency,
-                safes: chunkArg.safes,
-                trusted: chunkArg.trusted,
-                exclude_spam: chunkArg.excludeSpam,
-                wallet_address: chunkArg.walletAddress,
-              },
-            })
-
-            if (result.error) {
-              return { error: result.error }
-            }
-
-            combinedData = combinedData.concat(result.data as SafesGetSafeOverviewV1ApiResponse)
-          }
-
-          return { data: combinedData }
-        },
-        providesTags: ['safes'],
-      }),
-    }),
-    overrideExisting: true,
-  })
-
-// V2 endpoint (used by web app when PORTFOLIO_ENDPOINT feature flag is enabled)
-export const additionalSafesRtkApiV2 = cgwClient
-  .enhanceEndpoints({
-    addTagTypes,
-  })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      safesGetOverviewForManyV2: build.query<
         SafesGetSafeOverviewV2ApiResponse,
         Omit<SafesGetSafeOverviewV2ApiArg, 'safes'> & { safes: string[] }
       >({
@@ -88,16 +28,14 @@ export const additionalSafesRtkApiV2 = cgwClient
 
           let combinedData: SafesGetSafeOverviewV2ApiResponse = []
 
-          // Fetch each chunk
           for (const chunk of chunkedSafes) {
             const chunkArg: SafesGetSafeOverviewV2ApiArg = {
               currency,
-              safes: chunk.join(','), // convert the chunk back to comma-separated
+              safes: chunk.join(','),
               trusted,
               walletAddress,
             }
 
-            // Call the v2 endpoint
             const result = await fetchWithBaseQuery({
               url: '/v2/safes',
               params: {
@@ -124,4 +62,3 @@ export const additionalSafesRtkApiV2 = cgwClient
   })
 
 export const { useSafesGetOverviewForManyQuery, useLazySafesGetOverviewForManyQuery } = additionalSafesRtkApi
-export const { useSafesGetOverviewForManyV2Query, useLazySafesGetOverviewForManyV2Query } = additionalSafesRtkApiV2

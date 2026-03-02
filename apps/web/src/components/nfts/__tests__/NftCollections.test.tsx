@@ -15,9 +15,11 @@ jest.mock('@/services/observability', () => ({
   captureException: jest.fn(),
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,

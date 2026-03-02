@@ -179,7 +179,7 @@ const ExplorePossibleWidget = () => {
   }
 
   return (
-    <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
+    <Card sx={{ px: 3, pt: 2.5, pb: 1.5 }} component="section">
       <div style={{ position: 'relative' }}>
         {/* Gradient fade on the right */}
         <div

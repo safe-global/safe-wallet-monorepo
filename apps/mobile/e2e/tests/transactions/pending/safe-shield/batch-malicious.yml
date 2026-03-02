@@ -70,7 +70,7 @@ tags:
       TAP_TO_OPEN: 'Risk detected'
       HEADER: 'RISK DETECTED'
       LABEL_1: 'Unverified contract'
-      DESCRIPTION_1: '.*contract is not verified.*'
+      DESCRIPTION_1: '.*contracts are not verified yet.*'
       EXPAND_SHOW_ALL: 'true'
       EXPANDED_ADDRESS: '.*0xA0b86991.*'
       LABEL_2: 'Malicious threat detected'
