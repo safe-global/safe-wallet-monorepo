@@ -4,6 +4,10 @@ import lt from 'semver/functions/lt'
 import valid from 'semver/functions/valid'
 import { remoteConfigService } from '@/src/services/remoteConfig/remoteConfigService'
 
+function isValidVersion(version: string | null): version is string {
+  return version !== null && valid(version) !== null
+}
+
 interface UpdateCheckResult {
   requiresForceUpdate: boolean
   recommendsUpdate: boolean
@@ -30,14 +34,14 @@ export function useAppUpdateCheck(): UpdateCheckResult {
         const minRequired = remoteConfigService.getPlatformString('min_required_version')
         const recommended = remoteConfigService.getPlatformString('recommended_version')
 
-        if (!valid(appVersion) || !valid(minRequired) || !appVersion) {
+        if (!isValidVersion(appVersion) || !isValidVersion(minRequired)) {
           return
         }
 
         const needsForce = lt(appVersion, minRequired)
         setRequiresForceUpdate(needsForce)
 
-        if (!needsForce && valid(recommended)) {
+        if (!needsForce && isValidVersion(recommended)) {
           setRecommendsUpdate(lt(appVersion, recommended))
         }
       } catch {
