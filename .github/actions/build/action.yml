@@ -42,7 +42,7 @@ runs:
         if [ -n "$EXPORTED" ]; then
           echo "$EXPORTED" >> "$GITHUB_ENV"
           # Log exported key names (values masked)
-          echo "$EXPORTED" | grep -oP '^[A-Z_]+(?=<<)' | while read -r key; do
+          echo "$EXPORTED" | grep -oP '^[A-Z0-9_]+(?=<<)' | while read -r key; do
             echo "  Exported: $key"
           done
         else
