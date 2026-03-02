@@ -1,6 +1,9 @@
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
+import type { RecoveryQueueItem } from '@/features/recovery'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { isExecutable, isSignableBy } from '@/utils/transaction-guards'
 
 const MAX_DECIMALS = 4
 
@@ -41,21 +44,44 @@ export function getTxLabel(tx: TransactionQueuedItem): string {
   return formatAmountsInLabel(label, MAX_DECIMALS)
 }
 
-/**
- * Splits the tx label into a first line (type, e.g. "Send") and rest (e.g. amount + recipient).
- */
-export function getTxLabelParts(tx: TransactionQueuedItem): { primary: string; secondary: string } {
-  const full = getTxLabel(tx)
-  const spaceIndex = full.indexOf(' ')
-  if (spaceIndex === -1) {
-    return { primary: full, secondary: '' }
-  }
-  return {
-    primary: full.slice(0, spaceIndex),
-    secondary: full.slice(spaceIndex + 1).trim(),
-  }
-}
-
 export function formatTxDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+export function getActionableTransactions(
+  txs: TransactionQueuedItem[],
+  safe: SafeState,
+  walletAddress?: string,
+): TransactionQueuedItem[] {
+  if (!walletAddress) {
+    return txs
+  }
+
+  return txs.filter((tx) => {
+    return isSignableBy(tx.transaction, walletAddress) || isExecutable(tx.transaction, walletAddress, safe)
+  })
+}
+
+export function _getTransactionsToDisplay({
+  recoveryQueue,
+  queue,
+  walletAddress,
+  safe,
+  maxTxs = 3,
+}: {
+  recoveryQueue: RecoveryQueueItem[]
+  queue: TransactionQueuedItem[]
+  walletAddress?: string
+  safe: SafeState
+  maxTxs?: number
+}): [RecoveryQueueItem[], TransactionQueuedItem[]] {
+  if (recoveryQueue.length >= maxTxs) {
+    return [recoveryQueue.slice(0, maxTxs), []]
+  }
+
+  const actionableQueue = getActionableTransactions(queue, safe, walletAddress)
+  const _queue = actionableQueue.length > 0 ? actionableQueue : queue
+  const queueToDisplay = _queue.slice(0, maxTxs - recoveryQueue.length)
+
+  return [recoveryQueue, queueToDisplay]
 }
