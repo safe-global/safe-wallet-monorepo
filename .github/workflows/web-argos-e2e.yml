@@ -1,4 +1,4 @@
-name: Web Argos E2E
+name: Web Argos visual regression tests
 
 on:
   workflow_dispatch:
