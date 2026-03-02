@@ -1,4 +1,5 @@
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { sanitizePendingQueriesTransform } from '../index'
 
 interface TransformResult {
@@ -13,7 +14,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('passes state through unchanged', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': { status: 'pending', data: null },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', data: null },
         },
         config: { online: true },
       }
@@ -28,7 +29,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('removes queries with pending status', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': { status: 'pending', startedTimeStamp: 123 },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending', startedTimeStamp: 123 },
         },
         config: { online: true },
       }
@@ -44,7 +45,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('preserves queries with fulfilled status', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': { status: 'fulfilled', data: { chains: [] } },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'fulfilled', data: { chains: [] } },
         },
         config: { online: true },
       }
@@ -57,7 +58,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('preserves queries with rejected status', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': { status: 'rejected', error: 'Network error' },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'rejected', error: 'Network error' },
         },
       }
 
@@ -69,7 +70,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('filters only pending queries when mixed statuses exist', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': { status: 'pending' },
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: { status: 'pending' },
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
           'getSafeInfo("0x456")': { status: 'rejected', error: 'Error' },
         },
@@ -110,7 +111,7 @@ describe('sanitizePendingQueriesTransform', () => {
     it('handles queries with undefined entries', () => {
       const state = {
         queries: {
-          'getChainsConfigV2("MOBILE")': undefined,
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       }
@@ -119,7 +120,7 @@ describe('sanitizePendingQueriesTransform', () => {
 
       expect(result).toEqual({
         queries: {
-          'getChainsConfigV2("MOBILE")': undefined,
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: undefined,
           'getBalances("0x123")': { status: 'fulfilled', data: [] },
         },
       })

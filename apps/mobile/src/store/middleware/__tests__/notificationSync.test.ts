@@ -5,6 +5,7 @@ import { configureStore, Action } from '@reduxjs/toolkit'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 jest.mock('@/src/services/notifications/store-sync/sync', () => ({
   syncNotificationExtensionData: jest.fn(),
@@ -185,7 +186,7 @@ describe('notificationSyncMiddleware', () => {
 
       // Dispatch the real RTK Query thunk
       await testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
       )
 
       // The middleware should have been triggered by the fulfilled action
@@ -202,7 +203,7 @@ describe('notificationSyncMiddleware', () => {
 
       // Dispatch the real RTK Query thunk
       const promise = testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
       )
 
       // Advance through all retry delays (5 retries with exponential backoff)
@@ -329,7 +330,7 @@ describe('notificationSyncMiddleware', () => {
 
       // Dispatch RTK Query action
       await testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
       )
 
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(3)

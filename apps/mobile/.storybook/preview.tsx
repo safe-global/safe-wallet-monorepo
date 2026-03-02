@@ -14,6 +14,7 @@ import { web3API } from '@/src/store/signersBalance'
 import { TOKEN_LISTS } from '@/src/store/settingsSlice'
 import { chainsAdapter } from '@safe-global/store/gateway/chains'
 import { mockChain } from '@/src/tests/mocks'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 const navigationRef = createNavigationContainerRef()
 
@@ -53,7 +54,7 @@ const createStorybookStore = () => {
       },
       [cgwClient.reducerPath]: {
         queries: {
-          'getChainsConfigV2("MOBILE")': {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: {
             status: 'fulfilled',
             data: mockChainsState,
           },
