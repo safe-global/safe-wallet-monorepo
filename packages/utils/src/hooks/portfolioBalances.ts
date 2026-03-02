@@ -17,7 +17,7 @@ export const createPortfolioBalances = (balances: Balances): PortfolioBalances =
   ...balances,
   tokensFiatTotal: balances.fiatTotal,
   positionsFiatTotal: '0',
-  positions: undefined,
+  positions: [],
 })
 
 export const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
