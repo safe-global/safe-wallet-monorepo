@@ -49,6 +49,7 @@ describe('proposeSendTransaction', () => {
         value: '1000000000000000000',
         data: '0x',
       }),
+      undefined,
     )
     expect(mockSafeSDK.getTransactionHash).toHaveBeenCalledWith(mockTx)
     expect(proposeNewTransaction).toHaveBeenCalledWith(
@@ -83,6 +84,7 @@ describe('proposeSendTransaction', () => {
         to: tokenAddress,
         value: '0',
       }),
+      undefined,
     )
   })
 

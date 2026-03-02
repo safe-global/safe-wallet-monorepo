@@ -1,5 +1,8 @@
-import type { TransactionDetails, ProposeTransactionDto } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { Operation } from '@safe-global/store/gateway/types'
+import type {
+  TransactionDetails,
+  ProposeTransactionDto,
+  Operation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { AppDispatch } from '@/src/store'
@@ -29,7 +32,7 @@ function buildProposeDto(
     value: data.value?.toString() ?? '0',
     data: data.data || undefined,
     nonce: data.nonce.toString(),
-    operation: data.operation as unknown as Operation,
+    operation: data.operation as Operation,
     safeTxGas: data.safeTxGas?.toString() ?? '0',
     baseGas: data.baseGas?.toString() ?? '0',
     gasPrice: data.gasPrice?.toString() ?? '0',

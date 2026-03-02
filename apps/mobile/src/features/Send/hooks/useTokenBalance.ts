@@ -38,7 +38,8 @@ export function useTokenBalance({
     return item.tokenInfo.address === tokenAddress
   })
 
-  const decimals = (token?.tokenInfo.decimals as number) ?? 18
+  const raw = token?.tokenInfo.decimals
+  const decimals = raw != null ? Number(raw) : 18
   const maxBalance = token?.balance ?? '0'
   const hasFiatPrice = !!token?.fiatConversion && parseFloat(token.fiatConversion) > 0
 

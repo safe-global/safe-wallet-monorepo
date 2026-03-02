@@ -53,9 +53,9 @@ export const proposeSendTransaction = async ({
 }: ProposeSendTransactionArgs): Promise<string> => {
   validateAddresses(recipient, tokenAddress)
 
+  const safeSDK = await getVerifiedSafeSDK(chainId)
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
   const safeTx = await createTx(txData, nonce)
-  const safeSDK = await getVerifiedSafeSDK(chainId)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   const txDetails = await proposeNewTransaction({

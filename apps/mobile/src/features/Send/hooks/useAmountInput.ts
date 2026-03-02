@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { safeParseUnits, safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { sanitizeDecimalInput } from '@/src/utils/formatters'
 
 interface UseAmountInputResult {
@@ -67,12 +67,7 @@ const checkExceedsBalance = (tokenAmount: string, decimals: number, maxBalance: 
   if (inputWei === undefined) {
     return false
   }
-  const formatted = safeFormatUnits(maxBalance, decimals) ?? '0'
-  const balanceWei = safeParseUnits(formatted, decimals)
-  if (balanceWei === undefined) {
-    return false
-  }
-  return inputWei > balanceWei
+  return inputWei > BigInt(maxBalance)
 }
 
 /**

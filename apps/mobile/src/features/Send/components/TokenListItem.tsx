@@ -16,7 +16,8 @@ interface TokenListItemProps {
 
 export const TokenListItem = memo(function TokenListItem({ item, currency, onPress }: TokenListItemProps) {
   const { tokenInfo, balance, fiatBalance } = item
-  const formattedAmount = `${formatVisualAmount(balance, tokenInfo.decimals as number)} ${tokenInfo.symbol}`
+  const decimals = tokenInfo.decimals != null ? Number(tokenInfo.decimals) : 18
+  const formattedAmount = `${formatVisualAmount(balance, decimals)} ${tokenInfo.symbol}`
   const formattedFiat = shouldDisplayPreciseBalance(fiatBalance, 7)
     ? formatCurrencyPrecise(fiatBalance, currency)
     : formatCurrency(fiatBalance, currency)

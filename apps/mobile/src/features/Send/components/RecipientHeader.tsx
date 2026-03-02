@@ -2,7 +2,7 @@ import React from 'react'
 import { Pressable } from 'react-native'
 import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { shortenAddress } from '@/src/utils/formatters'
+import { RecipientDisplay } from './RecipientDisplay'
 
 interface RecipientHeaderProps {
   recipientAddress: string
@@ -10,27 +10,6 @@ interface RecipientHeaderProps {
   displayNonce: number | undefined
   onRecipientPress: () => void
   onNoncePress: () => void
-}
-
-function RecipientDisplay({ recipientAddress, recipientName }: { recipientAddress: string; recipientName?: string }) {
-  if (recipientName) {
-    return (
-      <View gap={2}>
-        <Text fontSize="$4" fontWeight={600} color="$color">
-          {recipientName}
-        </Text>
-        <Text fontSize="$3" color="$colorSecondary">
-          {shortenAddress(recipientAddress, 4)}
-        </Text>
-      </View>
-    )
-  }
-
-  return (
-    <Text fontSize="$4" color="$color">
-      {shortenAddress(recipientAddress, 6)}
-    </Text>
-  )
 }
 
 export function RecipientHeader({
@@ -62,7 +41,7 @@ export function RecipientHeader({
             <Text fontSize="$4" color="$colorSecondary">
               To:
             </Text>
-            <RecipientDisplay recipientAddress={recipientAddress} recipientName={recipientName} />
+            <RecipientDisplay address={recipientAddress} name={recipientName} />
           </View>
         </Pressable>
       </View>

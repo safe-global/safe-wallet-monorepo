@@ -1,16 +1,17 @@
 import { Stack } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
-import { View, Text } from 'tamagui'
+import { View, Text, useTheme } from 'tamagui'
 import { Loader } from '@/src/components/Loader'
 
 export default function SendLayout() {
   const safeSDK = useSafeSDK()
+  const theme = useTheme()
 
   if (!safeSDK) {
     return (
       <View flex={1} justifyContent="center" alignItems="center" gap="$3">
-        <Loader size={48} color="#12FF80" />
+        <Loader size={48} color={String(theme.primary.get())} />
         <Text color="$colorSecondary">Initializing Safe SDK...</Text>
       </View>
     )

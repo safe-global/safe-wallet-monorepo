@@ -19,8 +19,8 @@ interface UseFiatConversionResult {
   hasFiatPrice: boolean
 }
 
-/** Returns the currency symbol for a given currency code. */
-const getCurrencySymbol = (currency: string): string => {
+/** Returns the narrow currency symbol for a given ISO 4217 code. */
+export const getCurrencySymbol = (currency: string): string => {
   try {
     return (
       new Intl.NumberFormat('en', {
@@ -37,92 +37,15 @@ const getCurrencySymbol = (currency: string): string => {
 }
 
 /**
- * Parse a raw string as a number, treating partial
- * decimals like "." or "" as 0.
+ * Truncate a numeric string to at most `maxDecimals` decimal
+ * places. This always rounds DOWN (floors) - no rounding up.
  */
-const safeParseFloat = (value: string): number => {
-  if (!value || value === '.') {
-    return 0
-  }
-  const n = parseFloat(value)
-  return Number.isNaN(n) ? 0 : n
-}
-
-/** Truncate a numeric string to at most `maxDecimals` decimal places. */
-const truncateDecimals = (value: string, maxDecimals: number): string => {
+export const truncateToDecimals = (value: string, maxDecimals: number): string => {
   const dotIndex = value.indexOf('.')
   if (dotIndex === -1) {
     return value
   }
   return value.slice(0, dotIndex + 1 + maxDecimals)
-}
-
-const parseRate = (fiatRate: string | undefined): { hasFiatPrice: boolean; rate: number } => {
-  const rate = fiatRate ? parseFloat(fiatRate) : 0
-  return { hasFiatPrice: rate > 0, rate }
-}
-
-const computeTokenAmount = (
-  rawInput: string,
-  isFiatMode: boolean,
-  hasFiatPrice: boolean,
-  rate: number,
-  decimals: number,
-): string => {
-  if (!rawInput) {
-    return ''
-  }
-  if (!isFiatMode || !hasFiatPrice) {
-    return rawInput
-  }
-
-  const fiatNum = safeParseFloat(rawInput)
-  if (fiatNum === 0 || rate === 0) {
-    return ''
-  }
-
-  return truncateDecimals((fiatNum / rate).toString(), decimals)
-}
-
-const computeDerivedFiat = (
-  rawInput: string,
-  isFiatMode: boolean,
-  hasFiatPrice: boolean,
-  rate: number,
-  currency: string,
-): string => {
-  if (isFiatMode || !hasFiatPrice) {
-    return ''
-  }
-
-  const tokenNum = safeParseFloat(rawInput)
-  return formatCurrency((tokenNum * rate).toString(), currency)
-}
-
-const computeDerivedToken = (
-  isFiatMode: boolean,
-  hasFiatPrice: boolean,
-  tokenAmount: string,
-  symbol: string,
-): string => {
-  if (!isFiatMode || !hasFiatPrice) {
-    return ''
-  }
-  return `${tokenAmount || '0'} ${symbol}`
-}
-
-const formatPrimaryDisplay = (
-  rawInput: string,
-  isFiatMode: boolean,
-  hasFiatPrice: boolean,
-  currencySymbol: string,
-  symbol: string,
-): string => {
-  const display = rawInput || '0'
-  if (isFiatMode && hasFiatPrice) {
-    return `${currencySymbol} ${display}`
-  }
-  return `${display} ${symbol}`
 }
 
 export function useFiatConversion({
@@ -134,34 +57,40 @@ export function useFiatConversion({
 }: UseFiatConversionArgs): UseFiatConversionResult {
   const [isFiatMode, setIsFiatMode] = useState(true)
 
-  const { hasFiatPrice, rate } = parseRate(fiatRate)
+  const rate = fiatRate ? parseFloat(fiatRate) : 0
+  const hasFiatPrice = rate > 0
 
   const currencySymbol = useMemo(() => getCurrencySymbol(currency), [currency])
 
-  const tokenAmount = useMemo(
-    () => computeTokenAmount(rawInput, isFiatMode, hasFiatPrice, rate, decimals),
-    [rawInput, isFiatMode, hasFiatPrice, rate, decimals],
-  )
+  const { tokenAmount, primaryDisplay, secondaryDisplay } = useMemo(() => {
+    const display = rawInput || '0'
+    const inputNum = rawInput && rawInput !== '.' ? parseFloat(rawInput) : 0
+    const validInput = Number.isNaN(inputNum) ? 0 : inputNum
 
-  const derivedFiat = useMemo(
-    () => computeDerivedFiat(rawInput, isFiatMode, hasFiatPrice, rate, currency),
-    [rawInput, isFiatMode, hasFiatPrice, rate, currency],
-  )
+    if (isFiatMode && hasFiatPrice) {
+      // Fiat mode: convert fiat input to token amount
+      let token = ''
+      if (rawInput && validInput > 0 && rate > 0) {
+        const raw = (validInput / rate).toString()
+        token = truncateToDecimals(raw, decimals)
+      }
 
-  const derivedToken = useMemo(
-    () => computeDerivedToken(isFiatMode, hasFiatPrice, tokenAmount, symbol),
-    [isFiatMode, hasFiatPrice, tokenAmount, symbol],
-  )
+      return {
+        tokenAmount: token,
+        primaryDisplay: `${currencySymbol} ${display}`,
+        secondaryDisplay: token ? `${token} ${symbol}` : `0 ${symbol}`,
+      }
+    }
 
-  const primaryDisplay = useMemo(
-    () => formatPrimaryDisplay(rawInput, isFiatMode, hasFiatPrice, currencySymbol, symbol),
-    [rawInput, isFiatMode, hasFiatPrice, currencySymbol, symbol],
-  )
+    // Token mode (or no fiat price available)
+    const fiatDisplay = hasFiatPrice ? formatCurrency((validInput * rate).toString(), currency) : ''
 
-  const secondaryDisplay = useMemo(
-    () => (isFiatMode && hasFiatPrice ? derivedToken : derivedFiat),
-    [isFiatMode, hasFiatPrice, derivedToken, derivedFiat],
-  )
+    return {
+      tokenAmount: rawInput,
+      primaryDisplay: `${display} ${symbol}`,
+      secondaryDisplay: fiatDisplay,
+    }
+  }, [rawInput, isFiatMode, hasFiatPrice, rate, decimals, currency, currencySymbol, symbol])
 
   const toggleMode = useCallback(() => {
     if (hasFiatPrice) {

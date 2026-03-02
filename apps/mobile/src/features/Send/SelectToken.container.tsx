@@ -1,15 +1,19 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Keyboard, Pressable, TextInput, StyleSheet } from 'react-native'
+import { Pressable, TextInput, StyleSheet } from 'react-native'
 import { Text, View, useTheme } from 'tamagui'
 import { FlashList } from '@shopify/flash-list'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Loader } from '@/src/components/Loader'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { shortenAddress } from '@/src/utils/formatters'
 import { useTokenBalances } from '@/src/features/Assets/components/Tokens/useTokenBalances'
 import { TokenListItem } from './components/TokenListItem'
+import { RecipientDisplay } from './components/RecipientDisplay'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
+function ItemSeparator() {
+  return <View height={8} />
+}
 
 function filterTokensByQuery(items: Balance[] | undefined, query: string): Balance[] {
   if (!items) {
@@ -29,23 +33,88 @@ function filterTokensByQuery(items: Balance[] | undefined, query: string): Balan
   })
 }
 
-function RecipientDisplay({ name, address }: { name?: string; address: string }) {
-  if (name) {
-    return (
-      <View gap={2}>
-        <Text fontSize="$4" fontWeight={600} color="$color">
-          {name}
-        </Text>
-        <Text fontSize="$3" color="$colorSecondary">
-          {shortenAddress(address, 4)}
-        </Text>
-      </View>
-    )
-  }
+interface TokenListHeaderProps {
+  recipientAddress: string
+  recipientName?: string
+  searchQuery: string
+  onRecipientPress: () => void
+  onManageTokens: () => void
+  onSearchChange: (text: string) => void
+}
+
+function TokenListHeader({
+  recipientAddress,
+  recipientName,
+  searchQuery,
+  onRecipientPress,
+  onManageTokens,
+  onSearchChange,
+}: TokenListHeaderProps) {
+  const theme = useTheme()
+
   return (
-    <Text fontSize="$4" color="$color">
-      {shortenAddress(address, 6)}
-    </Text>
+    <View gap="$5" paddingBottom="$4">
+      <View gap="$2">
+        <View flexDirection="row" alignItems="center" gap="$2">
+          <SafeFontIcon name="send-to" size={16} color="$color" />
+          <Text fontSize="$4" color="$color">
+            Recipient
+          </Text>
+        </View>
+        <Pressable onPress={onRecipientPress} testID="recipient-summary">
+          <View
+            flexDirection="row"
+            alignItems="center"
+            backgroundColor="$backgroundSkeleton"
+            borderRadius={8}
+            paddingHorizontal="$4"
+            height={64}
+            gap="$2"
+          >
+            <Text fontSize="$4" color="$colorSecondary">
+              To:
+            </Text>
+            <RecipientDisplay name={recipientName} address={recipientAddress} />
+          </View>
+        </Pressable>
+      </View>
+
+      <View gap="$3">
+        <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingRight="$1">
+          <View flexDirection="row" alignItems="center" gap="$2">
+            <SafeFontIcon name="token" size={16} color="$color" />
+            <Text fontSize="$4" color="$color">
+              Select token:
+            </Text>
+          </View>
+          <Pressable hitSlop={8} onPress={onManageTokens} testID="manage-tokens-button">
+            <SafeFontIcon name="options-horizontal" size={16} color="$colorSecondary" />
+          </Pressable>
+        </View>
+
+        <View
+          style={[
+            styles.searchBar,
+            {
+              backgroundColor: String(theme.backgroundSkeleton.get()),
+            },
+          ]}
+        >
+          <SafeFontIcon name="search" size={16} color="$colorSecondary" />
+          <TextInput
+            style={[styles.searchInput, { color: String(theme.color.get()) }]}
+            placeholder="Search"
+            placeholderTextColor={String(theme.colorSecondary.get())}
+            value={searchQuery}
+            onChangeText={onSearchChange}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            testID="token-search-input"
+          />
+        </View>
+      </View>
+    </View>
   )
 }
 
@@ -91,87 +160,30 @@ export function SelectTokenContainer() {
     router.push('/manage-tokens-sheet')
   }, [router])
 
+  const handleRecipientPress = useCallback(() => {
+    router.back()
+  }, [router])
+
   const renderItem = useCallback(
     ({ item }: { item: Balance }) => <TokenListItem item={item} currency={currency} onPress={handleTokenPress} />,
     [currency, handleTokenPress],
   )
 
-  const handleScrollBeginDrag = useCallback(() => {
-    Keyboard.dismiss()
-  }, [])
-
-  const listHeader = useMemo(
-    () => (
-      <View gap="$5" paddingBottom="$4">
-        <View gap="$2">
-          <View flexDirection="row" alignItems="center" gap="$2">
-            <SafeFontIcon name="send-to" size={16} color="$color" />
-            <Text fontSize="$4" color="$color">
-              Recipient
-            </Text>
-          </View>
-          <Pressable onPress={() => router.back()} testID="recipient-summary">
-            <View
-              flexDirection="row"
-              alignItems="center"
-              backgroundColor="$backgroundSkeleton"
-              borderRadius={8}
-              paddingHorizontal="$4"
-              height={64}
-              gap="$2"
-            >
-              <Text fontSize="$4" color="$colorSecondary">
-                To:
-              </Text>
-              <RecipientDisplay name={recipientName} address={recipientAddress ?? ''} />
-            </View>
-          </Pressable>
-        </View>
-
-        <View gap="$3">
-          <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingRight="$1">
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <SafeFontIcon name="token" size={16} color="$color" />
-              <Text fontSize="$4" color="$color">
-                Select token:
-              </Text>
-            </View>
-            <Pressable hitSlop={8} onPress={handleManageTokens} testID="manage-tokens-button">
-              <SafeFontIcon name="options-horizontal" size={16} color="$colorSecondary" />
-            </Pressable>
-          </View>
-
-          <View
-            style={[
-              styles.searchBar,
-              {
-                backgroundColor: String(theme.backgroundSkeleton.get()),
-              },
-            ]}
-          >
-            <SafeFontIcon name="search" size={16} color="$colorSecondary" />
-            <TextInput
-              style={[styles.searchInput, { color: String(theme.color.get()) }]}
-              placeholder="Search"
-              placeholderTextColor={String(theme.colorSecondary.get())}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
-              testID="token-search-input"
-            />
-          </View>
-        </View>
-      </View>
-    ),
-    [recipientAddress, recipientName, router, searchQuery, theme, handleManageTokens],
+  const listHeader = (
+    <TokenListHeader
+      recipientAddress={recipientAddress ?? ''}
+      recipientName={recipientName}
+      searchQuery={searchQuery}
+      onRecipientPress={handleRecipientPress}
+      onManageTokens={handleManageTokens}
+      onSearchChange={setSearchQuery}
+    />
   )
 
   if (isLoading) {
     return (
       <View flex={1} justifyContent="center" alignItems="center">
-        <Loader size={48} color="#12FF80" />
+        <Loader size={48} color={String(theme.primary.get())} />
       </View>
     )
   }
@@ -204,11 +216,10 @@ export function SelectTokenContainer() {
         renderItem={renderItem}
         keyExtractor={(item: Balance) => item.tokenInfo.address}
         ListHeaderComponent={listHeader}
-        ItemSeparatorComponent={() => <View height={8} />}
+        ItemSeparatorComponent={ItemSeparator}
         contentContainerStyle={{ padding: 16 }}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
-        onScrollBeginDrag={handleScrollBeginDrag}
         ListEmptyComponent={<EmptySearchResult searchQuery={searchQuery} />}
       />
     </View>

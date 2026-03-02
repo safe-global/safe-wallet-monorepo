@@ -184,7 +184,7 @@ export function EnterAmountContainer() {
         exceedsBalance={exceedsBalance}
         isValid={isValid}
         hasActiveSigner={!!activeSigner}
-        isSubmitting={isSubmitting.current}
+        isSubmitting={isSubmitting}
         keyboardVisible={keyboardVisible}
         bottomInset={bottom}
         onReview={handleReview}
@@ -204,6 +204,7 @@ export function EnterAmountContainer() {
       <CustomNonceModal
         visible={nonce.showCustomNonceModal}
         defaultNonce={String(nonce.displayNonce ?? '')}
+        currentNonce={nonce.currentNonce ?? 0}
         onSave={nonce.handleSaveCustomNonce}
         onCancel={nonce.handleCancelCustomNonce}
       />

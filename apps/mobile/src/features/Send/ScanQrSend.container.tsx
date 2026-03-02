@@ -8,16 +8,18 @@ import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { useToastController } from '@tamagui/toast'
 import { ToastViewport } from '@tamagui/toast'
 import { QrCamera } from '@/src/components/Camera'
-
-const toastForValueShown: Record<string, boolean> = {}
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChain } from '@/src/store/chains'
 
 export function ScanQrSendContainer() {
   const router = useRouter()
   const permission = Camera.getCameraPermissionStatus()
   const { hasPermission } = useCameraPermission()
   const hasScanned = useRef(false)
+  const toastForValueShown = useRef<Set<string>>(new Set())
   const [isCameraActive, setIsCameraActive] = useState(false)
   const toast = useToastController()
+  const activeChain = useAppSelector(selectActiveChain)
 
   const handleFocusEffect = useCallback(() => {
     if (!hasPermission) {
@@ -36,11 +38,11 @@ export function ScanQrSendContainer() {
 
   const showInvalidAddressToast = useCallback(
     (code: string) => {
-      if (toastForValueShown[code]) {
+      if (toastForValueShown.current.has(code)) {
         return
       }
 
-      toastForValueShown[code] = true
+      toastForValueShown.current.add(code)
       toast.show('Not a valid address', {
         native: false,
         duration: 2000,
@@ -58,11 +60,18 @@ export function ScanQrSendContainer() {
       }
 
       const code = codes[0].value || ''
-      const { address } = parsePrefixedAddress(code)
+      const { address, prefix } = parsePrefixedAddress(code)
 
       if (!isValidAddress(address)) {
         showInvalidAddressToast(code)
         return
+      }
+
+      if (prefix && activeChain?.shortName && prefix !== activeChain.shortName) {
+        toast.show(`Address is for ${prefix}, but active chain is ${activeChain.shortName}`, {
+          native: false,
+          duration: 3000,
+        })
       }
 
       hasScanned.current = true
@@ -72,7 +81,7 @@ export function ScanQrSendContainer() {
         params: { scannedAddress: address },
       })
     },
-    [isCameraActive, router, showInvalidAddressToast],
+    [isCameraActive, router, showInvalidAddressToast, activeChain, toast],
   )
 
   const handleActivateCamera = useCallback(() => {

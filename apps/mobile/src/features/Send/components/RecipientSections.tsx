@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo, useCallback } from 'react'
 import { Pressable } from 'react-native'
 import { Text, View } from 'tamagui'
 import { Identicon } from '@/src/components/Identicon'
@@ -21,31 +21,37 @@ function SectionHeader({ title }: { title: string }) {
   )
 }
 
-function RecipientRow({
-  option,
+const RecipientRow = memo(function RecipientRow({
+  address,
+  name,
   onSelect,
 }: {
-  option: RecipientOption
+  address: string
+  name?: string
   onSelect: (address: string, name?: string) => void
 }) {
+  const handlePress = useCallback(() => {
+    onSelect(address, name)
+  }, [onSelect, address, name])
+
   return (
-    <Pressable onPress={() => onSelect(option.address, option.name)} testID={`recipient-${option.address}`}>
+    <Pressable onPress={handlePress} testID={`recipient-${address}`}>
       <View flexDirection="row" alignItems="center" gap="$3" padding="$3" borderRadius={8}>
-        <Identicon address={option.address as Address} size={40} rounded />
+        <Identicon address={address as Address} size={40} rounded />
         <View flex={1} gap="$1">
-          {option.name && (
+          {name && (
             <Text fontSize="$4" fontWeight={600} color="$color">
-              {option.name}
+              {name}
             </Text>
           )}
           <Text fontSize="$3" color="$colorSecondary">
-            {shortenAddress(option.address, 6)}
+            {shortenAddress(address, 6)}
           </Text>
         </View>
       </View>
     </Pressable>
   )
-}
+})
 
 export function RecipientSections({ safes, signers, addressBook, onSelect }: RecipientSectionsProps) {
   const hasResults = safes.length > 0 || signers.length > 0 || addressBook.length > 0
@@ -60,7 +66,7 @@ export function RecipientSections({ safes, signers, addressBook, onSelect }: Rec
         <View>
           <SectionHeader title="My Safe accounts" />
           {safes.map((opt) => (
-            <RecipientRow key={opt.address} option={opt} onSelect={onSelect} />
+            <RecipientRow key={opt.address} address={opt.address} name={opt.name} onSelect={onSelect} />
           ))}
         </View>
       )}
@@ -69,7 +75,7 @@ export function RecipientSections({ safes, signers, addressBook, onSelect }: Rec
         <View>
           <SectionHeader title="Signers" />
           {signers.map((opt) => (
-            <RecipientRow key={opt.address} option={opt} onSelect={onSelect} />
+            <RecipientRow key={opt.address} address={opt.address} name={opt.name} onSelect={onSelect} />
           ))}
         </View>
       )}
@@ -78,7 +84,7 @@ export function RecipientSections({ safes, signers, addressBook, onSelect }: Rec
         <View>
           <SectionHeader title="Address book" />
           {addressBook.map((opt) => (
-            <RecipientRow key={opt.address} option={opt} onSelect={onSelect} />
+            <RecipientRow key={opt.address} address={opt.address} name={opt.name} onSelect={onSelect} />
           ))}
         </View>
       )}

@@ -13,6 +13,7 @@ interface UseNonceSelectionArgs {
 interface UseNonceSelectionResult {
   nonceSheetRef: React.RefObject<BottomSheetModal | null>
   recommendedNonce: number | undefined
+  currentNonce: number | undefined
   queuedNonces: { nonce: number; label: string }[]
   fetchMore: () => void
   isFetchingMore: boolean
@@ -28,7 +29,7 @@ interface UseNonceSelectionResult {
 
 export function useNonceSelection({ chainId, safeAddress, inputRef }: UseNonceSelectionArgs): UseNonceSelectionResult {
   const nonceSheetRef = useRef<BottomSheetModal>(null)
-  const { recommendedNonce, queuedNonces, fetchMore, isFetchingMore } = useNonce(chainId, safeAddress)
+  const { recommendedNonce, currentNonce, queuedNonces, fetchMore, isFetchingMore } = useNonce(chainId, safeAddress)
 
   const [selectedNonce, setSelectedNonce] = useState<number | undefined>()
   const [showCustomNonceModal, setShowCustomNonceModal] = useState(false)
@@ -77,6 +78,7 @@ export function useNonceSelection({ chainId, safeAddress, inputRef }: UseNonceSe
   return {
     nonceSheetRef,
     recommendedNonce,
+    currentNonce,
     queuedNonces,
     fetchMore,
     isFetchingMore,

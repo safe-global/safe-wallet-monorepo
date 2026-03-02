@@ -120,7 +120,7 @@ function AddressInputField({
             value={value}
             onChangeText={onChangeText}
             placeholder="Wallet address or ENS"
-            placeholderTextColor="rgba(255,255,255,0.3)"
+            placeholderTextColor="$colorSecondary"
             autoCapitalize="none"
             autoCorrect={false}
             fontSize="$4"
@@ -199,7 +199,7 @@ export function RecipientInput({
           />
         )}
       </View>
-      {!isSelected && !hasAddress && <RecipientValidationBadge state={validationState} contactName={contactName} />}
+      {!isSelected && hasAddress && <RecipientValidationBadge state={validationState} contactName={contactName} />}
     </View>
   )
 }

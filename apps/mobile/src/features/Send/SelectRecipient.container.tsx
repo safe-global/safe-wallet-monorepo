@@ -81,6 +81,8 @@ export function SelectRecipientContainer() {
     router.push('/(send)/scan-qr')
   }, [router])
 
+  const displayName = recipientName ?? validation.contactName
+
   const handleContinue = useCallback(() => {
     if (!validation.canContinue) {
       return
@@ -93,13 +95,11 @@ export function SelectRecipientContainer() {
         ...(displayName ? { recipientName: displayName } : {}),
       },
     })
-  }, [address, recipientName, validation.canContinue, router])
+  }, [address, displayName, validation.canContinue, router])
 
   const handleContactSaved = useCallback(() => {
     setShowAddContact(false)
   }, [])
-
-  const displayName = recipientName ?? validation.contactName
   const isSelected = !!displayName
   const hasAddress = validation.state !== 'empty' && validation.state !== 'typing'
   const showBrowseOptions = !isSelected && !hasAddress
