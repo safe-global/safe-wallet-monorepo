@@ -9,6 +9,7 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
   layout: 'none',
+  shadcn: true,
   store: {
     safeInfo: {
       data: { chainId: '1' },

@@ -9,6 +9,7 @@ const defaultSetup = createMockStory({
   features: { spaces: true },
   pathname: '/welcome/invite-members',
   query: { spaceId: '1' },
+  shadcn: true,
 })
 
 const meta = {

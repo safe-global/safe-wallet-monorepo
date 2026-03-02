@@ -10,7 +10,7 @@ const meta: Meta<typeof SpaceCardNew> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  decorators: [withMockProvider()],
+  decorators: [withMockProvider({ shadcn: true })],
 }
 
 export default meta
