@@ -13,6 +13,17 @@ jest.mock('@/src/store/activeSafeSlice', () => ({
   selectActiveSafe: () => mockActiveSafe,
 }))
 
+// Mock active chain so useTotalBalances can compute the `trusted` parameter
+// without waiting for the chains RTK Query to populate
+jest.mock('@/src/store/chains', () => ({
+  ...jest.requireActual('@/src/store/chains'),
+  selectActiveChain: () => ({
+    chainId: '1',
+    chainName: 'Ethereum',
+    features: [],
+  }),
+}))
+
 describe('TokensContainer', () => {
   afterEach(() => {
     server.resetHandlers()

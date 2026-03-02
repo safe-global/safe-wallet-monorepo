@@ -1,7 +1,7 @@
 /**
  * Build-time script to pre-fetch chain configurations from the CGW API.
  * Writes the result to src/config/__generated__/chains.json so the app can
- * use it as an instant cache seed on startup, avoiding the blocking /v1/chains
+ * use it as an instant cache seed on startup, avoiding the blocking /v2/chains
  * network request before any other API call can proceed.
  *
  * Run with: yarn fetch-chains
@@ -27,6 +27,7 @@ const GATEWAY_URL_PRODUCTION = process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION ||
 const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 
 const GATEWAY_URL = IS_PRODUCTION ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const OUTPUT_DIR = path.join(__dirname, '..', 'src', 'config', '__generated__')
@@ -39,7 +40,9 @@ type ChainPage = {
 
 async function fetchAllChains(): Promise<unknown[]> {
   const allChains: unknown[] = []
-  let url: string | null = `${GATEWAY_URL}/v1/chains?cursor=limit%3D50%26offset%3D0`
+  let url: URL | null = new URL('/v2/chains', GATEWAY_URL)
+  url.searchParams.set('serviceKey', CONFIG_SERVICE_KEY)
+  url.searchParams.set('cursor', 'limit=50&offset=0')
 
   while (url) {
     const response = await fetch(url)
@@ -51,7 +54,7 @@ async function fetchAllChains(): Promise<unknown[]> {
     const data: ChainPage = await response.json()
     allChains.push(...data.results)
 
-    url = data.next ?? null
+    url = data.next ? new URL(data.next) : null
   }
 
   return allChains

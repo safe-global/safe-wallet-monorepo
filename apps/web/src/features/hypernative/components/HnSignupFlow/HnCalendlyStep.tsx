@@ -71,13 +71,6 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
   return (
     <HnSignupLayout contentClassName={css.calendlyColumn}>
       <div className={css.calendlyWrapper}>
-        {!isSecondStep && !hasError && (
-          <div className={css.calendlyHeader}>
-            <Typography variant="h2" className={css.calendlyTitle}>
-              Get connected to the right expert
-            </Typography>
-          </div>
-        )}
         {hasError ? (
           <Box className={css.errorContainer}>
             <Typography variant="h3" className={css.errorTitle}>
@@ -112,15 +105,7 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
             {showSkeleton && (
               <div className={css.calendlySkeletonOverlay}>
                 <Skeleton variant="rounded" width="100%" height="40px" sx={{ mb: 2, bgcolor: SKELETON_COLOR }} />
-                <br />
-                <Skeleton
-                  variant="rounded"
-                  sx={{
-                    width: { sm: '100%', md: '160px' },
-                    bgcolor: SKELETON_COLOR,
-                  }}
-                  height="40px"
-                />
+                <Skeleton variant="rounded" width="100%" height="40px" sx={{ bgcolor: SKELETON_COLOR }} />
               </div>
             )}
             <div

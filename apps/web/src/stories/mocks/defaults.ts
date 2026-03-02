@@ -25,7 +25,7 @@ export function createDefaultSettings(isDarkMode: boolean) {
 
 // Note: Chain data is loaded via RTK Query (gatewayApi), not a Redux slice.
 // The createChainData function in chains.ts creates mock chain data that MSW
-// handlers use to respond to /v1/chains/* API requests.
+// handlers use to respond to /v2/chains/* API requests.
 
 /**
  * Creates default safe info state

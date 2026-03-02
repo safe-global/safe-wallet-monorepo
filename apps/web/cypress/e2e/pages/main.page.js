@@ -29,7 +29,7 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
-/** Waits for the page to settle before Chromatic captures the screenshot. */
+/** Waits for the page to settle before Argos captures the screenshot. */
 export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
 }

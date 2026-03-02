@@ -2,9 +2,9 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**64 tests** across **33 test files** — each test captures **light + dark mode** (128 Chromatic snapshots total)
+**64 tests** across **33 test files** — each test captures an Argos screenshot automatically.
 
-Dark mode is applied automatically via a global `afterEach` hook in `cypress/support/e2e.js` that toggles `data-theme="dark"` and takes a second Chromatic snapshot.
+Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
 ## Covered pages
 
