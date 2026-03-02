@@ -56,8 +56,8 @@ setupMobileCookieHandling()
 
 export const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
-  [`queries.getChainsConfigV2(${JSON.stringify(CONFIG_SERVICE_KEY)})`, 'config'],
-  [`queries.getChainsConfigV2(${JSON.stringify(CONFIG_SERVICE_KEY)})`, 'config'],
+  [`queries.getChainsConfigV2(${CONFIG_SERVICE_KEY})`, 'config'],
+  [`queries.getChainsConfigV2(${CONFIG_SERVICE_KEY})`, 'config'],
 )
 
 type QueryEntry = { status?: string } | undefined
