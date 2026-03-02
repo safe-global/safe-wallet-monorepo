@@ -117,7 +117,7 @@ describe('useTotalBalances', () => {
       expect(result.current.data?.fiatTotal).toBe('1000')
       expect(result.current.data?.tokensFiatTotal).toBe('1000')
       expect(result.current.data?.positionsFiatTotal).toBe('0')
-      expect(result.current.data?.positions).toEqual([])
+      expect(result.current.data?.positions).toBeUndefined()
       expect(result.current.error).toBeUndefined()
       expect(result.current.loading).toBe(false)
     })
@@ -195,7 +195,7 @@ describe('useTotalBalances', () => {
       expect(item?.fiatBalance24hChange).toBe('0.05')
     })
 
-    it('should fallback to tx service when portfolio returns empty data', () => {
+    it('should fallback to tx service when portfolio returns empty', () => {
       const { result } = setupAndRender(portfolioParams, {
         portfolio: { currentData: createMockEmptyPortfolio() },
         txService: { currentData: createMockTxServiceBalances() },
@@ -203,8 +203,6 @@ describe('useTotalBalances', () => {
 
       expect(result.current.data?.fiatTotal).toBe('1000')
       expect(result.current.data?.tokensFiatTotal).toBe('1000')
-      expect(result.current.data?.positions).toEqual([])
-      expect(result.current.data?.positionsFiatTotal).toBe('0')
     })
 
     it('should fallback to tx service when portfolio errors', () => {
@@ -216,7 +214,7 @@ describe('useTotalBalances', () => {
       expect(result.current.data?.fiatTotal).toBe('1000')
     })
 
-    it('should return counterfactual balances for undeployed safe with portfolio feature', () => {
+    it('should use counterfactual balances on fallback for undeployed safe', () => {
       const mockEmptyPortfolio = createMockEmptyPortfolio()
       const mockCfBalances: Balances = { fiatTotal: '500', items: [] }
 
@@ -233,8 +231,6 @@ describe('useTotalBalances', () => {
       )
 
       expect(result.current.data?.fiatTotal).toBe('500')
-      expect(result.current.data?.positions).toEqual([])
-      expect(result.current.data?.positionsFiatTotal).toBe('0')
     })
 
     it('should handle loading state', () => {

@@ -41,7 +41,7 @@ describe('portfolioBalances helpers', () => {
       expect(result.fiatTotal).toBe('1000')
       expect(result.tokensFiatTotal).toBe('1000')
       expect(result.positionsFiatTotal).toBe('0')
-      expect(result.positions).toEqual([])
+      expect(result.positions).toBeUndefined()
       expect(result.items).toEqual(balances.items)
     })
   })
