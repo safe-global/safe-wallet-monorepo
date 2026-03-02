@@ -40,7 +40,7 @@ tags:
 - assertVisible:
     id: 'soft-update-button'
 
-# The home tab should still be visible behind the bottom sheet (non-blocking)
+# The home tab is not visible while the bottom sheet is displayed
 - assertNotVisible:
     id: 'home-tab'
 
