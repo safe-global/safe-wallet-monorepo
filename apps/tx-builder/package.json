@@ -27,7 +27,7 @@
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@safe-global/safe-deployments": "^1.37.51",
     "@safe-global/safe-gateway-typescript-sdk": "^3.22.9",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "ethereum-blockies-base64": "^1.0.2",
     "ethers": "^6.14.3",
     "evm-proxy-detection": "^1.0.0",
