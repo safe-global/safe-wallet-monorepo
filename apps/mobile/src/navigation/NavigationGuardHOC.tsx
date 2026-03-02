@@ -1,11 +1,15 @@
 import { useRouter, useSegments } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
 import { useBiometrics } from '../hooks/useBiometrics'
+import { useAppUpdateCheck } from '@/src/features/AppUpdate/hooks/useAppUpdateCheck'
+import { ForceUpdateScreen } from '@/src/features/AppUpdate/components/ForceUpdateScreen'
+import { SoftUpdatePrompt } from '@/src/features/AppUpdate/components/SoftUpdatePrompt'
+import { remoteConfigService } from '@/src/services/remoteConfig/remoteConfigService'
 let navigated = false
 
 function useInitialNavigationScreen() {
@@ -65,7 +69,29 @@ function useInitialNavigationScreen() {
 }
 
 export function NavigationGuardHOC({ children }: { children: React.ReactNode }) {
+  const { requiresForceUpdate, recommendsUpdate, isLoading } = useAppUpdateCheck()
+  const [softUpdateDismissed, setSoftUpdateDismissed] = useState(false)
+
   useInitialNavigationScreen()
   useBiometrics()
-  return children
+
+  const handleSoftUpdateDismiss = useCallback(() => {
+    setSoftUpdateDismissed(true)
+  }, [])
+
+  if (isLoading) {
+    return null
+  }
+
+  if (requiresForceUpdate) {
+    const minVersion = remoteConfigService.getPlatformString('min_required_version')
+    return <ForceUpdateScreen minVersion={minVersion} />
+  }
+
+  return (
+    <>
+      {children}
+      {recommendsUpdate && !softUpdateDismissed && <SoftUpdatePrompt onDismiss={handleSoftUpdateDismiss} />}
+    </>
+  )
 }

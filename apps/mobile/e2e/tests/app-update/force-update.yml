@@ -1,0 +1,45 @@
+appId: ${APP_ID}
+tags:
+  - app-update
+  - smoke
+---
+# Force Update Screen E2E Test
+# Verifies that when a force update is required, the blocking screen
+# is shown with the correct UI elements and the update button is present.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Set up an onboarded account so the app loads normally first
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for the home screen to confirm app loaded normally
+- assertVisible:
+    id: 'home-tab'
+
+# Trigger force update scenario via hidden test control
+- tapOn:
+    id: 'e2eForceUpdate'
+
+# ============================================
+# Verify Force Update Screen
+# ============================================
+
+# The full-screen blocking UI should now be visible
+- assertVisible:
+    id: 'force-update-screen'
+
+# Verify the heading text
+- assertVisible: 'Update required'
+
+# Verify the description text
+- assertVisible: '.*Please update to continue using the app.*'
+
+# Verify the update button is present
+- assertVisible:
+    id: 'force-update-button'
+
+# Verify the home tab is no longer visible (screen is blocking)
+- assertNotVisible:
+    id: 'home-tab'

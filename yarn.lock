@@ -12033,6 +12033,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/remote-config@npm:23.3.1":
+  version: 23.3.1
+  resolution: "@react-native-firebase/remote-config@npm:23.3.1"
+  peerDependencies:
+    "@react-native-firebase/analytics": 23.3.1
+    "@react-native-firebase/app": 23.3.1
+  checksum: 10/62bcd9c3f4cbb6eb2dccade5f8658e1b9e5f829087606f37763050f05542968bf8a79ae540c55a12b65ac211c7e850c866956f6c797c1a0b54f4508ce19ded3a
+  languageName: node
+  linkType: hard
+
 "@react-native-masked-view/masked-view@npm:0.3.2":
   version: 0.3.2
   resolution: "@react-native-masked-view/masked-view@npm:0.3.2"
@@ -13226,6 +13236,7 @@ __metadata:
     "@react-native-firebase/app": "npm:^23.3.1"
     "@react-native-firebase/crashlytics": "npm:^23.3.1"
     "@react-native-firebase/messaging": "npm:^23.3.1"
+    "@react-native-firebase/remote-config": "npm:23.3.1"
     "@react-native-masked-view/masked-view": "npm:0.3.2"
     "@react-native-menu/menu": "npm:^2.0.0"
     "@react-navigation/native": "npm:^7.1.17"
