@@ -19,7 +19,6 @@ import { AppRoutes } from '@/config/routes'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import useNotificationsPopover, { NOTIFICATION_CENTER_LIMIT } from './hooks/useNotificationsPopover'
 
-
 export type NotificationsPopoverRef = {
   handleClick: (event: MouseEvent<HTMLButtonElement>) => void
 }
@@ -109,7 +108,12 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
 
           {hasPushNotifications && (
             <Link href={{ pathname: AppRoutes.settings.notifications, query: router.query }} passHref legacyBehavior>
-              <MuiLink data-testid="notifications-button" className={notificationCss.settingsLink} variant="body2" onClick={onSettingsClick}>
+              <MuiLink
+                data-testid="notifications-button"
+                className={notificationCss.settingsLink}
+                variant="body2"
+                onClick={onSettingsClick}
+              >
                 <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
               </MuiLink>
             </Link>
