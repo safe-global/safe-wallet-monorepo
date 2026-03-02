@@ -7,7 +7,7 @@ import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
 import { Provider } from 'react-redux'
 import { persistor, store } from '@/src/store'
 import { PersistGate } from 'redux-persist/integration/react'
-import { isStorybookEnv } from '@/src/config/constants'
+import { isStorybookEnv, CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
@@ -58,7 +58,9 @@ persistor.subscribe(() => {
   const { bootstrapped } = persistor.getState()
   if (bootstrapped) {
     // The chain config is persisted in the store, but might be outdated.
-    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
+    store.dispatch(
+      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+    )
 
     // Run initial notification extension sync after store is rehydrated
     syncNotificationExtensionData(store)
