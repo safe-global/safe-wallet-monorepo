@@ -26,16 +26,28 @@ runs:
       env:
         SECRETS_JSON: ${{ inputs.secrets }}
       run: |
+        set -euo pipefail
+
         # Auto-export all NEXT_PUBLIC_* secrets.
         # New secrets with this prefix are picked up automatically.
-        # Uses heredoc delimiters to safely handle multi-line values
+        # Uses per-key heredoc delimiters to safely handle multi-line values
         # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
-        echo "$SECRETS_JSON" | jq -r '
+        EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
           to_entries[]
           | select(.key | startswith("NEXT_PUBLIC_"))
           | select(.value != null and .value != "")
           | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
-        ' >> "$GITHUB_ENV"
+        ')
+
+        if [ -n "$EXPORTED" ]; then
+          echo "$EXPORTED" >> "$GITHUB_ENV"
+          # Log exported key names (values masked)
+          echo "$EXPORTED" | grep -oP '^[A-Z_]+(?=<<)' | while read -r key; do
+            echo "  Exported: $key"
+          done
+        else
+          echo "Warning: No NEXT_PUBLIC_* secrets found to export"
+        fi
 
     - name: Set environment variables
       shell: bash
