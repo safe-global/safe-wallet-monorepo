@@ -43,12 +43,6 @@ jest.mock('@/components/ui/sidebar', () => ({
   },
 }))
 
-jest.mock('next/link', () => {
-  const MockLink = ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>
-  MockLink.displayName = 'MockLink'
-  return MockLink
-})
-
 describe('NavItem', () => {
   const baseItem: ResolvedSidebarItem = {
     icon: House,
