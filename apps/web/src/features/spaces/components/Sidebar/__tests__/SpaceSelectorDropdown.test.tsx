@@ -154,9 +154,6 @@ describe('SpaceSelectorDropdown', () => {
     const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
     fireEvent.click(trigger)
 
-    // Each space renders a clickable button with its name in a <span>.
-    // "Alpha" also appears in the selected-space header div, so we avoid getByText
-    // and instead count the list-item buttons (identified by their span content).
     const spaceItemButtons = screen
       .getAllByRole('button')
       .filter((btn) => spaces.some((s) => btn.querySelector('span')?.textContent === s.name))
