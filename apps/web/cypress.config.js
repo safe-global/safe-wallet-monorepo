@@ -1,20 +1,10 @@
 import { defineConfig } from 'cypress'
 import 'dotenv/config'
 import * as fs from 'fs'
-import { installPlugin } from '@chromatic-com/cypress'
 import { registerArgosTask } from '@argos-ci/cypress/task'
 import { version } from './src/markdown/terms/version.js'
 
-// Chromatic needs --remote-debugging-port to archive network resources.
-// The port is only set when the cypress action's `chromatic` input is true.
-// Without it, register a no-op task so Chromatic's support hooks don't crash.
-function setupVisualRegressionPlugins(on, config) {
-  if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS?.includes('--remote-debugging-port')) {
-    installPlugin(on, config)
-  } else {
-    on('task', { prepareArchives: () => null })
-  }
-
+function setupArgosPlugin(on, config) {
   registerArgosTask(on, config, {
     uploadToArgos: !!process.env.ARGOS_TOKEN,
     buildName: 'web-e2e',
@@ -58,7 +48,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       config.env.CURRENT_COOKIE_TERMS_VERSION = version
 
-      setupVisualRegressionPlugins(on, config)
+      setupArgosPlugin(on, config)
       setupHeadlessViewport(on)
 
       on('task', {
