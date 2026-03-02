@@ -58,7 +58,9 @@ persistor.subscribe(() => {
   const { bootstrapped } = persistor.getState()
   if (bootstrapped) {
     // The chain config is persisted in the store, but might be outdated.
-    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }))
+    store.dispatch(
+      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+    )
 
     // Run initial notification extension sync after store is rehydrated
     syncNotificationExtensionData(store)

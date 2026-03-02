@@ -184,7 +184,9 @@ describe('notificationSyncMiddleware', () => {
       )
 
       // Dispatch the real RTK Query thunk
-      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action)
+      await testStore.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
+      )
 
       // The middleware should have been triggered by the fulfilled action
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
@@ -326,7 +328,9 @@ describe('notificationSyncMiddleware', () => {
       testStore.dispatch(addressBookSlice.actions.removeContact('0x456'))
 
       // Dispatch RTK Query action
-      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action)
+      await testStore.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate('MOBILE') as unknown as Action,
+      )
 
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(3)
     })
