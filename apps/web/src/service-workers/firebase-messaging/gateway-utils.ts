@@ -30,11 +30,13 @@ const getBaseUrl = (): string => {
  * Fetches chains configuration using direct fetch
  * Service workers can't access Redux store, so we use plain HTTP calls
  *
+ * @param serviceKey - Service key for scoping chain features
  * @returns Promise with results array of Chain objects
  */
-export const getChainsConfig = async (): Promise<{ results: Chain[] }> => {
-  const url = `${getBaseUrl()}/v1/chains`
-  const response = await fetch(url)
+export const getChainsConfig = async (serviceKey: string): Promise<{ results: Chain[] }> => {
+  const url = new URL('/v2/chains', getBaseUrl())
+  url.searchParams.set('serviceKey', serviceKey)
+  const response = await fetch(url.toString())
 
   if (!response.ok) {
     throw new Error(`Failed to fetch chains: ${response.status}`)
