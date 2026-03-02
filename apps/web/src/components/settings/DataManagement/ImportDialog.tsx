@@ -15,6 +15,7 @@ import FileIcon from '@/public/images/settings/data/file.svg'
 import { ImportFileUpload } from '@/components/settings/DataManagement/ImportFileUpload'
 import { showNotification } from '@/store/notificationsSlice'
 import { visitedSafesSlice } from '@/store/visitedSafesSlice'
+import { customAbiSlice } from '@/store/customAbiSlice'
 
 import css from './styles.module.css'
 
@@ -32,11 +33,21 @@ export const ImportDialog = ({
   setJsonData: Dispatch<SetStateAction<string | undefined>>
 }): ReactElement => {
   const dispatch = useAppDispatch()
-  const { addedSafes, addressBook, addressBookEntriesCount, settings, safeApps, undeployedSafes, visitedSafes, error } =
-    useGlobalImportJsonParser(jsonData)
+  const {
+    addedSafes,
+    addressBook,
+    addressBookEntriesCount,
+    settings,
+    safeApps,
+    undeployedSafes,
+    visitedSafes,
+    customAbis,
+    error,
+  } = useGlobalImportJsonParser(jsonData)
 
   const isDisabled =
-    (!addedSafes && !addressBook && !settings && !safeApps && !undeployedSafes && !visitedSafes) || !!error
+    (!addedSafes && !addressBook && !settings && !safeApps && !undeployedSafes && !visitedSafes && !customAbis) ||
+    !!error
 
   const handleClose = () => {
     setFileName(undefined)
@@ -78,6 +89,10 @@ export const ImportDialog = ({
     if (visitedSafes) {
       dispatch(visitedSafesSlice.actions.setVisitedSafes(visitedSafes))
       trackEvent(SETTINGS_EVENTS.DATA.IMPORT_VISITED_SAFES)
+    }
+
+    if (customAbis) {
+      dispatch(customAbiSlice.actions.setCustomAbis(customAbis))
     }
 
     dispatch(

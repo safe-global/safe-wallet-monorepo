@@ -53,20 +53,24 @@ function EntryDialog({
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
     const targetChainIds = chainIds ?? [actualChainId]
-    dispatch(upsertAddressBookEntries({ ...data, chainIds: targetChainIds }))
 
     if (abiValue.trim()) {
       try {
         new Interface(abiValue)
-        const address = checksumAddress(data.address)
-        targetChainIds.forEach((cId) => {
-          dispatch(upsertCustomAbi({ chainId: cId, entry: { address, name: data.name, abi: abiValue.trim() } }))
-        })
-        trackEvent(SETTINGS_EVENTS.CUSTOM_ABIS.ADD)
       } catch {
         setAbiError('Invalid ABI format')
         return
       }
+    }
+
+    dispatch(upsertAddressBookEntries({ ...data, chainIds: targetChainIds }))
+
+    if (abiValue.trim()) {
+      const address = checksumAddress(data.address)
+      targetChainIds.forEach((cId) => {
+        dispatch(upsertCustomAbi({ chainId: cId, entry: { address, name: data.name, abi: abiValue.trim() } }))
+      })
+      trackEvent(SETTINGS_EVENTS.CUSTOM_ABIS.ADD)
     }
 
     handleClose()

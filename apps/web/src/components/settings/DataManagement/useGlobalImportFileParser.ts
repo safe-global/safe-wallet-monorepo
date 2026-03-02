@@ -11,6 +11,7 @@ import type { SettingsState } from '@/store/settingsSlice'
 import { useMemo } from 'react'
 import type { VisitedSafesState } from '@/store/visitedSafesSlice'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
+import type { CustomAbisState } from '@/store/customAbiSlice'
 
 export const enum SAFE_EXPORT_VERSION {
   V1 = '1.0',
@@ -67,6 +68,7 @@ export const _filterValidAbEntries = (ab?: AddressBookState): AddressBookState |
  *  - safeApps
  *  - settings
  *  - visited Safes
+ *  - custom ABIs
  *
  * @param jsonData
  * @returns data to import and some insights about it
@@ -79,6 +81,7 @@ type Data = {
   safeApps?: SafeAppsState
   undeployedSafes?: UndeployedSafesState
   visitedSafes?: VisitedSafesState
+  customAbis?: CustomAbisState
   error?: ImportErrors
   addressBookEntriesCount: number
   addedSafesCount: number
@@ -95,6 +98,7 @@ export const useGlobalImportJsonParser = (jsonData: string | undefined): Data =>
       safeApps: undefined,
       undeployedSafes: undefined,
       visitedSafes: undefined,
+      customAbis: undefined,
     }
 
     if (!jsonData) {
@@ -142,6 +146,7 @@ export const useGlobalImportJsonParser = (jsonData: string | undefined): Data =>
         data.safeApps = parsedFile.data.safeApps
         data.undeployedSafes = parsedFile.data.undeployedSafes
         data.visitedSafes = parsedFile.data.visitedSafes
+        data.customAbis = parsedFile.data.customAbis
 
         break
       }

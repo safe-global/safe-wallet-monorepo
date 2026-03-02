@@ -5,22 +5,29 @@ import Button from '@mui/material/Button'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
-import { removeCustomAbi } from '@/store/customAbiSlice'
+import { removeCustomAbi, selectCustomAbisByChain } from '@/store/customAbiSlice'
 import useChainId from '@/hooks/useChainId'
 import useAddressBook from '@/hooks/useAddressBook'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 
 const RemoveDialog = ({ handleClose, address }: { handleClose: () => void; address: string }): ReactElement => {
   const dispatch = useAppDispatch()
   const chainId = useChainId()
   const addressBook = useAddressBook()
+  const customAbis = useAppSelector((state) => selectCustomAbisByChain(state, chainId))
 
   const name = addressBook?.[address]
+  const hasCustomAbi = !!customAbis[address]
 
   const handleConfirm = () => {
     dispatch(removeAddressBookEntry({ chainId, address }))
     dispatch(removeCustomAbi({ chainId, address }))
+    if (hasCustomAbi) {
+      trackEvent(SETTINGS_EVENTS.CUSTOM_ABIS.REMOVE)
+    }
     handleClose()
   }
 
