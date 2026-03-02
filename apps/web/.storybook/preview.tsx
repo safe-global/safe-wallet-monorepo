@@ -149,7 +149,7 @@ const preview: Preview = {
   loaders: [mswLoader],
 
   decorators: [
-    // Conditional MUI/shadcn decorator: skip MUI for UI/ stories, wrap with ShadcnProvider instead
+    // All stories get ShadcnProvider (matching the real app). UI/ stories skip MUI.
     (Story, context) => {
       const themeMode = (context.globals?.theme as 'light' | 'dark') || 'light'
 
@@ -164,12 +164,14 @@ const preview: Preview = {
       const theme = createSafeTheme(themeMode)
 
       return (
-        <CacheProvider value={emotionCache}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Story />
-          </ThemeProvider>
-        </CacheProvider>
+        <ShadcnProvider dark={themeMode === 'dark'}>
+          <CacheProvider value={emotionCache}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Story />
+            </ThemeProvider>
+          </CacheProvider>
+        </ShadcnProvider>
       )
     },
     ThemeSyncDecorator,
