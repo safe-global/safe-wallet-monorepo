@@ -9,7 +9,7 @@ import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getTxStatus, formatTxDate, _getTransactionsToDisplay } from '../../utils'
-import type { RecoveryQueueItem} from '@/features/recovery';
+import type { RecoveryQueueItem } from '@/features/recovery'
 import { useRecoveryQueue } from '@/features/recovery'
 import useWallet from '@/hooks/wallets/useWallet'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
@@ -28,7 +28,6 @@ const TxIcon = ({ tx }: TxIconProps): ReactElement => (
     <TxTypeIcon tx={tx.transaction} />
   </div>
 )
-
 
 const PendingTxList = (): ReactElement => {
   const { page, loading } = useTxQueue()
@@ -50,7 +49,6 @@ const PendingTxList = (): ReactElement => {
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = loading || safeLoading || isInitialState
-
 
   const handleViewAll = () => {
     router.push({ pathname: AppRoutes.transactions.queue, query: { safe: router.query.safe } })
@@ -84,7 +82,11 @@ const PendingTxList = (): ReactElement => {
               <SafeWidget.Item
                 key={tx.transaction.id}
                 href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
-                label={<div className="flex gap-1 items-center"><TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} /></div>}
+                label={
+                  <div className="flex gap-1 items-center">
+                    <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
+                  </div>
+                }
                 info={formatTxDate(tx.transaction.timestamp)}
                 startNode={<TxIcon tx={tx} />}
                 actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
@@ -92,7 +94,6 @@ const PendingTxList = (): ReactElement => {
             )
           })}
         </>
-
       )}
       {!isLoading && queuedTxs.length > 0 && (
         <SafeWidget.Footer count={parseInt(queueSize)} text="View all pending transactions" onClick={handleViewAll} />
