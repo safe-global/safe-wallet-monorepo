@@ -1,13 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode } from 'react'
+import { AppRoutes } from '@/config/routes'
+import { trackEvent } from '@/services/analytics'
 import { SpaceSelectorDropdown } from '../variants/SpaceSelectorDropdown'
 
+const mockPush = jest.fn()
 jest.mock('next/router', () => ({
   useRouter: () => ({
     pathname: '/spaces',
     query: { spaceId: '1' },
-    push: jest.fn(),
+    push: mockPush,
   }),
 }))
 
@@ -120,6 +123,10 @@ jest.mock('@/components/ui/dropdown-menu', () => {
 })
 
 describe('SpaceSelectorDropdown', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('adds an accessible label to the trigger', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space' }} spaces={[]} />)
 
@@ -134,5 +141,77 @@ describe('SpaceSelectorDropdown', () => {
 
     fireEvent.click(trigger)
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('shows all space items when the dropdown is opened', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha' },
+      { id: 2, name: 'Beta' },
+      { id: 3, name: 'Gamma' },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    fireEvent.click(trigger)
+
+    const spaceItemButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => spaces.some((s) => btn.querySelector('span')?.textContent === s.name))
+    expect(spaceItemButtons).toHaveLength(3)
+  })
+
+  it('calls router.push with the correct spaceId when a space is selected', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha' },
+      { id: 2, name: 'Beta' },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    fireEvent.click(trigger)
+
+    const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+    fireEvent.click(betaButton!)
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '2' } })
+  })
+
+  it('tracks CREATE_SPACE_MODAL event and navigates when "Create space" is clicked', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('Create space'))
+
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
+  })
+
+  it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View spaces" is clicked', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('View spaces'))
+
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
+  })
+
+  it('shows a checkmark only next to the currently selected space', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha' },
+      { id: 2, name: 'Beta' },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    fireEvent.click(trigger)
+
+    const alphaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+    const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+
+    expect(alphaButton?.querySelector('svg')).toBeInTheDocument()
+    expect(betaButton?.querySelector('svg')).not.toBeInTheDocument()
   })
 })

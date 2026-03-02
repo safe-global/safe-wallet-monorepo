@@ -4,37 +4,42 @@ import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../variants/SpacesSidebarVariant'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from '../types'
 
-// Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp, ...props }: any) => (
-    <button
-      data-active={isActive}
-      disabled={disabled}
-      className={className}
-      {...props}
-      {...(renderProp ? { as: 'a' } : {})}
-    >
+  SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  SidebarMenuButton: ({
+    children,
+    isActive,
+    disabled,
+    className,
+    'data-testid': testId,
+  }: {
+    children: ReactNode
+    isActive?: boolean
+    disabled?: boolean
+    className?: string
+    'data-testid'?: string
+  }) => (
+    <button data-active={isActive} disabled={disabled} className={className} data-testid={testId}>
       {children}
     </button>
   ),
 }))
 
-// Mock Next.js Link component
 jest.mock('next/link', () => {
-  const Link = ({ children, href }: any) => <a href={href}>{children}</a>
+  const Link = ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>
   Link.displayName = 'Link'
   return Link
 })
 
-// Mock SpaceSelectorDropdown
 jest.mock('../variants/SpaceSelectorDropdown', () => ({
-  SpaceSelectorDropdown: ({ selectedSpace, spaces }: any) => (
+  SpaceSelectorDropdown: ({ selectedSpace, spaces }: { selectedSpace?: SpaceItem; spaces?: SpaceItem[] }) => (
     <div>
       Selected: {selectedSpace?.name} | Spaces: {spaces?.length}
     </div>
@@ -97,7 +102,7 @@ describe('SpacesSidebarVariant', () => {
     ],
   }
 
-  it('renders space selector dropdown', () => {
+  it('passes selectedSpace and spaces to the space selector dropdown', () => {
     render(
       <SpacesSidebarVariant
         mainNavItems={mockMainNavItems}
@@ -107,7 +112,7 @@ describe('SpacesSidebarVariant', () => {
       />,
     )
 
-    expect(screen.getByText(/Selected:/)).toBeInTheDocument()
+    expect(screen.getByText('Selected: Test Space | Spaces: 2')).toBeInTheDocument()
   })
 
   it('renders all navigation items with labels', () => {
@@ -142,7 +147,7 @@ describe('SpacesSidebarVariant', () => {
   })
 
   it('disables items marked as disabled', () => {
-    const { container } = render(
+    render(
       <SpacesSidebarVariant
         mainNavItems={mockMainNavItems}
         setupGroup={mockSetupGroup}
@@ -151,8 +156,6 @@ describe('SpacesSidebarVariant', () => {
       />,
     )
 
-    const buttons = container.querySelectorAll('button')
-    const securityButton = Array.from(buttons).find((btn) => btn.textContent?.includes('Security'))
-    expect(securityButton).toHaveAttribute('disabled')
+    expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
   })
 })

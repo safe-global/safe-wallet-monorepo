@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { SidebarTopBar } from '../SidebarTopBar'
 
-// Mock the sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarTrigger: ({ className, 'data-testid': testId }: { className?: string; 'data-testid'?: string }) => (
     <button data-testid={testId} className={className}>
@@ -13,12 +12,23 @@ jest.mock('@/components/ui/sidebar', () => ({
   })),
 }))
 
-// Mock Next.js Image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, width, height, className, 'data-testid': testId }: any) => (
-    <img data-testid={testId} src={src} alt={alt} width={width} height={height} className={className} />
-  ),
+  default: ({
+    src,
+    alt,
+    width,
+    height,
+    className,
+    'data-testid': testId,
+  }: {
+    src: string
+    alt: string
+    width: number
+    height: number
+    className?: string
+    'data-testid'?: string
+  }) => <img data-testid={testId} src={src} alt={alt} width={width} height={height} className={className} />,
 }))
 
 describe('SidebarTopBar', () => {

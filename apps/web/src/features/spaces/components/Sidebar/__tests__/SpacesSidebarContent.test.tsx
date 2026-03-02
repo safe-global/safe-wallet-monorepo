@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
+import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { SpacesSidebarContent } from '../variants/SpacesSidebarContent'
-import type { SpaceItem } from '../types'
+import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
 
-// Mock hooks
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
@@ -19,7 +19,6 @@ jest.mock('../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-// Mock config
 jest.mock('../config', () => ({
   spacesMainNavigation: [
     {
@@ -51,9 +50,14 @@ jest.mock('../config', () => ({
   },
 }))
 
-// Mock SpacesSidebarVariant
 jest.mock('../variants/SpacesSidebarVariant', () => ({
-  SpacesSidebarVariant: ({ mainNavItems, setupGroup }: any) => (
+  SpacesSidebarVariant: ({
+    mainNavItems,
+    setupGroup,
+  }: {
+    mainNavItems: ResolvedSidebarItem[]
+    setupGroup: ResolvedSidebarGroup
+  }) => (
     <div>
       <div>Main items: {mainNavItems.length}</div>
       <div>Setup items: {setupGroup.items.length}</div>
@@ -162,5 +166,17 @@ describe('SpacesSidebarContent', () => {
     )
 
     expect(screen.getByText(/Main items:/)).toBeInTheDocument()
+  })
+
+  it('is unaffected by geoblocking — nav items remain visible when user is blocked', () => {
+    render(
+      <GeoblockingContext.Provider value={true}>
+        <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />
+      </GeoblockingContext.Provider>,
+    )
+
+    const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(mainNav).toHaveLength(2)
+    expect(setupGroup.items).toHaveLength(2)
   })
 })
