@@ -33,17 +33,33 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, tooltip, className, ...props }: any) => (
-    <button data-active={isActive} data-tooltip={tooltip} className={className} {...props}>
+  SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  SidebarMenuButton: ({
+    children,
+    isActive,
+    tooltip,
+    className,
+  }: {
+    children: ReactNode
+    isActive?: boolean
+    tooltip?: string
+    className?: string
+  }) => (
+    <button data-active={isActive} data-tooltip={tooltip} className={className}>
       {children}
     </button>
   ),
 }))
 
 jest.mock('@/components/ui/avatar', () => ({
-  Avatar: ({ children, className }: any) => <div className={className}>{children}</div>,
-  AvatarFallback: ({ children, className }: any) => <div className={className}>{children}</div>,
+  Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  AvatarFallback: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
 }))
 
 jest.mock('../config', () => ({

@@ -10,28 +10,36 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, disabled, className, render: renderProp, ...props }: any) => (
-    <button
-      data-active={isActive}
-      disabled={disabled}
-      className={className}
-      {...props}
-      {...(renderProp ? { as: 'a' } : {})}
-    >
+  SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  SidebarMenuButton: ({
+    children,
+    isActive,
+    disabled,
+    className,
+    'data-testid': testId,
+  }: {
+    children: ReactNode
+    isActive?: boolean
+    disabled?: boolean
+    className?: string
+    'data-testid'?: string
+  }) => (
+    <button data-active={isActive} disabled={disabled} className={className} data-testid={testId}>
       {children}
     </button>
   ),
 }))
 
 jest.mock('next/link', () => {
-  const Link = ({ children, href }: any) => <a href={href}>{children}</a>
+  const Link = ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>
   Link.displayName = 'Link'
   return Link
 })
 
 jest.mock('../variants/SpaceSelectorDropdown', () => ({
-  SpaceSelectorDropdown: ({ selectedSpace, spaces }: any) => (
+  SpaceSelectorDropdown: ({ selectedSpace, spaces }: { selectedSpace?: SpaceItem; spaces?: SpaceItem[] }) => (
     <div>
       Selected: {selectedSpace?.name} | Spaces: {spaces?.length}
     </div>

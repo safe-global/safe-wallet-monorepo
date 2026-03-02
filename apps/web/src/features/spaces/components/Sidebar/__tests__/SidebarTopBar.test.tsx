@@ -14,9 +14,21 @@ jest.mock('@/components/ui/sidebar', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, width, height, className, 'data-testid': testId }: any) => (
-    <img data-testid={testId} src={src} alt={alt} width={width} height={height} className={className} />
-  ),
+  default: ({
+    src,
+    alt,
+    width,
+    height,
+    className,
+    'data-testid': testId,
+  }: {
+    src: string
+    alt: string
+    width: number
+    height: number
+    className?: string
+    'data-testid'?: string
+  }) => <img data-testid={testId} src={src} alt={alt} width={width} height={height} className={className} />,
 }))
 
 describe('SidebarTopBar', () => {

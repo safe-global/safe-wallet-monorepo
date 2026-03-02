@@ -1,12 +1,29 @@
 import { render, screen } from '@testing-library/react'
 import { House } from 'lucide-react'
+import type { ReactElement, ReactNode } from 'react'
 import type { ResolvedSidebarItem } from '../types'
 import { NavItem } from '../variants/NavItem'
 
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
-  SidebarMenuItem: ({ children, className }: any) => <div className={className}>{children}</div>,
-  SidebarMenuButton: ({ children, isActive, disabled, render: renderProp, className, 'data-testid': testId }: any) => {
+  SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  SidebarMenuButton: ({
+    children,
+    isActive,
+    disabled,
+    render: renderProp,
+    className,
+    'data-testid': testId,
+  }: {
+    children: ReactNode
+    isActive?: boolean
+    disabled?: boolean
+    render?: ReactElement<{ href: string | { pathname?: string } }>
+    className?: string
+    'data-testid'?: string
+  }) => {
     if (renderProp && !disabled) {
       // Next.js Link href can be a string or { pathname, query } object
       const rawHref = renderProp.props.href
@@ -27,7 +44,9 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 jest.mock('next/link', () => {
-  return ({ children, href }: any) => <a href={href}>{children}</a>
+  const MockLink = ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>
+  MockLink.displayName = 'MockLink'
+  return MockLink
 })
 
 describe('NavItem', () => {

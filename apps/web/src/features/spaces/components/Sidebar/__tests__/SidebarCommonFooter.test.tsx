@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
@@ -26,7 +26,17 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  SidebarMenuButton: ({ children, render: renderProp, className, 'data-testid': testId }: any) =>
+  SidebarMenuButton: ({
+    children,
+    render: renderProp,
+    className,
+    'data-testid': testId,
+  }: {
+    children: ReactNode
+    render?: ReactElement<{ href: string; target?: string; rel?: string }>
+    className?: string
+    'data-testid'?: string
+  }) =>
     renderProp ? (
       <a
         data-testid={testId}
@@ -45,7 +55,15 @@ jest.mock('@/components/ui/sidebar', () => ({
 }))
 
 jest.mock('@/components/ui/switch', () => ({
-  Switch: ({ id, checked, onCheckedChange }: any) => (
+  Switch: ({
+    id,
+    checked,
+    onCheckedChange,
+  }: {
+    id: string
+    checked: boolean
+    onCheckedChange: (checked: boolean) => void
+  }) => (
     <input
       id={id}
       type="checkbox"
