@@ -162,7 +162,7 @@ const getStaticChainsPreloadedState = (): Partial<RootState> | undefined => {
   return {
     [cgwClient.reducerPath]: {
       queries: {
-        [`getChainsConfigV2(${JSON.stringify(CONFIG_SERVICE_KEY)})`]: {
+        [`getChainsConfigV2(${CONFIG_SERVICE_KEY})`]: {
           status: 'fulfilled' as const,
           endpointName: 'getChainsConfigV2' as const,
           requestId: `static-chains-${Date.now()}`,
