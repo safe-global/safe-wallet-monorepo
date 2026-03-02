@@ -34,7 +34,7 @@ runs:
           to_entries[]
           | select(.key | startswith("NEXT_PUBLIC_"))
           | select(.value != null and .value != "")
-          | "\(.key)<<__EOF__\n\(.value)\n__EOF__"
+          | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
         ' >> "$GITHUB_ENV"
 
     - name: Set environment variables
