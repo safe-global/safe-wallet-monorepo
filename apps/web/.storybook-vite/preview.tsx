@@ -8,8 +8,7 @@ import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
 
 import '../src/styles/globals.css'
-import '../src/styles/shadcn.css'
-import { ShadcnProvider } from '../src/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '../.storybook/shadcn'
 
 // Create emotion cache once for Storybook (same as real app)
 // This ensures MUI styles are injected first, allowing CSS modules to override them
