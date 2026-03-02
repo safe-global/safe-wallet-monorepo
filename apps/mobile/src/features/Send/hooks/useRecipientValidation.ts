@@ -5,7 +5,7 @@ import { useAddressBookCheck } from '@safe-global/utils/features/safe-shield/hoo
 import { RecipientStatus } from '@safe-global/utils/features/safe-shield/types'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { selectAddressBookState } from '@/src/store/addressBookSlice'
+import { type Contact, selectAddressBookState } from '@/src/store/addressBookSlice'
 import { selectSigners } from '@/src/store/signersSlice'
 import { selectAllSafes } from '@/src/store/safesSlice'
 
@@ -18,26 +18,77 @@ export interface RecipientValidationResult {
   canContinue: boolean
 }
 
+function findContact(contacts: Record<string, Contact>, addr: string): Contact | undefined {
+  return (
+    contacts[addr] ?? contacts[addr.toLowerCase()] ?? Object.values(contacts).find((c) => sameAddress(c.value, addr))
+  )
+}
+
+function resolveContactName(contacts: Record<string, Contact>, addr: string): string {
+  const contact = findContact(contacts, addr)
+  return contact ? contact.name : 'My Safe'
+}
+
+function resolveSignerName(
+  signers: Record<string, { name?: string | null; value: string }>,
+  addr: string,
+): string | undefined {
+  const signer = Object.values(signers).find((s) => sameAddress(s.value, addr))
+  return signer ? (signer.name ?? 'Signer') : undefined
+}
+
+function resolveAddressState(
+  trimmed: string,
+  activeSafeAddress: string,
+  addressBookCheck: Record<string, { type: string }> | undefined,
+  contacts: Record<string, Contact>,
+  signers: Record<string, { name?: string | null; value: string }>,
+): RecipientValidationResult {
+  if (!trimmed) {
+    return { state: 'empty', isValid: false, canContinue: false }
+  }
+
+  if (trimmed.length < 42 || !isAddress(trimmed)) {
+    const state = trimmed.length < 42 ? 'typing' : 'invalid'
+    return { state, isValid: false, canContinue: false }
+  }
+
+  if (sameAddress(trimmed, activeSafeAddress)) {
+    return { state: 'self-send', isValid: true, canContinue: true }
+  }
+
+  const shieldResult = addressBookCheck?.[trimmed]
+  if (shieldResult?.type === RecipientStatus.KNOWN_RECIPIENT) {
+    const contactName = resolveContactName(contacts, trimmed)
+    return { state: 'known', contactName, isValid: true, canContinue: true }
+  }
+
+  const signerName = resolveSignerName(signers, trimmed)
+  if (signerName) {
+    return {
+      state: 'known',
+      contactName: signerName,
+      isValid: true,
+      canContinue: true,
+    }
+  }
+
+  return { state: 'unknown', isValid: true, canContinue: true }
+}
+
 export function useRecipientValidation(address: string): RecipientValidationResult {
   const activeSafe = useDefinedActiveSafe()
   const addressBookState = useAppSelector(selectAddressBookState)
   const signers = useAppSelector(selectSigners)
   const allSafes = useAppSelector(selectAllSafes)
 
-  // Reuse SafeShield's isInAddressBook pattern (same as mobile useCounterpartyAnalysis)
   const isInAddressBook = useMemo(() => {
     return (addr: string, checkChainId: string): boolean => {
-      const contact =
-        addressBookState.contacts[addr] ??
-        addressBookState.contacts[addr.toLowerCase()] ??
-        Object.values(addressBookState.contacts).find((c) => sameAddress(c.value, addr))
+      const contact = findContact(addressBookState.contacts, addr)
       if (!contact) {
         return false
       }
-      if (contact.chainIds.length === 0) {
-        return true
-      }
-      return contact.chainIds.includes(checkChainId)
+      return contact.chainIds.length === 0 || contact.chainIds.includes(checkChainId)
     }
   }, [addressBookState.contacts])
 
@@ -47,58 +98,13 @@ export function useRecipientValidation(address: string): RecipientValidationResu
   const isValidAddress = trimmed.length >= 42 && isAddress(trimmed)
   const addresses = useMemo(() => (isValidAddress ? [trimmed] : []), [isValidAddress, trimmed])
 
-  // SafeShield address book + owned safe check
   const addressBookCheck = useAddressBookCheck(activeSafe.chainId, addresses, isInAddressBook, ownedSafes)
 
-  const result = useMemo((): RecipientValidationResult => {
-    if (!trimmed) {
-      return { state: 'empty', isValid: false, canContinue: false }
-    }
-
-    if (trimmed.length < 42) {
-      return { state: 'typing', isValid: false, canContinue: false }
-    }
-
-    if (!isAddress(trimmed)) {
-      return { state: 'invalid', isValid: false, canContinue: false }
-    }
-
-    if (sameAddress(trimmed, activeSafe.address)) {
-      return { state: 'self-send', isValid: true, canContinue: true }
-    }
-
-    // Use SafeShield result for address book + owned safe checks
-    const shieldResult = addressBookCheck?.[trimmed]
-    if (shieldResult?.type === RecipientStatus.KNOWN_RECIPIENT) {
-      // Resolve a display name from the address book
-      let contactName: string | undefined
-      const contact =
-        addressBookState.contacts[trimmed] ??
-        addressBookState.contacts[trimmed.toLowerCase()] ??
-        Object.values(addressBookState.contacts).find((c) => sameAddress(c.value, trimmed))
-
-      if (contact) {
-        contactName = contact.name
-      } else {
-        contactName = 'My Safe'
-      }
-
-      return { state: 'known', contactName, isValid: true, canContinue: true }
-    }
-
-    // Signer check (not covered by SafeShield)
-    const signer = Object.values(signers).find((s) => sameAddress(s.value, trimmed))
-    if (signer) {
-      return {
-        state: 'known',
-        contactName: signer.name ?? 'Signer',
-        isValid: true,
-        canContinue: true,
-      }
-    }
-
-    return { state: 'unknown', isValid: true, canContinue: true }
-  }, [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers])
+  const result = useMemo(
+    (): RecipientValidationResult =>
+      resolveAddressState(trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers),
+    [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers],
+  )
 
   return result
 }

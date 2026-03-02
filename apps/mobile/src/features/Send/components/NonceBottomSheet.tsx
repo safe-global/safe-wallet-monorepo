@@ -24,21 +24,88 @@ interface NonceBottomSheetProps {
   isFetchingMore?: boolean
 }
 
-export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetProps>(function NonceBottomSheet(
-  { recommendedNonce, queuedNonces, selectedNonce, onSelectNonce, onAddCustomNonce, onEndReached, isFetchingMore },
-  ref,
-) {
-  const theme = useTheme()
-  const insets = useSafeAreaInsets()
-  const [footerHeight, setFooterHeight] = useState(0)
+function RecommendedNonceRow({
+  nonce,
+  isSelected,
+  onPress,
+}: {
+  nonce: number
+  isSelected: boolean
+  onPress: () => void
+}) {
+  return (
+    <Pressable onPress={onPress} testID="nonce-recommended">
+      <View
+        flexDirection="row"
+        alignItems="center"
+        height={64}
+        paddingHorizontal="$3"
+        borderRadius={8}
+        backgroundColor={isSelected ? '$backgroundLightgray' : '$backgroundPaper'}
+      >
+        <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
+          {nonce}
+        </Text>
+        <View flex={1}>
+          <Text fontSize="$4" fontWeight={600} color="$color">
+            New transaction
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  )
+}
 
-  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
+function ReplaceExistingDivider() {
+  return (
+    <View flexDirection="row" alignItems="center" gap="$3" paddingHorizontal="$2" paddingVertical="$2">
+      <View flex={1} height={1} backgroundColor="$borderLight" />
+      <Text fontSize="$4" color="$colorSecondary">
+        Replace existing
+      </Text>
+      <View flex={1} height={1} backgroundColor="$borderLight" />
+    </View>
+  )
+}
 
-  const renderFooter = useCallback(
+function QueuedNonceRow({
+  item,
+  isSelected,
+  onPress,
+}: {
+  item: QueuedNonceItem
+  isSelected: boolean
+  onPress: () => void
+}) {
+  return (
+    <Pressable onPress={onPress} testID={`nonce-queued-${item.nonce}`}>
+      <View
+        flexDirection="row"
+        alignItems="center"
+        height={64}
+        paddingHorizontal="$3"
+        borderRadius={8}
+        backgroundColor={isSelected ? '$backgroundLightgray' : undefined}
+      >
+        <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
+          {item.nonce}
+        </Text>
+        <View flex={1}>
+          <Text fontSize="$4" fontWeight={600} color="$color">
+            {item.label}
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  )
+}
+
+function useRenderFooter(insets: { bottom: number }, onAddCustomNonce: () => void, onLayout: (height: number) => void) {
+  return useCallback(
     (props: BottomSheetFooterProps) => (
       <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
         <View
-          onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}
+          onLayout={(e) => onLayout(e.nativeEvent.layout.height)}
           backgroundColor="$backgroundSheet"
           paddingHorizontal="$4"
           paddingTop="$2"
@@ -47,14 +114,7 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
         >
           <View height={1} backgroundColor="$borderLight" marginBottom="$2" />
           <Pressable onPress={onAddCustomNonce} testID="nonce-add-custom">
-            <View
-              flexDirection="row"
-              alignItems="center"
-              height={64}
-              paddingHorizontal="$3"
-              borderRadius={8}
-              gap="$3"
-            >
+            <View flexDirection="row" alignItems="center" height={64} paddingHorizontal="$3" borderRadius={8} gap="$3">
               <View
                 width={40}
                 height={40}
@@ -73,21 +133,27 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
         </View>
       </BottomSheetFooter>
     ),
-    [insets.bottom, onAddCustomNonce],
+    [insets.bottom, onAddCustomNonce, onLayout],
   )
+}
+
+export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetProps>(function NonceBottomSheet(
+  { recommendedNonce, queuedNonces, selectedNonce, onSelectNonce, onAddCustomNonce, onEndReached, isFetchingMore },
+  ref,
+) {
+  const theme = useTheme()
+  const insets = useSafeAreaInsets()
+  const [footerHeight, setFooterHeight] = useState(0)
+
+  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
+
+  const renderFooter = useRenderFooter(insets, onAddCustomNonce, setFooterHeight)
 
   const handleSelectRecommended = useCallback(() => {
     if (recommendedNonce !== undefined) {
       onSelectNonce(recommendedNonce)
     }
   }, [recommendedNonce, onSelectNonce])
-
-  const handleSelectQueued = useCallback(
-    (nonce: number) => {
-      onSelectNonce(nonce)
-    },
-    [onSelectNonce],
-  )
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -128,65 +194,23 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
         </View>
 
         <View paddingHorizontal="$4" gap="$4">
-          {/* Recommended nonce */}
           {recommendedNonce !== undefined && (
-            <Pressable onPress={handleSelectRecommended} testID="nonce-recommended">
-              <View
-                flexDirection="row"
-                alignItems="center"
-                height={64}
-                paddingHorizontal="$3"
-                borderRadius={8}
-                backgroundColor={isRecommendedSelected ? '$backgroundLightgray' : '$backgroundPaper'}
-              >
-                <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
-                  {recommendedNonce}
-                </Text>
-                <View flex={1}>
-                  <Text fontSize="$4" fontWeight={600} color="$color">
-                    New transaction
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
+            <RecommendedNonceRow
+              nonce={recommendedNonce}
+              isSelected={isRecommendedSelected}
+              onPress={handleSelectRecommended}
+            />
           )}
 
-          {/* Replace existing divider */}
-          {queuedNonces.length > 0 && (
-            <View flexDirection="row" alignItems="center" gap="$3" paddingHorizontal="$2" paddingVertical="$2">
-              <View flex={1} height={1} backgroundColor="$borderLight" />
-              <Text fontSize="$4" color="$colorSecondary">
-                Replace existing
-              </Text>
-              <View flex={1} height={1} backgroundColor="$borderLight" />
-            </View>
-          )}
+          {queuedNonces.length > 0 && <ReplaceExistingDivider />}
 
-          {/* Queued nonces */}
           {queuedNonces.map((item) => (
-            <Pressable
+            <QueuedNonceRow
               key={item.nonce}
-              onPress={() => handleSelectQueued(item.nonce)}
-              testID={`nonce-queued-${item.nonce}`}
-            >
-              <View
-                flexDirection="row"
-                alignItems="center"
-                height={64}
-                paddingHorizontal="$3"
-                borderRadius={8}
-                backgroundColor={selectedNonce === item.nonce ? '$backgroundLightgray' : undefined}
-              >
-                <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
-                  {item.nonce}
-                </Text>
-                <View flex={1}>
-                  <Text fontSize="$4" fontWeight={600} color="$color">
-                    {item.label}
-                  </Text>
-                </View>
-              </View>
-            </Pressable>
+              item={item}
+              isSelected={selectedNonce === item.nonce}
+              onPress={() => onSelectNonce(item.nonce)}
+            />
           ))}
 
           {isFetchingMore && (

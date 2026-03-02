@@ -10,6 +10,39 @@ import { RecipientSections } from './components/RecipientSections'
 import { AddToAddressBookModal } from './components/AddToAddressBookModal'
 import { useRecipientValidation } from './hooks/useRecipientValidation'
 import { useRecipientSearch } from './hooks/useRecipientSearch'
+import { IconName } from '@/src/types/iconTypes'
+
+function IconRow({
+  icon,
+  label,
+  onPress,
+  testID,
+}: {
+  icon: IconName
+  label: string
+  onPress: () => void
+  testID: string
+}) {
+  return (
+    <Pressable onPress={onPress} testID={testID}>
+      <View flexDirection="row" alignItems="center" gap="$3" padding="$3">
+        <View
+          width={40}
+          height={40}
+          borderRadius={20}
+          backgroundColor="$backgroundSkeleton"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <SafeFontIcon name={icon} size={20} color="$color" />
+        </View>
+        <Text fontSize="$4" fontWeight={600} color="$color">
+          {label}
+        </Text>
+      </View>
+    </Pressable>
+  )
+}
 
 export function SelectRecipientContainer() {
   const router = useRouter()
@@ -70,6 +103,7 @@ export function SelectRecipientContainer() {
   const isSelected = !!displayName
   const hasAddress = validation.state !== 'empty' && validation.state !== 'typing'
   const showBrowseOptions = !isSelected && !hasAddress
+  const showAddToAddressBook = !isSelected && validation.state === 'unknown'
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -89,45 +123,18 @@ export function SelectRecipientContainer() {
               selectedName={displayName}
             />
 
-            {!isSelected && validation.state === 'unknown' && (
-              <Pressable onPress={() => setShowAddContact(true)} testID="add-to-address-book">
-                <View flexDirection="row" alignItems="center" gap="$3" padding="$3">
-                  <View
-                    width={40}
-                    height={40}
-                    borderRadius={20}
-                    backgroundColor="$backgroundSkeleton"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <SafeFontIcon name="plus" size={20} color="$color" />
-                  </View>
-                  <Text fontSize="$4" fontWeight={600} color="$color">
-                    Add to address book
-                  </Text>
-                </View>
-              </Pressable>
+            {showAddToAddressBook && (
+              <IconRow
+                icon="plus"
+                label="Add to address book"
+                onPress={() => setShowAddContact(true)}
+                testID="add-to-address-book"
+              />
             )}
 
             {showBrowseOptions && (
               <>
-                <Pressable onPress={handleQrPress} testID="scan-qr-button">
-                  <View flexDirection="row" alignItems="center" gap="$3" padding="$3">
-                    <View
-                      width={40}
-                      height={40}
-                      borderRadius={20}
-                      backgroundColor="$backgroundSkeleton"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <SafeFontIcon name="qr-code" size={20} color="$color" />
-                    </View>
-                    <Text fontSize="$4" fontWeight={600} color="$color">
-                      Scan QR code
-                    </Text>
-                  </View>
-                </Pressable>
+                <IconRow icon="qr-code" label="Scan QR code" onPress={handleQrPress} testID="scan-qr-button" />
 
                 <RecipientSections
                   safes={searchResults.safes}

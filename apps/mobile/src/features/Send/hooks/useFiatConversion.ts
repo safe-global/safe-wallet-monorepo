@@ -57,6 +57,74 @@ const truncateDecimals = (value: string, maxDecimals: number): string => {
   return value.slice(0, dotIndex + 1 + maxDecimals)
 }
 
+const parseRate = (fiatRate: string | undefined): { hasFiatPrice: boolean; rate: number } => {
+  const rate = fiatRate ? parseFloat(fiatRate) : 0
+  return { hasFiatPrice: rate > 0, rate }
+}
+
+const computeTokenAmount = (
+  rawInput: string,
+  isFiatMode: boolean,
+  hasFiatPrice: boolean,
+  rate: number,
+  decimals: number,
+): string => {
+  if (!rawInput) {
+    return ''
+  }
+  if (!isFiatMode || !hasFiatPrice) {
+    return rawInput
+  }
+
+  const fiatNum = safeParseFloat(rawInput)
+  if (fiatNum === 0 || rate === 0) {
+    return ''
+  }
+
+  return truncateDecimals((fiatNum / rate).toString(), decimals)
+}
+
+const computeDerivedFiat = (
+  rawInput: string,
+  isFiatMode: boolean,
+  hasFiatPrice: boolean,
+  rate: number,
+  currency: string,
+): string => {
+  if (isFiatMode || !hasFiatPrice) {
+    return ''
+  }
+
+  const tokenNum = safeParseFloat(rawInput)
+  return formatCurrency((tokenNum * rate).toString(), currency)
+}
+
+const computeDerivedToken = (
+  isFiatMode: boolean,
+  hasFiatPrice: boolean,
+  tokenAmount: string,
+  symbol: string,
+): string => {
+  if (!isFiatMode || !hasFiatPrice) {
+    return ''
+  }
+  return `${tokenAmount || '0'} ${symbol}`
+}
+
+const formatPrimaryDisplay = (
+  rawInput: string,
+  isFiatMode: boolean,
+  hasFiatPrice: boolean,
+  currencySymbol: string,
+  symbol: string,
+): string => {
+  const display = rawInput || '0'
+  if (isFiatMode && hasFiatPrice) {
+    return `${currencySymbol} ${display}`
+  }
+  return `${display} ${symbol}`
+}
+
 export function useFiatConversion({
   rawInput,
   fiatRate,
@@ -66,62 +134,34 @@ export function useFiatConversion({
 }: UseFiatConversionArgs): UseFiatConversionResult {
   const [isFiatMode, setIsFiatMode] = useState(true)
 
-  const hasFiatPrice = !!fiatRate && parseFloat(fiatRate) > 0
-  const rate = hasFiatPrice ? parseFloat(fiatRate) : 0
+  const { hasFiatPrice, rate } = parseRate(fiatRate)
 
   const currencySymbol = useMemo(() => getCurrencySymbol(currency), [currency])
 
-  const tokenAmount = useMemo(() => {
-    if (!rawInput) {
-      return ''
-    }
-    if (isFiatMode && hasFiatPrice) {
-      const fiatNum = safeParseFloat(rawInput)
-      if (fiatNum === 0 || rate === 0) {
-        return ''
-      }
-      return truncateDecimals((fiatNum / rate).toString(), decimals)
-    }
-    return rawInput
-  }, [rawInput, isFiatMode, hasFiatPrice, rate, decimals])
+  const tokenAmount = useMemo(
+    () => computeTokenAmount(rawInput, isFiatMode, hasFiatPrice, rate, decimals),
+    [rawInput, isFiatMode, hasFiatPrice, rate, decimals],
+  )
 
-  // Derived fiat value (for secondary display in token mode)
-  const derivedFiat = useMemo(() => {
-    if (!hasFiatPrice) {
-      return ''
-    }
-    if (isFiatMode) {
-      return ''
-    }
-    const tokenNum = safeParseFloat(rawInput)
-    return formatCurrency((tokenNum * rate).toString(), currency)
-  }, [rawInput, isFiatMode, hasFiatPrice, rate, currency])
+  const derivedFiat = useMemo(
+    () => computeDerivedFiat(rawInput, isFiatMode, hasFiatPrice, rate, currency),
+    [rawInput, isFiatMode, hasFiatPrice, rate, currency],
+  )
 
-  // Derived token value (for secondary display in fiat mode)
-  const derivedToken = useMemo(() => {
-    if (!isFiatMode || !hasFiatPrice) {
-      return ''
-    }
-    const t = tokenAmount || '0'
-    return `${t} ${symbol}`
-  }, [isFiatMode, hasFiatPrice, tokenAmount, symbol])
+  const derivedToken = useMemo(
+    () => computeDerivedToken(isFiatMode, hasFiatPrice, tokenAmount, symbol),
+    [isFiatMode, hasFiatPrice, tokenAmount, symbol],
+  )
 
-  // Primary: show exactly what the user is typing with the right prefix
-  const primaryDisplay = useMemo(() => {
-    const display = rawInput || '0'
-    if (isFiatMode && hasFiatPrice) {
-      return `${currencySymbol} ${display}`
-    }
-    return `${display} ${symbol}`
-  }, [rawInput, isFiatMode, hasFiatPrice, currencySymbol, symbol])
+  const primaryDisplay = useMemo(
+    () => formatPrimaryDisplay(rawInput, isFiatMode, hasFiatPrice, currencySymbol, symbol),
+    [rawInput, isFiatMode, hasFiatPrice, currencySymbol, symbol],
+  )
 
-  // Secondary: show the derived conversion
-  const secondaryDisplay = useMemo(() => {
-    if (isFiatMode && hasFiatPrice) {
-      return derivedToken
-    }
-    return derivedFiat
-  }, [isFiatMode, hasFiatPrice, derivedToken, derivedFiat])
+  const secondaryDisplay = useMemo(
+    () => (isFiatMode && hasFiatPrice ? derivedToken : derivedFiat),
+    [isFiatMode, hasFiatPrice, derivedToken, derivedFiat],
+  )
 
   const toggleMode = useCallback(() => {
     if (hasFiatPrice) {

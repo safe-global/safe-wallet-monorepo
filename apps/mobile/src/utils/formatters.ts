@@ -56,8 +56,9 @@ export const sanitizeDecimalInput = (value: string) => {
   if (sanitized.startsWith('.')) {
     sanitized = '0' + sanitized
   }
-  // Strip leading zeros: "05" → "5", but keep "0" and "0."
-  if (sanitized.length > 1 && sanitized.startsWith('0') && sanitized[1] !== '.') {
+  // Strip leading zeros: "05" -> "5", but keep "0" and "0."
+  const hasRedundantLeadingZeros = sanitized.length > 1 && sanitized.startsWith('0') && sanitized[1] !== '.'
+  if (hasRedundantLeadingZeros) {
     sanitized = sanitized.replace(/^0+/, '') || '0'
   }
   return sanitized

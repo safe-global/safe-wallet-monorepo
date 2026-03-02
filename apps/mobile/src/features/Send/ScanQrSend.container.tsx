@@ -34,31 +34,45 @@ export function ScanQrSendContainer() {
 
   useFocusEffect(handleFocusEffect)
 
+  const showInvalidAddressToast = useCallback(
+    (code: string) => {
+      if (toastForValueShown[code]) {
+        return
+      }
+
+      toastForValueShown[code] = true
+      toast.show('Not a valid address', {
+        native: false,
+        duration: 2000,
+      })
+    },
+    [toast],
+  )
+
   const onScan = useCallback(
     (codes: Code[]) => {
-      if (codes.length > 0 && isCameraActive && !hasScanned.current) {
-        const code = codes[0].value || ''
-        const { address } = parsePrefixedAddress(code)
+      const canProcess = codes.length > 0 && isCameraActive && !hasScanned.current
 
-        if (isValidAddress(address)) {
-          hasScanned.current = true
-          setIsCameraActive(false)
-          router.navigate({
-            pathname: '/(send)/recipient',
-            params: { scannedAddress: address },
-          })
-        } else {
-          if (!toastForValueShown[code]) {
-            toastForValueShown[code] = true
-            toast.show('Not a valid address', {
-              native: false,
-              duration: 2000,
-            })
-          }
-        }
+      if (!canProcess) {
+        return
       }
+
+      const code = codes[0].value || ''
+      const { address } = parsePrefixedAddress(code)
+
+      if (!isValidAddress(address)) {
+        showInvalidAddressToast(code)
+        return
+      }
+
+      hasScanned.current = true
+      setIsCameraActive(false)
+      router.navigate({
+        pathname: '/(send)/recipient',
+        params: { scannedAddress: address },
+      })
     },
-    [isCameraActive, router, toast],
+    [isCameraActive, router, showInvalidAddressToast],
   )
 
   const handleActivateCamera = useCallback(() => {

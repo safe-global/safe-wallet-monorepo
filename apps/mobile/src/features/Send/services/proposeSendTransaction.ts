@@ -17,6 +17,29 @@ interface ProposeSendTransactionArgs extends SendTransactionParams {
  *
  * The user will sign via the existing confirm-transaction flow.
  */
+function validateAddresses(recipient: string, tokenAddress: string): void {
+  if (!isAddress(recipient)) {
+    throw new Error(`Invalid recipient address: ${recipient}`)
+  }
+  if (!isAddress(tokenAddress)) {
+    throw new Error(`Invalid token address: ${tokenAddress}`)
+  }
+}
+
+async function getVerifiedSafeSDK(chainId: string) {
+  const safeSDK = getSafeSDK()
+  if (!safeSDK) {
+    throw new Error('Safe SDK is not initialized')
+  }
+
+  const sdkChainId = await safeSDK.getChainId()
+  if (sdkChainId.toString() !== chainId) {
+    throw new Error(`Chain mismatch: SDK on chain ${sdkChainId}, expected ${chainId}`)
+  }
+
+  return safeSDK
+}
+
 export const proposeSendTransaction = async ({
   recipient,
   tokenAddress,
@@ -28,27 +51,11 @@ export const proposeSendTransaction = async ({
   dispatch,
   nonce,
 }: ProposeSendTransactionArgs): Promise<string> => {
-  if (!isAddress(recipient)) {
-    throw new Error(`Invalid recipient address: ${recipient}`)
-  }
-  if (!isAddress(tokenAddress)) {
-    throw new Error(`Invalid token address: ${tokenAddress}`)
-  }
+  validateAddresses(recipient, tokenAddress)
 
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
-
   const safeTx = await createTx(txData, nonce)
-
-  const safeSDK = getSafeSDK()
-  if (!safeSDK) {
-    throw new Error('Safe SDK is not initialized')
-  }
-
-  const sdkChainId = await safeSDK.getChainId()
-  if (sdkChainId.toString() !== chainId) {
-    throw new Error(`Chain mismatch: SDK on chain ${sdkChainId}, expected ${chainId}`)
-  }
-
+  const safeSDK = await getVerifiedSafeSDK(chainId)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   const txDetails = await proposeNewTransaction({

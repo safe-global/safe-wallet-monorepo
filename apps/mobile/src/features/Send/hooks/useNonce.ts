@@ -12,6 +12,8 @@ interface QueuedNonceItem {
   label: string
 }
 
+type QueuedItem = QueuedItemPage['results'][number]
+
 interface UseNonceResult {
   recommendedNonce: number | undefined
   currentNonce: number | undefined
@@ -20,6 +22,54 @@ interface UseNonceResult {
   isFetchingMore: boolean
   hasMore: boolean
   fetchMore: () => void
+}
+
+function flattenPages(pages: QueuedItemPage[] | undefined): QueuedItem[] {
+  if (!pages) {
+    return []
+  }
+  return pages.flatMap((page) => page.results || [])
+}
+
+function resolveTransactionNonce(txItem: TransactionQueuedItem, fallbackNonce: number | undefined): number | undefined {
+  const { executionInfo } = txItem.transaction
+  if (executionInfo?.type === 'MULTISIG') {
+    return executionInfo.nonce
+  }
+  return fallbackNonce
+}
+
+function buildQueuedNonceItem(txItem: TransactionQueuedItem, nonce: number): QueuedNonceItem {
+  return { nonce, label: extractTxLabel(txItem.transaction.txInfo) }
+}
+
+function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
+  const result: QueuedNonceItem[] = []
+  let conflictNonce: number | undefined
+
+  for (const item of items) {
+    if (item.type === 'CONFLICT_HEADER') {
+      conflictNonce = (item as ConflictHeaderQueuedItem).nonce
+      continue
+    }
+
+    if (item.type !== 'TRANSACTION') {
+      continue
+    }
+
+    const txItem = item as TransactionQueuedItem
+    const nonce = resolveTransactionNonce(txItem, conflictNonce)
+
+    if (nonce === undefined) {
+      continue
+    }
+
+    if (!result.some((existing) => existing.nonce === nonce)) {
+      result.push(buildQueuedNonceItem(txItem, nonce))
+    }
+  }
+
+  return result.sort((a, b) => b.nonce - a.nonce)
 }
 
 export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
@@ -40,48 +90,9 @@ export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
     trusted: true,
   })
 
-  const allItems = useMemo(() => {
-    if (!currentData?.pages) {
-      return []
-    }
-    return currentData.pages.flatMap((page: QueuedItemPage) => page.results || [])
-  }, [currentData?.pages])
+  const allItems = useMemo(() => flattenPages(currentData?.pages), [currentData?.pages])
 
-  const queuedNonces = useMemo(() => {
-    if (allItems.length === 0) {
-      return []
-    }
-
-    const items: QueuedNonceItem[] = []
-    let currentNonce: number | undefined
-
-    for (const item of allItems) {
-      if (item.type === 'CONFLICT_HEADER') {
-        currentNonce = (item as ConflictHeaderQueuedItem).nonce
-        continue
-      }
-
-      if (item.type === 'TRANSACTION') {
-        const txItem = item as TransactionQueuedItem
-        const tx = txItem.transaction
-        const nonce =
-          tx.executionInfo?.type === 'MULTISIG'
-            ? tx.executionInfo.nonce
-            : currentNonce
-
-        if (nonce === undefined) {
-          continue
-        }
-
-        const label = extractTxLabel(tx.txInfo)
-        if (!items.some((existing) => existing.nonce === nonce)) {
-          items.push({ nonce, label })
-        }
-      }
-    }
-
-    return items.sort((a, b) => b.nonce - a.nonce)
-  }, [allItems])
+  const queuedNonces = useMemo(() => collectQueuedNonces(allItems), [allItems])
 
   const fetchMore = useCallback(() => {
     if (hasNextPage && !isFetching) {

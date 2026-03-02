@@ -1,35 +1,31 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
-import { Text, View, getTokenValue } from 'tamagui'
+import React, { useCallback, useRef } from 'react'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
+import { Text, View } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { SafeButton } from '@/src/components/SafeButton'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Alert } from '@/src/components/Alert'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
-import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { shortenAddress } from '@/src/utils/formatters'
-import { formatVisualAmount, safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
+import { RecipientHeader } from './components/RecipientHeader'
+import { FooterAction } from './components/FooterAction'
 import { NonceBottomSheet } from './components/NonceBottomSheet'
 import { CustomNonceModal } from './components/CustomNonceModal'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
-import { useNonce } from './hooks/useNonce'
-import { isNativeToken } from './services/tokenTransferParams'
-import { proposeSendTransaction } from './services/proposeSendTransaction'
-import logger from '@/src/utils/logger'
+import { useKeyboardVisible } from './hooks/useKeyboardVisible'
+import { useNonceSelection } from './hooks/useNonceSelection'
+import { useTokenBalance } from './hooks/useTokenBalance'
+import { useSendTransaction } from './hooks/useSendTransaction'
 
 export function EnterAmountContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
   const inputRef = useRef<TextInput>(null)
-  const nonceSheetRef = useRef<BottomSheetModal>(null)
   const params = useLocalSearchParams<{
     recipientAddress: string
     recipientName?: string
@@ -37,46 +33,21 @@ export function EnterAmountContainer() {
   }>()
   const { recipientAddress, recipientName, tokenAddress } = params
   const activeSafe = useDefinedActiveSafe()
-  const dispatch = useAppDispatch()
-  const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const currency = useAppSelector(selectCurrency)
-  const isSubmitting = useRef(false)
-  const [submitError, setSubmitError] = useState<string>()
-  const [keyboardVisible, setKeyboardVisible] = useState(false)
+  const keyboardVisible = useKeyboardVisible()
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true))
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false))
-    return () => {
-      showSub.remove()
-      hideSub.remove()
-    }
-  }, [])
-
-  // Nonce state
-  const { recommendedNonce, queuedNonces, fetchMore, isFetchingMore } = useNonce(activeSafe.chainId, activeSafe.address)
-  const [selectedNonce, setSelectedNonce] = useState<number | undefined>()
-  const [showCustomNonceModal, setShowCustomNonceModal] = useState(false)
-
-  const displayNonce = selectedNonce ?? recommendedNonce
-
-  const { data: balancesData } = useBalancesGetBalancesV1Query({
+  const { token, decimals, maxBalance, hasFiatPrice, formattedBalance } = useTokenBalance({
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
-    fiatCode: currency,
+    tokenAddress: tokenAddress ?? '',
+    currency,
   })
 
-  const token = balancesData?.items.find((item) => {
-    if (isNativeToken(tokenAddress)) {
-      return item.tokenInfo.type === 'NATIVE_TOKEN'
-    }
-    return item.tokenInfo.address === tokenAddress
+  const nonce = useNonceSelection({
+    chainId: activeSafe.chainId,
+    safeAddress: activeSafe.address,
+    inputRef,
   })
-
-  const decimals = (token?.tokenInfo.decimals as number) ?? 18
-  const maxBalance = token?.balance ?? '0'
-
-  const hasFiatPrice = !!token?.fiatConversion && parseFloat(token.fiatConversion) > 0
 
   const { rawInput, setRawInput, setMax } = useAmountInput()
 
@@ -101,49 +72,14 @@ export function EnterAmountContainer() {
     maxBalance,
   })
 
-  const handleReview = useCallback(async () => {
-    if (!isValid || isSubmitting.current || !activeSigner) {
-      return
-    }
-    isSubmitting.current = true
-    setSubmitError(undefined)
-
-    try {
-      const txId = await proposeSendTransaction({
-        recipient: recipientAddress ?? '',
-        tokenAddress: tokenAddress ?? '',
-        amount: fiatConversion.tokenAmount,
-        decimals,
-        chainId: activeSafe.chainId,
-        safeAddress: activeSafe.address,
-        sender: activeSigner.value,
-        dispatch,
-        nonce: selectedNonce,
-      })
-
-      router.push({
-        pathname: '/confirm-transaction',
-        params: { txId },
-      })
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to create transaction'
-      logger.error('Send transaction proposal failed:', e)
-      setSubmitError(message)
-    } finally {
-      isSubmitting.current = false
-    }
-  }, [
-    isValid,
-    activeSigner,
-    recipientAddress,
-    tokenAddress,
-    fiatConversion.tokenAmount,
+  const { submitError, activeSigner, handleReview, isSubmitting } = useSendTransaction({
+    recipientAddress: recipientAddress ?? '',
+    tokenAddress: tokenAddress ?? '',
+    tokenAmount: fiatConversion.tokenAmount,
     decimals,
-    activeSafe,
-    dispatch,
-    router,
-    selectedNonce,
-  ])
+    isValid,
+    selectedNonce: nonce.selectedNonce,
+  })
 
   const handleMax = useCallback(() => {
     const formatted = safeFormatUnits(maxBalance, decimals)
@@ -162,51 +98,7 @@ export function EnterAmountContainer() {
     setMax(formatted)
   }, [maxBalance, decimals, fiatConversion.isFiatMode, fiatConversion.hasFiatPrice, token?.fiatConversion, setMax])
 
-  const handleOpenNonceSheet = useCallback(() => {
-    Keyboard.dismiss()
-    nonceSheetRef.current?.present()
-  }, [])
-
-  const refocusInput = useCallback(() => {
-    setTimeout(() => inputRef.current?.focus(), 300)
-  }, [])
-
-  const handleSelectNonce = useCallback(
-    (nonce: number) => {
-      setSelectedNonce(nonce === recommendedNonce ? undefined : nonce)
-      nonceSheetRef.current?.dismiss()
-      refocusInput()
-    },
-    [recommendedNonce, refocusInput],
-  )
-
-  const handleAddCustomNonce = useCallback(() => {
-    nonceSheetRef.current?.dismiss()
-    // Small delay to avoid bottom sheet and modal fighting
-    setTimeout(() => {
-      setShowCustomNonceModal(true)
-    }, 300)
-  }, [])
-
-  const handleSaveCustomNonce = useCallback(
-    (nonce: number) => {
-      setSelectedNonce(nonce === recommendedNonce ? undefined : nonce)
-      setShowCustomNonceModal(false)
-      refocusInput()
-    },
-    [recommendedNonce, refocusInput],
-  )
-
-  const handleCancelCustomNonce = useCallback(() => {
-    setShowCustomNonceModal(false)
-    refocusInput()
-  }, [refocusInput])
-
   const inlineError = exceedsDecimals ? `Should have 1 to ${decimals} decimals` : undefined
-
-  const formattedBalance = useMemo(() => {
-    return token ? formatVisualAmount(maxBalance, decimals) : undefined
-  }, [token, maxBalance, decimals])
 
   return (
     <KeyboardAvoidingView
@@ -215,73 +107,14 @@ export function EnterAmountContainer() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false} keyboardShouldPersistTaps="handled">
-        {/* Recipient and Nonce header */}
-        <View paddingHorizontal="$4" paddingTop="$3" flexDirection="row" gap="$2">
-          {/* Recipient column */}
-          <View flex={1} gap="$2">
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <SafeFontIcon name="send-to" size={16} color="$color" />
-              <Text fontSize="$4" color="$color">
-                Recipient
-              </Text>
-            </View>
-            <Pressable onPress={() => router.navigate('/(send)/recipient')} testID="recipient-summary">
-              <View
-                flexDirection="row"
-                alignItems="center"
-                backgroundColor="$backgroundSkeleton"
-                borderRadius={8}
-                paddingHorizontal="$4"
-                height={64}
-                gap="$2"
-              >
-                <Text fontSize="$4" color="$colorSecondary">
-                  To:
-                </Text>
-                {recipientName ? (
-                  <View gap={2}>
-                    <Text fontSize="$4" fontWeight={600} color="$color">
-                      {recipientName}
-                    </Text>
-                    <Text fontSize="$3" color="$colorSecondary">
-                      {shortenAddress(recipientAddress ?? '', 4)}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text fontSize="$4" color="$color">
-                    {shortenAddress(recipientAddress ?? '', 6)}
-                  </Text>
-                )}
-              </View>
-            </Pressable>
-          </View>
+        <RecipientHeader
+          recipientAddress={recipientAddress ?? ''}
+          recipientName={recipientName}
+          displayNonce={nonce.displayNonce}
+          onRecipientPress={() => router.navigate('/(send)/recipient')}
+          onNoncePress={nonce.handleOpenNonceSheet}
+        />
 
-          {/* Nonce column */}
-          <View gap="$2" minWidth={100}>
-            <View flexDirection="row" alignItems="center" gap="$2">
-              <SafeFontIcon name="apps" size={16} color="$color" />
-              <Text fontSize="$4" color="$color">
-                Nonce
-              </Text>
-            </View>
-            <Pressable onPress={handleOpenNonceSheet} testID="nonce-display">
-              <View
-                alignItems="center"
-                justifyContent="center"
-                backgroundColor="$backgroundSkeleton"
-                borderRadius={8}
-                paddingHorizontal="$4"
-                height={64}
-              >
-                <Text fontSize="$4" color="$color">
-                  {displayNonce !== undefined ? `# ${displayNonce}` : '—'}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Amount content area */}
         <Pressable style={{ flex: 1 }} onPress={() => inputRef.current?.focus()}>
           <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$4" paddingVertical="$6">
             <AmountDisplay
@@ -347,43 +180,32 @@ export function EnterAmountContainer() {
         </Pressable>
       </ScrollView>
 
-      {/* Review button or insufficient balance alert — stays above keyboard */}
-      <View
-        paddingHorizontal="$4"
-        paddingTop="$3"
-        paddingBottom={keyboardVisible ? getTokenValue('$4') : Math.max(bottom, getTokenValue('$4'))}
-      >
-        {exceedsBalance ? (
-          <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
-        ) : (
-          <SafeButton
-            onPress={handleReview}
-            disabled={!isValid || !activeSigner || isSubmitting.current}
-            testID="review-button"
-          >
-            Review & confirm
-          </SafeButton>
-        )}
-      </View>
-
-      {/* Nonce bottom sheet */}
-      <NonceBottomSheet
-        ref={nonceSheetRef}
-        recommendedNonce={recommendedNonce}
-        queuedNonces={queuedNonces}
-        selectedNonce={selectedNonce}
-        onSelectNonce={handleSelectNonce}
-        onAddCustomNonce={handleAddCustomNonce}
-        onEndReached={fetchMore}
-        isFetchingMore={isFetchingMore}
+      <FooterAction
+        exceedsBalance={exceedsBalance}
+        isValid={isValid}
+        hasActiveSigner={!!activeSigner}
+        isSubmitting={isSubmitting.current}
+        keyboardVisible={keyboardVisible}
+        bottomInset={bottom}
+        onReview={handleReview}
       />
 
-      {/* Custom nonce modal */}
+      <NonceBottomSheet
+        ref={nonce.nonceSheetRef}
+        recommendedNonce={nonce.recommendedNonce}
+        queuedNonces={nonce.queuedNonces}
+        selectedNonce={nonce.selectedNonce}
+        onSelectNonce={nonce.handleSelectNonce}
+        onAddCustomNonce={nonce.handleAddCustomNonce}
+        onEndReached={nonce.fetchMore}
+        isFetchingMore={nonce.isFetchingMore}
+      />
+
       <CustomNonceModal
-        visible={showCustomNonceModal}
-        defaultNonce={String(displayNonce ?? '')}
-        onSave={handleSaveCustomNonce}
-        onCancel={handleCancelCustomNonce}
+        visible={nonce.showCustomNonceModal}
+        defaultNonce={String(nonce.displayNonce ?? '')}
+        onSave={nonce.handleSaveCustomNonce}
+        onCancel={nonce.handleCancelCustomNonce}
       />
     </KeyboardAvoidingView>
   )

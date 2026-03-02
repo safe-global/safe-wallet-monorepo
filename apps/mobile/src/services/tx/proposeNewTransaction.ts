@@ -15,6 +15,33 @@ interface ProposeNewTransactionParams {
   origin?: string
 }
 
+function buildProposeDto(
+  signedTx: SafeTransaction,
+  safeTxHash: string,
+  sender: string,
+  origin?: string,
+): ProposeTransactionDto {
+  const signatures = signedTx.signatures.size > 0 ? signedTx.encodedSignatures() : undefined
+  const { data } = signedTx
+
+  return {
+    to: data.to,
+    value: data.value?.toString() ?? '0',
+    data: data.data || undefined,
+    nonce: data.nonce.toString(),
+    operation: data.operation as unknown as Operation,
+    safeTxGas: data.safeTxGas?.toString() ?? '0',
+    baseGas: data.baseGas?.toString() ?? '0',
+    gasPrice: data.gasPrice?.toString() ?? '0',
+    gasToken: data.gasToken,
+    refundReceiver: data.refundReceiver,
+    safeTxHash,
+    sender,
+    signature: signatures,
+    origin,
+  }
+}
+
 const proposeNewTransaction = async ({
   chainId,
   safeAddress,
@@ -24,24 +51,7 @@ const proposeNewTransaction = async ({
   dispatch,
   origin,
 }: ProposeNewTransactionParams): Promise<TransactionDetails> => {
-  const signatures = signedTx.signatures.size > 0 ? signedTx.encodedSignatures() : undefined
-
-  const proposeTransactionDto: ProposeTransactionDto = {
-    to: signedTx.data.to,
-    value: signedTx.data.value?.toString() ?? '0',
-    data: signedTx.data.data || undefined,
-    nonce: signedTx.data.nonce.toString(),
-    operation: signedTx.data.operation as unknown as Operation,
-    safeTxGas: signedTx.data.safeTxGas?.toString() ?? '0',
-    baseGas: signedTx.data.baseGas?.toString() ?? '0',
-    gasPrice: signedTx.data.gasPrice?.toString() ?? '0',
-    gasToken: signedTx.data.gasToken,
-    refundReceiver: signedTx.data.refundReceiver,
-    safeTxHash,
-    sender,
-    signature: signatures,
-    origin,
-  }
+  const proposeTransactionDto = buildProposeDto(signedTx, safeTxHash, sender, origin)
 
   const result = await dispatch(
     cgwApi.endpoints.transactionsProposeTransactionV1.initiate({

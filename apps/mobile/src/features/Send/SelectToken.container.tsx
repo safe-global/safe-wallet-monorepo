@@ -11,6 +11,55 @@ import { useTokenBalances } from '@/src/features/Assets/components/Tokens/useTok
 import { TokenListItem } from './components/TokenListItem'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
+function filterTokensByQuery(items: Balance[] | undefined, query: string): Balance[] {
+  if (!items) {
+    return []
+  }
+  const trimmed = query.trim().toLowerCase()
+  if (!trimmed) {
+    return items
+  }
+  return items.filter((item) => {
+    const { name, symbol, address } = item.tokenInfo
+    return (
+      name.toLowerCase().includes(trimmed) ||
+      symbol.toLowerCase().includes(trimmed) ||
+      address.toLowerCase().includes(trimmed)
+    )
+  })
+}
+
+function RecipientDisplay({ name, address }: { name?: string; address: string }) {
+  if (name) {
+    return (
+      <View gap={2}>
+        <Text fontSize="$4" fontWeight={600} color="$color">
+          {name}
+        </Text>
+        <Text fontSize="$3" color="$colorSecondary">
+          {shortenAddress(address, 4)}
+        </Text>
+      </View>
+    )
+  }
+  return (
+    <Text fontSize="$4" color="$color">
+      {shortenAddress(address, 6)}
+    </Text>
+  )
+}
+
+function EmptySearchResult({ searchQuery }: { searchQuery: string }) {
+  if (!searchQuery.trim()) {
+    return null
+  }
+  return (
+    <View paddingVertical="$6" alignItems="center">
+      <Text color="$colorSecondary">No tokens match your search</Text>
+    </View>
+  )
+}
+
 export function SelectTokenContainer() {
   const router = useRouter()
   const theme = useTheme()
@@ -22,26 +71,7 @@ export function SelectTokenContainer() {
   const { visibleItems, currency, isLoading, error, refetch } = useTokenBalances()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredItems = useMemo(() => {
-    if (!visibleItems) {
-      return []
-    }
-    if (!searchQuery.trim()) {
-      return visibleItems
-    }
-
-    const query = searchQuery.trim().toLowerCase()
-
-    return visibleItems.filter((item) => {
-      const { name, symbol, address } = item.tokenInfo
-
-      return (
-        name.toLowerCase().includes(query) ||
-        symbol.toLowerCase().includes(query) ||
-        address.toLowerCase().includes(query)
-      )
-    })
-  }, [visibleItems, searchQuery])
+  const filteredItems = useMemo(() => filterTokensByQuery(visibleItems, searchQuery), [visibleItems, searchQuery])
 
   const handleTokenPress = useCallback(
     (tokenAddress: string) => {
@@ -93,20 +123,7 @@ export function SelectTokenContainer() {
               <Text fontSize="$4" color="$colorSecondary">
                 To:
               </Text>
-              {recipientName ? (
-                <View gap={2}>
-                  <Text fontSize="$4" fontWeight={600} color="$color">
-                    {recipientName}
-                  </Text>
-                  <Text fontSize="$3" color="$colorSecondary">
-                    {shortenAddress(recipientAddress ?? '', 4)}
-                  </Text>
-                </View>
-              ) : (
-                <Text fontSize="$4" color="$color">
-                  {shortenAddress(recipientAddress ?? '', 6)}
-                </Text>
-              )}
+              <RecipientDisplay name={recipientName} address={recipientAddress ?? ''} />
             </View>
           </Pressable>
         </View>
@@ -192,13 +209,7 @@ export function SelectTokenContainer() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={handleScrollBeginDrag}
-        ListEmptyComponent={
-          searchQuery.trim() ? (
-            <View paddingVertical="$6" alignItems="center">
-              <Text color="$colorSecondary">No tokens match your search</Text>
-            </View>
-          ) : null
-        }
+        ListEmptyComponent={<EmptySearchResult searchQuery={searchQuery} />}
       />
     </View>
   )
