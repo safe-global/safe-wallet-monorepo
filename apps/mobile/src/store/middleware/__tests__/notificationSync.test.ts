@@ -1,7 +1,7 @@
 import notificationSyncMiddleware from '../notificationSync'
 import { addressBookSlice } from '@/src/store/addressBookSlice'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
-import { configureStore, Action } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -116,22 +116,24 @@ describe('notificationSyncMiddleware', () => {
     })
   })
 
+  const createChainsTestStore = () =>
+    configureStore({
+      reducer: {
+        addressBook: addressBookSlice.reducer,
+        [apiSliceWithChainsConfig.reducerPath]: apiSliceWithChainsConfig.reducer,
+      },
+      middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware().concat(apiSliceWithChainsConfig.middleware).concat(notificationSyncMiddleware),
+    })
+
   describe('chain configuration actions', () => {
-    let testStore: ReturnType<typeof configureStore>
+    let testStore: ReturnType<typeof createChainsTestStore>
 
     beforeEach(() => {
       // Ensure base URL is set for RTK Query
       setBaseUrl(TEST_GATEWAY_URL)
 
-      // Create a test store with the middleware and RTK Query
-      testStore = configureStore({
-        reducer: {
-          addressBook: addressBookSlice.reducer,
-          [apiSliceWithChainsConfig.reducerPath]: apiSliceWithChainsConfig.reducer,
-        },
-        middleware: (getDefaultMiddleware) =>
-          getDefaultMiddleware().concat(apiSliceWithChainsConfig.middleware).concat(notificationSyncMiddleware),
-      })
+      testStore = createChainsTestStore()
     })
 
     it('should sync when real getChainsConfigV2 fulfilled action is dispatched', async () => {
@@ -185,9 +187,7 @@ describe('notificationSyncMiddleware', () => {
       )
 
       // Dispatch the real RTK Query thunk
-      await testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
-      )
+      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       // The middleware should have been triggered by the fulfilled action
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(1)
@@ -203,7 +203,7 @@ describe('notificationSyncMiddleware', () => {
 
       // Dispatch the real RTK Query thunk
       const promise = testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
       )
 
       // Advance through all retry delays (5 retries with exponential backoff)
@@ -315,23 +315,14 @@ describe('notificationSyncMiddleware', () => {
       setBaseUrl(TEST_GATEWAY_URL)
 
       // Create a test store
-      const testStore = configureStore({
-        reducer: {
-          addressBook: addressBookSlice.reducer,
-          [apiSliceWithChainsConfig.reducerPath]: apiSliceWithChainsConfig.reducer,
-        },
-        middleware: (getDefaultMiddleware) =>
-          getDefaultMiddleware().concat(apiSliceWithChainsConfig.middleware).concat(notificationSyncMiddleware),
-      })
+      const testStore = createChainsTestStore()
 
       // Dispatch addressBook actions (these will be processed by our original middleware)
       testStore.dispatch(addressBookSlice.actions.addContact({ value: '0x123', name: 'Contact', chainIds: ['1'] }))
       testStore.dispatch(addressBookSlice.actions.removeContact('0x456'))
 
       // Dispatch RTK Query action
-      await testStore.dispatch(
-        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY) as unknown as Action,
-      )
+      await testStore.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(mockSyncNotificationExtensionData).toHaveBeenCalledTimes(3)
     })
