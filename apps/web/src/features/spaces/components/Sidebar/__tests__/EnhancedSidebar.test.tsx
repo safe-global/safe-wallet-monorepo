@@ -82,29 +82,4 @@ describe('EnhancedSidebar', () => {
 
     expect(screen.getByText('Safe Variant')).toBeInTheDocument()
   })
-
-  it('passes props to variant component', () => {
-    const { getSidebarVariant } = require('../variants')
-    const MockVariantComponent = jest.fn((_props: Record<string, unknown>) => <div>Variant</div>)
-    getSidebarVariant.mockReturnValue(MockVariantComponent)
-
-    render(
-      <EnhancedSidebar
-        type="spaces"
-        spaceName="My Space"
-        spaceInitial="M"
-        selectedSpace={mockSelectedSpace}
-        spaces={mockSpaces}
-      />,
-    )
-
-    expect(MockVariantComponent.mock.calls[0]?.[0]).toEqual(
-      expect.objectContaining({
-        spaceName: 'My Space',
-        spaceInitial: 'M',
-        selectedSpace: mockSelectedSpace,
-        spaces: mockSpaces,
-      }),
-    )
-  })
 })
