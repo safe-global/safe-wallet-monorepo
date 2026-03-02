@@ -22,6 +22,45 @@ import { useNonceSelection } from './hooks/useNonceSelection'
 import { useTokenBalance } from './hooks/useTokenBalance'
 import { useSendTransaction } from './hooks/useSendTransaction'
 
+const FIAT_DECIMALS = 2
+const isIos = Platform.OS === 'ios'
+const keyboardBehavior = isIos ? 'padding' : undefined
+const keyboardOffset = isIos ? 100 : 0
+
+/** Compute the fiat-denominated max when in fiat mode. */
+function computeFiatMax(formatted: string, fiatRate: string | undefined): string | undefined {
+  const rate = parseFloat(fiatRate ?? '0')
+  if (rate <= 0) {
+    return undefined
+  }
+  return (parseFloat(formatted) * rate).toFixed(FIAT_DECIMALS)
+}
+
+/** Build the decimal-error message, if any. */
+function getDecimalError(exceedsDecimals: boolean, decimals: number): string | undefined {
+  if (!exceedsDecimals) {
+    return undefined
+  }
+  return `Should have 1 to ${decimals} decimals`
+}
+
+function FiatToggleButton({ onToggle }: { onToggle: () => void }) {
+  return (
+    <Pressable onPress={onToggle} testID="toggle-fiat-button">
+      <View
+        width={40}
+        height={40}
+        borderRadius={80}
+        backgroundColor="$backgroundSkeleton"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <SafeFontIcon name="transactions" size={24} color="$color" />
+      </View>
+    </Pressable>
+  )
+}
+
 export function EnterAmountContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
@@ -31,7 +70,9 @@ export function EnterAmountContainer() {
     recipientName?: string
     tokenAddress: string
   }>()
-  const { recipientAddress, recipientName, tokenAddress } = params
+  const recipientAddress = params.recipientAddress ?? ''
+  const recipientName = params.recipientName
+  const tokenAddress = params.tokenAddress ?? ''
   const activeSafe = useDefinedActiveSafe()
   const currency = useAppSelector(selectCurrency)
   const keyboardVisible = useKeyboardVisible()
@@ -39,7 +80,7 @@ export function EnterAmountContainer() {
   const { token, decimals, maxBalance, hasFiatPrice, formattedBalance } = useTokenBalance({
     chainId: activeSafe.chainId,
     safeAddress: activeSafe.address,
-    tokenAddress: tokenAddress ?? '',
+    tokenAddress,
     currency,
   })
 
@@ -51,15 +92,16 @@ export function EnterAmountContainer() {
 
   const { rawInput, setRawInput, setMax } = useAmountInput()
 
+  const tokenSymbol = token?.tokenInfo.symbol ?? ''
   const fiatConversion = useFiatConversion({
     rawInput,
     fiatRate: token?.fiatConversion,
     currency,
-    symbol: token?.tokenInfo.symbol ?? '',
+    symbol: tokenSymbol,
     decimals,
   })
 
-  const inputMaxDecimals = fiatConversion.isFiatMode && hasFiatPrice ? 2 : decimals
+  const inputMaxDecimals = fiatConversion.isFiatMode && hasFiatPrice ? FIAT_DECIMALS : decimals
 
   const handleInputChange = useCallback(
     (value: string) => setRawInput(value, inputMaxDecimals),
@@ -73,8 +115,8 @@ export function EnterAmountContainer() {
   })
 
   const { submitError, activeSigner, handleReview, isSubmitting } = useSendTransaction({
-    recipientAddress: recipientAddress ?? '',
-    tokenAddress: tokenAddress ?? '',
+    recipientAddress,
+    tokenAddress,
     tokenAmount: fiatConversion.tokenAmount,
     decimals,
     isValid,
@@ -88,27 +130,21 @@ export function EnterAmountContainer() {
     }
 
     if (fiatConversion.isFiatMode && fiatConversion.hasFiatPrice) {
-      const rate = parseFloat(token?.fiatConversion ?? '0')
-      if (rate > 0) {
-        const fiatMax = (parseFloat(formatted) * rate).toFixed(2)
-        setMax(fiatMax)
-        return
-      }
+      const fiatMax = computeFiatMax(formatted, token?.fiatConversion)
+      setMax(fiatMax ?? formatted)
+      return
     }
+
     setMax(formatted)
   }, [maxBalance, decimals, fiatConversion.isFiatMode, fiatConversion.hasFiatPrice, token?.fiatConversion, setMax])
 
-  const inlineError = exceedsDecimals ? `Should have 1 to ${decimals} decimals` : undefined
+  const inlineError = getDecimalError(exceedsDecimals, decimals)
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardBehavior} keyboardVerticalOffset={keyboardOffset}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false} keyboardShouldPersistTaps="handled">
         <RecipientHeader
-          recipientAddress={recipientAddress ?? ''}
+          recipientAddress={recipientAddress}
           recipientName={recipientName}
           displayNonce={nonce.displayNonce}
           onRecipientPress={() => router.navigate('/(send)/recipient')}
@@ -126,25 +162,12 @@ export function EnterAmountContainer() {
 
             <View flexDirection="row" alignItems="center" gap="$2" marginTop="$6">
               <TokenPill
-                symbol={token?.tokenInfo.symbol ?? ''}
+                symbol={tokenSymbol}
                 logoUri={token?.tokenInfo.logoUri}
                 balance={formattedBalance}
                 onMaxPress={handleMax}
               />
-              {fiatConversion.hasFiatPrice && (
-                <Pressable onPress={fiatConversion.toggleMode} testID="toggle-fiat-button">
-                  <View
-                    width={40}
-                    height={40}
-                    borderRadius={80}
-                    backgroundColor="$backgroundSkeleton"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <SafeFontIcon name="transactions" size={24} color="$color" />
-                  </View>
-                </Pressable>
-              )}
+              {fiatConversion.hasFiatPrice && <FiatToggleButton onToggle={fiatConversion.toggleMode} />}
             </View>
 
             <TextInput

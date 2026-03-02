@@ -11,6 +11,10 @@ import { QrCamera } from '@/src/components/Camera'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
 
+function isChainMismatch(prefix: string | undefined, activeShortName: string | undefined): boolean {
+  return Boolean(prefix && activeShortName && prefix !== activeShortName)
+}
+
 export function ScanQrSendContainer() {
   const router = useRouter()
   const permission = Camera.getCameraPermissionStatus()
@@ -51,11 +55,34 @@ export function ScanQrSendContainer() {
     [toast],
   )
 
+  const warnChainMismatch = useCallback(
+    (prefix: string | undefined) => {
+      const activeShortName = activeChain?.shortName
+
+      if (!isChainMismatch(prefix, activeShortName)) {
+        return
+      }
+
+      toast.show(`Address is for ${prefix}, but active chain is ${activeShortName}`, { native: false, duration: 3000 })
+    },
+    [activeChain?.shortName, toast],
+  )
+
+  const navigateToRecipient = useCallback(
+    (address: string) => {
+      hasScanned.current = true
+      setIsCameraActive(false)
+      router.navigate({
+        pathname: '/(send)/recipient',
+        params: { scannedAddress: address },
+      })
+    },
+    [router],
+  )
+
   const onScan = useCallback(
     (codes: Code[]) => {
-      const canProcess = codes.length > 0 && isCameraActive && !hasScanned.current
-
-      if (!canProcess) {
+      if (codes.length === 0 || !isCameraActive || hasScanned.current) {
         return
       }
 
@@ -67,21 +94,10 @@ export function ScanQrSendContainer() {
         return
       }
 
-      if (prefix && activeChain?.shortName && prefix !== activeChain.shortName) {
-        toast.show(`Address is for ${prefix}, but active chain is ${activeChain.shortName}`, {
-          native: false,
-          duration: 3000,
-        })
-      }
-
-      hasScanned.current = true
-      setIsCameraActive(false)
-      router.navigate({
-        pathname: '/(send)/recipient',
-        params: { scannedAddress: address },
-      })
+      warnChainMismatch(prefix)
+      navigateToRecipient(address)
     },
-    [isCameraActive, router, showInvalidAddressToast, activeChain, toast],
+    [isCameraActive, showInvalidAddressToast, warnChainMismatch, navigateToRecipient],
   )
 
   const handleActivateCamera = useCallback(() => {

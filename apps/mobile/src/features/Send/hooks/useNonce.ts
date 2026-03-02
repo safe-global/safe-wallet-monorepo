@@ -72,6 +72,19 @@ function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
   return result.sort((a, b) => b.nonce - a.nonce)
 }
 
+function deriveLoadingState(
+  isNoncesLoading: boolean,
+  isQueueLoading: boolean,
+  isFetching: boolean,
+  hasNextPage: boolean | undefined,
+) {
+  return {
+    isLoading: isNoncesLoading || isQueueLoading,
+    isFetchingMore: isFetching && !isQueueLoading,
+    hasMore: Boolean(hasNextPage),
+  }
+}
+
 export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
   const { data: noncesData, isLoading: isNoncesLoading } = useSafesGetNoncesV1Query({
     chainId,
@@ -100,14 +113,14 @@ export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
     }
   }, [hasNextPage, isFetching, fetchNextPage])
 
+  const loadingState = deriveLoadingState(isNoncesLoading, isQueueLoading, isFetching, hasNextPage)
+
   return {
     recommendedNonce: noncesData?.recommendedNonce,
     currentNonce: noncesData?.currentNonce,
     queuedNonces,
-    isLoading: isNoncesLoading || isQueueLoading,
-    isFetchingMore: isFetching && !isQueueLoading,
-    hasMore: !!hasNextPage,
     fetchMore,
+    ...loadingState,
   }
 }
 

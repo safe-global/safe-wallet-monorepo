@@ -19,6 +19,21 @@ interface UseTokenBalanceResult {
   formattedBalance: string | undefined
 }
 
+function findToken(items: Balance[], tokenAddress: string): Balance | undefined {
+  return items.find((item) =>
+    isNativeToken(tokenAddress) ? item.tokenInfo.type === 'NATIVE_TOKEN' : item.tokenInfo.address === tokenAddress,
+  )
+}
+
+function getDecimals(token: Balance | undefined): number {
+  const raw = token?.tokenInfo.decimals
+  return raw != null ? Number(raw) : 18
+}
+
+function hasFiatConversion(token: Balance | undefined): boolean {
+  return !!token?.fiatConversion && parseFloat(token.fiatConversion) > 0
+}
+
 export function useTokenBalance({
   chainId,
   safeAddress,
@@ -31,17 +46,10 @@ export function useTokenBalance({
     fiatCode: currency,
   })
 
-  const token = balancesData?.items.find((item) => {
-    if (isNativeToken(tokenAddress)) {
-      return item.tokenInfo.type === 'NATIVE_TOKEN'
-    }
-    return item.tokenInfo.address === tokenAddress
-  })
-
-  const raw = token?.tokenInfo.decimals
-  const decimals = raw != null ? Number(raw) : 18
+  const token = findToken(balancesData?.items ?? [], tokenAddress)
+  const decimals = getDecimals(token)
   const maxBalance = token?.balance ?? '0'
-  const hasFiatPrice = !!token?.fiatConversion && parseFloat(token.fiatConversion) > 0
+  const hasFiatPrice = hasFiatConversion(token)
 
   const formattedBalance = useMemo(() => {
     return token ? formatVisualAmount(maxBalance, decimals) : undefined

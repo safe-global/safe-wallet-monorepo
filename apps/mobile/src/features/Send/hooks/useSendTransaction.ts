@@ -38,7 +38,8 @@ export function useSendTransaction({
   const [submitError, setSubmitError] = useState<string>()
 
   const handleReview = useCallback(async () => {
-    if (!isValid || isSubmitting || !activeSigner) {
+    const cannotSubmit = !isValid || isSubmitting || !activeSigner
+    if (cannotSubmit) {
       return
     }
     setIsSubmitting(true)

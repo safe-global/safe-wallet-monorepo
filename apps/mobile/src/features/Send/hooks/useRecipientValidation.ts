@@ -37,13 +37,14 @@ function resolveSignerName(
   return signer ? (signer.name ?? 'Signer') : undefined
 }
 
-function resolveAddressState(
-  trimmed: string,
-  activeSafeAddress: string,
-  addressBookCheck: Record<string, { type: string }> | undefined,
-  contacts: Record<string, Contact>,
-  signers: Record<string, { name?: string | null; value: string }>,
-): RecipientValidationResult {
+interface AddressContext {
+  activeSafeAddress: string
+  addressBookCheck: Record<string, { type: string }> | undefined
+  contacts: Record<string, Contact>
+  signers: Record<string, { name?: string | null; value: string }>
+}
+
+function resolveIncompleteAddress(trimmed: string): RecipientValidationResult | undefined {
   if (!trimmed) {
     return { state: 'empty', isValid: false, canContinue: false }
   }
@@ -53,27 +54,36 @@ function resolveAddressState(
     return { state, isValid: false, canContinue: false }
   }
 
-  if (sameAddress(trimmed, activeSafeAddress)) {
+  return undefined
+}
+
+function resolveKnownAddress(trimmed: string, ctx: AddressContext): RecipientValidationResult | undefined {
+  if (sameAddress(trimmed, ctx.activeSafeAddress)) {
     return { state: 'self-send', isValid: true, canContinue: true }
   }
 
-  const shieldResult = addressBookCheck?.[trimmed]
+  const shieldResult = ctx.addressBookCheck?.[trimmed]
   if (shieldResult?.type === RecipientStatus.KNOWN_RECIPIENT) {
-    const contactName = resolveContactName(contacts, trimmed)
+    const contactName = resolveContactName(ctx.contacts, trimmed)
     return { state: 'known', contactName, isValid: true, canContinue: true }
   }
 
-  const signerName = resolveSignerName(signers, trimmed)
+  const signerName = resolveSignerName(ctx.signers, trimmed)
   if (signerName) {
-    return {
-      state: 'known',
-      contactName: signerName,
-      isValid: true,
-      canContinue: true,
-    }
+    return { state: 'known', contactName: signerName, isValid: true, canContinue: true }
   }
 
-  return { state: 'unknown', isValid: true, canContinue: true }
+  return undefined
+}
+
+const UNKNOWN_RESULT: RecipientValidationResult = {
+  state: 'unknown',
+  isValid: true,
+  canContinue: true,
+}
+
+function resolveAddressState(trimmed: string, ctx: AddressContext): RecipientValidationResult {
+  return resolveIncompleteAddress(trimmed) ?? resolveKnownAddress(trimmed, ctx) ?? UNKNOWN_RESULT
 }
 
 export function useRecipientValidation(address: string): RecipientValidationResult {
@@ -102,7 +112,12 @@ export function useRecipientValidation(address: string): RecipientValidationResu
 
   const result = useMemo(
     (): RecipientValidationResult =>
-      resolveAddressState(trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers),
+      resolveAddressState(trimmed, {
+        activeSafeAddress: activeSafe.address,
+        addressBookCheck,
+        contacts: addressBookState.contacts,
+        signers,
+      }),
     [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers],
   )
 

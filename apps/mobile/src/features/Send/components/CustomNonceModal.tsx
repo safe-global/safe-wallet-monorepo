@@ -11,6 +11,10 @@ interface CustomNonceModalProps {
   onCancel: () => void
 }
 
+function isNonceInRange(parsed: number, currentNonce: number): boolean {
+  return !Number.isNaN(parsed) && parsed >= currentNonce && parsed <= Number.MAX_SAFE_INTEGER
+}
+
 function validateNonce(value: string, currentNonce: number): string | undefined {
   if (value.length === 0) {
     return undefined
@@ -45,7 +49,7 @@ export function CustomNonceModal({ visible, defaultNonce, currentNonce, onSave, 
 
   const handleSave = useCallback(() => {
     const parsed = parseInt(value, 10)
-    if (!Number.isNaN(parsed) && parsed >= currentNonce && parsed <= Number.MAX_SAFE_INTEGER) {
+    if (isNonceInRange(parsed, currentNonce)) {
       onSave(parsed)
     }
   }, [value, currentNonce, onSave])
