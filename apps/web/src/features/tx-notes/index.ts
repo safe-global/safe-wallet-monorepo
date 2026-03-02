@@ -21,7 +21,7 @@
  * function MyComponentWithStates() {
  *   const feature = useLoadFeature(TxNotesFeature)
  *
- *   if (feature.$isLoading) return <Skeleton />
+ *   if (!feature.$isReady) return <Skeleton />
  *   if (feature.$isDisabled) return null
  *
  *   return <feature.TxNote />

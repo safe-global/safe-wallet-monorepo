@@ -1,6 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NextLink from 'next/link'
-import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import { Box, Stack, Typography } from '@mui/material'
@@ -9,6 +8,7 @@ import TxInfo from '@/components/transactions/TxInfo'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { DateTime } from '@/components/common/DateTime/DateTime'
 
@@ -17,18 +17,18 @@ type PendingTxType = {
 }
 
 const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
-  const router = useRouter()
   const { id } = transaction
+  const safeQueryParam = useSafeQueryParam()
 
   const url = useMemo(
     () => ({
       pathname: AppRoutes.transactions.tx,
       query: {
         id,
-        safe: router.query.safe,
+        safe: safeQueryParam,
       },
     }),
-    [router, id],
+    [safeQueryParam, id],
   )
 
   return (

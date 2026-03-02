@@ -1,22 +1,9 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  IconButton,
-  Box,
-  Alert,
-  Typography,
-  List,
-  ListItem,
-} from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Box, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import SecurityBanner from './SecurityBanner'
 import SafeSelectionList from './SafeSelectionList'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import SelectAllConfirmDialog from './SelectAllConfirmDialog'
 import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
 
 interface SafeSelectionModalProps {
@@ -63,15 +50,27 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onClose={close} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontWeight: 'bold',
+            borderBottom: '1px solid',
+            borderColor: 'border.light',
+            px: 3,
+            pt: 3,
+            pb: 2,
+          }}
+        >
           <Box>Manage trusted Safes</Box>
           <IconButton onClick={close} size="small" edge="end">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          <SecurityBanner title="Verify Safes before confirming" />
+        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto', pt: '16px !important' }}>
+          <SecurityBanner title="Verify before you trust" />
 
           {/* Selection controls */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -97,7 +96,15 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
           />
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 2,
+            borderTop: '1px solid',
+            borderColor: 'border.light',
+          }}
+        >
           <Button onClick={close} variant="text">
             Cancel
           </Button>
@@ -118,59 +125,12 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
       )}
 
       {/* Confirmation dialog for Select All with similar addresses */}
-      <Dialog open={pendingSelectAllConfirmation} onClose={cancelSelectAll} maxWidth="sm" fullWidth>
-        <DialogTitle>Similar addresses detected</DialogTitle>
-
-        <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              {similarAddressesForSelectAll.length} Safe{similarAddressesForSelectAll.length === 1 ? '' : 's'} in your
-              list closely resemble other addresses. Review them carefully before continuing.
-            </Typography>
-          </Alert>
-
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            The following addresses have been flagged as similar:
-          </Typography>
-
-          <List
-            sx={{
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'border.light',
-              maxHeight: 200,
-              overflow: 'auto',
-            }}
-          >
-            {similarAddressesForSelectAll.map((item) => (
-              <ListItem key={item.address} sx={{ py: 1 }}>
-                <Box sx={{ width: '100%' }}>
-                  <EthHashInfo address={item.address} showCopyButton shortAddress={false} showAvatar avatarSize={24} />
-                  {item.name && (
-                    <Typography variant="caption" color="text.secondary">
-                      {item.name}
-                    </Typography>
-                  )}
-                </Box>
-              </ListItem>
-            ))}
-          </List>
-
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Do you want to include these addresses in your selection?
-          </Typography>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={cancelSelectAll} variant="text">
-            No, skip similar addresses
-          </Button>
-          <Button onClick={confirmSelectAll} variant="contained" startIcon={<WarningAmberIcon color="warning" />}>
-            Yes, include them anyway
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SelectAllConfirmDialog
+        open={pendingSelectAllConfirmation}
+        similarAddresses={similarAddressesForSelectAll}
+        onConfirm={confirmSelectAll}
+        onCancel={cancelSelectAll}
+      />
     </>
   )
 }

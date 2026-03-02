@@ -1,9 +1,7 @@
 import { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { setCuratedNestedSafes } from '@/store/settingsSlice'
-import { pinSafe, unpinSafe } from '@/store/addedSafesSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
 import { detectSimilarAddresses } from '@/features/myAccounts/services/addressSimilarity'
@@ -56,7 +54,6 @@ const groupSafesBySimilarity = (
 export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[]) => {
   const dispatch = useAppDispatch()
   const parentSafeAddress = useSafeAddress()
-  const chainId = useChainId()
   const { curatedAddresses, hasCompletedCuration } = useCuratedNestedSafes()
 
   // Track previous curated addresses to detect removals on save
@@ -139,18 +136,10 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   }, [curatedAddresses])
 
   // Save curation - dispatches setCuratedNestedSafes with hasCompletedCuration: true
-  // Also syncs trust state: pins newly selected safes, unpins removed safes
+  // Trust is determined by useIsTrustedSafe which checks both addedSafes and curated nested safes
   const saveChanges = useCallback(() => {
     const selectedList = Array.from(selectedAddresses)
-    const previousCurated = previousCuratedRef.current
 
-    // Calculate newly added addresses (need to pin/trust)
-    const addedAddresses = selectedList.filter((addr) => !previousCurated.has(addr))
-
-    // Calculate removed addresses (need to unpin/untrust)
-    const removedAddresses = Array.from(previousCurated).filter((addr) => !selectedAddresses.has(addr))
-
-    // Dispatch curation state update
     dispatch(
       setCuratedNestedSafes({
         parentSafeAddress,
@@ -159,19 +148,9 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
       }),
     )
 
-    // Pin newly curated nested safes (makes them trusted for SafeShield)
-    for (const address of addedAddresses) {
-      dispatch(pinSafe({ chainId, address }))
-    }
-
-    // Unpin removed nested safes (removes trust)
-    for (const address of removedAddresses) {
-      dispatch(unpinSafe({ chainId, address }))
-    }
-
     // Update previous curated ref for next save comparison
     previousCuratedRef.current = new Set(selectedList)
-  }, [selectedAddresses, parentSafeAddress, chainId, dispatch])
+  }, [selectedAddresses, parentSafeAddress, dispatch])
 
   // Check if there are unsaved changes
   const hasChanges = useMemo(() => {

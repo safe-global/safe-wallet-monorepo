@@ -57,12 +57,14 @@ describe('Sidebar sorting tests', () => {
   })
 
   it('Verify that a pinned safe can be sorted by name and last visited', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__visitedSafes, ls.visitedSafes.set1)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe2)
-    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__visitedSafes, ls.visitedSafes.set1)
+    main.addToAppLocalStorage(
+      constants.localStorageKeys.SAFE_v2__addedSafes,
+      ls.addedSafes.sidebarTrustedSafesForSorting,
+    )
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
 

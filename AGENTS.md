@@ -149,10 +149,10 @@ function ParentComponent() {
 
 // For explicit loading/disabled states:
 function ParentWithStates() {
-  const { MyComponent, $isLoading, $isDisabled } = useLoadFeature(MyFeature)
+  const { MyComponent, $isReady, $isDisabled } = useLoadFeature(MyFeature)
 
-  if ($isLoading) return <Skeleton />
   if ($isDisabled) return null
+  if (!$isReady) return <Skeleton />
 
   return <MyComponent />
 }
@@ -199,7 +199,7 @@ export default {
 
 **Hooks Pattern:** Hooks are exported directly from `index.ts` (always loaded, not lazy) to avoid Rules of Hooks violations. Keep hooks lightweight with minimal imports. Put heavy logic in services (lazy-loaded).
 
-See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isLoading`, `$isDisabled`, `$isReady`).
+See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
 ## Workflow
 
@@ -216,14 +216,20 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
      - Formatting: Run `yarn prettier:fix` to auto-fix
      - Linting: Run `yarn workspace @safe-global/web lint:fix` to auto-fix where possible
 
-3. **Formatting**: run `yarn prettier:fix` before committing (also handled automatically by pre-commit hook).
+3. **Formatting (CRITICAL)**: **ALWAYS** run `yarn prettier:fix` before staging and committing. Do NOT rely on lint-staged alone — it can miss formatting issues due to stash/restore edge cases. Run it explicitly:
+
+   ```bash
+   yarn prettier:fix
+   ```
+
+   Then verify with `yarn workspace @safe-global/web prettier` (the check-only command). **CI will reject unformatted code.**
 
 4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
 
    ```bash
    yarn workspace @safe-global/web type-check
    yarn workspace @safe-global/web lint
-   yarn workspace @safe-global/web prettier
+   yarn workspace @safe-global/web prettier   # verify formatting (CI runs this)
    yarn workspace @safe-global/web test
    ```
 
@@ -274,11 +280,21 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 
 ### E2E Tests (Web only)
 
-- Located in `apps/web/cypress/e2e/`
-- **IMPORTANT**: Follow the Cypress E2E automation rules in `.cursor/rules/cypress-e2e.mdc` when writing or modifying tests
-- Run with `yarn workspace @safe-global/web cypress:open` for interactive mode
-- Run with `yarn workspace @safe-global/web cypress:run` for headless mode
-- Smoke tests in `cypress/e2e/smoke/` are run in CI
+Located in `apps/web/cypress/e2e/`. Full conventions and patterns: `apps/web/cypress/CLAUDE.md`.
+
+| Category   | Folder            | CI                           | Purpose                                    |
+| ---------- | ----------------- | ---------------------------- | ------------------------------------------ |
+| Smoke      | `e2e/smoke/`      | Every PR                     | Critical path functional tests             |
+| Visual     | `e2e/visual/`     | Manual (`workflow_dispatch`) | Chromatic visual regression (light + dark) |
+| Regression | `e2e/regression/` | On-demand                    | Feature tests                              |
+| Happy path | `e2e/happypath/`  | On-demand                    | User journey tests                         |
+
+```bash
+yarn workspace @safe-global/web cypress:open   # interactive
+yarn workspace @safe-global/web cypress:run    # headless
+```
+
+Coverage report: `apps/web/cypress/COVERAGE.md`
 
 ### Test Coverage
 
@@ -325,7 +341,6 @@ import { MyComponent } from './MyComponent'
 const meta = {
   title: 'Components/MyComponent',
   component: MyComponent,
-  tags: ['autodocs'],
 } satisfies Meta<typeof MyComponent>
 
 export default meta
@@ -337,6 +352,23 @@ export const Default: Story = {
   },
 }
 ```
+
+#### Component Stories with Redux
+
+For components that use Redux hooks (`useAppSelector`, `useDispatch`, RTK Query) but don't need full API mocking, wrap with `withMockProvider()`:
+
+```typescript
+import { withMockProvider } from '@/storybook/preview'
+
+const meta = {
+  title: 'Features/MyFeature/MyComponent',
+  component: MyComponent,
+  decorators: [withMockProvider()],
+  tags: ['autodocs'],
+} satisfies Meta<typeof MyComponent>
+```
+
+For detailed Storybook patterns, context error reference, MSW fixtures, and the full provider stack, see `apps/web/.storybook/AGENTS.md`.
 
 #### Page/Widget Stories with API Mocking
 
@@ -366,7 +398,6 @@ const meta = {
     ...defaultSetup.parameters, // Includes MSW handlers and Next.js router mock
   },
   decorators: [defaultSetup.decorator], // Provides Redux, Wallet, SDK, TxModal contexts
-  tags: ['autodocs'],
 } satisfies Meta<typeof Dashboard>
 
 export default meta
@@ -421,7 +452,6 @@ import {
 - Place story files next to the component they document
 - Use descriptive story names (Default, WithError, Loading, etc.)
 - Include all important component states and variations
-- Use the `autodocs` tag for automatic documentation generation
 - Story files are located throughout `apps/web/src/` alongside components
 - **For pages/widgets**: Use `createMockStory` to avoid duplicating mock setup code
 - **For simple components**: Use basic story format without mocking utilities
@@ -535,7 +565,10 @@ Avoid these common mistakes when contributing:
 2. **Forgetting to run tests** – Always run tests before committing (`yarn workspace @safe-global/web test`)
 3. **Breaking mobile when changing shared code** – Shared packages (`packages/**`) affect both web and mobile
 4. **Hardcoding values** – Use theme variables from `vars.css` (web) or Tamagui tokens (mobile)
-5. **Modifying generated files** – Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+5. **Modifying generated files** – Never manually edit auto-generated files:
+   - Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+   - Files in `packages/store/src/gateway/AUTO_GENERATED/` are generated from `schema.json` (run `yarn workspace @safe-global/store build:dev` to regenerate)
+   - CI will fail if AUTO_GENERATED files don't match the schema
 6. **Not handling chain-specific logic** – Always consider multi-chain scenarios
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components

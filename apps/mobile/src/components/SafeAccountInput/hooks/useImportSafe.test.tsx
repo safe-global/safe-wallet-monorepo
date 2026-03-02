@@ -62,7 +62,7 @@ describe('useImportSafe', () => {
       ]
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json(mockSafeOverviews)
         }),
       )
@@ -116,7 +116,7 @@ describe('useImportSafe', () => {
       const mockSafeOverviews = [createMockSafeOverview('1', VALID_ADDRESS)]
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json(mockSafeOverviews)
         }),
       )
@@ -142,7 +142,7 @@ describe('useImportSafe', () => {
 
     it('should handle empty response when no Safe deployment found', async () => {
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json([])
         }),
       )
@@ -168,7 +168,7 @@ describe('useImportSafe', () => {
 
     it('should handle API error', async () => {
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json({ message: 'Internal server error' }, { status: 500 })
         }),
       )
@@ -197,7 +197,7 @@ describe('useImportSafe', () => {
       let requestedSafes: string[] = []
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
           const url = new URL(request.url)
           const safes = url.searchParams.get('safes')
           if (safes) {
@@ -225,7 +225,7 @@ describe('useImportSafe', () => {
       let requestedCurrency: string | null = null
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
           const url = new URL(request.url)
           requestedCurrency = url.searchParams.get('currency')
           return HttpResponse.json([])

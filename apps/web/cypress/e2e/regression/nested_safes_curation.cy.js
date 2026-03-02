@@ -79,10 +79,8 @@ describe('Nested safes curation tests', () => {
       nsafes.verifySelectedSafesCount(0)
       // Suspicious safes have warning icons
       nsafes.verifyWarningIconCount(TEST_CONFIG.SUSPICIOUS_SAFES_COUNT)
-      // No cancel button on first-time (must confirm)
-      nsafes.verifyCancelBtnNotExists()
-      // Save button shows "Confirm selection"
-      nsafes.verifySaveBtnExists()
+      // Both Cancel and Confirm selection buttons should be visible
+      nsafes.verifySaveAndCancelBtnsExist()
     })
 
     it('Verify user can select safes and confirm curation', () => {

@@ -31,11 +31,10 @@ const NewTxButton = (): ReactElement => {
           data-testid="new-tx-btn"
           onClick={onClick}
           variant="contained"
-          size="small"
+          size="medium"
           disabled={!isOk}
           fullWidth
           disableElevation
-          sx={{ py: 1.3 }}
         >
           New transaction
         </Button>

@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import NonPinnedWarning from './index'
 
 const meta = {
   title: 'Features/MyAccounts/NonPinnedWarning',
   component: NonPinnedWarning,
+  decorators: [withMockProvider()],
   parameters: {
     layout: 'padded',
   },
@@ -11,6 +13,7 @@ const meta = {
   args: {
     safeAddress: '0x1234567890123456789012345678901234567890',
     safeName: undefined,
+    chainId: '1',
     hasSimilarAddress: false,
     similarAddresses: [],
     isConfirmDialogOpen: false,

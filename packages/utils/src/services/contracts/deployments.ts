@@ -3,7 +3,9 @@ import {
   getSafeSingletonDeployment,
   getSafeL2SingletonDeployment,
   getMultiSendCallOnlyDeployment,
+  getMultiSendCallOnlyDeployments,
   getMultiSendDeployment,
+  getMultiSendDeployments,
   getFallbackHandlerDeployment,
   getProxyFactoryDeployment,
   getSignMessageLibDeployment,
@@ -17,6 +19,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type SafeVersion } from '@safe-global/types-kit'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { ZKSYNC_ERA_CHAIN_ID } from '@safe-global/utils/config/chains'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
 
@@ -27,6 +30,8 @@ const SAFE_L2_CODE_HASHES = new Set<string>(
     Object.values(deployment.deployments as DeploymentRecord).map(({ codeHash }) => codeHash.toLowerCase()),
   ),
 )
+
+const SUPPORTED_ZKSYNC_CANONICAL_CHAIN_IDS = new Set([ZKSYNC_ERA_CHAIN_ID])
 
 export const isL2MasterCopyCodeHash = (codeHash: string | undefined): boolean => {
   if (!codeHash) {
@@ -185,4 +190,68 @@ export const getSignMessageLibContractDeployment = (chain: Chain, safeVersion: S
 
 export const getCreateCallContractDeployment = (chain: Chain, safeVersion: SafeState['version']) => {
   return _tryDeploymentVersions(getCreateCallDeployment, chain, safeVersion)
+}
+
+/**
+ * zkSync Era uses different bytecode formats:
+ * - EVM bytecode (canonical deployments) - standard Solidity compiled
+ * - EraVM bytecode (zkSync-specific deployments) - zksolc compiled
+ *
+ * EVM contracts cannot delegatecall to EraVM contracts, so Safes using canonical
+ * mastercopies must use canonical auxiliary contracts (MultiSend, SignMessageLib, etc.)
+ */
+
+/**
+ * Checks if an implementation address is a canonical (EVM bytecode) Safe deployment on zkSync.
+ * On zkSync, canonical deployments have EVM bytecode while zkSync-specific deployments have EraVM bytecode.
+ */
+export const isCanonicalDeployment = (
+  implementationAddress: string,
+  chainId: string,
+  version: SafeState['version'],
+): boolean => {
+  // Canonical aux-contract override is currently enabled only for zkSync Era mainnet.
+  if (!SUPPORTED_ZKSYNC_CANONICAL_CHAIN_IDS.has(chainId)) {
+    return false
+  }
+
+  const safeVersion = version ?? '1.3.0'
+
+  // Check L2 singleton deployments
+  const l2Deployment = getSafeL2SingletonDeployment({ version: safeVersion, network: chainId })
+  if (l2Deployment?.deployments.canonical?.address) {
+    if (sameAddress(implementationAddress, l2Deployment.deployments.canonical.address)) {
+      return true
+    }
+  }
+
+  // Check L1 singleton deployments
+  const l1Deployment = getSafeSingletonDeployment({ version: safeVersion, network: chainId })
+  if (l1Deployment?.deployments.canonical?.address) {
+    if (sameAddress(implementationAddress, l1Deployment.deployments.canonical.address)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * Gets the canonical MultiSendCallOnly address for a given version.
+ * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
+ */
+export const getCanonicalMultiSendCallOnlyAddress = (version: SafeState['version']): string | undefined => {
+  const safeVersion = version ?? '1.3.0'
+  const deployment = getMultiSendCallOnlyDeployments({ version: safeVersion })
+  return deployment?.deployments.canonical?.address
+}
+
+/**
+ * Gets the canonical MultiSend address for a given version.
+ * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
+ */
+export const getCanonicalMultiSendAddress = (version: SafeState['version']): string | undefined => {
+  const safeVersion = version ?? '1.3.0'
+  const deployment = getMultiSendDeployments({ version: safeVersion })
+  return deployment?.deployments.canonical?.address
 }

@@ -67,7 +67,7 @@ export default function CancelRecoveryButton({
             onClick={onClick}
             variant="danger"
             disabled={isDisabled}
-            size={compact ? 'small' : 'stretched'}
+            size={compact ? 'small' : 'large'}
           >
             Cancel
           </Button>

@@ -8,6 +8,16 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 
+jest.mock('@/features/hypernative', () => ({
+  ...jest.requireActual('@/features/hypernative'),
+  useHnQueueAssessment: () => ({
+    assessments: {},
+    isLoading: false,
+    setPages: jest.fn(),
+    setTx: jest.fn(),
+  }),
+}))
+
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 const SAFE_ADDRESS = '0x87a57cBf742CC1Fc702D0E9BF595b1E056693e2f'
 

@@ -1,7 +1,7 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { DialogContent, DialogActions, Button, Typography } from '@mui/material'
 import { useMembersRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import { trackEvent } from '@/services/analytics'

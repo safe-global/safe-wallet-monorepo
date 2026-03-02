@@ -64,7 +64,6 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         fullAddress
         showCopyButton
         hasExplorer
-        monospace
         highlight4bytes={!!safe.similarityGroup}
       >
         {!isMobile && statusChips}
@@ -77,6 +76,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         name={name}
         isReplayable={false}
         undeployedSafe={!!undeployedSafe}
+        hideNestedSafes
       />
       {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </AccountItem.Button>

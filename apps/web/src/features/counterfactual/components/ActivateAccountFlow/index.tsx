@@ -229,7 +229,7 @@ const ActivateAccountFlow = () => {
                 data-testid="activate-account-flow-btn"
                 onClick={createSafe}
                 variant="contained"
-                size="stretched"
+                size="xlarge"
                 disabled={!isOk || submitDisabled}
               >
                 {!isSubmittable ? <CircularProgress size={20} /> : 'Activate'}

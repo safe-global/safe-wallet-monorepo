@@ -6,6 +6,7 @@ import { apiSliceWithChainsConfig } from '../index'
 import { setBaseUrl } from '../../cgwClient'
 
 const GATEWAY_URL = 'https://test-gateway.safe.global'
+const CONFIG_SERVICE_KEY = 'TEST'
 
 const mockChains = [
   createMockChain({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }),
@@ -51,7 +52,7 @@ describe('chains retry functionality', () => {
   describe('successful responses', () => {
     it('should fetch chains successfully on first attempt', async () => {
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({
             results: mockChains,
             next: null,
@@ -60,7 +61,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.entities).toBeDefined()
@@ -76,14 +77,14 @@ describe('chains retry functionality', () => {
       const page2Chains = [mockChains[2]]
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/chains`, ({ request }) => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             return HttpResponse.json({
               results: page1Chains,
-              next: `${GATEWAY_URL}/v1/chains?cursor=page2`,
+              next: `${GATEWAY_URL}/v2/chains?cursor=page2`,
             })
           }
 
@@ -95,7 +96,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(Object.keys(result.data?.entities ?? {}).length).toBe(3)
@@ -110,7 +111,7 @@ describe('chains retry functionality', () => {
       let attemptCount = 0
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           attemptCount++
 
           if (attemptCount < 3) {
@@ -125,7 +126,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -138,7 +139,7 @@ describe('chains retry functionality', () => {
       let attemptCount = 0
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           attemptCount++
 
           if (attemptCount < 2) {
@@ -153,7 +154,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -165,7 +166,7 @@ describe('chains retry functionality', () => {
       let attemptCount = 0
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           attemptCount++
           return HttpResponse.json({
             results: mockChains,
@@ -175,7 +176,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(attemptCount).toBe(1)
@@ -185,14 +186,14 @@ describe('chains retry functionality', () => {
       let attemptCount = 0
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           attemptCount++
           return HttpResponse.error()
         }),
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -204,13 +205,13 @@ describe('chains retry functionality', () => {
   describe('error handling', () => {
     it('should return error after max retries exhausted', async () => {
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.error()
         }),
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -225,18 +226,18 @@ describe('chains retry functionality', () => {
       let page2Attempts = 0
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/chains`, ({ request }) => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             page1Attempts++
             if (page1Attempts < 2) {
               return HttpResponse.error()
             }
             return HttpResponse.json({
               results: [mockChains[0]],
-              next: `${GATEWAY_URL}/v1/chains?cursor=page2`,
+              next: `${GATEWAY_URL}/v2/chains?cursor=page2`,
             })
           }
 
@@ -252,7 +253,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -264,14 +265,14 @@ describe('chains retry functionality', () => {
 
     it('should fail pagination if max retries exceeded on any page', async () => {
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/chains`, ({ request }) => {
           const url = new URL(request.url)
           const cursor = url.searchParams.get('cursor')
 
-          if (!cursor) {
+          if (cursor !== 'page2') {
             return HttpResponse.json({
               results: [mockChains[0]],
-              next: `${GATEWAY_URL}/v1/chains?cursor=page2`,
+              next: `${GATEWAY_URL}/v2/chains?cursor=page2`,
             })
           }
 
@@ -280,7 +281,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const promise = store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
       await jest.runAllTimersAsync()
       const result = await promise
 
@@ -291,7 +292,7 @@ describe('chains retry functionality', () => {
   describe('adapter integration', () => {
     it('should normalize chains data using adapter', async () => {
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({
             results: mockChains,
             next: null,
@@ -300,7 +301,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
 
@@ -315,7 +316,7 @@ describe('chains retry functionality', () => {
       const customChain = createMockChain({ chainId: '999', chainName: 'Test Chain' })
 
       server = setupServer(
-        http.get(`${GATEWAY_URL}/v1/chains`, () => {
+        http.get(`${GATEWAY_URL}/v2/chains`, () => {
           return HttpResponse.json({
             results: [customChain],
             next: null,
@@ -324,7 +325,7 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.ids).toContain('999')

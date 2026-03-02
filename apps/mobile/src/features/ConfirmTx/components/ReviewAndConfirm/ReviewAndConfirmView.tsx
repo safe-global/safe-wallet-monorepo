@@ -22,12 +22,12 @@ export function ReviewAndConfirmView({ txDetails, children, header }: ReviewAndC
     <MaterialTabBar
       {...props}
       indicatorStyle={{
-        backgroundColor: theme.color?.get(),
+        backgroundColor: theme.color.get(),
       }}
-      style={{ backgroundColor: isDark ? theme.background?.get() : theme.backgroundSheet?.get() }}
-      labelStyle={{ color: theme.color?.get(), fontSize: 16, fontWeight: '600' }}
-      activeColor={theme.color?.get()}
-      inactiveColor={theme.colorSecondary?.get()}
+      style={{ backgroundColor: isDark ? theme.background.get() : theme.backgroundSheet.get() }}
+      labelStyle={{ color: theme.color.get(), fontSize: 16, fontWeight: '600' }}
+      activeColor={theme.color.get()}
+      inactiveColor={theme.colorSecondary.get()}
       width={300}
     />
   )

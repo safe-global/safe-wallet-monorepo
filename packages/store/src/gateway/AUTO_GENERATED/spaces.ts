@@ -1,49 +1,11 @@
 import { cgwClient as api } from '../cgwClient'
-export const addTagTypes = ['accounts', 'spaces'] as const
+export const addTagTypes = ['spaces'] as const
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      addressBooksGetAddressBookV1: build.query<
-        AddressBooksGetAddressBookV1ApiResponse,
-        AddressBooksGetAddressBookV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}` }),
-        providesTags: ['accounts'],
-      }),
-      addressBooksCreateAddressBookItemV1: build.mutation<
-        AddressBooksCreateAddressBookItemV1ApiResponse,
-        AddressBooksCreateAddressBookItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
-          method: 'POST',
-          body: queryArg.createAddressBookItemDto,
-        }),
-        invalidatesTags: ['accounts'],
-      }),
-      addressBooksDeleteAddressBookV1: build.mutation<
-        AddressBooksDeleteAddressBookV1ApiResponse,
-        AddressBooksDeleteAddressBookV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['accounts'],
-      }),
-      addressBooksDeleteAddressBookItemV1: build.mutation<
-        AddressBooksDeleteAddressBookItemV1ApiResponse,
-        AddressBooksDeleteAddressBookItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/accounts/${queryArg.address}/address-books/${queryArg.chainId}/${queryArg.addressBookItemId}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['accounts'],
-      }),
       addressBooksGetAddressBookItemsV1: build.query<
         AddressBooksGetAddressBookItemsV1ApiResponse,
         AddressBooksGetAddressBookItemsV1ApiArg
@@ -168,28 +130,6 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AddressBooksGetAddressBookV1ApiResponse = /** status 200  */ AddressBook
-export type AddressBooksGetAddressBookV1ApiArg = {
-  address: string
-  chainId: string
-}
-export type AddressBooksCreateAddressBookItemV1ApiResponse = /** status 200  */ AddressBookItem
-export type AddressBooksCreateAddressBookItemV1ApiArg = {
-  address: string
-  chainId: string
-  createAddressBookItemDto: CreateAddressBookItemDto
-}
-export type AddressBooksDeleteAddressBookV1ApiResponse = unknown
-export type AddressBooksDeleteAddressBookV1ApiArg = {
-  address: string
-  chainId: string
-}
-export type AddressBooksDeleteAddressBookItemV1ApiResponse = unknown
-export type AddressBooksDeleteAddressBookItemV1ApiArg = {
-  address: string
-  chainId: string
-  addressBookItemId: number
-}
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
   /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
@@ -309,21 +249,6 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
-export type AddressBookItem = {
-  name: string
-  address: string
-  chainIds: string[]
-}
-export type AddressBook = {
-  id: string
-  accountId: string
-  chainId: string
-  data: AddressBookItem[]
-}
-export type CreateAddressBookItemDto = {
-  name: string
-  address: string
-}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
@@ -334,6 +259,11 @@ export type SpaceAddressBookItemDto = {
 export type SpaceAddressBookDto = {
   spaceId: string
   data: SpaceAddressBookItemDto[]
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
 }
 export type UpsertAddressBookItemsDto = {
   items: AddressBookItem[]
@@ -347,23 +277,20 @@ export type CreateSpaceDto = {
 }
 export type UserDto = {
   id: number
-  status: 'PENDING' | 'ACTIVE'
 }
 export type MemberDto = {
-  id: number
   role: 'ADMIN' | 'MEMBER'
   name: string
   invitedBy: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  createdAt: string
-  updatedAt: string
   user: UserDto
 }
 export type GetSpaceResponse = {
   id: number
   name: string
-  status: 'ACTIVE'
   members: MemberDto[]
+  /** Total count of Safes in the space */
+  safeCount: number
 }
 export type UpdateSpaceResponse = {
   id: number
@@ -372,24 +299,20 @@ export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
 }
-export type CreateSpaceSafeDto = {
+export type SpaceSafeDto = {
   chainId: string
   address: string
 }
 export type CreateSpaceSafesDto = {
-  safes: CreateSpaceSafeDto[]
+  safes: SpaceSafeDto[]
 }
 export type GetSpaceSafeResponse = {
   safes: {
     [key: string]: string[]
   }
 }
-export type DeleteSpaceSafeDto = {
-  chainId: string
-  address: string
-}
 export type DeleteSpaceSafesDto = {
-  safes: DeleteSpaceSafeDto[]
+  safes: SpaceSafeDto[]
 }
 export type Invitation = {
   userId: number
@@ -436,11 +359,6 @@ export type UpdateMemberAliasDto = {
   alias: string
 }
 export const {
-  useAddressBooksGetAddressBookV1Query,
-  useLazyAddressBooksGetAddressBookV1Query,
-  useAddressBooksCreateAddressBookItemV1Mutation,
-  useAddressBooksDeleteAddressBookV1Mutation,
-  useAddressBooksDeleteAddressBookItemV1Mutation,
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,

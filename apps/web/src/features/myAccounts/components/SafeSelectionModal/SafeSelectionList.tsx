@@ -137,14 +137,7 @@ const SafeSelectionList = ({ items, isLoading, searchQuery, onSearchChange, onTo
         }}
       />
 
-      <Box
-        sx={{
-          border: '1px solid',
-          borderColor: 'border.light',
-          borderRadius: 1,
-          p: 1,
-        }}
-      >
+      <Box>
         {items.length === 0 ? (
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Typography color="text.secondary">

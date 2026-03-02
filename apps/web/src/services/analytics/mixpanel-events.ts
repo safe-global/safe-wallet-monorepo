@@ -37,6 +37,9 @@ export enum MixpanelEvent {
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
+  HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
+  HYPERNATIVE_CONNECTED = 'Hypernative Connected',
+  FALSE_RESULT_REPORTED = 'False Result Reported',
 }
 
 export enum MixpanelUserProperty {

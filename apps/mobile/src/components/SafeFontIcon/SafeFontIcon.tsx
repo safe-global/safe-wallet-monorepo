@@ -19,7 +19,7 @@ export interface IconProps extends Omit<React.ComponentProps<typeof SafeIcon>, '
 
 export const SafeFontIcon = ({ name, size = 24, color, ...rest }: IconProps) => {
   const theme = useTheme()
-  const iconColor = color ? theme[color]?.get() || getVariable(color, 'color') : theme.color?.get()
+  const iconColor = color ? theme[color]?.get() || getVariable(color, 'color') : theme.color.get()
   const [fontsLoaded] = useFonts({
     SafeIcons: require('@/assets/fonts/safe-icons/safe-icons.ttf'),
   })

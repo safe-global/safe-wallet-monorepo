@@ -161,8 +161,8 @@ const { isEligible, remaining, limit } = useNoFeeCampaignEligibility()
 ```typescript
 const noFeeFeature = useLoadFeature(NoFeeCampaignFeature)
 
-if (noFeeFeature.$isLoading) return <Skeleton />
 if (noFeeFeature.$isDisabled) return null
+if (!noFeeFeature.$isReady) return <Skeleton />
 
 // Destructure after state checks
 const { NoFeeCampaignBanner } = noFeeFeature

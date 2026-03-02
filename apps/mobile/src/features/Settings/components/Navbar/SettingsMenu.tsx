@@ -27,8 +27,12 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
-  const color = theme.color?.get()
-  const colorError = 'red'
+  const color = theme.color.get()
+  // hardcoded to the iOS red
+  // when we set danger to a button, it automatically sets a color that the OS selects
+  // titleColor only works on android and not on iOS
+  // that's why I'm hardcoding the iOS value of the danger text here
+  const colorError = 'rgb(255,66,69)'
 
   if (!safeAddress) {
     return null
@@ -180,6 +184,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             {
               id: 'remove',
               title: 'Remove account',
+              titleColor: colorError,
               attributes: {
                 destructive: true,
               },

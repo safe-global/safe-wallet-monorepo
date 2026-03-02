@@ -193,7 +193,7 @@ export function generateIndexTemplate(config: FeatureConfig): string {
   lines.push(` * function MyComponentWithStates() {`)
   lines.push(` *   const feature = useLoadFeature(${featureNamePascal}Feature)`)
   lines.push(` *`)
-  lines.push(` *   if (feature.$isLoading) return <Skeleton />`)
+  lines.push(` *   if (!feature.$isReady) return <Skeleton />`)
   lines.push(` *   if (feature.$isDisabled) return null`)
   lines.push(` *`)
   lines.push(` *   return <feature.${publicAPI.components[0] || 'MyComponent'} />`)

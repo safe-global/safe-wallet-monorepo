@@ -107,3 +107,9 @@ apps/web/src/types/contracts/*
 
 # tx-builder
 apps/tx-builder/build/*
+apps/tx-builder/vite.config.js
+apps/tx-builder/vite.config.d.ts
+
+# claude-workflows
+todos/*
+docs/

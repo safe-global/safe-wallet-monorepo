@@ -21,12 +21,13 @@ import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
 import {
-  useHnQueueAssessment,
+  useHnQueueAssessmentResult,
   useShowHypernativeAssessment,
   useHypernativeOAuth,
-  HnQueueAssessment,
+  HypernativeFeature,
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -36,6 +37,7 @@ type TxSummaryProps = {
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -48,7 +50,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
   // Extract safeTxHash for assessment
   const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
-  const assessment = useHnQueueAssessment(safeTxHash)
+  const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
 

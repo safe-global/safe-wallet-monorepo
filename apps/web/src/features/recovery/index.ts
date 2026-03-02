@@ -23,7 +23,7 @@
  * function MyComponentWithStates() {
  *   const feature = useLoadFeature(RecoveryFeature)
  *
- *   if (feature.$isLoading) return <Skeleton />
+ *   if (!feature.$isReady) return <Skeleton />
  *   if (feature.$isDisabled) return null
  *
  *   return <feature.CancelRecoveryButton />

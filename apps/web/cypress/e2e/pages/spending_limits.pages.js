@@ -184,19 +184,7 @@ export function enterSpendingLimitAmount(amount) {
 }
 
 export function enterBeneficiaryAddress(address) {
-  // Set value using native input event setter to work with React's controlled inputs
-  getBeneficiaryInput().then(($input) => {
-    // Get the native input element
-    const input = $input[0]
-    // Use native setter to set value (works with React)
-    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    nativeInputValueSetter.call(input, address)
-    // Dispatch input event to trigger React's onChange
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-  })
-  // Wait for validation and click outside to trigger blur
-  cy.wait(500)
-  cy.get('body').click(0, 0)
+  getBeneficiaryInput().clear().type(address)
 }
 
 export function checkBeneficiaryInputValue(value) {

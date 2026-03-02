@@ -23,7 +23,8 @@
       "@/public/*": ["./public/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
-      "@safe-global/test/*": ["../../config/test/*"]
+      "@safe-global/test/*": ["../../config/test/*"],
+      "@/storybook/*": ["./.storybook/*"]
     },
     "plugins": [
       {

@@ -4,18 +4,12 @@ import { showNotification, closeNotification } from '@/store/notificationsSlice'
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'
-import {
-  canMigrateUnsupportedMastercopy,
-  isMigrationToL2Possible,
-  isValidMasterCopy,
-} from '@safe-global/utils/services/contracts/safeContracts'
 import { useRouter } from 'next/router'
 import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
-import { useBytecodeComparison } from './useBytecodeComparison'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -136,42 +130,10 @@ const useSafeNotifications = (): void => {
   ])
 
   /**
-   * Show a notification when the Safe master copy is not supported
+   * Notification for unsupported master copy has been moved to the
+   * "Attention required" panel on the dashboard (UnsupportedMastercopyWarning component)
+   * to consolidate all warning banners in one place.
    */
-  const bytecodeComparison = useBytecodeComparison()
-
-  useEffect(() => {
-    if (isValidMasterCopy(safe.implementationVersionState)) return
-    if (bytecodeComparison.isLoading) return
-
-    const canMigrate = canMigrateUnsupportedMastercopy(safe, bytecodeComparison.result) || isMigrationToL2Possible(safe)
-
-    const message = canMigrate
-      ? 'This Safe Account was created with an unsupported base contract. It is possible to migrate it to a compatible base contract. You can migrate it to a compatible contract on the Home screen.'
-      : `This Safe Account was created with an unsupported base contract.
-           The web interface might not work correctly.
-           We recommend using the command line interface instead.`
-
-    const id = dispatch(
-      showNotification({
-        variant: canMigrate ? 'info' : 'warning',
-        message,
-        groupKey: 'invalid-mastercopy',
-        link: canMigrate ? undefined : CLI_LINK,
-      }),
-    )
-
-    return () => {
-      dispatch(closeNotification({ id }))
-    }
-  }, [
-    dispatch,
-    safe,
-    safe.implementationVersionState,
-    bytecodeComparison.result,
-    bytecodeComparison.isLoading,
-    query.safe,
-  ])
 }
 
 export default useSafeNotifications

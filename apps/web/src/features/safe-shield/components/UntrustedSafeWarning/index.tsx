@@ -5,8 +5,9 @@ import { SeverityIcon } from '../SeverityIcon'
 import AddTrustedSafeDialog from '@/features/myAccounts/components/NonPinnedWarning/AddTrustedSafeDialog'
 import { useSimilarAddressDetection } from '@/features/myAccounts'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
 
 type UntrustedSafeWarningProps = {
@@ -20,6 +21,7 @@ type UntrustedSafeWarningProps = {
  * with a confirmation dialog.
  */
 const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSafeWarningProps): ReactElement => {
+  const dispatch = useAppDispatch()
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
   const { safe, safeAddress } = useSafeInfo()
   const chainId = safe?.chainId ?? ''
@@ -32,7 +34,11 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
     trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE, label: TRUSTED_SAFE_LABELS.safe_shield })
   }
   const handleCloseConfirmDialog = () => setIsConfirmDialogOpen(false)
-  const handleConfirmAddToTrustedList = () => {
+  const handleConfirmAddToTrustedList = (name: string) => {
+    const canUpdateAddressBook = name && safeAddress && chainId
+    if (canUpdateAddressBook) {
+      dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: safeAddress, name: name.trim() }))
+    }
     onAddToTrustedList()
     setIsConfirmDialogOpen(false)
   }
@@ -56,7 +62,7 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
                 onClick={handleOpenConfirmDialog}
                 sx={{ alignSelf: 'flex-start', mt: 1 }}
               >
-                Add to trusted list
+                Trust this Safe
               </Button>
             </Stack>
           </Stack>
@@ -68,6 +74,7 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
           open={isConfirmDialogOpen}
           safeAddress={safeAddress}
           safeName={safeName}
+          chainId={chainId}
           hasSimilarAddress={hasSimilarAddress}
           similarAddresses={similarAddresses}
           onConfirm={handleConfirmAddToTrustedList}

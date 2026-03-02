@@ -1,6 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import DialogContent from '@mui/material/DialogContent'
-import UpdateSpaceForm from '@/features/spaces/components/SpaceSettings/UpdateSpaceForm'
+import UpdateSpaceForm from './UpdateSpaceForm'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@mui/material'
 import { AppRoutes } from '@/config/routes'

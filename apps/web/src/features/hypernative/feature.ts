@@ -26,6 +26,7 @@ import { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
 import { HnAnalysisGroupCard } from './components/HnAnalysisGroupCard'
 import { HnCustomChecksCard } from './components/HnCustomChecksCard'
 import { HnInfoCard } from './components/HnInfoCard'
+import { HnQueueAssessment } from './components/HnQueueAssessment'
 
 // Service imports
 import { isHypernativeGuard } from './services/hypernativeGuardCheck'
@@ -52,6 +53,7 @@ const feature: HypernativeContract = {
   HnAnalysisGroupCard,
   HnCustomChecksCard,
   HnInfoCard,
+  HnQueueAssessment,
 
   // Services
   isHypernativeGuard,

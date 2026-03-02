@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
@@ -42,18 +43,18 @@ describe('Sidebar tests 3', () => {
   })
 
   it('Verify that trusted safes appear in the sidebar', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe2)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafes.safe1short, sideBar.sideBarSafes.safe2short])
   })
 
   it('Verify there is an option to name an unnamed safe', () => {
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe1)
-    main.addSafeToTrustedList('11155111', sideBar.sideBarSafes.safe2)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.openSidebar()
     sideBar.verifySafeGiveNameOptionExists(0)
