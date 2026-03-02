@@ -68,12 +68,7 @@ export function CustomNonceModal({ visible, defaultNonce, onSave, onCancel }: Cu
 
               <View style={[styles.verticalDivider, { backgroundColor: dividerColor }]} />
 
-              <Pressable
-                style={styles.buttonHalf}
-                onPress={handleSave}
-                disabled={!isValid}
-                testID="custom-nonce-save"
-              >
+              <Pressable style={styles.buttonHalf} onPress={handleSave} disabled={!isValid} testID="custom-nonce-save">
                 <Text
                   fontSize={14}
                   fontWeight={700}
