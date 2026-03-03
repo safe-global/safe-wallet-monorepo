@@ -26,6 +26,15 @@ import { useLoadFeature } from '@/features/__core__'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
+import SafeWidget from '../SafeWidget'
+
+const AddActionsAction = () => {
+  return (
+    <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+      <AddAccounts />
+    </Track>
+  )
+}
 
 const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
   return (
@@ -49,7 +58,7 @@ const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
 const DASHBOARD_LIST_DISPLAY_LIMIT = 3
 
 const SpaceDashboard = () => {
-  const { AccountsWidget } = useLoadFeature(MyAccountsFeature)
+  const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -84,17 +93,19 @@ const SpaceDashboard = () => {
 
           <Grid container spacing={3}>
             <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
-              <AccountsWidget
-                accounts={accounts}
-                loading={isOverviewLoading}
-                remainingCount={remainingCount > 0 ? remainingCount : undefined}
-                onViewAll={handleViewAll}
-                action={
-                  <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-                    <AddAccounts />
-                  </Track>
-                }
-              />
+              {$isReady ? (
+                <AccountsWidget
+                  accounts={accounts}
+                  loading={isOverviewLoading}
+                  remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                  onViewAll={handleViewAll}
+                  action={<AddActionsAction />}
+                />
+              ) : (
+                <SafeWidget title="Accounts" action={<AddActionsAction />}>
+                  <div className="animate-pulse rounded-lg bg-muted" />
+                </SafeWidget>
+              )}
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Card sx={{ p: 2 }}>

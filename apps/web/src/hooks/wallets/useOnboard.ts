@@ -156,7 +156,7 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
     if (isUnlocked !== false) {
-      connectWallet(onboard, {
+      await connectWallet(onboard, {
         autoSelect: { label: lastWalletLabel, disableModals: isUnlocked === true },
       })
     }
@@ -194,6 +194,7 @@ export const useInitOnboard = () => {
     enableWallets().then(async () => {
       // Reconnect last wallet and mark wallet provider as ready
       await connectLastWallet(onboard)
+
       setWalletReady(true)
     })
   }, [chain, onboard])
@@ -205,6 +206,7 @@ export const useInitOnboard = () => {
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)
+
       if (newWallet) {
         if (newWallet.label !== lastConnectedWallet) {
           lastConnectedWallet = newWallet.label

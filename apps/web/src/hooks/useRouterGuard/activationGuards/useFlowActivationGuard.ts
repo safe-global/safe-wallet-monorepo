@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { type UseGuard } from '..'
 import { AppRoutes } from '@/config/routes'
-import useWallet from '@/hooks/wallets/useWallet'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
@@ -77,7 +76,6 @@ const guardRules: GuardRule[] = [
 
 export const useFlowActivationGuard: UseGuard = () => {
   const { pathname, query } = useRouter()
-  const wallet = useWallet()
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
@@ -106,14 +104,13 @@ export const useFlowActivationGuard: UseGuard = () => {
         isPublicRoute: !ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)) && !isSpaceRoute,
         isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
         isWalletReady,
-        isConnected: !!wallet,
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
       },
       guardRules,
     )
-  }, [pathname, query, wallet, isWalletReady, isSiweAuthenticated, fetchSpaces])
+  }, [pathname, query, isWalletReady, isSiweAuthenticated, fetchSpaces])
 
   return {
     activationGuard,
