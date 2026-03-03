@@ -1,21 +1,21 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
-import Dashboard from '@/components/dashboard'
+import SafeOverview from '@/features/safe-overview'
 import { BRAND_NAME } from '@/config/constants'
 
-const Home: NextPage = () => {
+const DashboardNew: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Dashboard`}</title>
+        <title>{`${BRAND_NAME} – Overview`}</title>
       </Head>
 
       <main>
-        <Dashboard />
+        <SafeOverview />
       </main>
     </>
   )
 }
 
-export default Home
+export default DashboardNew
