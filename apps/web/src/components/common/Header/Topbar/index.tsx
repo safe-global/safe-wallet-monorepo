@@ -36,7 +36,6 @@ const Topbar = (): ReactElement => {
             messages={unreadCount}
             onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
             onWalletClick={handleWalletClick}
-
           />
         </div>
       </header>
