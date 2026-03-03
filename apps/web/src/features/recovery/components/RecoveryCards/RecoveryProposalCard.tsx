@@ -51,12 +51,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button
-      data-testid="start-recovery"
-      variant="contained"
-      onClick={handleRecoverWithTracking}
-      className={css.button}
-    >
+    <Button data-testid="start-recovery" variant="contained" onClick={handleRecoverWithTracking} className={css.button}>
       Start recovery
     </Button>
   )

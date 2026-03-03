@@ -147,9 +147,11 @@ export function clearRecoverers() {
 }
 
 export function clickOnStartRecoveryBtn() {
-  cy.get(recoveryProposalCard).should('be.visible').within(() => {
-    cy.get(startRecoveryBtn).click()
-  })
+  cy.get(recoveryProposalCard)
+    .should('be.visible')
+    .within(() => {
+      cy.get(startRecoveryBtn).click()
+    })
 }
 
 export function enterOwnerAddress(address) {
