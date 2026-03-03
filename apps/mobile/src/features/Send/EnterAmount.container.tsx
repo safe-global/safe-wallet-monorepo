@@ -78,10 +78,7 @@ export function EnterAmountContainer() {
   const keyboardVisible = useKeyboardVisible()
 
   const { token, decimals, maxBalance, hasFiatPrice, formattedBalance } = useTokenBalance({
-    chainId: activeSafe.chainId,
-    safeAddress: activeSafe.address,
     tokenAddress,
-    currency,
   })
 
   const nonce = useNonceSelection({

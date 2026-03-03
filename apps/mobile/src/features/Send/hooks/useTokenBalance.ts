@@ -1,14 +1,11 @@
 import { useMemo } from 'react'
-import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import useMobileTotalBalances from '@/src/hooks/useTotalBalances'
 import { isNativeToken } from '../services/tokenTransferParams'
 
 interface UseTokenBalanceArgs {
-  chainId: string
-  safeAddress: string
   tokenAddress: string
-  currency: string
 }
 
 interface UseTokenBalanceResult {
@@ -34,19 +31,10 @@ function hasFiatConversion(token: Balance | undefined): boolean {
   return !!token?.fiatConversion && parseFloat(token.fiatConversion) > 0
 }
 
-export function useTokenBalance({
-  chainId,
-  safeAddress,
-  tokenAddress,
-  currency,
-}: UseTokenBalanceArgs): UseTokenBalanceResult {
-  const { data: balancesData } = useBalancesGetBalancesV1Query({
-    chainId,
-    safeAddress,
-    fiatCode: currency,
-  })
+export function useTokenBalance({ tokenAddress }: UseTokenBalanceArgs): UseTokenBalanceResult {
+  const { data } = useMobileTotalBalances()
 
-  const token = findToken(balancesData?.items ?? [], tokenAddress)
+  const token = findToken(data?.items ?? [], tokenAddress)
   const decimals = getDecimals(token)
   const maxBalance = token?.balance ?? '0'
   const hasFiatPrice = hasFiatConversion(token)
