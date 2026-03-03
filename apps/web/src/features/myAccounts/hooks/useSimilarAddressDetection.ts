@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses } from '../services/addressSimilarity'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SimilarAddressInfo } from './useNonPinnedSafeWarning.types'
 
 type SimilarAddressResult = {

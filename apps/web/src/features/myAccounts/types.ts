@@ -6,8 +6,12 @@
  */
 
 // Similarity detection types
-export type { SimilarityConfig, SimilarityGroup, SimilarityDetectionResult } from './services/addressSimilarity.types'
-export { DEFAULT_SIMILARITY_CONFIG } from './services/addressSimilarity.types'
+export type {
+  SimilarityConfig,
+  SimilarityGroup,
+  SimilarityDetectionResult,
+} from '@safe-global/utils/utils/addressSimilarity.types'
+export { DEFAULT_SIMILARITY_CONFIG } from '@safe-global/utils/utils/addressSimilarity.types'
 
 // Safe selection modal types
 export type { SelectableSafe } from './hooks/useSafeSelectionModal.types'
