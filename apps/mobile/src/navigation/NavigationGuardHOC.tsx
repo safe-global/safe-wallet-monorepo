@@ -38,7 +38,7 @@ function useInitialNavigationScreen() {
     }
   }, [shouldShowOptIn, hasShownNotifications, dispatch])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here
     if (navigated) {
       return

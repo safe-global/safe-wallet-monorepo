@@ -34,14 +34,20 @@ export function useAppUpdateCheck(): UpdateCheckResult {
         const minRequired = remoteConfigService.getPlatformString('min_required_version')
         const recommended = remoteConfigService.getPlatformString('recommended_version')
 
-        if (!isValidVersion(appVersion) || !isValidVersion(minRequired)) {
+        if (!isValidVersion(appVersion)) {
           return
         }
 
-        const needsForce = lt(appVersion, minRequired)
-        setRequiresForceUpdate(needsForce)
+        if (isValidVersion(minRequired)) {
+          const needsForce = lt(appVersion, minRequired)
+          setRequiresForceUpdate(needsForce)
 
-        if (!needsForce && isValidVersion(recommended)) {
+          if (needsForce) {
+            return
+          }
+        }
+
+        if (isValidVersion(recommended)) {
           setRecommendsUpdate(lt(appVersion, recommended))
         }
       } catch {

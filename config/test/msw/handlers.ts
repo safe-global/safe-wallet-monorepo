@@ -106,7 +106,6 @@ const chainsConfig = {
   ],
 }
 
-
 export const handlers = (GATEWAY_URL: string) => [
   http.get(`${GATEWAY_URL}/v1/auth/nonce`, () => {
     return HttpResponse.json({
@@ -201,7 +200,6 @@ export const handlers = (GATEWAY_URL: string) => [
   http.get<{ chainId: string }, never, MasterCopy[]>(`${GATEWAY_URL}/v1/chains/:chainId/about/master-copies`, () => {
     return HttpResponse.json(defaultMasterCopies)
   }),
-
 
   // Chains config endpoint for RTK Query initialization (v1 - used by mobile)
   http.get(`${GATEWAY_URL}/v1/chains`, () => {

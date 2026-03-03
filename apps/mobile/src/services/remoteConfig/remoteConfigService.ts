@@ -16,7 +16,6 @@ const DEFAULTS: Record<string, string> = {
   recommended_version_android: '0.0.0',
 }
 
-let initialized = false
 let defaultsSet = false
 
 async function initialize(): Promise<void> {
@@ -30,10 +29,8 @@ async function initialize(): Promise<void> {
     defaultsSet = true
 
     await fetchAndActivate(config)
-    initialized = true
   } catch (error) {
     console.warn('[RemoteConfig] Initialization failed, using defaults:', error)
-    initialized = true
   }
 }
 
@@ -59,7 +56,4 @@ export const remoteConfigService = {
   initialize,
   getString,
   getPlatformString,
-  get isInitialized() {
-    return initialized
-  },
 }
