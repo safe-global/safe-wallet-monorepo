@@ -27,7 +27,13 @@ export function resetCaptchaPromise() {
   createCaptchaReadyPromise()
 }
 
-function initializeCaptchaHeaders() {
+let initialized = false
+
+// Must be called once at app startup, before any CGW requests are made.
+export function initializeCaptchaHeaders() {
+  if (initialized) return
+  initialized = true
+
   // Create initial promise
   createCaptchaReadyPromise()
 
@@ -45,5 +51,3 @@ function initializeCaptchaHeaders() {
     return headers
   })
 }
-
-initializeCaptchaHeaders()

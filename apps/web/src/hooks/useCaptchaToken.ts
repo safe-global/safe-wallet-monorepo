@@ -13,7 +13,7 @@ declare global {
           size?: 'normal' | 'compact' | 'flexible'
           appearance?: 'always' | 'execute' | 'interaction-only'
           callback?: (token: string) => void
-          'error-callback'?: (error: Error) => void
+          'error-callback'?: (error: string) => void
           'expired-callback'?: () => void
           'before-interactive-callback'?: () => void
           'after-interactive-callback'?: () => void
@@ -138,9 +138,10 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
             setIsModalOpen(false)
           }, 500)
         },
-        'error-callback': (error: Error) => {
+        'error-callback': (error: string) => {
           sharedTokenRef.current = null
-          setError(error)
+          resolveCaptchaReady()
+          setError(new Error(error))
           setIsLoading(false)
           setToken(null)
         },
@@ -162,6 +163,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
       widgetIdRef.current = widgetId
       hasRenderedRef.current = true
     } catch (err) {
+      resolveCaptchaReady()
       setError(err instanceof Error ? err : new Error('Failed to initialize Turnstile'))
       setIsLoading(false)
     }
@@ -181,7 +183,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
   // Load script
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY) {
-      // No captcha configured - resolve immediately so requests can proceed
+      // Captcha disabled - resolve immediately so requests can proceed
       resolveCaptchaReady()
       setIsLoading(false)
       return
@@ -192,6 +194,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
         await loadTurnstileScript()
         setIsScriptReady(true)
       } catch (err) {
+        resolveCaptchaReady()
         setError(err instanceof Error ? err : new Error('Failed to load Turnstile'))
         setIsLoading(false)
       }

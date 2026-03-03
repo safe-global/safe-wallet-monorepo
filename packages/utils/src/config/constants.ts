@@ -25,7 +25,7 @@ export const TENDERLY_PROJECT_NAME =
 export const TENDERLY_ORG_NAME =
   process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || process.env.EXPO_PUBLIC_TENDERLY_ORG_NAME || ''
 
-// Captcha
+// Captcha — set to empty string to disable CAPTCHA entirely
 export const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
   process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ||

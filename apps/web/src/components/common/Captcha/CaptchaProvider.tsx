@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
 import { useCaptchaToken } from '@/hooks/useCaptchaToken'
+import { initializeCaptchaHeaders } from '@/hooks/captchaHeadersInit'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 import CaptchaModal from './CaptchaModal'
+
+// Register the CGW header interceptor once at module load time,
+// before any requests can be made.
+initializeCaptchaHeaders()
 
 interface CaptchaContextType {
   token: string | null
@@ -24,8 +30,7 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
       isLoading: captcha.isLoading,
       error: captcha.error,
       refreshToken: captcha.refreshToken,
-      // Ready when we have a token or when loading is complete (no captcha configured)
-      isReady: !!captcha.token || (!captcha.isLoading && !captcha.error),
+      isReady: !!captcha.token || !TURNSTILE_SITE_KEY,
     }),
     [captcha.token, captcha.isLoading, captcha.error, captcha.refreshToken],
   )
