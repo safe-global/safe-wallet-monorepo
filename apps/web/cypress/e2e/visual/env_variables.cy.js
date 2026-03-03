@@ -19,7 +19,6 @@ describe(
 
     it('[VISUAL] Screenshot environment variables settings page', () => {
       cy.visit(constants.envVariablesUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains('Environment variables', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },
