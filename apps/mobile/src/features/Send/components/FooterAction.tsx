@@ -29,7 +29,12 @@ export function FooterAction({
       {exceedsBalance ? (
         <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
       ) : (
-        <SafeButton onPress={onReview} disabled={!isValid || !hasActiveSigner || isSubmitting} testID="review-button">
+        <SafeButton
+          onPress={onReview}
+          disabled={!isValid || !hasActiveSigner || isSubmitting}
+          loading={isSubmitting}
+          testID="review-button"
+        >
           Review & confirm
         </SafeButton>
       )}
