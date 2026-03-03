@@ -4,20 +4,19 @@ import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 
-import { router, useGlobalSearchParams } from 'expo-router'
+import { useGlobalSearchParams } from 'expo-router'
+import { useNavigation } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
+import { dismissToConfirmTransaction } from '@/src/navigation/dismissToConfirmTransaction'
 
 export const SignSuccess = () => {
   const { txId } = useGlobalSearchParams<{ txId: string }>()
   const { bottom } = useSafeAreaInsets()
+  const navigation = useNavigation()
+
   const handleDonePress = () => {
-    router.dismissTo({
-      pathname: '/confirm-transaction',
-      params: {
-        txId,
-      },
-    })
+    dismissToConfirmTransaction(navigation, txId ?? '')
   }
 
   return (

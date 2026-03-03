@@ -1,4 +1,4 @@
-import { detectSimilarAddresses, getBucketKey, hammingDistance, getMiddleSection } from './addressSimilarity'
+import { detectSimilarAddresses, getBucketKey, hammingDistance, getMiddleSection } from '../addressSimilarity'
 
 describe('addressSimilarity', () => {
   describe('getBucketKey', () => {

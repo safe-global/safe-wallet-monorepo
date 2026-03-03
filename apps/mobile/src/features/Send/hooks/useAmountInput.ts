@@ -1,0 +1,102 @@
+import { useCallback, useMemo, useState } from 'react'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { sanitizeDecimalInput } from '@/src/utils/formatters'
+
+interface UseAmountInputResult {
+  rawInput: string
+  setRawInput: (value: string, maxDecimals: number) => void
+  setMax: (value: string) => void
+}
+
+const getDecimalCount = (value: string): number => {
+  const dotIndex = value.indexOf('.')
+  if (dotIndex === -1) {
+    return 0
+  }
+  return value.length - dotIndex - 1
+}
+
+/**
+ * Manages the raw text input state with sanitization.
+ * Decimal enforcement is done per-keystroke via setRawInput's
+ * maxDecimals parameter.
+ */
+export function useAmountInput(): UseAmountInputResult {
+  const [rawInput, setRawInputState] = useState('')
+
+  const setRawInput = useCallback((value: string, maxDecimals: number) => {
+    const sanitized = sanitizeDecimalInput(value)
+    if (getDecimalCount(sanitized) > maxDecimals) {
+      return
+    }
+    setRawInputState(sanitized)
+  }, [])
+
+  const setMax = useCallback((value: string) => {
+    setRawInputState(value)
+  }, [])
+
+  return { rawInput, setRawInput, setMax }
+}
+
+const validateDecimalLength = (value: string, maxDecimals: number): boolean => {
+  const parts = value.split('.')
+  if (parts.length < 2) {
+    return true
+  }
+  return parts[1].length <= maxDecimals
+}
+
+const checkIsZero = (tokenAmount: string): boolean => {
+  if (!tokenAmount) {
+    return true
+  }
+  const parsed = parseFloat(tokenAmount)
+  return parsed === 0 || Number.isNaN(parsed)
+}
+
+const checkExceedsDecimals = (tokenAmount: string, decimals: number): boolean => {
+  if (!tokenAmount) {
+    return false
+  }
+  return !validateDecimalLength(tokenAmount, decimals)
+}
+
+const checkExceedsBalance = (tokenAmount: string, decimals: number, maxBalance: string): boolean => {
+  const inputWei = safeParseUnits(tokenAmount, decimals)
+  if (inputWei === undefined) {
+    return false
+  }
+  return inputWei > BigInt(maxBalance)
+}
+
+/**
+ * Validates a token amount against decimals and balance constraints.
+ * `tokenAmount` must always be in token units (not fiat).
+ */
+export function useTokenAmountValidation({
+  tokenAmount,
+  decimals,
+  maxBalance,
+}: {
+  tokenAmount: string
+  decimals: number
+  maxBalance: string
+}) {
+  const isZero = useMemo(() => checkIsZero(tokenAmount), [tokenAmount])
+
+  const exceedsDecimals = useMemo(() => checkExceedsDecimals(tokenAmount, decimals), [tokenAmount, decimals])
+
+  const exceedsBalance = useMemo(() => {
+    if (!tokenAmount || isZero || exceedsDecimals) {
+      return false
+    }
+    return checkExceedsBalance(tokenAmount, decimals, maxBalance)
+  }, [tokenAmount, decimals, maxBalance, isZero, exceedsDecimals])
+
+  const isValid = useMemo(() => {
+    return !!tokenAmount && !isZero && !exceedsBalance && !exceedsDecimals
+  }, [tokenAmount, isZero, exceedsBalance, exceedsDecimals])
+
+  return { isZero, exceedsBalance, exceedsDecimals, isValid }
+}

@@ -5,6 +5,7 @@ import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Address } from '@/src/types/address'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 const mockUseWeb3ReadOnly = jest.fn()
 const mockUseDefaultGasPrice = jest.fn()
@@ -65,7 +66,7 @@ const createStoreWithChains = async (overrides?: Partial<RootState>): Promise<Te
     ...overrides,
   })
 
-  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
   return store
 }

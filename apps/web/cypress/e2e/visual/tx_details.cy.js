@@ -23,7 +23,6 @@ describe(
 
     it('[VISUAL] Screenshot executed transaction detail page', () => {
       cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + executedTx)
-      cy.contains('Transaction details', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },

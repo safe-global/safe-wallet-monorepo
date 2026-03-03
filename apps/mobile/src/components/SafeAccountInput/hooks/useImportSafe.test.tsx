@@ -10,7 +10,7 @@ import type { FormValues } from '@/src/features/ImportReadOnly/types'
 import { Provider } from 'react-redux'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/src/tests/server'
-import { GATEWAY_URL } from '@/src/config/constants'
+import { CONFIG_SERVICE_KEY, GATEWAY_URL } from '@/src/config/constants'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 jest.mock('lodash/debounce', () => (fn: (...args: unknown[]) => unknown) => {
@@ -35,7 +35,7 @@ const createStoreWithChains = async (): Promise<TestStore> => {
   const store = createTestStore({
     settings: { currency: 'usd' },
   })
-  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
   return store
 }
 
