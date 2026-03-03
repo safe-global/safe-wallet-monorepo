@@ -15,8 +15,6 @@ let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-// DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer2 = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
@@ -52,7 +50,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
     dashboard.expandActionRequiredPanel()
     dashboard.checkInconsistentSignersMsgDisplayed()
-    dashboard.clickActionInPanel('Review signers')
+    dashboard.clickActionInPanel(dashboard.reviewSignersTestId)
     cy.url().should('include', '/settings/setup').and('include', staticSafes.MATIC_STATIC_SAFE_28)
   })
 

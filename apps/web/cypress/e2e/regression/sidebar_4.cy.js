@@ -50,7 +50,7 @@ describe('Sidebar tests 4', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
     wallet.connectSigner(signer)
     dashboard.verifyActionRequiredCard({ messages: [dashboard.nonPinnedWarningTitle] })
-    dashboard.clickActionInPanel(dashboard.trustThisSafeButtonLabel)
+    dashboard.clickActionInPanel(dashboard.trustThisSafeButtonTestId)
     dashboard.verifyTrustDialogVisible()
   })
 })

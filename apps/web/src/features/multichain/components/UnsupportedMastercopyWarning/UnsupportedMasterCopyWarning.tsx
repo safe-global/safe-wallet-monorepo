@@ -54,7 +54,7 @@ export const UnsupportedMastercopyWarning = () => {
             }
       }
       trackingEvent={canMigrate ? ATTENTION_PANEL_EVENTS.MIGRATE_MASTERCOPY : ATTENTION_PANEL_EVENTS.GET_CLI_MASTERCOPY}
-      actionTestId={canMigrate ? undefined : 'get-cli-link'}
+      actionTestId={canMigrate ? 'migrate-mastercopy-btn' : 'get-cli-link'}
     />
   )
 }

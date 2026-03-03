@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants'
 import * as dashboard from '../pages/dashboard.pages'
-import * as safeapps from '../pages/safeapps.pages'
 import * as createTx from '../pages/create_tx.pages'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -70,7 +69,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
 
     dashboard.verifyActionRequiredCard({
       messages: [dashboard.outdatedOfficialTitlePrefix, dashboard.outdatedOfficialContent],
-      actionLabel: dashboard.mastercopyActions.update,
+      actionTestId: dashboard.mastercopyActions.update,
     })
     dashboard.clickActionInPanel(dashboard.mastercopyActions.update)
     dashboard.verifyMigrateSafeFlowOpened()
@@ -81,7 +80,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
 
     dashboard.verifyActionRequiredCard({
       messages: [dashboard.unsupportedMastercopyTitle, dashboard.unsupportedMigratableContent],
-      actionLabel: dashboard.mastercopyActions.migrate,
+      actionTestId: dashboard.mastercopyActions.migrate,
     })
     dashboard.clickActionInPanel(dashboard.mastercopyActions.migrate)
     dashboard.verifyMigrateSafeFlowOpened()
@@ -92,7 +91,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
 
     dashboard.verifyActionRequiredCard({
       messages: [dashboard.unsupportedMastercopyTitle, dashboard.unsupportedCliContent],
-      actionLabel: dashboard.mastercopyActions.getCli,
+      actionTestId: dashboard.mastercopyActions.getCli,
     })
     dashboard.verifyGetCliLinkInPanel()
   })

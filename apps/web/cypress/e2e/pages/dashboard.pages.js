@@ -29,10 +29,11 @@ export const outdatedOfficialTitlePrefix = 'New Safe version is available'
 export const outdatedOfficialContent =
   'Update now to take advantage of new features and the highest security standards available. You will need to confirm this update just like any other transaction.'
 export const mastercopyActions = {
-  update: 'Update',
-  migrate: 'Migrate',
-  getCli: 'Get CLI',
+  update: '[data-testid="update-mastercopy-btn"]',
+  migrate: '[data-testid="migrate-mastercopy-btn"]',
+  getCli: '[data-testid="get-cli-link"]',
 }
+export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
 
 // Case #2 & #3 — Unsupported mastercopy (Warning)
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
@@ -43,7 +44,7 @@ export const unsupportedCliContent =
 
 const migrateSafeSubtitle = 'Update Safe Account base contract'
 export const nonPinnedWarningTitle = 'Not in your trusted list'
-export const trustThisSafeButtonLabel = 'Trust this Safe'
+export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
 const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
 export function clickOnTxByIndex(index) {
@@ -195,16 +196,16 @@ export function verifyActionRequiredPanelCount(expectedCount) {
  * @param {string[]} [options.messages=[]] - Text(s) that must be visible in the card (title, content)
  * @param {string} [options.actionLabel] - Text on the action button/link to verify visible
  */
-export function verifyActionRequiredCard({ expandFirst = true, messages = [], actionLabel } = {}) {
+export function verifyActionRequiredCard({ expandFirst = true, messages = [], actionTestId } = {}) {
   if (expandFirst) {
     expandActionRequiredPanel()
   }
   if (messages.length > 0) {
     main.verifyValuesExist(actionRequiredPanel, messages)
   }
-  if (actionLabel) {
+  if (actionTestId) {
     cy.get(actionRequiredPanel).within(() => {
-      cy.contains('button, a', actionLabel).should('be.visible')
+      cy.get(actionTestId).should('be.visible')
     })
   }
 }
@@ -213,9 +214,9 @@ export function verifyActionRequiredCard({ expandFirst = true, messages = [], ac
  * Click an action (button or link) in the action required panel by its label text.
  * @param {string} actionLabel - Text on the button/link to click
  */
-export function clickActionInPanel(actionLabel) {
+export function clickActionInPanel(actionTestId) {
   cy.get(actionRequiredPanel).within(() => {
-    cy.contains('button, a', actionLabel).click()
+    cy.get(actionTestId).click()
   })
 }
 
