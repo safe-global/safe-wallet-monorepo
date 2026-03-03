@@ -124,7 +124,7 @@ const SidebarWrapper = ({ children }: { children: ReactNode }) => (
 const meta = {
   title: 'Features/Spaces/SpacesSidebar',
   component: SpacesSidebarVariant,
-  decorators: [withMockProvider()],
+  decorators: [withMockProvider({ shadcn: true })],
   parameters: {
     layout: 'fullscreen',
   },

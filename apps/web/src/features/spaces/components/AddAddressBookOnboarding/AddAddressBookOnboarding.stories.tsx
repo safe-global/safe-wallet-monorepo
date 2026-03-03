@@ -9,6 +9,7 @@ const defaultSetup = createMockStory({
   features: { spaces: true },
   pathname: '/welcome/address-book',
   query: { spaceId: '1' },
+  shadcn: true,
 })
 
 const meta = {

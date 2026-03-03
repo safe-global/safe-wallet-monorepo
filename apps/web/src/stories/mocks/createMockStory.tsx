@@ -67,6 +67,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     handlers: customHandlers = [],
     pathname = '/home',
     query: customQuery = {},
+    shadcn = false,
   } = config
 
   // Get fixture data for scenario
@@ -108,6 +109,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
         context={context}
         layout={layout}
         pathname={pathname}
+        shadcn={shadcn}
       >
         <Story />
       </MockContextProvider>

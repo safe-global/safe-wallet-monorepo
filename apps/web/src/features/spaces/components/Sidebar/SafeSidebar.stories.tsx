@@ -40,7 +40,7 @@ const meta = {
       },
     },
   },
-  decorators: [withMockProvider()],
+  decorators: [withMockProvider({ shadcn: true })],
 } satisfies Meta<typeof EnhancedSidebar>
 
 export default meta

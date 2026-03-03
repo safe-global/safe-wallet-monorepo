@@ -9,6 +9,7 @@ const defaultSetup = createMockStory({
   features: { spaces: true },
   pathname: '/welcome/select-safes',
   query: { spaceId: '1' },
+  shadcn: true,
 })
 
 const meta = {

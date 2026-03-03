@@ -8,9 +8,7 @@ import createEmotionCache from '../src/utils/createEmotionCache'
 import { initialize, mswLoader } from 'msw-storybook-addon'
 
 import '../src/styles/globals.css'
-import '../src/styles/shadcn.css'
-import './shadcn-stories.css'
-import { ShadcnProvider } from '../src/components/ui/ShadcnProvider'
+import { ShadcnProvider } from './shadcn'
 
 // Create emotion cache once for Storybook (same as real app)
 // This ensures MUI styles are injected first, allowing CSS modules to override them
@@ -26,18 +24,6 @@ initialize({
 export { withLayout, withMockProvider } from './decorators'
 
 const BACKGROUND_COLORS: Record<string, string> = { light: '#ffffff', dark: '#121312' }
-
-// Wraps the story in .shadcn-scope so shadcn/ui Tailwind and CSS variables apply.
-// Required for any story that uses components from src/components/ui/ (shadcn).
-const ShadcnScopeDecorator = (Story: React.ComponentType, context: { globals?: { theme?: string } }) => {
-  const themeMode = context.globals?.theme || 'light'
-  const isDark = themeMode === 'dark'
-  return (
-    <div className={isDark ? 'shadcn-scope dark' : 'shadcn-scope'}>
-      <Story />
-    </div>
-  )
-}
 
 // Syncs data-theme attribute and background color with the theme switcher
 const ThemeSyncDecorator = (
@@ -161,11 +147,8 @@ const preview: Preview = {
   loaders: [mswLoader],
 
   decorators: [
-    ThemeSyncDecorator,
-    // Wraps story in .shadcn-scope so shadcn/ui components get Tailwind and CSS variables
-    ShadcnScopeDecorator,
-    // Custom MUI theme decorator with emotion cache (same as real app)
-    // This ensures CSS modules can override MUI styles
+    // UI/ stories get ShadcnProvider only (no MUI). All other stories get MUI only.
+    // Stories that need shadcn opt in via `shadcn: true` on withMockProvider/createMockStory.
     (Story, context) => {
       const themeMode = (context.globals?.theme as 'light' | 'dark') || 'light'
 
@@ -188,6 +171,7 @@ const preview: Preview = {
         </CacheProvider>
       )
     },
+    ThemeSyncDecorator,
   ],
 }
 

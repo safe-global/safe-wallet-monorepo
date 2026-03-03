@@ -8,6 +8,7 @@ const defaultSetup = createMockStory({
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/welcome/create-space',
+  shadcn: true,
 })
 
 const meta = {
