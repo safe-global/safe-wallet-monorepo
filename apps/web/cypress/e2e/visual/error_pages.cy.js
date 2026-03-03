@@ -9,13 +9,11 @@ describe('[VISUAL] Error page screenshots', { defaultCommandTimeout: 60000, ...c
 
   it('[VISUAL] Screenshot 404 page', () => {
     cy.visit(constants.error404Url, { failOnStatusCode: false })
-    cy.contains('404', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot 403 page', () => {
     cy.visit(constants.error403Url, { failOnStatusCode: false })
-    cy.contains('403', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 })

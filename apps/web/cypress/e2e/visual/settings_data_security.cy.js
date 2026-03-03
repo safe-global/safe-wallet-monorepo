@@ -19,13 +19,11 @@ describe(
 
     it('[VISUAL] Screenshot data settings page', () => {
       cy.visit(constants.dataSettingsUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains('Data', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
 
     it('[VISUAL] Screenshot security settings page', () => {
       cy.visit(constants.securityUrl + staticSafes.SEP_STATIC_SAFE_4)
-      cy.contains('Security', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },

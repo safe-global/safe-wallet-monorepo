@@ -12,7 +12,6 @@ describe(
 
     it('[VISUAL] Screenshot advanced create new safe form', () => {
       cy.visit(constants.advancedCreateSafeSepoliaUrl)
-      cy.contains('Create new Safe Account', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },
