@@ -11,13 +11,9 @@ interface SafeWidgetProps {
 
 const SafeWidgetRoot = ({ title, onTitleClick, action, children, className }: SafeWidgetProps): ReactElement => {
   return (
-    <div
-      data-slot="safe-widget"
-      className={cn('flex h-full min-h-0 flex-col rounded-sm bg-card p-1', onTitleClick && 'cursor-pointer', className)}
-      onClick={onTitleClick}
-    >
+    <div data-slot="safe-widget" className={cn('flex h-full min-h-0 flex-col rounded-sm bg-card p-1', className)}>
       <div className="flex shrink-0 items-center justify-between pb-2 pr-2 pt-6">
-        <div className="flex items-center px-4">
+        <div className={cn('flex items-center px-4', onTitleClick && 'cursor-pointer')} onClick={onTitleClick}>
           <h4 className="text-xl leading-6 font-semibold text-foreground">{title}</h4>
         </div>
         {action && <div className="flex items-center">{action}</div>}

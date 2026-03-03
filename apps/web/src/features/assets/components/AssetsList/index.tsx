@@ -35,16 +35,11 @@ const AssetsList = (): ReactElement => {
     router.push({ pathname: AppRoutes.balances.index, query: { safe: router.query.safe } })
   }
 
-  const handleNavigate = () => {
-    router.push({ pathname: AppRoutes.balances.index, query: { safe: router.query.safe } })
-  }
-
   return (
     <SafeWidget
       title="Assets"
-      onTitleClick={handleNavigate}
       action={
-        <Button variant="ghost" size="icon-sm" onClick={handleNavigate}>
+        <Button variant="ghost" size="icon-sm" onClick={handleViewAll}>
           <ChevronRight className="size-6" />
         </Button>
       }

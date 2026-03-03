@@ -3,10 +3,10 @@ import { useRouter } from 'next/router'
 import { cn } from '@/utils/cn'
 
 interface WidgetItemProps {
-  label: string
-  info: string
+  label: string | ReactNode
+  info: string | ReactNode
   /** Optional second line (e.g. amount + recipient); can wrap so full text is visible. */
-  description?: string
+  description?: string | ReactNode
   href?: string
   startNode?: ReactNode
   featuredNode?: ReactNode
@@ -44,16 +44,26 @@ const WidgetItem = ({
         className,
       )}
     >
-      <div className="flex min-w-0 w-[220px] items-center gap-4">
+      <div className="flex min-w-[220px] flex-1 items-center gap-4">
         {startNode}
-        <div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
-          <span className="overflow-hidden text-base leading-6 font-medium text-foreground whitespace-nowrap">
-            {label}
-          </span>
-          {description ? (
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
+          {typeof label === 'string' ? (
+            <span className="overflow-hidden text-base leading-6 font-medium text-foreground whitespace-nowrap">
+              {label}
+            </span>
+          ) : (
+            label
+          )}
+          {typeof description === 'string' ? (
             <span className="break-words text-sm leading-4 text-muted-foreground">{description}</span>
-          ) : null}
-          <span className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap">{info}</span>
+          ) : (
+            description
+          )}
+          {typeof info === 'string' ? (
+            <span className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap">{info}</span>
+          ) : (
+            info
+          )}
         </div>
       </div>
 

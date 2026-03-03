@@ -1,37 +1,51 @@
 import { type ReactElement, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { ArrowUpRight, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { getLatestTransactions } from '@/utils/tx-list'
-import useTxQueue from '@/hooks/useTxQueue'
+import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { AppRoutes } from '@/config/routes'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getTxStatus, getTxLabelParts, formatTxDate } from '../../utils'
+import { getTxStatus, formatTxDate, _getTransactionsToDisplay } from '../../utils'
+import type { RecoveryQueueItem } from '@/features/recovery'
+import { useRecoveryQueue } from '@/features/recovery'
+import useWallet from '@/hooks/wallets/useWallet'
+import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
+import TxInfo from '@/components/transactions/TxInfo'
+import PendingRecoveryListItem from '@/components/dashboard/PendingTxs/PendingRecoveryListItem'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const MAX_TXS = 3
 
-const TxIcon = (): ReactElement => (
+interface TxIconProps {
+  tx: TransactionQueuedItem
+}
+
+const TxIcon = ({ tx }: TxIconProps): ReactElement => (
   <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
-    <ArrowUpRight className="size-5 text-foreground" />
+    <TxTypeIcon tx={tx.transaction} />
   </div>
 )
 
 const PendingTxList = (): ReactElement => {
-  const router = useRouter()
   const { page, loading } = useTxQueue()
-  const { safeLoaded, safeLoading } = useSafeInfo()
+  const router = useRouter()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
+  const wallet = useWallet()
+  const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
+  const recoveryQueue = useRecoveryQueue()
+  const queueSize = useQueuedTxsLength()
 
-  const queuedTxs = useMemo(() => {
-    const all = getLatestTransactions(page?.results)
-    return all.slice(0, MAX_TXS)
-  }, [page?.results])
-
-  const remainingCount = useMemo(() => {
-    const all = getLatestTransactions(page?.results)
-    return all.length > MAX_TXS ? all.length - MAX_TXS : undefined
-  }, [page?.results])
+  const [recoveryTxs, queuedTxs] = useMemo(() => {
+    return _getTransactionsToDisplay({
+      recoveryQueue,
+      queue: queuedTxns,
+      walletAddress: wallet?.address,
+      safe,
+    })
+  }, [recoveryQueue, queuedTxns, wallet?.address, safe])
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = loading || safeLoading || isInitialState
@@ -58,23 +72,31 @@ const PendingTxList = (): ReactElement => {
       ) : queuedTxs.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
       ) : (
-        queuedTxs.map((tx) => {
-          const { primary, secondary } = getTxLabelParts(tx)
-          return (
-            <SafeWidget.Item
-              key={tx.transaction.id}
-              href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
-              label={primary}
-              description={secondary || undefined}
-              info={formatTxDate(tx.transaction.timestamp)}
-              startNode={<TxIcon />}
-              actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
-            />
-          )
-        })
+        <>
+          {recoveryTxs.map((tx: RecoveryQueueItem) => (
+            <PendingRecoveryListItem transaction={tx} key={tx.transactionHash} />
+          ))}
+
+          {queuedTxs.map((tx: TransactionQueuedItem) => {
+            return (
+              <SafeWidget.Item
+                key={tx.transaction.id}
+                href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
+                label={
+                  <div className="flex gap-1 items-center">
+                    <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
+                  </div>
+                }
+                info={formatTxDate(tx.transaction.timestamp)}
+                startNode={<TxIcon tx={tx} />}
+                actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
+              />
+            )
+          })}
+        </>
       )}
       {!isLoading && queuedTxs.length > 0 && (
-        <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={handleViewAll} />
+        <SafeWidget.Footer count={parseInt(queueSize)} text="View all pending transactions" onClick={handleViewAll} />
       )}
     </SafeWidget>
   )
