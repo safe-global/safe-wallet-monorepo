@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { isAddress } from 'ethers'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
