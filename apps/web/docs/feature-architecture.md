@@ -99,10 +99,10 @@ function MyPageWithHooks() {
 
 // If you need explicit loading/disabled handling:
 function MyPageWithStates() {
-  const { WalletConnectWidget, $isLoading, $isDisabled } = useLoadFeature(WalletConnectFeature)
+  const { WalletConnectWidget, $isReady, $isDisabled } = useLoadFeature(WalletConnectFeature)
 
-  if ($isLoading) return <Skeleton />
   if ($isDisabled) return null
+  if (!$isReady) return <Skeleton />
 
   return <WalletConnectWidget />
 }
@@ -123,12 +123,11 @@ function MyPageWithStates() {
 
 **Meta properties** (prefixed with `$`) provide state information:
 
-| Property      | Type      | Description                          |
-| ------------- | --------- | ------------------------------------ |
-| `$isLoading`  | `boolean` | `true` while feature code is loading |
-| `$isDisabled` | `boolean` | `true` if feature flag is off        |
-| `$isReady`    | `boolean` | `true` when loaded and enabled       |
-| `$error`      | `Error?`  | Error if loading failed              |
+| Property      | Type      | Description                    |
+| ------------- | --------- | ------------------------------ |
+| `$isDisabled` | `boolean` | `true` if feature flag is off  |
+| `$isReady`    | `boolean` | `true` when loaded and enabled |
+| `$error`      | `Error?`  | Error if loading failed        |
 
 ### Why Proxy-Based Stubs?
 
@@ -292,8 +291,8 @@ export const chartService = {
               ┌───────────────┼───────────────┐
               ▼               ▼               ▼
         ┌───────────┐  ┌───────────┐  ┌───────────┐
-        │ $isLoading│  │$isDisabled│  │  $isReady │
-        │   true    │  │   true    │  │   true    │
+        │ !$isReady │  │$isDisabled│  │  $isReady │
+        │  (false)  │  │   true    │  │   true    │
         └───────────┘  └───────────┘  └───────────┘
               │               │               │
               ▼               ▼               ▼
@@ -328,14 +327,12 @@ export type FeatureImplementation = Record<string, unknown>
  * Meta properties added by useLoadFeature ($ prefix)
  */
 export interface FeatureMeta {
-  /** True while feature code is loading */
-  $isLoading: boolean
   /** True if feature flag is disabled */
   $isDisabled: boolean
   /** True when feature is loaded and enabled */
   $isReady: boolean
   /** Error if loading failed */
-  $error: Error | null
+  $error: Error | undefined
 }
 
 /**
@@ -543,7 +540,6 @@ function createFeatureProxy<T>(meta: FeatureMeta, impl?: T): T & FeatureMeta {
   return new Proxy({} as T & FeatureMeta, {
     get(_, prop: string) {
       // Meta properties ($ prefix)
-      if (prop === '$isLoading') return meta.$isLoading
       if (prop === '$isDisabled') return meta.$isDisabled
       if (prop === '$isReady') return meta.$isReady
       if (prop === '$error') return meta.$error
@@ -590,10 +586,9 @@ export function useLoadFeature<T extends FeatureImplementation>(handle: FeatureH
 
   // Build meta state
   const meta: FeatureMeta = {
-    $isLoading: isEnabled === true && !cached && loading.has(handle.name),
     $isDisabled: isEnabled === false,
     $isReady: isEnabled === true && !!cached,
-    $error: null,
+    $error: undefined,
   }
 
   // Always return proxy - never null
@@ -650,8 +645,8 @@ function Header() {
 function HeaderWithStates() {
   const wc = useLoadFeature(WalletConnectFeature)
 
-  if (wc.$isLoading) return <Skeleton />
   if (wc.$isDisabled) return null
+  if (!wc.$isReady) return <Skeleton />
 
   return <wc.WalletConnectWidget />
 }
@@ -808,9 +803,9 @@ const feature = useLoadFeature(MyFeature)
 //    ^? {
 //      MyComponent: ComponentType<...>,
 //      useMyHook: () => ...,
-//      $isLoading: boolean,
 //      $isDisabled: boolean,
 //      $isReady: boolean,
+//      $error: Error | undefined,
 //    }
 
 // No null check needed - always an object
@@ -946,7 +941,7 @@ export const WalletConnectFeature = createFeatureHandle('walletconnect', FEATURE
 
 | Value       | Meaning                               | Behavior                |
 | ----------- | ------------------------------------- | ----------------------- |
-| `undefined` | Loading (chain config not yet loaded) | `$isLoading` is true    |
+| `undefined` | Loading (chain config not yet loaded) | `$isReady` is false     |
 | `false`     | Feature disabled for current chain    | `$isDisabled` is true   |
 | `true`      | Feature enabled                       | `$isReady` becomes true |
 
@@ -1071,7 +1066,7 @@ Benefits:
 - **No optional chaining**: Proxy stubs eliminate `?.` complexity for components
 - **React hooks compliant**: Hooks are direct imports (always loaded), no Rules of Hooks violations
 - **Type-safe**: Full TypeScript inference from the handle
-- **Simple API**: Always returns an object, use `$isReady`/`$isLoading`/`$isDisabled` for state
+- **Simple API**: Always returns an object, use `$isReady`/`$isDisabled` for state
 - **Flat structure**: No nested `.components.` - just `feature.MyComponent`
 - **IDE-friendly**: Cmd+click on `WalletConnectFeature` jumps to the handle definition
 - **Tree-shakeable**: Unused features won't be bundled
@@ -1625,8 +1620,8 @@ function SafeShieldScanner() {
 function SafeShieldScannerWithStates() {
   const hn = useLoadFeature(HypernativeFeature)
 
-  if (hn.$isLoading) return <Skeleton />
   if (hn.$isDisabled) return null
+  if (!hn.$isReady) return <Skeleton />
 
   const scanner = useHypernativeScanner()
   return <hn.Banner data={scanner.data} />
@@ -1671,7 +1666,7 @@ function SafeShieldScannerWithStates() {
 - [ ] **Importing hooks directly from feature index** (e.g., `import { useMyHook } from '@/features/myfeature'`)
 - [ ] **No optional chaining** - feature always returns an object (proxy stubs for components)
 - [ ] Using **flat access**: `feature.MyComponent`, `feature.myService` (no nested `.components.`)
-- [ ] Using meta properties (`$isLoading`, `$isDisabled`, `$isReady`) for explicit state handling
+- [ ] Using meta properties (`$isDisabled`, `$isReady`, `$error`) for explicit state handling
 - [ ] Type-safe (types inferred from handle)
 - [ ] No direct imports from feature internal folders (except hooks from index)
 
@@ -1709,7 +1704,7 @@ The handle is imported at app startup, but it's tiny (~100 bytes). The actual fe
 **Always returns an object** - never `null` or `undefined`. The object includes:
 
 1. **Feature exports** (flat structure) - actual implementation when ready, proxy stubs otherwise
-2. **Meta properties** (`$isLoading`, `$isDisabled`, `$isReady`, `$error`)
+2. **Meta properties** (`$isDisabled`, `$isReady`, `$error`)
 
 ```typescript
 import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
@@ -1727,17 +1722,16 @@ return <wc.Widget />
 For explicit state handling, use meta properties:
 
 ```typescript
-if (wc.$isLoading) return <Skeleton />
 if (wc.$isDisabled) return null
+if (!wc.$isReady) return <Skeleton />
 return <wc.Widget />
 ```
 
-| Meta Property | Type      | Description                          |
-| ------------- | --------- | ------------------------------------ |
-| `$isLoading`  | `boolean` | `true` while feature code is loading |
-| `$isDisabled` | `boolean` | `true` if feature flag is off        |
-| `$isReady`    | `boolean` | `true` when loaded and enabled       |
-| `$error`      | `Error?`  | Error if loading failed              |
+| Meta Property | Type      | Description                    |
+| ------------- | --------- | ------------------------------ |
+| `$isDisabled` | `boolean` | `true` if feature flag is off  |
+| `$isReady`    | `boolean` | `true` when loaded and enabled |
+| `$error`      | `Error?`  | Error if loading failed        |
 
 ### Q: How do I share types between features?
 

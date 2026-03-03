@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, View } from 'tamagui'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { InfoSheet } from '@/src/components/InfoSheet'
 
 interface PositionFiatChangeProps {
@@ -31,7 +31,7 @@ export const PositionFiatChange = ({ fiatBalance24hChange, fiatBalance, currency
 
   const fiatBalanceNumber = Number(fiatBalance)
   const changeAmount = fiatBalanceNumber * changeAsNumber
-  const formattedChangeAmount = formatCurrency(Math.abs(changeAmount).toString(), currency)
+  const formattedChangeAmount = formatCurrencyPrecise(Math.abs(changeAmount).toString(), currency)
 
   const getColor = () => {
     switch (direction) {

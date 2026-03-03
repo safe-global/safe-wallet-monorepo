@@ -1,4 +1,5 @@
 import { AppRoutes } from '@/config/routes'
+import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
@@ -37,8 +38,8 @@ export const isRouteEnabled = (route: string, chain?: Chain) => {
 export const getChainConfig = async (chainId: string): Promise<Chain> => {
   const store = getStoreInstance()
 
-  const queryThunk = cgwApi.endpoints.chainsGetChainV1.initiate(
-    { chainId },
+  const queryThunk = cgwApi.endpoints.chainsGetChainV2.initiate(
+    { chainId, serviceKey: CONFIG_SERVICE_KEY },
     {
       forceRefetch: true,
     },

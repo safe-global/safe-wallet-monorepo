@@ -17,11 +17,23 @@ jest.mock('@safe-global/utils/services/SimpleTxWatcher', () => ({
 jest.mock('@safe-global/utils/services/RelayTxWatcher', () => ({
   RelayTxWatcher: {
     getInstance: jest.fn(() => ({
-      watchTaskId: jest.fn(() => Promise.resolve({ transactionHash: '0xabc123' })),
+      watchTaskId: jest.fn(() =>
+        Promise.resolve({
+          status: 200,
+          receipt: {
+            transactionHash: '0xabc123',
+          },
+        }),
+      ),
       stopWatchingTaskId: jest.fn(),
     })),
   },
   TIMEOUT_ERROR_CODE: 'TIMEOUT',
+}))
+
+jest.mock('@safe-global/store/gateway/cgwClient', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/cgwClient'),
+  getBaseUrl: jest.fn(() => 'https://test-cgw.example.com'),
 }))
 
 jest.mock('@safe-global/utils/services/SimplePoller', () => ({

@@ -1,12 +1,13 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { Button, Card, Divider, Grid, Typography } from '@mui/material'
 import { useRouter } from 'next/dist/client/router'
 import type { ReactElement } from 'react'
-
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import { Countdown } from '@/components/common/Countdown'
 import RecoveryPending from '@/public/images/common/recovery-pending.svg'
+import { ActionCard } from '@/components/common/ActionCard'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
@@ -40,64 +41,41 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
 
   const icon = <RecoveryPending />
   const title = isExecutable
-    ? 'Account can be recovered'
+    ? 'Account can be recovered. '
     : isExpired
-      ? 'Account recovery expired'
-      : 'Account recovery in progress'
+      ? 'Account recovery expired. '
+      : 'Account recovery in progress. '
   const desc = isExecutable
     ? 'The review window has passed and it is now possible to execute the recovery proposal.'
     : isExpired
       ? 'The pending recovery proposal has expired and needs to be cancelled before a new one can be created.'
       : 'The recovery process has started. This Account will be ready to recover in:'
 
-  const link = (
-    <Track {...RECOVERY_EVENTS.LEARN_MORE} label="in-progress-card">
-      <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-        Learn more
-      </ExternalLink>
-    </Track>
-  )
-
   if (orientation === 'horizontal') {
     return (
-      <Card sx={{ py: 3, px: 4 }}>
-        <Grid
-          container
-          sx={{
-            display: 'flex',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 3,
-            flexDirection: { xs: 'column', md: 'row' },
-          }}
-        >
-          <Grid item>{icon}</Grid>
-
-          <Grid item xs>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              {title}
-            </Typography>
-
-            <Typography
-              sx={{
-                color: 'primary.light',
-                mb: 1,
-              }}
-            >
-              {desc}
-            </Typography>
-
-            <Countdown seconds={remainingSeconds} />
-          </Grid>
-
-          <Grid item>{link}</Grid>
-        </Grid>
-      </Card>
+      <ActionCard
+        severity="info"
+        title={title}
+        content={
+          <>
+            {desc}
+            {!isExecutable && !isExpired && (
+              <>
+                {' '}
+                <Countdown seconds={remainingSeconds} />
+              </>
+            )}
+          </>
+        }
+        learnMore={{
+          href: HelpCenterArticle.RECOVERY,
+          trackingEvent: RECOVERY_EVENTS.LEARN_MORE,
+          label: 'in-progress-card',
+        }}
+        action={{ label: 'Go to queue', onClick }}
+        trackingEvent={ATTENTION_PANEL_EVENTS.CHECK_RECOVERY_PROPOSAL}
+        testId="recovery-in-progress-card"
+      />
     )
   }
 
@@ -121,7 +99,11 @@ export function RecoveryInProgressCard({ orientation = 'vertical', onClose, reco
         >
           {icon}
 
-          {link}
+          <Track {...RECOVERY_EVENTS.LEARN_MORE} label="in-progress-card">
+            <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+              Learn more
+            </ExternalLink>
+          </Track>
         </Grid>
 
         <Grid item xs={12}>

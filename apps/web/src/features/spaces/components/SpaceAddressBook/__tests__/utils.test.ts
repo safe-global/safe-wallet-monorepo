@@ -1,10 +1,6 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
-import {
-  createContactItems,
-  flattenAddressBook,
-  getSelectedAddresses,
-} from '@/features/spaces/components/SpaceAddressBook/utils'
-import type { ImportContactsFormValues } from '@/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialog'
+import { createContactItems, flattenAddressBook, getSelectedAddresses } from '../utils'
+import type { ImportContactsFormValues } from '../Import/ImportAddressBookDialog'
 
 describe('space address book utils', () => {
   describe('flattenAddressBook', () => {

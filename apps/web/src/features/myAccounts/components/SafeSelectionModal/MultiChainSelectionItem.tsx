@@ -131,6 +131,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 name={name}
                 isReplayable={false}
                 undeployedSafe={false}
+                hideNestedSafes
               />
             </AccountItem.Content>
           </Box>

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import SafeSelectionModal from './index'
 import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
 
@@ -60,6 +61,7 @@ const baseMockModal: UseSafeSelectionModalReturn = {
 const meta = {
   title: 'Features/MyAccounts/SafeSelectionModal',
   component: SafeSelectionModal,
+  decorators: [withMockProvider()],
   parameters: {
     layout: 'centered',
   },

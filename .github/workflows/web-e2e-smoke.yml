@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Cypress Smoke tests
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
@@ -30,6 +32,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/cypress
         with:

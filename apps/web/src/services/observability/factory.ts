@@ -1,21 +1,9 @@
 import type { IObservabilityProvider } from './types'
 import { NoOpProvider } from './providers/noop'
-import { DatadogProvider } from './providers/datadog'
+import { DatadogProvider, isDatadogEnabled } from './providers/datadog'
 import { SentryProvider } from './providers/sentry'
 import { CompositeProvider } from './providers/composite'
-import {
-  SENTRY_DSN,
-  DATADOG_CLIENT_TOKEN,
-  DATADOG_RUM_APPLICATION_ID,
-  DATADOG_RUM_CLIENT_TOKEN,
-  DATADOG_FORCE_ENABLE,
-  IS_PRODUCTION,
-} from '@/config/constants'
-
-const shouldEnableDatadog = IS_PRODUCTION || DATADOG_FORCE_ENABLE
-const isDatadogEnabled =
-  shouldEnableDatadog &&
-  (Boolean(DATADOG_CLIENT_TOKEN) || (Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)))
+import { SENTRY_DSN } from '@/config/constants'
 const isSentryEnabled = Boolean(SENTRY_DSN)
 
 export const createObservabilityProvider = (): IObservabilityProvider => {

@@ -77,7 +77,6 @@ export const AppSettingsContainer = () => {
           type: 'floating-menu',
           rightNode: (
             <FloatingMenu
-              themeVariant={themePreference}
               onPressAction={({ nativeEvent }) => {
                 const mode = nativeEvent.event as 'auto' | 'dark' | 'light'
                 setThemePreference(mode)
@@ -123,13 +122,6 @@ export const AppSettingsContainer = () => {
             />
           ),
           disabled: false,
-        },
-        {
-          label: 'Change passcode',
-          leftIcon: 'lock',
-          onPress: () => console.log('change passcode'),
-          disabled: true,
-          tag: 'Coming soon',
         },
       ],
     },

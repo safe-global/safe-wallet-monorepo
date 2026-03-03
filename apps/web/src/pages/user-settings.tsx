@@ -1,16 +1,20 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import UserSettings from '@/features/spaces/components/UserSettings'
+import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
 
 const UserSettingsPage: NextPage = () => {
+  const spaces = useLoadFeature(SpacesFeature)
+  useFeatureFlagRedirect()
+
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – User Settings`}</title>
       </Head>
 
-      <UserSettings />
+      <spaces.UserSettings />
     </>
   )
 }

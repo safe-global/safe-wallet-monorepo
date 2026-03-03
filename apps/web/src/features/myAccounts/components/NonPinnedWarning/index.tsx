@@ -1,75 +1,65 @@
-import { Alert, AlertTitle, Button, IconButton, Typography, Box } from '@mui/material'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
-import CloseIcon from '@mui/icons-material/Close'
-import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd'
+import { useEffect, useRef } from 'react'
+import { ActionCard } from '@/components/common/ActionCard'
+import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
+import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
 import AddTrustedSafeDialog from './AddTrustedSafeDialog'
-import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.types'
-
-interface NonPinnedWarningProps {
-  safeAddress: string
-  safeName?: string
-  hasSimilarAddress: boolean
-  similarAddresses: SimilarAddressInfo[]
-  isConfirmDialogOpen: boolean
-  onOpenConfirmDialog: () => void
-  onCloseConfirmDialog: () => void
-  onConfirmAdd: () => void
-  onDismiss: () => void
-}
 
 /**
- * Warning banner displayed when user is viewing a non-pinned safe they own
- * Provides option to add the safe to their pinned list with confirmation dialog
+ * Warning card displayed when user is viewing a non-pinned safe they own
+ * Uses ActionCard component for consistent UI across all dashboard warnings
+ * Provides option to trust the safe with confirmation dialog
  */
-const NonPinnedWarning = ({
-  safeAddress,
-  safeName,
-  hasSimilarAddress,
-  similarAddresses,
-  isConfirmDialogOpen,
-  onOpenConfirmDialog,
-  onCloseConfirmDialog,
-  onConfirmAdd,
-  onDismiss,
-}: NonPinnedWarningProps) => {
+const NonPinnedWarning = () => {
+  const {
+    shouldShowWarning,
+    safeAddress,
+    safeName,
+    chainId,
+    hasSimilarAddress,
+    similarAddresses,
+    isConfirmDialogOpen,
+    openConfirmDialog,
+    closeConfirmDialog,
+    confirmAndAddToPinnedList,
+  } = useNonPinnedSafeWarning()
+
+  // Track when warning is shown (once per render)
+  const hasTrackedWarning = useRef(false)
+  useEffect(() => {
+    if (shouldShowWarning && !hasTrackedWarning.current) {
+      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW)
+      hasTrackedWarning.current = true
+    }
+  }, [shouldShowWarning])
+
+  if (!shouldShowWarning) {
+    return null
+  }
+
   return (
     <>
-      <Alert
+      <ActionCard
         severity="warning"
-        icon={<WarningAmberIcon />}
-        data-testid="non-pinned-warning"
-        action={
-          <IconButton size="small" onClick={onDismiss} aria-label="dismiss">
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        }
-        sx={{ mb: 2 }}
-      >
-        <AlertTitle>Untrusted Safe</AlertTitle>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          You are a signer of this Safe, but it is not yet included in your trusted list.
-        </Typography>
-        <Box>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<BookmarkAddIcon />}
-            onClick={onOpenConfirmDialog}
-            data-testid="add-to-pinned-list-button"
-          >
-            Add trusted Safe
-          </Button>
-        </Box>
-      </Alert>
+        title="Not in your trusted list"
+        content="You're a signer of this Safe, but you haven't marked it as trusted yet. Trusting a Safe helps you recognize it and reduces the risk of impersonation."
+        action={{
+          label: 'Trust this Safe',
+          onClick: openConfirmDialog,
+        }}
+        trackingEvent={ATTENTION_PANEL_EVENTS.TRUST_SAFE}
+        testId="non-pinned-warning"
+      />
 
       <AddTrustedSafeDialog
         open={isConfirmDialogOpen}
         safeAddress={safeAddress}
         safeName={safeName}
+        chainId={chainId}
         hasSimilarAddress={hasSimilarAddress}
         similarAddresses={similarAddresses}
-        onConfirm={onConfirmAdd}
-        onCancel={onCloseConfirmDialog}
+        onConfirm={confirmAndAddToPinnedList}
+        onCancel={closeConfirmDialog}
       />
     </>
   )

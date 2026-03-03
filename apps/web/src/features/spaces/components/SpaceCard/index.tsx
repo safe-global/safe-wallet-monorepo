@@ -5,10 +5,10 @@ import Link from 'next/link'
 import css from './styles.module.css'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
-import { useSpaceSafeCount } from '@/features/spaces/hooks/useSpaceSafeCount'
-import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
-import SpaceContextMenu from '@/features/spaces/components/SpaceCard/SpaceContextMenu'
-import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { MemberStatus } from '@/features/spaces'
+import InitialsAvatar from '../InitialsAvatar'
+import SpaceContextMenu from './SpaceContextMenu'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SpaceSummary = ({
@@ -47,15 +47,16 @@ const SpaceCard = ({
   space,
   isCompact = false,
   isLink = true,
+  currentUserId,
 }: {
   space: GetSpaceResponse
   isCompact?: boolean
   isLink?: boolean
+  currentUserId?: number
 }) => {
-  const { id, name, members } = space
+  const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const numberOfAccounts = useSpaceSafeCount(id)
-  const isAdmin = useIsAdmin(id)
+  const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   return (
     <Card data-testid="space-card" className={classNames(css.card, { [css.compact]: isCompact })}>
@@ -63,12 +64,7 @@ const SpaceCard = ({
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 
-      <SpaceSummary
-        name={name}
-        numberOfAccounts={numberOfAccounts}
-        numberOfMembers={numberOfMembers}
-        isCompact={isCompact}
-      />
+      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} isCompact={isCompact} />
 
       {isAdmin && <SpaceContextMenu space={space} />}
     </Card>

@@ -43,7 +43,7 @@ exports[`PositionFiatChange renders negative change with minus sign 1`] = `
           -
           3.50%
            (
-          $ 35
+          $ 35.00
           )
         </Text>
       </View>
@@ -95,7 +95,7 @@ exports[`PositionFiatChange renders positive change with plus sign 1`] = `
           +
           5.00%
            (
-          $ 50
+          $ 50.00
           )
         </Text>
       </View>

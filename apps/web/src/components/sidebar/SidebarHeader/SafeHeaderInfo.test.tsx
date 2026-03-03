@@ -63,7 +63,6 @@ describe('SafeHeaderInfo', () => {
 
     mockUseLoadFeature.mockReturnValue({
       SafeHeaderHnTooltip,
-      $isLoading: false,
       $isDisabled: false,
       $isReady: true,
     })

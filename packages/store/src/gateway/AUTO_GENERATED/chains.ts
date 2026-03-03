@@ -35,6 +35,29 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/about/indexing` }),
         providesTags: ['chains'],
       }),
+      chainsGetGasPriceV1: build.query<ChainsGetGasPriceV1ApiResponse, ChainsGetGasPriceV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/gas-price` }),
+        providesTags: ['chains'],
+      }),
+      chainsGetChainsV2: build.query<ChainsGetChainsV2ApiResponse, ChainsGetChainsV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
+      chainsGetChainV2: build.query<ChainsGetChainV2ApiResponse, ChainsGetChainV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains/${queryArg.chainId}`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -70,6 +93,25 @@ export type ChainsGetIndexingStatusV1ApiResponse =
 export type ChainsGetIndexingStatusV1ApiArg = {
   /** Chain ID of the blockchain network */
   chainId: string
+}
+export type ChainsGetGasPriceV1ApiResponse = /** status 200  */ GasPriceResponse
+export type ChainsGetGasPriceV1ApiArg = {
+  chainId: string
+}
+export type ChainsGetChainsV2ApiResponse =
+  /** status 200 Paginated list of supported chains with service-scoped features */ ChainPage
+export type ChainsGetChainsV2ApiArg = {
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type ChainsGetChainV2ApiResponse = /** status 200 Chain details with service-scoped features */ Chain
+export type ChainsGetChainV2ApiArg = {
+  /** Chain ID of the blockchain network */
+  chainId: string
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
 }
 export type NativeCurrency = {
   decimals: number
@@ -171,8 +213,38 @@ export type MasterCopy = {
   version: string
 }
 export type IndexingStatus = {
-  lastSync: number
+  currentBlockNumber: number
+  currentBlockTimestamp: string
+  erc20BlockNumber: number
+  erc20BlockTimestamp: string
+  erc20Synced: boolean
+  masterCopiesBlockNumber: number
+  masterCopiesBlockTimestamp: string
+  masterCopiesSynced: boolean
   synced: boolean
+  lastSync: number
+}
+export type GasPriceResult = {
+  /** Last block number */
+  LastBlock: string
+  /** Safe gas price recommendation (Gwei) */
+  SafeGasPrice: string
+  /** Proposed gas price (Gwei) */
+  ProposeGasPrice: string
+  /** Fast gas price recommendation (Gwei) */
+  FastGasPrice: string
+  /** Base fee of the next pending block (Gwei) */
+  suggestBaseFee: string
+  /** Gas used ratio to estimate network congestion */
+  gasUsedRatio: string
+}
+export type GasPriceResponse = {
+  /** Status code ("1" = success) */
+  status: string
+  /** Response message */
+  message: string
+  /** Gas price data */
+  result: GasPriceResult
 }
 export const {
   useChainsGetChainsV1Query,
@@ -187,4 +259,10 @@ export const {
   useLazyChainsGetMasterCopiesV1Query,
   useChainsGetIndexingStatusV1Query,
   useLazyChainsGetIndexingStatusV1Query,
+  useChainsGetGasPriceV1Query,
+  useLazyChainsGetGasPriceV1Query,
+  useChainsGetChainsV2Query,
+  useLazyChainsGetChainsV2Query,
+  useChainsGetChainV2Query,
+  useLazyChainsGetChainV2Query,
 } = injectedRtkApi

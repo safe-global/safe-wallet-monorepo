@@ -130,7 +130,7 @@ export const OwnerList = () => {
                     variant="text"
                     startIcon={<SvgIcon component={EditOwnerIcon} inheritViewBox />}
                     disabled={!isOk}
-                    size="compact"
+                    size="medium"
                   >
                     Manage signers
                   </Button>
@@ -138,7 +138,7 @@ export const OwnerList = () => {
               )}
             </CheckWallet>
 
-            <Button variant="text" onClick={() => exportOwners(safe, addressBook)} size="compact">
+            <Button variant="text" onClick={() => exportOwners(safe, addressBook)} size="medium">
               Export as CSV
             </Button>
           </Box>

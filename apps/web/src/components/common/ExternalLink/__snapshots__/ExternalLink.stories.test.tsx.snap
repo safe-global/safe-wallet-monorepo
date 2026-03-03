@@ -5,7 +5,7 @@ exports[`./ExternalLink.stories ButtonMode 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <a
-    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1bi6f53-MuiButtonBase-root-MuiButton-root"
+    class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-876fro-MuiButtonBase-root-MuiButton-root"
     href="https://safe.global"
     rel="noreferrer noopener"
     tabindex="0"
