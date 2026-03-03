@@ -72,16 +72,16 @@ export function SafeListItem({
       {...(pressStyle ? { pressStyle } : {})}
     >
       <View flexDirection="row" width="100%" alignItems="center" justifyContent="space-between">
-        <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>
+        <View flexDirection="row" flex={1} minWidth={0} alignItems="center" gap={12}>
           {leftNode}
 
-          <View>
+          <View flex={1} minWidth={0}>
             {type && (
               <View flexDirection="row" alignItems="center" gap={4}>
                 {icon && (
                   <SafeFontIcon testID={`safe-list-${icon}-icon`} name={icon} size={10} color="$colorSecondary" />
                 )}
-                <Text fontSize="$2" lineHeight={20} color="$colorSecondary">
+                <Text fontSize="$2" lineHeight={20} color="$colorSecondary" numberOfLines={1} ellipsizeMode="tail">
                   {type}
                 </Text>
               </View>
@@ -111,9 +111,11 @@ export function SafeListItem({
 
             <SafeFontIcon name="chevron-right" size={16} />
           </View>
-        ) : (
-          rightNode
-        )}
+        ) : rightNode ? (
+          <View alignItems="flex-end" flexShrink={1} minWidth={0} marginLeft="$2">
+            {rightNode}
+          </View>
+        ) : null}
       </View>
 
       {bottomContent && (

@@ -25,7 +25,11 @@ export function TxSafeAppCard({ safeAppInfo, txInfo, ...rest }: TxSafeAppCardPro
           accessibilityLabel={safeAppInfo.name}
         />
       }
-      rightNode={<Text>{txInfo.methodName}</Text>}
+      rightNode={
+        <Text numberOfLines={1} ellipsizeMode="tail" textAlign="right">
+          {txInfo.methodName}
+        </Text>
+      }
       {...rest}
     />
   )
