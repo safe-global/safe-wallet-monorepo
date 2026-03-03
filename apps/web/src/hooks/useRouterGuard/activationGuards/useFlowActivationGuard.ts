@@ -9,23 +9,11 @@ import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 // ---------------------------------------------------------------------------
 // Route classifications
 // ---------------------------------------------------------------------------
-
-const PUBLIC_ROUTES = [
-  AppRoutes.terms,
-  AppRoutes.privacy,
-  AppRoutes.imprint,
-  AppRoutes.cookie,
-  AppRoutes.licenses,
-  AppRoutes.safeLabsTerms,
-  AppRoutes['403'],
-  AppRoutes['404'],
-  AppRoutes._offline,
-  AppRoutes.welcome.index,
-]
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -49,11 +37,8 @@ const guardRules: GuardRule[] = [
 
   // Not connected or not signed in with SIWE → welcome
   {
-    match: ({ isConnected, isSiweAuthenticated }) => {
-      const shouldRedirect = !isConnected || !isSiweAuthenticated
-      console.log('## data', { isConnected, isSiweAuthenticated })
-      console.log('## shouldRedirect Not connected or not signed in with SIWE → welcome', shouldRedirect)
-      return shouldRedirect
+    match: ({ isSiweAuthenticated }) => {
+      return !isSiweAuthenticated
     },
     action: () => redirect(AppRoutes.welcome.index),
   },
@@ -62,7 +47,6 @@ const guardRules: GuardRule[] = [
   {
     match: ({ hasSpaces, isOnboardingRoute }) => {
       const shouldRedirect = !hasSpaces && !isOnboardingRoute
-      console.log('## shouldRedirect Authenticated but has no spaces → onboarding', shouldRedirect)
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.welcome.createSpace),
@@ -73,10 +57,6 @@ const guardRules: GuardRule[] = [
     match: ({ hasSpaces, isOnboardingRoute, query }) => {
       // query paramerters are only available on the client side
       const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
-      console.log(
-        '## shouldRedirect Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page',
-        shouldRedirect,
-      )
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.spaces.createSpace),
@@ -85,7 +65,6 @@ const guardRules: GuardRule[] = [
   {
     match: ({ isWalletReady, isPartOfSpaceUrl, isOnboardingRoute, isPublicRoute }) => {
       const shouldRedirect = isWalletReady && !isPartOfSpaceUrl && !isOnboardingRoute && !isPublicRoute
-      console.log('## redirecting in the Has spaces but no valid space selected → welcome', shouldRedirect)
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.welcome.index),
@@ -103,6 +82,7 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
+  const isSpaceRoute = useIsSpaceRoute()
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
@@ -123,7 +103,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       {
         pathname,
         query,
-        isPublicRoute: PUBLIC_ROUTES.some((route) => route.startsWith(pathname)),
+        isPublicRoute: !ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)) && !isSpaceRoute,
         isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
         isWalletReady,
         isConnected: !!wallet,

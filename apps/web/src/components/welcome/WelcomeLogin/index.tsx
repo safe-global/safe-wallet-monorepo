@@ -6,14 +6,17 @@ import useWallet from '@/hooks/wallets/useWallet'
 import Track from '@/components/common/Track'
 import WalletLogin from './WalletLogin'
 import { useHomeAuth } from './hooks/useHomeAuth'
-import { useSignInRedirect } from './hooks/useSignInRedirect'
+import { useRouter } from 'next/router'
 
 const WelcomeLogin = () => {
   const wallet = useWallet()
-  const { redirect, spaces } = useSignInRedirect()
+  const router = useRouter()
 
   const { performAuth, loading } = useHomeAuth({
-    onSuccess: redirect,
+    onSuccess: () => {
+      router.push({ pathname: AppRoutes.welcome.accounts, query: { ...router.query } })
+    },
+    skipSiwe: true,
   })
 
   return (
@@ -42,19 +45,12 @@ const WelcomeLogin = () => {
                 or
               </Typography>
             </Divider>
-            {spaces && spaces.length > 0 ? (
-              <Link href={AppRoutes.welcome.accounts}>
-                <Button disableElevation size="small">
-                  View my accounts
-                </Button>
-              </Link>
-            ) : (
-              <Link href={AppRoutes.newSafe.load} className={css.watchViewAccountLink}>
-                <Button disableElevation size="small">
-                  Watch any account
-                </Button>
-              </Link>
-            )}
+
+            <Link href={AppRoutes.newSafe.load} className={css.watchViewAccountLink}>
+              <Button disableElevation size="small">
+                Watch any account
+              </Button>
+            </Link>
           </>
         )}
       </Box>

@@ -14,6 +14,7 @@ const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000
 interface UseSIWEAuthArgs {
   onSuccess: () => void
   onError?: (error: Error) => void
+  skipSiwe?: boolean
 }
 
 /**
@@ -49,7 +50,7 @@ const handleAuthError = (error: unknown, dispatch: AppDispatch, onError?: (error
   )
 }
 
-export const useHomeAuth = ({ onSuccess, onError }: UseSIWEAuthArgs) => {
+export const useHomeAuth = ({ onSuccess, onError, skipSiwe }: UseSIWEAuthArgs) => {
   const dispatch = useAppDispatch()
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const { signIn, loading } = useSiwe()
@@ -58,7 +59,7 @@ export const useHomeAuth = ({ onSuccess, onError }: UseSIWEAuthArgs) => {
     if (loading) return
 
     try {
-      if (!isUserAuthenticated) {
+      if (!isUserAuthenticated && !skipSiwe) {
         const didSignIn = await performSignIn(signIn, dispatch)
         if (!didSignIn) return
       }
