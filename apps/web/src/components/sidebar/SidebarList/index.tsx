@@ -70,6 +70,7 @@ export const SidebarListItemText = ({
       variant: 'body2',
       fontWeight: bold ? 700 : undefined,
       display: 'flex',
+      alignItems: 'center',
       justifyContent: 'space-between',
     }}
     {...rest}
