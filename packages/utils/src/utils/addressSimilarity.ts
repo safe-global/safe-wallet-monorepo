@@ -8,7 +8,7 @@
  * Algorithm:
  * 1. Normalize all addresses to lowercase
  * 2. Create buckets based on prefix+suffix pattern
- * 3. Flag buckets that contain both pinned and unpinned addresses
+ * 3. Flag buckets that contain multiple addresses
  * 4. Within flagged buckets, verify middle section similarity using Hamming distance
  */
 
