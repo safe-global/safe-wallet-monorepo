@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
-import SafeOverview from '@/features/safe-overview'
+import Dashboard from '@/components/dashboard'
 import { BRAND_NAME } from '@/config/constants'
 
 const Home: NextPage = () => {
@@ -12,7 +12,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <SafeOverview />
+        <Dashboard />
       </main>
     </>
   )
