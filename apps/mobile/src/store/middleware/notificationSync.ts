@@ -23,7 +23,7 @@ function shouldSyncNotificationData(action: unknown): boolean {
     addressBookSlice.actions.addContacts.match(action) ||
     addressBookSlice.actions.upsertContact.match(action) ||
     // Chain configuration from RTK Query
-    apiSliceWithChainsConfig.endpoints.getChainsConfig.matchFulfilled(action)
+    apiSliceWithChainsConfig.endpoints.getChainsConfigV2.matchFulfilled(action)
   )
 }
 
