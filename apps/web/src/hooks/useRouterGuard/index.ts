@@ -38,7 +38,6 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
       } else {
         // we do not want to set isCheckingAccess to false here because we want
         // the checking access to be reseted only after the redirect is done
-        console.log('## caiu no redirect', redirectTo)
         router.replace(redirectTo ?? AppRoutes.welcome.index)
       }
     }
