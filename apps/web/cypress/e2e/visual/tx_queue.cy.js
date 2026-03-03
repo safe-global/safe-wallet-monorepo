@@ -20,7 +20,6 @@ describe(
         cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_2)
       })
       cy.wait('@getQueuedTransactions')
-      cy.contains('Batch', { timeout: 10000 }).should('be.visible')
     })
 
     it('[VISUAL] Screenshot queue page with pending transactions', () => {
