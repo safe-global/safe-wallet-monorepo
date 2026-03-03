@@ -176,12 +176,12 @@ export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).should('not.exist')
 }
 
-export function verifyRecoveryProposalModalState(option, horizontal = false) {
-  if (horizontal) {
-    cy.get(recoveryProposalCard).should('be.visible')
-    return
-  }
+export function verifyRecoveryProposalDialog(option) {
   cy.get(recoveryProposalModal).should(option)
+}
+
+export function verifyRecoveryProposalCard() {
+  cy.get(recoveryProposalCard).should('be.visible')
 }
 
 export function verifyRecoveryModalDisplayed() {
