@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -35,13 +35,17 @@ export function useSendTransaction({
   const dispatch = useAppDispatch()
   const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isSubmittingRef = useRef(false)
   const [submitError, setSubmitError] = useState<string>()
 
   const handleReview = useCallback(async () => {
+    if (isSubmittingRef.current) return
+
     const cannotSubmit = !isValid || isSubmitting || !activeSigner
     if (cannotSubmit) {
       return
     }
+    isSubmittingRef.current = true
     setIsSubmitting(true)
     setSubmitError(undefined)
 
@@ -67,6 +71,7 @@ export function useSendTransaction({
       logger.error('Send transaction proposal failed:', e)
       setSubmitError(message)
     } finally {
+      isSubmittingRef.current = false
       setIsSubmitting(false)
     }
   }, [

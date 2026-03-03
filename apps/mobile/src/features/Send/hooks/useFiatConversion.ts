@@ -62,7 +62,7 @@ const fiatToToken = (validInput: number, rate: number, maxDecimals: number): str
   if (validInput <= 0 || rate <= 0) {
     return ''
   }
-  const raw = (validInput / rate).toString()
+  const raw = (validInput / rate).toFixed(maxDecimals).replace(/\.?0+$/, '')
   return truncateToDecimals(raw, maxDecimals)
 }
 
@@ -72,15 +72,24 @@ interface DisplayResult {
   secondaryDisplay: string
 }
 
+interface BuildFiatDisplayArgs {
+  rawInput: string
+  validInput: number
+  rate: number
+  decimals: number
+  currencySymbol: string
+  symbol: string
+}
+
 /** Build display strings for fiat-input mode. */
-const buildFiatDisplay = (
-  rawInput: string,
-  validInput: number,
-  rate: number,
-  decimals: number,
-  currencySymbol: string,
-  symbol: string,
-): DisplayResult => {
+const buildFiatDisplay = ({
+  rawInput,
+  validInput,
+  rate,
+  decimals,
+  currencySymbol,
+  symbol,
+}: BuildFiatDisplayArgs): DisplayResult => {
   const display = rawInput || '0'
   const token = fiatToToken(validInput, rate, decimals)
   return {
@@ -90,15 +99,24 @@ const buildFiatDisplay = (
   }
 }
 
+interface BuildTokenDisplayArgs {
+  rawInput: string
+  validInput: number
+  rate: number
+  hasFiatPrice: boolean
+  currency: string
+  symbol: string
+}
+
 /** Build display strings for token-input mode. */
-const buildTokenDisplay = (
-  rawInput: string,
-  validInput: number,
-  rate: number,
-  hasFiatPrice: boolean,
-  currency: string,
-  symbol: string,
-): DisplayResult => {
+const buildTokenDisplay = ({
+  rawInput,
+  validInput,
+  rate,
+  hasFiatPrice,
+  currency,
+  symbol,
+}: BuildTokenDisplayArgs): DisplayResult => {
   const display = rawInput || '0'
   const fiatDisplay = hasFiatPrice ? formatCurrency((validInput * rate).toString(), currency) : ''
   return {
@@ -126,10 +144,10 @@ export function useFiatConversion({
     const validInput = parseInput(rawInput)
 
     if (isFiatMode && hasFiatPrice) {
-      return buildFiatDisplay(rawInput, validInput, rate, decimals, currencySymbol, symbol)
+      return buildFiatDisplay({ rawInput, validInput, rate, decimals, currencySymbol, symbol })
     }
 
-    return buildTokenDisplay(rawInput, validInput, rate, hasFiatPrice, currency, symbol)
+    return buildTokenDisplay({ rawInput, validInput, rate, hasFiatPrice, currency, symbol })
   }, [rawInput, isFiatMode, hasFiatPrice, rate, decimals, currency, currencySymbol, symbol])
 
   const toggleMode = useCallback(() => {
