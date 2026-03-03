@@ -77,7 +77,7 @@ export function EnterAmountContainer() {
   const currency = useAppSelector(selectCurrency)
   const keyboardVisible = useKeyboardVisible()
 
-  const { token, decimals, maxBalance, hasFiatPrice, formattedBalance } = useTokenBalance({
+  const { token, decimals, maxBalance, hasFiatPrice, formattedBalance, isTokenDataReady } = useTokenBalance({
     tokenAddress,
   })
 
@@ -116,7 +116,7 @@ export function EnterAmountContainer() {
     tokenAddress,
     tokenAmount: fiatConversion.tokenAmount,
     decimals,
-    isValid,
+    isValid: isValid && isTokenDataReady,
     selectedNonce: nonce.selectedNonce,
   })
 

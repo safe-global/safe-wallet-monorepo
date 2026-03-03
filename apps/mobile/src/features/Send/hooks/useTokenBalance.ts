@@ -14,6 +14,7 @@ interface UseTokenBalanceResult {
   maxBalance: string
   hasFiatPrice: boolean
   formattedBalance: string | undefined
+  isTokenDataReady: boolean
 }
 
 function findToken(items: Balance[], tokenAddress: string): Balance | undefined {
@@ -43,5 +44,7 @@ export function useTokenBalance({ tokenAddress }: UseTokenBalanceArgs): UseToken
     return token ? formatVisualAmount(maxBalance, decimals) : undefined
   }, [token, maxBalance, decimals])
 
-  return { token, decimals, maxBalance, hasFiatPrice, formattedBalance }
+  const isTokenDataReady = token?.tokenInfo.decimals != null
+
+  return { token, decimals, maxBalance, hasFiatPrice, formattedBalance, isTokenDataReady }
 }
