@@ -147,7 +147,9 @@ export function clearRecoverers() {
 }
 
 export function clickOnStartRecoveryBtn() {
-  cy.get(startRecoveryBtn).click()
+  cy.get(recoveryProposalCard).should('be.visible').within(() => {
+    cy.get(startRecoveryBtn).click()
+  })
 }
 
 export function enterOwnerAddress(address) {
@@ -173,8 +175,11 @@ export function clickOnRecoverLaterBtn() {
 }
 
 export function verifyRecoveryProposalModalState(option, horizontal = false) {
-  const selector = horizontal ? recoveryProposalCard : recoveryProposalModal
-  cy.get(selector).should(option)
+  if (horizontal) {
+    cy.get(recoveryProposalCard).should('be.visible')
+    return
+  }
+  cy.get(recoveryProposalModal).should(option)
 }
 
 export function verifyRecoveryModalDisplayed() {

@@ -51,7 +51,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
     dashboard.expandActionRequiredPanel()
-    sideBar.checkInconsistentSignersMsgDisplayed()
+    dashboard.checkInconsistentSignersMsgDisplayed()
     dashboard.clickActionInPanel('Review signers')
     cy.url().should('include', '/settings/setup').and('include', staticSafes.MATIC_STATIC_SAFE_28)
   })

@@ -235,3 +235,11 @@ export function verifyGetCliLinkInPanel() {
 export function verifyTrustDialogVisible() {
   cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
 }
+
+/** Message in action-required-panel when signers differ across chains (dashboard) */
+const differentSignersAcrossChainsMsg = 'different signers across different networks'
+
+/** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
+export function checkInconsistentSignersMsgDisplayed() {
+  cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
+}
