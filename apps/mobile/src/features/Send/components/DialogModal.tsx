@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Pressable, StyleSheet } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet } from 'react-native'
 import { Text, View, useTheme } from 'tamagui'
 
 interface DialogModalProps {
@@ -28,57 +28,62 @@ export function DialogModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={styles.overlay} onPress={onCancel}>
-        <Pressable
-          style={[
-            styles.container,
-            {
-              backgroundColor: String(theme.backgroundPaper.get()),
-              borderColor: dividerColor,
-            },
-          ]}
-          onPress={(e) => e.stopPropagation()}
-        >
-          <View alignItems="center" gap="$4" paddingVertical="$4">
-            {title ? (
-              <Text fontSize={16} fontWeight={700} color="$color" textAlign="center">
-                {title}
-              </Text>
-            ) : null}
-
-            {children}
-          </View>
-
-          <View>
-            <View style={[styles.horizontalDivider, { backgroundColor: dividerColor }]} />
-            <View flexDirection="row" alignItems="center" height={43}>
-              <Pressable style={styles.buttonHalf} onPress={onCancel} testID="dialog-cancel">
-                <Text fontSize={14} fontWeight={700} color="$color" textAlign="center">
-                  {cancelLabel}
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <Pressable style={styles.overlay} onPress={onCancel}>
+          <Pressable
+            style={[
+              styles.container,
+              {
+                backgroundColor: String(theme.backgroundPaper.get()),
+                borderColor: dividerColor,
+              },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View alignItems="center" gap="$4" paddingVertical="$4">
+              {title ? (
+                <Text fontSize={16} fontWeight={700} color="$color" textAlign="center">
+                  {title}
                 </Text>
-              </Pressable>
+              ) : null}
 
-              <View style={[styles.verticalDivider, { backgroundColor: dividerColor }]} />
-
-              <Pressable style={styles.buttonHalf} onPress={onSave} disabled={saveDisabled} testID="dialog-save">
-                <Text
-                  fontSize={14}
-                  fontWeight={700}
-                  color={saveDisabled ? '$colorSecondary' : '$success'}
-                  textAlign="center"
-                >
-                  {saveLabel}
-                </Text>
-              </Pressable>
+              {children}
             </View>
-          </View>
+
+            <View>
+              <View style={[styles.horizontalDivider, { backgroundColor: dividerColor }]} />
+              <View flexDirection="row" alignItems="center" height={43}>
+                <Pressable style={styles.buttonHalf} onPress={onCancel} testID="dialog-cancel">
+                  <Text fontSize={14} fontWeight={700} color="$color" textAlign="center">
+                    {cancelLabel}
+                  </Text>
+                </Pressable>
+
+                <View style={[styles.verticalDivider, { backgroundColor: dividerColor }]} />
+
+                <Pressable style={styles.buttonHalf} onPress={onSave} disabled={saveDisabled} testID="dialog-save">
+                  <Text
+                    fontSize={14}
+                    fontWeight={700}
+                    color={saveDisabled ? '$colorSecondary' : '$success'}
+                    textAlign="center"
+                  >
+                    {saveLabel}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

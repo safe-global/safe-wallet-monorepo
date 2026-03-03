@@ -15,7 +15,7 @@ interface RecipientSectionsProps {
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <Text fontSize="$2" fontWeight={600} color="$colorSecondary" paddingVertical="$2">
+    <Text fontSize="$4" fontWeight={500} color="$colorSecondary" paddingVertical="$2">
       {title}
     </Text>
   )
@@ -36,7 +36,7 @@ const RecipientRow = memo(function RecipientRow({
 
   return (
     <Pressable onPress={handlePress} testID={`recipient-${address}`}>
-      <View flexDirection="row" alignItems="center" gap="$3" padding="$3" borderRadius={8}>
+      <View flexDirection="row" alignItems="center" gap="$3" paddingVertical="$3" paddingRight="$3" borderRadius={8}>
         <Identicon address={address as Address} size={40} rounded />
         <View flex={1} gap="$1">
           {name && (
@@ -44,7 +44,7 @@ const RecipientRow = memo(function RecipientRow({
               {name}
             </Text>
           )}
-          <Text fontSize="$3" color="$colorSecondary">
+          <Text fontSize="$4" color="$colorSecondary">
             {shortenAddress(address, 6)}
           </Text>
         </View>

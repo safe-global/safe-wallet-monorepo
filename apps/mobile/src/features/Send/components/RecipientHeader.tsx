@@ -48,22 +48,26 @@ export function RecipientHeader({
 
       <View gap="$2" minWidth={100}>
         <View flexDirection="row" alignItems="center" gap="$2">
-          <SafeFontIcon name="apps" size={16} color="$color" />
+          <SafeFontIcon name="blocks" size={16} color="$color" />
           <Text fontSize="$4" color="$color">
             Nonce
           </Text>
         </View>
         <Pressable onPress={onNoncePress} testID="nonce-display">
           <View
+            flexDirection="row"
             alignItems="center"
-            justifyContent="center"
             backgroundColor="$backgroundSkeleton"
             borderRadius={8}
             paddingHorizontal="$4"
             height={64}
+            gap="$1"
           >
-            <Text fontSize="$4" color="$color">
-              {displayNonce !== undefined ? `# ${displayNonce}` : '\u2014'}
+            <Text fontSize="$4" color="$colorSecondary">
+              #
+            </Text>
+            <Text fontSize={16} color="$color">
+              {displayNonce !== undefined ? String(displayNonce) : '\u2014'}
             </Text>
           </View>
         </Pressable>

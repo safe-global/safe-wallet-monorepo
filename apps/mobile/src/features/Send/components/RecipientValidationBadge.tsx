@@ -21,6 +21,12 @@ const stateConfig: Record<
     icon: 'alert',
     label: 'Sending to your own Safe',
   },
+  suspicious: {
+    color: '$warning',
+    bg: '$warningBackground',
+    icon: 'alert',
+    label: 'Suspicious recipient',
+  },
 }
 
 export function RecipientValidationBadge({ state, contactName }: RecipientValidationBadgeProps) {

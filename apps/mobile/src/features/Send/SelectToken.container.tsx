@@ -81,9 +81,9 @@ function TokenListHeader({
 
       <View gap="$3">
         <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingRight="$1">
-          <View flexDirection="row" alignItems="center" gap="$2">
+          <View flexDirection="row" alignItems="center" gap="$1">
             <SafeFontIcon name="token" size={16} color="$color" />
-            <Text fontSize="$4" color="$color">
+            <Text fontSize={16} fontWeight={700} color="$color" paddingHorizontal="$1">
               Select token:
             </Text>
           </View>
