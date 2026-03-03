@@ -48,6 +48,26 @@ Stable architectural landmarks for fast orientation:
 | Theme package | `packages/theme/src/` | Palettes, spacing, typography tokens |
 | Mobile entry | `apps/mobile/src/app/_layout.tsx` | Expo Router root layout |
 
+### AST-Based Code Search
+
+If `ast-grep` (aka `sg`) is installed, prefer it over text-based grep for structural code searches. It understands TypeScript/TSX syntax so it won't match inside comments or strings.
+
+```bash
+# Find all components using useAppSelector
+sg -p 'useAppSelector($$$)' --lang tsx apps/web/src/
+
+# Find all createSlice calls
+sg -p 'createSlice({ name: $NAME, $$$})' --lang ts apps/web/src/
+
+# Find all default exports of a function component
+sg -p 'export default function $NAME($$$) { $$$}' --lang tsx apps/web/src/
+
+# Find useMemo with specific dependency
+sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
+```
+
+Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
