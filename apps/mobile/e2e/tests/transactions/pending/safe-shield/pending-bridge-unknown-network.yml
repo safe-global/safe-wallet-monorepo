@@ -65,7 +65,7 @@ tags:
       EXPANDED_ADDRESS: '.*0x1231DEB6f5749EF6cE6943a275A1D3E7486F4E.*'
       SCROLL_TO_FOOTER: 'true'
       LABEL_3: 'Threat analysis failed'
-      DESCRIPTION_3: '.*Threat analysis failed.*Simulation Error.*Reverted.*'
+      DESCRIPTION_3: '.*Threat analysis failed. Review before processing.*'
 
 # Verify we're back on the confirm transaction screen
 - assertVisible: 'Confirm transaction'

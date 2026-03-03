@@ -6,7 +6,7 @@ import { selectCurrency, selectTokenList, TOKEN_LISTS } from '@/src/store/settin
 import { selectActiveChain } from '@/src/store/chains'
 import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { POLLING_INTERVAL } from '@/src/config/constants'
+import { POLLING_INTERVAL, POSITIONS_POLLING_INTERVAL } from '@/src/config/constants'
 import useTotalBalances, { type TotalBalancesResult } from '@safe-global/utils/hooks/useTotalBalances'
 
 export type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
@@ -39,7 +39,7 @@ const useMobileTotalBalances = (): TotalBalancesResult => {
     hasPortfolioFeature,
     isAllTokensSelected,
     isDeployed: true, // Mobile Safes are always deployed
-    portfolioPollingInterval: POLLING_INTERVAL,
+    portfolioPollingInterval: POSITIONS_POLLING_INTERVAL,
     txServicePollingInterval: POLLING_INTERVAL,
     skip: !activeSafe,
   })

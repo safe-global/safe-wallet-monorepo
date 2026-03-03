@@ -26,7 +26,7 @@ describe('[SMOKE] Sidebar tests', { defaultCommandTimeout: 60000, ...constants.V
     sideBar.expandGroupSafes(0)
     sideBar.checkMultichainSubSafeExists([constants.networks.ethereum, constants.networks.sepolia])
 
-    // Wait for main content to fully load before Chromatic captures the snapshot
+    // Wait for main content to fully load before the snapshot is captured
     cy.contains('Sepolia Ether', { timeout: 30000 }).should('be.visible')
   })
 })

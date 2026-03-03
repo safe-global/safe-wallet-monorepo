@@ -38,8 +38,8 @@ tags:
 - runFlow:
     file: '../../../../utils/assertions/verify-safe-shield-widget.yml'
     env:
-      WIDGET_HEADER: 'Checks passed'
-      LABEL_1: 'Known contract'
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Unofficial fallback handler'
       LABEL_2: 'No threat detected'
 
 # Verify balance change block (no balance change)
@@ -52,10 +52,10 @@ tags:
 - runFlow:
     file: '../../../../utils/assertions/verify-safe-shield-sheet.yml'
     env:
-      TAP_TO_OPEN: 'Checks passed'
-      HEADER: 'CHECKS PASSED'
-      LABEL_1: 'Known contract'
-      DESCRIPTION_1: '.*You have already interacted with this contract.*'
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'Issues found'
+      LABEL_1: 'Unofficial fallback handler'
+      DESCRIPTION_1: '.*Verify the fallback handler is trusted and secure before proceeding.*'
       LABEL_2: 'No threat detected'
       DESCRIPTION_2: '.*Threat analysis found no issues.*'
 

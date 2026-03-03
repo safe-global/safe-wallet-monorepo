@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
 import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
+import { setupPositionsTestSafe } from '../setup/positionsSetup'
 import {
   setupAllPendingTxSafes,
   setupPendingTxsSafe1,
@@ -111,6 +112,12 @@ export function TestCtrls() {
         <Pressable
           testID="e2eOnboardedAccountTestAssets"
           onPress={() => setupOnboardedAccountForAssets(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2ePositionsTestSafe"
+          onPress={() => setupPositionsTestSafe(dispatch, router)}
           accessibilityRole="button"
           style={BTN}
         />

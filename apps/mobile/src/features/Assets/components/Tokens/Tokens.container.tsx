@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { ListRenderItem } from 'react-native'
+import { ListRenderItem, RefreshControl } from 'react-native'
 import { getTokenValue } from 'tamagui'
 
 import { SafeTab } from '@/src/components/SafeTab'
@@ -13,6 +13,9 @@ import { useTokenBalances } from './useTokenBalances'
 export function TokensContainer() {
   const { visibleItems, currency, isFetching, error, isLoading, hasItems, allFilteredByDust, refetch } =
     useTokenBalances()
+  const onRefresh = useCallback(() => {
+    refetch()
+  }, [refetch])
 
   const renderItem: ListRenderItem<Balance> = useCallback(
     ({ item }) => <TokenItem item={item} currency={currency} />,
@@ -53,6 +56,7 @@ export function TokensContainer() {
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
       style={{ marginTop: getTokenValue('$2') }}
+      refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefresh} />}
     />
   )
 }

@@ -34,7 +34,7 @@ Object.defineProperty(self, 'location', {
 // Helper to mock chains response
 const mockChainsResponse = (chains: Chain[]) => {
   server.use(
-    http.get(`${GATEWAY_URL}/v1/chains`, () => {
+    http.get(`${GATEWAY_URL}/v2/chains`, () => {
       return HttpResponse.json({
         count: chains.length,
         next: null,

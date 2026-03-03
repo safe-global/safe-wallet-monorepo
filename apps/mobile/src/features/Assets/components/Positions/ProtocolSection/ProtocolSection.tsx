@@ -4,7 +4,7 @@ import { Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { Logo } from '@/src/components/Logo'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import { calculateProtocolPercentage } from '@safe-global/utils/features/positions'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
@@ -21,15 +21,16 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
   const { protocol_metadata, fiatTotal } = protocol
   const percentageRatio = calculateProtocolPercentage(fiatTotal, totalFiatValue)
   const formattedPercentage = formatPercentage(percentageRatio)
-  const formattedFiatTotal = formatCurrency(fiatTotal, currency)
+  const formattedFiatTotal = formatCurrencyPrecise(fiatTotal, currency)
   const fiatChange = calculateProtocolFiatChange(protocol)
+  const protocolSlug = protocol.protocol.toLowerCase().replace(/\s+/g, '-')
 
   const handlePress = () => {
     router.push({ pathname: '/protocol-detail-sheet', params: { protocolId: protocol.protocol } })
   }
 
   return (
-    <Pressable onPress={handlePress} testID={`protocol-section-${protocol.protocol}`}>
+    <Pressable onPress={handlePress} testID={`protocol-section-${protocolSlug}`} collapsable={false}>
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
@@ -59,7 +60,14 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
               borderRadius="$2"
               flexShrink={0}
             >
-              <Text fontSize={11} color="$color" fontWeight={400} lineHeight={16} letterSpacing={1}>
+              <Text
+                fontSize={11}
+                color="$color"
+                fontWeight={400}
+                lineHeight={16}
+                letterSpacing={1}
+                testID={`protocol-${protocolSlug}-percentage`}
+              >
                 {formattedPercentage}
               </Text>
             </View>
@@ -67,7 +75,13 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
         </View>
         <View flexDirection="row" alignItems="center" gap="$2" flexShrink={0}>
           <View alignItems="flex-end">
-            <Text fontSize="$4" fontWeight={600} color="$color" lineHeight={20}>
+            <Text
+              fontSize="$4"
+              fontWeight={600}
+              color="$color"
+              lineHeight={20}
+              testID={`protocol-${protocolSlug}-fiat-total`}
+            >
               {formattedFiatTotal}
             </Text>
             {fiatChange !== null && (
