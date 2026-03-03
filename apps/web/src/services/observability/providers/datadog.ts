@@ -4,7 +4,6 @@ import { datadogRum } from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
   DATADOG_CLIENT_TOKEN,
-  DATADOG_FORCE_ENABLE,
   DATADOG_LOGS_SAMPLE_RATE,
   DATADOG_RUM_APPLICATION_ID,
   DATADOG_RUM_CLIENT_TOKEN,
@@ -21,7 +20,6 @@ import {
   DATADOG_RUM_TRACING_ENABLED,
   GATEWAY_URL_PRODUCTION,
   GATEWAY_URL_STAGING,
-  IS_PRODUCTION,
 } from '@/config/constants'
 
 type DatadogSite =
@@ -32,21 +30,14 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-const shouldEnableDatadog = IS_PRODUCTION || DATADOG_FORCE_ENABLE
-const isDatadogLogsEnabled = shouldEnableDatadog && Boolean(DATADOG_CLIENT_TOKEN)
-const isDatadogRumEnabled =
-  shouldEnableDatadog && Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+export const isDatadogLogsEnabled = Boolean(DATADOG_CLIENT_TOKEN)
+export const isDatadogRumEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+export const isDatadogEnabled = isDatadogLogsEnabled || isDatadogRumEnabled
 
 export class DatadogProvider implements IObservabilityProvider {
   readonly name = 'Datadog'
   private isLogsInitialized = false
   private isRumInitialized = false
-
-  private setRumGlobalContext(): void {
-    datadogRum.setGlobalContextProperty('env', DATADOG_RUM_ENV)
-    datadogRum.setGlobalContextProperty('service', DATADOG_RUM_SERVICE)
-    datadogRum.setGlobalContextProperty('version', COMMIT_HASH)
-  }
 
   async init(): Promise<void> {
     const isClient = typeof window !== 'undefined'
@@ -90,7 +81,6 @@ export class DatadogProvider implements IObservabilityProvider {
       const isAlreadyInitialized = typeof getInitConfiguration === 'function' && Boolean(getInitConfiguration())
       if (isAlreadyInitialized) {
         this.isRumInitialized = true
-        this.setRumGlobalContext()
         return
       }
 
@@ -115,8 +105,6 @@ export class DatadogProvider implements IObservabilityProvider {
           ],
         }),
       })
-
-      this.setRumGlobalContext()
 
       this.isRumInitialized = true
     } catch (error) {
