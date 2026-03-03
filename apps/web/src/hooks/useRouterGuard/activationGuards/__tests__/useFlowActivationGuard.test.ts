@@ -163,7 +163,7 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('not connected or not authenticated', () => {
-    it('should redirect to welcome when wallet is not connected', async () => {
+    it('should allow access when wallet is not connected but SIWE authenticated', async () => {
       setupMocks({
         pathname: '/home',
         wallet: null,
@@ -175,7 +175,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+      expect(guardResult).toEqual({ success: true })
     })
 
     it('should redirect to welcome when not authenticated via SIWE', async () => {
