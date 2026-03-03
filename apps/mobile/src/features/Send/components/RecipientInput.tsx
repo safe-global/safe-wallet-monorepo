@@ -25,16 +25,26 @@ const borderColors: Record<RecipientValidationState, string> = {
   unknown: '$info',
   invalid: '$error',
   'self-send': '$warning',
+  suspicious: '$warning',
 }
 
-const labelConfig: Partial<Record<RecipientValidationState, { icon: string; color: string; text: string }>> = {
-  known: { icon: 'check', color: '$success', text: 'Known recipient' },
-  unknown: { icon: 'info', color: '$info', text: 'Unknown recipient' },
-  invalid: { icon: 'alert', color: '$error', text: 'Invalid recipient' },
+const labelConfig: Partial<
+  Record<RecipientValidationState, { icon: string; iconColor: string; textColor: string; text: string }>
+> = {
+  known: { icon: 'check', iconColor: '$success', textColor: '$color', text: 'Known recipient' },
+  unknown: { icon: 'info', iconColor: '$info', textColor: '$color', text: 'Unknown recipient' },
+  invalid: { icon: 'alert', iconColor: '$error', textColor: '$error', text: 'Invalid recipient' },
   'self-send': {
     icon: 'alert',
-    color: '$warning',
+    iconColor: '$warning',
+    textColor: '$color',
     text: 'Sending to your own Safe',
+  },
+  suspicious: {
+    icon: 'alert',
+    iconColor: '$warning',
+    textColor: '$color',
+    text: 'Suspicious recipient',
   },
 }
 
@@ -44,8 +54,8 @@ function RecipientLabel({ validationState }: { validationState: RecipientValidat
   if (label) {
     return (
       <>
-        <SafeFontIcon name={label.icon as 'check'} size={16} color={label.color} />
-        <Text fontSize="$4" color={label.color}>
+        <SafeFontIcon name={label.icon as 'check'} size={16} color={label.iconColor} />
+        <Text fontSize="$4" color={label.textColor}>
           {label.text}
         </Text>
       </>
@@ -119,8 +129,8 @@ function AddressInputField({
             flex={1}
             value={value}
             onChangeText={onChangeText}
-            placeholder="Wallet address or ENS"
-            placeholderTextColor="$colorSecondary"
+            placeholder="Wallet address"
+            placeholderTextColor="$colorDisabled"
             autoCapitalize="none"
             autoCorrect={false}
             fontSize="$4"
@@ -139,13 +149,13 @@ function AddressInputField({
       ) : (
         <Pressable onPress={onPaste} testID="paste-button">
           <View
-            borderWidth={1}
-            borderColor="$borderLight"
+            backgroundColor="$backgroundSecondary"
             borderRadius={100}
-            paddingHorizontal="$2"
-            paddingVertical="$0.5"
+            paddingHorizontal="$3"
+            height={26}
+            justifyContent="center"
           >
-            <Text fontSize="$4" color="$colorSecondary">
+            <Text fontSize="$4" color="$color">
               Paste
             </Text>
           </View>
@@ -175,17 +185,19 @@ export function RecipientInput({
 
   return (
     <View gap="$2">
-      <View flexDirection="row" alignItems="center" gap="$2">
+      <View flexDirection="row" alignItems="center" gap="$1" paddingLeft={4}>
         <RecipientLabel validationState={validationState} />
       </View>
       <View
         flexDirection="row"
         alignItems="center"
+        gap="$3"
         borderWidth={1}
         borderColor={borderColors[validationState]}
         borderRadius={8}
         padding="$4"
         minHeight={64}
+        backgroundColor="transparent"
       >
         {isSelected ? (
           <SelectedRecipient value={value} selectedName={selectedName} onClear={onClear} />
@@ -199,7 +211,9 @@ export function RecipientInput({
           />
         )}
       </View>
-      {!isSelected && hasAddress && <RecipientValidationBadge state={validationState} contactName={contactName} />}
+      {!isSelected && hasAddress && validationState !== 'unknown' && (
+        <RecipientValidationBadge state={validationState} contactName={contactName} />
+      )}
     </View>
   )
 }

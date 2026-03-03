@@ -8,14 +8,16 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { type Contact, selectAddressBookState } from '@/src/store/addressBookSlice'
 import { selectSigners } from '@/src/store/signersSlice'
 import { selectAllSafes } from '@/src/store/safesSlice'
+import { useSuspiciousAddressDetection, type SuspiciousAddressMatch } from './useSuspiciousAddressDetection'
 
-export type RecipientValidationState = 'empty' | 'typing' | 'known' | 'unknown' | 'invalid' | 'self-send'
+export type RecipientValidationState = 'empty' | 'typing' | 'known' | 'unknown' | 'invalid' | 'self-send' | 'suspicious'
 
 export interface RecipientValidationResult {
   state: RecipientValidationState
   contactName?: string
   isValid: boolean
   canContinue: boolean
+  suspiciousMatch?: SuspiciousAddressMatch
 }
 
 function findContact(contacts: Record<string, Contact>, addr: string): Contact | undefined {
@@ -109,17 +111,27 @@ export function useRecipientValidation(address: string): RecipientValidationResu
   const addresses = useMemo(() => (isValidAddress ? [trimmed] : []), [isValidAddress, trimmed])
 
   const addressBookCheck = useAddressBookCheck(activeSafe.chainId, addresses, isInAddressBook, ownedSafes)
+  const suspiciousDetection = useSuspiciousAddressDetection(address)
 
-  const result = useMemo(
-    (): RecipientValidationResult =>
-      resolveAddressState(trimmed, {
-        activeSafeAddress: activeSafe.address,
-        addressBookCheck,
-        contacts: addressBookState.contacts,
-        signers,
-      }),
-    [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers],
-  )
+  const result = useMemo((): RecipientValidationResult => {
+    const baseResult = resolveAddressState(trimmed, {
+      activeSafeAddress: activeSafe.address,
+      addressBookCheck,
+      contacts: addressBookState.contacts,
+      signers,
+    })
+
+    if (baseResult.state === 'unknown' && suspiciousDetection.isSuspicious) {
+      return {
+        ...baseResult,
+        state: 'suspicious',
+        canContinue: false,
+        suspiciousMatch: suspiciousDetection.match,
+      }
+    }
+
+    return baseResult
+  }, [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers, suspiciousDetection])
 
   return result
 }

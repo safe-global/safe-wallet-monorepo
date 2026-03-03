@@ -8,6 +8,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { RecipientInput } from './components/RecipientInput'
 import { RecipientSections } from './components/RecipientSections'
 import { AddToAddressBookModal } from './components/AddToAddressBookModal'
+import { SuspiciousAddressComparison } from './components/SuspiciousAddressComparison'
 import { useRecipientValidation } from './hooks/useRecipientValidation'
 import { useRecipientSearch } from './hooks/useRecipientSearch'
 import { IconName } from '@/src/types/iconTypes'
@@ -25,7 +26,7 @@ function IconRow({
 }) {
   return (
     <Pressable onPress={onPress} testID={testID}>
-      <View flexDirection="row" alignItems="center" gap="$3" padding="$3">
+      <View flexDirection="row" alignItems="center" gap="$3" paddingVertical="$3" paddingRight="$3">
         <View
           width={40}
           height={40}
@@ -34,9 +35,9 @@ function IconRow({
           alignItems="center"
           justifyContent="center"
         >
-          <SafeFontIcon name={icon} size={20} color="$color" />
+          <SafeFontIcon name={icon} size={24} color="$color" />
         </View>
-        <Text fontSize="$4" fontWeight={600} color="$color">
+        <Text fontSize="$5" color="$color">
           {label}
         </Text>
       </View>
@@ -97,9 +98,23 @@ export function SelectRecipientContainer() {
     })
   }, [address, displayName, validation.canContinue, router])
 
+  const handleSuspiciousSelect = useCallback(
+    (selectedAddress: string, name?: string) => {
+      router.push({
+        pathname: '/(send)/token',
+        params: {
+          recipientAddress: selectedAddress.trim(),
+          ...(name ? { recipientName: name } : {}),
+        },
+      })
+    },
+    [router],
+  )
+
   const handleContactSaved = useCallback(() => {
     setShowAddContact(false)
   }, [])
+  const isSuspicious = validation.state === 'suspicious'
   const isSelected = !!displayName
   const hasAddress = validation.state !== 'empty' && validation.state !== 'typing'
   const showBrowseOptions = !isSelected && !hasAddress
@@ -111,47 +126,62 @@ export function SelectRecipientContainer() {
         <ScrollView
           keyboardShouldPersistTaps="handled"
           onScrollBeginDrag={Keyboard.dismiss}
-          contentContainerStyle={{ padding: getTokenValue('$4') }}
+          contentContainerStyle={{
+            paddingTop: getTokenValue('$6'),
+            paddingBottom: getTokenValue('$4'),
+            paddingHorizontal: getTokenValue('$4'),
+          }}
         >
-          <View gap="$4">
-            <RecipientInput
-              value={address}
-              onChangeText={handleAddressChange}
-              onClear={handleClear}
-              validationState={validation.state}
-              contactName={validation.contactName}
-              selectedName={displayName}
+          {isSuspicious && validation.suspiciousMatch ? (
+            <SuspiciousAddressComparison
+              suspiciousAddress={address}
+              knownAddress={validation.suspiciousMatch.knownAddress}
+              knownName={validation.suspiciousMatch.knownName}
+              onSelect={handleSuspiciousSelect}
             />
-
-            {showAddToAddressBook && (
-              <IconRow
-                icon="plus"
-                label="Add to address book"
-                onPress={() => setShowAddContact(true)}
-                testID="add-to-address-book"
+          ) : (
+            <View gap="$2">
+              <RecipientInput
+                value={address}
+                onChangeText={handleAddressChange}
+                onClear={handleClear}
+                validationState={validation.state}
+                contactName={validation.contactName}
+                selectedName={displayName}
               />
-            )}
 
-            {showBrowseOptions && (
-              <>
-                <IconRow icon="qr-code" label="Scan QR code" onPress={handleQrPress} testID="scan-qr-button" />
-
-                <RecipientSections
-                  safes={searchResults.safes}
-                  signers={searchResults.signers}
-                  addressBook={searchResults.addressBook}
-                  onSelect={handleSelect}
+              {showAddToAddressBook && (
+                <IconRow
+                  icon="plus"
+                  label="Add to address book"
+                  onPress={() => setShowAddContact(true)}
+                  testID="add-to-address-book"
                 />
-              </>
-            )}
-          </View>
+              )}
+
+              {showBrowseOptions && (
+                <>
+                  <IconRow icon="qr-code" label="Scan QR code" onPress={handleQrPress} testID="scan-qr-button" />
+
+                  <RecipientSections
+                    safes={searchResults.safes}
+                    signers={searchResults.signers}
+                    addressBook={searchResults.addressBook}
+                    onSelect={handleSelect}
+                  />
+                </>
+              )}
+            </View>
+          )}
         </ScrollView>
 
-        <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
-          <SafeButton onPress={handleContinue} disabled={!validation.canContinue} testID="continue-button">
-            Continue
-          </SafeButton>
-        </View>
+        {!isSuspicious && (
+          <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={Math.max(bottom, getTokenValue('$4'))}>
+            <SafeButton onPress={handleContinue} disabled={!validation.canContinue} testID="continue-button">
+              Continue
+            </SafeButton>
+          </View>
+        )}
       </View>
 
       <AddToAddressBookModal

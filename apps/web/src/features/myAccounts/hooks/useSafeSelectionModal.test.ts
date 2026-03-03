@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react'
 import useSafeSelectionModal from './useSafeSelectionModal'
 import * as store from '@/store'
 import * as useAllSafes from '@/hooks/safes/useAllSafes'
-import * as addressSimilarity from '../services/addressSimilarity'
+import * as addressSimilarity from '@safe-global/utils/utils/addressSimilarity'
 
 jest.mock('@/store', () => ({
   useAppDispatch: jest.fn(),
@@ -14,7 +14,7 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('../services/addressSimilarity', () => ({
+jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
   detectSimilarAddresses: jest.fn(),
 }))
 

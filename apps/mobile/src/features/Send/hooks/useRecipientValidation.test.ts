@@ -6,6 +6,12 @@ import { generateChecksummedAddress, createMockSafeInfo } from '@safe-global/tes
 
 jest.mock('@/src/store/hooks')
 jest.mock('@/src/store/hooks/activeSafe')
+jest.mock('./useSuspiciousAddressDetection', () => ({
+  useSuspiciousAddressDetection: () => ({
+    isSuspicious: false,
+    match: undefined,
+  }),
+}))
 
 const mockActiveSafe = createMockSafeInfo()
 
