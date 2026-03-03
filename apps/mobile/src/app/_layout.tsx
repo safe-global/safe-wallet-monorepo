@@ -116,18 +116,9 @@ function NavigationStack() {
       <Stack.Screen name="how-to-execute-sheet" options={transparentModalOptions} />
       <Stack.Screen name="notifications-opt-in" options={hiddenHeaderModalOptions} />
       <Stack.Screen name="biometrics-opt-in" options={hiddenHeaderModalOptions} />
-      <Stack.Screen
-        name="confirm-transaction"
-        options={{ title: 'Confirm transaction', headerRight: () => <View width={16} /> }}
-      />
-      <Stack.Screen
-        name="review-and-confirm"
-        options={{ title: 'Review and confirm', headerRight: () => <View width={16} /> }}
-      />
-      <Stack.Screen
-        name="review-and-execute"
-        options={{ title: 'Review and execute', headerRight: () => <View width={16} /> }}
-      />
+      <Stack.Screen name="confirm-transaction" options={{ title: 'Confirm transaction' }} />
+      <Stack.Screen name="review-and-confirm" options={{ title: 'Review and confirm' }} />
+      <Stack.Screen name="review-and-execute" options={{ title: 'Review and execute' }} />
       <Stack.Screen name="currency" options={{ headerShown: true, title: 'Currency' }} />
       <Stack.Screen name="share" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="manage-tokens-sheet" options={transparentModalOptions} />
