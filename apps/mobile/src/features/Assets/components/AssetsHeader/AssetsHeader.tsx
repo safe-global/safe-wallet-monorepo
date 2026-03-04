@@ -28,20 +28,21 @@ export function AssetsHeader({
 }: AssetsHeaderProps) {
   return (
     <StyledAssetsHeader>
-      <ReadOnlyContainer marginTop="$4" marginBottom="$2" />
+      <ReadOnlyContainer marginTop={-8} marginBottom="$2" />
 
       <BalanceContainer />
 
-      <XStack marginTop="$2" marginBottom="$4" justifyContent="center" gap="$2">
+      <XStack marginTop="$2" justifyContent="center" gap="$2">
         <Pressable onPress={onReceivePress} testID="receive-button">
           <View
             flexDirection="row"
             alignItems="center"
+            justifyContent="center"
             gap="$1"
-            backgroundColor="$backgroundSkeleton"
+            backgroundColor="$backgroundSecondary"
             borderRadius={8}
-            paddingHorizontal="$5"
             paddingVertical="$3"
+            width={115}
           >
             <SafeFontIcon name="qr-code" size={18} color="$color" />
             <Text fontSize="$4" fontWeight={700} color="$color">
@@ -54,11 +55,12 @@ export function AssetsHeader({
             <View
               flexDirection="row"
               alignItems="center"
+              justifyContent="center"
               gap="$1"
-              backgroundColor="$backgroundSkeleton"
+              backgroundColor="$backgroundSecondary"
               borderRadius={8}
-              paddingHorizontal="$5"
               paddingVertical="$3"
+              width={115}
             >
               <SafeFontIcon name="transaction-outgoing" size={18} color="$color" />
               <Text fontSize="$4" fontWeight={700} color="$color">
@@ -69,7 +71,7 @@ export function AssetsHeader({
         )}
       </XStack>
 
-      <View marginBottom="$4" marginTop="$2">
+      <View marginBottom="$4" marginTop="$10">
         {amount > 0 && (
           <PendingTransactions
             isLoading={isLoading}

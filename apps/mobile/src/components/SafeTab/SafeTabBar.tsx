@@ -78,7 +78,7 @@ export const SafeTabBar = ({
     <View
       backgroundColor="$background"
       gap="$6"
-      paddingHorizontal="$4"
+      paddingHorizontal="$6"
       flexDirection="row"
       borderBottomColor={'$borderLight'}
       borderBottomWidth={1}
