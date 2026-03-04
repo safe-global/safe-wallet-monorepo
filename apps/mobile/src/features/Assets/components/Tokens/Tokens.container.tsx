@@ -55,7 +55,8 @@ export function TokensContainer() {
       data={visibleItems}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
-      style={{ marginTop: getTokenValue('$2') }}
+      contentContainerStyle={{ paddingHorizontal: getTokenValue('$4'), gap: getTokenValue('$2') }}
+      style={{ marginTop: getTokenValue('$4') }}
       refreshControl={<RefreshControl refreshing={isFetching} onRefresh={onRefresh} />}
     />
   )
