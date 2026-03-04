@@ -21,7 +21,6 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
-  AppRoutes.welcome.addressBook,
 ]
 
 const NO_HEADER_ROUTES = [
@@ -30,7 +29,6 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
-  AppRoutes.welcome.addressBook,
   AppRoutes.spaces.createSpace,
 ]
 

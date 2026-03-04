@@ -1,7 +1,5 @@
 import { TotalValueElement } from '@/features/spaces/components/TotalValueElement'
 
-import { HeaderActions } from './HeaderActions'
-
 /**
  * DashboardHeader
  *
@@ -20,25 +18,10 @@ interface DashboardHeaderProps {
   otherActions?: React.ReactNode
 }
 
-const DashboardHeader = ({
-  value,
-  loading,
-  onSend,
-  onReceive,
-  onSwap,
-  onBuildTransaction,
-  otherActions,
-}: DashboardHeaderProps) => {
+const DashboardHeader = ({ value, loading }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-6 mb-10">
       <TotalValueElement value={value} loading={loading} />
-      <HeaderActions
-        onSend={onSend}
-        onReceive={onReceive}
-        onSwap={onSwap}
-        onBuildTransaction={onBuildTransaction}
-        otherActions={otherActions}
-      />
     </div>
   )
 }
