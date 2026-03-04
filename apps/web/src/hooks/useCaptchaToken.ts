@@ -98,6 +98,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
   const widgetContainerRef = useRef<HTMLDivElement | null>(null)
   const widgetIdRef = useRef<string | null>(null)
   const hasRenderedRef = useRef<boolean>(false)
+  const isMountedRef = useRef<boolean>(true)
 
   // Ref to access the latest theme value inside callbacks (avoids stale closures)
   const themeRef = useRef(theme)
@@ -135,7 +136,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
 
           // Close modal after successful verification (if it was open)
           setTimeout(() => {
-            setIsModalOpen(false)
+            if (isMountedRef.current) setIsModalOpen(false)
           }, 500)
         },
         'error-callback': (error: string) => {
@@ -213,6 +214,7 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current)
@@ -220,6 +222,9 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
           // Ignore
         }
       }
+      widgetIdRef.current = null
+      widgetContainerRef.current = null
+      hasRenderedRef.current = false
     }
   }, [])
 
