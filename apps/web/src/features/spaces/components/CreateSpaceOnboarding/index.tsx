@@ -17,7 +17,7 @@ import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 
-const ONBOARDING_TOTAL_STEPS = 4
+const ONBOARDING_TOTAL_STEPS = 3
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const [error, setError] = useState<string>()
