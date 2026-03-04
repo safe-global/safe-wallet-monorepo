@@ -224,12 +224,10 @@ export function verifyMigrateSafeFlowOpened() {
   cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
 }
 
-const getCliLinkTestId = '[data-testid="get-cli-link"]'
-
 /** Verifies the "Get CLI" link is visible in the action required panel (Case #3). */
 export function verifyGetCliLinkInPanel() {
   cy.get(actionRequiredPanel).within(() => {
-    cy.get(getCliLinkTestId, { timeout: 10000 }).should('be.visible')
+    cy.get(mastercopyActions.getCli, { timeout: 10000 }).should('be.visible')
   })
 }
 

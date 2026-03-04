@@ -63,8 +63,8 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
   })
 
   // Mastercopy warnings (Action Required panel) — see specs/002-cypress-banner-actioncard-migration
-
-  it('Verify that Case #1 (outdated official mastercopy) shows Info card with Update CTA and opens upgrade flow', () => {
+  //we need 1.1.1 test save - deployment tbd
+  it.skip('Verify that outdated official mastercopy shows Info card with Update CTA and opens upgrade flow', () => {
     cy.visit(constants.homeUrl + staticSafes.ETH_STATIC_SAFE_OUTDATED_MASTERCOPY)
 
     dashboard.verifyActionRequiredCard({
@@ -75,7 +75,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyMigrateSafeFlowOpened()
   })
 
-  it('Verify that Case #2 (unsupported migratable) shows Warning card with unsupported copy and Migrate CTA', () => {
+  it('Verify that aligable for migration mastercopy shows Warning card with unsupported copy and Migrate CTA', () => {
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_31)
 
     dashboard.verifyActionRequiredCard({
@@ -86,7 +86,7 @@ describe('Dashboard tests', { defaultCommandTimeout: 60000 }, () => {
     dashboard.verifyMigrateSafeFlowOpened()
   })
 
-  it('Verify that Case #3 (unsupported not migratable) shows Warning card with Get CLI CTA opening CLI docs in new tab', () => {
+  it('Verify that unsupported not migration shows Warning card with Get CLI CTA opening CLI docs in new tab', () => {
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_32)
 
     dashboard.verifyActionRequiredCard({
