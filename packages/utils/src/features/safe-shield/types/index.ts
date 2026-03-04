@@ -218,6 +218,13 @@ export type ThreatAnalysisResults = {
 
 // Deadlock check types
 
+export enum DeadlockStatus {
+  VALID = 'valid',
+  BLOCKED = 'blocked',
+  WARNING = 'warning',
+  UNKNOWN = 'unknown',
+}
+
 export type OwnerChange =
   | { type: 'addOwner'; ownerAddress: string; threshold: number }
   | { type: 'removeOwner'; ownerAddress: string; threshold: number }
@@ -233,9 +240,15 @@ export interface SafeOwnerInfo {
 }
 
 export interface DeadlockCheckResult {
-  status: 'valid' | 'blocked' | 'warning' | 'unknown'
+  status: DeadlockStatus
   reason?: string
   mutualOwnerAddress?: string
   hasDeepNesting: boolean
   fetchFailures: string[]
 }
+
+export type DeadlockCheckParams = {
+  editedSafeAddress: string
+  projectedOwners: string[]
+  projectedThreshold: number
+} | null

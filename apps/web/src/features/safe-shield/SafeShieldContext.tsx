@@ -1,6 +1,5 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useState,
   useEffect,
@@ -21,17 +20,12 @@ import {
   type RecipientAnalysisResults,
   type SafeAnalysisResult,
   type DeadlockCheckResult,
+  type DeadlockCheckParams,
+  DeadlockStatus,
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-
-type DeadlockCheckParams = {
-  editedSafeAddress: string
-  projectedOwners: string[]
-  projectedThreshold: number
-} | null
 
 export type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -78,22 +72,10 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   )
   const [deadlockResult] = deadlock
 
-  const [isRiskConfirmed, _setIsRiskConfirmed] = useState(false)
+  const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
-  const isDeadlockWarning = deadlockResult?.status === 'warning' || deadlockResult?.status === 'unknown'
-
-  const setIsRiskConfirmed: Dispatch<SetStateAction<boolean>> = useCallback(
-    (value) => {
-      _setIsRiskConfirmed((prev) => {
-        const next = typeof value === 'function' ? value(prev) : value
-        if (next && !prev && isDeadlockWarning) {
-          trackEvent(SETTINGS_EVENTS.DEADLOCK.WARNING_ACKNOWLEDGED)
-        }
-        return next
-      })
-    },
-    [isDeadlockWarning],
-  )
+  const isDeadlockWarning =
+    deadlockResult?.status === DeadlockStatus.WARNING || deadlockResult?.status === DeadlockStatus.UNKNOWN
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
@@ -109,7 +91,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   }, [threatAnalysisResult, safeAnalysis, isDeadlockWarning])
 
   useEffect(() => {
-    _setIsRiskConfirmed(false)
+    setIsRiskConfirmed(false)
   }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResult?.status])
 
   return (

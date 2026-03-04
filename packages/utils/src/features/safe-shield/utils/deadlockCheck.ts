@@ -1,4 +1,5 @@
 import type { OwnerChange, SafeOwnerInfo, DeadlockCheckResult } from '../types'
+import { DeadlockStatus } from '../types'
 
 export function computeProjectedState(
   currentOwners: string[],
@@ -41,7 +42,7 @@ export function checkDeadlock(
 
   if (fetchFailures.length > 0) {
     return {
-      status: 'unknown',
+      status: DeadlockStatus.UNKNOWN,
       reason: 'Could not fetch owner data for one or more Safe signers.',
       hasDeepNesting: false,
       fetchFailures,
@@ -51,7 +52,7 @@ export function checkDeadlock(
   // No Safe owners fetched means all owners are EOAs — valid, skip
   if (safeOwnerInfos.length === 0) {
     return {
-      status: 'valid',
+      status: DeadlockStatus.VALID,
       hasDeepNesting: false,
       fetchFailures: [],
     }
@@ -77,7 +78,7 @@ export function checkDeadlock(
 
       if (nonCircularOwnerCount < projectedThreshold) {
         return {
-          status: 'blocked',
+          status: DeadlockStatus.BLOCKED,
           reason:
             'With this owner and threshold configuration, this Safe cannot collect enough valid signatures to execute transactions.',
           mutualOwnerAddress: info.address,
@@ -90,7 +91,7 @@ export function checkDeadlock(
 
   if (hasDeepNesting) {
     return {
-      status: 'warning',
+      status: DeadlockStatus.WARNING,
       reason:
         'One or more Safe signers have their own Safe signers. Full signer safety could not be verified beyond direct owners.',
       hasDeepNesting: true,
@@ -99,7 +100,7 @@ export function checkDeadlock(
   }
 
   return {
-    status: 'valid',
+    status: DeadlockStatus.VALID,
     hasDeepNesting: false,
     fetchFailures: [],
   }

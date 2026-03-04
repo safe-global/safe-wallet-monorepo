@@ -1,5 +1,10 @@
-import type { ContractAnalysisResults, ThreatAnalysisResults, RecipientAnalysisResults } from '../types'
-import { CommonSharedStatus, Severity, ThreatStatus } from '../types'
+import type {
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+  RecipientAnalysisResults,
+  DeadlockCheckResult,
+} from '../types'
+import { CommonSharedStatus, DeadlockStatus, Severity, ThreatStatus } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
 import { SEVERITY_TO_TITLE } from '../constants'
@@ -17,7 +22,7 @@ import { isThreatAnalysisResult } from './mapVisibleAnalysisResults'
  * @param threatResults - Optional threat analysis result
  * @param hasSimulationError - Optional boolean indicating if the simulation has failed
  * @param hnLoginRequired - Optional boolean indicating if the Hypernative login is required
- * @param hasDeadlock - Optional boolean indicating if a signer deadlock was detected
+ * @param deadlockResult - Optional deadlock check result with status and reason
  * @returns An object containing the overall severity level and corresponding title, or undefined
  *          if no analysis results are provided. The severity is determined by the most severe
  *          finding across all analysis types.
@@ -37,8 +42,9 @@ export const getOverallStatus = (
   threatResults?: ThreatAnalysisResults,
   hasSimulationError?: boolean,
   hnLoginRequired?: boolean,
-  hasDeadlock?: boolean,
+  deadlockResult?: DeadlockCheckResult,
 ): { severity: Severity; title: string } | undefined => {
+  const hasDeadlock = deadlockResult?.status === DeadlockStatus.BLOCKED
   if (
     !recipientResults &&
     !contractResults &&
@@ -92,12 +98,12 @@ export const getOverallStatus = (
     })
   }
 
-  if (hasDeadlock) {
+  if (hasDeadlock && deadlockResult) {
     allResults.push({
       severity: Severity.CRITICAL,
       title: SEVERITY_TO_TITLE[Severity.CRITICAL],
       type: CommonSharedStatus.FAILED,
-      description: 'A signer deadlock was detected in the projected owner configuration.',
+      description: deadlockResult.reason || 'A signer deadlock was detected in the projected owner configuration.',
     })
   }
 

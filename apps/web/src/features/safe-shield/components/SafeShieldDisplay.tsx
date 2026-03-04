@@ -79,8 +79,6 @@ export const SafeShieldDisplay = ({
     [hypernativeAuth],
   )
 
-  const hasDeadlock = deadlockResult?.status === 'blocked'
-
   const overallStatus = useMemo(
     () =>
       getOverallStatus(
@@ -89,9 +87,9 @@ export const SafeShieldDisplay = ({
         threatResults,
         hasSimulationError,
         hnLoginRequired,
-        hasDeadlock,
+        deadlockResult,
       ),
-    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, hasDeadlock],
+    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResult],
   )
 
   return (

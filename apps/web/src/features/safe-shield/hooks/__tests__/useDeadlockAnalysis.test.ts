@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useDeadlockAnalysis } from '../useDeadlockAnalysis'
-import * as analytics from '@/services/analytics'
+import { DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
 
 const mockTriggerGetSafe = jest.fn()
 const mockUnwrap = jest.fn()
@@ -17,17 +17,6 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(() => '1'),
-}))
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-  SETTINGS_EVENTS: {
-    DEADLOCK: {
-      CHECK_RUN: { action: 'Deadlock check run' },
-      BLOCKED: { action: 'Deadlock blocked' },
-      WARNING_SHOWN: { action: 'Deadlock warning shown' },
-    },
-  },
 }))
 
 const buildSafeResponse = (owners: string[], threshold = 1) => ({
@@ -59,24 +48,26 @@ describe('useDeadlockAnalysis', () => {
   })
 
   it('returns valid when all owners are EOAs (not Safes)', async () => {
-    mockUnwrap.mockRejectedValue(new Error('Not Found'))
+    mockUnwrap.mockRejectedValue({ status: 404, data: { message: 'Not Found' } })
 
     const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xEOA1', '0xEOA2'], 1))
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.status).toBe('valid')
+      expect(data?.status).toBe(DeadlockStatus.VALID)
     })
   })
 
   it('returns valid when Safe owner does not create mutual ownership', async () => {
-    mockUnwrap.mockResolvedValueOnce(buildSafeResponse(['0xOtherEOA'], 1)).mockRejectedValue(new Error('Not Found'))
+    mockUnwrap
+      .mockResolvedValueOnce(buildSafeResponse(['0xOtherEOA'], 1))
+      .mockRejectedValue({ status: 404, data: { message: 'Not Found' } })
 
     const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xSafeOwner'], 1))
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.status).toBe('valid')
+      expect(data?.status).toBe(DeadlockStatus.VALID)
     })
   })
 
@@ -89,67 +80,20 @@ describe('useDeadlockAnalysis', () => {
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.status).toBe('blocked')
+      expect(data?.status).toBe(DeadlockStatus.BLOCKED)
     })
   })
 
   it('returns unknown when a Safe owner fetch fails with network error', async () => {
-    mockUnwrap.mockRejectedValue(new Error('Network error'))
+    mockUnwrap.mockRejectedValue({ status: 500, data: { message: 'Internal Server Error' } })
 
     const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xOwner1'], 1))
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.status).toBe('unknown')
+      expect(data?.status).toBe(DeadlockStatus.UNKNOWN)
       expect(data?.fetchFailures).toContain('0xOwner1')
     })
-  })
-
-  it('tracks CHECK_RUN analytics when result is produced', async () => {
-    mockUnwrap.mockRejectedValue(new Error('Not Found'))
-
-    const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xEOA1'], 1))
-
-    await waitFor(() => {
-      expect(result.current[0]?.status).toBe('valid')
-    })
-
-    expect(analytics.trackEvent).toHaveBeenCalledWith(analytics.SETTINGS_EVENTS.DEADLOCK.CHECK_RUN)
-  })
-
-  it('tracks BLOCKED analytics when deadlock is detected', async () => {
-    mockUnwrap.mockImplementation(() => {
-      return Promise.resolve(buildSafeResponse(['0xSafe', '0xEOA'], 2))
-    })
-
-    const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xSafeOwner'], 1))
-
-    await waitFor(() => {
-      expect(result.current[0]?.status).toBe('blocked')
-    })
-
-    expect(analytics.trackEvent).toHaveBeenCalledWith(analytics.SETTINGS_EVENTS.DEADLOCK.BLOCKED)
-  })
-
-  it('tracks WARNING_SHOWN analytics for warning status', async () => {
-    let callCount = 0
-    mockUnwrap.mockImplementation(() => {
-      callCount++
-      if (callCount === 1) {
-        return Promise.resolve(buildSafeResponse(['0xOtherEOA'], 1))
-      }
-      // Second call (nested check) succeeds — indicating nested Safe
-      return Promise.resolve(buildSafeResponse(['0xDeep'], 1))
-    })
-
-    const { result } = renderHook(() => useDeadlockAnalysis('0xSafe', ['0xSafeOwner'], 1))
-
-    await waitFor(() => {
-      const [data] = result.current
-      expect(data?.status).toBe('warning')
-    })
-
-    expect(analytics.trackEvent).toHaveBeenCalledWith(analytics.SETTINGS_EVENTS.DEADLOCK.WARNING_SHOWN)
   })
 
   it('does not clobber state when inputs change (cancellation)', async () => {
@@ -158,7 +102,9 @@ describe('useDeadlockAnalysis', () => {
       resolveFirst = resolve
     })
 
-    mockUnwrap.mockImplementationOnce(() => firstPromise).mockRejectedValue(new Error('Not Found'))
+    mockUnwrap
+      .mockImplementationOnce(() => firstPromise)
+      .mockRejectedValue({ status: 404, data: { message: 'Not Found' } })
 
     const { result, rerender } = renderHook(
       ({ owners }: { owners: string[] }) => useDeadlockAnalysis('0xSafe', owners, 1),
@@ -170,7 +116,7 @@ describe('useDeadlockAnalysis', () => {
 
     await waitFor(() => {
       const [data] = result.current
-      expect(data?.status).toBe('valid')
+      expect(data?.status).toBe(DeadlockStatus.VALID)
     })
 
     // Now resolve the stale first fetch — it should NOT overwrite state
@@ -181,6 +127,6 @@ describe('useDeadlockAnalysis', () => {
 
     // Result should still be 'valid' from the second (current) run
     const [data] = result.current
-    expect(data?.status).toBe('valid')
+    expect(data?.status).toBe(DeadlockStatus.VALID)
   })
 })

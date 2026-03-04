@@ -1,21 +1,22 @@
 import { useState, type ReactElement } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { DeadlockStatus, Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 
-const STATUS_TO_SEVERITY: Record<string, Severity> = {
-  blocked: Severity.CRITICAL,
-  warning: Severity.WARN,
-  unknown: Severity.WARN,
+const STATUS_TO_SEVERITY: Record<DeadlockStatus, Severity> = {
+  [DeadlockStatus.BLOCKED]: Severity.CRITICAL,
+  [DeadlockStatus.WARNING]: Severity.WARN,
+  [DeadlockStatus.UNKNOWN]: Severity.WARN,
+  [DeadlockStatus.VALID]: Severity.OK,
 }
 
-const STATUS_TO_TITLE: Record<string, string> = {
-  blocked: 'This setup creates a signing deadlock',
-  warning: 'Nested signer safety could not be fully verified',
-  unknown: 'Nested signer safety could not be fully verified',
+const STATUS_TO_TITLE: Partial<Record<DeadlockStatus, string>> = {
+  [DeadlockStatus.BLOCKED]: 'This setup creates a signing deadlock',
+  [DeadlockStatus.WARNING]: 'Nested signer safety could not be fully verified',
+  [DeadlockStatus.UNKNOWN]: 'Nested signer safety could not be fully verified',
 }
 
 const DeadlockAnalysisCard = ({
@@ -27,7 +28,7 @@ const DeadlockAnalysisCard = ({
 }): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
 
-  if (loading || !result || result.status === 'valid') {
+  if (loading || !result || result.status === DeadlockStatus.VALID) {
     return null
   }
 
@@ -35,9 +36,9 @@ const DeadlockAnalysisCard = ({
   const title = STATUS_TO_TITLE[result.status]
   const borderColor = SEVERITY_COLORS[severity].main
   const description =
-    result.status === 'unknown'
+    result.status === DeadlockStatus.UNKNOWN
       ? 'We could not fetch all nested Safe owners and thresholds. Continuing may create an unexecutable setup.'
-      : result.reason
+      : result.reason || 'Unknown deadlock issue detected'
 
   return (
     <Box data-testid="deadlock-analysis-card">

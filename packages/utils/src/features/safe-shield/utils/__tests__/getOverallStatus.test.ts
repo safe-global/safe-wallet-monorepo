@@ -1,5 +1,5 @@
 import { getOverallStatus } from '../getOverallStatus'
-import { Severity, StatusGroup } from '../../types'
+import { DeadlockStatus, Severity, StatusGroup } from '../../types'
 import type { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders/recipient-analysis-result.builder'
 import { ContractAnalysisResultBuilder } from '../../builders/contract-analysis-result.builder'
@@ -417,9 +417,22 @@ describe('getOverallStatus', () => {
     })
   })
 
-  describe('hasDeadlock parameter', () => {
-    it('should return CRITICAL severity when hasDeadlock is true with no analysis results', () => {
-      const result = getOverallStatus(undefined, undefined, undefined, false, false, true)
+  describe('deadlockResult parameter', () => {
+    const blockedDeadlock = {
+      status: DeadlockStatus.BLOCKED,
+      reason: 'Cannot collect enough valid signatures.',
+      hasDeepNesting: false,
+      fetchFailures: [],
+    }
+
+    const validDeadlock = {
+      status: DeadlockStatus.VALID,
+      hasDeepNesting: false,
+      fetchFailures: [],
+    }
+
+    it('should return CRITICAL severity when deadlock is blocked with no analysis results', () => {
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, blockedDeadlock)
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)
@@ -433,35 +446,35 @@ describe('getOverallStatus', () => {
         },
       }
 
-      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, true)
+      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, blockedDeadlock)
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)
       expect(result!.title).toBe('Risk detected')
     })
 
-    it('should not affect results when hasDeadlock is false', () => {
+    it('should not affect results when deadlock status is valid', () => {
       const recipientResults: RecipientAnalysisResults = {
         '0xRecipient1': {
           [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
         },
       }
 
-      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, false)
+      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, validDeadlock)
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.OK)
       expect(result!.title).toBe('Checks passed')
     })
 
-    it('should return CRITICAL when both hasDeadlock and threat are CRITICAL', () => {
+    it('should return CRITICAL when both deadlock and threat are CRITICAL', () => {
       const threatResults = {
         '0xThreat1': {
           [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
         },
       } as unknown as ThreatAnalysisResults
 
-      const result = getOverallStatus(undefined, undefined, threatResults, false, false, true)
+      const result = getOverallStatus(undefined, undefined, threatResults, false, false, blockedDeadlock)
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)

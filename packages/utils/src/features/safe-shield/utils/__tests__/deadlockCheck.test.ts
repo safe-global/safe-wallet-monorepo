@@ -1,4 +1,5 @@
 import { computeProjectedState, checkDeadlock } from '../deadlockCheck'
+import { DeadlockStatus } from '../../types'
 import { SafeOwnerInfo } from '../../types'
 
 describe('computeProjectedState', () => {
@@ -59,7 +60,7 @@ describe('checkDeadlock', () => {
 
   it('returns valid when no Safe owners are provided (all EOAs)', () => {
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xEOA2'], 2, [])
-    expect(result.status).toBe('valid')
+    expect(result.status).toBe(DeadlockStatus.VALID)
     expect(result.hasDeepNesting).toBe(false)
     expect(result.fetchFailures).toEqual([])
   })
@@ -76,7 +77,7 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 2, safeOwnerInfos)
-    expect(result.status).toBe('blocked')
+    expect(result.status).toBe(DeadlockStatus.BLOCKED)
     expect(result.mutualOwnerAddress).toBe('0xSafeB')
     expect(result.reason).toContain('cannot collect enough valid signatures')
   })
@@ -94,7 +95,7 @@ describe('checkDeadlock', () => {
 
     // 3 owners, threshold 2 — can reach threshold with EOA1 + EOA3 alone
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB', '0xEOA3'], 2, safeOwnerInfos)
-    expect(result.status).toBe('valid')
+    expect(result.status).toBe(DeadlockStatus.VALID)
   })
 
   it('returns valid when threshold is 1 (EOA alone suffices)', () => {
@@ -109,7 +110,7 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 1, safeOwnerInfos)
-    expect(result.status).toBe('valid')
+    expect(result.status).toBe(DeadlockStatus.VALID)
   })
 
   it('returns warning when no mutual ownership but deep nesting exists', () => {
@@ -124,7 +125,7 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 1, safeOwnerInfos)
-    expect(result.status).toBe('warning')
+    expect(result.status).toBe(DeadlockStatus.WARNING)
     expect(result.hasDeepNesting).toBe(true)
     expect(result.reason).toContain('could not be verified beyond direct owners')
   })
@@ -141,7 +142,7 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 1, safeOwnerInfos)
-    expect(result.status).toBe('valid')
+    expect(result.status).toBe(DeadlockStatus.VALID)
     expect(result.hasDeepNesting).toBe(false)
   })
 
@@ -157,7 +158,7 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 2, safeOwnerInfos)
-    expect(result.status).toBe('unknown')
+    expect(result.status).toBe(DeadlockStatus.UNKNOWN)
     expect(result.fetchFailures).toEqual(['0xSafeB'])
   })
 
@@ -173,6 +174,6 @@ describe('checkDeadlock', () => {
     ]
 
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 2, safeOwnerInfos)
-    expect(result.status).toBe('blocked')
+    expect(result.status).toBe(DeadlockStatus.BLOCKED)
   })
 })
