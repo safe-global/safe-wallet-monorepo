@@ -45,6 +45,7 @@ exports[`StakingTxExitCard matches snapshot 1`] = `
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -159,6 +160,8 @@ exports[`StakingTxExitCard matches snapshot 1`] = `
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#A1A3A7",
@@ -190,19 +193,28 @@ exports[`StakingTxExitCard matches snapshot 1`] = `
             </Text>
           </View>
         </View>
-        <Text
+        <View
           style={
             {
-              "color": "#121312",
-              "fontFamily": "DMSans-SemiBold",
-              "textAlign": "right",
+              "alignItems": "flex-end",
+              "flexShrink": 1,
             }
           }
-          suppressHighlighting={true}
         >
-          1
-           Validator
-        </Text>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-SemiBold",
+                "textAlign": "right",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            1
+             Validator
+          </Text>
+        </View>
       </View>
     </View>
   </View>

@@ -36,6 +36,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -95,6 +96,8 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#A1A3A7",
@@ -165,6 +168,7 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
