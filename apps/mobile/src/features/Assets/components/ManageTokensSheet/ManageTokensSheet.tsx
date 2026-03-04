@@ -45,13 +45,7 @@ export const ManageTokensSheet = ({
               trackColor={{ true: '$primary' }}
             />
           </View>
-          <View
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-            padding="$3"
-            height={64}
-          >
+          <View flexDirection="row" alignItems="center" justifyContent="space-between" padding="$3" height={64}>
             <Text fontSize="$5" lineHeight={22} letterSpacing={0.15}>
               {`Hide tokens below $${DUST_THRESHOLD}`}
             </Text>
