@@ -25,18 +25,22 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
+import { useAppSelector } from '@/store'
+import { lastUsedSpace } from '@/store/authSlice'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
   onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-export function getLogoLink(router: ReturnType<typeof useRouter>): Url {
-  return router.pathname === AppRoutes.home || !router.query.safe
-    ? router.pathname === AppRoutes.spaces.index
-      ? AppRoutes.welcome.index
-      : { pathname: AppRoutes.spaces.index }
-    : { pathname: AppRoutes.home, query: { safe: router.query.safe } }
+export function getLogoLink(router: ReturnType<typeof useRouter>, spaceId?: string | null): Url {
+  if (router.pathname !== AppRoutes.home && router.query.safe) {
+    return { pathname: AppRoutes.home, query: { safe: router.query.safe } }
+  }
+  if (spaceId) {
+    return { pathname: AppRoutes.spaces.index, query: { spaceId } }
+  }
+  return router.pathname === AppRoutes.welcome.accounts ? AppRoutes.welcome.index : AppRoutes.welcome.accounts
 }
 
 const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
@@ -47,9 +51,10 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const router = useRouter()
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
+  const spaceId = useAppSelector(lastUsedSpace)
 
-  // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
-  const logoHref = getLogoLink(router)
+  // If on the home page, the logo should link back to the space (if any), else to accounts
+  const logoHref = getLogoLink(router, spaceId)
 
   const handleMenuToggle = () => {
     if (onMenuToggle) {

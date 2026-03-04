@@ -3,6 +3,8 @@ import classnames from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
 
 import Topbar from '@/components/common/Header/Topbar'
+import Header from '@/components/common/Header'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
 import Footer from '../Footer'
@@ -11,6 +13,7 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import { AppRoutes } from '@/config/routes'
+import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
@@ -39,6 +42,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
+  const isSpaceRoute = useIsSpaceRoute()
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
@@ -51,7 +55,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && <Topbar />}
+      {!hideHeader &&
+        (isSpaceRoute ? (
+          <Topbar />
+        ) : (
+          <header className={css.header}>
+            <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
+          </header>
+        ))}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
@@ -64,8 +75,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {/* Disabled breadcrumbs for now */}
-            {/* {!hideHeader && <Breadcrumbs />}  */}
+            {!hideHeader && !isSpaceRoute && <Breadcrumbs />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div
