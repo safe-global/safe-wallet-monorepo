@@ -144,7 +144,7 @@ export function EnterAmountContainer() {
           recipientAddress={recipientAddress}
           recipientName={recipientName}
           displayNonce={nonce.displayNonce}
-          onRecipientPress={() => router.navigate('/(send)/recipient')}
+          onRecipientPress={() => router.dismissTo('/(send)/recipient')}
           onNoncePress={nonce.handleOpenNonceSheet}
         />
 
