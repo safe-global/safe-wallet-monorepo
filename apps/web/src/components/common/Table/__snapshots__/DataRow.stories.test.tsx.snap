@@ -2,39 +2,35 @@
 
 exports[`./DataRow.stories StringValue 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
+      data-testid=""
     >
       <div
-        class="MuiGrid-root MuiGrid-container mui-style-1yff1ei-MuiGrid-root"
-        data-testid=""
+        class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
+        data-testid="tx-row-title"
+        style="word-break: break-word;"
+      >
+        <span
+          class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+        >
+          Transaction Hash
+        </span>
+      </div>
+      <div
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
+        data-testid="tx-data-row"
       >
         <div
-          class="MuiGrid-root MuiGrid-item mui-style-ezmk0c-MuiGrid-root"
-          data-testid="tx-row-title"
-          style="word-break: break-word;"
+          class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-          >
-            Transaction Hash
-          </span>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true mui-style-1vd824g-MuiGrid-root"
-          data-testid="tx-data-row"
-        >
-          <div
-            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-          >
-            0x536e...94f9
-          </div>
+          0x536e...94f9
         </div>
       </div>
     </div>

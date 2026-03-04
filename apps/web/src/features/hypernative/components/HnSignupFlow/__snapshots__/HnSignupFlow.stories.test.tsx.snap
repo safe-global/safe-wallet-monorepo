@@ -2,10 +2,6 @@
 
 exports[`./HnSignupFlow.stories Default 1`] = `
 <div
-  class="shadcn-scope"
->
-  <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
-  />
-</div>
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+/>
 `;
