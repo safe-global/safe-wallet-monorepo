@@ -2,70 +2,58 @@
 
 exports[`./SpendingLimitLabel.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiBox-root mui-style-171onha"
   >
-    <div
-      class="MuiBox-root mui-style-171onha"
+    <mock-icon
+      aria-hidden=""
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
+      focusable="false"
+    />
+    <p
+      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
     >
-      <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
-        focusable="false"
-      />
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-      >
-        100 ETH per day
-      </p>
-    </div>
+      100 ETH per day
+    </p>
   </div>
 </div>
 `;
 
 exports[`./SpendingLimitLabel.stories OneTime 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiBox-root mui-style-171onha"
   >
-    <div
-      class="MuiBox-root mui-style-171onha"
+    <p
+      class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
     >
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
-      >
-        50 ETH
-      </p>
-    </div>
+      50 ETH
+    </p>
   </div>
 </div>
 `;
 
 exports[`./SpendingLimitLabel.stories WithCustomLabel 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiBox-root mui-style-171onha"
   >
-    <div
-      class="MuiBox-root mui-style-171onha"
+    <mock-icon
+      aria-hidden=""
+      class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
+      focusable="false"
+    />
+    <p
+      class="MuiTypography-root MuiTypography-body1 mui-style-10qi7i0-MuiTypography-root"
     >
-      <mock-icon
-        aria-hidden=""
-        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeMedium mui-style-16hj0i2-MuiSvgIcon-root"
-        focusable="false"
-      />
-      <p
-        class="MuiTypography-root MuiTypography-body1 mui-style-10qi7i0-MuiTypography-root"
-      >
-        Custom spending limit
-      </p>
-    </div>
+      Custom spending limit
+    </p>
   </div>
 </div>
 `;

@@ -2,33 +2,29 @@
 
 exports[`./index.stories Cancelled 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1im6wh6-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1im6wh6-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Cancelled
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Cancelled
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
@@ -36,33 +32,29 @@ exports[`./index.stories Cancelled 1`] = `
 
 exports[`./index.stories Expired 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-a204je-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-a204je-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Expired
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Expired
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
@@ -70,33 +62,29 @@ exports[`./index.stories Expired 1`] = `
 
 exports[`./index.stories Filled 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Filled
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Filled
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
@@ -104,33 +92,29 @@ exports[`./index.stories Filled 1`] = `
 
 exports[`./index.stories Open 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Open
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Open
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
@@ -138,33 +122,29 @@ exports[`./index.stories Open 1`] = `
 
 exports[`./index.stories PartiallyFilled 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1cjet8q-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Partially filled
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Partially filled
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>
@@ -172,33 +152,29 @@ exports[`./index.stories PartiallyFilled 1`] = `
 
 exports[`./index.stories Pending 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
     >
-      <div
-        class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-2q1p8k-MuiChip-root"
+      <span
+        class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
       >
         <span
-          class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+          class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
         >
-          <span
-            class="MuiTypography-root MuiTypography-caption mui-style-lkspku-MuiTypography-root"
-          >
-            <mock-icon
-              aria-hidden=""
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
-              focusable="false"
-            />
-            Execution needed
-          </span>
+          <mock-icon
+            aria-hidden=""
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+            focusable="false"
+          />
+          Execution needed
         </span>
-      </div>
+      </span>
     </div>
   </div>
 </div>

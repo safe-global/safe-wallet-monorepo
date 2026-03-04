@@ -2,34 +2,30 @@
 
 exports[`./InitialsAvatar.stories AllSizes 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
   >
     <div
-      class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+      class="initialsAvatar MuiBox-root mui-style-ksqe1t"
     >
-      <div
-        class="initialsAvatar MuiBox-root mui-style-ksqe1t"
-      >
-        S
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-nmen8c"
-      >
-        S
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-11n5h3k"
-      >
-        S
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-6uhehl"
-      >
-        S
-      </div>
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-nmen8c"
+    >
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-11n5h3k"
+    >
+      S
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-6uhehl"
+    >
+      S
     </div>
   </div>
 </div>
@@ -37,55 +33,47 @@ exports[`./InitialsAvatar.stories AllSizes 1`] = `
 
 exports[`./InitialsAvatar.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-1qgn1pp"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-1qgn1pp"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;
 
 exports[`./InitialsAvatar.stories DifferentNames 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
   >
     <div
-      class="MuiStack-root mui-style-1sos3zc-MuiStack-root"
+      class="initialsAvatar MuiBox-root mui-style-fjpxmy"
     >
-      <div
-        class="initialsAvatar MuiBox-root mui-style-fjpxmy"
-      >
-        A
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-1ddg8e0"
-      >
-        B
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-1w7946m"
-      >
-        C
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-bzu3o8"
-      >
-        D
-      </div>
-      <div
-        class="initialsAvatar MuiBox-root mui-style-1lq8kgu"
-      >
-        E
-      </div>
+      A
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1ddg8e0"
+    >
+      B
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1w7946m"
+    >
+      C
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-bzu3o8"
+    >
+      D
+    </div>
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1lq8kgu"
+    >
+      E
     </div>
   </div>
 </div>
@@ -93,80 +81,60 @@ exports[`./InitialsAvatar.stories DifferentNames 1`] = `
 
 exports[`./InitialsAvatar.stories Large 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-1qgn1pp"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-1qgn1pp"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;
 
 exports[`./InitialsAvatar.stories Medium 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-7emiao"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-7emiao"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;
 
 exports[`./InitialsAvatar.stories Rounded 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-1r6vwch"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-1r6vwch"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;
 
 exports[`./InitialsAvatar.stories Small 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-1bxo8he"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-1bxo8he"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;
 
 exports[`./InitialsAvatar.stories XSmall 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="initialsAvatar MuiBox-root mui-style-13lurrd"
   >
-    <div
-      class="initialsAvatar MuiBox-root mui-style-13lurrd"
-    >
-      S
-    </div>
+    S
   </div>
 </div>
 `;

@@ -2,67 +2,63 @@
 
 exports[`./HnMiniTxBanner.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  <span
+    data-track="hypernative: Guardian Form Viewed"
   >
-    <span
-      data-track="hypernative: Guardian Form Viewed"
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
+      style="--Paper-shadow: none;"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-1869usn-MuiPaper-root-MuiCard-root"
-        style="--Paper-shadow: none;"
+        class="MuiStack-root bannerStack mui-style-1hyf038-MuiStack-root"
       >
+        <img
+          alt="Guardian badge"
+          class="bannerImage"
+          data-nimg="1"
+          decoding="async"
+          height="32"
+          loading="lazy"
+          src="/images/hypernative/guardian-badge.svg"
+          style="color: transparent;"
+          width="32"
+        />
         <div
-          class="MuiStack-root bannerStack mui-style-1hyf038-MuiStack-root"
+          class="bannerContent MuiBox-root mui-style-0"
         >
-          <img
-            alt="Guardian badge"
-            class="bannerImage"
-            data-nimg="1"
-            decoding="async"
-            height="32"
-            loading="lazy"
-            src="/images/hypernative/guardian-badge.svg"
-            style="color: transparent;"
-            width="32"
-          />
-          <div
-            class="bannerContent MuiBox-root mui-style-0"
+          <p
+            class="MuiTypography-root MuiTypography-body2 bannerTitle mui-style-17vdyq3-MuiTypography-root"
           >
-            <p
-              class="MuiTypography-root MuiTypography-body2 bannerTitle mui-style-17vdyq3-MuiTypography-root"
-            >
-              Enforce enterprise-grade security
-            </p>
-            <span
-              class="MuiTypography-root MuiTypography-caption bannerDescription mui-style-19nflmw-MuiTypography-root"
-            >
-              Learn more
-            </span>
-          </div>
+            Enforce enterprise-grade security
+          </p>
+          <span
+            class="MuiTypography-root MuiTypography-caption bannerDescription mui-style-19nflmw-MuiTypography-root"
+          >
+            Learn more
+          </span>
         </div>
-        <button
-          aria-label="close"
-          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-          tabindex="0"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall closeIcon mui-style-1yr0wav-MuiSvgIcon-root"
-            data-testid="CloseIcon"
-            focusable="false"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-            />
-          </svg>
-        </button>
       </div>
-    </span>
-  </div>
+      <button
+        aria-label="close"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+        tabindex="0"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall closeIcon mui-style-1yr0wav-MuiSvgIcon-root"
+          data-testid="CloseIcon"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </button>
+    </div>
+  </span>
 </div>
 `;
