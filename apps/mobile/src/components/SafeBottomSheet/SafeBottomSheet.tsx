@@ -73,7 +73,7 @@ export function SafeBottomSheet<T>({
         alignItems="center"
         backgroundColor="$backgroundSheet"
       >
-        <H4 fontWeight={700} tabIndex={0}>
+        <H4 fontWeight={600} tabIndex={0}>
           {title}
         </H4>
 
