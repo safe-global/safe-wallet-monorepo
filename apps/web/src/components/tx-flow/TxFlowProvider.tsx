@@ -30,6 +30,7 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -176,7 +177,7 @@ const TxFlowProvider = <T extends unknown>({
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed, deadlock } = useSafeShield()
   const [deadlockResult] = deadlock
-  const isDeadlockBlocked = deadlockResult?.status === 'blocked'
+  const isDeadlockBlocked = deadlockResult?.status === DeadlockStatus.BLOCKED
   const isRiskUnconfirmed = needsRiskConfirmation && !isRiskConfirmed
 
   const isCreation = !txId
