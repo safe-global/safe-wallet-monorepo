@@ -45,6 +45,7 @@ exports[`TxSettingCard should render the default markup 1`] = `
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -108,6 +109,8 @@ exports[`TxSettingCard should render the default markup 1`] = `
               }
             >
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#A1A3A7",

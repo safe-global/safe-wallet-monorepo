@@ -42,6 +42,7 @@ exports[`PositionItem renders correctly 1`] = `
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -192,65 +193,74 @@ exports[`PositionItem renders correctly 1`] = `
           style={
             {
               "alignItems": "flex-end",
+              "flexShrink": 1,
             }
           }
         >
-          <Text
-            style={
-              {
-                "color": "#121312",
-                "fontFamily": "DM Sans",
-                "fontSize": 14,
-              }
-            }
-            suppressHighlighting={true}
-            testID="position-USDC-fiat-balance"
-          >
-            $ 1,500.00
-          </Text>
           <View
             style={
               {
-                "marginTop": 4,
+                "alignItems": "flex-end",
               }
             }
           >
+            <Text
+              style={
+                {
+                  "color": "#121312",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                }
+              }
+              suppressHighlighting={true}
+              testID="position-USDC-fiat-balance"
+            >
+              $ 1,500.00
+            </Text>
             <View
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "marginTop": 4,
+                }
+              }
             >
               <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "flexDirection": "row",
-                    "gap": 4,
-                  }
-                }
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
               >
-                <Text
+                <View
                   style={
                     {
-                      "color": "#00B460",
-                      "fontFamily": "DM Sans",
-                      "fontSize": 13,
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 4,
                     }
                   }
-                  suppressHighlighting={true}
                 >
-                  +
-                  2.50%
-                   (
-                  $ 37.50
-                  )
-                </Text>
+                  <Text
+                    style={
+                      {
+                        "color": "#00B460",
+                        "fontFamily": "DM Sans",
+                        "fontSize": 13,
+                      }
+                    }
+                    suppressHighlighting={true}
+                  >
+                    +
+                    2.50%
+                     (
+                    $ 37.50
+                    )
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
