@@ -71,7 +71,7 @@ export function SafeListItem({
       // If just set pressStyle to undefined, then the onPress doesn't work, that's why we need this hack
       {...(pressStyle ? { pressStyle } : {})}
     >
-      <View flexDirection="row" width="100%" alignItems="center" justifyContent="space-between">
+      <View flexDirection="row" width="100%" alignItems="center" justifyContent="space-between" gap={8}>
         <View flexDirection="row" maxWidth={rightNode ? '55%' : '100%'} alignItems="center" gap={12}>
           {leftNode}
 
@@ -81,7 +81,7 @@ export function SafeListItem({
                 {icon && (
                   <SafeFontIcon testID={`safe-list-${icon}-icon`} name={icon} size={10} color="$colorSecondary" />
                 )}
-                <Text fontSize="$2" lineHeight={20} color="$colorSecondary">
+                <Text fontSize="$2" lineHeight={20} color="$colorSecondary" numberOfLines={1} ellipsizeMode="tail">
                   {type}
                 </Text>
               </View>
@@ -111,9 +111,11 @@ export function SafeListItem({
 
             <SafeFontIcon name="chevron-right" size={16} />
           </View>
-        ) : (
-          rightNode
-        )}
+        ) : rightNode ? (
+          <View flexShrink={1} alignItems="flex-end">
+            {rightNode}
+          </View>
+        ) : null}
       </View>
 
       {bottomContent && (
