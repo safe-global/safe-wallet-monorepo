@@ -215,3 +215,27 @@ export type ThreatAnalysisResults = {
   BALANCE_CHANGE?: BalanceChangeDto[]
   request_id?: string
 }
+
+// Deadlock check types
+
+export type OwnerChange =
+  | { type: 'addOwner'; ownerAddress: string; threshold: number }
+  | { type: 'removeOwner'; ownerAddress: string; threshold: number }
+  | { type: 'swapOwner'; oldOwnerAddress: string; newOwnerAddress: string }
+  | { type: 'changeThreshold'; threshold: number }
+
+export interface SafeOwnerInfo {
+  address: string
+  owners: string[]
+  threshold: number
+  hasNestedSafes: boolean
+  fetchError: boolean
+}
+
+export interface DeadlockCheckResult {
+  status: 'valid' | 'blocked' | 'warning' | 'unknown'
+  reason?: string
+  mutualOwnerAddress?: string
+  hasDeepNesting: boolean
+  fetchFailures: string[]
+}

@@ -417,6 +417,58 @@ describe('getOverallStatus', () => {
     })
   })
 
+  describe('hasDeadlock parameter', () => {
+    it('should return CRITICAL severity when hasDeadlock is true with no analysis results', () => {
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, true)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should prioritize deadlock CRITICAL over WARN results', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.RECIPIENT_ACTIVITY]: [RecipientAnalysisResultBuilder.lowActivity().build()],
+        },
+      }
+
+      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, true)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should not affect results when hasDeadlock is false', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+        },
+      }
+
+      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, false)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.OK)
+      expect(result!.title).toBe('Checks passed')
+    })
+
+    it('should return CRITICAL when both hasDeadlock and threat are CRITICAL', () => {
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
+        },
+      } as unknown as ThreatAnalysisResults
+
+      const result = getOverallStatus(undefined, undefined, threatResults, false, false, true)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+  })
+
   describe('hnLoginRequired parameter', () => {
     it('should return INFO severity with Authentication required title when hnLoginRequired is true', () => {
       const result = getOverallStatus(undefined, undefined, undefined, false, true)

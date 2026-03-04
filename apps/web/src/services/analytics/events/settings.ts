@@ -154,6 +154,24 @@ export const SETTINGS_EVENTS = {
       category: SETTINGS_CATEGORY,
     },
   },
+  DEADLOCK: {
+    CHECK_RUN: {
+      action: 'Deadlock check run',
+      category: SETTINGS_CATEGORY,
+    },
+    BLOCKED: {
+      action: 'Deadlock blocked',
+      category: SETTINGS_CATEGORY,
+    },
+    WARNING_SHOWN: {
+      action: 'Deadlock warning shown',
+      category: SETTINGS_CATEGORY,
+    },
+    WARNING_ACKNOWLEDGED: {
+      action: 'Deadlock warning acknowledged',
+      category: SETTINGS_CATEGORY,
+    },
+  },
 }
 
 export enum SETTINGS_LABELS {

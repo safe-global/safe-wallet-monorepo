@@ -17,6 +17,7 @@ import { isThreatAnalysisResult } from './mapVisibleAnalysisResults'
  * @param threatResults - Optional threat analysis result
  * @param hasSimulationError - Optional boolean indicating if the simulation has failed
  * @param hnLoginRequired - Optional boolean indicating if the Hypernative login is required
+ * @param hasDeadlock - Optional boolean indicating if a signer deadlock was detected
  * @returns An object containing the overall severity level and corresponding title, or undefined
  *          if no analysis results are provided. The severity is determined by the most severe
  *          finding across all analysis types.
@@ -36,8 +37,16 @@ export const getOverallStatus = (
   threatResults?: ThreatAnalysisResults,
   hasSimulationError?: boolean,
   hnLoginRequired?: boolean,
+  hasDeadlock?: boolean,
 ): { severity: Severity; title: string } | undefined => {
-  if (!recipientResults && !contractResults && !threatResults && !hasSimulationError && !hnLoginRequired) {
+  if (
+    !recipientResults &&
+    !contractResults &&
+    !threatResults &&
+    !hasSimulationError &&
+    !hnLoginRequired &&
+    !hasDeadlock
+  ) {
     return undefined
   }
 
@@ -80,6 +89,15 @@ export const getOverallStatus = (
       title: SEVERITY_TO_TITLE[Severity.WARN],
       type: CommonSharedStatus.FAILED,
       description: 'Tenderly simulation failed',
+    })
+  }
+
+  if (hasDeadlock) {
+    allResults.push({
+      severity: Severity.CRITICAL,
+      title: SEVERITY_TO_TITLE[Severity.CRITICAL],
+      type: CommonSharedStatus.FAILED,
+      description: 'A signer deadlock was detected in the projected owner configuration.',
     })
   }
 

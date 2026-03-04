@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useState,
   useEffect,
@@ -8,8 +9,9 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import { useCounterpartyAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
+import { useCounterpartyAnalysis, useDeadlockAnalysis, useRecipientAnalysis, useThreatAnalysis } from './hooks'
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
+import { useEffectDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -18,24 +20,34 @@ import {
   type ThreatAnalysisResults,
   type RecipientAnalysisResults,
   type SafeAnalysisResult,
+  type DeadlockCheckResult,
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
+import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 
-type SafeShieldContextType = {
+type DeadlockCheckParams = {
+  editedSafeAddress: string
+  projectedOwners: string[]
+  projectedThreshold: number
+} | null
+
+export type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
   safeTx?: SafeTransaction
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
+  deadlock: AsyncResult<DeadlockCheckResult>
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
   // Safe-level analysis (untrusted Safe check)
   safeAnalysis: SafeAnalysisResult | null
   addToTrustedList: () => void
+  setDeadlockCheckParams: Dispatch<SetStateAction<DeadlockCheckParams>>
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -58,25 +70,47 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
 
-  const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
+  const [deadlockCheckParams, setDeadlockCheckParams] = useState<DeadlockCheckParams>(null)
+  const deadlock = useDeadlockAnalysis(
+    deadlockCheckParams?.editedSafeAddress,
+    deadlockCheckParams?.projectedOwners,
+    deadlockCheckParams?.projectedThreshold,
+  )
+  const [deadlockResult] = deadlock
+
+  const [isRiskConfirmed, _setIsRiskConfirmed] = useState(false)
+
+  const isDeadlockWarning = deadlockResult?.status === 'warning' || deadlockResult?.status === 'unknown'
+
+  const setIsRiskConfirmed: Dispatch<SetStateAction<boolean>> = useCallback(
+    (value) => {
+      _setIsRiskConfirmed((prev) => {
+        const next = typeof value === 'function' ? value(prev) : value
+        if (next && !prev && isDeadlockWarning) {
+          trackEvent(SETTINGS_EVENTS.DEADLOCK.WARNING_ACKNOWLEDGED)
+        }
+        return next
+      })
+    },
+    [isDeadlockWarning],
+  )
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
     const hasCriticalThreat = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
-    // Include Safe-level analysis in risk confirmation
-    const needsRiskConfirmation = hasCriticalThreat || safeAnalysis?.severity === Severity.CRITICAL
+    const needsRiskConfirmation = hasCriticalThreat || safeAnalysis?.severity === Severity.CRITICAL || isDeadlockWarning
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, safeAnalysis])
+  }, [threatAnalysisResult, safeAnalysis, isDeadlockWarning])
 
   useEffect(() => {
-    setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis])
+    _setIsRiskConfirmed(false)
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResult?.status])
 
   return (
     <SafeShieldContext.Provider
@@ -87,11 +121,13 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         recipient,
         contract,
         threat,
+        deadlock,
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
         safeAnalysis,
         addToTrustedList,
+        setDeadlockCheckParams,
       }}
     >
       {children}
@@ -133,4 +169,24 @@ export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
       setSafeTx(txData)
     }
   }, [txData, setSafeTx])
+}
+
+/**
+ * Hook to register deadlock check params for Safe Shield analysis.
+ * Called from Review components that know the projected owner state.
+ */
+export const useSafeShieldForDeadlockCheck = (
+  editedSafeAddress: string,
+  projectedOwners: string[],
+  projectedThreshold: number,
+) => {
+  const { setDeadlockCheckParams } = useSafeShield()
+
+  useEffectDeepCompare(() => {
+    setDeadlockCheckParams({ editedSafeAddress, projectedOwners, projectedThreshold })
+
+    return () => {
+      setDeadlockCheckParams(null)
+    }
+  }, [editedSafeAddress, projectedOwners, projectedThreshold, setDeadlockCheckParams])
 }

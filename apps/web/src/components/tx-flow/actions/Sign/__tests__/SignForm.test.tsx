@@ -12,6 +12,7 @@ import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
   ThreatAnalysisResults,
+  DeadlockCheckResult,
 } from '@safe-global/utils/features/safe-shield/types'
 
 // We assume that CheckWallet always returns true
@@ -59,6 +60,8 @@ describe('SignForm', () => {
       setIsRiskConfirmed: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      deadlock: [undefined, undefined, false] as AsyncResult<DeadlockCheckResult>,
+      setDeadlockCheckParams: jest.fn(),
     },
     options: [
       { id: 'sign', label: 'Sign' },

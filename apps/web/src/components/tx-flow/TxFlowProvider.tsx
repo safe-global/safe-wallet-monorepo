@@ -174,8 +174,10 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
-  const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
-  const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
+  const { needsRiskConfirmation, isRiskConfirmed, deadlock } = useSafeShield()
+  const [deadlockResult] = deadlock
+  const isDeadlockBlocked = deadlockResult?.status === 'blocked'
+  const isRiskUnconfirmed = needsRiskConfirmation && !isRiskConfirmed
 
   const isCreation = !txId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
@@ -249,7 +251,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isRiskUnconfirmed || isDeadlockBlocked,
     setIsSubmitDisabled,
 
     submitError,

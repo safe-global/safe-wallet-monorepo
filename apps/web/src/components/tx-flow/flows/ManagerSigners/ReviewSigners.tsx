@@ -1,8 +1,9 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeShieldForDeadlockCheck } from '@/features/safe-shield/SafeShieldContext'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { getRecoveryProposalTransactions } from '@/features/recovery/services/transaction'
@@ -19,6 +20,11 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
+
+  const projectedOwners = useMemo(() => (data ? data.owners.map((o) => o.address) : []), [data])
+  const projectedThreshold = data?.threshold ?? safe.threshold
+
+  useSafeShieldForDeadlockCheck(safe.address.value, projectedOwners, projectedThreshold)
 
   useEffect(() => {
     if (!data) {

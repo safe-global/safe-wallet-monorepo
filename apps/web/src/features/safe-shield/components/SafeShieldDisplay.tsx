@@ -10,6 +10,7 @@ import type {
   RecipientAnalysisResults,
   ThreatAnalysisResults,
   SafeAnalysisResult,
+  DeadlockCheckResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
@@ -52,6 +53,8 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  deadlockResult,
+  deadlockLoading,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -62,6 +65,8 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  deadlockResult?: DeadlockCheckResult
+  deadlockLoading?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -74,9 +79,19 @@ export const SafeShieldDisplay = ({
     [hypernativeAuth],
   )
 
+  const hasDeadlock = deadlockResult?.status === 'blocked'
+
   const overallStatus = useMemo(
-    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired),
-    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired],
+    () =>
+      getOverallStatus(
+        recipientResults,
+        contractResults,
+        threatResults,
+        hasSimulationError,
+        hnLoginRequired,
+        hasDeadlock,
+      ),
+    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, hasDeadlock],
   )
 
   return (
@@ -95,6 +110,8 @@ export const SafeShieldDisplay = ({
           showHypernativeActiveStatus={showHypernativeActiveStatus}
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
+          deadlockResult={deadlockResult}
+          deadlockLoading={deadlockLoading}
         />
       </Card>
 

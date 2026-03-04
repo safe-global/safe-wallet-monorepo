@@ -1,7 +1,8 @@
 import { useCurrentChain } from '@/hooks/useChains'
-import { useContext, useEffect, type PropsWithChildren } from 'react'
+import { useContext, useEffect, useMemo, type PropsWithChildren } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeShieldForDeadlockCheck } from '@/features/safe-shield/SafeShieldContext'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createSwapOwnerTx, createAddOwnerTx } from '@/services/tx/tx-sender'
 import { useAppDispatch } from '@/store'
@@ -11,6 +12,8 @@ import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
 import { SettingsChangeContext } from './context'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { computeProjectedState } from '@safe-global/utils/features/safe-shield/utils'
+import type { OwnerChange } from '@safe-global/utils/features/safe-shield/types'
 
 export const ReviewOwner = ({
   params,
@@ -26,6 +29,22 @@ export const ReviewOwner = ({
   const { chainId } = safe
   const chain = useCurrentChain()
   const { newOwner, removedOwner, threshold } = params
+
+  const currentOwners = useMemo(() => safe.owners.map((o) => o.value), [safe.owners])
+
+  const change: OwnerChange = useMemo(() => {
+    if (removedOwner) {
+      return { type: 'swapOwner', oldOwnerAddress: removedOwner.address, newOwnerAddress: newOwner.address }
+    }
+    return { type: 'addOwner', ownerAddress: newOwner.address, threshold }
+  }, [removedOwner, newOwner.address, threshold])
+
+  const projected = useMemo(
+    () => computeProjectedState(currentOwners, safe.threshold, change),
+    [currentOwners, safe.threshold, change],
+  )
+
+  useSafeShieldForDeadlockCheck(safe.address.value, projected.owners, projected.threshold)
 
   useEffect(() => {
     if (!chain) return

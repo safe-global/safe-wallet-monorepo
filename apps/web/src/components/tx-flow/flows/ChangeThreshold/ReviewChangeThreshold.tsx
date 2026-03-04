@@ -1,5 +1,6 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useContext, useEffect, type PropsWithChildren } from 'react'
+import { useSafeShieldForDeadlockCheck } from '@/features/safe-shield/SafeShieldContext'
+import { useContext, useEffect, useMemo, type PropsWithChildren } from 'react'
 
 import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
@@ -8,6 +9,7 @@ import { ChangeThresholdFlowFieldNames } from '@/components/tx-flow/flows/Change
 import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/ChangeThreshold'
 
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { computeProjectedState } from '@safe-global/utils/features/safe-shield/utils'
 
 const ReviewChangeThreshold = ({
   params,
@@ -18,6 +20,15 @@ const ReviewChangeThreshold = ({
   const newThreshold = params[ChangeThresholdFlowFieldNames.threshold]
 
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
+
+  const currentOwners = useMemo(() => safe.owners.map((o) => o.value), [safe.owners])
+
+  const projected = useMemo(
+    () => computeProjectedState(currentOwners, safe.threshold, { type: 'changeThreshold', threshold: newThreshold }),
+    [currentOwners, safe.threshold, newThreshold],
+  )
+
+  useSafeShieldForDeadlockCheck(safe.address.value, projected.owners, projected.threshold)
 
   useEffect(() => {
     createUpdateThresholdTx(newThreshold).then(setSafeTx).catch(setSafeTxError)

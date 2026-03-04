@@ -3,6 +3,7 @@ import SafeShieldWidget from '../index'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   ContractAnalysisResults,
+  DeadlockCheckResult,
   RecipientAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
@@ -51,6 +52,7 @@ const mockUseCheckSimulation = useCheckSimulation as jest.MockedFunction<typeof 
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
 const emptyContract: AsyncResult<ContractAnalysisResults> = [{}, undefined, false]
 const emptyThreat: AsyncResult<ThreatAnalysisResults> = [undefined, undefined, false]
+const emptyDeadlock: AsyncResult<DeadlockCheckResult> = [undefined, undefined, false]
 
 const makeEligibility = (overrides: Partial<HypernativeEligibility> = {}): HypernativeEligibility => ({
   isHypernativeEligible: false,
@@ -74,6 +76,8 @@ describe('SafeShieldWidget', () => {
       setSafeTx: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
+      deadlock: emptyDeadlock,
+      setDeadlockCheckParams: jest.fn(),
     })
     mockUseHypernativeOAuth.mockReturnValue({
       isAuthenticated: false,

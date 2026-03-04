@@ -12,6 +12,7 @@ jest.mock('../hooks', () => ({
     contract: [undefined, undefined, false],
   })),
   useThreatAnalysis: jest.fn(),
+  useDeadlockAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 
 // Mock new dependencies for untrusted Safe check
