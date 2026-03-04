@@ -4,9 +4,11 @@ import { router } from 'expo-router'
 import { useCallback } from 'react'
 import { AssetsHeader } from './AssetsHeader'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasSigner } from '@/src/hooks/useHasSigner'
 
 export const AssetsHeaderContainer = () => {
   const { amount, hasMore, isLoading } = usePendingTxs()
+  const { hasSigner } = useHasSigner()
   const isSendEnabled = useHasFeature(FEATURES.SEND_FLOW) ?? false
 
   const onPendingTransactionsPress = useCallback(() => {
@@ -27,7 +29,7 @@ export const AssetsHeaderContainer = () => {
       hasMore={hasMore}
       amount={amount}
       onPendingTransactionsPress={onPendingTransactionsPress}
-      showSendButton={isSendEnabled}
+      showSendButton={hasSigner && isSendEnabled}
       onSendPress={onSendPress}
       onReceivePress={onReceivePress}
     />
