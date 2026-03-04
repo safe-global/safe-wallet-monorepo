@@ -8,6 +8,7 @@ import {
   type SafeOwnerInfo,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { processInBatches } from '@safe-global/utils/utils/async'
 import useChainId from '@/hooks/useChainId'
 
 type TriggerGetSafe = ReturnType<typeof useLazySafesGetSafeV1Query>[0]
@@ -19,40 +20,38 @@ async function fetchSafeOwnerInfos(
   triggerGetSafe: TriggerGetSafe,
   chainId: string,
 ): Promise<SafeOwnerInfo[]> {
-  const results = await Promise.all(
-    owners.map(async (ownerAddress): Promise<SafeOwnerInfo | null> => {
-      try {
-        const response = await triggerGetSafe({ chainId, safeAddress: ownerAddress }).unwrap()
-        const ownerAddresses = response.owners.map((o) => o.value)
+  const results = await processInBatches(owners, async (ownerAddress): Promise<SafeOwnerInfo | null> => {
+    try {
+      const response = await triggerGetSafe({ chainId, safeAddress: ownerAddress }).unwrap()
+      const ownerAddresses = response.owners.map((o) => o.value)
 
-        return {
-          address: ownerAddress,
-          owners: ownerAddresses,
-          threshold: response.threshold,
-          hasNestedSafes: false,
-          fetchError: false,
-        }
-      } catch (error: unknown) {
-        // 404 means the address is not a Safe (it's an EOA) — expected, skip it
-        const isNotFound =
-          typeof error === 'object' &&
-          error !== null &&
-          'status' in error &&
-          (error as { status: unknown }).status === 404
-        if (isNotFound) {
-          return null
-        }
-        // Any other error (network, server, etc.) is a genuine fetch failure
-        return {
-          address: ownerAddress,
-          owners: [],
-          threshold: 0,
-          hasNestedSafes: false,
-          fetchError: true,
-        }
+      return {
+        address: ownerAddress,
+        owners: ownerAddresses,
+        threshold: response.threshold,
+        hasNestedSafes: false,
+        fetchError: false,
       }
-    }),
-  )
+    } catch (error: unknown) {
+      // 404 means the address is not a Safe (it's an EOA) — expected, skip it
+      const isNotFound =
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        (error as { status: unknown }).status === 404
+      if (isNotFound) {
+        return null
+      }
+      // Any other error (network, server, etc.) is a genuine fetch failure
+      return {
+        address: ownerAddress,
+        owners: [],
+        threshold: 0,
+        hasNestedSafes: false,
+        fetchError: true,
+      }
+    }
+  })
   return results.filter((info): info is SafeOwnerInfo => info !== null)
 }
 
@@ -62,22 +61,27 @@ async function checkNestedSafes(
   triggerGetSafe: TriggerGetSafe,
   chainId: string,
 ): Promise<void> {
-  await Promise.all(
-    safeOwnerInfos
-      .filter((info) => !info.fetchError)
-      .map(async (info) => {
-        const candidates = info.owners.filter((o) => !knownSafeAddresses.has(o.toLowerCase()))
-        const checks = await Promise.all(
-          candidates.map((nestedOwner) =>
-            triggerGetSafe({ chainId, safeAddress: nestedOwner })
-              .unwrap()
-              .then(() => true)
-              .catch(() => false),
-          ),
-        )
-        info.hasNestedSafes = checks.some(Boolean)
-      }),
+  const tasks: Array<{ info: SafeOwnerInfo; candidate: string }> = []
+
+  for (const info of safeOwnerInfos) {
+    if (info.fetchError) continue
+    for (const candidate of info.owners.filter((o) => !knownSafeAddresses.has(o.toLowerCase()))) {
+      tasks.push({ info, candidate })
+    }
+  }
+
+  if (tasks.length === 0) return
+
+  const results = await processInBatches(tasks, (task) =>
+    triggerGetSafe({ chainId, safeAddress: task.candidate })
+      .unwrap()
+      .then(() => true)
+      .catch(() => false),
   )
+
+  results.forEach((isSafe, index) => {
+    if (isSafe) tasks[index].info.hasNestedSafes = true
+  })
 }
 
 export function useDeadlockAnalysis(

@@ -38,9 +38,7 @@ function detectMutualDeadlock(
   projectedOwners: string[],
   projectedThreshold: number,
 ): boolean {
-  const hasMutualOwnership = info.owners.some(
-    (owner) => owner.toLowerCase() === editedSafeAddress.toLowerCase(),
-  )
+  const hasMutualOwnership = info.owners.some((owner) => owner.toLowerCase() === editedSafeAddress.toLowerCase())
   if (!hasMutualOwnership) return false
 
   const nonCircularOwnerCount = projectedOwners.filter(
