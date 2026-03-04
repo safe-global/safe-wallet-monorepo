@@ -72,7 +72,7 @@ export function ScanQrSendContainer() {
     (address: string) => {
       hasScanned.current = true
       setIsCameraActive(false)
-      router.navigate({
+      router.dismissTo({
         pathname: '/(send)/recipient',
         params: { scannedAddress: address },
       })
