@@ -18,7 +18,6 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
-  AppRoutes.welcome.addressBook,
 ]
 
 const guardRules: GuardRule[] = [
