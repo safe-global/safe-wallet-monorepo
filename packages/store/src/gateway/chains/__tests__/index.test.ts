@@ -61,7 +61,9 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.entities).toBeDefined()
@@ -96,7 +98,9 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
 
       expect(result.isSuccess).toBe(true)
       expect(Object.keys(result.data?.entities ?? {}).length).toBe(3)
@@ -176,7 +180,9 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
 
       expect(result.isSuccess).toBe(true)
       expect(attemptCount).toBe(1)
@@ -301,7 +307,9 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
 
       expect(result.isSuccess).toBe(true)
 
@@ -325,7 +333,9 @@ describe('chains retry functionality', () => {
       )
       server.listen()
 
-      const result = await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
+      const result = await store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
 
       expect(result.isSuccess).toBe(true)
       expect(result.data?.ids).toContain('999')

@@ -91,6 +91,9 @@ export const SidebarListItemCounter = ({
     <Box
       component="span"
       sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         color: variant === 'warning' ? 'static.main' : 'text.primary',
         backgroundColor: variant === 'warning' ? 'warning.light' : 'background.main',
         border: variant === 'subtle' ? '1px solid' : undefined,
