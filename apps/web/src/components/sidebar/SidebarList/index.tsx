@@ -6,6 +6,7 @@ import ListItemText, { type ListItemTextProps } from '@mui/material/ListItemText
 import Link from 'next/link'
 import type { LinkProps } from 'next/link'
 import Badge from '@mui/material/Badge'
+import Box from '@mui/material/Box'
 
 import css from './styles.module.css'
 
@@ -87,21 +88,23 @@ export const SidebarListItemCounter = ({
   variant?: 'warning' | 'subtle'
 }): ReactElement | null =>
   count ? (
-    <Badge
+    <Box
+      component="span"
       sx={{
-        '& .MuiBadge-badge': {
-          color: variant === 'warning' ? 'static.main' : 'text.primary',
-          backgroundColor: variant === 'warning' ? 'warning.light' : 'background.main',
-          border: variant === 'subtle' ? '1px solid' : undefined,
-          borderColor: variant === 'subtle' ? 'background.main' : undefined,
-          transform: 'none',
-          fontWeight: 'bold',
-          padding: '0 4px',
-          fontSize: '11px',
-        },
+        color: variant === 'warning' ? 'static.main' : 'text.primary',
+        backgroundColor: variant === 'warning' ? 'warning.light' : 'background.main',
+        border: variant === 'subtle' ? '1px solid' : undefined,
+        borderColor: variant === 'subtle' ? 'background.main' : undefined,
+        fontWeight: 700,
+        fontSize: 11,
+        lineHeight: '20px',
+        minWidth: 20,
+        px: 0.5,
+        borderRadius: '10px',
+        textAlign: 'center',
         ml: 3,
       }}
-      variant="standard"
-      badgeContent={count}
-    />
+    >
+      {count}
+    </Box>
   ) : null
