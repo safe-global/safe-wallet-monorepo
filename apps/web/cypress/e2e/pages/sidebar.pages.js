@@ -122,10 +122,6 @@ export const undeployedSafe = 'Undeployed Sepolia'
 export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
-const signersNotConsistentMsg = 'Signers are not consistent'
-const signersNotConsistentMsg2 = (network) => `Signers are different on these networks of this account:${network}`
-const signersNotConsistentMsg3 =
-  'To manage your account easier and to prevent lose of funds, we recommend keeping the same signers'
 const signersNotConsistentConfirmTxViewMsg = (network) =>
   `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`
 const activateStr = 'You need to activate your Safe first'
@@ -695,12 +691,6 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
       expect(isStringPresent).to.be.true
       return cy.wrap(liElements)
     })
-}
-
-export function checkInconsistentSignersMsgDisplayed(network) {
-  cy.contains(signersNotConsistentMsg).should('exist')
-  cy.contains(signersNotConsistentMsg2(network)).should('exist')
-  cy.contains(signersNotConsistentMsg3).should('exist')
 }
 
 export function checkInconsistentSignersMsgDisplayedConfirmTxView(network) {

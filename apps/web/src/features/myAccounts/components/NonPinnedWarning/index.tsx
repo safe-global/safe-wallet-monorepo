@@ -49,6 +49,7 @@ const NonPinnedWarning = () => {
         }}
         trackingEvent={ATTENTION_PANEL_EVENTS.TRUST_SAFE}
         testId="non-pinned-warning"
+        actionTestId="trust-this-safe-button"
       />
 
       <AddTrustedSafeDialog
