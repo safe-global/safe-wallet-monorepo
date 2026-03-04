@@ -2,18 +2,14 @@
 
 exports[`./DateTime.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
-  <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  <span
+    aria-label="Apr 8, 2024 - 5:05:29 AM"
+    class=""
+    data-mui-internal-clone-element="true"
   >
-    <span
-      aria-label="Apr 8, 2024 - 5:05:29 AM"
-      class=""
-      data-mui-internal-clone-element="true"
-    >
-      5:05 AM
-    </span>
-  </div>
+    5:05 AM
+  </span>
 </div>
 `;
