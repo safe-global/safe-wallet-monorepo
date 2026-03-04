@@ -38,9 +38,6 @@ export function RecipientHeader({
             height={64}
             gap="$2"
           >
-            <Text fontSize="$4" color="$colorSecondary">
-              To:
-            </Text>
             <RecipientDisplay address={recipientAddress} name={recipientName} />
           </View>
         </Pressable>
