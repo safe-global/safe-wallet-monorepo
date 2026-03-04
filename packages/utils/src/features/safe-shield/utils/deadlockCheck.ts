@@ -1,5 +1,5 @@
 import type { OwnerChange, SafeOwnerInfo, DeadlockCheckResult } from '../types'
-import { DeadlockStatus } from '../types'
+import { DeadlockReason, DeadlockStatus } from '../types'
 
 export function computeProjectedState(
   currentOwners: string[],
@@ -32,6 +32,23 @@ export function computeProjectedState(
   }
 }
 
+function detectMutualDeadlock(
+  info: SafeOwnerInfo,
+  editedSafeAddress: string,
+  projectedOwners: string[],
+  projectedThreshold: number,
+): boolean {
+  const hasMutualOwnership = info.owners.some(
+    (owner) => owner.toLowerCase() === editedSafeAddress.toLowerCase(),
+  )
+  if (!hasMutualOwnership) return false
+
+  const nonCircularOwnerCount = projectedOwners.filter(
+    (owner) => owner.toLowerCase() !== info.address.toLowerCase(),
+  ).length
+  return nonCircularOwnerCount < projectedThreshold
+}
+
 export function checkDeadlock(
   editedSafeAddress: string,
   projectedOwners: string[],
@@ -43,7 +60,7 @@ export function checkDeadlock(
   if (fetchFailures.length > 0) {
     return {
       status: DeadlockStatus.UNKNOWN,
-      reason: 'Could not fetch owner data for one or more Safe signers.',
+      reason: DeadlockReason.FETCH_FAILURE,
       hasDeepNesting: false,
       fetchFailures,
     }
@@ -58,33 +75,20 @@ export function checkDeadlock(
     }
   }
 
-  const editedLower = editedSafeAddress.toLowerCase()
   let hasDeepNesting = false
 
   for (const info of safeOwnerInfos) {
-    // Check for deeper nesting
     if (info.hasNestedSafes) {
       hasDeepNesting = true
     }
 
-    // Check for mutual ownership: does this Safe owner list the edited Safe as its owner?
-    const hasMutualOwnership = info.owners.some((owner) => owner.toLowerCase() === editedLower)
-
-    if (hasMutualOwnership) {
-      // Count how many signatures the edited Safe can collect WITHOUT this circular owner
-      const nonCircularOwnerCount = projectedOwners.filter(
-        (owner) => owner.toLowerCase() !== info.address.toLowerCase(),
-      ).length
-
-      if (nonCircularOwnerCount < projectedThreshold) {
-        return {
-          status: DeadlockStatus.BLOCKED,
-          reason:
-            'With this owner and threshold configuration, this Safe cannot collect enough valid signatures to execute transactions.',
-          mutualOwnerAddress: info.address,
-          hasDeepNesting,
-          fetchFailures: [],
-        }
+    if (detectMutualDeadlock(info, editedSafeAddress, projectedOwners, projectedThreshold)) {
+      return {
+        status: DeadlockStatus.BLOCKED,
+        reason: DeadlockReason.MUTUAL_DEADLOCK,
+        mutualOwnerAddress: info.address,
+        hasDeepNesting,
+        fetchFailures: [],
       }
     }
   }
@@ -92,8 +96,7 @@ export function checkDeadlock(
   if (hasDeepNesting) {
     return {
       status: DeadlockStatus.WARNING,
-      reason:
-        'One or more Safe signers have their own Safe signers. Full signer safety could not be verified beyond direct owners.',
+      reason: DeadlockReason.DEEP_NESTING,
       hasDeepNesting: true,
       fetchFailures: [],
     }

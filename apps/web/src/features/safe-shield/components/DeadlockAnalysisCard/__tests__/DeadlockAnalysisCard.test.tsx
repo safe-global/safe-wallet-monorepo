@@ -1,18 +1,18 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
-import { DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
+import { DeadlockReason, DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
 import DeadlockAnalysisCard from '../index'
 
 const blockedResult: DeadlockCheckResult = {
   status: DeadlockStatus.BLOCKED,
-  reason: 'Safe A requires Safe B to sign, and Safe B requires Safe A to sign.',
+  reason: DeadlockReason.MUTUAL_DEADLOCK,
   hasDeepNesting: false,
   fetchFailures: [],
 }
 
 const warningResult: DeadlockCheckResult = {
   status: DeadlockStatus.WARNING,
-  reason: 'This Safe has deeply nested Safe signers.',
+  reason: DeadlockReason.DEEP_NESTING,
   hasDeepNesting: true,
   fetchFailures: [],
 }
@@ -57,7 +57,7 @@ describe('DeadlockAnalysisCard', () => {
       render(<DeadlockAnalysisCard result={blockedResult} />)
 
       expect(screen.getByTestId('deadlock-analysis-card')).toBeInTheDocument()
-      expect(screen.getByText('This setup creates a signing deadlock')).toBeInTheDocument()
+      expect(screen.getByText('Signing deadlock risk detected')).toBeInTheDocument()
     })
 
     it('should not show the reason by default', () => {
@@ -69,7 +69,7 @@ describe('DeadlockAnalysisCard', () => {
     it('should expand and show the reason when clicked', () => {
       render(<DeadlockAnalysisCard result={blockedResult} />)
 
-      fireEvent.click(screen.getByText('This setup creates a signing deadlock'))
+      fireEvent.click(screen.getByText('Signing deadlock risk detected'))
 
       expect(screen.getByText(blockedResult.reason!)).toBeVisible()
     })
@@ -77,7 +77,7 @@ describe('DeadlockAnalysisCard', () => {
     it('should collapse when clicked again', async () => {
       render(<DeadlockAnalysisCard result={blockedResult} />)
 
-      const title = screen.getByText('This setup creates a signing deadlock')
+      const title = screen.getByText('Signing deadlock risk detected')
       fireEvent.click(title)
       fireEvent.click(title)
 
@@ -111,16 +111,12 @@ describe('DeadlockAnalysisCard', () => {
       expect(screen.getByText('Nested signer safety could not be fully verified')).toBeInTheDocument()
     })
 
-    it('should show the hardcoded fetch-failure message when expanded', () => {
+    it('should show the fetch-failure reason when expanded', () => {
       render(<DeadlockAnalysisCard result={unknownResult} />)
 
       fireEvent.click(screen.getByText('Nested signer safety could not be fully verified'))
 
-      expect(
-        screen.getByText(
-          'We could not fetch all nested Safe owners and thresholds. Continuing may create an unexecutable setup.',
-        ),
-      ).toBeVisible()
+      expect(screen.getByText(DeadlockReason.FETCH_FAILURE)).toBeVisible()
     })
   })
 })

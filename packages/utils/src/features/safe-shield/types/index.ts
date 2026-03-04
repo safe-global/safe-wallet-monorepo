@@ -225,6 +225,13 @@ export enum DeadlockStatus {
   UNKNOWN = 'unknown',
 }
 
+export enum DeadlockReason {
+  FETCH_FAILURE = 'Could not fetch owner data for one or more Safe signers.',
+  MUTUAL_DEADLOCK = 'This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward.',
+  DEEP_NESTING = 'One or more Safe signers have their own Safe signers. Full signer safety could not be verified beyond direct owners.',
+  GENERIC = 'A signer deadlock was detected in the projected owner configuration.',
+}
+
 export type OwnerChange =
   | { type: 'addOwner'; ownerAddress: string; threshold: number }
   | { type: 'removeOwner'; ownerAddress: string; threshold: number }

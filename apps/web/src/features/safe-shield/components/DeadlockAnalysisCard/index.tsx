@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react'
 import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import { DeadlockStatus, Severity } from '@safe-global/utils/features/safe-shield/types'
+import { DeadlockReason, DeadlockStatus, Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
@@ -14,7 +14,7 @@ const STATUS_TO_SEVERITY: Record<DeadlockStatus, Severity> = {
 }
 
 const STATUS_TO_TITLE: Partial<Record<DeadlockStatus, string>> = {
-  [DeadlockStatus.BLOCKED]: 'This setup creates a signing deadlock',
+  [DeadlockStatus.BLOCKED]: 'Signing deadlock risk detected',
   [DeadlockStatus.WARNING]: 'Nested signer safety could not be fully verified',
   [DeadlockStatus.UNKNOWN]: 'Nested signer safety could not be fully verified',
 }
@@ -35,10 +35,7 @@ const DeadlockAnalysisCard = ({
   const severity = STATUS_TO_SEVERITY[result.status]
   const title = STATUS_TO_TITLE[result.status]
   const borderColor = SEVERITY_COLORS[severity].main
-  const description =
-    result.status === DeadlockStatus.UNKNOWN
-      ? 'We could not fetch all nested Safe owners and thresholds. Continuing may create an unexecutable setup.'
-      : result.reason || 'Unknown deadlock issue detected'
+  const description = result.reason ?? DeadlockReason.FETCH_FAILURE
 
   return (
     <Box data-testid="deadlock-analysis-card">

@@ -1,5 +1,5 @@
 import { computeProjectedState, checkDeadlock } from '../deadlockCheck'
-import { DeadlockStatus } from '../../types'
+import { DeadlockReason, DeadlockStatus } from '../../types'
 import { SafeOwnerInfo } from '../../types'
 
 describe('computeProjectedState', () => {
@@ -79,7 +79,7 @@ describe('checkDeadlock', () => {
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 2, safeOwnerInfos)
     expect(result.status).toBe(DeadlockStatus.BLOCKED)
     expect(result.mutualOwnerAddress).toBe('0xSafeB')
-    expect(result.reason).toContain('cannot collect enough valid signatures')
+    expect(result.reason).toBe(DeadlockReason.MUTUAL_DEADLOCK)
   })
 
   it('returns valid when Safe can reach threshold without circular owner', () => {
@@ -127,7 +127,7 @@ describe('checkDeadlock', () => {
     const result = checkDeadlock(editedSafe, ['0xEOA1', '0xSafeB'], 1, safeOwnerInfos)
     expect(result.status).toBe(DeadlockStatus.WARNING)
     expect(result.hasDeepNesting).toBe(true)
-    expect(result.reason).toContain('could not be verified beyond direct owners')
+    expect(result.reason).toBe(DeadlockReason.DEEP_NESTING)
   })
 
   it('returns valid when no mutual ownership and no deep nesting', () => {
