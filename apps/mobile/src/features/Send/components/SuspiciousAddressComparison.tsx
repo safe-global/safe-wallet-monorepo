@@ -68,9 +68,6 @@ function AddressCard({
           minHeight={64}
           backgroundColor="transparent"
         >
-          <Text fontSize="$4" color="$colorSecondary">
-            To:
-          </Text>
           <View flex={1}>
             <HighlightedAddress address={address} />
           </View>

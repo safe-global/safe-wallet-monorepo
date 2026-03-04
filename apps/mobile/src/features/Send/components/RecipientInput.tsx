@@ -116,10 +116,7 @@ function AddressInputField({
 }) {
   return (
     <>
-      <View flex={1} flexDirection="row" alignItems="center" gap="$2">
-        <Text fontSize="$4" color="$colorSecondary">
-          To:
-        </Text>
+      <View flex={1} flexDirection="row" alignItems="center">
         {hasAddress ? (
           <Text fontSize="$4" color="$color" flex={1}>
             {value}
