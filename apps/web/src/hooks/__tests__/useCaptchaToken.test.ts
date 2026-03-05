@@ -159,6 +159,18 @@ describe('useCaptchaToken', () => {
       expect(mockTurnstile.reset).toHaveBeenCalledWith('widget-id-1')
       expect(result.current.isLoading).toBe(true)
     })
+
+    it('clears error so modal shows instructions instead of verification failed', async () => {
+      const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
+      mountContainer(result)
+      await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalled())
+
+      act(() => getCallbacks()['error-callback']?.('300010'))
+      expect(result.current.error?.message).toBe('300010')
+
+      act(() => result.current.refreshToken())
+      expect(result.current.error).toBeNull()
+    })
   })
 
   describe('cleanup', () => {

@@ -59,6 +59,7 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   const refreshToken = useCallback(() => {
     if (!widgetIdRef.current) return
     window.turnstile?.reset(widgetIdRef.current)
+    setError(null)
     setIsLoading(true)
   }, [])
 
