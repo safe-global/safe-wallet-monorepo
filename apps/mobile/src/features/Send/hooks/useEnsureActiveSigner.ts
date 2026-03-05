@@ -6,6 +6,17 @@ import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectSigners, Signer } from '@/src/store/signersSlice'
 import { RootState } from '@/src/store'
 
+function isSignerStale(current: Signer | undefined, available: Signer[]): boolean {
+  return current !== undefined && available.length > 0 && !available.some((s) => s.value === current.value)
+}
+
+function resolveActiveSigner(current: Signer | undefined, available: Signer[]): Signer | undefined {
+  if (available.length === 0 || current === undefined) {
+    return undefined
+  }
+  return available.find((s) => s.value === current.value)
+}
+
 export function useEnsureActiveSigner() {
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
@@ -22,12 +33,8 @@ export function useEnsureActiveSigner() {
       .filter((signer): signer is Signer => signer !== undefined)
   }, [owners, signers])
 
-  const isSignerStale =
-    currentActiveSigner !== undefined &&
-    availableSigners.length > 0 &&
-    !availableSigners.some((s) => s.value === currentActiveSigner.value)
-
-  const needsSignerUpdate = availableSigners.length > 0 && (!currentActiveSigner || isSignerStale)
+  const stale = isSignerStale(currentActiveSigner, availableSigners)
+  const needsSignerUpdate = availableSigners.length > 0 && (!currentActiveSigner || stale)
 
   useEffect(() => {
     if (needsSignerUpdate) {
@@ -40,7 +47,7 @@ export function useEnsureActiveSigner() {
     }
   }, [needsSignerUpdate, availableSigners, dispatch, activeSafe.address])
 
-  const activeSigner = isSignerStale || availableSigners.length === 0 ? undefined : currentActiveSigner
+  const activeSigner = resolveActiveSigner(currentActiveSigner, availableSigners)
 
   return { activeSigner, availableSigners }
 }

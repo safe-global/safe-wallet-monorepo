@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useRef } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
 import { Text, View } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -8,7 +8,6 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
 import { RecipientHeader } from './components/RecipientHeader'
@@ -19,6 +18,7 @@ import { ProposerBottomSheet } from './components/ProposerBottomSheet'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
 import { useKeyboardVisible } from './hooks/useKeyboardVisible'
+import { useMaxAmount } from './hooks/useMaxAmount'
 import { useNonceSelection } from './hooks/useNonceSelection'
 import { useTokenBalance } from './hooks/useTokenBalance'
 import { useSendTransaction } from './hooks/useSendTransaction'
@@ -26,27 +26,9 @@ import { useEnsureActiveSigner } from './hooks/useEnsureActiveSigner'
 import { useProposerSheet } from './hooks/useProposerSheet'
 import { Address } from '@/src/types/address'
 
-const FIAT_DECIMALS = 2
 const isIos = Platform.OS === 'ios'
 const keyboardBehavior = isIos ? 'padding' : undefined
 const keyboardOffset = isIos ? 100 : 0
-
-/** Compute the fiat-denominated max when in fiat mode. */
-function computeFiatMax(formatted: string, fiatRate: string | undefined): string | undefined {
-  const rate = parseFloat(fiatRate ?? '0')
-  if (rate <= 0) {
-    return undefined
-  }
-  return (parseFloat(formatted) * rate).toFixed(FIAT_DECIMALS)
-}
-
-/** Build the decimal-error message, if any. */
-function getDecimalError(exceedsDecimals: boolean, decimals: number): string | undefined {
-  if (!exceedsDecimals) {
-    return undefined
-  }
-  return `Should have 1 to ${decimals} decimals`
-}
 
 function FiatToggleButton({ onToggle }: { onToggle: () => void }) {
   return (
@@ -81,7 +63,7 @@ export function EnterAmountContainer() {
   const currency = useAppSelector(selectCurrency)
   const keyboardVisible = useKeyboardVisible()
 
-  const { token, decimals, maxBalance, hasFiatPrice, formattedBalance, isTokenDataReady } = useTokenBalance({
+  const { token, decimals, maxBalance, formattedBalance, isTokenDataReady } = useTokenBalance({
     tokenAddress,
   })
 
@@ -102,17 +84,21 @@ export function EnterAmountContainer() {
     decimals,
   })
 
-  const inputMaxDecimals = fiatConversion.isFiatMode && hasFiatPrice ? FIAT_DECIMALS : decimals
-
-  const handleInputChange = useCallback(
-    (value: string) => setRawInput(value, inputMaxDecimals),
-    [setRawInput, inputMaxDecimals],
-  )
-
   const { exceedsBalance, exceedsDecimals, isValid } = useTokenAmountValidation({
     tokenAmount: fiatConversion.tokenAmount,
     decimals,
     maxBalance,
+  })
+
+  const { handleMax, handleInputChange, inlineError } = useMaxAmount({
+    maxBalance,
+    decimals,
+    isFiatMode: fiatConversion.isFiatMode,
+    hasFiatPrice: fiatConversion.hasFiatPrice,
+    fiatRate: token?.fiatConversion,
+    setRawInput,
+    setMax,
+    exceedsDecimals,
   })
 
   const { activeSigner, availableSigners } = useEnsureActiveSigner()
@@ -126,23 +112,6 @@ export function EnterAmountContainer() {
     selectedNonce: nonce.selectedNonce ?? nonce.recommendedNonce,
     sender: activeSigner?.value,
   })
-
-  const handleMax = useCallback(() => {
-    const formatted = safeFormatUnits(maxBalance, decimals)
-    if (!formatted) {
-      return
-    }
-
-    if (fiatConversion.isFiatMode && fiatConversion.hasFiatPrice) {
-      const fiatMax = computeFiatMax(formatted, token?.fiatConversion)
-      setMax(fiatMax ?? formatted)
-      return
-    }
-
-    setMax(formatted)
-  }, [maxBalance, decimals, fiatConversion.isFiatMode, fiatConversion.hasFiatPrice, token?.fiatConversion, setMax])
-
-  const inlineError = getDecimalError(exceedsDecimals, decimals)
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardBehavior} keyboardVerticalOffset={keyboardOffset}>
