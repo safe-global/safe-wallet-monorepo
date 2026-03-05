@@ -11,8 +11,12 @@ describe('captchaHeadersInit', () => {
     jest.doMock('@safe-global/store/gateway/cgwClient', () => ({
       setPrepareHeadersHook: jest.fn(),
     }))
-    ;({ resolveCaptchaReady, resetCaptchaPromise, initializeCaptchaHeaders, sharedTokenRef } =
-      require('@/hooks/captchaHeadersInit'))
+    ;({
+      resolveCaptchaReady,
+      resetCaptchaPromise,
+      initializeCaptchaHeaders,
+      sharedTokenRef,
+    } = require('@/hooks/captchaHeadersInit'))
     ;({ setPrepareHeadersHook: mockSetPrepareHeadersHook } = require('@safe-global/store/gateway/cgwClient'))
   })
 
