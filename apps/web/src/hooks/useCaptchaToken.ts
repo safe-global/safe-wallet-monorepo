@@ -25,57 +25,9 @@ declare global {
   }
 }
 
-/**
- * Waits for window.turnstile to be available after script load.
- * Polls every 100ms for up to 5 seconds.
- */
-function waitForTurnstile(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (window.turnstile) {
-      resolve()
-      return
-    }
-
-    let attempts = 0
-    const checkInterval = setInterval(() => {
-      attempts++
-      if (window.turnstile) {
-        clearInterval(checkInterval)
-        resolve()
-      } else if (attempts >= 50) {
-        clearInterval(checkInterval)
-        reject(new Error('Turnstile failed to initialize'))
-      }
-    }, 100)
-  })
-}
-
-/**
- * Loads the Turnstile script if not already present.
- */
-function loadTurnstileScript(): Promise<void> {
-  if (window.turnstile) {
-    return Promise.resolve()
-  }
-
-  const existingScript = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')
-  if (existingScript) {
-    return waitForTurnstile()
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-    script.async = true
-    script.defer = true
-    script.onload = () => waitForTurnstile().then(resolve).catch(reject)
-    script.onerror = () => reject(new Error('Failed to load Turnstile script'))
-    ;(document.head || document.body).appendChild(script)
-  })
-}
-
 interface UseCaptchaTokenOptions {
   theme?: 'light' | 'dark' | 'auto'
+  isScriptReady: boolean
 }
 
 interface UseCaptchaTokenReturn {
@@ -87,13 +39,11 @@ interface UseCaptchaTokenReturn {
   refreshToken: () => void
 }
 
-export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptchaTokenReturn {
-  const { theme = 'auto' } = options
+export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTokenOptions): UseCaptchaTokenReturn {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isScriptReady, setIsScriptReady] = useState(false)
 
   const widgetContainerRef = useRef<HTMLDivElement | null>(null)
   const widgetIdRef = useRef<string | null>(null)
@@ -181,27 +131,12 @@ export function useCaptchaToken(options: UseCaptchaTokenOptions = {}): UseCaptch
     [isScriptReady, renderWidget],
   )
 
-  // Load script
+  // Handle captcha disabled (no site key) - resolve immediately so requests can proceed
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY) {
-      // Captcha disabled - resolve immediately so requests can proceed
       resolveCaptchaReady()
       setIsLoading(false)
-      return
     }
-
-    const loadScript = async () => {
-      try {
-        await loadTurnstileScript()
-        setIsScriptReady(true)
-      } catch (err) {
-        resolveCaptchaReady()
-        setError(err instanceof Error ? err : new Error('Failed to load Turnstile'))
-        setIsLoading(false)
-      }
-    }
-
-    loadScript()
   }, [])
 
   // Render widget when script becomes ready (if container already mounted)

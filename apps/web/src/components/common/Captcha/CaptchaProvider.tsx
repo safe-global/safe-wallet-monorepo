@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
+import Script from 'next/script'
 import { useCaptchaToken } from '@/hooks/useCaptchaToken'
-import { initializeCaptchaHeaders } from '@/hooks/captchaHeadersInit'
+import { initializeCaptchaHeaders, resolveCaptchaReady } from '@/hooks/captchaHeadersInit'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 import CaptchaModal from './CaptchaModal'
@@ -9,6 +10,8 @@ import CaptchaModal from './CaptchaModal'
 // Register the CGW header interceptor once at module load time,
 // before any requests can be made.
 initializeCaptchaHeaders()
+
+const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
 
 interface CaptchaContextType {
   token: string | null
@@ -22,7 +25,9 @@ const CaptchaContext = createContext<CaptchaContextType | undefined>(undefined)
 
 export function CaptchaProvider({ children }: { children: ReactNode }) {
   const isDarkMode = useDarkMode()
-  const captcha = useCaptchaToken({ theme: isDarkMode ? 'dark' : 'light' })
+  const [isScriptReady, setIsScriptReady] = useState(false)
+
+  const captcha = useCaptchaToken({ theme: isDarkMode ? 'dark' : 'light', isScriptReady })
 
   const contextValue = useMemo(
     () => ({
@@ -38,6 +43,14 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
   return (
     <CaptchaContext.Provider value={contextValue}>
       {children}
+      {TURNSTILE_SITE_KEY && (
+        <Script
+          src={TURNSTILE_SCRIPT_URL}
+          strategy="afterInteractive"
+          onReady={() => setIsScriptReady(true)}
+          onError={() => resolveCaptchaReady()}
+        />
+      )}
       <CaptchaModal open={captcha.isModalOpen} onWidgetContainerReady={captcha.onWidgetContainerReady} />
     </CaptchaContext.Provider>
   )
