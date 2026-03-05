@@ -25,10 +25,10 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
         {
           "alignItems": "flex-start",
           "backgroundColor": "#FFFFFF",
-          "borderBottomLeftRadius": 7,
-          "borderBottomRightRadius": 7,
-          "borderTopLeftRadius": 7,
-          "borderTopRightRadius": 7,
+          "borderBottomLeftRadius": 6,
+          "borderBottomRightRadius": 6,
+          "borderTopLeftRadius": 6,
+          "borderTopRightRadius": 6,
           "flexDirection": "column",
           "flexWrap": "wrap",
           "gap": 12,
@@ -45,6 +45,7 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
           {
             "alignItems": "center",
             "flexDirection": "row",
+            "gap": 8,
             "justifyContent": "space-between",
             "width": "100%",
           }
@@ -159,6 +160,8 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
                 
               </Text>
               <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
                 style={
                   {
                     "color": "#A1A3A7",
@@ -190,19 +193,28 @@ exports[`StakingTxDepositCard renders correctly 1`] = `
             </Text>
           </View>
         </View>
-        <Text
+        <View
           style={
             {
-              "color": "#121312",
-              "fontFamily": "DMSans-Bold",
+              "alignItems": "flex-end",
+              "flexShrink": 1,
             }
           }
-          suppressHighlighting={true}
         >
-          1
-           
-          ETH
-        </Text>
+          <Text
+            style={
+              {
+                "color": "#121312",
+                "fontFamily": "DMSans-Bold",
+              }
+            }
+            suppressHighlighting={true}
+          >
+            1
+             
+            ETH
+          </Text>
+        </View>
       </View>
     </View>
   </View>

@@ -33,6 +33,8 @@ export interface ActionCardProps {
   learnMore?: LearnMoreLink
   trackingEvent?: AnalyticsEvent
   testId?: string
+  /** Optional data-testid for the action button/link for Cypress and testing */
+  actionTestId?: string
 }
 
 const ACTION_BUTTON_SX = {
@@ -78,21 +80,28 @@ const DEFAULT_LEARN_MORE_EVENT: AnalyticsEvent = {
 const ActionButton = ({
   action,
   trackingEvent,
+  testId = 'action-card-button',
 }: {
   action: ActionCardButton
   trackingEvent?: AnalyticsEvent
+  testId?: string
 }): ReactElement => {
+  const buttonProps = {
+    variant: 'text' as const,
+    size: 'small' as const,
+    endIcon: <KeyboardArrowRightRoundedIcon />,
+    sx: ACTION_BUTTON_SX,
+    'data-testid': testId,
+  }
+
   if (action.href) {
     return (
       <Button
-        variant="text"
-        size="small"
+        {...buttonProps}
         component="a"
         href={action.href}
         target={action.target}
         rel={action.rel}
-        endIcon={<KeyboardArrowRightRoundedIcon />}
-        sx={ACTION_BUTTON_SX}
         onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
       >
         {action.label}
@@ -102,10 +111,7 @@ const ActionButton = ({
 
   return (
     <Button
-      variant="text"
-      size="small"
-      endIcon={<KeyboardArrowRightRoundedIcon />}
-      sx={ACTION_BUTTON_SX}
+      {...buttonProps}
       onClick={() => {
         if (trackingEvent) {
           trackEvent(trackingEvent)
@@ -126,6 +132,7 @@ export const ActionCard = ({
   learnMore,
   trackingEvent,
   testId = 'action-card',
+  actionTestId,
 }: ActionCardProps): ReactElement => {
   const config = severityConfig[severity]
 
@@ -181,7 +188,7 @@ export const ActionCard = ({
       {/* Action */}
       {action && (
         <Box sx={{ paddingLeft: 'calc(20px + 0.85 * 8px)' }}>
-          <ActionButton action={action} trackingEvent={trackingEvent} />
+          <ActionButton action={action} trackingEvent={trackingEvent} testId={actionTestId} />
         </Box>
       )}
     </Paper>

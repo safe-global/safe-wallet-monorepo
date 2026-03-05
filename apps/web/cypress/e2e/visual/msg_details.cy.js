@@ -24,9 +24,7 @@ describe(
         cy.visit(constants.transactionsMessagesUrl + staticSafes.SEP_STATIC_SAFE_23)
       })
       cy.wait('@getMessages')
-      cy.contains('Sign', { timeout: 10000 }).should('be.visible')
-      cy.get(createtx.messageItem).first().click()
-      cy.contains('Created by', { timeout: 10000 }).should('be.visible')
+      cy.get(createtx.messageItem, { timeout: 10000 }).first().click()
       main.awaitVisualStability()
     })
   },

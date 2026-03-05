@@ -26,6 +26,7 @@ export function TokenItem({ item, currency }: TokenItemProps) {
       name={tokenInfo.name}
       logoUri={tokenInfo.logoUri}
       description={formattedAmount}
+      transparent={false}
       rightNode={
         <View alignItems="flex-end">
           <Text fontSize="$4" fontWeight={600} color="$color" testID={`token-${tokenInfo.symbol}-fiat-balance`}>

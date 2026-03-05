@@ -81,7 +81,9 @@ All visual tests call `mockVisualTestApis()` in `beforeEach()` to intercept CGW 
 
 ALL selectors in `e2e/pages/*.pages.js`. Never use raw selectors in `.cy.js` files.
 
-Preference: `data-testid` > semantic HTML/ARIA > `cy.contains()` > never class names.
+Preference: `data-testid` > semantic HTML/ARIA > `cy.contains()` > never class names. Reuse existing test IDs; add new ones only when the element has none.
+
+For links and external CTAs: use `data-testid` (or `actionTestId` on ActionCard) in the component and select by that in the page object. Do **not** use `cy.contains('a', ...)`, `.should('have.attr', 'href', ...)`, or `.and('have.attr', 'target', '_blank')`; add a testid only if missing, then assert visibility or behavior.
 
 ## Data setup
 

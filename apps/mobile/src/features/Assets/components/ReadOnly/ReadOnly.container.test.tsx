@@ -55,7 +55,7 @@ describe('ReadOnlyContainer', () => {
     )
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('Read-only mode')).toBeTruthy()
+    expect(screen.getByText('You are in read-only mode')).toBeTruthy()
   })
 
   it("should render read-only message when signers don't match owners", () => {
@@ -65,14 +65,14 @@ describe('ReadOnlyContainer', () => {
     })
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.getByText('Read-only mode')).toBeTruthy()
+    expect(screen.getByText('You are in read-only mode')).toBeTruthy()
   })
 
   it('should not render read-only message when there are signers', () => {
     const initialState = createInitialState(mockSigners, mockSafeInfo)
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.queryByText('Read-only mode')).toBeNull()
+    expect(screen.queryByText('You are in read-only mode')).toBeNull()
   })
 
   it('should not render read-only message when warning is dismissed', () => {
@@ -85,6 +85,6 @@ describe('ReadOnlyContainer', () => {
     )
     render(<ReadOnlyContainer />, { initialStore: initialState })
 
-    expect(screen.queryByText('Read-only mode')).toBeNull()
+    expect(screen.queryByText('You are in read-only mode')).toBeNull()
   })
 })

@@ -26,7 +26,10 @@ const getChainsConfigs = async (
   api: BaseQueryApi,
   url: '/v1/chains' | '/v2/chains',
   serviceKey: string | undefined,
-  args: string | FetchArgs = { url, params: { ...(serviceKey ? { serviceKey: serviceKey } : {}), cursor: 'limit=50&offset=0' } },
+  args: string | FetchArgs = {
+    url,
+    params: { ...(serviceKey ? { serviceKey: serviceKey } : {}), cursor: 'limit=50&offset=0' },
+  },
   results: ChainInfo[] = [],
 ): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
   const response = await retryingBaseQuery(args, api, {})
@@ -38,7 +41,9 @@ const getChainsConfigs = async (
   const data = response.data as { results?: ChainInfo[]; next?: string }
 
   if (!Array.isArray(data?.results)) {
-    return { error: { status: 'CUSTOM_ERROR', error: 'Invalid response: missing results array' } as FetchBaseQueryError }
+    return {
+      error: { status: 'CUSTOM_ERROR', error: 'Invalid response: missing results array' } as FetchBaseQueryError,
+    }
   }
 
   const nextResults = [...results, ...data.results]
