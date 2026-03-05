@@ -1,9 +1,13 @@
 import type { DataDecoded, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { formatUnits } from 'ethers'
+import { formatUnits, id } from 'ethers'
 import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
+import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
+import { LIMIT_ORDER_TITLE, SWAP_ORDER_TITLE, TWAP_ORDER_TITLE } from '../constants'
+import type { SwapState } from '../store/swapParamsSlice'
 
 type Quantity = {
   amount: string | number | bigint
@@ -219,4 +223,29 @@ export const isSettingTwapFallbackHandler = (decodedData: DataDecoded) => {
         ),
     ) || false
   )
+}
+
+// Signature hashes for getSwapTitle
+const PRE_SIGN_SIGHASH = id('setPreSignature(bytes,bool)').slice(0, 10)
+const WRAP_SIGHASH = id('deposit()').slice(0, 10)
+const UNWRAP_SIGHASH = id('withdraw(uint256)').slice(0, 10)
+const CREATE_WITH_CONTEXT_SIGHASH = id('createWithContext((address,bytes32,bytes),address,bytes,bool)').slice(0, 10)
+const CANCEL_ORDER_SIGHASH = id('invalidateOrder(bytes)').slice(0, 10)
+
+export const getSwapTitle = (tradeType: SwapState['tradeType'], txs: BaseTransaction[] | undefined) => {
+  const hashToLabel: Record<string, string> = {
+    [PRE_SIGN_SIGHASH]: tradeType === 'limit' ? LIMIT_ORDER_TITLE : SWAP_ORDER_TITLE,
+    [APPROVAL_SIGNATURE_HASH]: 'Approve',
+    [WRAP_SIGHASH]: 'Wrap',
+    [UNWRAP_SIGHASH]: 'Unwrap',
+    [CREATE_WITH_CONTEXT_SIGHASH]: TWAP_ORDER_TITLE,
+    [CANCEL_ORDER_SIGHASH]: 'Cancel Order',
+  }
+
+  const swapTitle = txs
+    ?.map((tx) => hashToLabel[tx.data.slice(0, 10)])
+    .filter(Boolean)
+    .join(' and ')
+
+  return swapTitle
 }

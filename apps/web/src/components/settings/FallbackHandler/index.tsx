@@ -13,7 +13,7 @@ import { useCompatibilityFallbackHandlerDeployments } from '@/hooks/useCompatibi
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { useIsTWAPFallbackHandler } from '@/features/swap'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 

@@ -1,3 +1,5 @@
+export const SWAP_WIDGET_URL = 'https://iframe.jumper.exchange/swap'
+
 export const SWAP_TITLE = 'Safe Swap'
 export const SWAP_ORDER_TITLE = 'Swap order'
 export const LIMIT_ORDER_TITLE = 'Limit order'

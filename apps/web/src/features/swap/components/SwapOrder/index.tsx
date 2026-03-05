@@ -6,9 +6,9 @@ import type {
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { TwapOrderTransactionInfo as SwapTwapOrder } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Fragment } from 'react'
-import OrderId from '@/features/swap/components/OrderId'
-import StatusLabel from '@/features/swap/components/StatusLabel'
-import SwapProgress from '@/features/swap/components/SwapProgress'
+import OrderId from '../OrderId'
+import StatusLabel from '../StatusLabel'
+import SwapProgress from '../SwapProgress'
 import { capitalize } from '@/hooks/useMnemonicName'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import Stack from '@mui/material/Stack'
@@ -26,16 +26,16 @@ import {
   getPartiallyFilledSurplus,
   getSurplusPrice,
   isOrderPartiallyFilled,
-} from '@/features/swap/helpers/utils'
+} from '../../helpers/utils'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/utils/transaction-guards'
 import { EmptyRow } from '@/components/common/Table/EmptyRow'
-import { PartDuration } from '@/features/swap/components/SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '@/features/swap/components/SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '@/features/swap/components/SwapOrder/rows/PartBuyAmount'
-import { SurplusFee } from '@/features/swap/components/SwapOrder/rows/SurplusFee'
+import { PartDuration } from './rows/PartDuration'
+import { PartSellAmount } from './rows/PartSellAmount'
+import { PartBuyAmount } from './rows/PartBuyAmount'
+import { SurplusFee } from './rows/SurplusFee'
 
 type SwapOrderProps = {
   txData?: TransactionData | null

@@ -1,15 +1,20 @@
 import { renderHook } from '@/tests/test-utils'
 import { useHasUntrustedFallbackHandler } from '../useHasUntrustedFallbackHandler'
-import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { useTWAPFallbackHandlerAddress } from '@/features/swap'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 import { faker } from '@faker-js/faker'
 import { getCompatibilityFallbackHandlerDeployment } from '@safe-global/safe-deployments'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 
+// TWAP_FALLBACK_HANDLER constant - imported directly from helpers to avoid circular deps in tests
+const TWAP_FALLBACK_HANDLER = '0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4'
+
 jest.mock('@/hooks/useCompatibilityFallbackHandlerDeployments')
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/features/swap/hooks/useIsTWAPFallbackHandler')
+jest.mock('@/features/swap', () => ({
+  useTWAPFallbackHandlerAddress: jest.fn(),
+  TWAP_FALLBACK_HANDLER: '0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4',
+}))
 
 const fallbackHandlerAddress = getCompatibilityFallbackHandlerDeployment({
   network: '1',
