@@ -13356,28 +13356,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^5.1.1":
-  version: 5.2.22
-  resolution: "@safe-global/protocol-kit@npm:5.2.22"
-  dependencies:
-    "@noble/curves": "npm:^1.6.0"
-    "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.49"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.21"
-    "@safe-global/types-kit": "npm:^1.0.5"
-    abitype: "npm:^1.0.2"
-    semver: "npm:^7.6.3"
-    viem: "npm:^2.21.8"
-  dependenciesMeta:
-    "@noble/curves":
-      optional: true
-    "@peculiar/asn1-schema":
-      optional: true
-  checksum: 10/0d90d30d80bf19107ab8b24e9d278e6b6c72d073b9fb0d3723626a0764464bc96b73805fbbc7a93c0c94112bfcd57f5f78de2d702e9146d16ec316935ca66385
-  languageName: node
-  linkType: hard
-
-"@safe-global/protocol-kit@npm:^5.2.25":
+"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.25":
   version: 5.2.25
   resolution: "@safe-global/protocol-kit@npm:5.2.25"
   dependencies:
@@ -13429,25 +13408,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.49":
-  version: 1.37.49
-  resolution: "@safe-global/safe-deployments@npm:1.37.49"
-  dependencies:
-    semver: "npm:^7.6.2"
-  checksum: 10/0291dd527cf38d0026bb3edbb44da658c2edd4e695290c47de7fc70ad5538c3c6d7a78783d802ffc79cee0e6d15285b671f44dea168bcefa53475f6c5eeb8fab
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-deployments@npm:^1.37.51":
-  version: 1.37.51
-  resolution: "@safe-global/safe-deployments@npm:1.37.51"
-  dependencies:
-    semver: "npm:^7.6.2"
-  checksum: 10/25f2ae53812bcf282de9468bc0a3cc60464db1ade1910d8af839ac84ec38a80a5e4bd1a28aefc311f7eb1bbe8c3b1794ddc909da407b856c7b98c5c8dcb5d625
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-deployments@npm:^1.37.52":
+"@safe-global/safe-deployments@npm:^1.37.51, @safe-global/safe-deployments@npm:^1.37.52":
   version: 1.37.52
   resolution: "@safe-global/safe-deployments@npm:1.37.52"
   dependencies:
@@ -13470,21 +13431,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.21":
-  version: 2.2.21
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.21"
-  checksum: 10/ede226e1fff06befa6adb267a2bec007caaaf6d44008585304a178c9bfb5d486079c2fd19e4277e6b0bc36d13d887b2e99940ca2546eaf62f9da77da6a406cf0
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-modules-deployments@npm:^2.2.23":
-  version: 2.2.23
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.23"
-  checksum: 10/8be53678686565b57108dbb3c099f5cbce9c42651daa46a1c18f8994504246b4e7aa423e0ff8ef39ea2ec6328551fd8a3cd6aa0f9334b09fd4842af965b27cbb
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-modules-deployments@npm:^2.2.24":
+"@safe-global/safe-modules-deployments@npm:^2.2.23, @safe-global/safe-modules-deployments@npm:^2.2.24":
   version: 2.2.24
   resolution: "@safe-global/safe-modules-deployments@npm:2.2.24"
   checksum: 10/d10a39dc939f6f5522a98367eb42948befffd310d063757325a77e0e6ec60d7df6b4c63ca3a0e84bfb75b6624373a867e08372f84c2a64319f35cbce1375fffd
