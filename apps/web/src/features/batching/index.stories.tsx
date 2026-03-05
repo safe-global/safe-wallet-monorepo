@@ -10,7 +10,7 @@ import LayersIcon from '@mui/icons-material/Layers'
  * Note: Actual BatchIndicator and BatchSidebar require Redux store context.
  */
 const meta: Meta = {
-  title: 'Components/Batch',
+  title: 'Features/Batching',
   parameters: {
     layout: 'centered',
   },

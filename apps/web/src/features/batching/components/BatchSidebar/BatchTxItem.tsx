@@ -3,7 +3,7 @@ import { type SyntheticEvent, useMemo, useCallback } from 'react'
 import { ButtonBase, ListItem, Skeleton, SvgIcon } from '@mui/material'
 import css from './styles.module.css'
 
-import { type DraftBatchItem } from '@/store/batchSlice'
+import { type DraftBatchItem } from '../../store/batchSlice'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'

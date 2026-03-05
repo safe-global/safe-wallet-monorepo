@@ -52,6 +52,7 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 - Common pitfalls and debugging tips
 
 ## Active Technologies
+
 - JavaScript (Cypress E2E) + TypeScript React app under tes + Cypress, existing page objects in `apps/web/cypress/e2e/pages`, Safe dashboard components (`ActionRequiredPanel`, `NonPinnedWarning`) (002-cypress-banner-actioncard-migration)
 - Browser localStorage test seeding via existing helpers (`addToLocalStorage`, `addToAppLocalStorage`) (002-cypress-banner-actioncard-migration)
 
