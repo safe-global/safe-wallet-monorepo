@@ -57,14 +57,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   themeRef.current = theme
 
   const refreshToken = useCallback(() => {
-    if (!TURNSTILE_SITE_KEY || !window.turnstile || !widgetIdRef.current) return
-
-    try {
-      window.turnstile.reset(widgetIdRef.current)
-      setIsLoading(true)
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to reset Turnstile'))
-    }
+    if (!widgetIdRef.current) return
+    window.turnstile?.reset(widgetIdRef.current)
+    setIsLoading(true)
   }, [])
 
   // Render widget when script is ready and container is available
@@ -108,9 +103,6 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
         'before-interactive-callback': () => {
           setIsModalOpen(true)
         },
-        'after-interactive-callback': () => {
-          // Modal will be closed by the success callback
-        },
       })
 
       widgetIdRef.current = widgetId
@@ -148,13 +140,7 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      if (widgetIdRef.current) {
-        try {
-          window.turnstile?.remove(widgetIdRef.current)
-        } catch {
-          // Ignore
-        }
-      }
+      if (widgetIdRef.current) window.turnstile?.remove(widgetIdRef.current)
       widgetIdRef.current = null
       widgetContainerRef.current = null
       hasRenderedRef.current = false
