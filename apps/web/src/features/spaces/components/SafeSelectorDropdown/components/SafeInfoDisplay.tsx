@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
 import { getInitials } from '../utils'
 
@@ -15,7 +16,7 @@ const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => 
     </Avatar>
     <div className="flex flex-col items-start flex-1 min-w-0">
       <span className="text-sm font-medium text-foreground">{name}</span>
-      <span className="text-xs text-muted-foreground">{address}</span>
+      <span className="text-xs text-muted-foreground">{shortenAddress(address)}</span>
     </div>
   </div>
 )

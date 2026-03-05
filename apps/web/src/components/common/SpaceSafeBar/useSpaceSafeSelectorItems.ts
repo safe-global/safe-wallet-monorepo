@@ -1,0 +1,124 @@
+import { useMemo, useCallback } from 'react'
+import { useRouter } from 'next/router'
+import { useSpaceSafes } from '@/features/spaces'
+import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
+import useChains from '@/hooks/useChains'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
+import useWallet from '@/hooks/wallets/useWallet'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { AppRoutes } from '@/config/routes'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { ChainInfo } from '@/features/spaces/types'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+
+const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
+  chainId,
+  chainName: chain?.chainName ?? chainId,
+  chainLogoUri: chain?.chainLogoUri ?? null,
+})
+
+export function useSpaceSafeSelectorItems() {
+  const { allSafes } = useSpaceSafes()
+  const { safe, safeAddress } = useSafeInfo()
+  const currentChainId = useChainId()
+  const { configs: chainConfigs } = useChains()
+  const router = useRouter()
+  const currency = useAppSelector(selectCurrency)
+  const { address: walletAddress } = useWallet() || {}
+
+  const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
+
+  const { data: overviews, isLoading: overviewsLoading } = useGetMultipleSafeOverviewsQuery(
+    flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken,
+  )
+
+  const items: SafeItemData[] = useMemo(() => {
+    return allSafes.map((item) => {
+      const isCurrentSafe = item.address.toLowerCase() === safeAddress.toLowerCase()
+
+      if (isMultiChainSafeItem(item)) {
+        const chainIds = item.safes.map((s) => s.chainId)
+        // Put currentChainId first so useSafeSelectorState shows the right chain in the trigger
+        const orderedChainIds = isCurrentSafe
+          ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)]
+          : chainIds
+
+        // Multi-chain balance = sum of ALL chains (matches myAccounts logic)
+        const safeOverviews =
+          overviews?.filter(
+            (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
+          ) ?? []
+        const totalFiat = safeOverviews.reduce((sum, o) => sum + parseFloat(o.fiatTotal || '0'), 0)
+        const firstOverview = safeOverviews[0] as SafeOverview | undefined
+
+        const multiItem = {
+          id: `${orderedChainIds[0]}:${item.address}`,
+          name: item.name ?? shortenAddress(item.address),
+          address: item.address,
+          threshold: isCurrentSafe ? safe.threshold : (firstOverview?.threshold ?? 0),
+          owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (firstOverview?.owners.length ?? 0),
+          balance: totalFiat.toString(),
+          isLoading: overviewsLoading && safeOverviews.length === 0,
+          chains: orderedChainIds.map((id) =>
+            toChainInfo(
+              id,
+              chainConfigs.find((c) => c.chainId === id),
+            ),
+          ),
+        }
+        return multiItem
+      }
+
+      // Single-chain safe: show that chain's balance directly
+      const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
+
+      return {
+        id: `${item.chainId}:${item.address}`,
+        name: item.name ?? shortenAddress(item.address),
+        address: item.address,
+        threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
+        owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
+        balance: overview?.fiatTotal ?? '0',
+        isLoading: overviewsLoading && !overview,
+        chains: [
+          toChainInfo(
+            item.chainId,
+            chainConfigs.find((c) => c.chainId === item.chainId),
+          ),
+        ],
+      }
+    })
+  }, [allSafes, safeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs])
+
+  const selectedItemId = `${currentChainId}:${safeAddress}`
+
+  const handleItemSelect = useCallback(
+    (itemId: string) => {
+      const colonIndex = itemId.indexOf(':')
+      const chainId = itemId.slice(0, colonIndex)
+      const address = itemId.slice(colonIndex + 1)
+      const chain = chainConfigs.find((c) => c.chainId === chainId)
+      if (!chain) return
+      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
+    },
+    [chainConfigs, router],
+  )
+
+  const handleChainChange = useCallback(
+    (chainId: string) => {
+      const chain = chainConfigs.find((c) => c.chainId === chainId)
+      if (!chain) return
+      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
+    },
+    [chainConfigs, router, safeAddress],
+  )
+
+  return { items, selectedItemId, handleItemSelect, handleChainChange }
+}

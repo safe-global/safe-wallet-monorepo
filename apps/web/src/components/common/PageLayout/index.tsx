@@ -13,7 +13,7 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import BatchSidebar from '@/components/batch/BatchSidebar'
 import { AppRoutes } from '@/config/routes'
-import Breadcrumbs from '@/components/common/Breadcrumbs'
+import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
@@ -75,7 +75,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {!hideHeader && !isSpaceRoute && <Breadcrumbs />}
+            {!hideHeader && !isSpaceRoute && <SpaceSafeBar />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div
