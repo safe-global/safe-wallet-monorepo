@@ -148,9 +148,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      if (widgetIdRef.current && window.turnstile) {
+      if (widgetIdRef.current) {
         try {
-          window.turnstile.remove(widgetIdRef.current)
+          window.turnstile?.remove(widgetIdRef.current)
         } catch {
           // Ignore
         }
