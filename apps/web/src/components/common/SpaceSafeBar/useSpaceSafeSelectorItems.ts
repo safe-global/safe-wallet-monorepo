@@ -9,7 +9,6 @@ import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { AppRoutes } from '@/config/routes'
@@ -60,7 +59,7 @@ export function useSpaceSafeSelectorItems() {
 
         const multiItem = {
           id: `${orderedChainIds[0]}:${item.address}`,
-          name: item.name ?? shortenAddress(item.address),
+          name: item.name ?? '',
           address: item.address,
           threshold: isCurrentSafe ? safe.threshold : (firstOverview?.threshold ?? 0),
           owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (firstOverview?.owners.length ?? 0),
@@ -81,7 +80,7 @@ export function useSpaceSafeSelectorItems() {
 
       return {
         id: `${item.chainId}:${item.address}`,
-        name: item.name ?? shortenAddress(item.address),
+        name: item.name ?? '',
         address: item.address,
         threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
         owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),

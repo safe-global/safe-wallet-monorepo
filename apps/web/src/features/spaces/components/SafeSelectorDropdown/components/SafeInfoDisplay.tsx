@@ -9,16 +9,23 @@ export interface SafeInfoDisplayProps {
   className?: string
 }
 
-const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => (
-  <div className={cn('flex items-center gap-3', className)}>
-    <Avatar size="sm">
-      <AvatarFallback>{getInitials(name)}</AvatarFallback>
-    </Avatar>
-    <div className="flex flex-col items-start flex-1 min-w-0">
-      <span className="text-sm font-medium text-foreground">{name}</span>
-      <span className="text-xs text-muted-foreground">{shortenAddress(address)}</span>
+const SafeInfoDisplay = ({ name, address, className }: SafeInfoDisplayProps) => {
+  const displayName = name || shortenAddress(address)
+  const showAddressLine = Boolean(name)
+
+  return (
+    <div className={cn('flex items-center gap-3', className)}>
+      <Avatar size="sm">
+        <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+      </Avatar>
+      <div className="flex flex-col items-start flex-1 min-w-0">
+        <span className="text-sm font-medium text-foreground">{displayName}</span>
+        {showAddressLine && (
+          <span className="text-xs text-muted-foreground">{shortenAddress(address)}</span>
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default SafeInfoDisplay
