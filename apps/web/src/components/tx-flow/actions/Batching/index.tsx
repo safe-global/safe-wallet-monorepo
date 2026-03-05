@@ -90,7 +90,7 @@ const useShouldRegisterSlot = () => {
   const isDelegateCall = safeTx ? checkIsDelegateCall(safeTx) : false
   const isMultiSend = Boolean(safeTx && isMultiSendCalldata(safeTx?.data.data))
   const isFromTxBuilder = data?.app?.name === SafeAppsName.TRANSACTION_BUILDER
-  const isBatchingEnabled = useHasFeature(FEATURES.BATCHING)
+  const isBatchingEnabled = useHasFeature(FEATURES.BATCHING) === true
 
   return (
     isBatchingEnabled &&
