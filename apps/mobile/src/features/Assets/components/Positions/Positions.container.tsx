@@ -61,7 +61,8 @@ export const PositionsContainer = () => {
       data={data}
       renderItem={renderItem}
       keyExtractor={(item) => item.protocol}
-      style={{ marginTop: getTokenValue('$2'), paddingHorizontal: getTokenValue('$2') }}
+      contentContainerStyle={{ paddingHorizontal: getTokenValue('$4'), gap: getTokenValue('$2') }}
+      style={{ marginTop: getTokenValue('$4') }}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
     />
   )
