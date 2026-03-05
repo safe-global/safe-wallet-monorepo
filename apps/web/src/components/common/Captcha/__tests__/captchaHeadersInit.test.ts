@@ -16,7 +16,7 @@ describe('captchaHeadersInit', () => {
       resetCaptchaPromise,
       initializeCaptchaHeaders,
       sharedTokenRef,
-    } = require('@/hooks/captchaHeadersInit'))
+    } = require('@/components/common/Captcha/captchaHeadersInit'))
     ;({ setPrepareHeadersHook: mockSetPrepareHeadersHook } = require('@safe-global/store/gateway/cgwClient'))
   })
 

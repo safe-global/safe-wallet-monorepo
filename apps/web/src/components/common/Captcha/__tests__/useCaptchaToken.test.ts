@@ -1,9 +1,9 @@
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import { sharedTokenRef, resolveCaptchaReady, resetCaptchaPromise } from '@/hooks/captchaHeadersInit'
-import { useCaptchaToken } from '@/hooks/useCaptchaToken'
+import { sharedTokenRef, resolveCaptchaReady, resetCaptchaPromise } from '@/components/common/Captcha/captchaHeadersInit'
+import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
 
 // jest.mock is hoisted before imports, so the imports above receive the mocked versions
-jest.mock('@/hooks/captchaHeadersInit', () => ({
+jest.mock('@/components/common/Captcha/captchaHeadersInit', () => ({
   sharedTokenRef: { current: null },
   resolveCaptchaReady: jest.fn(),
   resetCaptchaPromise: jest.fn(),

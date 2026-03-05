@@ -89,7 +89,7 @@ import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
-import { Captcha } from '@/components/common/Captcha'
+import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
@@ -197,7 +197,7 @@ const SafeWalletApp = ({
         <AppProviders>
           <CssBaseline />
 
-          <Captcha>
+          <CaptchaProvider>
             <InitApp />
 
             <LazyWeb3Init />
@@ -223,7 +223,7 @@ const SafeWalletApp = ({
 
               <PkModulePopup />
             </TermsGate>
-          </Captcha>
+          </CaptchaProvider>
         </AppProviders>
       </CacheProvider>
     </Provider>

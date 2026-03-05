@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
-import { createContext, useContext, useMemo, useState } from 'react'
+import { useState } from 'react'
 import Script from 'next/script'
-import { useCaptchaToken } from '@/hooks/useCaptchaToken'
-import { initializeCaptchaHeaders, resolveCaptchaReady } from '@/hooks/captchaHeadersInit'
+import { useCaptchaToken } from './useCaptchaToken'
+import { initializeCaptchaHeaders, resolveCaptchaReady } from './captchaHeadersInit'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 import CaptchaModal from './CaptchaModal'
@@ -13,48 +13,21 @@ initializeCaptchaHeaders()
 
 const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
 
-interface CaptchaContextType {
-  token: string | null
-  isLoading: boolean
-  isReady: boolean
-  error: Error | null
-  refreshToken: () => void
-}
-
-const CaptchaContext = createContext<CaptchaContextType | undefined>(undefined)
-
 export function CaptchaProvider({ children }: { children: ReactNode }) {
   const isDarkMode = useDarkMode()
   const [isScriptReady, setIsScriptReady] = useState(false)
-  const [scriptError, setScriptError] = useState<Error | null>(null)
 
   const captcha = useCaptchaToken({ theme: isDarkMode ? 'dark' : 'light', isScriptReady })
 
-  const contextValue = useMemo(
-    () => ({
-      token: captcha.token,
-      isLoading: captcha.isLoading,
-      error: captcha.error ?? scriptError,
-      refreshToken: captcha.refreshToken,
-      isReady: !!captcha.token || !TURNSTILE_SITE_KEY,
-    }),
-    [captcha.token, captcha.isLoading, captcha.error, captcha.refreshToken, scriptError],
-  )
-
-  const onScriptError = () => {
-    resolveCaptchaReady()
-    setScriptError(new Error('Failed to load CAPTCHA script'))
-  }
-
   return (
-    <CaptchaContext.Provider value={contextValue}>
+    <>
       {children}
       {TURNSTILE_SITE_KEY && (
         <Script
           src={TURNSTILE_SCRIPT_URL}
           strategy="afterInteractive"
           onReady={() => setIsScriptReady(true)}
-          onError={onScriptError}
+          onError={resolveCaptchaReady}
         />
       )}
       <CaptchaModal
@@ -63,14 +36,6 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
         error={captcha.error}
         onRetry={captcha.refreshToken}
       />
-    </CaptchaContext.Provider>
+    </>
   )
-}
-
-export function useCaptcha() {
-  const context = useContext(CaptchaContext)
-  if (!context) {
-    throw new Error('useCaptcha must be used within a CaptchaProvider')
-  }
-  return context
 }
