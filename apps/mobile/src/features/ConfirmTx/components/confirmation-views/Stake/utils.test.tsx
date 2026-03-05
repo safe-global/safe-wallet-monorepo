@@ -7,6 +7,7 @@ import {
   Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 const mockDepositTxInfo: NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit',
@@ -65,7 +66,7 @@ describe('Staking Utils', () => {
       },
     })
 
-    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined))
+    await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
   })
   describe('formatStakingDepositItems', () => {
     it('formats deposit information correctly with minimal txData', () => {

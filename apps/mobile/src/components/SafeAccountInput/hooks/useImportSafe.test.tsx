@@ -10,7 +10,7 @@ import type { FormValues } from '@/src/features/ImportReadOnly/types'
 import { Provider } from 'react-redux'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/src/tests/server'
-import { GATEWAY_URL } from '@/src/config/constants'
+import { CONFIG_SERVICE_KEY, GATEWAY_URL } from '@/src/config/constants'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 jest.mock('lodash/debounce', () => (fn: (...args: unknown[]) => unknown) => {
@@ -35,7 +35,7 @@ const createStoreWithChains = async (): Promise<TestStore> => {
   const store = createTestStore({
     settings: { currency: 'usd' },
   })
-  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate())
+  await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
   return store
 }
 
@@ -62,7 +62,7 @@ describe('useImportSafe', () => {
       ]
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json(mockSafeOverviews)
         }),
       )
@@ -116,7 +116,7 @@ describe('useImportSafe', () => {
       const mockSafeOverviews = [createMockSafeOverview('1', VALID_ADDRESS)]
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json(mockSafeOverviews)
         }),
       )
@@ -142,7 +142,7 @@ describe('useImportSafe', () => {
 
     it('should handle empty response when no Safe deployment found', async () => {
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json([])
         }),
       )
@@ -168,7 +168,7 @@ describe('useImportSafe', () => {
 
     it('should handle API error', async () => {
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, () => {
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
           return HttpResponse.json({ message: 'Internal server error' }, { status: 500 })
         }),
       )
@@ -197,7 +197,7 @@ describe('useImportSafe', () => {
       let requestedSafes: string[] = []
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
           const url = new URL(request.url)
           const safes = url.searchParams.get('safes')
           if (safes) {
@@ -225,7 +225,7 @@ describe('useImportSafe', () => {
       let requestedCurrency: string | null = null
 
       server.use(
-        http.get(`${GATEWAY_URL}/v1/safes`, ({ request }) => {
+        http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
           const url = new URL(request.url)
           requestedCurrency = url.searchParams.get('currency')
           return HttpResponse.json([])

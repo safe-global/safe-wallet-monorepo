@@ -25,7 +25,7 @@ const NoModules = () => {
 const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string; chainId: string; name?: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
   const [recovery] = useRecovery()
-  const { selectDelayModifierByAddress, $isLoading } = useLoadFeature(RecoveryFeature)
+  const { selectDelayModifierByAddress, $isReady } = useLoadFeature(RecoveryFeature)
   const delayModifier = recovery && selectDelayModifierByAddress?.(recovery, moduleAddress)
 
   const onRemove = () => {
@@ -53,7 +53,7 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
             onClick={onRemove}
             color="error"
             size="small"
-            disabled={!isOk || $isLoading}
+            disabled={!isOk || !$isReady}
             title="Remove module"
           >
             <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />

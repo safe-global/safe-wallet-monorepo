@@ -51,8 +51,9 @@ describe('Address book tests - 2', () => {
   })
 
   it('Verify that editing an entry from the transaction details updates the name in address book', () => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_7)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     console.log(typeReceive.summaryTitle)
     createtx.clickOnTransactionItemByName(typeReceive.summaryTitle, typeReceive.summaryTxInfo)
     addressBook.clickOnMoreActionsBtn()

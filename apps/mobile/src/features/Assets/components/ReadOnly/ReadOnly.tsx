@@ -1,9 +1,7 @@
-import { Container } from '@/src/components/Container'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { DimensionValue, Pressable } from 'react-native'
 import { View, Text } from 'tamagui'
 import { ReadOnlyWarningModal } from '@/src/components/ReadOnlyWarningModal'
-import { ReadOnlyIconBlock } from './ReadOnlyIconBlock'
 
 export interface ReadOnlyProps {
   signers: string[]
@@ -25,37 +23,36 @@ export const ReadOnly = ({
   if (signers.length === 0 && !isDismissed) {
     return (
       <ReadOnlyWarningModal onAddSigner={onAddSigner}>
-        <Container
+        <View
           marginBottom={marginBottom}
           marginTop={marginTop}
-          paddingVertical="$3"
-          paddingHorizontal="$4"
           backgroundColor="$backgroundSecondary"
-          borderRadius="$6"
+          borderRadius={8}
+          height={64}
+          paddingHorizontal="$3"
+          flexDirection="row"
+          alignItems="center"
+          gap="$3"
         >
-          <View flexDirection="row" alignItems="center" justifyContent="space-between">
-            <View flexDirection="row" alignItems="center" gap="$3" flex={1}>
-              <ReadOnlyIconBlock />
-              <View flex={1} gap="$0">
-                <Text fontSize="$4" fontWeight={700} lineHeight={18} letterSpacing={0.1}>
-                  Read-only mode
-                </Text>
-                <Text color="$colorSecondary" fontSize="$4" lineHeight={18} letterSpacing={0.1}>
-                  To sign transactions, add a signer.
-                </Text>
-              </View>
-            </View>
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation()
-                onDismiss()
-              }}
-              style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0, padding: 4 }]}
-            >
-              <SafeFontIcon name="close" size={16} color="$borderMain" />
-            </Pressable>
+          <SafeFontIcon name="eye-n" color="$color" size={24} />
+          <View flex={1}>
+            <Text fontSize="$4" fontWeight={600} lineHeight={20} letterSpacing={0.15}>
+              You are in read-only mode
+            </Text>
+            <Text color="$colorSecondary" fontSize="$4" lineHeight={20} letterSpacing={0.1}>
+              To sign transactions, add a signer.
+            </Text>
           </View>
-        </Container>
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation()
+              onDismiss()
+            }}
+            style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0, padding: 4 }]}
+          >
+            <SafeFontIcon name="close" size={24} color="$borderMain" />
+          </Pressable>
+        </View>
       </ReadOnlyWarningModal>
     )
   }

@@ -29,7 +29,7 @@ exports[`./PageHeader.stories LongTitle 1`] = `
       Transaction queue and history overview
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1bi6f53-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-876fro-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >
@@ -68,7 +68,7 @@ exports[`./PageHeader.stories WithButton 1`] = `
       Address book
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary mui-style-1gsxpsb-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary mui-style-1t6wehw-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >

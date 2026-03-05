@@ -1,0 +1,36 @@
+.header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.headerText {
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+/* Badge alignment to match PendingTxsList */
+.headerText :global .MuiBadge-root {
+  margin-left: var(--space-1);
+}
+
+.headerText :global .MuiBadge-badge {
+  position: relative;
+}
+
+.chevron {
+  width: 20px;
+  height: 20px;
+}
+
+.warningsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Remove default margins from warning components */
+.warningsContainer :global(> *) {
+  margin: 0 !important;
+}

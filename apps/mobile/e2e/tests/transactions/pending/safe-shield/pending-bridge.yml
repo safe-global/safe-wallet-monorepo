@@ -45,7 +45,7 @@ tags:
     file: ../../../../utils/assertions/verify-safe-shield-widget.yml
     env:
       WIDGET_HEADER: 'Issues found'
-      LABEL_1: 'Missing ownership'
+      LABEL_1: 'Low activity recipient'
       LABEL_2: 'Verified contract'
       LABEL_3: 'Threat analysis failed'
       RUN_SIMULATION: 'true'
@@ -67,8 +67,8 @@ tags:
     env:
       TAP_TO_OPEN: 'Issues found'
       HEADER: 'ISSUES FOUND'
-      LABEL_1: 'Missing ownership'
-      DESCRIPTION_1: '.*not activated on the target chain.*'
+      LABEL_1: 'Low activity recipient'
+      DESCRIPTION_1: '.*but with a different configuration.*'
       DESCRIPTION_1_2: '.*has few transactions.*'
       DESCRIPTION_1_3: '.*in your address book.*'
       LABEL_2: 'Verified contract'

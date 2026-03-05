@@ -19,3 +19,6 @@ cypress/downloads/
 
 # Storybook
 storybook-static
+
+# Generated build-time data
+src/config/__generated__/

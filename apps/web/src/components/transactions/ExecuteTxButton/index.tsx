@@ -62,8 +62,8 @@ const ExecuteTxButton = ({
               onMouseLeave={onMouseLeave}
               variant="contained"
               disabled={!isOk || isDisabled}
-              size={compact ? 'small' : 'stretched'}
-              sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
+              size={compact ? 'small' : 'large'}
+              sx={{ minWidth: '106.5px' }}
             >
               Execute
             </Button>

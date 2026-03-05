@@ -13,7 +13,8 @@ const warningSection = '[data-testid="warning-section"]'
 const termsCheckbox = 'input[type="checkbox"]'
 export const removeRecovererBtn = '[data-testid="remove-recoverer-btn"]'
 export const editRecovererBtn = '[data-testid="edit-recoverer-btn"]'
-const startRecoveryBtn = '[data-testid="start-recovery-btn"]'
+const recoveryProposalCard = '[data-testid="recovery-proposal-card"]'
+const startRecoveryBtn = '[data-testid="start-recovery"]'
 const recoveryDelaySelect = '[data-testid="recovery-delay-select"]'
 const recoveryExpirySelect = '[data-testid="recovery-expiry-select"]'
 const postponeRecoveryBtn = '[data-testid="postpone-recovery-btn"]'
@@ -24,7 +25,6 @@ const cancelProposalBtn = '[data-testid="cancel-proposal-btn"]'
 const executeFormBtn = '[data-testid="execute-form-btn"]'
 const advancedBtn = '[data-testid="advanced-btn"]'
 const recoveryProposalModal = '[data-testid="recovery-proposal"]'
-const recoveryProposalHorizontal = '[data-testid="recovery-proposal-hr"]'
 const recoveryModalTitle = 'How does recovery work'
 
 export const recoveryOptions = {
@@ -64,7 +64,7 @@ export function cancelRecoveryTx() {
   cy.get(cancelProposalBtn).scrollIntoView().click()
 }
 export function clickOnRecoveryExecuteBtn() {
-  cy.get(executeBtn).eq(0).should('be.enabled', { timeout: 300000 })
+  cy.get(executeBtn, { timeout: 300000 }).eq(0).should('be.enabled')
   cy.wait(1000)
   cy.get(executeBtn).eq(0).click()
 }
@@ -147,7 +147,11 @@ export function clearRecoverers() {
 }
 
 export function clickOnStartRecoveryBtn() {
-  cy.get(startRecoveryBtn).click()
+  cy.get(recoveryProposalCard)
+    .should('be.visible')
+    .within(() => {
+      cy.get(startRecoveryBtn).click()
+    })
 }
 
 export function enterOwnerAddress(address) {
@@ -172,10 +176,12 @@ export function clickOnRecoverLaterBtn() {
   cy.get(postponeRecoveryBtn).should('not.exist')
 }
 
-export function verifyRecoveryProposalModalState(option, horizontal = false) {
-  let modal = recoveryProposalModal
-  if (horizontal) modal = recoveryProposalHorizontal
-  cy.get(modal).should(option)
+export function verifyRecoveryProposalDialog(option) {
+  cy.get(recoveryProposalModal).should(option)
+}
+
+export function verifyRecoveryProposalCard() {
+  cy.get(recoveryProposalCard).should('be.visible')
 }
 
 export function verifyRecoveryModalDisplayed() {

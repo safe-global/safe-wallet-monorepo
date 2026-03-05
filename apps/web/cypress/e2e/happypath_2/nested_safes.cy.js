@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as ls from '../../support/localstorage_data.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import * as txs from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -21,11 +22,10 @@ describe('Nested safes happy path tests', () => {
 
   it('Verify that batch tx appears in the Queue with create proxy action', () => {
     const safe = 'Created safe'
-    const chainId = '11155111' // Sepolia
 
     cy.visit(constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_39)
-    // Add the parent safe to trusted list (required for nested safe creation)
-    main.addSafeToTrustedList(chainId, staticSafes.SEP_STATIC_SAFE_39.substring(4))
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe39)
+    cy.reload()
     wallet.connectSigner(signer)
     cy.wait(5000)
     createTx.deleteAllTx()

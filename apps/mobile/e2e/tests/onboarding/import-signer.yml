@@ -13,9 +13,6 @@ tags:
     id: 'transactions-tab'
 - assertVisible:
     id: 'tx-history-list'
-- tapOn: 'Messages'
-- assertVisible:
-    id: 'messages-tab-content'
 - tapOn: 'Account, tab, 3 of 3'
 - assertVisible: '0x2f3e...Fbb6.*'
 - tapOn:

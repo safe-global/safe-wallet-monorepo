@@ -128,7 +128,7 @@ export function PendingTxListContainer({
           padding="$2"
           testID="pending-tx-progress-indicator"
         >
-          <CircleSnail size={24} color={theme.color?.get()} thickness={2} duration={600} spinDuration={1500} />
+          <CircleSnail size={24} color={theme.color.get()} thickness={2} duration={600} spinDuration={1500} />
         </View>
       )}
 

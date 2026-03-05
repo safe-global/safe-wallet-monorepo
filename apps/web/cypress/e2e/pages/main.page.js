@@ -29,6 +29,24 @@ const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
 
+/** Waits for the page to settle before Argos captures the screenshot. */
+export function awaitVisualStability() {
+  cy.wait(constants.VISUAL_SETTLE_TIME)
+}
+
+/** Intercepts the chain config API and injects a feature flag if not already present. */
+export function enableChainFeature(featureName) {
+  cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+    req.continue((res) => {
+      if (res.body && res.body.features) {
+        if (!res.body.features.includes(featureName)) {
+          res.body.features.push(featureName)
+        }
+      }
+    })
+  })
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }
@@ -384,6 +402,16 @@ export function addToLocalStorage(key, jsonValue) {
 }
 
 /**
+ * Sets localStorage in the app window (AUT). Use after cy.visit() then cy.reload() so the app picks up the data.
+ * Use this when the test runs in Cypress and the app must see the data (addToLocalStorage writes to the runner's window).
+ */
+export function addToAppLocalStorage(key, jsonValue) {
+  return cy.window().then((win) => {
+    win.localStorage.setItem(key, JSON.stringify(jsonValue))
+  })
+}
+
+/**
  * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
  * This function sets up the settings and verifies they are stored correctly before proceeding
  * @returns {Promise} A promise that resolves when settings are set and verified
@@ -445,25 +473,6 @@ export function getAddedSafeAddressFromLocalStorage(chainId, index) {
     const addedSafesObj = JSON.parse(addedSafes)
     const safeAddress = Object.keys(addedSafesObj[chainId])[index]
     return safeAddress
-  })
-}
-
-export function addSafeToTrustedList(chainId, safeAddress) {
-  cy.window().then((win) => {
-    const existingData = win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes)
-    const addedSafes = existingData ? JSON.parse(existingData) : {}
-
-    if (!addedSafes[chainId]) {
-      addedSafes[chainId] = {}
-    }
-
-    addedSafes[chainId][safeAddress] = {
-      owners: [],
-      threshold: 1,
-      ethBalance: '0',
-    }
-
-    win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addedSafes, JSON.stringify(addedSafes))
   })
 }
 

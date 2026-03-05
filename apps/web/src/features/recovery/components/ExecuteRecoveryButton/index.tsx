@@ -51,8 +51,8 @@ export default function ExecuteRecoveryButton({
                 onClick={onClick}
                 variant="contained"
                 disabled={!isOk || isDisabled}
-                sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
-                size={compact ? 'small' : 'stretched'}
+                sx={{ minWidth: '106.5px' }}
+                size={compact ? 'small' : 'large'}
               >
                 Execute
               </Button>

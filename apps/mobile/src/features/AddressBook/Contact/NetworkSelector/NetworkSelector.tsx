@@ -2,8 +2,9 @@ import React, { useRef, useEffect } from 'react'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { getVariable, useTheme } from 'tamagui'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectAllChains, useGetChainsConfigQuery, getChainsByIds } from '@/src/store/chains'
+import { selectAllChains, useGetChainsConfigV2Query, getChainsByIds } from '@/src/store/chains'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NetworkSelectorHeader } from './NetworkSelectorHeader'
 import { NetworkSelectorContent } from './NetworkSelectorContent'
@@ -28,7 +29,7 @@ export const NetworkSelector = ({
   const theme = useTheme()
 
   // Fetch chains data to ensure it's up to date
-  useGetChainsConfigQuery()
+  useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
 
   const allChains = useAppSelector(selectAllChains) || []
   const selectedChains = useAppSelector((state) => getChainsByIds(state, selectedChainIds))

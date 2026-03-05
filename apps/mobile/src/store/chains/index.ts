@@ -3,8 +3,9 @@ import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '..'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { selectActiveSafe } from '../activeSafeSlice'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
-const selectChainsResult = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()
+const selectChainsResult = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)
 
 const selectChainsData = createSelector(selectChainsResult, (result) => {
   return result.data ?? initialState
@@ -46,5 +47,5 @@ export const getChainsByIds = createSelector(
   },
 )
 
-export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig
+export const { useGetChainsConfigV2Query } = apiSliceWithChainsConfig
 export { selectAllChains }

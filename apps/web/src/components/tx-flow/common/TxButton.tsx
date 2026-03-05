@@ -16,7 +16,6 @@ import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 
 const buttonSx = {
-  height: '58px',
   '& svg path': { fill: 'currentColor' },
 }
 
@@ -27,6 +26,7 @@ export const SendTokensButton = ({ onClick, sx }: { onClick: () => void; sx?: Bu
         data-testid="send-tokens-btn"
         onClick={onClick}
         variant="contained"
+        size="xlarge"
         sx={sx ?? buttonSx}
         fullWidth
         startIcon={<AssetsIcon width={20} />}
@@ -50,6 +50,7 @@ export const TxBuilderButton = () => {
       <Link href={txBuilder.link} passHref style={{ width: '100%' }}>
         <Button
           variant="outlined"
+          size="xlarge"
           sx={buttonSx}
           fullWidth
           onClick={onClick}
@@ -90,7 +91,14 @@ export const MakeASwapButton = () => {
   }
 
   return (
-    <Button variant="contained" sx={buttonSx} fullWidth startIcon={<SwapIcon width={20} />} onClick={onClick}>
+    <Button
+      variant="contained"
+      size="xlarge"
+      sx={buttonSx}
+      fullWidth
+      startIcon={<SwapIcon width={20} />}
+      onClick={onClick}
+    >
       Swap tokens
     </Button>
   )

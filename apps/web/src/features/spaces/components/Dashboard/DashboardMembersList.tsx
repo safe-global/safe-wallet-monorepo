@@ -6,7 +6,7 @@ import AddMemberModal from '../AddMemberModal'
 import MemberName from '../MembersList/MemberName'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '@/features/spaces'
 
 const DashboardMembersList = ({ members }: { members: Member[] }) => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)

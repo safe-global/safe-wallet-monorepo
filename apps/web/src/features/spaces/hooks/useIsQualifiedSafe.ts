@@ -1,4 +1,4 @@
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpaceSafesGetV1Query, useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'

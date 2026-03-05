@@ -26,8 +26,6 @@ export interface NonPinnedWarningState {
   chainId: string
   /** The user's role (owner, proposer, or viewer) */
   userRole: SafeUserRole
-  /** Whether the warning has been dismissed for this session */
-  isDismissed: boolean
   /** Whether the confirmation dialog is open */
   isConfirmDialogOpen: boolean
   /** Whether the current safe has a similar address to another user's safe */
@@ -42,6 +40,4 @@ export interface NonPinnedWarningState {
   closeConfirmDialog: () => void
   /** Add the safe to the pinned list (called after confirmation) */
   confirmAndAddToPinnedList: (name: string) => void
-  /** Temporarily dismiss the warning for this session */
-  dismiss: () => void
 }

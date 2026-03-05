@@ -4,7 +4,7 @@ import { type SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import useChainId from '@/hooks/useChainId'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useGetSpaceAddressBook } from '@/features/spaces'
 import { useAddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 export enum ContactSource {

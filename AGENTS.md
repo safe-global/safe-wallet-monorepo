@@ -32,6 +32,42 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+### Key Entry Points
+
+Stable architectural landmarks for fast orientation:
+
+| Area | Path | Purpose |
+|------|------|---------|
+| Web app entry | `apps/web/src/pages/_app.tsx` | Next.js app bootstrap, providers, `InitApp` |
+| Redux store | `apps/web/src/store/index.ts` | `makeStore()`, middleware, RTK Query APIs |
+| RTK Query APIs | `apps/web/src/store/api/gateway/` | CGW API endpoints (balances, transactions, etc.) |
+| Feature system | `apps/web/src/features/__core__/` | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Page layout | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts` | Current Safe address, owners, threshold |
+| Chain config | `packages/store/src/gateway/chains/` | RTK Query chains endpoint with retry logic |
+| Theme package | `packages/theme/src/` | Palettes, spacing, typography tokens |
+| Mobile entry | `apps/mobile/src/app/_layout.tsx` | Expo Router root layout |
+
+### AST-Based Code Search
+
+If `ast-grep` (aka `sg`) is installed, prefer it over text-based grep for structural code searches. It understands TypeScript/TSX syntax so it won't match inside comments or strings.
+
+```bash
+# Find all components using useAppSelector
+sg -p 'useAppSelector($$$)' --lang tsx apps/web/src/
+
+# Find all createSlice calls
+sg -p 'createSlice({ name: $NAME, $$$})' --lang ts apps/web/src/
+
+# Find all default exports of a function component
+sg -p 'export default function $NAME($$$) { $$$}' --lang tsx apps/web/src/
+
+# Find useMemo with specific dependency
+sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
+```
+
+Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
@@ -149,10 +185,10 @@ function ParentComponent() {
 
 // For explicit loading/disabled states:
 function ParentWithStates() {
-  const { MyComponent, $isLoading, $isDisabled } = useLoadFeature(MyFeature)
+  const { MyComponent, $isReady, $isDisabled } = useLoadFeature(MyFeature)
 
-  if ($isLoading) return <Skeleton />
   if ($isDisabled) return null
+  if (!$isReady) return <Skeleton />
 
   return <MyComponent />
 }
@@ -199,7 +235,7 @@ export default {
 
 **Hooks Pattern:** Hooks are exported directly from `index.ts` (always loaded, not lazy) to avoid Rules of Hooks violations. Keep hooks lightweight with minimal imports. Put heavy logic in services (lazy-loaded).
 
-See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isLoading`, `$isDisabled`, `$isReady`).
+See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
 ## Workflow
 
@@ -216,14 +252,20 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
      - Formatting: Run `yarn prettier:fix` to auto-fix
      - Linting: Run `yarn workspace @safe-global/web lint:fix` to auto-fix where possible
 
-3. **Formatting**: run `yarn prettier:fix` before committing (also handled automatically by pre-commit hook).
+3. **Formatting (CRITICAL)**: **ALWAYS** run `yarn prettier:fix` before staging and committing. Do NOT rely on lint-staged alone — it can miss formatting issues due to stash/restore edge cases. Run it explicitly:
+
+   ```bash
+   yarn prettier:fix
+   ```
+
+   Then verify with `yarn workspace @safe-global/web prettier` (the check-only command). **CI will reject unformatted code.**
 
 4. **Linting and tests**: when you change any source code under `apps/` or `packages/`, execute, for web:
 
    ```bash
    yarn workspace @safe-global/web type-check
    yarn workspace @safe-global/web lint
-   yarn workspace @safe-global/web prettier
+   yarn workspace @safe-global/web prettier   # verify formatting (CI runs this)
    yarn workspace @safe-global/web test
    ```
 
@@ -274,11 +316,21 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 
 ### E2E Tests (Web only)
 
-- Located in `apps/web/cypress/e2e/`
-- **IMPORTANT**: Follow the Cypress E2E automation rules in `.cursor/rules/cypress-e2e.mdc` when writing or modifying tests
-- Run with `yarn workspace @safe-global/web cypress:open` for interactive mode
-- Run with `yarn workspace @safe-global/web cypress:run` for headless mode
-- Smoke tests in `cypress/e2e/smoke/` are run in CI
+Located in `apps/web/cypress/e2e/`. Full conventions and patterns: `apps/web/cypress/CLAUDE.md`.
+
+| Category   | Folder            | CI                           | Purpose                                    |
+| ---------- | ----------------- | ---------------------------- | ------------------------------------------ |
+| Smoke      | `e2e/smoke/`      | Every PR                     | Critical path functional tests             |
+| Visual     | `e2e/visual/`     | Manual (`workflow_dispatch`) | Chromatic visual regression (light + dark) |
+| Regression | `e2e/regression/` | On-demand                    | Feature tests                              |
+| Happy path | `e2e/happypath/`  | On-demand                    | User journey tests                         |
+
+```bash
+yarn workspace @safe-global/web cypress:open   # interactive
+yarn workspace @safe-global/web cypress:run    # headless
+```
+
+Coverage report: `apps/web/cypress/COVERAGE.md`
 
 ### Test Coverage
 
@@ -549,7 +601,10 @@ Avoid these common mistakes when contributing:
 2. **Forgetting to run tests** – Always run tests before committing (`yarn workspace @safe-global/web test`)
 3. **Breaking mobile when changing shared code** – Shared packages (`packages/**`) affect both web and mobile
 4. **Hardcoding values** – Use theme variables from `vars.css` (web) or Tamagui tokens (mobile)
-5. **Modifying generated files** – Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+5. **Modifying generated files** – Never manually edit auto-generated files:
+   - Files in `packages/utils/src/types/contracts/` are auto-generated from ABIs
+   - Files in `packages/store/src/gateway/AUTO_GENERATED/` are generated from `schema.json` (run `yarn workspace @safe-global/store build:dev` to regenerate)
+   - CI will fail if AUTO_GENERATED files don't match the schema
 6. **Not handling chain-specific logic** – Always consider multi-chain scenarios
 7. **Skipping Storybook stories** – New components should have stories for documentation
 8. **Incomplete error handling** – Always handle loading, error, and empty states in UI components

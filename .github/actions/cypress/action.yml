@@ -27,10 +27,15 @@ inputs:
     description: 'Cypress cloud tag key'
     required: false
 
-  chromatic:
-    description: 'Enable Chromatic archive generation'
+  parallel:
+    description: 'Enable Cypress Cloud parallel mode'
     required: false
-    default: 'false'
+    default: 'true'
+
+  record:
+    description: 'Record results to Cypress Cloud'
+    required: false
+    default: 'true'
 
   container-index:
     description: 'Container index for parallel runs (used for artifact naming)'
@@ -57,11 +62,11 @@ runs:
     - uses: cypress-io/github-action@v6
       with:
         spec: ${{ inputs.spec }}
-        group: ${{ inputs.group }}
-        parallel: true
+        group: ${{ inputs.record == 'true' && inputs.group || '' }}
+        parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
         browser: chrome
-        record: true
-        tag: ${{ inputs.tag }}
+        record: ${{ inputs.record == 'true' }}
+        tag: ${{ inputs.record == 'true' && inputs.tag || '' }}
         config: baseUrl=http://localhost:8080
         install: false
         start: yarn workspace @safe-global/web serve
@@ -75,13 +80,3 @@ runs:
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}
         CYPRESS_WALLET_CREDENTIALS: ${{ fromJSON(inputs.secrets).CYPRESS_WALLET_CREDENTIALS }}
         BEAMER_DATA_E2E: ${{ fromJSON(inputs.secrets).BEAMER_DATA_E2E }}
-        ELECTRON_EXTRA_LAUNCH_ARGS: ${{ inputs.chromatic == 'true' && '--remote-debugging-port=9222' || '' }}
-
-    - name: Upload Chromatic archives
-      if: inputs.chromatic == 'true' && !cancelled()
-      uses: actions/upload-artifact@v6
-      with:
-        name: chromatic-archives-${{ inputs.container-index }}
-        path: apps/web/cypress/downloads
-        if-no-files-found: ignore
-        retention-days: 1

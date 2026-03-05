@@ -31,6 +31,7 @@
   },
   "peerDependencies": {
     "@safe-global/protocol-kit": "^5.x",
+    "@safe-global/store": "*",
     "@safe-global/types-kit": "^1.x",
     "ethers": "^6.x"
   }

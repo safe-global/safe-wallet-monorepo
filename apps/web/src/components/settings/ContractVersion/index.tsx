@@ -14,6 +14,18 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { Box } from '@/components/common/Mui'
+
+/**
+ * Generates a GitHub release URL for a specific Safe contract version.
+ * Strips L2 suffix if present (e.g., "1.3.0+L2" → "v1.3.0").
+ * @param version - The Safe contract version (e.g., "1.4.1" or "1.3.0+L2")
+ * @returns GitHub release URL (e.g., "https://github.com/safe-fndn/safe-smart-account/releases/tag/v1.4.1")
+ */
+const getReleaseUrl = (version: string): string => {
+  const cleanVersion = version.split('+')[0]
+  return `https://github.com/safe-fndn/safe-smart-account/releases/tag/v${cleanVersion}`
+}
 
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -31,6 +43,8 @@ export const ContractVersion = () => {
   const isLatestVersion = safe.version && !showUpdateDialog
 
   const latestSafeVersion = getLatestSafeVersion(currentChain)
+
+  const releaseUrl = safe.version ? getReleaseUrl(safe.version) : undefined
 
   return (
     <>
@@ -53,32 +67,40 @@ export const ContractVersion = () => {
         )}
       </Typography>
 
-      {safeLoaded && safe.version && showUpdateDialog ? (
-        <Alert
-          sx={{ mt: 2, borderRadius: '2px', borderColor: '#B0FFC9' }}
-          icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
-        >
-          <AlertTitle sx={{ fontWeight: 700 }}>
-            New version is available: {latestSafeVersion} (
-            <ExternalLink href={safeMasterCopy?.deployerRepoUrl}>changelog</ExternalLink>)
-          </AlertTitle>
-
-          <Typography mb={2}>
-            Update now to take advantage of new features and the highest security standards available. You will need to
-            confirm this update just like any other transaction.
-          </Typography>
-
-          <CheckWallet>
-            {(isOk) => (
-              <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
-                Update
-              </Button>
-            )}
-          </CheckWallet>
-        </Alert>
-      ) : (
-        <UnsupportedMastercopyWarning />
+      {safeLoaded && releaseUrl && (
+        <Typography variant="body2" mt={0.5}>
+          <ExternalLink href={releaseUrl}>View release</ExternalLink>
+        </Typography>
       )}
+
+      <Box mt={2}>
+        {safeLoaded && safe.version && showUpdateDialog ? (
+          <Alert
+            sx={{ borderRadius: '2px', borderColor: '#B0FFC9' }}
+            icon={<SvgIcon component={InfoIcon} inheritViewBox color="secondary" />}
+          >
+            <AlertTitle sx={{ fontWeight: 700 }}>
+              New version is available: {latestSafeVersion} (
+              <ExternalLink href={safeMasterCopy?.deployerRepoUrl}>changelog</ExternalLink>)
+            </AlertTitle>
+
+            <Typography mb={2}>
+              Update now to take advantage of new features and the highest security standards available. You will need
+              to confirm this update just like any other transaction.
+            </Typography>
+
+            <CheckWallet>
+              {(isOk) => (
+                <Button onClick={() => setTxFlow(<UpdateSafeFlow />)} variant="contained" disabled={!isOk}>
+                  Update
+                </Button>
+              )}
+            </CheckWallet>
+          </Alert>
+        ) : (
+          <UnsupportedMastercopyWarning />
+        )}
+      </Box>
     </>
   )
 }

@@ -1,9 +1,8 @@
-import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
 import { useMemo } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
-import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
 import { selectCurrency } from '@/src/store/settingsSlice'
 
 export const useSafeOverviewService = (safeAddress?: string) => {
@@ -14,7 +13,7 @@ export const useSafeOverviewService = (safeAddress?: string) => {
     [chainIds, safeAddress],
   )
 
-  const { data } = useSafesGetOverviewForManyQuery<SafeOverviewResult>(
+  const { data } = useSafeOverviewsQuery(
     {
       safes,
       currency,

@@ -377,6 +377,10 @@ exports[`./index.stories CustomRecipient 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
+                      <b>
+                        rin
+                        :
+                      </b>
                       <span>
                         0x9008D19f58AAbD9eD0D60971565AA8510560ab41
                       </span>
@@ -384,7 +388,24 @@ exports[`./index.stories CustomRecipient 1`] = `
                   </div>
                   <div
                     class="MuiBox-root mui-style-yjghm1"
-                  />
+                  >
+                    <a
+                      aria-label="View on rinkeby.etherscan.io"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                      data-mui-internal-clone-element="true"
+                      data-testid="explorer-btn"
+                      href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+                      rel="noreferrer"
+                      tabindex="0"
+                      target="_blank"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -440,6 +461,10 @@ exports[`./index.stories CustomRecipient 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
+                      <b>
+                        rin
+                        :
+                      </b>
                       <span>
                         0x1234...7890
                       </span>
@@ -447,7 +472,24 @@ exports[`./index.stories CustomRecipient 1`] = `
                   </div>
                   <div
                     class="MuiBox-root mui-style-yjghm1"
-                  />
+                  >
+                    <a
+                      aria-label="View on rinkeby.etherscan.io"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                      data-mui-internal-clone-element="true"
+                      data-testid="explorer-btn"
+                      href="https://rinkeby.etherscan.io/address/0x1234567890123456789012345678901234567890"
+                      rel="noreferrer"
+                      tabindex="0"
+                      target="_blank"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -865,6 +907,10 @@ exports[`./index.stories Default 1`] = `
                       data-mui-internal-clone-element="true"
                       style="cursor: pointer;"
                     >
+                      <b>
+                        rin
+                        :
+                      </b>
                       <span>
                         0x9008D19f58AAbD9eD0D60971565AA8510560ab41
                       </span>
@@ -872,7 +918,24 @@ exports[`./index.stories Default 1`] = `
                   </div>
                   <div
                     class="MuiBox-root mui-style-yjghm1"
-                  />
+                  >
+                    <a
+                      aria-label="View on rinkeby.etherscan.io"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                      data-mui-internal-clone-element="true"
+                      data-testid="explorer-btn"
+                      href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
+                      rel="noreferrer"
+                      tabindex="0"
+                      target="_blank"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall mui-style-tqxw8e-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
