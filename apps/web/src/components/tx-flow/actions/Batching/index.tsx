@@ -16,6 +16,8 @@ import { Box, Divider } from '@mui/material'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { SafeAppsName } from '@/config/constants'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const Batching = ({
   onSubmit,
@@ -88,8 +90,10 @@ const useShouldRegisterSlot = () => {
   const isDelegateCall = safeTx ? checkIsDelegateCall(safeTx) : false
   const isMultiSend = Boolean(safeTx && isMultiSendCalldata(safeTx?.data.data))
   const isFromTxBuilder = data?.app?.name === SafeAppsName.TRANSACTION_BUILDER
+  const isBatchingEnabled = useHasFeature(FEATURES.BATCHING) !== false
 
   return (
+    isBatchingEnabled &&
     isOwner &&
     isCreation &&
     !isBatch &&
