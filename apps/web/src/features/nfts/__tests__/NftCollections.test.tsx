@@ -1,6 +1,6 @@
 import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { ReactElement } from 'react'
-import NftCollections from '../NftCollections'
+import NftCollections from '../components/NftCollections'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { trackEvent } from '@/services/analytics'
 import useCollectibles from '@/hooks/useCollectibles'
