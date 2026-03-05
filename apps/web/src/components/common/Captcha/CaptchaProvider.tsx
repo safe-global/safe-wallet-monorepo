@@ -26,6 +26,7 @@ const CaptchaContext = createContext<CaptchaContextType | undefined>(undefined)
 export function CaptchaProvider({ children }: { children: ReactNode }) {
   const isDarkMode = useDarkMode()
   const [isScriptReady, setIsScriptReady] = useState(false)
+  const [scriptError, setScriptError] = useState<Error | null>(null)
 
   const captcha = useCaptchaToken({ theme: isDarkMode ? 'dark' : 'light', isScriptReady })
 
@@ -33,12 +34,17 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
     () => ({
       token: captcha.token,
       isLoading: captcha.isLoading,
-      error: captcha.error,
+      error: captcha.error ?? scriptError,
       refreshToken: captcha.refreshToken,
       isReady: !!captcha.token || !TURNSTILE_SITE_KEY,
     }),
-    [captcha.token, captcha.isLoading, captcha.error, captcha.refreshToken],
+    [captcha.token, captcha.isLoading, captcha.error, captcha.refreshToken, scriptError],
   )
+
+  const onScriptError = () => {
+    resolveCaptchaReady()
+    setScriptError(new Error('Failed to load CAPTCHA script'))
+  }
 
   return (
     <CaptchaContext.Provider value={contextValue}>
@@ -48,10 +54,15 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
           src={TURNSTILE_SCRIPT_URL}
           strategy="afterInteractive"
           onReady={() => setIsScriptReady(true)}
-          onError={() => resolveCaptchaReady()}
+          onError={onScriptError}
         />
       )}
-      <CaptchaModal open={captcha.isModalOpen} onWidgetContainerReady={captcha.onWidgetContainerReady} />
+      <CaptchaModal
+        open={captcha.isModalOpen}
+        onWidgetContainerReady={captcha.onWidgetContainerReady}
+        error={captcha.error}
+        onRetry={captcha.refreshToken}
+      />
     </CaptchaContext.Provider>
   )
 }

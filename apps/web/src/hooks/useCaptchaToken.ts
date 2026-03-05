@@ -25,6 +25,8 @@ declare global {
   }
 }
 
+const MODAL_CLOSE_DELAY_MS = 500
+
 interface UseCaptchaTokenOptions {
   theme?: 'light' | 'dark' | 'auto'
   isScriptReady: boolean
@@ -87,7 +89,7 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
           // Close modal after successful verification (if it was open)
           setTimeout(() => {
             if (isMountedRef.current) setIsModalOpen(false)
-          }, 500)
+          }, MODAL_CLOSE_DELAY_MS)
         },
         'error-callback': (error: string) => {
           sharedTokenRef.current = null
@@ -124,11 +126,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   const onWidgetContainerReady = useCallback(
     (container: HTMLDivElement | null) => {
       widgetContainerRef.current = container
-      if (container && isScriptReady) {
-        renderWidget()
-      }
+      if (container) renderWidget()
     },
-    [isScriptReady, renderWidget],
+    [renderWidget],
   )
 
   // Handle captcha disabled (no site key) - resolve immediately so requests can proceed
@@ -141,9 +141,7 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
 
   // Render widget when script becomes ready (if container already mounted)
   useEffect(() => {
-    if (isScriptReady && widgetContainerRef.current) {
-      renderWidget()
-    }
+    if (isScriptReady) renderWidget()
   }, [isScriptReady, renderWidget])
 
   // Cleanup on unmount
