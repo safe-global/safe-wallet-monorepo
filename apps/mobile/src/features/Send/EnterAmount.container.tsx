@@ -1,16 +1,13 @@
 import React, { useCallback, useRef } from 'react'
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
 import { Text, View } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { setActiveSigner } from '@/src/store/activeSignerSlice'
-import { Signer } from '@/src/store/signersSlice'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
@@ -26,6 +23,7 @@ import { useNonceSelection } from './hooks/useNonceSelection'
 import { useTokenBalance } from './hooks/useTokenBalance'
 import { useSendTransaction } from './hooks/useSendTransaction'
 import { useEnsureActiveSigner } from './hooks/useEnsureActiveSigner'
+import { useProposerSheet } from './hooks/useProposerSheet'
 import { Address } from '@/src/types/address'
 
 const FIAT_DECIMALS = 2
@@ -117,9 +115,8 @@ export function EnterAmountContainer() {
     maxBalance,
   })
 
-  const dispatch = useAppDispatch()
-  const proposerSheetRef = useRef<BottomSheetModal>(null)
   const { activeSigner, availableSigners } = useEnsureActiveSigner()
+  const proposer = useProposerSheet({ safeAddress: activeSafe.address, inputRef })
   const { submitError, handleReview, isSubmitting } = useSendTransaction({
     recipientAddress,
     tokenAddress,
@@ -129,25 +126,6 @@ export function EnterAmountContainer() {
     selectedNonce: nonce.selectedNonce ?? nonce.recommendedNonce,
     sender: activeSigner?.value,
   })
-
-  const handleOpenProposerSheet = useCallback(() => {
-    Keyboard.dismiss()
-    proposerSheetRef.current?.present()
-  }, [])
-
-  const handleSelectProposer = useCallback(
-    (signer: Signer) => {
-      dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer }))
-      proposerSheetRef.current?.dismiss()
-    },
-    [dispatch, activeSafe.address],
-  )
-
-  const handleProposerSheetChange = useCallback((index: number) => {
-    if (index === -1) {
-      inputRef.current?.focus()
-    }
-  }, [])
 
   const handleMax = useCallback(() => {
     const formatted = safeFormatUnits(maxBalance, decimals)
@@ -238,7 +216,7 @@ export function EnterAmountContainer() {
         keyboardVisible={keyboardVisible}
         bottomInset={bottom}
         onReview={handleReview}
-        onOpenSignerSheet={handleOpenProposerSheet}
+        onOpenSignerSheet={proposer.handleOpenProposerSheet}
       />
 
       <NonceBottomSheet
@@ -261,11 +239,11 @@ export function EnterAmountContainer() {
       />
 
       <ProposerBottomSheet
-        ref={proposerSheetRef}
+        ref={proposer.proposerSheetRef}
         availableSigners={availableSigners}
         selectedAddress={activeSigner?.value as Address | undefined}
-        onSelectSigner={handleSelectProposer}
-        onChange={handleProposerSheetChange}
+        onSelectSigner={proposer.handleSelectProposer}
+        onChange={proposer.handleProposerSheetChange}
       />
     </KeyboardAvoidingView>
   )

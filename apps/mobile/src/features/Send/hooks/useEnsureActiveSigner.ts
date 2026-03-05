@@ -17,10 +17,9 @@ export function useEnsureActiveSigner() {
   const currentActiveSigner = useAppSelector((state: RootState) => selectActiveSigner(state, activeSafe.address))
 
   const availableSigners: Signer[] = useMemo(() => {
-    if (!owners) {
-      return []
-    }
-    return owners.map((owner) => signers[owner.value]).filter((signer): signer is Signer => signer !== undefined)
+    return (owners ?? [])
+      .map((owner) => signers[owner.value])
+      .filter((signer): signer is Signer => signer !== undefined)
   }, [owners, signers])
 
   const isSignerStale =
@@ -28,11 +27,10 @@ export function useEnsureActiveSigner() {
     availableSigners.length > 0 &&
     !availableSigners.some((s) => s.value === currentActiveSigner.value)
 
+  const needsSignerUpdate = availableSigners.length > 0 && (!currentActiveSigner || isSignerStale)
+
   useEffect(() => {
-    if (availableSigners.length === 0) {
-      return
-    }
-    if (!currentActiveSigner || isSignerStale) {
+    if (needsSignerUpdate) {
       dispatch(
         setActiveSigner({
           safeAddress: activeSafe.address,
@@ -40,7 +38,7 @@ export function useEnsureActiveSigner() {
         }),
       )
     }
-  }, [currentActiveSigner, isSignerStale, availableSigners, dispatch, activeSafe.address])
+  }, [needsSignerUpdate, availableSigners, dispatch, activeSafe.address])
 
   const activeSigner = isSignerStale ? undefined : currentActiveSigner
 
