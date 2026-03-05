@@ -17,12 +17,15 @@ interface ProposeSendTransactionArgs extends SendTransactionParams {
  *
  * The user will sign via the existing confirm-transaction flow.
  */
-function validateAddresses(recipient: string, tokenAddress: string): void {
+function validateAddresses(recipient: string, tokenAddress: string, sender: string): void {
   if (!isAddress(recipient)) {
     throw new Error(`Invalid recipient address: ${recipient}`)
   }
   if (!isAddress(tokenAddress)) {
     throw new Error(`Invalid token address: ${tokenAddress}`)
+  }
+  if (!isAddress(sender)) {
+    throw new Error(`Invalid sender address: ${sender}`)
   }
 }
 
@@ -51,7 +54,7 @@ export const proposeSendTransaction = async ({
   dispatch,
   nonce,
 }: ProposeSendTransactionArgs): Promise<string> => {
-  validateAddresses(recipient, tokenAddress)
+  validateAddresses(recipient, tokenAddress, sender)
 
   const safeSDK = await getVerifiedSafeSDK(chainId)
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
@@ -61,7 +64,7 @@ export const proposeSendTransaction = async ({
   const txDetails = await proposeNewTransaction({
     chainId,
     safeAddress,
-    sender,
+    sender: getAddress(sender),
     signedTx: safeTx,
     safeTxHash,
     dispatch,
