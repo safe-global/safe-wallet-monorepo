@@ -5,3 +5,5 @@ import type { NftsContract } from './contract'
 export const NftsFeature = createFeatureHandle<NftsContract>('nfts', FEATURES.ERC721)
 
 export type { NftsContract } from './contract'
+
+export { default as NftsPage } from './components/NftsPage'
