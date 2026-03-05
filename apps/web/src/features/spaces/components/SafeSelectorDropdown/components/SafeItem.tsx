@@ -7,10 +7,16 @@ import type { SafeItemData } from '../types'
 
 const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {
   const isNested = Boolean(parentSafeId)
+  const chainShortName = chains[0]?.shortName ?? ''
 
   return (
     <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')}>
-      <SafeInfoDisplay name={name} address={address} className="flex-1" />
+      <SafeInfoDisplay
+        name={name}
+        address={address}
+        chainShortName={chainShortName}
+        className="flex-1"
+      />
       <div className="flex items-center gap-2 bg-muted rounded-full px-0.5 py-0.5 pl-0.5 pr-2.5 shrink-0">
         {chains.slice(0, 3).map((chainItem, index) => (
           <span

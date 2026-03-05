@@ -21,6 +21,7 @@ const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
   chainName: chain?.chainName ?? chainId,
   chainLogoUri: chain?.chainLogoUri ?? null,
+  shortName: chain?.shortName ?? chainId,
 })
 
 export function useSpaceSafeSelectorItems() {

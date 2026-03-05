@@ -1,7 +1,6 @@
 import { Settings } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { getInitials } from '../utils'
+import { getInitials, getSafeDisplayInfo } from '../utils'
 import ChainSelectorBlock from './ChainSelectorBlock'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
@@ -20,8 +19,14 @@ function SafeSelectorTriggerContent({
   onChainSelect,
 }: SafeSelectorTriggerContentProps) {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation()
-  const displayName = selectedItem.name || shortenAddress(selectedItem.address)
-  const showAddressLine = Boolean(selectedItem.name)
+  const selectedChain =
+    selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
+  const chainShortName = selectedChain?.shortName ?? ''
+  const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
+    selectedItem.name,
+    selectedItem.address,
+    chainShortName,
+  )
 
   return (
     <div className="flex items-center gap-4 w-full">
@@ -34,9 +39,7 @@ function SafeSelectorTriggerContent({
           <Settings className="size-3 text-muted-foreground shrink-0" />
         </div>
         {showAddressLine && (
-          <span className="text-xs text-muted-foreground">
-            {shortenAddress(selectedItem.address)}
-          </span>
+          <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>
         )}
       </div>
       <div

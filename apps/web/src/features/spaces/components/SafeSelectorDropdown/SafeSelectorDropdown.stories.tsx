@@ -38,9 +38,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const baseChains = [
-  { chainId: '1', chainName: 'Ethereum', chainLogoUri: undefined },
-  { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: undefined },
-  { chainId: '8453', chainName: 'Base', chainLogoUri: undefined },
+  { chainId: '1', chainName: 'Ethereum', chainLogoUri: undefined, shortName: 'eth' },
+  { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: undefined, shortName: 'gno' },
+  { chainId: '8453', chainName: 'Base', chainLogoUri: undefined, shortName: 'base' },
 ]
 
 const SAFE_NAMES = [
