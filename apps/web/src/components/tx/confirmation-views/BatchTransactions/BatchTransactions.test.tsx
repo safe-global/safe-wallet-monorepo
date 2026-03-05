@@ -4,14 +4,9 @@ import { render } from '@/tests/test-utils'
 import BatchTransactions from '.'
 import * as useDraftBatch from '@/features/batching'
 import * as useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
-import BatchTxList from '@/features/batching/components/BatchSidebar/BatchTxList'
 import { mockedDraftBatch } from './mockData'
 import { Operation } from '@safe-global/store/gateway/types'
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ BatchTxList, $isReady: true, $isDisabled: false }),
-  createFeatureHandle: () => ({}),
-}))
 jest.spyOn(useDraftBatch, 'useDraftBatch').mockImplementation(() => mockedDraftBatch)
 
 const mockUseTxPreview = jest.spyOn(useTxPreview, 'default')
