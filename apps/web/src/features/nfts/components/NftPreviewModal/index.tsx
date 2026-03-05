@@ -2,7 +2,7 @@ import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/coll
 import ModalDialog from '@/components/common/ModalDialog'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
-import { nftPlatforms } from '../config'
+import { nftPlatforms } from '../../config'
 import useChainId from '@/hooks/useChainId'
 import { CircularProgress } from '@mui/material'
 

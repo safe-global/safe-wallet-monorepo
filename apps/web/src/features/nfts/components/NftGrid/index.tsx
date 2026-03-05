@@ -25,7 +25,7 @@ import NftIcon from '@/public/images/common/nft.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ExternalLink from '@/components/common/ExternalLink'
 import useChainId from '@/hooks/useChainId'
-import { nftPlatforms } from '../config'
+import { nftPlatforms } from '../../config'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
 interface NftsTableProps {
