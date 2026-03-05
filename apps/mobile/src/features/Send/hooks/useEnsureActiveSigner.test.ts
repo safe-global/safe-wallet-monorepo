@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-native'
+import { renderHook, act } from '@testing-library/react-native'
 import { useAppSelector } from '@/src/store/hooks'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { Signer } from '@/src/store/signersSlice'
@@ -32,7 +32,7 @@ jest.mock('@/src/store/signersSlice', () => ({
   selectSigners: jest.fn(),
 }))
 
-const mockUseAppSelector = useAppSelector as jest.Mock
+const mockUseAppSelector = useAppSelector as unknown as jest.Mock
 
 const makeSigner = (address: string): Signer => ({
   value: address,
@@ -92,8 +92,8 @@ describe('useEnsureActiveSigner', () => {
     })
   })
 
-  describe('auto-selection of active signer', () => {
-    it('dispatches setActiveSigner with first available when no active signer', () => {
+  describe('ensureActiveSigner callback', () => {
+    it('does not dispatch on render (no automatic side effects)', () => {
       const signerA = makeSigner('0xA')
       const owners = [makeOwner('0xA')]
       const signersRecord = { '0xA': signerA }
@@ -101,6 +101,20 @@ describe('useEnsureActiveSigner', () => {
       setupSelectors(owners, signersRecord, undefined)
 
       renderHook(() => useEnsureActiveSigner())
+
+      expect(mockDispatch).not.toHaveBeenCalled()
+    })
+
+    it('dispatches setActiveSigner with first available when called with no active signer', () => {
+      const signerA = makeSigner('0xA')
+      const owners = [makeOwner('0xA')]
+      const signersRecord = { '0xA': signerA }
+
+      setupSelectors(owners, signersRecord, undefined)
+
+      const { result } = renderHook(() => useEnsureActiveSigner())
+
+      act(() => result.current.ensureActiveSigner())
 
       expect(mockDispatch).toHaveBeenCalledTimes(1)
       expect(setActiveSigner).toHaveBeenCalledWith({
@@ -117,7 +131,9 @@ describe('useEnsureActiveSigner', () => {
 
       setupSelectors(owners, signersRecord, staleSigner)
 
-      renderHook(() => useEnsureActiveSigner())
+      const { result } = renderHook(() => useEnsureActiveSigner())
+
+      act(() => result.current.ensureActiveSigner())
 
       expect(mockDispatch).toHaveBeenCalledTimes(1)
       expect(setActiveSigner).toHaveBeenCalledWith({
@@ -125,17 +141,27 @@ describe('useEnsureActiveSigner', () => {
         signer: signerA,
       })
     })
-  })
 
-  describe('no dispatch when active signer is valid', () => {
-    it('does not dispatch when active signer is in available signers', () => {
+    it('does not dispatch when active signer is valid', () => {
       const signerA = makeSigner('0xA')
       const owners = [makeOwner('0xA')]
       const signersRecord = { '0xA': signerA }
 
       setupSelectors(owners, signersRecord, signerA)
 
-      renderHook(() => useEnsureActiveSigner())
+      const { result } = renderHook(() => useEnsureActiveSigner())
+
+      act(() => result.current.ensureActiveSigner())
+
+      expect(mockDispatch).not.toHaveBeenCalled()
+    })
+
+    it('does not dispatch when no available signers', () => {
+      setupSelectors(undefined, {}, undefined)
+
+      const { result } = renderHook(() => useEnsureActiveSigner())
+
+      act(() => result.current.ensureActiveSigner())
 
       expect(mockDispatch).not.toHaveBeenCalled()
     })

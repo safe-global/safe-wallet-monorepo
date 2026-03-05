@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
 import { Text, View } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -101,7 +101,9 @@ export function EnterAmountContainer() {
     exceedsDecimals,
   })
 
-  const { activeSigner, availableSigners } = useEnsureActiveSigner()
+  const { activeSigner, availableSigners, ensureActiveSigner } = useEnsureActiveSigner()
+
+  useEffect(() => ensureActiveSigner(), [])
   const proposer = useProposerSheet({ safeAddress: activeSafe.address, inputRef })
   const { submitError, handleReview, isSubmitting } = useSendTransaction({
     recipientAddress,

@@ -1,14 +1,10 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectActiveSigner, setActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectSafeInfo } from '@/src/store/safesSlice'
 import { selectSigners, Signer } from '@/src/store/signersSlice'
 import { RootState } from '@/src/store'
-
-function isSignerStale(current: Signer | undefined, available: Signer[]): boolean {
-  return current !== undefined && available.length > 0 && !available.some((s) => s.value === current.value)
-}
 
 function resolveActiveSigner(current: Signer | undefined, available: Signer[]): Signer | undefined {
   if (available.length === 0 || current === undefined) {
@@ -33,11 +29,14 @@ export function useEnsureActiveSigner() {
       .filter((signer): signer is Signer => signer !== undefined)
   }, [owners, signers])
 
-  const stale = isSignerStale(currentActiveSigner, availableSigners)
-  const needsSignerUpdate = availableSigners.length > 0 && (!currentActiveSigner || stale)
+  const activeSigner = resolveActiveSigner(currentActiveSigner, availableSigners)
 
-  useEffect(() => {
-    if (needsSignerUpdate) {
+  const ensureActiveSigner = useCallback(() => {
+    if (availableSigners.length === 0) {
+      return
+    }
+    const isValid = currentActiveSigner && availableSigners.some((s) => s.value === currentActiveSigner.value)
+    if (!isValid) {
       dispatch(
         setActiveSigner({
           safeAddress: activeSafe.address,
@@ -45,9 +44,7 @@ export function useEnsureActiveSigner() {
         }),
       )
     }
-  }, [needsSignerUpdate, availableSigners, dispatch, activeSafe.address])
+  }, [availableSigners, currentActiveSigner, dispatch, activeSafe.address])
 
-  const activeSigner = resolveActiveSigner(currentActiveSigner, availableSigners)
-
-  return { activeSigner, availableSigners }
+  return { activeSigner, availableSigners, ensureActiveSigner }
 }
