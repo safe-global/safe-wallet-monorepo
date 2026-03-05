@@ -34,10 +34,7 @@ export const ProtocolSection = ({ protocol, totalFiatValue, currency }: Protocol
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"
-        marginBottom="$2"
-        height={64}
-        paddingLeft="$3"
-        paddingRight="$2"
+        paddingHorizontal="$3"
         paddingVertical="$3"
         flexDirection="row"
         alignItems="center"

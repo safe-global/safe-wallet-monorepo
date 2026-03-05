@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { ListRenderItem, RefreshControl } from 'react-native'
-import { getTokenValue } from 'tamagui'
-
 import { SafeTab } from '@/src/components/SafeTab'
 import { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { Fallback } from '../Fallback'
 import { NoFunds } from '@/src/features/Assets/components/NoFunds'
 import { AssetError } from '@/src/features/Assets/Assets.error'
+import { assetListContentStyle, assetListStyle } from '../../styles'
 import { TokenItem } from './TokenItem'
 import { useTokenBalances } from './useTokenBalances'
 
@@ -64,8 +63,8 @@ export function TokensContainer() {
       data={visibleItems}
       renderItem={renderItem}
       keyExtractor={(item, index): string => item.tokenInfo.name + index}
-      contentContainerStyle={{ paddingHorizontal: getTokenValue('$4'), gap: getTokenValue('$2') }}
-      style={{ marginTop: getTokenValue('$4') }}
+      contentContainerStyle={assetListContentStyle}
+      style={assetListStyle}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
     />
   )

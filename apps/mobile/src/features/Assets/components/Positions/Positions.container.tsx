@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { RefreshControl } from 'react-native'
-import { getTokenValue } from 'tamagui'
-
 import { SafeTab } from '@/src/components/SafeTab'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { calculatePositionsFiatTotal } from '@safe-global/utils/features/positions'
 
+import { assetListContentStyle, assetListStyle } from '../../styles'
 import { Fallback } from '../Fallback'
 import { PositionsEmpty } from './PositionsEmpty'
 import { PositionsError } from './PositionsError'
@@ -61,7 +60,8 @@ export const PositionsContainer = () => {
       data={data}
       renderItem={renderItem}
       keyExtractor={(item) => item.protocol}
-      style={{ marginTop: getTokenValue('$2'), paddingHorizontal: getTokenValue('$2') }}
+      contentContainerStyle={assetListContentStyle}
+      style={assetListStyle}
       refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
     />
   )
