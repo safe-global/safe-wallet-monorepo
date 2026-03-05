@@ -82,7 +82,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button data-testid="add-manually-button" size="compact" onClick={() => setAddManuallyOpen(true)}>
+      <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
         + Add manually
       </Button>
       <ModalDialog

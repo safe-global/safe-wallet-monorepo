@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 import { makeSafeId } from '@/src/utils/formatters'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
-import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
 import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { Address } from '@/src/types/address'
@@ -25,7 +25,7 @@ export const AddSignersFormContainer = () => {
   const chainIds = useAppSelector(selectAllChainsIds)
   const appSigners = useAppSelector(selectSigners)
   const currency = useAppSelector(selectCurrency)
-  const { currentData, isFetching } = useSafesGetOverviewForManyQuery({
+  const { currentData, isFetching } = useSafeOverviewsQuery({
     safes: chainIds.map((chainId: string) => makeSafeId(chainId, params.safeAddress)),
     currency,
     trusted: true,

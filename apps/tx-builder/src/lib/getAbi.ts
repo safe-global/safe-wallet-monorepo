@@ -7,10 +7,15 @@ enum PROVIDER {
   GATEWAY = 2,
 }
 
-type SourcifyResponse = {
-  name: string
-  path: string
-  content: string
+type SourcifyV2Response = {
+  abi: ContractMethod[]
+  matchId: string
+  creationMatch: 'exact_match' | 'match' | null
+  runtimeMatch: 'exact_match' | 'match' | null
+  match: 'exact_match' | 'match' | null
+  verifiedAt: string
+  chainId: string
+  address: string
 }
 
 interface GatewayContractResponse {
@@ -19,13 +24,12 @@ interface GatewayContractResponse {
   }
 }
 
-const METADATA_FILE = 'metadata.json'
 const DEFAULT_TIMEOUT = 10000
 
 const getProviderURL = (chain: string, address: string, urlProvider: PROVIDER): string => {
   switch (urlProvider) {
     case PROVIDER.SOURCIFY:
-      return `https://sourcify.dev/server/files/${chain}/${address}`
+      return `https://sourcify.dev/server/v2/contract/${chain}/${address}?fields=abi`
     case PROVIDER.GATEWAY:
       return `https://safe-client.safe.global/v1/chains/${chain}/contracts/${address}`
     default:
@@ -34,17 +38,15 @@ const getProviderURL = (chain: string, address: string, urlProvider: PROVIDER): 
 }
 
 const getAbiFromSourcify = async (address: string, chainId: string): Promise<ContractMethod[]> => {
-  const { data } = await axios.get<SourcifyResponse[]>(getProviderURL(chainId, address, PROVIDER.SOURCIFY), {
+  const { data } = await axios.get<SourcifyV2Response>(getProviderURL(chainId, address, PROVIDER.SOURCIFY), {
     timeout: DEFAULT_TIMEOUT,
   })
 
-  if (data.length) {
-    const metadata = data.find((item: SourcifyResponse) => item.name === METADATA_FILE)
-    const abi = metadata && JSON.parse(metadata.content)?.output?.abi
-    if (abi) return abi
+  if (data.abi) {
+    return data.abi
   }
 
-  throw new Error('Contract found but could not found abi using Sourcify')
+  throw new Error('Contract found but could not find ABI using Sourcify')
 }
 
 const getAbiFromGateway = async (address: string, chainName: string): Promise<ContractMethod[]> => {

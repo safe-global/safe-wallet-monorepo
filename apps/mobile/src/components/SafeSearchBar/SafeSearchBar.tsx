@@ -47,15 +47,15 @@ const SafeSearchBar: React.FC<SafeSearchBarProps> = ({ placeholder, onSearch, th
     onSearch('')
   }
 
-  const colorSecondary = theme.colorSecondary?.get()
+  const colorSecondary = theme.colorSecondary.get()
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <View style={[styles.searchBar, { backgroundColor: theme.backgroundSecondary?.get() }]}>
+      <View style={[styles.searchBar, { backgroundColor: theme.backgroundSecondary.get() }]}>
         <SafeFontIcon name="search" size={18} color={colorSecondary} />
 
         <TextInput
-          style={[styles.input, { color: theme.color?.get() }]}
+          style={[styles.input, { color: theme.color.get() }]}
           placeholder={placeholder}
           placeholderTextColor={colorSecondary}
           value={searchQuery}

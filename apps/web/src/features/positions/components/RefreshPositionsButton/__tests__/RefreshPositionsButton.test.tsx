@@ -3,9 +3,11 @@ import RefreshPositionsButton from '../index'
 import * as analytics from '@/services/analytics'
 import * as useRefetchBalances from '@/hooks/useRefetchBalances'
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 jest.mock('@/services/analytics/events/positions', () => ({
   POSITIONS_EVENTS: {

@@ -59,7 +59,6 @@ describe('SecurityLogin', () => {
 
     // Setup useLoadFeature mock to return our mock component
     mockUseLoadFeature.mockReturnValue({
-      $isLoading: false,
       $isDisabled: false,
       $isReady: true,
       HnActivatedSettingsBanner: MockHnActivatedSettingsBanner,

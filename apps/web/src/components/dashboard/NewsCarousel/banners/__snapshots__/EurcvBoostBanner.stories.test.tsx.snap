@@ -45,13 +45,13 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
           </a>
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeCompact MuiButton-textSizeCompact MuiButton-colorStatic bannerCtaText mui-style-9raz31-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic bannerCtaText mui-style-1wse3e8-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
           Start earning
           <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeCompact mui-style-ioep0k-MuiButton-endIcon"
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-pctag4-MuiButton-endIcon"
           >
             <svg
               aria-hidden="true"

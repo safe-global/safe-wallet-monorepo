@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -31,23 +31,13 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   const addressBook = useAppSelector((state) => selectAddressBookByChain(state, chainId))
   const safeName = safeAddress ? addressBook?.[safeAddress] : undefined
 
-  const [isDismissed, setIsDismissed] = useState(false)
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
 
   // Determine user role (owner takes priority over proposer)
   const userRole: SafeUserRole = isOwner ? 'owner' : isProposer ? 'proposer' : 'viewer'
 
   // Show warning if user is owner or proposer but safe is not trusted
-  const shouldShowWarning = !isDismissed && !isTrustedSafe && (userRole === 'owner' || userRole === 'proposer')
-
-  // Track when warning is first shown
-  const hasTrackedWarning = useRef(false)
-  useEffect(() => {
-    if (shouldShowWarning && !hasTrackedWarning.current) {
-      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW)
-      hasTrackedWarning.current = true
-    }
-  }, [shouldShowWarning])
+  const shouldShowWarning = !isTrustedSafe && (userRole === 'owner' || userRole === 'proposer')
 
   // Open confirmation dialog
   const openConfirmDialog = useCallback(() => {
@@ -61,30 +51,28 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   }, [])
 
   // Add safe to pinned list (called after confirmation)
-  const confirmAndAddToPinnedList = useCallback(async () => {
-    if (!chainId || !safeAddress) return
+  const confirmAndAddToPinnedList = useCallback(
+    (name: string) => {
+      if (!chainId || !safeAddress) return
 
-    trustSafe({
-      chainId,
-      address: safeAddress,
-      owners: safe?.owners,
-      threshold: safe?.threshold,
-    })
+      trustSafe({
+        chainId,
+        address: safeAddress,
+        name: name || undefined,
+        owners: safe?.owners,
+        threshold: safe?.threshold,
+      })
 
-    trackEvent({
-      ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE_CONFIRM,
-      label: hasSimilarAddress ? TRUSTED_SAFE_LABELS.with_similarity : TRUSTED_SAFE_LABELS.without_similarity,
-    })
+      trackEvent({
+        ...OVERVIEW_EVENTS.TRUSTED_SAFES_ADD_SINGLE_CONFIRM,
+        label: hasSimilarAddress ? TRUSTED_SAFE_LABELS.with_similarity : TRUSTED_SAFE_LABELS.without_similarity,
+      })
 
-    // Close the dialog after adding
-    setIsConfirmDialogOpen(false)
-  }, [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress])
-
-  // Dismiss warning for this session
-  const dismiss = useCallback(() => {
-    setIsDismissed(true)
-    trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_DISMISS)
-  }, [])
+      // Close the dialog after adding
+      setIsConfirmDialogOpen(false)
+    },
+    [chainId, safeAddress, safe?.owners, safe?.threshold, trustSafe, hasSimilarAddress],
+  )
 
   return {
     shouldShowWarning,
@@ -92,14 +80,12 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
     safeName,
     chainId,
     userRole,
-    isDismissed,
     isConfirmDialogOpen,
     hasSimilarAddress,
     similarAddresses,
     openConfirmDialog,
     closeConfirmDialog,
     confirmAndAddToPinnedList,
-    dismiss,
   }
 }
 

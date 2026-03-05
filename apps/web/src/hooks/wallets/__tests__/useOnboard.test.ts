@@ -2,15 +2,18 @@ import { faker } from '@faker-js/faker'
 import type { EIP1193Provider, OnboardAPI, WalletState } from '@web3-onboard/core'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getConnectedWallet, switchWallet, trackWalletType } from '../useOnboard'
+import { trackEvent } from '@/services/analytics'
 
 // mock wallets
 jest.mock('@/hooks/wallets/wallets', () => ({
   getDefaultWallets: jest.fn(() => []),
 }))
 
-// mock analytics
+// mock analytics - using jest.requireActual to avoid hoisting issues
 jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
   WALLET_EVENTS: {
     CONNECT: { action: 'connect_wallet' },
     WALLET_CONNECT: { action: 'wallet_connect' },
@@ -21,9 +24,6 @@ jest.mock('@/services/analytics', () => ({
     EOA_WALLET_NETWORK: 'EOA Wallet Network',
   },
 }))
-
-// Import the mocked trackEvent
-const { trackEvent } = require('@/services/analytics')
 
 describe('useOnboard', () => {
   describe('getConnectedWallet', () => {
@@ -150,7 +150,7 @@ describe('useOnboard', () => {
 
   describe('trackWalletType', () => {
     beforeEach(() => {
-      trackEvent.mockClear()
+      ;(trackEvent as jest.Mock).mockClear()
     })
 
     it('should track wallet connection with proper Mixpanel parameters', () => {

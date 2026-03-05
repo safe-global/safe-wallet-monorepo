@@ -1,21 +1,19 @@
 import { useContext } from 'react'
-import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
-import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { QueueAssessmentContext } from '../contexts/QueueAssessmentContext'
+import { QueueAssessmentContext, type QueueAssessmentContextValue } from '../contexts/QueueAssessmentContext'
 
 /**
- * Hook to get assessment data for a specific transaction hash
- * Uses the QueueAssessmentContext to retrieve assessment results
+ * Hook to access the QueueAssessmentContext
+ * Provides access to assessments, loading state, and setPages function
  *
- * @param safeTxHash - The safeTxHash of the transaction
- * @returns AsyncResult containing threat analysis results, or undefined if not available
+ * @returns QueueAssessmentContextValue
+ * @throws Error if used outside HnQueueAssessmentProvider
  */
-export function useHnQueueAssessment(safeTxHash: string | undefined): AsyncResult<ThreatAnalysisResults> | undefined {
+export function useHnQueueAssessment(): QueueAssessmentContextValue {
   const context = useContext(QueueAssessmentContext)
 
-  if (!safeTxHash || !context) {
-    return undefined
+  if (!context) {
+    throw new Error('useHnQueueAssessment must be used within a HnQueueAssessmentProvider')
   }
 
-  return context.assessments[safeTxHash as `0x${string}`]
+  return context
 }

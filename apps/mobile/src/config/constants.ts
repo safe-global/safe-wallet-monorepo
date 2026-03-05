@@ -8,6 +8,7 @@ export const isAndroid = Platform.OS === 'android'
 export const isTestingEnv = process.env.NODE_ENV === 'test'
 export const isStorybookEnv = Constants?.expoConfig?.extra?.storybookEnabled === 'true'
 export const POLLING_INTERVAL = 15_000
+export const DUST_THRESHOLD = 0.01
 export const POSITIONS_POLLING_INTERVAL = 300_000 // 5 minutes
 
 export const COMING_SOON_MESSAGE = 'This feature is coming soon.'
@@ -17,6 +18,7 @@ export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+export const CONFIG_SERVICE_KEY = process.env.EXPO_PUBLIC_CONFIG_SERVICE_KEY || 'MOBILE'
 
 export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64
 export const SECURITY_WATCHER_MAIL = process.env.EXPO_PUBLIC_SECURITY_WATCHER_MAIL

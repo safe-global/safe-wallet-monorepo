@@ -14,7 +14,7 @@ import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 
 type EditContactDialogProps = {

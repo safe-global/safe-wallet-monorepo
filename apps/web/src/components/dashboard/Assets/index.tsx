@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
-import SwapButton from '@/features/swap/components/SwapButton'
+import { SwapFeature, useIsSwapFeatureEnabled } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
 import { WidgetCard } from '../styled'
 import css from './styles.module.css'
@@ -10,7 +11,6 @@ import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
@@ -21,7 +21,6 @@ import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { StakeFeature } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 
@@ -59,6 +58,7 @@ const AssetRow = ({
   showStake?: boolean
 }) => {
   const stake = useLoadFeature(StakeFeature)
+  const { SwapButton } = useLoadFeature(SwapFeature)
 
   return (
     <Box className={css.container} key={item.tokenInfo.address}>

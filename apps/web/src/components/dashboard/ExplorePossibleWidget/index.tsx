@@ -117,7 +117,7 @@ const ExplorePossibleWidget = () => {
         subtitle: 'subtitle' in config ? config.subtitle : undefined,
         badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
-        link: config.getLink(router.query.safe, txBuilderApp?.link),
+        link: config.getLink(router.query.safe, txBuilderApp.link),
       })),
     [router.query.safe, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )
@@ -179,7 +179,7 @@ const ExplorePossibleWidget = () => {
   }
 
   return (
-    <Card sx={{ px: 3, pt: 2.5, pb: 3 }} component="section">
+    <Card sx={{ px: 3, pt: 2.5, pb: 1.5 }} component="section">
       <div style={{ position: 'relative' }}>
         {/* Gradient fade on the right */}
         <div

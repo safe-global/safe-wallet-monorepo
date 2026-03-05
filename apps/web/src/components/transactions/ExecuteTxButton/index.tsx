@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
+import { useIsExpiredSwap } from '@/features/swap'
 import useIsPending from '@/hooks/useIsPending'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement, useContext } from 'react'
@@ -62,8 +62,8 @@ const ExecuteTxButton = ({
               onMouseLeave={onMouseLeave}
               variant="contained"
               disabled={!isOk || isDisabled}
-              size={compact ? 'small' : 'stretched'}
-              sx={{ minWidth: '106.5px', py: compact ? 0.8 : undefined }}
+              size={compact ? 'small' : 'large'}
+              sx={{ minWidth: '106.5px' }}
             >
               Execute
             </Button>

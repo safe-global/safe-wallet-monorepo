@@ -16,9 +16,11 @@ class AppCommunicator {
   private iframeRef: RefObject<HTMLIFrameElement | null>
   private handlers = new Map<Methods, MessageHandler>()
   private config: AppCommunicatorConfig
+  private allowedOrigin: string
 
-  constructor(iframeRef: RefObject<HTMLIFrameElement | null>, config?: AppCommunicatorConfig) {
+  constructor(iframeRef: RefObject<HTMLIFrameElement | null>, allowedOrigin: string, config?: AppCommunicatorConfig) {
     this.iframeRef = iframeRef
+    this.allowedOrigin = allowedOrigin
     this.config = config || {}
 
     window.addEventListener('message', this.handleIncomingMessage)
@@ -30,17 +32,15 @@ class AppCommunicator {
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
     if (!msg.data) return false
-    if (msg.data.hasOwnProperty('isCookieEnabled')) {
-      return true
-    }
 
     const sentFromIframe = this.iframeRef.current?.contentWindow === msg.source
+    const originMatches = msg.origin === this.allowedOrigin
     const knownMethod = Object.values(Methods).includes(msg.data.method)
 
     // TODO: move it to safe-app Methods types
     const isThemeInfoMethod = (msg.data.method as string) === 'getCurrentTheme'
 
-    return sentFromIframe && (knownMethod || isThemeInfoMethod)
+    return sentFromIframe && originMatches && (knownMethod || isThemeInfoMethod)
   }
 
   private canHandleMessage = (msg: SDKMessageEvent): boolean => {
@@ -55,7 +55,7 @@ class AppCommunicator {
       ? MessageFormatter.makeErrorResponse(requestId, data as string, sdkVersion)
       : MessageFormatter.makeResponse(requestId, data, sdkVersion)
 
-    this.iframeRef.current?.contentWindow?.postMessage(msg, '*')
+    this.iframeRef.current?.contentWindow?.postMessage(msg, this.allowedOrigin)
   }
 
   handleIncomingMessage = async (msg: SDKMessageEvent): Promise<void> => {
@@ -78,7 +78,7 @@ class AppCommunicator {
       } catch (e) {
         const error = asError(e)
 
-        this.send(error.message, msg.data.id, true)
+        this.send('Request failed', msg.data.id, true)
         this.config?.onError?.(error, msg.data)
       }
     }

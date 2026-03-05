@@ -22,6 +22,7 @@ export default [
       '**/.next/',
       '**/.github/',
       '**/cypress/',
+      '**/cypress.config.js',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',

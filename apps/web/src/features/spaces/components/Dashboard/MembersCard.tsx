@@ -1,9 +1,9 @@
 import classnames from 'classnames'
-import css from '@/features/spaces/components/Dashboard/styles.module.css'
+import css from './styles.module.css'
 import MemberIcon from '@/public/images/spaces/member.svg'
 import { Typography, Paper, Box, Button, SvgIcon, Tooltip } from '@mui/material'
 import { useState } from 'react'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useIsAdmin } from '@/features/spaces'
 import AddMemberModal from '../AddMemberModal'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -32,7 +32,7 @@ const MembersCard = () => {
                   data-testid="add-member-button"
                   onClick={handleInviteClick}
                   variant={isButtonDisabled ? 'contained' : 'outlined'}
-                  size="compact"
+                  size="medium"
                   aria-label="Invite team members"
                   disabled={isButtonDisabled}
                 >

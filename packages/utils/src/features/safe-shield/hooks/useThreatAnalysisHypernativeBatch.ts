@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { mapHypernativeResponse } from '@safe-global/utils/features/safe-shield/utils/mapHypernativeResponse'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { isHypernativeBatchAssessmentErrorResponse } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { buildHypernativeBatchRequestData } from '../utils/buildHypernativeBatchRequestData'
+import type { HypernativeBatchAssessmentRequestDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 
 type UseThreatAnalysisHypernativeBatchProps = {
   safeTxHashes: `0x${string}`[]
@@ -30,66 +31,58 @@ export function useThreatAnalysisHypernativeBatch({
   authToken,
   skip = false,
 }: UseThreatAnalysisHypernativeBatchProps): Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> {
+  const [request, setRequest] = useState<HypernativeBatchAssessmentRequestDto | undefined>(undefined)
+  const prevRequestRef = useRef<HypernativeBatchAssessmentRequestDto | undefined>(undefined)
   const prevHashesRef = useRef<`0x${string}`[]>([])
-  const prevRequestRef = useRef<{ safeTxHashes: `0x${string}`[] } | undefined>(undefined)
   const [triggerBatchAssessment, { data: batchResponse, error, isLoading }] =
     hypernativeApi.useGetBatchAssessmentsMutation()
 
   // Build batch request only when hash values actually change
-  const batchRequest = useMemo(() => {
-    if (skip) {
-      prevHashesRef.current = []
-      prevRequestRef.current = undefined
-      return undefined
-    }
-
-    // Compare hash values, not array reference
-    // Simple array comparison for primitive arrays (more efficient than lodash.isEqual)
+  useEffect(() => {
     const prevHashes = prevHashesRef.current
+
     const hashesEqual =
       prevHashes.length === safeTxHashes.length && prevHashes.every((hash) => safeTxHashes.includes(hash))
 
     if (hashesEqual) {
-      // Hashes haven't changed, return previous request
-      return prevRequestRef.current
+      return
     }
 
     // Hashes changed, update refs and build new request
-    prevHashesRef.current = safeTxHashes
     const newRequest = buildHypernativeBatchRequestData(safeTxHashes)
-    prevRequestRef.current = newRequest
-    return newRequest
-  }, [safeTxHashes, skip])
+
+    if (newRequest) {
+      setRequest(newRequest)
+      prevHashesRef.current = safeTxHashes
+      prevRequestRef.current = newRequest
+    }
+  }, [safeTxHashes])
 
   // Trigger batch assessment when request is ready
   useEffect(() => {
-    if (!skip && batchRequest && authToken && batchRequest.safeTxHashes.length > 0) {
+    if (!skip && request && authToken && request.safeTxHashes.length > 0) {
       triggerBatchAssessment({
-        ...batchRequest,
+        ...request,
         authToken,
       })
     }
-  }, [batchRequest, authToken, triggerBatchAssessment, skip])
+  }, [request, authToken, triggerBatchAssessment, skip])
 
   // Process batch response into individual results
   const resultsMap = useMemo(() => {
     const results: Record<`0x${string}`, AsyncResult<ThreatAnalysisResults>> = {}
-
-    if (skip) {
+    if (skip || !request || !authToken) {
       return results
     }
 
-    // Handle missing authToken case
-    if (!authToken) {
-      const requestedHashes = batchRequest?.safeTxHashes || []
-      requestedHashes.forEach((hash) => {
-        results[hash] = [undefined, new Error('authToken is required'), false]
-      })
+    const requestedHashes = request?.safeTxHashes || []
+
+    // Return early if no response, not loading, and no error
+    if (!batchResponse && !isLoading && !error) {
       return results
     }
 
     // Initialize all requested hashes with loading state
-    const requestedHashes = batchRequest?.safeTxHashes || []
     requestedHashes.forEach((hash) => {
       results[hash] = [undefined, undefined, true]
     })
@@ -113,15 +106,12 @@ export function useThreatAnalysisHypernativeBatch({
       requestedHashes.forEach((hash) => {
         const responseItem = batchResponse.find((item) => item.safeTxHash === hash)
 
-        if (!responseItem) {
-          // Hash not found in response (shouldn't happen per API spec, but handle gracefully)
-          results[hash] = [undefined, new Error('Assessment result not found'), false]
+        if (responseItem === undefined) {
           return
         }
 
-        if (responseItem.status === 'NOT_FOUND') {
-          // Assessment not found for this transaction
-          results[hash] = [undefined, undefined, false]
+        if (responseItem === null || responseItem.status === 'NOT_FOUND') {
+          results[hash] = [undefined, new Error('Assessment result not found'), false]
           return
         }
 
@@ -149,15 +139,10 @@ export function useThreatAnalysisHypernativeBatch({
           results[hash] = [undefined, new Error(`Unexpected status: ${responseItem.status}`), false]
         }
       })
-    } else if (!isLoading) {
-      // No response and not loading - all results are undefined
-      requestedHashes.forEach((hash) => {
-        results[hash] = [undefined, undefined, false]
-      })
     }
 
     return results
-  }, [batchResponse, error, isLoading, skip, batchRequest, safeAddress, authToken])
+  }, [batchResponse, error, isLoading, skip, request, safeAddress, authToken])
 
   return resultsMap
 }

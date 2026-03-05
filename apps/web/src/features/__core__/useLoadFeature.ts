@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
-import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { logError, Errors } from '@/services/exceptions'
 import type { FeatureHandle, FeatureImplementation } from './types'
 
@@ -10,8 +9,6 @@ import type { FeatureHandle, FeatureImplementation } from './types'
  * Prefixed with $ to avoid conflicts with feature exports.
  */
 interface FeatureMeta {
-  /** True while feature code is loading */
-  $isLoading: boolean
   /** True if feature flag is disabled */
   $isDisabled: boolean
   /** True when feature is loaded and ready to use */
@@ -20,22 +17,43 @@ interface FeatureMeta {
   $error: Error | undefined
 }
 
+type LoadResult<T> = { feature: T } | { error: Error } | undefined
+
+/** Extracts the feature from a load result, or undefined. */
+function getFeature<T>(result: LoadResult<T>): T | undefined {
+  return result && 'feature' in result ? result.feature : undefined
+}
+
+/** Extracts the error from a load result, or undefined. */
+function getError<T>(result: LoadResult<T>): Error | undefined {
+  return result && 'error' in result ? result.error : undefined
+}
+
+/** Coerces an unknown thrown value into an Error instance. */
+function toError(err: unknown): Error {
+  return err instanceof Error ? err : new Error(String(err))
+}
+
 /**
  * Creates a proxy that provides automatic stubs based on naming conventions.
- * - PascalCase → component returning null
- * - useSomething → undefined (hooks not stubbed - see Hooks Pattern in docs)
- * - camelCase → undefined (will throw if called, helping catch missing $isReady checks)
+ * The proxy is created once per hook instance and reads meta values from a ref,
+ * so its reference stays stable while the feature is not ready.
+ *
+ * - PascalCase -> component returning null
+ * - useSomething -> undefined (hooks not stubbed - see Hooks Pattern in docs)
+ * - camelCase -> undefined (will throw if called, helping catch missing $isReady checks)
  */
-function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T & FeatureMeta {
+function createStableStubProxy<T extends FeatureImplementation>(
+  metaRef: React.RefObject<FeatureMeta>,
+): T & FeatureMeta {
   const stubCache = new Map<string | symbol, unknown>()
 
   return new Proxy({} as T & FeatureMeta, {
     get(_, prop) {
-      // Return meta properties directly
-      if (prop === '$isLoading') return meta.$isLoading
-      if (prop === '$isDisabled') return meta.$isDisabled
-      if (prop === '$isReady') return meta.$isReady
-      if (prop === '$error') return meta.$error
+      // Meta properties read from the ref — always fresh
+      if (prop === '$isDisabled') return metaRef.current.$isDisabled
+      if (prop === '$isReady') return metaRef.current.$isReady
+      if (prop === '$error') return metaRef.current.$error
 
       // Return cached stub if exists
       if (stubCache.has(prop)) {
@@ -44,17 +62,7 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
 
       // Create stub based on naming convention
       const name = String(prop)
-      let stub: unknown
-
-      if (name[0] === name[0].toUpperCase() && !name.startsWith('use')) {
-        // Component stub - renders null
-        stub = () => null
-      } else {
-        // Hooks and services - undefined (no stub)
-        // Hooks: undefined when not ready (component must not mount until ready)
-        // Services: undefined when not ready (will throw if called, catching missing $isReady checks)
-        stub = undefined
-      }
+      const stub = name[0] >= 'A' && name[0] <= 'Z' ? () => null : undefined
 
       stubCache.set(prop, stub)
       return stub
@@ -62,17 +70,75 @@ function createStubProxy<T extends FeatureImplementation>(meta: FeatureMeta): T 
   })
 }
 
+// ── Shared Feature Registry ──────────────────────────────────────
+// Stores loaded features globally so multiple components calling
+// useLoadFeature(SameFeature) share a single load and get the result
+// synchronously on first render. Only successful loads are cached;
+// errors remain per-instance so retry is possible on remount.
+
+type CachedLoadResult = { feature: unknown }
+
+/** Resolved features keyed by handle.name. */
+const featureCache = new Map<string, CachedLoadResult>()
+
+/** In-flight promises for deduplication. Removed on resolve/reject. */
+const pendingLoads = new Map<string, Promise<CachedLoadResult>>()
+
+/** Returns a cached load result from the registry, or undefined. */
+function getCachedResult(name: string): CachedLoadResult | undefined {
+  return featureCache.get(name)
+}
+
+/** Returns a shared load promise, deduplicating concurrent loads. */
+function getOrCreateLoadPromise<T extends FeatureImplementation>(handle: FeatureHandle<T>): Promise<CachedLoadResult> {
+  const existing = pendingLoads.get(handle.name)
+  if (existing) return existing
+
+  const promise = handle
+    .load()
+    .then((module) => {
+      const result: CachedLoadResult = {
+        feature: { name: handle.name, useIsEnabled: handle.useIsEnabled, ...module.default },
+      }
+      featureCache.set(handle.name, result)
+      pendingLoads.delete(handle.name)
+      return result
+    })
+    .catch((err) => {
+      pendingLoads.delete(handle.name)
+      throw err
+    })
+
+  pendingLoads.set(handle.name, promise)
+  return promise
+}
+
+/** @internal Clears the shared registry. Exported for test cleanup only. */
+export function _resetFeatureRegistry(): void {
+  featureCache.clear()
+  pendingLoads.clear()
+}
+
+// ── Hook ─────────────────────────────────────────────────────────
+
 /**
  * Hook to load a feature lazily based on its handle.
  *
  * ALWAYS returns an object - never null or undefined. When the feature is
- * loading or disabled, returns a Proxy with automatic stubs based on naming:
- * - PascalCase → component returning null
- * - useSomething → undefined (hooks not stubbed - component must not mount until ready)
- * - camelCase → undefined (will throw if called without checking $isReady)
+ * not yet ready or disabled, returns a Proxy with automatic stubs based on naming:
+ * - PascalCase -> component returning null
+ * - useSomething -> undefined (hooks not stubbed - component must not mount until ready)
+ * - camelCase -> undefined (will throw if called without checking $isReady)
+ *
+ * There is no intermediate "loading" state — the hook goes directly from not-ready
+ * to ready in a single transition, minimizing re-renders.
+ *
+ * Features are cached in a shared registry so that when multiple components use the
+ * same feature, only the first triggers a load. Subsequent components get the result
+ * synchronously on first render (1 render instead of 2).
  *
  * @param handle - The feature handle with name, useIsEnabled, and load function.
- * @returns Feature object with meta properties ($isLoading, $isDisabled, $isReady, $error)
+ * @returns Feature object with meta properties ($isDisabled, $isReady, $error)
  *
  * @example
  * ```typescript
@@ -117,53 +183,62 @@ export function useLoadFeature<T extends FeatureImplementation>(
   // Check feature flag (must be called unconditionally as it's a hook)
   const isEnabled = handle.useIsEnabled()
 
-  // Load feature when enabled
-  const [feature, error, loading] = useAsync(
-    () => {
-      if (isEnabled !== true) return
-      return handle.load().then(
-        (module) =>
-          ({
-            name: handle.name,
-            useIsEnabled: handle.useIsEnabled,
-            ...module.default,
-          }) as LoadedFeature,
-      )
-    },
-    [isEnabled, handle],
-    false,
+  // Single state: the loaded feature or an error. No intermediate "loading" state.
+  // Check the shared registry synchronously — if another component already loaded
+  // this feature, we get it on first render without any async work.
+  const [loaded, setLoaded] = useState<LoadResult<LoadedFeature>>(
+    () => (isEnabled === true ? getCachedResult(handle.name) : undefined) as unknown as LoadResult<LoadedFeature>,
   )
 
-  // Log errors for debugging
-  if (error) {
-    logError(Errors._906, error)
-  }
+  useEffect(() => {
+    if (isEnabled !== true) return
 
-  // Compute meta state
-  const $isDisabled = isEnabled === false
-  const $isLoading = isEnabled === undefined || loading
-  const $isReady = isEnabled === true && !loading && !!feature
-  const $error = error
-
-  // Return feature with meta, or stub proxy
-  return useMemo(() => {
-    if ($isReady && feature) {
-      // Feature loaded - return real implementation with meta
-      return {
-        ...feature,
-        $isLoading: false,
-        $isDisabled: false,
-        $isReady: true,
-        $error: undefined,
-      } as LoadedFeature & FeatureMeta
+    // Shared registry has this feature? Restore state with the cached reference.
+    // React bails out if setLoaded receives the same referential object.
+    const cached = getCachedResult(handle.name)
+    if (cached) {
+      setLoaded(cached as unknown as LoadResult<LoadedFeature>)
+      return
     }
 
-    // Not ready - return stub proxy
-    return createStubProxy<T>({
-      $isLoading,
-      $isDisabled,
-      $isReady: false,
-      $error,
-    }) as LoadedFeature & FeatureMeta
-  }, [$isReady, $isLoading, $isDisabled, $error, feature])
+    let cancelled = false
+
+    getOrCreateLoadPromise(handle).then(
+      (result) => {
+        if (cancelled) return
+        setLoaded(result as unknown as LoadResult<LoadedFeature>)
+      },
+      (err) => {
+        if (cancelled) return
+        logError(Errors._906, toError(err))
+        setLoaded({ error: toError(err) })
+      },
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [isEnabled, handle])
+
+  // Derive meta from current state
+  const feature = getFeature(loaded)
+  const meta: FeatureMeta = {
+    $isDisabled: isEnabled === false,
+    $isReady: !!feature,
+    $error: getError(loaded),
+  }
+
+  // Stable proxy — created once per hook instance, reads meta from ref
+  const metaRef = useRef<FeatureMeta>(meta)
+  metaRef.current = meta
+
+  const stubProxy = useMemo(() => createStableStubProxy<T>(metaRef), [])
+
+  // Return feature with meta, or the stable stub proxy
+  return useMemo(() => {
+    if (feature) {
+      return { ...feature, ...meta } as LoadedFeature & FeatureMeta
+    }
+    return stubProxy as unknown as LoadedFeature & FeatureMeta
+  }, [feature, stubProxy, meta])
 }

@@ -1,0 +1,61 @@
+name: Store Codegen Check
+
+on:
+  pull_request:
+    paths:
+      - packages/store/src/gateway/AUTO_GENERATED/**
+      - packages/store/scripts/api-schema/schema.json
+      - .github/workflows/store-codegen-check.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-codegen:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if AUTO_GENERATED files or schema.json changed in PR
+        id: check-files
+        run: |
+          # Get the list of changed files in the PR
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Check if schema.json or AUTO_GENERATED files changed
+          if echo "$CHANGED_FILES" | grep -qE "packages/store/(scripts/api-schema/schema\.json|src/gateway/AUTO_GENERATED/)"; then
+            echo "should_validate=true" >> $GITHUB_OUTPUT
+            echo "✅ Will validate AUTO_GENERATED files against schema.json"
+          else
+            echo "should_validate=false" >> $GITHUB_OUTPUT
+            echo "⏭️ Neither schema.json nor AUTO_GENERATED files changed - skipping validation"
+          fi
+
+      - uses: ./.github/actions/yarn
+        if: steps.check-files.outputs.should_validate == 'true'
+
+      - name: Run codegen
+        if: steps.check-files.outputs.should_validate == 'true'
+        run: yarn workspace @safe-global/store build:dev
+
+      - name: Check for uncommitted changes
+        if: steps.check-files.outputs.should_validate == 'true'
+        run: |
+          # Check both schema.json and AUTO_GENERATED files
+          CHANGED_FILES=$(git diff --name-only packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/ || true)
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "❌ Generated files don't match the committed versions!"
+            echo ""
+            echo "Files that differ:"
+            echo "$CHANGED_FILES"
+            exit 1
+          fi
+
+          echo "✅ Both schema.json and AUTO_GENERATED files match the staging API"

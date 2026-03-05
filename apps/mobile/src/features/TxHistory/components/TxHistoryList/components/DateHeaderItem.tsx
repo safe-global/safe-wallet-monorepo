@@ -10,7 +10,7 @@ const DateHeaderItemComponent = ({ timestamp }: DateHeaderItemProps) => {
   const dateTitle = formatWithSchema(timestamp, 'MMM d, yyyy')
 
   return (
-    <View marginTop="$2" backgroundColor="$background" paddingTop="$2">
+    <View marginTop="$2" paddingTop="$2">
       <Text fontWeight={500} color="$colorSecondary">
         {dateTitle}
       </Text>

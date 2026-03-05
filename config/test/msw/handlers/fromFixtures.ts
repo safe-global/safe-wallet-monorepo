@@ -88,14 +88,14 @@ export const createChainHandlersFromFixture = (GATEWAY_URL: string, featureOverr
   }
 
   return [
-    http.get<never, never, ChainPage>(`${GATEWAY_URL}/v1/chains`, () => {
+    http.get<never, never, ChainPage>(`${GATEWAY_URL}/v2/chains`, () => {
       return HttpResponse.json({
         ...chainFixtures.all,
         results: [chainData],
       })
     }),
 
-    http.get<{ chainId: string }, never, Chain>(`${GATEWAY_URL}/v1/chains/:chainId`, () => {
+    http.get<{ chainId: string }, never, Chain>(`${GATEWAY_URL}/v2/chains/:chainId`, () => {
       return HttpResponse.json(chainData)
     }),
   ]

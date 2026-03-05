@@ -24,7 +24,7 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '.'
+} from './types'
 import TxCard from '../../common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'

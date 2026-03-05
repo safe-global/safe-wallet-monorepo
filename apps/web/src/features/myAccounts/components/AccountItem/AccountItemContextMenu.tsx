@@ -6,6 +6,7 @@ export interface AccountItemContextMenuProps {
   name?: string
   isReplayable?: boolean
   undeployedSafe?: boolean
+  hideNestedSafes?: boolean
   onClose?: () => void
 }
 
@@ -15,6 +16,7 @@ function AccountItemContextMenu({
   name,
   isReplayable = false,
   undeployedSafe = false,
+  hideNestedSafes = false,
   onClose,
 }: AccountItemContextMenuProps) {
   return (
@@ -25,6 +27,7 @@ function AccountItemContextMenu({
       addNetwork={isReplayable}
       rename
       undeployedSafe={undeployedSafe}
+      hideNestedSafes={hideNestedSafes}
       onClose={onClose}
     />
   )

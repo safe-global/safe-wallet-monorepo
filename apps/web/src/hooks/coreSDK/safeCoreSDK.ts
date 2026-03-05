@@ -7,6 +7,7 @@ import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeCon
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/services'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
+import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
 import {
@@ -91,6 +92,13 @@ export const initSafeSDK = async ({
   if (isLegacyVersion(safeVersion)) {
     isL1SafeSingleton = true
   }
+
+  contractNetworks = getCanonicalMultiSendContractNetworks({
+    implementationAddress: implementation,
+    chainId,
+    safeVersion,
+    contractNetworks,
+  })
 
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {

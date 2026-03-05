@@ -15,11 +15,11 @@ export function ShareButton({ onPress, testID }: ShareButtonProps) {
         backgroundColor="$backgroundSkeleton"
         alignItems="center"
         justifyContent="center"
-        borderRadius={16}
-        height={32}
-        width={32}
+        borderRadius={200}
+        height={40}
+        width={40}
       >
-        <SafeFontIcon name="export" size={16} color="$color" />
+        <SafeFontIcon name="export" size={24} color="$color" />
       </View>
     </Pressable>
   )

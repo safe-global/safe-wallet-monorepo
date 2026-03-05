@@ -14,8 +14,9 @@ import { ThemeProvider } from '@mui/material/styles'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
+import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
@@ -88,6 +89,7 @@ import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 // Initialize observability before React rendering starts
@@ -101,6 +103,7 @@ setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
+  useInitStaticChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()
@@ -141,7 +144,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     <WalletProvider>
       <GeoblockingProvider>
         <TxModalProvider>
-          <AddressBookSourceProvider>{children}</AddressBookSourceProvider>
+          <AddressBookSourceProvider>
+            <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+          </AddressBookSourceProvider>
         </TxModalProvider>
       </GeoblockingProvider>
     </WalletProvider>

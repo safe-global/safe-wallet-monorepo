@@ -4,9 +4,10 @@ import { Skeleton } from 'moti/skeleton'
 import { Logo } from '@/src/components/Logo'
 import { Fiat } from '@/src/components/Fiat'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectChainById, selectAllChains, useGetChainsConfigQuery } from '@/src/store/chains'
+import { selectChainById, selectAllChains, useGetChainsConfigV2Query } from '@/src/store/chains'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
 export interface ChainIndicatorProps {
   chainId?: string
@@ -38,7 +39,7 @@ export const ChainIndicator = ({
   currency: propCurrency,
 }: ChainIndicatorProps) => {
   // Fetch chains data to ensure it's up to date
-  const { isLoading } = useGetChainsConfigQuery()
+  const { isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
 
   const activeSafe = useDefinedActiveSafe()
   const currentChainId = activeSafe.chainId

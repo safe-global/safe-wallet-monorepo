@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import PinnedSafes from './index'
 import type { AllSafeItems } from '@/hooks/safes'
 
 const meta = {
   title: 'Features/MyAccounts/PinnedSafes',
   component: PinnedSafes,
+  decorators: [withMockProvider()],
   parameters: {
     layout: 'padded',
   },

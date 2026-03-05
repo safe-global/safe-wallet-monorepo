@@ -15,6 +15,7 @@ export interface SettingsState {
   themePreference: ThemePreference
   currency: string
   tokenList: TOKEN_LISTS
+  hideDust: boolean
   env: EnvState
 }
 
@@ -23,6 +24,7 @@ const initialState: SettingsState = {
   themePreference: 'auto' as ThemePreference,
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
+  hideDust: true,
   env: {
     rpc: {},
     tenderly: {
@@ -47,6 +49,9 @@ const settingsSlice = createSlice({
     },
     setTokenList: (state, { payload }: PayloadAction<SettingsState['tokenList']>) => {
       state.tokenList = payload
+    },
+    setHideDust: (state, { payload }: PayloadAction<boolean>) => {
+      state.hideDust = payload
     },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
@@ -77,11 +82,13 @@ export const selectTokenList = createSelector(
   (settings) => settings.tokenList || initialState.tokenList,
 )
 
+export const selectHideDust = createSelector(selectSettingsState, (settings) => settings.hideDust ?? true)
+
 export const selectRpc = createSelector(selectSettingsState, (settings) => {
   return settings?.env?.rpc
 })
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
-export const { updateSettings, resetSettings, setCurrency, setTokenList } = settingsSlice.actions
+export const { updateSettings, resetSettings, setCurrency, setTokenList, setHideDust } = settingsSlice.actions
 export default settingsSlice.reducer

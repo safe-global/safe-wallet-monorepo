@@ -19,6 +19,7 @@ export const DEFAULT_CHAIN_ID = IS_PRODUCTION ? DEFAULT_MAINNET_CHAIN_ID : DEFAU
 export const GATEWAY_URL_PRODUCTION =
   process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
+export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // Status page
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
@@ -65,7 +66,6 @@ export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
     ? parsedSessionReplaySampleRate
     : 0
 
-export const DATADOG_FORCE_ENABLE = process.env.NEXT_PUBLIC_DATADOG_FORCE_ENABLE === 'true'
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
 const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
@@ -97,6 +97,9 @@ export const SAFE_LOCKING_ADDRESS: { [chainId: string]: string } = {
   [chains.eth]: '0x0a7CB434f96f65972D46A5c1A64a9654dC9959b2',
   [chains.sep]: '0xb161ccb96b9b817F9bDf0048F212725128779DE9',
 }
+
+export const DEVELOPER_PORTAL_URL =
+  process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
 
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
