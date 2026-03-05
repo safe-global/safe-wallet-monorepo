@@ -3,7 +3,7 @@ import type {
   MultiSend,
   BaseDataDecoded,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { DraftBatchItem } from '@/store/batchSlice'
+import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
 import { List } from '@mui/material'

@@ -1,6 +1,6 @@
 import { Badge, ButtonBase, SvgIcon } from '@mui/material'
 import BatchIcon from '@/public/images/common/batch.svg'
-import { useDraftBatch } from '@/hooks/useDraftBatch'
+import { useDraftBatch } from '@/features/batching'
 import Track from '@/components/common/Track'
 import { BATCH_EVENTS } from '@/services/analytics'
 import BatchTooltip from './BatchTooltip'
