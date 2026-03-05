@@ -25,8 +25,8 @@ const useOnboardingNavigation = () => {
   }, [router, spaceId])
 
   const handleBack = useCallback(() => {
-    router.push({ pathname: AppRoutes.welcome.createSpace })
-  }, [router])
+    router.push({ pathname: AppRoutes.welcome.createSpace, query: { spaceId } })
+  }, [router, spaceId])
 
   const handleSkip = useCallback(() => {
     router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
