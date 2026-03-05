@@ -8,7 +8,9 @@ jest.mock('@safe-global/utils/utils/formatters', () => ({
     const divisor = BigInt(10) ** BigInt(decimals)
     const whole = num / divisor
     const remainder = num % divisor
-    if (remainder === 0n) return whole.toString()
+    if (remainder === 0n) {
+      return whole.toString()
+    }
     const fracStr = remainder.toString().padStart(decimals, '0').replace(/0+$/, '')
     return `${whole}.${fracStr}`
   },
