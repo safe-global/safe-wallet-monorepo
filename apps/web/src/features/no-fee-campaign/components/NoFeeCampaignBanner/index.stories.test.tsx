@@ -3,20 +3,15 @@
  * Run "yarn generate:storybook-tests" to regenerate
  */
 import '../../../../tests/storybook-setup'
-import { composeStories } from '@storybook/react'
-import { render } from '@testing-library/react'
-import type { ComponentType } from 'react'
-
-import * as stories from './index.stories'
-
-const composedStories = composeStories(stories)
+import { render } from '../../../../tests/test-utils'
+import NoFeeCampaignBanner from './index'
 
 describe('./NoFeeCampaignBanner.stories', () => {
-  Object.entries(composedStories).forEach(([storyName, Story]) => {
-    test(storyName, () => {
-      const StoryComponent = Story as ComponentType
-      const { container } = render(<StoryComponent />)
-      expect(container.firstChild).toMatchSnapshot()
+  test('Default', () => {
+    const { container } = render(<NoFeeCampaignBanner onDismiss={() => {}} />, {
+      routerProps: { query: { safe: 'eth:0x0000000000000000000000000000000000000001' } },
     })
+
+    expect(container.firstChild).toMatchSnapshot()
   })
 })

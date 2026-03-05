@@ -2,76 +2,72 @@
 
 exports[`./NoFeeCampaignBanner.stories Default 1`] = `
 <div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-t31lyp-MuiPaper-root-MuiCard-root"
+  style="--Paper-shadow: none;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner mui-style-t31lyp-MuiPaper-root-MuiCard-root"
-    style="--Paper-shadow: none;"
+    class="MuiStack-root bannerStack css-pl8gqh-MuiStack-root"
   >
+    <img
+      alt="USDe logo"
+      class="bannerImage"
+      data-nimg="1"
+      decoding="async"
+      height="95"
+      loading="lazy"
+      src="/images/common/no-fee-campaign/Cards_USDe.svg"
+      style="color: transparent;"
+      width="95"
+    />
     <div
-      class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
+      class="bannerContent MuiBox-root css-0"
     >
-      <img
-        alt="USDe logo"
-        class="bannerImage"
-        data-nimg="1"
-        decoding="async"
-        height="95"
-        loading="lazy"
-        src="/images/common/no-fee-campaign/Cards_USDe.svg"
-        style="color: transparent;"
-        width="95"
-      />
-      <div
-        class="bannerContent MuiBox-root mui-style-0"
+      <h4
+        class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle css-1x3wnrt-MuiTypography-root"
       >
-        <h4
-          class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
+        Enjoy Free January
+      </h4>
+      <p
+        class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription css-17vdyq3-MuiTypography-root"
+      >
+        No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!
+         
+        <a
+          class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-dhjj49-MuiTypography-root-MuiLink-root"
+          href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+          rel="noopener noreferrer"
+          target="_blank"
         >
-          Enjoy Free January
-        </h4>
-        <p
-          class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"
-        >
-          No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!
-           
-          <a
-            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-dhjj49-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Learn more
-          </a>
-        </p>
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary bannerCtaContained mui-style-1pyhuog-MuiButtonBase-root-MuiButton-root"
-          disabled=""
-          tabindex="-1"
-          type="button"
-        >
-          New transaction
-        </button>
-      </div>
+          Learn more
+        </a>
+      </p>
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary bannerCtaContained css-1pyhuog-MuiButtonBase-root-MuiButton-root"
+        disabled=""
+        tabindex="-1"
+        type="button"
+      >
+        New transaction
+      </button>
     </div>
-    <button
-      aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
-      tabindex="0"
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon mui-style-1dhtbeh-MuiSvgIcon-root"
-        data-testid="CloseIcon"
-        focusable="false"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-        />
-      </svg>
-    </button>
   </div>
+  <button
+    aria-label="close"
+    class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton css-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+    tabindex="0"
+    type="button"
+  >
+    <svg
+      aria-hidden="true"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium closeIcon css-1dhtbeh-MuiSvgIcon-root"
+      data-testid="CloseIcon"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+      />
+    </svg>
+  </button>
 </div>
 `;
