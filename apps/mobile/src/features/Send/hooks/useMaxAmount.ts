@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { truncateToDecimals } from './useFiatConversion'
 
 const FIAT_DECIMALS = 2
 
@@ -8,7 +9,8 @@ function computeFiatMax(formatted: string, fiatRate: string | undefined): string
   if (rate <= 0) {
     return undefined
   }
-  return (parseFloat(formatted) * rate).toFixed(FIAT_DECIMALS)
+  const raw = (parseFloat(formatted) * rate).toFixed(FIAT_DECIMALS + 2)
+  return truncateToDecimals(raw, FIAT_DECIMALS)
 }
 
 function getDecimalError(exceedsDecimals: boolean, decimals: number): string | undefined {
