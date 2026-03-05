@@ -70,7 +70,7 @@ const SpaceDashboard = () => {
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
   const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
-  const { accounts, isLoading: isOverviewLoading } = useSpaceAccountsData(safesToDisplay)
+  const { accounts, isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
   const remainingCount = Math.max(0, safeItems.length - DASHBOARD_LIST_DISPLAY_LIMIT)
 
   const handleViewAll = () => {
@@ -100,6 +100,8 @@ const SpaceDashboard = () => {
                   remainingCount={remainingCount > 0 ? remainingCount : undefined}
                   onViewAll={handleViewAll}
                   action={<AddActionsAction />}
+                  error={error}
+                  onRefresh={refetch}
                 />
               ) : (
                 <SafeWidget title="Accounts" action={<AddActionsAction />}>

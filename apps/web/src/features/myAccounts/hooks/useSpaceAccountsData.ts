@@ -18,6 +18,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { AppRoutes } from '@/config/routes'
 import type { Account, SubAccount } from '../components/AccountsWidget/types'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 const getSafeHref = (chain: Chain | undefined, address: string): string => {
   const shortName = chain?.shortName ?? ''
@@ -89,7 +90,12 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
 
   const flatSafes = useMemo(() => flattenSafeItems(safes), [safes])
 
-  const { data: overviews, isLoading } = useGetMultipleSafeOverviewsQuery(
+  const {
+    data: overviews,
+    isFetching,
+    error,
+    refetch,
+  } = useGetMultipleSafeOverviewsQuery(
     flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress: wallet?.address } : skipToken,
   )
 
@@ -105,7 +111,7 @@ const useSpaceAccountsData = (safes: AllSafeItems) => {
     })
   }, [safes, overviews, chains])
 
-  return { accounts, isLoading }
+  return { accounts, isLoading: isFetching, error: error ? getRtkQueryErrorMessage(error) : undefined, refetch }
 }
 
 export default useSpaceAccountsData
