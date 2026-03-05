@@ -6,7 +6,6 @@ import { useHypernativeOAuth, useIsHypernativeEligible } from '@/features/hypern
 
 const SafeShieldWidget = (): ReactElement => {
   const { recipient, contract, threat, safeTx, safeAnalysis, addToTrustedList, deadlock } = useSafeShield()
-  const [deadlockResult, , deadlockLoading] = deadlock
   const hypernativeAuth = useHypernativeOAuth()
   const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
   const showHnInfo = !eligibilityLoading && isHypernativeEligible
@@ -29,8 +28,7 @@ const SafeShieldWidget = (): ReactElement => {
       showHypernativeActiveStatus={showHnActiveStatus}
       safeAnalysis={safeAnalysis}
       onAddToTrustedList={addToTrustedList}
-      deadlockResult={deadlockResult}
-      deadlockLoading={deadlockLoading}
+      deadlock={deadlock}
     />
   )
 }

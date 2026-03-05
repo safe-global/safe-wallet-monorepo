@@ -226,9 +226,9 @@ export enum DeadlockStatus {
 }
 
 export enum DeadlockReason {
-  FETCH_FAILURE = 'Could not fetch owner data for one or more Safe signers.',
+  FETCH_FAILURE = "We couldn't verify the complete signer configuration for one or more owners. A signing deadlock may exist that could permanently lock funds. Proceed only if you're confident in your setup.",
   MUTUAL_DEADLOCK = 'This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward.',
-  DEEP_NESTING = 'One or more Safe signers have their own Safe signers. Full signer safety could not be verified beyond direct owners.',
+  DEEP_NESTING = "We couldn't verify the complete signer configuration for one or more owners. A signing deadlock may exist that could permanently lock funds. Proceed only if you're confident in your setup.",
   GENERIC = 'A signer deadlock was detected in the projected owner configuration.',
 }
 

@@ -3,6 +3,7 @@ import { Box, Typography, Stack, IconButton, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { DeadlockReason, DeadlockStatus, Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 
@@ -15,18 +16,13 @@ const STATUS_TO_SEVERITY: Record<DeadlockStatus, Severity> = {
 
 const STATUS_TO_TITLE: Partial<Record<DeadlockStatus, string>> = {
   [DeadlockStatus.BLOCKED]: 'Signing deadlock risk detected',
-  [DeadlockStatus.WARNING]: 'Nested signer safety could not be fully verified',
-  [DeadlockStatus.UNKNOWN]: 'Nested signer safety could not be fully verified',
+  [DeadlockStatus.WARNING]: 'Full signer verification unavailable',
+  [DeadlockStatus.UNKNOWN]: 'Full signer verification unavailable',
 }
 
-const DeadlockAnalysisCard = ({
-  result,
-  loading,
-}: {
-  result?: DeadlockCheckResult
-  loading?: boolean
-}): ReactElement | null => {
+const DeadlockAnalysisCard = ({ deadlock }: { deadlock?: AsyncResult<DeadlockCheckResult> }): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
+  const [result, , loading] = deadlock || []
 
   if (loading || !result || result.status === DeadlockStatus.VALID) {
     return null

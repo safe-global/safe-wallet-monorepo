@@ -12,9 +12,9 @@ import type {
   SafeAnalysisResult,
   DeadlockCheckResult,
 } from '@safe-global/utils/features/safe-shield/types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
-import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
@@ -53,8 +53,7 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
-  deadlockResult,
-  deadlockLoading,
+  deadlock,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -65,12 +64,12 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
-  deadlockResult?: DeadlockCheckResult
-  deadlockLoading?: boolean
+  deadlock?: AsyncResult<DeadlockCheckResult>
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
   const [threatResults] = threat || []
+  const [deadlockResult] = deadlock || []
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
 
@@ -108,8 +107,7 @@ export const SafeShieldDisplay = ({
           showHypernativeActiveStatus={showHypernativeActiveStatus}
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
-          deadlockResult={deadlockResult}
-          deadlockLoading={deadlockLoading}
+          deadlock={deadlock}
         />
       </Card>
 

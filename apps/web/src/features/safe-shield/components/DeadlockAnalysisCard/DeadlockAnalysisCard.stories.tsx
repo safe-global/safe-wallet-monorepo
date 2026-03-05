@@ -3,6 +3,7 @@ import { expect, userEvent, within } from '@storybook/test'
 import { Box } from '@mui/material'
 import { DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { withMockProvider } from '@/storybook/preview'
 import DeadlockAnalysisCard from './index'
 
@@ -22,6 +23,12 @@ const meta = {
 
 export default meta
 type Story = StoryObj<typeof meta>
+
+const toAsync = (result: DeadlockCheckResult, loading = false): AsyncResult<DeadlockCheckResult> => [
+  result,
+  undefined,
+  loading,
+]
 
 const blockedResult: DeadlockCheckResult = {
   status: DeadlockStatus.BLOCKED,
@@ -51,33 +58,33 @@ const validResult: DeadlockCheckResult = {
 }
 
 export const Blocked: Story = {
-  args: { result: blockedResult },
+  args: { deadlock: toAsync(blockedResult) },
 }
 
 export const BlockedExpanded: Story = {
-  args: { result: blockedResult },
+  args: { deadlock: toAsync(blockedResult) },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(canvas.getByText('This setup creates a signing deadlock'))
+    await userEvent.click(canvas.getByText('Signing deadlock risk detected'))
     await expect(canvas.getByText(blockedResult.reason!)).toBeVisible()
   },
 }
 
 export const Warning: Story = {
-  args: { result: warningResult },
+  args: { deadlock: toAsync(warningResult) },
 }
 
 export const Unknown: Story = {
-  args: { result: unknownResult },
+  args: { deadlock: toAsync(unknownResult) },
 }
 
 export const Valid: Story = {
-  args: { result: validResult },
+  args: { deadlock: toAsync(validResult) },
   tags: ['!autodocs'],
 }
 
 export const Loading: Story = {
-  args: { loading: true },
+  args: { deadlock: [undefined, undefined, true] },
   tags: ['!autodocs'],
 }
 

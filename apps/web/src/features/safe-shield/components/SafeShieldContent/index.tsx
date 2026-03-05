@@ -6,6 +6,7 @@ import type {
   RecipientAnalysisResults,
   Severity,
   SafeAnalysisResult,
+  DeadlockCheckResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
@@ -24,7 +25,6 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
-import type { DeadlockCheckResult } from '@safe-global/utils/features/safe-shield/types'
 import DeadlockAnalysisCard from '../DeadlockAnalysisCard'
 
 export const SafeShieldContent = ({
@@ -38,8 +38,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
-  deadlockResult,
-  deadlockLoading,
+  deadlock,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -51,8 +50,7 @@ export const SafeShieldContent = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
-  deadlockResult?: DeadlockCheckResult
-  deadlockLoading?: boolean
+  deadlock?: AsyncResult<DeadlockCheckResult>
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -93,7 +91,7 @@ export const SafeShieldContent = ({
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
         <Box sx={{ '& > div': { borderTop: '1px solid', borderColor: 'background.main' } }}>
-          <DeadlockAnalysisCard result={deadlockResult} loading={deadlockLoading} />
+          <DeadlockAnalysisCard deadlock={deadlock} />
 
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
