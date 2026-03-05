@@ -40,7 +40,7 @@ export function useEnsureActiveSigner() {
     }
   }, [needsSignerUpdate, availableSigners, dispatch, activeSafe.address])
 
-  const activeSigner = isSignerStale ? undefined : currentActiveSigner
+  const activeSigner = isSignerStale || availableSigners.length === 0 ? undefined : currentActiveSigner
 
   return { activeSigner, availableSigners }
 }
