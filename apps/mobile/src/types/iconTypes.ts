@@ -1,236 +1,294 @@
 export type IconName =
-  | 'transaction-earn'
-  | 'add-owner'
-  | 'address-book-empty-list'
-  | 'address-book'
-  | 'alert-triangle'
-  | 'alert'
-  | 'appearance'
-  | 'apps'
-  | 'arrow-down'
-  | 'arrow-left'
-  | 'arrow-right'
-  | 'arrow-sort'
-  | 'arrow-up'
-  | 'batch'
-  | 'bell'
-  | 'block'
-  | 'blocks-1'
-  | 'blocks'
-  | 'bookmark-filled'
-  | 'bookmark'
-  | 'camera'
-  | 'chat'
-  | 'check-filled'
-  | 'check-notifications'
-  | 'check-oulined'
-  | 'check'
-  | 'chevron-down'
-  | 'chevron-left'
-  | 'chevron-right'
-  | 'chevron-up'
-  | 'clock'
-  | 'close-filled'
   | 'close-outlined'
-  | 'close'
-  | 'code-blocks'
-  | 'copy'
-  | 'dapp-logo'
-  | 'delete'
-  | 'desktop'
-  | 'document'
-  | 'double-arrow'
-  | 'download'
-  | 'dropdown-arrow-small'
-  | 'edit-owner'
-  | 'edit'
-  | 'element-drag'
-  | 'experimental'
-  | 'export'
-  | 'external-link'
-  | 'eye-n'
-  | 'eye-off'
-  | 'eye-on'
-  | 'face-id'
-  | 'file'
-  | 'filter'
-  | 'fingerprint'
-  | 'hardware'
-  | 'home'
-  | 'info'
-  | 'key'
-  | 'keystone'
-  | 'ledger'
-  | 'lightbulb'
-  | 'link'
-  | 'lock'
-  | 'magic'
-  | 'mobile'
-  | 'nft'
-  | 'options-horizontal'
-  | 'options-vertical'
-  | 'owners'
-  | 'paste'
-  | 'plus-filled'
-  | 'plus-outlined'
-  | 'plus'
-  | 'points'
+  | 'view-only'
+  | 'switch'
   | 'qr-code-1'
-  | 'qr-code'
-  | 'question'
-  | 'repeat'
-  | 'replace-owner'
-  | 'rows-1'
-  | 'rows-2'
-  | 'rows'
-  | 'safe'
-  | 'scan-1'
-  | 'scan'
-  | 'search'
-  | 'seed'
-  | 'send-to'
-  | 'settings'
-  | 'share'
-  | 'shield-crossed'
-  | 'shield'
-  | 'sign'
-  | 'signature'
-  | 'star'
-  | 'tag'
-  | 'token'
   | 'transaction-batch'
-  | 'transaction-change-settings'
-  | 'transaction-contract'
-  | 'transaction-execute'
-  | 'transaction-incoming'
-  | 'transaction-outgoing'
-  | 'transaction-partial-fill'
-  | 'transaction-recovery'
-  | 'transaction-stake'
   | 'transaction-swap'
-  | 'transactions'
-  | 'twitter-x'
-  | 'unlock'
-  | 'update'
-  | 'upload'
-  | 'wallet'
   | 'what-is-new'
+  | 'wallet'
+  | 'upload'
+  | 'update'
+  | 'unlock'
+  | 'twitter-x'
+  | 'transactions'
+  | 'transaction-stake'
+  | 'transaction-recovery'
+  | 'transaction-partial-fill'
+  | 'transaction-outgoing'
+  | 'transaction-incoming'
+  | 'transaction-execute'
+  | 'transaction-earn'
+  | 'transaction-contract'
+  | 'transaction-change-settings'
+  | 'tools'
+  | 'tool'
+  | 'token'
+  | 'tag'
+  | 'subaccounts'
+  | 'star'
+  | 'signature'
+  | 'sign'
+  | 'shield'
+  | 'shield-crossed'
+  | 'share'
+  | 'settings'
+  | 'settings-outlined'
+  | 'server'
+  | 'send-to'
+  | 'send-to-user'
+  | 'seed'
+  | 'search'
+  | 'scan'
+  | 'scan-1'
+  | 'safe'
+  | 'rows'
+  | 'rows-2'
+  | 'rows-1'
+  | 'replace-owner'
+  | 'repeat'
+  | 'question'
+  | 'qr-code'
+  | 'points'
+  | 'plus'
+  | 'plus-outlined'
+  | 'plus-filled'
+  | 'pending'
+  | 'paste'
+  | 'owners'
+  | 'outgoing'
+  | 'options-vertical'
+  | 'options-horizontal'
+  | 'no-connection'
+  | 'nft'
+  | 'mobile'
+  | 'magic'
+  | 'lock'
+  | 'link'
+  | 'lightbulb'
+  | 'license'
+  | 'ledger'
+  | 'keystone'
+  | 'keyboard'
+  | 'key'
+  | 'invest'
+  | 'info'
+  | 'incoming'
+  | 'inactive'
+  | 'home'
+  | 'hat'
+  | 'hardware'
+  | 'get-in-touch'
+  | 'gas'
+  | 'fingerprint'
+  | 'filter'
+  | 'file'
+  | 'fiat'
+  | 'face-id'
+  | 'eye-on'
+  | 'eye-off'
+  | 'eye-n'
+  | 'external-link'
+  | 'export'
+  | 'experimental'
+  | 'ens'
+  | 'email'
+  | 'element-drag'
+  | 'edit'
+  | 'edit-owner'
+  | 'earn'
+  | 'dropdown-arrow-small'
+  | 'download'
+  | 'double-arrow'
+  | 'dots-grid'
+  | 'document'
+  | 'desktop'
+  | 'delete'
+  | 'dapp-logo'
+  | 'copy'
+  | 'code-blocks'
+  | 'close'
+  | 'close-filled'
+  | 'clock'
+  | 'chevron-up'
+  | 'chevron-right'
+  | 'chevron-left'
+  | 'chevron-down'
+  | 'check'
+  | 'check-oulined'
+  | 'check-notifications'
+  | 'check-filled'
+  | 'chat'
+  | 'chain'
+  | 'camera'
+  | 'camera-off'
+  | 'bookmark'
+  | 'bookmark-filled'
+  | 'blocks'
+  | 'blocks-1'
+  | 'block'
+  | 'bell'
+  | 'batch'
+  | 'arrow-up'
+  | 'arrow-sort'
+  | 'arrow-right'
+  | 'arrow-left'
+  | 'arrow-down'
+  | 'apps'
+  | 'appearance'
+  | 'api'
+  | 'allowance'
+  | 'alert'
+  | 'alert-triangle'
+  | 'alert-circle-filled'
+  | 'address-book'
+  | 'address-book-empty-list'
+  | 'add-owner'
 
 export const iconNames: IconName[] = [
-  'transaction-earn',
-  'add-owner',
-  'address-book-empty-list',
-  'address-book',
-  'alert-triangle',
-  'alert',
-  'appearance',
-  'apps',
-  'arrow-down',
-  'arrow-left',
-  'arrow-right',
-  'arrow-sort',
-  'arrow-up',
-  'batch',
-  'bell',
-  'block',
-  'blocks-1',
-  'blocks',
-  'bookmark-filled',
-  'bookmark',
-  'camera',
-  'chat',
-  'check-filled',
-  'check-notifications',
-  'check-oulined',
-  'check',
-  'chevron-down',
-  'chevron-left',
-  'chevron-right',
-  'chevron-up',
-  'clock',
-  'close-filled',
   'close-outlined',
-  'close',
-  'code-blocks',
-  'copy',
-  'dapp-logo',
-  'delete',
-  'desktop',
-  'document',
-  'double-arrow',
-  'download',
-  'dropdown-arrow-small',
-  'edit-owner',
-  'edit',
-  'element-drag',
-  'experimental',
-  'export',
-  'external-link',
-  'eye-n',
-  'eye-off',
-  'eye-on',
-  'face-id',
-  'file',
-  'filter',
-  'fingerprint',
-  'hardware',
-  'home',
-  'info',
-  'key',
-  'keystone',
-  'ledger',
-  'lightbulb',
-  'link',
-  'lock',
-  'magic',
-  'mobile',
-  'nft',
-  'options-horizontal',
-  'options-vertical',
-  'owners',
-  'paste',
-  'plus-filled',
-  'plus-outlined',
-  'plus',
-  'points',
+  'view-only',
+  'switch',
   'qr-code-1',
-  'qr-code',
-  'question',
-  'repeat',
-  'replace-owner',
-  'rows-1',
-  'rows-2',
-  'rows',
-  'safe',
-  'scan-1',
-  'scan',
-  'search',
-  'seed',
-  'send-to',
-  'settings',
-  'share',
-  'shield-crossed',
-  'shield',
-  'sign',
-  'signature',
-  'star',
-  'tag',
-  'token',
   'transaction-batch',
-  'transaction-change-settings',
-  'transaction-contract',
-  'transaction-execute',
-  'transaction-incoming',
-  'transaction-outgoing',
-  'transaction-partial-fill',
-  'transaction-recovery',
-  'transaction-stake',
   'transaction-swap',
-  'transactions',
-  'twitter-x',
-  'unlock',
-  'update',
-  'upload',
-  'wallet',
   'what-is-new',
+  'wallet',
+  'upload',
+  'update',
+  'unlock',
+  'twitter-x',
+  'transactions',
+  'transaction-stake',
+  'transaction-recovery',
+  'transaction-partial-fill',
+  'transaction-outgoing',
+  'transaction-incoming',
+  'transaction-execute',
+  'transaction-earn',
+  'transaction-contract',
+  'transaction-change-settings',
+  'tools',
+  'tool',
+  'token',
+  'tag',
+  'subaccounts',
+  'star',
+  'signature',
+  'sign',
+  'shield',
+  'shield-crossed',
+  'share',
+  'settings',
+  'settings-outlined',
+  'server',
+  'send-to',
+  'send-to-user',
+  'seed',
+  'search',
+  'scan',
+  'scan-1',
+  'safe',
+  'rows',
+  'rows-2',
+  'rows-1',
+  'replace-owner',
+  'repeat',
+  'question',
+  'qr-code',
+  'points',
+  'plus',
+  'plus-outlined',
+  'plus-filled',
+  'pending',
+  'paste',
+  'owners',
+  'outgoing',
+  'options-vertical',
+  'options-horizontal',
+  'no-connection',
+  'nft',
+  'mobile',
+  'magic',
+  'lock',
+  'link',
+  'lightbulb',
+  'license',
+  'ledger',
+  'keystone',
+  'keyboard',
+  'key',
+  'invest',
+  'info',
+  'incoming',
+  'inactive',
+  'home',
+  'hat',
+  'hardware',
+  'get-in-touch',
+  'gas',
+  'fingerprint',
+  'filter',
+  'file',
+  'fiat',
+  'face-id',
+  'eye-on',
+  'eye-off',
+  'eye-n',
+  'external-link',
+  'export',
+  'experimental',
+  'ens',
+  'email',
+  'element-drag',
+  'edit',
+  'edit-owner',
+  'earn',
+  'dropdown-arrow-small',
+  'download',
+  'double-arrow',
+  'dots-grid',
+  'document',
+  'desktop',
+  'delete',
+  'dapp-logo',
+  'copy',
+  'code-blocks',
+  'close',
+  'close-filled',
+  'clock',
+  'chevron-up',
+  'chevron-right',
+  'chevron-left',
+  'chevron-down',
+  'check',
+  'check-oulined',
+  'check-notifications',
+  'check-filled',
+  'chat',
+  'chain',
+  'camera',
+  'camera-off',
+  'bookmark',
+  'bookmark-filled',
+  'blocks',
+  'blocks-1',
+  'block',
+  'bell',
+  'batch',
+  'arrow-up',
+  'arrow-sort',
+  'arrow-right',
+  'arrow-left',
+  'arrow-down',
+  'apps',
+  'appearance',
+  'api',
+  'allowance',
+  'alert',
+  'alert-triangle',
+  'alert-circle-filled',
+  'address-book',
+  'address-book-empty-list',
+  'add-owner',
 ]
