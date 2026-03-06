@@ -2,106 +2,103 @@
 
 exports[`./index.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15fxbpu-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15fxbpu-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="MuiBox-root mui-style-1qm1lh"
     >
       <div
-        class="MuiBox-root mui-style-1qm1lh"
+        class="MuiBox-root mui-style-dzaqf9"
       >
         <div
-          class="MuiBox-root mui-style-dzaqf9"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
+          data-testid="table-container"
+          style="--Paper-shadow: none;"
         >
-          <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
-            data-testid="table-container"
-            style="--Paper-shadow: none;"
+          <table
+            aria-labelledby="tableTitle"
+            class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
           >
-            <table
-              aria-labelledby="tableTitle"
-              class="MuiTable-root compactTable mui-style-14ipoqq-MuiTable-root"
+            <thead
+              class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
             >
-              <thead
-                class="MuiTableHead-root mui-style-1bxxo5-MuiTableHead-root"
+              <tr
+                class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
               >
-                <tr
-                  class="MuiTableRow-root MuiTableRow-head mui-style-ee4r5n-MuiTableRow-root"
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
+                  scope="col"
                 >
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-16mkdhd-MuiTableCell-root"
-                    scope="col"
+                  <span
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
-                    <span
-                      class="MuiBox-root mui-style-1kuy7z7"
+                    <p
+                      class="MuiTypography-root MuiTypography-body2 mui-style-df2485-MuiTypography-root"
                     >
-                      <p
-                        class="MuiTypography-root MuiTypography-body2 mui-style-df2485-MuiTypography-root"
-                      >
-                        Supply
-                      </p>
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
-                    scope="col"
+                      Supply
+                    </p>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-14qoodj-MuiTableCell-root"
+                  scope="col"
+                >
+                  <span
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
-                    <span
-                      class="MuiBox-root mui-style-1kuy7z7"
-                    >
-                      Balance
-                    </span>
-                  </th>
-                  <th
-                    class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
-                    scope="col"
+                    Balance
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium mui-style-1lpfb9u-MuiTableCell-root"
+                  scope="col"
+                >
+                  <span
+                    class="MuiBox-root mui-style-1kuy7z7"
                   >
-                    <span
-                      class="MuiBox-root mui-style-1kuy7z7"
-                    >
-                      Value
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody
-                class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
+                    Value
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
+            >
+              <tr
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                data-testid="table-row"
+                tabindex="-1"
               >
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-name"
                 >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-name"
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
                         >
                           <div
-                            class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                            class="MuiBox-root mui-style-olq4e8"
                           >
-                            <div
-                              class="MuiBox-root mui-style-olq4e8"
-                            >
-                              <iframe
-                                height="32"
-                                loading="lazy"
-                                referrerpolicy="strict-origin"
-                                sandbox="allow-scripts"
-                                srcdoc="
+                            <iframe
+                              height="32"
+                              loading="lazy"
+                              referrerpolicy="strict-origin"
+                              sandbox="allow-scripts"
+                              srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
       <img src="https://assets.coingecko.com/coins/images/2518/small/weth.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
@@ -112,144 +109,144 @@ exports[`./index.stories Default 1`] = `
       </script>
     </body>
   "
-                                style="pointer-events: none; border: 0px; display: block;"
-                                tabindex="-1"
-                                title="WETH"
-                                width="32"
-                              />
-                            </div>
-                            <div
-                              class="MuiBox-root mui-style-0"
-                            >
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
-                              >
-                                Wrapped Ether
-                              </p>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-                              >
-                                WETH
-                                 •  
-                                Deposited
-                              </p>
-                            </div>
+                              style="pointer-events: none; border: 0px; display: block;"
+                              tabindex="-1"
+                              title="WETH"
+                              width="32"
+                            />
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                          >
-                            1.5
-                             
-                            WETH
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
                           <div
-                            class="MuiBox-root mui-style-s2uf1z"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
-                              <span
-                                aria-label="$ 5,475.00"
-                                class=""
-                                data-mui-internal-clone-element="true"
-                                style="white-space: nowrap;"
-                              >
-                                $ 5,475
-                              </span>
+                              Wrapped Ether
                             </p>
-                            <span
-                              class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            <p
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
-                              <div
-                                aria-label="24h change"
-                                class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                                data-mui-internal-clone-element="true"
-                              >
-                                <mock-icon
-                                  aria-hidden=""
-                                  class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                  focusable="false"
-                                />
-                                <span
-                                  class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-                                >
-                                  2.50%
-                                </span>
-                              </div>
-                            </span>
+                              WETH
+                               •  
+                              Deposited
+                            </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </td>
-                </tr>
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-balance"
                 >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-name"
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                        >
+                          1.5
+                           
+                          WETH
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-value"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
-                          <div
-                            class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                          >
+                            <span
+                              aria-label="$ 5,475.00"
+                              class=""
+                              data-mui-internal-clone-element="true"
+                              style="white-space: nowrap;"
+                            >
+                              $ 5,475
+                            </span>
+                          </p>
+                          <span
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
-                              class="MuiBox-root mui-style-olq4e8"
+                              aria-label="24h change"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
+                              data-mui-internal-clone-element="true"
                             >
-                              <iframe
-                                height="32"
-                                loading="lazy"
-                                referrerpolicy="strict-origin"
-                                sandbox="allow-scripts"
-                                srcdoc="
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
+                                focusable="false"
+                              />
+                              <span
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                              >
+                                2.50%
+                              </span>
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                data-testid="table-row"
+                tabindex="-1"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-name"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                        >
+                          <div
+                            class="MuiBox-root mui-style-olq4e8"
+                          >
+                            <iframe
+                              height="32"
+                              loading="lazy"
+                              referrerpolicy="strict-origin"
+                              sandbox="allow-scripts"
+                              srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
       <img src="https://assets.coingecko.com/coins/images/6319/small/usdc.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
@@ -260,144 +257,144 @@ exports[`./index.stories Default 1`] = `
       </script>
     </body>
   "
-                                style="pointer-events: none; border: 0px; display: block;"
-                                tabindex="-1"
-                                title="USDC"
-                                width="32"
-                              />
-                            </div>
-                            <div
-                              class="MuiBox-root mui-style-0"
-                            >
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
-                              >
-                                USD Coin
-                              </p>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-                              >
-                                USDC
-                                 •  
-                                Deposited
-                              </p>
-                            </div>
+                              style="pointer-events: none; border: 0px; display: block;"
+                              tabindex="-1"
+                              title="USDC"
+                              width="32"
+                            />
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                          >
-                            10,000
-                             
-                            USDC
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
                           <div
-                            class="MuiBox-root mui-style-s2uf1z"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
-                              <span
-                                aria-label="$ 10,000.00"
-                                class=""
-                                data-mui-internal-clone-element="true"
-                                style="white-space: nowrap;"
-                              >
-                                $ 10,000
-                              </span>
+                              USD Coin
                             </p>
-                            <span
-                              class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            <p
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
-                              <div
-                                aria-label="24h change"
-                                class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                                data-mui-internal-clone-element="true"
-                              >
-                                <mock-icon
-                                  aria-hidden=""
-                                  class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                  focusable="false"
-                                />
-                                <span
-                                  class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-                                >
-                                  0.01%
-                                </span>
-                              </div>
-                            </span>
+                              USDC
+                               •  
+                              Deposited
+                            </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </td>
-                </tr>
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-balance"
                 >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-name"
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                        >
+                          10,000
+                           
+                          USDC
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-value"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
-                          <div
-                            class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                          >
+                            <span
+                              aria-label="$ 10,000.00"
+                              class=""
+                              data-mui-internal-clone-element="true"
+                              style="white-space: nowrap;"
+                            >
+                              $ 10,000
+                            </span>
+                          </p>
+                          <span
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
-                              class="MuiBox-root mui-style-olq4e8"
+                              aria-label="24h change"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
+                              data-mui-internal-clone-element="true"
                             >
-                              <iframe
-                                height="32"
-                                loading="lazy"
-                                referrerpolicy="strict-origin"
-                                sandbox="allow-scripts"
-                                srcdoc="
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
+                                focusable="false"
+                              />
+                              <span
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                              >
+                                0.01%
+                              </span>
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                data-testid="table-row"
+                tabindex="-1"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-name"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                        >
+                          <div
+                            class="MuiBox-root mui-style-olq4e8"
+                          >
+                            <iframe
+                              height="32"
+                              loading="lazy"
+                              referrerpolicy="strict-origin"
+                              sandbox="allow-scripts"
+                              srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
       <img src="https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
@@ -408,144 +405,144 @@ exports[`./index.stories Default 1`] = `
       </script>
     </body>
   "
-                                style="pointer-events: none; border: 0px; display: block;"
-                                tabindex="-1"
-                                title="DAI"
-                                width="32"
-                              />
-                            </div>
-                            <div
-                              class="MuiBox-root mui-style-0"
-                            >
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
-                              >
-                                Dai Stablecoin
-                              </p>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-                              >
-                                DAI
-                                 •  
-                                Deposited
-                              </p>
-                            </div>
+                              style="pointer-events: none; border: 0px; display: block;"
+                              tabindex="-1"
+                              title="DAI"
+                              width="32"
+                            />
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                          >
-                            5,000
-                             
-                            DAI
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
                           <div
-                            class="MuiBox-root mui-style-s2uf1z"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
-                              <span
-                                aria-label="$ 5,000.00"
-                                class=""
-                                data-mui-internal-clone-element="true"
-                                style="white-space: nowrap;"
-                              >
-                                $ 5,000
-                              </span>
+                              Dai Stablecoin
                             </p>
-                            <span
-                              class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            <p
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
-                              <div
-                                aria-label="24h change"
-                                class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1v5d94b-MuiChip-root"
-                                data-mui-internal-clone-element="true"
-                              >
-                                <mock-icon
-                                  aria-hidden=""
-                                  class="MuiSvgIcon-root MuiSvgIcon-colorError MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorError mui-style-19da0qu-MuiSvgIcon-root"
-                                  focusable="false"
-                                />
-                                <span
-                                  class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-                                >
-                                  0.02%
-                                </span>
-                              </div>
-                            </span>
+                              DAI
+                               •  
+                              Deposited
+                            </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </td>
-                </tr>
-                <tr
-                  class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
-                  data-testid="table-row"
-                  tabindex="-1"
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-balance"
                 >
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-name"
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
                   >
                     <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
                     >
                       <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                        >
+                          5,000
+                           
+                          DAI
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-value"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
                       >
                         <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                          class="MuiBox-root mui-style-s2uf1z"
                         >
-                          <div
-                            class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                          >
+                            <span
+                              aria-label="$ 5,000.00"
+                              class=""
+                              data-mui-internal-clone-element="true"
+                              style="white-space: nowrap;"
+                            >
+                              $ 5,000
+                            </span>
+                          </p>
+                          <span
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
                           >
                             <div
-                              class="MuiBox-root mui-style-olq4e8"
+                              aria-label="24h change"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1v5d94b-MuiChip-root"
+                              data-mui-internal-clone-element="true"
                             >
-                              <iframe
-                                height="32"
-                                loading="lazy"
-                                referrerpolicy="strict-origin"
-                                sandbox="allow-scripts"
-                                srcdoc="
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorError MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorError mui-style-19da0qu-MuiSvgIcon-root"
+                                focusable="false"
+                              />
+                              <span
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                              >
+                                0.02%
+                              </span>
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"
+                data-testid="table-row"
+                tabindex="-1"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-name"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                        >
+                          <div
+                            class="MuiBox-root mui-style-olq4e8"
+                          >
+                            <iframe
+                              height="32"
+                              loading="lazy"
+                              referrerpolicy="strict-origin"
+                              sandbox="allow-scripts"
+                              srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
       <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
@@ -556,116 +553,115 @@ exports[`./index.stories Default 1`] = `
       </script>
     </body>
   "
-                                style="pointer-events: none; border: 0px; display: block;"
-                                tabindex="-1"
-                                title="UNK"
-                                width="32"
-                              />
-                            </div>
-                            <div
-                              class="MuiBox-root mui-style-0"
-                            >
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
-                              >
-                                Unknown Token
-                              </p>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
-                              >
-                                UNK
-                                 •  
-                                Deposited
-                              </p>
-                            </div>
+                              style="pointer-events: none; border: 0px; display: block;"
+                              tabindex="-1"
+                              title="UNK"
+                              width="32"
+                            />
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-balance"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
-                          <p
-                            class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
-                          >
-                            1,000
-                             
-                            UNK
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td
-                    class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
-                    data-testid="table-cell-value"
-                  >
-                    <div
-                      class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
-                      style="min-height: 0px;"
-                    >
-                      <div
-                        class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
-                      >
-                        <div
-                          class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
-                        >
                           <div
-                            class="MuiBox-root mui-style-s2uf1z"
+                            class="MuiBox-root mui-style-0"
                           >
                             <p
-                              class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ct9qkn-MuiTypography-root"
                             >
-                              <span
-                                aria-label="$ 2,500.00"
-                                class=""
-                                data-mui-internal-clone-element="true"
-                                style="white-space: nowrap;"
-                              >
-                                $ 2,500
-                              </span>
+                              Unknown Token
                             </p>
-                            <span
-                              class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                            <p
+                              class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
                             >
-                              <div
-                                aria-label="24h change"
-                                class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
-                                data-mui-internal-clone-element="true"
-                              >
-                                <mock-icon
-                                  aria-hidden=""
-                                  class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
-                                  focusable="false"
-                                />
-                                <span
-                                  class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
-                                >
-                                  1.23%
-                                </span>
-                              </div>
-                            </span>
+                              UNK
+                               •  
+                              Deposited
+                            </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-balance"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <p
+                          class="MuiTypography-root MuiTypography-body1 mui-style-1gmilbo-MuiTypography-root"
+                        >
+                          1,000
+                           
+                          UNK
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium mui-style-v0c5dw-MuiTableCell-root"
+                  data-testid="table-cell-value"
+                >
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-entered mui-style-qr6njo-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root mui-style-s2uf1z"
+                        >
+                          <p
+                            class="MuiTypography-root MuiTypography-body1 mui-style-v6lhhw-MuiTypography-root"
+                          >
+                            <span
+                              aria-label="$ 2,500.00"
+                              class=""
+                              data-mui-internal-clone-element="true"
+                              style="white-space: nowrap;"
+                            >
+                              $ 2,500
+                            </span>
+                          </p>
+                          <span
+                            class="MuiTypography-root MuiTypography-caption mui-style-19nflmw-MuiTypography-root"
+                          >
+                            <div
+                              aria-label="24h change"
+                              class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-w1uylf-MuiChip-root"
+                              data-mui-internal-clone-element="true"
+                            >
+                              <mock-icon
+                                aria-hidden=""
+                                class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium MuiChip-icon MuiChip-iconSmall MuiChip-iconColorSuccess mui-style-12cxu6e-MuiSvgIcon-root"
+                                focusable="false"
+                              />
+                              <span
+                                class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+                              >
+                                1.23%
+                              </span>
+                            </div>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

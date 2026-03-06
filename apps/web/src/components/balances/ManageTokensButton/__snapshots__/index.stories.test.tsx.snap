@@ -2,10 +2,40 @@
 
 exports[`./index.stories Default 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-1o8z91x-MuiButtonBase-root-MuiButton-root"
+      data-testid="manage-tokens-button"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-6rkz1o-MuiButton-startIcon"
+      >
+        <mock-icon />
+      </span>
+      <span
+        class="MuiBox-root mui-style-u5d1ce"
+      >
+        Manage tokens
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithHiddenTokens 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
     <div
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
@@ -28,44 +58,6 @@ exports[`./index.stories Default 1`] = `
           Manage tokens
         </span>
       </button>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`./index.stories WithHiddenTokens 1`] = `
-<div
-  class="shadcn-scope"
->
-  <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
-  >
-    <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
-      style="--Paper-shadow: none;"
-    >
-      <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
-        style="--Paper-shadow: none;"
-      >
-        <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-1o8z91x-MuiButtonBase-root-MuiButton-root"
-          data-testid="manage-tokens-button"
-          tabindex="0"
-          type="button"
-        >
-          <span
-            class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-6rkz1o-MuiButton-startIcon"
-          >
-            <mock-icon />
-          </span>
-          <span
-            class="MuiBox-root mui-style-u5d1ce"
-          >
-            Manage tokens
-          </span>
-        </button>
-      </div>
     </div>
   </div>
 </div>
@@ -73,33 +65,29 @@ exports[`./index.stories WithHiddenTokens 1`] = `
 
 exports[`./index.stories WithoutDefaultTokenlist 1`] = `
 <div
-  class="shadcn-scope"
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    style="background-color: rgb(255, 255, 255); padding: 1rem;"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
+    style="--Paper-shadow: none;"
   >
-    <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-p4s866-MuiPaper-root"
-      style="--Paper-shadow: none;"
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-1o8z91x-MuiButtonBase-root-MuiButton-root"
+      data-testid="manage-tokens-button"
+      tabindex="0"
+      type="button"
     >
-      <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-1o8z91x-MuiButtonBase-root-MuiButton-root"
-        data-testid="manage-tokens-button"
-        tabindex="0"
-        type="button"
+      <span
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-6rkz1o-MuiButton-startIcon"
       >
-        <span
-          class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-6rkz1o-MuiButton-startIcon"
-        >
-          <mock-icon />
-        </span>
-        <span
-          class="MuiBox-root mui-style-u5d1ce"
-        >
-          Manage tokens
-        </span>
-      </button>
-    </div>
+        <mock-icon />
+      </span>
+      <span
+        class="MuiBox-root mui-style-u5d1ce"
+      >
+        Manage tokens
+      </span>
+    </button>
   </div>
 </div>
 `;
