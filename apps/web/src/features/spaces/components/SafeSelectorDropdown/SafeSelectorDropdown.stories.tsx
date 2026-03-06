@@ -54,7 +54,7 @@ const SAFE_NAMES = [
 ]
 
 const createMockAddress = (index: number) =>
-  `0x${index.toString(16).padStart(4, '0')}...${(index + 100).toString(16).padStart(4, '0')}`
+  `0x${index.toString(16).padStart(40, '0')}` as `0x${string}`
 
 const createMockSafeItem = (index: number, overrides = {}): SafeItemData => ({
   id: `${baseChains[index % baseChains.length].chainId}:${createMockAddress(index + 1)}`,
@@ -69,25 +69,25 @@ const createMockSafeItem = (index: number, overrides = {}): SafeItemData => ({
 
 const mockItems: SafeItemData[] = [
   createMockSafeItem(0, {
-    id: '1:0xA77DE...98b6',
+    id: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
     name: 'My Safe',
-    address: '0xA77D...98b6',
+    address: '0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
     threshold: 3,
     owners: 5,
     balance: '16780000',
   }),
   createMockSafeItem(1, {
-    id: '100:0x8675...cdba',
+    id: '100:0x86753fe4b8e29ce8a38cdf9559d80e05b00cdba0',
     name: 'Another Safe',
-    address: '0x8675...cdba',
+    address: '0x86753fe4b8e29ce8a38cdf9559d80e05b00cdba0',
     threshold: 3,
     owners: 5,
     balance: '40070000',
   }),
   createMockSafeItem(2, {
-    id: '8453:0x8675...abcd',
+    id: '8453:0x86753fe4b8e29ce8a38cdf9559d80e05b0abcdef',
     name: 'One more Safe',
-    address: '0x8675...abcd',
+    address: '0x86753fe4b8e29ce8a38cdf9559d80e05b0abcdef',
     threshold: 3,
     owners: 5,
     balance: '31900000',
@@ -118,9 +118,9 @@ const InteractiveWrapper = ({ items, initialItemId }: { items: SafeItemData[]; i
 
 /** One safe with only one chain: threshold badge visible, no divider line or chevron. */
 const singleChainItem: SafeItemData = createMockSafeItem(0, {
-  id: '1:0xA77DE...98b6',
+  id: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
   name: 'My Safe',
-  address: '0xA77D...98b6',
+  address: '0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
   threshold: 3,
   owners: 5,
   balance: '16780000',
@@ -149,35 +149,35 @@ export const MultipleSafes: Story = {
 
 const mockItemsWithNested: SafeItemData[] = [
   createMockSafeItem(0, {
-    id: '1:0xA77DE...98b6',
+    id: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
     name: 'Parent Safe',
-    address: '0xA77D...98b6',
+    address: '0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
     threshold: 3,
     owners: 5,
     balance: '16780000',
   }),
   createMockSafeItem(1, {
-    id: '100:0x8675...cdba',
+    id: '100:0x86753fe4b8e29ce8a38cdf9559d80e05b00cdba0',
     name: 'Nested Safe 1',
-    address: '0x8675...cdba',
+    address: '0x86753fe4b8e29ce8a38cdf9559d80e05b00cdba0',
     threshold: 2,
     owners: 3,
     balance: '5000000',
-    parentSafeId: '1:0xA77DE...98b6',
+    parentSafeId: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
   }),
   createMockSafeItem(2, {
-    id: '8453:0x8675...abcd',
+    id: '8453:0x86753fe4b8e29ce8a38cdf9559d80e05b0abcdef',
     name: 'Nested Safe 2',
-    address: '0x8675...abcd',
+    address: '0x86753fe4b8e29ce8a38cdf9559d80e05b0abcdef',
     threshold: 2,
     owners: 4,
     balance: '3200000',
-    parentSafeId: '1:0xA77DE...98b6',
+    parentSafeId: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
   }),
   createMockSafeItem(3, {
-    id: '137:0x9988...ffee',
+    id: '137:0x9988776655443322110099887766554433221100',
     name: 'Another Parent',
-    address: '0x9988...ffee',
+    address: '0x9988776655443322110099887766554433221100',
     threshold: 4,
     owners: 7,
     balance: '25000000',

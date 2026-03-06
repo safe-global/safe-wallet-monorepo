@@ -1,5 +1,6 @@
+import { blo } from 'blo'
 import { Settings } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import ChainSelectorBlock from './ChainSelectorBlock'
 import SafeBalanceBlock from './SafeBalanceBlock'
@@ -31,6 +32,7 @@ function SafeSelectorTriggerContent({
   return (
     <div className="flex items-center gap-4 w-full">
       <Avatar size="sm">
+        <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-start flex-1 min-w-0">
