@@ -29,6 +29,12 @@
   justify-content: center;
 }
 
+.widgetItem {
+  iframe {
+    display: none!important;
+  }
+}
+
 .iconBGBlue {
   background-color: var(--color-info-background);
 }

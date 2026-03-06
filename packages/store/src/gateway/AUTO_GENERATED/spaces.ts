@@ -126,6 +126,19 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceSafesGetPendingTransactionsV1: build.query<
+        SpaceSafesGetPendingTransactionsV1ApiResponse,
+        SpaceSafesGetPendingTransactionsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/safes/pending-transactions`,
+          params: {
+            limit: queryArg.limit,
+            offset: queryArg.offset,
+          },
+        }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -358,6 +371,27 @@ export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
 }
+export type SpaceSafesGetPendingTransactionsV1ApiResponse =
+  /** status 200 Pending transactions retrieved successfully */ SpacePendingTransactionsPage
+export type SpaceSafesGetPendingTransactionsV1ApiArg = {
+  /** Space ID to get pending transactions for */
+  spaceId: number
+  /** Maximum number of results to return (max 20) */
+  limit?: number
+  /** Offset for pagination */
+  offset?: number
+}
+import type {
+  TransactionQueuedItem,
+  ConflictHeaderQueuedItem,
+  LabelQueuedItem,
+} from './transactions'
+export type SpacePendingTransactionsPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -384,4 +418,6 @@ export const {
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useSpaceSafesGetPendingTransactionsV1Query,
+  useLazySpaceSafesGetPendingTransactionsV1Query,
 } = injectedRtkApi

@@ -1,20 +1,18 @@
 import type { ReactElement } from 'react'
-import { ArrowUpRight, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-
-interface PendingTransaction {
-  id: string
-  label: string
-  info: string
-  status: string
-  initials?: string
-}
+import { getTxStatus, formatTxDate } from '@/features/transactions/utils'
+import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
+import TxInfo from '@/components/transactions/TxInfo'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
+import Identicon from '@/components/common/Identicon'
+import css from './styles.module.css'
 
 interface PendingTxWidgetProps {
-  transactions: PendingTransaction[]
+  transactions: TransactionQueuedItem[]
   loading?: boolean
   remainingCount?: number
   onViewAll?: () => void
@@ -23,9 +21,9 @@ interface PendingTxWidgetProps {
 
 const SKELETON_COUNT = 3
 
-const TxIcon = (): ReactElement => (
+const TxIcon = ({ tx }: { tx: TransactionQueuedItem }): ReactElement => (
   <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
-    <ArrowUpRight className="size-5 text-foreground" />
+    <TxTypeIcon tx={tx.transaction} />
   </div>
 )
 
@@ -45,31 +43,36 @@ const PendingTxWidget = ({
         </Button>
       }
     >
-      {loading
-        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : transactions.map((tx) => (
-            <SafeWidget.Item
-              key={tx.id}
-              label={tx.label}
-              info={tx.info}
-              startNode={<TxIcon />}
-              featuredNode={
-                tx.initials ? (
-                  <Avatar size="xs">
-                    <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">{tx.initials}</AvatarFallback>
-                  </Avatar>
-                ) : undefined
-              }
-              actionNode={<Badge variant="secondary">{tx.status}</Badge>}
-            />
-          ))}
-      {!loading && remainingCount !== undefined && (
-        <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={onViewAll} />
+      {loading ? (
+        Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
+      ) : transactions.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
+      ) : (
+        transactions.map((tx) => (
+          <SafeWidget.Item
+            key={tx.transaction.id}
+            className={css.widgetItem}
+            label={
+              <div className="flex items-center font-semibold gap-1">
+                <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
+              </div>
+            }
+            info={formatTxDate(tx.transaction.timestamp)}
+            startNode={<TxIcon tx={tx} />}
+            featuredNode={
+              isMultisigExecutionInfo(tx.transaction.executionInfo) &&
+                tx.transaction.executionInfo.missingSigners?.[0] ? (
+                <Identicon address={tx.transaction.executionInfo.missingSigners[0].value} size={24} />
+              ) : undefined
+            }
+            actionNode={<div className='w-[200px] max-w-full flex justify-end'><Badge variant="secondary">{getTxStatus(tx)}</Badge></div>}
+          />
+        ))
       )}
     </SafeWidget>
   )
 }
 
 export { PendingTxWidget }
-export type { PendingTxWidgetProps, PendingTransaction }
+export type { PendingTxWidgetProps }
 export default PendingTxWidget
