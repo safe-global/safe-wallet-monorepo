@@ -52,7 +52,7 @@ export function AssetsCard({
           rightNode
         )
       }
-      paddingVertical={'$2'}
+      paddingVertical={'$3'}
     />
   )
 }

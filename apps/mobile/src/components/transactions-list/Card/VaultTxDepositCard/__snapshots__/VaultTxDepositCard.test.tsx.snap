@@ -25,8 +25,8 @@ exports[`VaultTxDepositCard renders correctly 1`] = `
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }
@@ -148,7 +148,7 @@ exports[`VaultTxDepositCard renders correctly 1`] = `
                 }
                 testID="safe-list-transaction-earn-icon"
               >
-                
+                
               </Text>
               <Text
                 ellipsizeMode="tail"
