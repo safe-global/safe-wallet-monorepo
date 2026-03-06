@@ -60,10 +60,7 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
   ).length
 
-  const addNewSafes = async (
-    selectedSafes: AddAccountsFormValues['selectedSafes'],
-    spaceIdNum: number,
-  ) => {
+  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToAdd = Object.entries(selectedSafes)
@@ -90,10 +87,7 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     }
   }
 
-  const removeUnselectedSafes = async (
-    selectedSafes: AddAccountsFormValues['selectedSafes'],
-    spaceIdNum: number,
-  ) => {
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToRemove = flatSpaceSafes
