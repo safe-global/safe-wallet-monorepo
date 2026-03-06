@@ -10,6 +10,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
 
@@ -82,8 +83,7 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
       createSpaceSafesDto: { safes: safesToAdd },
     })
     if (result.error) {
-      // @ts-ignore
-      throw new Error(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
+      throw new Error(getRtkQueryErrorMessage(result.error))
     }
   }
 
@@ -104,8 +104,7 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
     if (result.error) {
-      // @ts-ignore
-      throw new Error(result.error?.data?.message || 'Something went wrong removing one or more Safe Accounts.')
+      throw new Error(getRtkQueryErrorMessage(result.error))
     }
   }
 

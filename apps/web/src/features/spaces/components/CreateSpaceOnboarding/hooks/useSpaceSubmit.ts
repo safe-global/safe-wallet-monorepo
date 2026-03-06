@@ -10,6 +10,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -28,7 +29,7 @@ const useSpaceSubmit = (
     const response = await updateSpace({ id: Number(spaceId), updateSpaceDto: { name } })
 
     if (response.error) {
-      throw response.error
+      throw new Error(getRtkQueryErrorMessage(response.error))
     }
 
     dispatch(
@@ -63,7 +64,7 @@ const useSpaceSubmit = (
     }
 
     if (response.error) {
-      throw response.error
+      throw new Error(getRtkQueryErrorMessage(response.error))
     }
   }
 
@@ -80,8 +81,9 @@ const useSpaceSubmit = (
       }
     } catch (error) {
       const errorMessage =
-        (error as { data?: { message?: string } })?.data?.message ||
-        `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
+        error instanceof Error
+          ? error.message
+          : `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
       setError(errorMessage)
       setIsSubmitting(false)
     }
