@@ -11,7 +11,7 @@ import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
 
 const ONBOARDING_STEP = 2
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 3
 
 const SelectSafesOnboarding = (): ReactElement => {
   const { spaceId, isReady, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()

@@ -13,7 +13,7 @@ import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 
-const ONBOARDING_TOTAL_STEPS = 4
+const ONBOARDING_TOTAL_STEPS = 3
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const wallet = useWallet()

@@ -22,7 +22,7 @@ const Topbar = (): ReactElement => {
 
   return (
     <>
-      <header className="flex items-center p-6  pb-0 justify-end bg-secondary">
+      <header className="flex items-center p-6 pb-0 justify-end bg-secondary">
         <HeaderNavigation
           walletAddress={wallet?.address ?? ''}
           messages={unreadCount}
