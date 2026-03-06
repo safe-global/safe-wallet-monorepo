@@ -8,6 +8,7 @@ import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useChain } from '@/hooks/useChains'
 import WalletBalance from '@/components/common/WalletBalance'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 import css from './styles.module.css'
 
@@ -35,6 +36,7 @@ const WalletOverview = ({
 }): ReactElement => {
   const walletChain = useChain(wallet.chainId)
   const prefix = walletChain?.shortName
+  const hideNativeToken = walletChain && hasFeature(walletChain, FEATURES.HIDE_NATIVE_TOKEN)
 
   return (
     <Box className={css.container}>
@@ -56,7 +58,7 @@ const WalletOverview = ({
           )}
         </Typography>
 
-        {showBalance && (
+        {showBalance && !hideNativeToken && (
           <Typography variant="caption" component="div" fontWeight="bold" display={{ xs: 'none', sm: 'block' }}>
             <WalletBalance balance={balance} />
           </Typography>
