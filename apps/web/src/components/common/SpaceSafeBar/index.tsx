@@ -4,7 +4,7 @@ import { useSpaceSafeSelectorItems } from './useSpaceSafeSelectorItems'
 
 function SpaceSafeBar() {
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { items, selectedItemId, handleItemSelect, handleChainChange } = useSpaceSafeSelectorItems()
+  const { items, selectedItemId, handleItemSelect, handleChainChange, isError, refetch } = useSpaceSafeSelectorItems()
 
   if (!isQualifiedSafe) return null
 
@@ -16,6 +16,8 @@ function SpaceSafeBar() {
         selectedItemId={selectedItemId}
         onItemSelect={handleItemSelect}
         onChainChange={handleChainChange}
+        isError={isError}
+        onRetry={refetch}
       />
     </div>
   )
