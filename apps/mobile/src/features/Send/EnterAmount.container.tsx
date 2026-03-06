@@ -133,6 +133,7 @@ export function EnterAmountContainer() {
               secondaryDisplay={fiatConversion.secondaryDisplay}
               onToggle={fiatConversion.toggleMode}
               canToggle={fiatConversion.hasFiatPrice}
+              hasValue={rawInput.length > 0}
             />
 
             <View flexDirection="row" alignItems="center" gap="$2" marginTop="$6">
