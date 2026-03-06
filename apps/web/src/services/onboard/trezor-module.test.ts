@@ -18,7 +18,7 @@ jest.mock('@trezor/connect-web', () => ({
     dispose: jest.fn(),
     ethereumGetAddress: jest.fn().mockResolvedValue({
       success: true,
-      payload: { address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' },
+      payload: [{ address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', serializedPath: "m/44'/60'/0'/0/0" }],
     }),
     ethereumSignMessage: jest.fn().mockResolvedValue({
       success: true,

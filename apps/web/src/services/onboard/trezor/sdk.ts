@@ -38,7 +38,9 @@ export async function getTrezorSdk() {
       const hex = message.startsWith('0x') ? message.slice(2) : message
       const result = await TrezorConnect.ethereumSignMessage({ path: derivationPath, message: hex, hex: true })
       if (!result.success) throw mapTrezorError(result.payload)
-      return result.payload.signature
+      const sig = result.payload.signature
+      // Trezor returns raw hex without 0x; ethers Signature.from() requires the prefix
+      return sig.startsWith('0x') ? sig : `0x${sig}`
     },
 
     signTransaction: async (
@@ -67,7 +69,9 @@ export async function getTrezorSdk() {
         ...(messageHash != null && { message_hash: messageHash }),
       })
       if (!result.success) throw mapTrezorError(result.payload)
-      return result.payload.signature
+      const typedSig = result.payload.signature
+      // Trezor returns raw hex without 0x; ethers Signature.from() requires the prefix
+      return typedSig.startsWith('0x') ? typedSig : `0x${typedSig}`
     },
   }
 }
