@@ -199,7 +199,7 @@ describe('useOnboardingSubmit', () => {
 
   it('should set error on add failure', async () => {
     mockAddSafesToSpace.mockResolvedValue({
-      error: { data: { message: 'Add failed' } },
+      error: { status: 400, data: { message: 'Add failed' } },
     })
 
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
@@ -220,7 +220,7 @@ describe('useOnboardingSubmit', () => {
   it('should set error on remove failure', async () => {
     mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
     mockRemoveSafesFromSpace.mockResolvedValue({
-      error: { data: { message: 'Remove failed' } },
+      error: { status: 400, data: { message: 'Remove failed' } },
     })
 
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
@@ -243,7 +243,7 @@ describe('useOnboardingSubmit', () => {
   })
 
   it('should set a generic error when error has no message', async () => {
-    mockAddSafesToSpace.mockResolvedValue({ error: { data: {} } })
+    mockAddSafesToSpace.mockResolvedValue({ error: { status: 400, data: {} } })
 
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
 
@@ -255,7 +255,7 @@ describe('useOnboardingSubmit', () => {
       await result.current.onSubmit()
     })
 
-    expect(result.current.error).toBe('Something went wrong adding one or more Safe Accounts.')
+    expect(result.current.error).toBe('Error: 400')
   })
 
   it('should track analytics event on submit', async () => {
