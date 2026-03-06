@@ -14,6 +14,7 @@ import useChainId from '@/hooks/useChainId'
 import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { setUnauthenticated } from '@/store/authSlice'
 import { logError, Errors } from '@/services/exceptions'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -29,6 +30,7 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
   const dispatch = useAppDispatch()
   const chainInfo = useChain(wallet.chainId)
   const prefix = chainInfo?.shortName
+  const hideNativeToken = chainInfo ? hasFeature(chainInfo, FEATURES.HIDE_NATIVE_TOKEN) : false
 
   const handleSwitchWallet = () => {
     if (onboard) {
@@ -77,22 +79,24 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
           <Typography variant="body2">{wallet.label}</Typography>
         </Box>
 
-        <Box className={css.row}>
-          <Typography variant="body2" color="primary.light">
-            Balance
-          </Typography>
-          <Typography variant="body2" textAlign="right">
-            <WalletBalance balance={balance} />
+        {!hideNativeToken && (
+          <Box className={css.row}>
+            <Typography variant="body2" color="primary.light">
+              Balance
+            </Typography>
+            <Typography variant="body2" textAlign="right">
+              <WalletBalance balance={balance} />
 
-            {currentChainId !== chainInfo?.chainId && (
-              <>
-                <Typography variant="body2" color="primary.light">
-                  ({chainInfo?.chainName || 'Unknown chain'})
-                </Typography>
-              </>
-            )}
-          </Typography>
-        </Box>
+              {currentChainId !== chainInfo?.chainId && (
+                <>
+                  <Typography variant="body2" color="primary.light">
+                    ({chainInfo?.chainName || 'Unknown chain'})
+                  </Typography>
+                </>
+              )}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Box display="flex" flexDirection="column" gap={2} width={1}>
