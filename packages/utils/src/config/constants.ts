@@ -25,6 +25,14 @@ export const TENDERLY_PROJECT_NAME =
 export const TENDERLY_ORG_NAME =
   process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || process.env.EXPO_PUBLIC_TENDERLY_ORG_NAME || ''
 
+// Captcha — set to empty string to disable CAPTCHA entirely
+export const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.NEXT_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
+  process.env.EXPO_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
+  ''
+
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
 export const HelpCenterArticle = {
