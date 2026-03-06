@@ -221,20 +221,30 @@ For information on releasing the web app, see the [Automated Release Procedure](
 ## Ode to the repo
 
 ```
-A monorepo of wallets, web and mobile too,
-Where multisig signatures see transactions through.
-Yarn workspaces bind the packages as one,
-With Redux store and RTK Query when the fetching's done.
+In ages past when Gnosis laid the founding stone,
+A vault was wrought that no single key could own.
+Where signatures must gather ere the gate will yield,
+M-of-N doth guard the treasure, sworn and sealed.
 
-M-of-N owners guard each Safe with care,
-Chain by chain, across the EVM layer.
-Storybook for stories, Cypress for the tests,
-Prettier and TypeScript keep the code at its best.
+Now Yarn doth wind its threads through hall and bower,
+Binding web and mobile in a single tower.
+Redux keeps the ledger, RTK Query rides afar,
+Returning with the fetched gold beneath the evening star.
 
-No `any` types allowed — that rule stands firm,
-Feature flags and lazy loads, each taking its turn.
-From Gnosis roots to Safe's evolving name,
-This codebase ships security — that is its aim.
+Chain by chain the watchers set their vigil wide,
+Across th' EVM kingdoms, ever at the Safe's own side.
+Storybook doth chronicle each component's tale,
+And Cypress walks the paths where lesser tests would fail.
+
+No `any` types shall darken these well-guarded lands —
+That ancient law doth hold by Prettier's own hands.
+Feature flags like waypoints mark what lies ahead,
+And lazy loads awaken only where the road doth tread.
+
+Long the name hath wandered — Gnosis once, now Safe it stands,
+Yet still the vow endureth, written into typed commands:
+That what you hold stays guarded, deep beyond all theft or flame,
+For this the codebase liveth — and security its name.
 ```
 
 ---
