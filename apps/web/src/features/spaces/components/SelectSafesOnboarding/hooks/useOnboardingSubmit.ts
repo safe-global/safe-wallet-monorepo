@@ -60,6 +60,61 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
   ).length
 
+  const addNewSafes = async (
+    selectedSafes: AddAccountsFormValues['selectedSafes'],
+    spaceIdNum: number,
+  ) => {
+    const flatSpaceSafes = flattenSafeItems(spaceSafes)
+
+    const safesToAdd = Object.entries(selectedSafes)
+      .filter(
+        ([key, isSelected]) =>
+          isSelected &&
+          !key.startsWith('multichain_') &&
+          !flatSpaceSafes.some((s) => {
+            const { chainId, address } = parseSafeKey(key)
+            return s.address === address && s.chainId === chainId
+          }),
+      )
+      .map(([key]) => parseSafeKey(key))
+
+    if (safesToAdd.length === 0) return
+
+    const result = await addSafesToSpace({
+      spaceId: spaceIdNum,
+      createSpaceSafesDto: { safes: safesToAdd },
+    })
+    if (result.error) {
+      // @ts-ignore
+      throw new Error(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
+    }
+  }
+
+  const removeUnselectedSafes = async (
+    selectedSafes: AddAccountsFormValues['selectedSafes'],
+    spaceIdNum: number,
+  ) => {
+    const flatSpaceSafes = flattenSafeItems(spaceSafes)
+
+    const safesToRemove = flatSpaceSafes
+      .filter((s) => {
+        const key = getSafeId(s)
+        return selectedSafes[key] === false || !(key in selectedSafes)
+      })
+      .map((s) => ({ chainId: s.chainId, address: s.address }))
+
+    if (safesToRemove.length === 0) return
+
+    const result = await removeSafesFromSpace({
+      spaceId: spaceIdNum,
+      deleteSpaceSafesDto: { safes: safesToRemove },
+    })
+    if (result.error) {
+      // @ts-ignore
+      throw new Error(result.error?.data?.message || 'Something went wrong removing one or more Safe Accounts.')
+    }
+  }
+
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
@@ -69,53 +124,10 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
 
-      const flatSpaceSafes = flattenSafeItems(spaceSafes)
       const spaceIdNum = Number(spaceId)
 
-      const safesToAdd = Object.entries(data.selectedSafes)
-        .filter(
-          ([key, isSelected]) =>
-            isSelected &&
-            !key.startsWith('multichain_') &&
-            !flatSpaceSafes.some((s) => {
-              const { chainId, address } = parseSafeKey(key)
-              return s.address === address && s.chainId === chainId
-            }),
-        )
-        .map(([key]) => parseSafeKey(key))
-
-      const safesToRemove = flatSpaceSafes
-        .filter((s) => {
-          const key = getSafeId(s)
-          return data.selectedSafes[key] === false || !(key in data.selectedSafes)
-        })
-        .map((s) => ({ chainId: s.chainId, address: s.address }))
-
-      if (safesToAdd.length > 0) {
-        const addResult = await addSafesToSpace({
-          spaceId: spaceIdNum,
-          createSpaceSafesDto: { safes: safesToAdd },
-        })
-        if (addResult.error) {
-          // @ts-ignore
-          setError(addResult.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
-          setIsSubmitting(false)
-          return
-        }
-      }
-
-      if (safesToRemove.length > 0) {
-        const removeResult = await removeSafesFromSpace({
-          spaceId: spaceIdNum,
-          deleteSpaceSafesDto: { safes: safesToRemove },
-        })
-        if (removeResult.error) {
-          // @ts-ignore
-          setError(removeResult.error?.data?.message || 'Something went wrong removing one or more Safe Accounts.')
-          setIsSubmitting(false)
-          return
-        }
-      }
+      await addNewSafes(data.selectedSafes, spaceIdNum)
+      await removeUnselectedSafes(data.selectedSafes, spaceIdNum)
 
       dispatch(
         showNotification({
@@ -126,8 +138,8 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
       )
 
       onSuccess()
-    } catch {
-      setError('Something went wrong updating Safe Accounts. Please try again.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe Accounts. Please try again.')
       setIsSubmitting(false)
     }
   })
