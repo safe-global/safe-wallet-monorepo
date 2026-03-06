@@ -2,6 +2,7 @@ import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -23,6 +24,81 @@ const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainLogoUri: chain?.chainLogoUri ?? null,
   shortName: chain?.shortName ?? chainId,
 })
+
+const sumFiatTotals = (overviews: SafeOverview[]): number =>
+  overviews.reduce((sum, o) => {
+    const fiat = parseFloat(o.fiatTotal || '0')
+    return isNaN(fiat) ? sum : sum + fiat
+  }, 0)
+
+const resolveThresholdAndOwners = (
+  isCurrentSafe: boolean,
+  safe: { threshold: number; owners?: { value: string }[] },
+  overview: SafeOverview | undefined,
+) => ({
+  threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
+  owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
+})
+
+const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
+  chainIds.map((id) =>
+    toChainInfo(
+      id,
+      chainConfigs.find((c) => c.chainId === id),
+    ),
+  )
+
+function buildMultiChainItem(
+  item: MultiChainSafeItem,
+  isCurrentSafe: boolean,
+  currentChainId: string,
+  overviews: SafeOverview[] | undefined,
+  overviewsLoading: boolean,
+  safe: { threshold: number; owners?: { value: string }[] },
+  chainConfigs: Chain[],
+): SafeItemData {
+  const chainIds = item.safes.map((s) => s.chainId)
+  const orderedChainIds = isCurrentSafe
+    ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)]
+    : chainIds
+
+  const safeOverviews =
+    overviews?.filter(
+      (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
+    ) ?? []
+  const firstOverview = safeOverviews[0] as SafeOverview | undefined
+
+  return {
+    id: `${orderedChainIds[0]}:${item.address}`,
+    name: item.name ?? '',
+    address: item.address,
+    ...resolveThresholdAndOwners(isCurrentSafe, safe, firstOverview),
+    balance: sumFiatTotals(safeOverviews).toString(),
+    isLoading: overviewsLoading && safeOverviews.length === 0,
+    chains: mapChainIds(chainConfigs, orderedChainIds),
+  }
+}
+
+function buildSingleChainItem(
+  item: SafeItem,
+  isCurrentSafe: boolean,
+  overviews: SafeOverview[] | undefined,
+  overviewsLoading: boolean,
+  safe: { threshold: number; owners?: { value: string }[] },
+  chainConfigs: Chain[],
+): SafeItemData {
+  const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
+
+  return {
+    id: `${item.chainId}:${item.address}`,
+    name: item.name ?? '',
+    address: item.address,
+    ...resolveThresholdAndOwners(isCurrentSafe, safe, overview),
+    balance: overview?.fiatTotal ?? '0',
+    isLoading: overviewsLoading && !overview,
+    chains: mapChainIds(chainConfigs, [item.chainId]),
+  }
+}
 
 export function useSpaceSafeSelectorItems() {
   const { allSafes } = useSpaceSafes()
@@ -47,59 +123,10 @@ export function useSpaceSafeSelectorItems() {
       const isCurrentSafe = item.address.toLowerCase() === safeAddress.toLowerCase()
 
       if (isMultiChainSafeItem(item)) {
-        const chainIds = item.safes.map((s) => s.chainId)
-        // Put currentChainId first so useSafeSelectorState shows the right chain in the trigger
-        const orderedChainIds = isCurrentSafe
-          ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)]
-          : chainIds
-
-        // Multi-chain balance = sum of ALL chains (matches myAccounts logic)
-        const safeOverviews =
-          overviews?.filter(
-            (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
-          ) ?? []
-        const totalFiat = safeOverviews.reduce((sum, o) => {
-          const fiat = parseFloat(o.fiatTotal || '0')
-          return isNaN(fiat) ? sum : sum + fiat
-        }, 0)
-        const firstOverview = safeOverviews[0] as SafeOverview | undefined
-
-        const multiItem = {
-          id: `${orderedChainIds[0]}:${item.address}`,
-          name: item.name ?? '',
-          address: item.address,
-          threshold: isCurrentSafe ? safe.threshold : (firstOverview?.threshold ?? 0),
-          owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (firstOverview?.owners.length ?? 0),
-          balance: totalFiat.toString(),
-          isLoading: overviewsLoading && safeOverviews.length === 0,
-          chains: orderedChainIds.map((id) =>
-            toChainInfo(
-              id,
-              chainConfigs.find((c) => c.chainId === id),
-            ),
-          ),
-        }
-        return multiItem
+        return buildMultiChainItem(item, isCurrentSafe, currentChainId, overviews, overviewsLoading, safe, chainConfigs)
       }
 
-      // Single-chain safe: show that chain's balance directly
-      const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
-
-      return {
-        id: `${item.chainId}:${item.address}`,
-        name: item.name ?? '',
-        address: item.address,
-        threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
-        owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
-        balance: overview?.fiatTotal ?? '0',
-        isLoading: overviewsLoading && !overview,
-        chains: [
-          toChainInfo(
-            item.chainId,
-            chainConfigs.find((c) => c.chainId === item.chainId),
-          ),
-        ],
-      }
+      return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs)
     })
   }, [allSafes, safeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs])
 
