@@ -58,9 +58,7 @@ function buildMultiChainItem(
   chainConfigs: Chain[],
 ): SafeItemData {
   const chainIds = item.safes.map((s) => s.chainId)
-  const orderedChainIds = isCurrentSafe
-    ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)]
-    : chainIds
+  const orderedChainIds = isCurrentSafe ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)] : chainIds
 
   const safeOverviews =
     overviews?.filter(
