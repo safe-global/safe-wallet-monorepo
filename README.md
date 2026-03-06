@@ -218,6 +218,25 @@ For information on releasing the web app, see the [Automated Release Procedure](
 - [Prettier Documentation](https://prettier.io/)
 - [Safe Developer Docs](https://docs.safe.global/)
 
+## Ode to the repo
+
+```
+A monorepo of wallets, web and mobile too,
+Where multisig signatures see transactions through.
+Yarn workspaces bind the packages as one,
+With Redux store and RTK Query when the fetching's done.
+
+M-of-N owners guard each Safe with care,
+Chain by chain, across the EVM layer.
+Storybook for stories, Cypress for the tests,
+Prettier and TypeScript keep the code at its best.
+
+No `any` types allowed — that rule stands firm,
+Feature flags and lazy loads, each taking its turn.
+From Gnosis roots to Safe's evolving name,
+This codebase ships security — that is its aim.
+```
+
 ---
 
 If you have any questions or run into issues, feel free to open a discussion or contact the maintainers. Happy coding!
