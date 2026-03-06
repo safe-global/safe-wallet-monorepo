@@ -79,9 +79,9 @@ const useSpaceSubmit = (
         await createSpace(data.name)
       }
     } catch (error) {
-      // @ts-ignore
       const errorMessage =
-        error?.data?.message || `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
+        (error as { data?: { message?: string } })?.data?.message ||
+        `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
       setError(errorMessage)
       setIsSubmitting(false)
     }
