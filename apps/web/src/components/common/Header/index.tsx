@@ -17,8 +17,8 @@ import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import SafeLogoMobile from '@/public/images/logo-no-text.svg'
 import Link from 'next/link'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import BatchIndicator from '@/components/batch/BatchIndicator'
 import { useLoadFeature } from '@/features/__core__'
+import { BatchingFeature } from '@/features/batching'
 import { WalletConnectFeature } from '@/features/walletconnect'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
@@ -45,6 +45,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
+  const { BatchIndicator } = useLoadFeature(BatchingFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
 

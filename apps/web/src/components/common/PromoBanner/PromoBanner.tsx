@@ -167,6 +167,7 @@ const PromoBanner = ({
                 {...(endIcon && { endIcon })}
                 variant="text"
                 size="medium"
+                onClick={handleClick}
                 className={css.bannerCtaText}
                 sx={customCtaColor ? { color: `${customCtaColor} !important` } : undefined}
                 color={customCtaColor ? undefined : 'static'}
