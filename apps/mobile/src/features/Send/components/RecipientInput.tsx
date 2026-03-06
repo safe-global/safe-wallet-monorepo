@@ -104,12 +104,14 @@ function SelectedRecipient({
 function AddressInputField({
   value,
   hasAddress,
+  isEditable,
   onChangeText,
   onClear,
   onPaste,
 }: {
   value: string
   hasAddress: boolean
+  isEditable: boolean
   onChangeText: (text: string) => void
   onClear: () => void
   onPaste: () => void
@@ -117,11 +119,7 @@ function AddressInputField({
   return (
     <>
       <View flex={1} flexDirection="row" alignItems="center">
-        {hasAddress ? (
-          <Text fontSize="$4" color="$color" flex={1}>
-            {value}
-          </Text>
-        ) : (
+        {isEditable ? (
           <Input
             flex={1}
             value={value}
@@ -137,6 +135,10 @@ function AddressInputField({
             backgroundColor="transparent"
             testID="recipient-input"
           />
+        ) : (
+          <Text fontSize="$4" color="$color" flex={1}>
+            {value}
+          </Text>
         )}
       </View>
       {hasAddress ? (
@@ -179,6 +181,7 @@ export function RecipientInput({
 
   const isSelected = !!selectedName && validationState !== 'empty' && validationState !== 'typing'
   const hasAddress = validationState !== 'empty' && validationState !== 'typing'
+  const isEditable = !hasAddress || validationState === 'invalid'
 
   return (
     <View gap="$2">
@@ -202,13 +205,14 @@ export function RecipientInput({
           <AddressInputField
             value={value}
             hasAddress={hasAddress}
+            isEditable={isEditable}
             onChangeText={onChangeText}
             onClear={onClear}
             onPaste={handlePaste}
           />
         )}
       </View>
-      {!isSelected && hasAddress && validationState !== 'unknown' && (
+      {!isSelected && hasAddress && validationState !== 'unknown' && validationState !== 'invalid' && (
         <RecipientValidationBadge state={validationState} contactName={contactName} />
       )}
     </View>
