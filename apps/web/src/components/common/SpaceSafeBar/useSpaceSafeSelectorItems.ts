@@ -58,7 +58,10 @@ export function useSpaceSafeSelectorItems() {
           overviews?.filter(
             (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
           ) ?? []
-        const totalFiat = safeOverviews.reduce((sum, o) => sum + parseFloat(o.fiatTotal || '0'), 0)
+        const totalFiat = safeOverviews.reduce((sum, o) => {
+          const fiat = parseFloat(o.fiatTotal || '0')
+          return isNaN(fiat) ? sum : sum + fiat
+        }, 0)
         const firstOverview = safeOverviews[0] as SafeOverview | undefined
 
         const multiItem = {
