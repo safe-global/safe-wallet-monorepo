@@ -11,11 +11,7 @@ export interface SafeInfoDisplayProps {
 }
 
 const SafeInfoDisplay = ({ name, address, chainShortName, className }: SafeInfoDisplayProps) => {
-  const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
-    name,
-    address,
-    chainShortName,
-  )
+  const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(name, address, chainShortName)
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
@@ -25,9 +21,7 @@ const SafeInfoDisplay = ({ name, address, chainShortName, className }: SafeInfoD
       </Avatar>
       <div className="flex flex-col items-start flex-1 min-w-0">
         <span className="text-sm font-medium text-foreground">{displayName}</span>
-        {showAddressLine && (
-          <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>
-        )}
+        {showAddressLine && <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>}
       </div>
     </div>
   )

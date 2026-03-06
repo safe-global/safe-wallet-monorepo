@@ -20,8 +20,7 @@ function SafeSelectorTriggerContent({
   onChainSelect,
 }: SafeSelectorTriggerContentProps) {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation()
-  const selectedChain =
-    selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
+  const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
     selectedItem.name,
@@ -40,9 +39,7 @@ function SafeSelectorTriggerContent({
           <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
           <Settings className="size-3 text-muted-foreground shrink-0" />
         </div>
-        {showAddressLine && (
-          <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>
-        )}
+        {showAddressLine && <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>}
       </div>
       <div
         className="shrink-0"

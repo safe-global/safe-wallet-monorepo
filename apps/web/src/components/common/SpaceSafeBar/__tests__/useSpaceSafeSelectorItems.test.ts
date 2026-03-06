@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useSpaceSafeSelectorItems } from './useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems } from '../useSpaceSafeSelectorItems'
 import type { SafeItem } from '@/hooks/safes/useAllSafes'
 import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
@@ -97,14 +97,22 @@ const chainConfigs = [
 
 const mockPush = jest.fn()
 
-function setupDefaults(overrides: {
-  allSafes?: Array<SafeItem | MultiChainSafeItem>
-  safeAddress?: string
-  currentChainId?: string
-  overviews?: Array<{ address: { value: string }; chainId: string; fiatTotal: string; threshold: number; owners: { value: string }[] }>
-  overviewsLoading?: boolean
-  overviewsError?: boolean
-} = {}) {
+function setupDefaults(
+  overrides: {
+    allSafes?: Array<SafeItem | MultiChainSafeItem>
+    safeAddress?: string
+    currentChainId?: string
+    overviews?: Array<{
+      address: { value: string }
+      chainId: string
+      fiatTotal: string
+      threshold: number
+      owners: { value: string }[]
+    }>
+    overviewsLoading?: boolean
+    overviewsError?: boolean
+  } = {},
+) {
   ;(useSpaceSafes as jest.Mock).mockReturnValue({
     allSafes: overrides.allSafes ?? [singleChainSafe],
   })
@@ -177,8 +185,20 @@ describe('useSpaceSafeSelectorItems', () => {
       safeAddress: '0xSafe2',
       currentChainId: '1',
       overviews: [
-        { address: { value: '0xSafe2' }, chainId: '1', fiatTotal: '3000', threshold: 2, owners: [{ value: '0xO1' }, { value: '0xO2' }] },
-        { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '2000', threshold: 2, owners: [{ value: '0xO1' }, { value: '0xO2' }] },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '1',
+          fiatTotal: '3000',
+          threshold: 2,
+          owners: [{ value: '0xO1' }, { value: '0xO2' }],
+        },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '137',
+          fiatTotal: '2000',
+          threshold: 2,
+          owners: [{ value: '0xO1' }, { value: '0xO2' }],
+        },
       ],
     })
 
@@ -234,8 +254,20 @@ describe('useSpaceSafeSelectorItems', () => {
       allSafes: [singleChainSafe, otherSafe],
       safeAddress: '0xSafe1',
       overviews: [
-        { address: { value: '0xSafe1' }, chainId: '1', fiatTotal: '5000', threshold: 2, owners: [{ value: '0xO1' }, { value: '0xO2' }] },
-        { address: { value: '0xOther' }, chainId: '1', fiatTotal: '8000', threshold: 3, owners: [{ value: '0xO1' }, { value: '0xO2' }, { value: '0xO3' }] },
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xO1' }, { value: '0xO2' }],
+        },
+        {
+          address: { value: '0xOther' },
+          chainId: '1',
+          fiatTotal: '8000',
+          threshold: 3,
+          owners: [{ value: '0xO1' }, { value: '0xO2' }, { value: '0xO3' }],
+        },
       ],
     })
 
@@ -377,8 +409,20 @@ describe('useSpaceSafeSelectorItems', () => {
       allSafes: [multiChainSafe],
       safeAddress: '0xDifferentSafe',
       overviews: [
-        { address: { value: '0xSafe2' }, chainId: '1', fiatTotal: '100', threshold: 4, owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }] },
-        { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '200', threshold: 4, owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }] },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '1',
+          fiatTotal: '100',
+          threshold: 4,
+          owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }],
+        },
+        {
+          address: { value: '0xSafe2' },
+          chainId: '137',
+          fiatTotal: '200',
+          threshold: 4,
+          owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }],
+        },
       ],
     })
 
@@ -442,7 +486,10 @@ describe('useSpaceSafeSelectorItems', () => {
 
   it('uses live safe threshold/owners for the currently viewed safe', () => {
     ;(useSafeInfo as jest.Mock).mockReturnValue({
-      safe: { threshold: 5, owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }, { value: '0x5' }] },
+      safe: {
+        threshold: 5,
+        owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }, { value: '0x4' }, { value: '0x5' }],
+      },
       safeAddress: '0xSafe1',
     })
 

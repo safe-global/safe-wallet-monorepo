@@ -40,9 +40,7 @@ export function useSpaceSafeSelectorItems() {
     isLoading: overviewsLoading,
     isError: overviewsError,
     refetch: refetchOverviews,
-  } = useGetMultipleSafeOverviewsQuery(
-    flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken,
-  )
+  } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
   const items: SafeItemData[] = useMemo(() => {
     return allSafes.map((item) => {
@@ -125,5 +123,12 @@ export function useSpaceSafeSelectorItems() {
     [chainConfigs, router, safeAddress],
   )
 
-  return { items, selectedItemId, handleItemSelect, handleChainChange, isError: overviewsError, refetch: refetchOverviews }
+  return {
+    items,
+    selectedItemId,
+    handleItemSelect,
+    handleChainChange,
+    isError: overviewsError,
+    refetch: refetchOverviews,
+  }
 }

@@ -15,10 +15,7 @@ export const getSafeDisplayInfo = (
   address: string,
   chainShortName?: string,
 ): { addressWithPrefix: string; displayName: string; showAddressLine: boolean } => {
-  const addressWithPrefix = formatPrefixedAddress(
-    shortenAddress(address),
-    chainShortName || undefined,
-  )
+  const addressWithPrefix = formatPrefixedAddress(shortenAddress(address), chainShortName || undefined)
   const displayName = name || addressWithPrefix
   const showAddressLine = Boolean(name)
   return { addressWithPrefix, displayName, showAddressLine }

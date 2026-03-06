@@ -53,8 +53,7 @@ const SAFE_NAMES = [
   'Payroll Safe',
 ]
 
-const createMockAddress = (index: number) =>
-  `0x${index.toString(16).padStart(40, '0')}` as `0x${string}`
+const createMockAddress = (index: number) => `0x${index.toString(16).padStart(40, '0')}` as `0x${string}`
 
 const createMockSafeItem = (index: number, overrides = {}): SafeItemData => ({
   id: `${baseChains[index % baseChains.length].chainId}:${createMockAddress(index + 1)}`,
