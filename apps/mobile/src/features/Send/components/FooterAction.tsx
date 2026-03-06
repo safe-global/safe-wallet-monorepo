@@ -41,24 +41,26 @@ export function FooterAction({
         />
       )}
 
-      {exceedsBalance ? (
-        <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
-      ) : !activeSigner && availableSigners.length === 0 ? (
-        <Alert
-          type="warning"
-          message="No signer keys found. Import a signer to propose transactions."
-          testID="no-signer-alert"
-        />
-      ) : (
-        <SafeButton
-          onPress={onReview}
-          disabled={!isValid || !activeSigner || isSubmitting}
-          loading={isSubmitting}
-          testID="review-button"
-        >
-          Review & confirm
-        </SafeButton>
-      )}
+      <View minHeight={52} justifyContent="center">
+        {exceedsBalance ? (
+          <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
+        ) : !activeSigner && availableSigners.length === 0 ? (
+          <Alert
+            type="warning"
+            message="No signer keys found. Import a signer to propose transactions."
+            testID="no-signer-alert"
+          />
+        ) : (
+          <SafeButton
+            onPress={onReview}
+            disabled={!isValid || !activeSigner || isSubmitting}
+            loading={isSubmitting}
+            testID="review-button"
+          >
+            Review & confirm
+          </SafeButton>
+        )}
+      </View>
     </View>
   )
 }
