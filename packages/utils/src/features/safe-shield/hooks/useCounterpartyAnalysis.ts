@@ -163,11 +163,14 @@ export function useCounterpartyAnalysis({
   }, [counterpartyData?.contract, fetchError, safeAddress])
 
   const deadlockResults = useMemo(() => {
+    if (fetchError) {
+      return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] }
+    }
     if (!counterpartyData?.deadlock) {
       return undefined
     }
     return counterpartyData.deadlock as DeadlockAnalysisResults
-  }, [counterpartyData?.deadlock])
+  }, [counterpartyData?.deadlock, fetchError])
 
   // Return results in the expected format
   return {
