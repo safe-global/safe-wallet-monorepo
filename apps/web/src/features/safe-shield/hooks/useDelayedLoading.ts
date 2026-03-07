@@ -50,6 +50,9 @@ export const calculateAnalysisDelays = (
   if ((contractEmpty || recipientEmpty) && deadlockEmpty) {
     simulationAnalysisDelay = threatDelay
   }
+  if (!deadlockEmpty) {
+    simulationAnalysisDelay = deadlockDelay + simulationDelay
+  }
   if (recipientEmpty && deadlockEmpty) {
     simulationAnalysisDelay += analysisVisibilityDelay
   }
