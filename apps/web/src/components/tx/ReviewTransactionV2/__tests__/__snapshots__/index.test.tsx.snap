@@ -745,3 +745,28 @@ exports[`ReviewTransaction should display an error screen 1`] = `
   </div>
 </div>
 `;
+
+exports[`ReviewTransaction should display an error screen 2`] = `
+<div>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root css-1w4z6qv-MuiPaper-root-MuiCard-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiCardContent-root cardContent css-1lt5qva-MuiCardContent-root"
+      data-testid="card-content"
+    >
+      <div
+        class="MuiBox-root css-17luq05"
+        data-testid="error-transaction-preview"
+      >
+        <p
+          class="MuiTypography-root MuiTypography-body1 css-w5uidf-MuiTypography-root"
+        >
+          Error loading preview. Please try again.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;

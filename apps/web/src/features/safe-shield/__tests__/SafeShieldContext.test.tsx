@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
-import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, StatusGroup, ThreatStatus, DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { ReactNode } from 'react'
@@ -10,6 +10,7 @@ jest.mock('../hooks', () => ({
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
   })),
   useThreatAnalysis: jest.fn(),
 }))
@@ -45,6 +46,7 @@ const mockSafeTxContextValue = {
 }
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
+const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),
@@ -79,6 +81,10 @@ const buildThreatResult = (severity: Severity) => [
   undefined,
   false,
 ]
+
+const buildDeadlockResult = (severity: Severity, type: DeadlockStatus) => ({
+  DEADLOCK: [{ severity, type, title: `${severity} deadlock`, description: 'Test deadlock' }],
+})
 
 describe('SafeShieldContext', () => {
   beforeEach(() => {
@@ -168,5 +174,64 @@ describe('SafeShieldContext', () => {
     await waitFor(() => {
       expect(result.current.isRiskConfirmed).toBe(false)
     })
+  })
+
+  it('should require risk confirmation for critical deadlock', async () => {
+    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
+    mockUseCounterpartyAnalysis.mockReturnValue({
+      recipient: [undefined, undefined, false],
+      contract: [undefined, undefined, false],
+      deadlock: [buildDeadlockResult(Severity.CRITICAL, DeadlockStatus.DEADLOCK_DETECTED), undefined, false],
+    })
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    const tx = buildSafeTransaction('0x1234')
+    act(() => {
+      result.current.setSafeTx(tx)
+    })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
+        expect(result.current.isRiskConfirmed).toBe(false)
+      },
+      { timeout: 3000 },
+    )
+  })
+
+  it('should not require risk confirmation for warn deadlock', async () => {
+    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
+    mockUseCounterpartyAnalysis.mockReturnValue({
+      recipient: [undefined, undefined, false],
+      contract: [undefined, undefined, false],
+      deadlock: [buildDeadlockResult(Severity.WARN, DeadlockStatus.NESTED_SAFE_WARNING), undefined, false],
+    })
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    const tx = buildSafeTransaction('0x1234')
+    act(() => {
+      result.current.setSafeTx(tx)
+    })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(false)
+      },
+      { timeout: 3000 },
+    )
   })
 })

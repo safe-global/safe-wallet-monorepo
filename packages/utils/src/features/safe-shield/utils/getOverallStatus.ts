@@ -1,4 +1,9 @@
-import type { ContractAnalysisResults, ThreatAnalysisResults, RecipientAnalysisResults } from '../types'
+import type {
+  ContractAnalysisResults,
+  ThreatAnalysisResults,
+  RecipientAnalysisResults,
+  DeadlockAnalysisResults,
+} from '../types'
 import { CommonSharedStatus, Severity, ThreatStatus } from '../types'
 import type { AnalysisResult } from '../types'
 import { getPrimaryResult } from './analysisUtils'
@@ -36,8 +41,16 @@ export const getOverallStatus = (
   threatResults?: ThreatAnalysisResults,
   hasSimulationError?: boolean,
   hnLoginRequired?: boolean,
+  deadlockResults?: DeadlockAnalysisResults,
 ): { severity: Severity; title: string } | undefined => {
-  if (!recipientResults && !contractResults && !threatResults && !hasSimulationError && !hnLoginRequired) {
+  if (
+    !recipientResults &&
+    !contractResults &&
+    !threatResults &&
+    !hasSimulationError &&
+    !hnLoginRequired &&
+    !deadlockResults
+  ) {
     return undefined
   }
 
@@ -71,6 +84,13 @@ export const getOverallStatus = (
           allResults.push({ ...groupResults, title: SEVERITY_TO_TITLE[groupResults.severity as Severity] })
         }
       }
+    }
+  }
+
+  // Add deadlock results
+  if (deadlockResults?.DEADLOCK) {
+    for (const result of deadlockResults.DEADLOCK) {
+      allResults.push({ ...result, title: SEVERITY_TO_TITLE[result.severity as Severity] })
     }
   }
 

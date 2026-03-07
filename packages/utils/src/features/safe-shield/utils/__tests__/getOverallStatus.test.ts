@@ -4,6 +4,7 @@ import type { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisR
 import { RecipientAnalysisResultBuilder } from '../../builders/recipient-analysis-result.builder'
 import { ContractAnalysisResultBuilder } from '../../builders/contract-analysis-result.builder'
 import { ThreatAnalysisResultBuilder } from '../../builders/threat-analysis-result.builder'
+import { DeadlockAnalysisBuilder } from '../../builders/deadlock-analysis.builder'
 
 describe('getOverallStatus', () => {
   describe('undefined cases', () => {
@@ -412,6 +413,64 @@ describe('getOverallStatus', () => {
       }
 
       const result = getOverallStatus(recipientResults, contractResults)
+
+      expect(result).toBeUndefined()
+    })
+  })
+
+  describe('deadlock analysis results', () => {
+    it('should return CRITICAL severity for deadlock detected', () => {
+      const [deadlockResults] = DeadlockAnalysisBuilder.deadlockDetected()
+
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, deadlockResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should return WARN severity for nested safe warning', () => {
+      const [deadlockResults] = DeadlockAnalysisBuilder.nestedSafeWarning()
+
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, deadlockResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.WARN)
+      expect(result!.title).toBe('Issues found')
+    })
+
+    it('should prioritize CRITICAL deadlock over OK recipient results', () => {
+      const recipientResults: RecipientAnalysisResults = {
+        '0xRecipient1': {
+          [StatusGroup.ADDRESS_BOOK]: [RecipientAnalysisResultBuilder.knownRecipient().build()],
+        },
+      }
+      const [deadlockResults] = DeadlockAnalysisBuilder.deadlockDetected()
+
+      const result = getOverallStatus(recipientResults, undefined, undefined, false, false, deadlockResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should prioritize CRITICAL threat over WARN deadlock', () => {
+      const threatResults = {
+        '0xThreat1': {
+          [StatusGroup.THREAT]: ThreatAnalysisResultBuilder.malicious().build(),
+        },
+      } as unknown as ThreatAnalysisResults
+      const [deadlockResults] = DeadlockAnalysisBuilder.nestedSafeWarning()
+
+      const result = getOverallStatus(undefined, undefined, threatResults, false, false, deadlockResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should return undefined when deadlock results are undefined', () => {
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, undefined)
 
       expect(result).toBeUndefined()
     })

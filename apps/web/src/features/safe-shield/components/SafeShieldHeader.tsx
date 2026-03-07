@@ -2,6 +2,7 @@ import { type ReactElement } from 'react'
 import { Box, Typography, Stack } from '@mui/material'
 import type {
   ContractAnalysisResults,
+  DeadlockAnalysisResults,
   RecipientAnalysisResults,
   Severity,
   ThreatAnalysisResults,
@@ -16,19 +17,22 @@ export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
   contract = [{}, undefined, false],
   threat = [{}, undefined, false],
+  deadlock = [{}, undefined, false],
   overallStatus,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
+  deadlock?: AsyncResult<DeadlockAnalysisResults>
   overallStatus?: { severity: Severity; title: string }
 }): ReactElement => {
   const [_recipientResults, recipientError, recipientLoading = false] = recipient
   const [_contractResults, contractError, contractLoading = false] = contract
   const [_threatResults, threatError, threatLoading = false] = threat
+  const [_deadlockResults, deadlockError, deadlockLoading = false] = deadlock
 
-  const loading = recipientLoading || contractLoading || threatLoading
-  const error = recipientError || contractError || threatError
+  const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
+  const error = recipientError || contractError || threatError || deadlockError
   const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const headerBgColor =

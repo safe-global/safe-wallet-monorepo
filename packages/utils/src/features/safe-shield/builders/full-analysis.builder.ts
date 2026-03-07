@@ -1,6 +1,12 @@
 import merge from 'lodash/merge'
-import type { ContractAnalysisResults, RecipientAnalysisResults, ThreatAnalysisResults } from '../types'
+import type {
+  ContractAnalysisResults,
+  DeadlockAnalysisResults,
+  RecipientAnalysisResults,
+  ThreatAnalysisResults,
+} from '../types'
 import { ContractAnalysisBuilder } from './contract-analysis.builder'
+import { DeadlockAnalysisBuilder } from './deadlock-analysis.builder'
 import { RecipientAnalysisBuilder } from './recipient-analysis.builder'
 import { ThreatAnalysisBuilder } from './threat-analysis.builder'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -10,10 +16,12 @@ export class FullAnalysisBuilder {
     recipient: AsyncResult<RecipientAnalysisResults>
     contract: AsyncResult<ContractAnalysisResults>
     threat: AsyncResult<ThreatAnalysisResults>
+    deadlock: AsyncResult<DeadlockAnalysisResults>
   } = {
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     threat: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
   }
 
   recipient(recipientAnalysis: AsyncResult<RecipientAnalysisResults>): this {
@@ -52,6 +60,12 @@ export class FullAnalysisBuilder {
       currentError || error,
       currentLoading || loading,
     ]
+    return this
+  }
+
+  deadlock(deadlockAnalysis: AsyncResult<DeadlockAnalysisResults>): this {
+    const [deadlockResult, error, loading = false] = deadlockAnalysis
+    this.response.deadlock = [deadlockResult, error, loading]
     return this
   }
 
@@ -128,5 +142,13 @@ export class FullAnalysisBuilder {
     return new FullAnalysisBuilder().contract(
       ContractAnalysisBuilder.unofficialFallbackHandlerContract(address).build(),
     )
+  }
+
+  static deadlockDetected(): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().deadlock(DeadlockAnalysisBuilder.deadlockDetected())
+  }
+
+  static nestedSafeWarning(): FullAnalysisBuilder {
+    return new FullAnalysisBuilder().deadlock(DeadlockAnalysisBuilder.nestedSafeWarning())
   }
 }

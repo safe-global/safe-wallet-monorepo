@@ -4,7 +4,12 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useSafeShieldAnalyzeCounterpartyV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { useAddressBookCheck } from './address-analysis/address-book-check/useAddressBookCheck'
 import { useAddressActivity } from './address-analysis/address-activity/useAddressActivity'
-import { type RecipientAnalysisResults, type ContractAnalysisResults, StatusGroup } from '../types'
+import {
+  type RecipientAnalysisResults,
+  type ContractAnalysisResults,
+  type DeadlockAnalysisResults,
+  StatusGroup,
+} from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { filterNonSafeRecipients, mergeAnalysisResults } from '../utils'
 import { ErrorType, getErrorInfo } from '../utils/errors'
@@ -39,6 +44,7 @@ export function useCounterpartyAnalysis({
 }): {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
 } {
   const [triggerAnalysis, { data: counterpartyData, error, isLoading: isCounterpartyLoading }] =
     useSafeShieldAnalyzeCounterpartyV1Mutation()
@@ -156,9 +162,17 @@ export function useCounterpartyAnalysis({
     return counterpartyData.contract as ContractAnalysisResults
   }, [counterpartyData?.contract, fetchError, safeAddress])
 
+  const deadlockResults = useMemo(() => {
+    if (!counterpartyData?.deadlock) {
+      return undefined
+    }
+    return counterpartyData.deadlock as DeadlockAnalysisResults
+  }, [counterpartyData?.deadlock])
+
   // Return results in the expected format
   return {
     recipient: [mergedRecipientResults, fetchError || activityCheckError, isLoading],
     contract: [contractResults, fetchError, isCounterpartyLoading],
+    deadlock: [deadlockResults, fetchError, isCounterpartyLoading],
   }
 }

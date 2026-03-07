@@ -9,6 +9,7 @@ import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
   ThreatAnalysisResults,
+  DeadlockAnalysisResults,
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
@@ -46,6 +47,7 @@ export const SafeShieldDisplay = ({
   recipient,
   contract,
   threat,
+  deadlock,
   safeTx,
   hypernativeAuth,
   showHypernativeInfo = true,
@@ -56,6 +58,7 @@ export const SafeShieldDisplay = ({
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
+  deadlock?: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
@@ -66,6 +69,7 @@ export const SafeShieldDisplay = ({
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
   const [threatResults] = threat || []
+  const [deadlockResults] = deadlock || []
   const { hasSimulationError } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
 
@@ -75,19 +79,34 @@ export const SafeShieldDisplay = ({
   )
 
   const overallStatus = useMemo(
-    () => getOverallStatus(recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired),
-    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired],
+    () =>
+      getOverallStatus(
+        recipientResults,
+        contractResults,
+        threatResults,
+        hasSimulationError,
+        hnLoginRequired,
+        deadlockResults,
+      ),
+    [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
   return (
     <Stack gap={1} data-testid="safe-shield-widget">
       <Card sx={{ borderRadius: '6px', overflow: 'hidden' }}>
-        <SafeShieldHeader recipient={recipient} contract={contract} threat={threat} overallStatus={overallStatus} />
+        <SafeShieldHeader
+          recipient={recipient}
+          contract={contract}
+          threat={threat}
+          deadlock={deadlock}
+          overallStatus={overallStatus}
+        />
 
         <SafeShieldContent
           threat={threat}
           recipient={recipient}
           contract={contract}
+          deadlock={deadlock}
           safeTx={safeTx}
           overallStatus={overallStatus}
           hypernativeAuth={hypernativeAuth}

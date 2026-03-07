@@ -198,6 +198,22 @@ export type ContractAnalysisDto = {
   /** Analysis results for setFallbackHandler operations. Identifies untrusted or unofficial fallback handlers in the transactions. */
   FALLBACK_HANDLER?: FallbackHandlerAnalysisResultDto[]
 }
+export type DeadlockAnalysisResultDto = {
+  /** Severity level indicating the importance and risk */
+  severity: 'OK' | 'INFO' | 'WARN' | 'CRITICAL'
+  /** Deadlock analysis status code */
+  type: 'DEADLOCK_DETECTED' | 'NESTED_SAFE_WARNING' | 'FAILED'
+  /** User-facing title of the finding */
+  title: string
+  /** Detailed description explaining the finding and its implications */
+  description: string
+  /** Error message for failed analysis */
+  error?: string
+}
+export type DeadlockAnalysisDto = {
+  /** Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations. */
+  DEADLOCK?: DeadlockAnalysisResultDto[]
+}
 export type CounterpartyAnalysisDto = {
   /** Recipient analysis results mapped by address. Contains recipient interaction history and bridge analysis.type: Record<Address, RecipientAnalysisDto>. */
   recipient: {
@@ -207,6 +223,8 @@ export type CounterpartyAnalysisDto = {
   contract: {
     [key: string]: ContractAnalysisDto
   }
+  /** Deadlock analysis results. Only present when the transaction targets an owner/threshold management function. */
+  deadlock?: DeadlockAnalysisDto
 }
 export type CounterpartyAnalysisRequestDto = {
   /** Recipient address of the transaction. */

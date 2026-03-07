@@ -17,6 +17,7 @@ import {
   type ContractAnalysisResults,
   type ThreatAnalysisResults,
   type RecipientAnalysisResults,
+  type DeadlockAnalysisResults,
   type SafeAnalysisResult,
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
@@ -30,6 +31,7 @@ type SafeShieldContextType = {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
@@ -51,6 +53,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const threat = useThreatAnalysis(safeTx, hypernativeAuthToken) ?? [undefined, undefined, false]
   const [threatAnalysisResult] = threat
 
+  const deadlock = counterpartyAnalysis.deadlock
+  const [deadlockResults] = deadlock
+
   const recipient = recipientOnlyAnalysis || counterpartyAnalysis.recipient
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
@@ -65,18 +70,25 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
     const severity = primaryThreatResult?.severity
     const hasCriticalThreat = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
-    // Include Safe-level analysis in risk confirmation
-    const needsRiskConfirmation = hasCriticalThreat || safeAnalysis?.severity === Severity.CRITICAL
+
+    const primaryDeadlockResult = getPrimaryResult(deadlockResults?.DEADLOCK || [])
+    const deadlockSeverity = primaryDeadlockResult?.severity
+    const hasCriticalDeadlock =
+      !!deadlockSeverity && SEVERITY_PRIORITY[deadlockSeverity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+
+    // Include Safe-level analysis and deadlock in risk confirmation
+    const needsRiskConfirmation =
+      hasCriticalThreat || hasCriticalDeadlock || safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, safeAnalysis])
+  }, [threatAnalysisResult, deadlockResults, safeAnalysis])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults])
 
   return (
     <SafeShieldContext.Provider
@@ -87,6 +99,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         recipient,
         contract,
         threat,
+        deadlock,
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,

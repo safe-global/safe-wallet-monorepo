@@ -8948,6 +8948,69 @@
           }
         }
       },
+      "DeadlockAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Deadlock analysis status code",
+            "enum": [
+              "DEADLOCK_DETECTED",
+              "NESTED_SAFE_WARNING",
+              "FAILED"
+            ],
+            "example": "DEADLOCK_DETECTED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "DeadlockAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "DEADLOCK": {
+            "description": "Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "DEADLOCK_DETECTED",
+                "title": "Signing deadlock risk detected",
+                "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeadlockAnalysisResultDto"
+            }
+          }
+        }
+      },
       "CounterpartyAnalysisDto": {
         "type": "object",
         "properties": {
@@ -8989,6 +9052,14 @@
                 ]
               }
             }
+          },
+          "deadlock": {
+            "description": "Deadlock analysis results. Only present when the transaction targets an owner/threshold management function.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeadlockAnalysisDto"
+              }
+            ]
           }
         },
         "required": [
