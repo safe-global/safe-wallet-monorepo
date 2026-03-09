@@ -188,7 +188,13 @@ export function trezorModule(): WalletInit {
               // Pre-compute hashes so older Trezor firmware can verify the signing request
               // and show the domain name/version on devices that don't parse full EIP-712 data.
               const { EIP712Domain: _domain, ...typesWithoutDomain } = typedData.types
-              const domainSeparatorHash = TypedDataEncoder.hashDomain(typedData.domain)
+              const { salt, ...domainRest } = typedData.domain
+              const normalizedDomain = {
+                ...domainRest,
+                // Trezor SDK types salt as ArrayBuffer but ethers expects BytesLike (string | Uint8Array)
+                ...(salt !== undefined && { salt: salt instanceof ArrayBuffer ? new Uint8Array(salt) : salt }),
+              }
+              const domainSeparatorHash = TypedDataEncoder.hashDomain(normalizedDomain)
               const messageHash =
                 typedData.primaryType !== 'EIP712Domain'
                   ? TypedDataEncoder.hashStruct(String(typedData.primaryType), typesWithoutDomain, typedData.message)
