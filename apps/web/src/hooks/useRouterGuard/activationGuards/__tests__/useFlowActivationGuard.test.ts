@@ -5,6 +5,7 @@ import * as store from '@/store'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
+import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -15,6 +16,10 @@ jest.mock('next/router', () => ({
     pathname: '/home',
     query: {},
   })),
+}))
+
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: jest.fn(() => false),
 }))
 
 // ---------------------------------------------------------------------------
@@ -31,6 +36,7 @@ interface SetupOptions {
   isAuthenticated?: boolean
   isStoreHydrated?: boolean
   spaces?: Array<{ id: number; name: string }> | undefined
+  isSpaceRoute?: boolean
 }
 
 const defaultSpaces = [
@@ -46,8 +52,10 @@ const setupMocks = ({
   isAuthenticated = true,
   isStoreHydrated = true,
   spaces = defaultSpaces,
+  isSpaceRoute = false,
 }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query })
+  ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
   jest
@@ -178,19 +186,20 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should allow access to home when not authenticated via SIWE (home is a public route)', async () => {
+    it('should redirect to welcome when not authenticated via SIWE on a space route', async () => {
       setupMocks({
-        pathname: '/home',
+        pathname: AppRoutes.spaces.index,
         wallet: { address: '0x123' },
         walletContext: { isReady: true },
         isStoreHydrated: true,
         isAuthenticated: false,
+        isSpaceRoute: true,
       })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: true })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
     })
   })
 
@@ -199,6 +208,10 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('authenticated but no spaces', () => {
+    it('should redirect to create space when user has no spaces', async () => {
+      setupMocks({ pathname: AppRoutes.spaces.index, spaces: [], isSpaceRoute: true })
+    })
+
     it('should allow access to home when user has no spaces (home is a public route)', async () => {
       setupMocks({ pathname: '/home', spaces: [] })
 
@@ -266,9 +279,10 @@ describe('useFlowActivationGuard', () => {
   describe('authenticated with valid space URL', () => {
     it('should allow access when user has a valid spaceId in query', async () => {
       setupMocks({
-        pathname: '/spaces',
+        pathname: AppRoutes.spaces.index,
         query: { spaceId: '1' },
         spaces: defaultSpaces,
+        isSpaceRoute: true,
       })
 
       const { result } = renderHook(() => useFlowActivationGuard())
@@ -277,17 +291,18 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should allow access when spaceId does not match any user space on non-space route', async () => {
+    it('should redirect to welcome when spaceId does not match any user space on space route', async () => {
       setupMocks({
-        pathname: '/spaces',
+        pathname: AppRoutes.spaces.index,
         query: { spaceId: '999' },
         spaces: defaultSpaces,
+        isSpaceRoute: true,
       })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: true })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
     })
   })
 
@@ -311,17 +326,18 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should allow access when spaceId in query is not part of user spaces on public route', async () => {
+    it('should redirect to welcome when spaceId in query is not part of user spaces on space route', async () => {
       setupMocks({
-        pathname: '/home',
+        pathname: AppRoutes.spaces.index,
         query: { spaceId: '999' },
         spaces: defaultSpaces,
+        isSpaceRoute: true,
       })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: true })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
     })
   })
 

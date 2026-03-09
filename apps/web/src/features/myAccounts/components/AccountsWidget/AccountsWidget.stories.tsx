@@ -98,3 +98,17 @@ export const ManyAccounts: Story = {
     remainingCount: 42,
   },
 }
+
+export const Empty: Story = {
+  args: {
+    accounts: [],
+  },
+}
+
+export const Error: Story = {
+  args: {
+    accounts: [],
+    error: 'Failed to load accounts',
+    onRefresh: () => console.log('Refresh clicked'),
+  },
+}

@@ -122,7 +122,43 @@ describe('AccountsWidget', () => {
     render(<AccountsWidget accounts={[]} />)
 
     expect(screen.getByText('Accounts')).toBeInTheDocument()
+    expect(screen.getByText('No accounts yet')).toBeInTheDocument()
     expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+  })
+
+  it('renders the error state with error message', () => {
+    render(<AccountsWidget accounts={[]} error="Failed to load accounts" />)
+
+    expect(screen.getByText('Failed to load accounts')).toBeInTheDocument()
+    expect(screen.queryByText('No accounts yet')).not.toBeInTheDocument()
+  })
+
+  it('renders the refresh button in error state when onRefresh is provided', () => {
+    render(<AccountsWidget accounts={[]} error="Something went wrong" onRefresh={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument()
+  })
+
+  it('calls onRefresh when the refresh button is clicked', async () => {
+    const onRefresh = jest.fn()
+    render(<AccountsWidget accounts={[]} error="Something went wrong" onRefresh={onRefresh} />)
+
+    await userEvent.click(screen.getByRole('button', { name: /refresh/i }))
+
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not render accounts when in error state', () => {
+    render(<AccountsWidget accounts={mockAccounts} error="Failed to load accounts" />)
+
+    expect(screen.getByText('Failed to load accounts')).toBeInTheDocument()
+    expect(screen.queryByText('My account')).not.toBeInTheDocument()
+  })
+
+  it('does not show error state while loading', () => {
+    render(<AccountsWidget accounts={[]} loading error="Failed to load accounts" />)
+
+    expect(screen.queryByText('Failed to load accounts')).not.toBeInTheDocument()
   })
 
   it('renders AccountItem.Balance with fiatTotal', () => {

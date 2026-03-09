@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Users } from 'lucide-react'
 import SafeWidget from './index'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -81,6 +81,30 @@ export const Assets: Story = {
         actionNode={<span className="text-sm font-medium text-muted-foreground">$1.12M</span>}
       />
       <SafeWidget.Footer count={14} text="View all assets" />
+    </SafeWidget>
+  ),
+}
+
+export const EmptyState: Story = {
+  render: () => (
+    <SafeWidget title="Accounts">
+      <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No accounts yet" />
+    </SafeWidget>
+  ),
+}
+
+export const ErrorState: Story = {
+  render: () => (
+    <SafeWidget title="Accounts">
+      <SafeWidget.ErrorState message="Failed to load accounts" onRefresh={() => console.log('Refresh')} />
+    </SafeWidget>
+  ),
+}
+
+export const ErrorStateWithoutRefresh: Story = {
+  render: () => (
+    <SafeWidget title="Assets">
+      <SafeWidget.ErrorState message="Something went wrong" />
     </SafeWidget>
   ),
 }

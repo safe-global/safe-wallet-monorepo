@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
+import { Users } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'
@@ -10,6 +11,8 @@ interface AccountsWidgetProps {
   remainingCount?: number
   onViewAll?: () => void
   action?: ReactNode
+  error?: string
+  onRefresh?: () => void
 }
 
 const SKELETON_COUNT = 3
@@ -20,7 +23,28 @@ const AccountsWidget = ({
   remainingCount,
   onViewAll,
   action,
+  error,
+  onRefresh,
 }: AccountsWidgetProps): ReactElement => {
+  const isEmpty = accounts.length === 0 && !loading
+  const hasError = !!error && !loading
+
+  if (hasError) {
+    return (
+      <SafeWidget title="Accounts" action={action}>
+        <SafeWidget.ErrorState message={error} onRefresh={onRefresh} />
+      </SafeWidget>
+    )
+  }
+
+  if (isEmpty) {
+    return (
+      <SafeWidget title="Accounts" action={action}>
+        <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No accounts yet" />
+      </SafeWidget>
+    )
+  }
+
   return (
     <SafeWidget title="Accounts" action={action}>
       {loading
