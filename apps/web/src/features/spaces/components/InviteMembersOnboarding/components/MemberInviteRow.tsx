@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
-import type { UseFormSetValue, UseFormReturn } from 'react-hook-form'
+import type { UseFormSetValue, UseFormReturn, UseFormTrigger } from 'react-hook-form'
 import { X } from 'lucide-react'
-import { checksumAddress, isChecksummedAddress } from '@safe-global/utils/utils/addresses'
+import { checksumAddress, isChecksummedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
@@ -26,12 +26,14 @@ interface MemberInviteRowProps {
   register: UseFormReturn<InviteMembersFormValues>['register']
   errors: UseFormReturn<InviteMembersFormValues>['formState']['errors']
   setValue: UseFormSetValue<InviteMembersFormValues>
+  trigger: UseFormTrigger<InviteMembersFormValues>
   canRemove: boolean
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, errors, setValue, canRemove, onRemove }: MemberInviteRowProps) => {
-  const addressValue = useWatch({ control, name: `members.${index}.address` })
+const MemberInviteRow = ({ index, control, register, errors, setValue, trigger, canRemove, onRemove }: MemberInviteRowProps) => {
+  const members = useWatch({ control, name: 'members' })
+  const addressValue = members?.[index]?.address ?? ''
   const fieldError = errors?.members?.[index]?.address
   const debouncedError = useDebounce(fieldError, 500)
   const displayError = fieldError ? debouncedError : undefined
@@ -49,8 +51,14 @@ const MemberInviteRow = ({ index, control, register, errors, setValue, canRemove
         <Input
           {...register(`members.${index}.address`, {
             required: index === 0,
+            onChange: () => {
+              const otherFields = members
+                ?.map((_, i) => (i !== index ? (`members.${i}.address` as const) : null))
+                .filter(Boolean) as `members.${number}.address`[]
+              if (otherFields?.length) trigger(otherFields)
+            },
             validate: (value) => {
-              if (!value.trim()) return undefined
+              if (!value?.trim()) return undefined
               if (isDomain(value)) return undefined
 
               if (!ADDRESS_RE.test(value)) return 'Invalid address'
@@ -69,6 +77,11 @@ const MemberInviteRow = ({ index, control, register, errors, setValue, canRemove
               if (!isChecksummedAddress(value)) {
                 return 'Invalid address checksum'
               }
+
+              const isDuplicate = members?.some(
+                (member, i) => i !== index && member.address && sameAddress(member.address, value),
+              )
+              if (isDuplicate) return 'Address already added'
             },
           })}
           placeholder="Wallet address or ENS name"

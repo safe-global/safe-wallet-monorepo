@@ -17,7 +17,7 @@ const TOTAL_STEPS = 3
 const InviteMembersOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()
   const { spaceId, isReady, goBack, redirectToNextStep } = useInviteNavigation()
-  const { control, formState, register, setValue, fields, append, remove, onSubmit, error, isSubmitting } =
+  const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
   if (!isReady) {
@@ -59,8 +59,12 @@ const InviteMembersOnboarding = (): ReactElement => {
                 register={register}
                 errors={formState.errors}
                 setValue={setValue}
+                trigger={trigger}
                 canRemove={fields.length > 1}
-                onRemove={() => remove(index)}
+                onRemove={() => {
+                  remove(index)
+                  setTimeout(() => trigger('members'), 0)
+                }}
               />
             ))}
           </div>
