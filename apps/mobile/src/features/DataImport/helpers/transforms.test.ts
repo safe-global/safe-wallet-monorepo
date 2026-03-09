@@ -248,7 +248,7 @@ describe('Data import helpers', () => {
       expect(mockProgressCallback).toHaveBeenCalled()
     })
 
-    it('storeSafeContacts dispatches addContact for each safe', () => {
+    it('storeSafeContacts dispatches addContact with chain-specific chainIds', () => {
       const data: LegacyDataStructure = {
         safes: [
           {
@@ -270,8 +270,25 @@ describe('Data import helpers', () => {
 
       storeSafeContacts(data, mockDispatch)
 
-      expect(mockDispatch).toHaveBeenCalledWith(addContact({ value: '0x1', name: 'Test Safe', chainIds: [] }))
-      expect(mockDispatch).toHaveBeenCalledWith(addContact({ value: '0x2', name: 'Test Safe 2', chainIds: [] }))
+      expect(mockDispatch).toHaveBeenCalledWith(addContact({ value: '0x1', name: 'Test Safe', chainIds: ['1'] }))
+      expect(mockDispatch).toHaveBeenCalledWith(addContact({ value: '0x2', name: 'Test Safe 2', chainIds: ['137'] }))
+    })
+
+    it('storeSafeContacts groups same address on multiple chains', () => {
+      const data: LegacyDataStructure = {
+        safes: [
+          { address: '0x1', chain: '1', name: 'My Safe', threshold: 2, owners: ['0x2'] },
+          { address: '0x1', chain: '137', name: 'My Safe', threshold: 2, owners: ['0x2'] },
+          { address: '0x1', chain: '10', name: 'My Safe', threshold: 2, owners: ['0x2'] },
+        ],
+      }
+
+      storeSafeContacts(data, mockDispatch)
+
+      expect(mockDispatch).toHaveBeenCalledTimes(1)
+      expect(mockDispatch).toHaveBeenCalledWith(
+        addContact({ value: '0x1', name: 'My Safe', chainIds: ['1', '137', '10'] }),
+      )
     })
 
     it('storeContacts dispatches addContacts', () => {
