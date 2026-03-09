@@ -6,11 +6,9 @@ import css from './styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
 import { Switch } from '@/components/ui/switch'
 import { Field, FieldLabel } from '@/components/ui/field'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
-import { LS_KEY } from '@/config/gateway'
 import { ApiCtaSidebar } from './ApiCtaSidebar'
 
 const HELP_URL = 'https://help.safe.global/en/'
@@ -18,20 +16,12 @@ const HELP_URL = 'https://help.safe.global/en/'
 export const SidebarCommonFooter = (): ReactElement => {
   const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()
-  const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
-
-  const onToggleGateway = (checked: boolean) => {
-    setIsProdGateway(checked)
-    setTimeout(() => {
-      location.reload()
-    }, 300)
-  }
 
   return (
     <SidebarFooter data-testid="sidebar-common-footer">
       {/* Dev Toggles - only in non-production */}
       {!IS_PRODUCTION && (
-        <div className="flex flex-col gap-2 border-b px-3 py-2">
+        <div className="flex flex-col gap-2 px-3 py-2">
           <Field orientation="horizontal">
             <Switch
               id="dark-mode-toggle"
@@ -39,10 +29,6 @@ export const SidebarCommonFooter = (): ReactElement => {
               onCheckedChange={(checked) => dispatch(setDarkMode(checked))}
             />
             <FieldLabel htmlFor="dark-mode-toggle">Dark mode</FieldLabel>
-          </Field>
-          <Field orientation="horizontal">
-            <Switch id="prod-cgw-toggle" checked={isProdGateway} onCheckedChange={onToggleGateway} />
-            <FieldLabel htmlFor="prod-cgw-toggle">Use prod CGW</FieldLabel>
           </Field>
         </div>
       )}
