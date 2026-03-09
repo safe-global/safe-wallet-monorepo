@@ -1,10 +1,10 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import type { Dispatch, SetStateAction } from 'react'
-import { useState, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
-import { Box, Button, IconButton, Paper } from '@mui/material'
+import { Box, IconButton, Paper } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import classnames from 'classnames'
 import css from './styles.module.css'
@@ -24,11 +24,7 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { BRAND_LOGO, BRAND_NAME, SUPPORT_CHAT_APP_ID, SUPPORT_CHAT_ENABLED } from '@/config/constants'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
-import { SupportChatDrawer } from '@safe-global/support-chat-embed'
-import { useSupportChat } from '@/hooks/useSupportChat'
+import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -52,8 +48,6 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const { BatchIndicator } = useLoadFeature(BatchingFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
-  const [isSupportOpen, setSupportOpen] = useState(false)
-  const { config, user } = useSupportChat()
 
   // If on the home page, the logo should link to the Accounts or Welcome page, otherwise to the home page
   const logoHref = getLogoLink(router)
@@ -73,57 +67,39 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   }
 
   const showBatchButton = safeAddress && (!isProposer || isSafeOwner)
-  const showSupport = Boolean(SUPPORT_CHAT_ENABLED && isOfficialHost && SUPPORT_CHAT_APP_ID)
-
-  const handleSupportOpen = () => setSupportOpen(true)
-  const handleSupportClose = () => setSupportOpen(false)
 
   return (
-    <>
-      <Paper className={css.container}>
-        <div className={classnames(css.element, css.menuButton)}>
-          {onMenuToggle && (
-            <IconButton onClick={handleMenuToggle} size="large" color="default" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-          )}
-        </div>
-
-        <div className={classnames(css.element, css.logoMobile)}>
-          <Link href={logoHref} passHref>
-            {isOfficialHost ? <SafeLogoMobile alt="Safe logo" /> : null}
-          </Link>
-        </div>
-
-        <div className={classnames(css.element, css.hideMobile, css.logo)}>
-          <Link href={logoHref} passHref>
-            {isOfficialHost ? <SafeLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
-          </Link>
-        </div>
-
-        {showSafeToken && (
-          <div className={classnames(css.element, css.hideMobile)}>
-            <SafeTokenWidget />
-          </div>
+    <Paper className={css.container}>
+      <div className={classnames(css.element, css.menuButton)}>
+        {onMenuToggle && (
+          <IconButton onClick={handleMenuToggle} size="large" color="default" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
         )}
+      </div>
+
+      <div className={classnames(css.element, css.logoMobile)}>
+        <Link href={logoHref} passHref>
+          {isOfficialHost ? <SafeLogoMobile alt="Safe logo" /> : null}
+        </Link>
+      </div>
+
+      <div className={classnames(css.element, css.hideMobile, css.logo)}>
+        <Link href={logoHref} passHref>
+          {isOfficialHost ? <SafeLabsLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
+        </Link>
+      </div>
+
+      {showSafeToken && (
+        <div className={classnames(css.element, css.hideMobile)}>
+          <SafeTokenWidget />
+        </div>
+      )}
 
       <Box className={css.rightSideGroup}>
         <div data-testid="notifications-center" className={css.element}>
           <NotificationCenter />
         </div>
-
-        {showSupport && (
-          <div className={classnames(css.element, css.hideMobile)}>
-            <Button
-              color="primary"
-              variant="text"
-              startIcon={<ChatBubbleOutlineIcon fontSize="small" />}
-              onClick={handleSupportOpen}
-            >
-              Support
-            </Button>
-          </div>
-        )}
 
         {showBatchButton && (
           <div className={classnames(css.element, css.hideMobile)}>
@@ -148,9 +124,6 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         </div>
       )}
     </Paper>
-
-    <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />
-  </>
   )
 }
 
