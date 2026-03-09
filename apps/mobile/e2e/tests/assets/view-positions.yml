@@ -27,7 +27,7 @@ tags:
 
 # Verify Positions tab content appears
 - assertVisible:
-    id: 'tab-content-Positions-1'
+    id: 'positions-tab'
 
 # ============================================
 # Verify AAVE V3 Protocol Section
@@ -96,7 +96,7 @@ tags:
 
 # Verify we're back to the positions list
 - assertVisible:
-    id: 'tab-content-Positions-1'
+    id: 'positions-tab'
 
 # Verify AAVE V3 protocol section is still visible
 - assertVisible:
@@ -148,5 +148,5 @@ tags:
 
 # Verify we're back to the positions list
 - assertVisible:
-    id: 'tab-content-Positions-1'
+    id: 'positions-tab'
 # Test completed successfully - AAVE V3 and Morpho positions verified

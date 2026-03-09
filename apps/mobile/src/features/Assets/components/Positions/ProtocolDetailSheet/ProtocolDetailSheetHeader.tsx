@@ -22,7 +22,13 @@ export const ProtocolDetailSheetHeader = ({ protocol, percentageRatio, currency 
   const { symbol, whole, decimals, endCurrency } = splitCurrencyParts(formattedFiatTotal)
 
   return (
-    <View paddingHorizontal="$2" width="100%" backgroundColor="$backgroundSheet" testID="protocol-detail-header">
+    <View
+      paddingHorizontal="$2"
+      width="100%"
+      backgroundColor="$backgroundSheet"
+      testID="protocol-detail-header"
+      collapsable={false}
+    >
       <View
         backgroundColor="$backgroundPaper"
         borderRadius="$3"

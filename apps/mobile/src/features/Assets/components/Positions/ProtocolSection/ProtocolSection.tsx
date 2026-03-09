@@ -1,5 +1,5 @@
 import React from 'react'
-import { Pressable } from 'react-native'
+import { Pressable } from 'react-native-gesture-handler'
 import { Text, View } from 'tamagui'
 import { useRouter } from 'expo-router'
 import { Logo } from '@/src/components/Logo'
