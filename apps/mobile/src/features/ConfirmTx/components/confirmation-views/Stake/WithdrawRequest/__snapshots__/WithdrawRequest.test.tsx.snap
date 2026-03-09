@@ -98,7 +98,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -440,7 +440,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                     ]
                   }
                 >
-                  
+                  
                 </Text>
               </View>
             </View>
@@ -498,7 +498,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -603,7 +603,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                     }
                     testID="logo-fallback-icon"
                   >
-                    
+                    
                   </Text>
                 </View>
               </View>
@@ -840,7 +840,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
               <Text
                 style={
@@ -1055,7 +1055,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   }
                   testID="warning-icon"
                 >
-                  
+                  
                 </Text>
               </View>
               <View

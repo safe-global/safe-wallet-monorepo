@@ -34,8 +34,8 @@ exports[`TxSettingCard should render the default markup 1`] = `
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }
@@ -95,7 +95,7 @@ exports[`TxSettingCard should render the default markup 1`] = `
                 ]
               }
             >
-              
+              
             </Text>
           </View>
           <View>

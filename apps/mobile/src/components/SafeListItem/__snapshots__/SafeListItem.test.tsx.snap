@@ -25,8 +25,8 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }
@@ -93,7 +93,7 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 }
                 testID="safe-list-add-owner-icon"
               >
-                
+                
               </Text>
               <Text
                 ellipsizeMode="tail"
@@ -157,8 +157,8 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
           "gap": 12,
           "justifyContent": "flex-start",
           "paddingBottom": 16,
-          "paddingLeft": 16,
-          "paddingRight": 16,
+          "paddingLeft": 12,
+          "paddingRight": 12,
           "paddingTop": 16,
         }
       }

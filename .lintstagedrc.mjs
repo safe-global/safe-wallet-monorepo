@@ -21,7 +21,7 @@ export default {
     'yarn workspace @safe-global/utils lint:fix',
     "bash -c 'yarn workspace @safe-global/utils type-check' --",
   ],
-  'apps/mobile/assets/fonts/safe-icons/selection.json': [
+  'apps/mobile/assets/fonts/safe-icons/safe-icons.icomoon.json': [
     'node ./apps/mobile/scripts/generateIconTypes.js',
     'git add ./apps/mobile/src/types/iconTypes.ts',
   ],

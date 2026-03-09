@@ -6597,6 +6597,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/vector-icons@npm:^15.1.1":
+  version: 15.1.1
+  resolution: "@expo/vector-icons@npm:15.1.1"
+  peerDependencies:
+    expo-font: ">=14.0.4"
+    react: "*"
+    react-native: "*"
+  checksum: 10/204fafd5141c81bd55dd33f6c00cdc48ec1d37b6460be6fa3f851ccb235e1fad1097f22d034470daa49a5b839d058bbcadda1efd349c670c2fdce2ae65fb9bba
+  languageName: node
+  linkType: hard
+
 "@expo/ws-tunnel@npm:^1.0.1":
   version: 1.0.6
   resolution: "@expo/ws-tunnel@npm:1.0.6"
@@ -13214,7 +13225,7 @@ __metadata:
     "@eslint/js": "npm:^9.18.0"
     "@ethersproject/shims": "npm:^5.7.0"
     "@expo/config-plugins": "npm:~54.0.1"
-    "@expo/vector-icons": "npm:^15.0.2"
+    "@expo/vector-icons": "npm:^15.1.1"
     "@faker-js/faker": "npm:^9.0.3"
     "@formatjs/intl-displaynames": "npm:^6.8.11"
     "@formatjs/intl-getcanonicallocales": "npm:^2.5.4"

@@ -41,7 +41,7 @@ function RecommendedNonceRow({
         height={64}
         paddingHorizontal="$3"
         borderRadius={8}
-        backgroundColor={isSelected ? '$backgroundLightgray' : '$backgroundPaper'}
+        backgroundColor={isSelected ? '$borderLight' : undefined}
       >
         <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
           {nonce}
@@ -85,7 +85,7 @@ function QueuedNonceRow({
         height={64}
         paddingHorizontal="$3"
         borderRadius={8}
-        backgroundColor={isSelected ? '$backgroundLightgray' : undefined}
+        backgroundColor={isSelected ? '$borderLight' : undefined}
       >
         <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
           {item.nonce}

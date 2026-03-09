@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { Identicon } from '@/src/components/Identicon'
 import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
 import { Address } from '@/src/types/address'
 
@@ -27,14 +26,13 @@ function SignerRow({ signer, isSelected, onPress }: { signer: Signer; isSelected
         height={64}
         paddingHorizontal="$3"
         borderRadius={8}
-        backgroundColor={isSelected ? '$backgroundLightgray' : undefined}
+        backgroundColor={isSelected ? '$borderLight' : undefined}
         gap="$3"
       >
         <Identicon address={signer.value as Address} size={40} />
         <View flex={1}>
           <ContactDisplayNameContainer address={signer.value as Address} />
         </View>
-        {isSelected && <SafeFontIcon name="check" color="$color" />}
       </View>
     </Pressable>
   )

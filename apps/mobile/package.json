@@ -41,7 +41,7 @@
     "@cowprotocol/app-data": "^3.1.0",
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~54.0.1",
-    "@expo/vector-icons": "^15.0.2",
+    "@expo/vector-icons": "^15.1.1",
     "@formatjs/intl-displaynames": "^6.8.11",
     "@formatjs/intl-getcanonicallocales": "^2.5.4",
     "@formatjs/intl-locale": "^4.2.10",
