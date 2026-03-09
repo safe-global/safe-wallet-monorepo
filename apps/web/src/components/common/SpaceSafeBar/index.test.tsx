@@ -17,7 +17,7 @@ jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(),
 }))
 
-jest.mock('./useSpaceSafeSelectorItems', () => ({
+jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
 }))
 
@@ -38,7 +38,7 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
 })
 
 import { useIsQualifiedSafe } from '@/features/spaces'
-import { useSpaceSafeSelectorItems } from './useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
