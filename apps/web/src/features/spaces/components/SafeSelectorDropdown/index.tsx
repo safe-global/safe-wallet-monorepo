@@ -1,10 +1,8 @@
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { AlertCircle, RotateCw } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
+import SafeSelectorError from './components/SafeSelectorError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
@@ -37,28 +35,7 @@ function SafeSelectorDropdown({
   }
 
   if (isError) {
-    return (
-      <Alert
-        variant="destructive"
-        className="w-auto rounded-2xl shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] *:[svg]:row-span-1 *:[svg]:translate-y-0 *:[svg]:self-center"
-      >
-        <AlertCircle />
-        <AlertTitle className="flex items-center justify-between gap-4">
-          Failed to load Safe data
-          {onRetry && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={onRetry}
-            >
-              <RotateCw className="size-3.5" />
-              Retry
-            </Button>
-          )}
-        </AlertTitle>
-      </Alert>
-    )
+    return <SafeSelectorError onRetry={onRetry} />
   }
 
   return (
