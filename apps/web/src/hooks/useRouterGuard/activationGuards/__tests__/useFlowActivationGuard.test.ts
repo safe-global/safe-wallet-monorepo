@@ -54,7 +54,7 @@ const setupMocks = ({
   spaces = defaultSpaces,
   isSpaceRoute = false,
 }: SetupOptions = {}) => {
-  ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query })
+  ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
