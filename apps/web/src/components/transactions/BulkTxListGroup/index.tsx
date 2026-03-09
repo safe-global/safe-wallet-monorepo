@@ -9,7 +9,7 @@ import css from './styles.module.css'
 import ExplorerButton from '@/components/common/ExplorerButton'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getOrderClass } from '@/features/swap/helpers/utils'
+import { getOrderClass } from '@/features/swap'
 
 const orderClassTitles: Record<string, string> = {
   limit: 'Limit order settlement',

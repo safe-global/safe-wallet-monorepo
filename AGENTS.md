@@ -32,6 +32,42 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+### Key Entry Points
+
+Stable architectural landmarks for fast orientation:
+
+| Area           | Path                                         | Purpose                                              |
+| -------------- | -------------------------------------------- | ---------------------------------------------------- |
+| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
+| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
+| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
+| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
+| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
+| Theme package  | `packages/theme/src/`                        | Palettes, spacing, typography tokens                 |
+| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                              |
+
+### AST-Based Code Search
+
+If `ast-grep` (aka `sg`) is installed, prefer it over text-based grep for structural code searches. It understands TypeScript/TSX syntax so it won't match inside comments or strings.
+
+```bash
+# Find all components using useAppSelector
+sg -p 'useAppSelector($$$)' --lang tsx apps/web/src/
+
+# Find all createSlice calls
+sg -p 'createSlice({ name: $NAME, $$$})' --lang ts apps/web/src/
+
+# Find all default exports of a function component
+sg -p 'export default function $NAME($$$) { $$$}' --lang tsx apps/web/src/
+
+# Find useMemo with specific dependency
+sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
+```
+
+Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.

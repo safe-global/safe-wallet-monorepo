@@ -5,7 +5,7 @@ import type {
 import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { BRAND_NAME } from '@/config/constants'
-import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
+import { HelpIconTooltip } from '../HelpIconTooltip'
 import MUILink from '@mui/material/Link'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 

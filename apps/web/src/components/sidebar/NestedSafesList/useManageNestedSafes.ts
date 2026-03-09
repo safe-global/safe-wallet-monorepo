@@ -4,8 +4,8 @@ import { useAppDispatch } from '@/store'
 import { setCuratedNestedSafes } from '@/store/settingsSlice'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { useCuratedNestedSafes } from '@/hooks/useCuratedNestedSafes'
-import { detectSimilarAddresses } from '@/features/myAccounts/services/addressSimilarity'
-import type { SimilarityDetectionResult } from '@/features/myAccounts/services/addressSimilarity.types'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import type { SimilarityDetectionResult } from '@safe-global/utils/utils/addressSimilarity.types'
 
 const toggleAddress = (prev: Set<string>, normalizedAddress: string): Set<string> => {
   const next = new Set(prev)

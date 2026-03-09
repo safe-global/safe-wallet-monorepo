@@ -53,6 +53,9 @@ Use `@AGENTS.md` in your prompts to include the full guidelines, which cover:
 
 ## Active Technologies
 
+- JavaScript (Cypress E2E) + TypeScript React app under tes + Cypress, existing page objects in `apps/web/cypress/e2e/pages`, Safe dashboard components (`ActionRequiredPanel`, `NonPinnedWarning`) (002-cypress-banner-actioncard-migration)
+- Browser localStorage test seeding via existing helpers (`addToLocalStorage`, `addToAppLocalStorage`) (002-cypress-banner-actioncard-migration)
+
 - TypeScript 5.x (Next.js 14.x) + Storybook 10.x, MSW 2.x, Chromatic, @storybook/nextjs, shadcn/ui (001-shadcn-storybook-migration)
 - N/A (tooling/documentation feature) (001-shadcn-storybook-migration)
 

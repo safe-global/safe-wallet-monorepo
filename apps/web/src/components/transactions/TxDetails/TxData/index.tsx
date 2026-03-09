@@ -30,8 +30,9 @@ import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejectio
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
-import SwapOrder from '@/features/swap/components/SwapOrder'
 import { StakingTxDepositDetails, StakingTxExitDetails, StakingTxWithdrawDetails } from './Staking'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
@@ -57,6 +58,7 @@ const TxData = ({
   imitation: boolean
 }>): ReactElement => {
   const chainId = useChainId()
+  const { SwapOrder } = useLoadFeature(SwapFeature)
 
   if (isOrderTxInfo(txInfo)) {
     return <SwapOrder txData={txData} txInfo={txInfo} />

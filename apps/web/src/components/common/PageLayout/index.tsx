@@ -11,7 +11,8 @@ import Footer from '../Footer'
 import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
-import BatchSidebar from '@/components/batch/BatchSidebar'
+import { useLoadFeature } from '@/features/__core__'
+import { BatchingFeature } from '@/features/batching'
 import { AppRoutes } from '@/config/routes'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
@@ -37,6 +38,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
+  const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)

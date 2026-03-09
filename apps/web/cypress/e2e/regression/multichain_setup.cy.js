@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -14,8 +15,6 @@ let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-// DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer2 = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
@@ -49,7 +48,10 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     sideBar.addNetwork(constants.networks.ethereum)
     cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    sideBar.checkInconsistentSignersMsgDisplayed(constants.networks.ethereum)
+    dashboard.expandActionRequiredPanel()
+    dashboard.checkInconsistentSignersMsgDisplayed()
+    dashboard.clickActionInPanel(dashboard.reviewSignersTestId)
+    cy.url().should('include', '/settings/setup').and('include', staticSafes.MATIC_STATIC_SAFE_28)
   })
 
   it('Verify warning on add owner for one safe in the group', () => {

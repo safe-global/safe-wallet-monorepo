@@ -1,7 +1,8 @@
 import React, { type ReactElement } from 'react'
 import { Box, Checkbox, Stack } from '@mui/material'
 import SendButton from './SendButton'
-import SwapButton from '@/features/swap/components/SwapButton'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import css from './styles.module.css'
@@ -25,6 +26,8 @@ export const ActionButtons = ({
   isSelected = false,
   onToggleAsset,
 }: ActionButtonsProps): ReactElement => {
+  const { SwapButton } = useLoadFeature(SwapFeature)
+
   if (mobile) {
     return (
       <Stack direction="row" className={css.mobileButtons}>

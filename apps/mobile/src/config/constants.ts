@@ -18,6 +18,7 @@ export const GATEWAY_URL_PRODUCTION =
   process.env.EXPO_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 export const GATEWAY_URL_STAGING = process.env.EXPO_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
 export const GATEWAY_URL = isProduction ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
+export const CONFIG_SERVICE_KEY = process.env.EXPO_PUBLIC_CONFIG_SERVICE_KEY || 'MOBILE'
 
 export const SECURITY_CERTIFICATE_HASH_BASE64 = process.env.EXPO_PUBLIC_SECURITY_SERTIFICATE_HASH_BASE64
 export const SECURITY_WATCHER_MAIL = process.env.EXPO_PUBLIC_SECURITY_WATCHER_MAIL

@@ -16,6 +16,17 @@ import { UnsupportedMastercopyWarning } from '@/features/multichain'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { Box } from '@/components/common/Mui'
 
+/**
+ * Generates a GitHub release URL for a specific Safe contract version.
+ * Strips L2 suffix if present (e.g., "1.3.0+L2" → "v1.3.0").
+ * @param version - The Safe contract version (e.g., "1.4.1" or "1.3.0+L2")
+ * @returns GitHub release URL (e.g., "https://github.com/safe-fndn/safe-smart-account/releases/tag/v1.4.1")
+ */
+const getReleaseUrl = (version: string): string => {
+  const cleanVersion = version.split('+')[0]
+  return `https://github.com/safe-fndn/safe-smart-account/releases/tag/v${cleanVersion}`
+}
+
 export const ContractVersion = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const [masterCopies] = useMasterCopies()
@@ -32,6 +43,8 @@ export const ContractVersion = () => {
   const isLatestVersion = safe.version && !showUpdateDialog
 
   const latestSafeVersion = getLatestSafeVersion(currentChain)
+
+  const releaseUrl = safe.version ? getReleaseUrl(safe.version) : undefined
 
   return (
     <>
@@ -53,6 +66,13 @@ export const ContractVersion = () => {
           <Skeleton width="60px" />
         )}
       </Typography>
+
+      {safeLoaded && releaseUrl && (
+        <Typography variant="body2" mt={0.5}>
+          <ExternalLink href={releaseUrl}>View release</ExternalLink>
+        </Typography>
+      )}
+
       <Box mt={2}>
         {safeLoaded && safe.version && showUpdateDialog ? (
           <Alert

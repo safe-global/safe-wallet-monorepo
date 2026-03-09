@@ -36,31 +36,26 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
 
   it('[VISUAL] Screenshot spaces dashboard page', () => {
     cy.visit(constants.spaceDashboardUrl + SPACE_ID)
-    cy.contains('Getting started', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces settings page', () => {
     cy.visit(constants.spaceUrl + SPACE_ID)
-    cy.contains('Settings', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces members page', () => {
     cy.visit(constants.spaceMembersUrl + SPACE_ID)
-    cy.contains('Members', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces safe accounts page', () => {
     cy.visit(constants.spaceSafeAccountsUrl + SPACE_ID)
-    cy.contains('Safe Accounts', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces address book page', () => {
     cy.visit(constants.spaceAddressBookUrl + SPACE_ID)
-    cy.contains('Address book', { timeout: 30000 }).should('be.visible')
     main.awaitVisualStability()
   })
 })

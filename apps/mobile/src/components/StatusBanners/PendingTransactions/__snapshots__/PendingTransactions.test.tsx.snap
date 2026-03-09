@@ -15,7 +15,7 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
         {
           "busy": undefined,
           "checked": undefined,
-          "disabled": false,
+          "disabled": undefined,
           "expanded": undefined,
           "selected": undefined,
         }
@@ -48,79 +48,48 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
       <View
         style={
           {
+            "alignItems": "center",
+            "backgroundColor": "#FFECC2",
+            "borderBottomLeftRadius": 8,
+            "borderBottomRightRadius": 8,
+            "borderTopLeftRadius": 8,
+            "borderTopRightRadius": 8,
             "flexDirection": "row",
-            "justifyContent": "center",
+            "justifyContent": "space-between",
+            "paddingBottom": 12,
+            "paddingLeft": 12,
+            "paddingRight": 12,
+            "paddingTop": 12,
             "width": "100%",
           }
         }
       >
         <View
-          collapsableChildren={false}
           style={
             {
               "alignItems": "center",
-              "backgroundColor": "#FFECC2",
-              "borderBottomLeftRadius": 5,
-              "borderBottomRightRadius": 5,
-              "borderTopLeftRadius": 5,
-              "borderTopRightRadius": 5,
               "flexDirection": "row",
-              "gap": 12,
-              "justifyContent": "center",
-              "paddingBottom": 8,
-              "paddingLeft": 16,
-              "paddingRight": 16,
-              "paddingTop": 8,
-              "width": "100%",
+              "gap": 8,
             }
           }
         >
           <View
-            testID="alert-start-icon"
-          >
-            <View
-              style={
-                {
-                  "alignItems": "center",
-                  "backgroundColor": "#FF8C00",
-                  "borderBottomLeftRadius": 100000,
-                  "borderBottomRightRadius": 100000,
-                  "borderTopLeftRadius": 100000,
-                  "borderTopRightRadius": 100000,
-                  "flexDirection": "column",
-                  "height": 24,
-                  "justifyContent": "center",
-                  "maxHeight": 24,
-                  "maxWidth": 24,
-                  "minHeight": 24,
-                  "minWidth": 24,
-                  "paddingBottom": 0,
-                  "paddingLeft": 0,
-                  "paddingRight": 0,
-                  "paddingTop": 0,
-                  "width": 24,
-                }
-              }
-            >
-              <Text
-                style={
-                  {
-                    "color": "#6C2D19",
-                    "fontFamily": "DMSans-SemiBold",
-                    "fontSize": 14,
-                  }
-                }
-                suppressHighlighting={true}
-              >
-                2
-              </Text>
-            </View>
-          </View>
-          <View
             style={
               {
-                "flexShrink": 1,
+                "alignItems": "center",
+                "alignSelf": "flex-start",
+                "backgroundColor": "#FF8C00",
+                "borderBottomLeftRadius": 8,
+                "borderBottomRightRadius": 8,
+                "borderTopLeftRadius": 8,
+                "borderTopRightRadius": 8,
                 "gap": 4,
+                "justifyContent": "center",
+                "minWidth": 24,
+                "paddingBottom": 1,
+                "paddingLeft": 4,
+                "paddingRight": 4,
+                "paddingTop": 1,
               }
             }
           >
@@ -128,41 +97,51 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               style={
                 {
                   "color": "#6C2D19",
-                  "fontFamily": "DMSans-SemiBold",
-                  "fontSize": 14,
+                  "fontFamily": "DMSans-Bold",
+                  "fontSize": 16,
+                  "lineHeight": 22,
                 }
               }
               suppressHighlighting={true}
             >
-              Pending transactions
+              2
             </Text>
           </View>
-          <View
-            testID="alert-end-icon"
-          >
-            <Text
-              allowFontScaling={false}
-              selectable={false}
-              style={
-                [
-                  {
-                    "color": "#6C2D19",
-                    "fontSize": 20,
-                  },
-                  undefined,
-                  {
-                    "fontFamily": "SafeIcons",
-                    "fontStyle": "normal",
-                    "fontWeight": "normal",
-                  },
-                  {},
-                ]
+          <Text
+            style={
+              {
+                "color": "#6C2D19",
+                "fontFamily": "DMSans-SemiBold",
+                "fontSize": 14,
+                "letterSpacing": -0.1,
               }
-            >
-              
-            </Text>
-          </View>
+            }
+            suppressHighlighting={true}
+          >
+            Pending transactions
+          </Text>
         </View>
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#6C2D19",
+                "fontSize": 24,
+              },
+              undefined,
+              {
+                "fontFamily": "SafeIcons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
+        >
+          
+        </Text>
       </View>
     </View>
   </View>
