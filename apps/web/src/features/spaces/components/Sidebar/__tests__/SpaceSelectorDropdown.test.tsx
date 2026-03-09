@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type * as ReactModule from 'react'
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
-import { SpaceSelectorDropdown } from '../variants/SpaceSelectorDropdown'
+import { SpaceSelectorDropdown, getAvatarColor } from '../variants/SpaceSelectorDropdown'
 
 const mockPush = jest.fn()
 jest.mock('next/router', () => ({
@@ -46,7 +46,11 @@ jest.mock('@/components/ui/sidebar', () => ({
 
 jest.mock('@/components/ui/avatar', () => ({
   Avatar: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  AvatarFallback: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  AvatarFallback: ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
+    <div data-testid="avatar-fallback" style={style}>
+      {children}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -196,6 +200,21 @@ describe('SpaceSelectorDropdown', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
+  })
+
+  describe('getAvatarColor', () => {
+    it('returns an hsl color string', () => {
+      expect(getAvatarColor(1)).toMatch(/^hsl\(/)
+    })
+
+    it('returns the same color for the same id', () => {
+      expect(getAvatarColor(5)).toBe(getAvatarColor(5))
+    })
+
+    it('returns different colors for different ids', () => {
+      const colors = [1, 2, 3, 4, 5].map(getAvatarColor)
+      expect(new Set(colors).size).toBe(colors.length)
+    })
   })
 
   it('shows a checkmark only next to the currently selected space', () => {
