@@ -55,7 +55,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     <>
       {!hideHeader &&
         (isSpaceRoute ? (
-          <Topbar />
+          <Topbar onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} />
         ) : (
           <header className={css.header}>
             <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
