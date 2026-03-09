@@ -45,7 +45,7 @@ const guardRules: GuardRule[] = [
   {
     match: ({ hasSpaces, isOnboardingRoute }) => {
       const shouldRedirect = !hasSpaces && !isOnboardingRoute
-      
+
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.welcome.createSpace),

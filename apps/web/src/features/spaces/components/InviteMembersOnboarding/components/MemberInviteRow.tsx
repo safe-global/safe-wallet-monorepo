@@ -19,6 +19,26 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 }
 
 const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
+const ERROR_DEBOUNCE_MS = 500
+
+type AutoChecksumCallback = (checksummed: string) => void
+
+function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCallback): string | undefined {
+  if (!ADDRESS_RE.test(value)) return 'Invalid address'
+
+  const hex = value.slice(2)
+  const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
+
+  if (hasNoChecksumIntent) {
+    const checksummed = checksumAddress(value.toLowerCase())
+    if (checksummed !== value) onAutoChecksum(checksummed)
+    return undefined
+  }
+
+  if (!isChecksummedAddress(value)) return 'Invalid address checksum'
+
+  return undefined
+}
 
 interface MemberInviteRowProps {
   index: number
@@ -31,12 +51,21 @@ interface MemberInviteRowProps {
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, errors, setValue, trigger, canRemove, onRemove }: MemberInviteRowProps) => {
+const MemberInviteRow = ({
+  index,
+  control,
+  register,
+  errors,
+  setValue,
+  trigger,
+  canRemove,
+  onRemove,
+}: MemberInviteRowProps) => {
   const members = useWatch({ control, name: 'members' })
   const addressValue = members?.[index]?.address ?? ''
-  const fieldError = errors?.members?.[index]?.address
-  const debouncedError = useDebounce(fieldError, 500)
-  const displayError = fieldError ? debouncedError : undefined
+  const fieldErrorMessage = errors?.members?.[index]?.address?.message
+  const debouncedError = useDebounce(fieldErrorMessage, ERROR_DEBOUNCE_MS)
+  const displayError = fieldErrorMessage ? debouncedError : undefined
 
   const handleAddressResolved = useCallback(
     (address: string) => {
@@ -61,22 +90,10 @@ const MemberInviteRow = ({ index, control, register, errors, setValue, trigger, 
               if (!value?.trim()) return undefined
               if (isDomain(value)) return undefined
 
-              if (!ADDRESS_RE.test(value)) return 'Invalid address'
-
-              const hex = value.slice(2)
-              const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
-
-              if (hasNoChecksumIntent) {
-                const checksummed = checksumAddress(value.toLowerCase())
-                if (checksummed !== value) {
-                  setValue(`members.${index}.address`, checksummed, { shouldValidate: true })
-                }
-                return undefined
-              }
-
-              if (!isChecksummedAddress(value)) {
-                return 'Invalid address checksum'
-              }
+              const addressError = validateEthereumAddress(value, (checksummed) => {
+                setValue(`members.${index}.address`, checksummed, { shouldValidate: true })
+              })
+              if (addressError) return addressError
 
               const isDuplicate = members?.some(
                 (member, i) => i !== index && member.address && sameAddress(member.address, value),
@@ -86,7 +103,7 @@ const MemberInviteRow = ({ index, control, register, errors, setValue, trigger, 
           })}
           placeholder="Wallet address or ENS name"
           className="h-11 rounded-lg bg-card pl-12 pr-4"
-          error={displayError?.message}
+          error={displayError}
           data-testid={`invite-address-input-${index}`}
         />
       </EnsAddressIdenticon>
