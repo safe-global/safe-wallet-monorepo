@@ -1,6 +1,7 @@
+import { blo } from 'blo'
 import { Settings } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getInitials } from '../utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getInitials, getSafeDisplayInfo } from '../utils'
 import ChainSelectorBlock from './ChainSelectorBlock'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
@@ -19,18 +20,26 @@ function SafeSelectorTriggerContent({
   onChainSelect,
 }: SafeSelectorTriggerContentProps) {
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation()
+  const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
+  const chainShortName = selectedChain?.shortName ?? ''
+  const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
+    selectedItem.name,
+    selectedItem.address,
+    chainShortName,
+  )
 
   return (
     <div className="flex items-center gap-4 w-full">
       <Avatar size="sm">
-        <AvatarFallback>{getInitials(selectedItem.name || '?')}</AvatarFallback>
+        <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
+        <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-start flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-foreground truncate">{selectedItem.name}</span>
+          <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
           <Settings className="size-3 text-muted-foreground shrink-0" />
         </div>
-        <span className="text-xs text-muted-foreground">{selectedItem.address}</span>
+        {showAddressLine && <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>}
       </div>
       <div
         className="shrink-0"
