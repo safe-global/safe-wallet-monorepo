@@ -108,6 +108,11 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     }
   }
 
+  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+    await addNewSafes(selectedSafes, spaceIdNum)
+    await removeUnselectedSafes(selectedSafes, spaceIdNum)
+  }
+
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
@@ -116,11 +121,7 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
 
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-
-      const spaceIdNum = Number(spaceId)
-
-      await addNewSafes(data.selectedSafes, spaceIdNum)
-      await removeUnselectedSafes(data.selectedSafes, spaceIdNum)
+      await processSelectedSafes(data.selectedSafes, Number(spaceId))
 
       dispatch(
         showNotification({

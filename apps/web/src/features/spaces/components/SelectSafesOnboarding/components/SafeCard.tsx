@@ -26,8 +26,7 @@ const SafeCard = ({ safe }: SafeCardProps) => {
   const safeId = isMultiChain ? getMultiChainSafeId(safe as MultiChainSafeItem) : getSafeId(safe as SafeItem)
 
   const watchedSubSafeIds = subSafeIds.map((id) => `selectedSafes.${id}` as const)
-  // @ts-ignore TODO: Check why this overload is not supported
-  const subSafeValues: boolean[] = isMultiChain ? watch(watchedSubSafeIds) : []
+  const subSafeValues = (isMultiChain ? watch(watchedSubSafeIds as readonly string[] as never) : []) as boolean[]
   const allSubSafesChecked = subSafeValues.every(Boolean) && subSafeValues.length > 0
 
   const handleMultiChainToggle = () => {
