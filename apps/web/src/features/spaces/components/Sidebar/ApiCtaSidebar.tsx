@@ -32,7 +32,10 @@ export const ApiCtaSidebar = (): ReactElement => {
   }
 
   return (
-    <div className="relative flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-3" data-testid="api-cta-sidebar">
+    <div
+      className="relative flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-3 group-data-[collapsible=icon]:hidden"
+      data-testid="api-cta-sidebar"
+    >
       <button
         className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
         onClick={() => setIsCollapsed(true)}
