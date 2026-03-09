@@ -39,27 +39,28 @@ export const ApiCtaSidebar = (): ReactElement => {
 
   return (
     <div
-      className="relative flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-3 group-data-[collapsible=icon]:hidden"
+      className="flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-5 group-data-[collapsible=icon]:hidden"
       data-testid="api-cta-sidebar"
     >
-      <button
-        className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-        onClick={() => setIsCollapsed(true)}
-        aria-label="Minimize API section"
-        data-testid="api-cta-minimize"
-      >
-        <X className="size-4" />
-      </button>
+      <div className="flex w-full items-start justify-between">
+        <Image
+          src="/images/spaces/api-sidebar.svg"
+          alt="API"
+          width={24}
+          height={24}
+          className="shrink-0 dark:brightness-0 dark:invert"
+        />
+        <button
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+          onClick={() => setIsCollapsed(true)}
+          aria-label="Minimize API section"
+          data-testid="api-cta-minimize"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
 
-      <Image
-        src="/images/spaces/api-sidebar.svg"
-        alt="API"
-        width={36}
-        height={36}
-        className="dark:brightness-0 dark:invert"
-      />
-
-      <p className="text-sm font-semibold leading-tight pr-5">Use API</p>
+      <p className="text-sm font-semibold leading-tight">Use API</p>
 
       <p className="text-sm text-muted-foreground leading-snug">Start building with our new Safe API</p>
 
