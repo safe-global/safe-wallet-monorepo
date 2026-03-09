@@ -2,11 +2,19 @@ import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
+import SafeSelectorError from './components/SafeSelectorError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
 
-function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, onChainChange }: SafeSelectorDropdownProps) {
+function SafeSelectorDropdown({
+  items,
+  selectedItemId,
+  onItemSelect,
+  onChainChange,
+  isError,
+  onRetry,
+}: SafeSelectorDropdownProps) {
   const {
     dropdownOpen,
     selectedChainId,
@@ -24,6 +32,10 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, onChainChan
 
   if (!selectedItem) {
     return null
+  }
+
+  if (isError) {
+    return <SafeSelectorError onRetry={onRetry} />
   }
 
   return (

@@ -1,5 +1,6 @@
 import { User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ReactNode } from 'react'
 
 export interface BalanceDisplayProps {
@@ -13,16 +14,19 @@ export interface BalanceDisplayProps {
 const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold = true }: BalanceDisplayProps) => (
   <div className="flex flex-col items-end gap-2 w-[100px] shrink-0">
     {isLoading ? (
-      <span className="text-xs font-medium text-muted-foreground">--</span>
+      <Skeleton className="h-3.5 w-14 rounded" />
     ) : (
       <span className="text-xs font-medium text-muted-foreground">{balance}</span>
     )}
-    {showThreshold && (
-      <Badge variant="secondary" className="gap-1">
-        <User className="size-3" />
-        {threshold}/{owners}
-      </Badge>
-    )}
+    {showThreshold &&
+      (isLoading ? (
+        <Skeleton className="h-5 w-12 rounded-full" />
+      ) : (
+        <Badge variant="secondary" className="gap-1">
+          <User className="size-3" />
+          {threshold}/{owners}
+        </Badge>
+      ))}
   </div>
 )
 
