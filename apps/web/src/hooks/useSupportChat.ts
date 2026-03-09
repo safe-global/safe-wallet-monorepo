@@ -22,10 +22,6 @@ export type UserIdentity = {
   accountId?: string
 }
 
-const shortenAddress = (address: string): string => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
-}
-
 const deriveAliasEmail = (address: string): string => {
   return `${address.toLowerCase()}@${SUPPORT_CHAT_ALIAS_DOMAIN}`
 }
