@@ -11,9 +11,7 @@ export interface RecipientOption {
   section: 'safes' | 'signers' | 'addressBook'
 }
 
-function buildAllContactNames(
-  contacts: { value: string; name: string }[],
-): Map<string, string> {
+function buildAllContactNames(contacts: { value: string; name: string }[]): Map<string, string> {
   const map = new Map<string, string>()
   for (const c of contacts) {
     map.set(c.value.toLowerCase(), c.name)

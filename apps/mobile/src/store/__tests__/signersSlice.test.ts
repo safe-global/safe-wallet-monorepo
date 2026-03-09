@@ -303,10 +303,7 @@ describe('signersSlice', () => {
   describe('computeSignerChainIds', () => {
     const signerAddress = '0xABCDef1234567890abcdef1234567890ABCDEF12'
 
-    const makeOverview = (
-      chainId: string,
-      owners: string[],
-    ) => ({
+    const makeOverview = (chainId: string, owners: string[]) => ({
       address: { value: generateEthereumAddress() },
       chainId,
       threshold: 1,
@@ -328,10 +325,7 @@ describe('signersSlice', () => {
       }
 
       const store = createTestStore(initialState)
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toHaveLength(3)
       expect(result).toContain('1')
@@ -351,20 +345,14 @@ describe('signersSlice', () => {
       }
 
       const store = createTestStore(initialState)
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toEqual([])
     })
 
     it('should return empty array when safes state is empty', () => {
       const store = createTestStore({ safes: {} })
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toEqual([])
     })
@@ -382,10 +370,7 @@ describe('signersSlice', () => {
       }
 
       const store = createTestStore(initialState)
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toEqual(['1'])
     })
@@ -402,10 +387,7 @@ describe('signersSlice', () => {
       }
 
       const store = createTestStore(initialState)
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toEqual(['1'])
     })
@@ -427,10 +409,7 @@ describe('signersSlice', () => {
       }
 
       const store = createTestStore(initialState)
-      const result = computeSignerChainIds(
-        signerAddress,
-        store.getState(),
-      )
+      const result = computeSignerChainIds(signerAddress, store.getState())
 
       expect(result).toHaveLength(3)
       expect(result).toContain('1')
