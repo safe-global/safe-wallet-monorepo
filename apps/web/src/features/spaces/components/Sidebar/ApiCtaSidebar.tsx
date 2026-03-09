@@ -23,7 +23,13 @@ export const ApiCtaSidebar = (): ReactElement => {
             onClick={() => setIsCollapsed(false)}
             data-testid="api-cta-collapsed"
           >
-            <Image src="/images/spaces/api-sidebar.svg" alt="API" width={16} height={16} />
+            <Image
+              src="/images/spaces/api-sidebar.svg"
+              alt="API"
+              width={16}
+              height={16}
+              className="dark:brightness-0 dark:invert"
+            />
             <span>API</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -45,7 +51,13 @@ export const ApiCtaSidebar = (): ReactElement => {
         <X className="size-4" />
       </button>
 
-      <Image src="/images/spaces/api-sidebar.svg" alt="API" width={36} height={36} />
+      <Image
+        src="/images/spaces/api-sidebar.svg"
+        alt="API"
+        width={36}
+        height={36}
+        className="dark:brightness-0 dark:invert"
+      />
 
       <p className="text-sm font-semibold leading-tight pr-5">Use API</p>
 
