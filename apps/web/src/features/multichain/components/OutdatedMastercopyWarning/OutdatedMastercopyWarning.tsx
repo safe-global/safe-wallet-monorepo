@@ -36,6 +36,7 @@ export const OutdatedMastercopyWarning = () => {
       content="Update now to take advantage of new features and the highest security standards available. You will need to confirm this update just like any other transaction."
       action={isOwner ? { label: 'Update', onClick: openUpdateModal } : undefined}
       trackingEvent={ATTENTION_PANEL_EVENTS.UPDATE_OUTDATED_MASTERCOPY}
+      actionTestId="update-mastercopy-btn"
     />
   )
 }

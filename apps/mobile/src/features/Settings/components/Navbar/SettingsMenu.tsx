@@ -71,11 +71,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             backgroundColor={'$backgroundSkeleton'}
             alignItems={'center'}
             justifyContent={'center'}
-            borderRadius={16}
-            height={32}
-            width={32}
+            borderRadius={200}
+            height={40}
+            width={40}
           >
-            <SafeFontIcon name={'settings'} size={20} color={'$color'} />
+            <SafeFontIcon name={'settings'} size={24} color={'$color'} />
           </View>
         </Pressable>
 
@@ -201,11 +201,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}
               justifyContent={'center'}
-              borderRadius={16}
-              height={32}
-              width={32}
+              borderRadius={200}
+              height={40}
+              width={40}
             >
-              <SafeFontIcon name={'options-horizontal'} size={20} color={'$color'} />
+              <SafeFontIcon name={'options-horizontal'} size={24} color={'$color'} />
             </View>
           </Pressable>
         </FloatingMenu>

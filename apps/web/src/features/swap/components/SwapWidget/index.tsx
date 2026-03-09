@@ -1,0 +1,288 @@
+import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
+import { type OnTradeParamsPayload, type CowEventListeners, CowEvents } from '@cowprotocol/events'
+import { type MutableRefObject, useEffect, useMemo, useRef, useState } from 'react'
+import { Box, useTheme } from '@mui/material'
+import { CowSwapWidget } from '@cowprotocol/widget-react'
+import { SafeAppAccessPolicyTypes, SafeAppFeatures } from '@safe-global/store/gateway/types'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
+import { useAppDispatch, useAppSelector } from '@/store'
+
+import css from '../../styles.module.css'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useWallet from '@/hooks/wallets/useWallet'
+import BlockedAddress from '@/components/common/BlockedAddress'
+import useSwapConsent from '../../useSwapConsent'
+import Disclaimer from '@/components/common/Disclaimer'
+import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
+import { selectSwapParams, setSwapParams } from '../../store/swapParamsSlice'
+import { setSwapOrder } from '@/store/swapOrderSlice'
+import useChainId from '@/hooks/useChainId'
+import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
+import { calculateFeePercentageInBps } from '../../helpers/fee'
+import { UiOrderTypeToOrderType } from '../../helpers/utils'
+import { useGetIsSanctionedQuery } from '@/store/api/ofac'
+import { skipToken } from '@reduxjs/toolkit/query/react'
+import { getKeyWithTrueValue } from '@/utils/helpers'
+import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+
+const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+
+type Params = {
+  sell?: {
+    // The token address
+    asset: string
+    amount: string
+  }
+}
+
+const SwapWidget = ({ sell }: Params) => {
+  const { palette } = useTheme()
+  const darkMode = useDarkMode()
+  const chainId = useChainId()
+  const dispatch = useAppDispatch()
+  const swapParams = useAppSelector(selectSwapParams)
+  const { safeAddress, safeLoading } = useSafeInfo()
+  const [recipientAddress, setRecipientAddress] = useState('')
+  const wallet = useWallet()
+  const { isConsentAccepted, onAccept } = useSwapConsent()
+  const feeEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_FEE_ENABLED)
+  const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
+  const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
+  const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
+  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi'
+
+  const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
+  const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
+  const { data: isRecipientAddressBlocked } = useGetIsSanctionedQuery(recipientAddress || skipToken)
+  const blockedAddresses = {
+    [safeAddress]: !!isSafeAddressBlocked,
+    [wallet?.address || '']: !!isWalletAddressBlocked,
+    [recipientAddress]: !!isRecipientAddressBlocked,
+  }
+
+  const blockedAddress = getKeyWithTrueValue(blockedAddresses)
+
+  const [params, setParams] = useState<CowSwapWidgetParams>({
+    appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
+    width: '100%', // Width in pixels (or 100% to use all available space)
+    height: '860px',
+    chainId,
+    baseUrl: cowSwapBaseUrl,
+    standaloneMode: false,
+    disableToastMessages: true,
+    disablePostedOrderConfirmationModal: true,
+    disableCrossChainSwap: true,
+    hideLogo: true,
+    hideNetworkSelector: true,
+    sounds: {
+      orderError: null,
+      orderExecuted: null,
+      postOrder: null,
+    },
+    tradeType: swapParams.tradeType,
+    sell: sell || {
+      asset: '',
+      amount: '0',
+    },
+    buy: {
+      asset: '',
+      amount: '0',
+    },
+    images: {
+      emptyOrders: darkMode
+        ? BASE_URL + '/images/common/swap-empty-dark.svg'
+        : BASE_URL + '/images/common/swap-empty-light.svg',
+    },
+    enabledTradeTypes: [TradeType.SWAP, TradeType.LIMIT, TradeType.ADVANCED],
+    theme: {
+      baseTheme: darkMode ? 'dark' : 'light',
+      primary: palette.primary.main,
+      background: palette.background.main,
+      paper: palette.background.paper,
+      text: palette.text.primary,
+      danger: palette.error.dark,
+      info: palette.info.main,
+      success: palette.success.main,
+      warning: palette.warning.main,
+      alert: palette.warning.main,
+    },
+    partnerFee: {
+      bps: feeEnabled ? 35 : 0,
+      recipient: SWAP_FEE_RECIPIENT,
+    },
+    content: {
+      feeLabel: 'Widget Fee',
+      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
+    },
+  })
+
+  const appData: SafeAppData = useMemo(
+    () => ({
+      id: 1,
+      url: cowSwapBaseUrl,
+      name: SWAP_TITLE,
+      iconUrl: darkMode ? './images/common/safe-swap-dark.svg' : './images/common/safe-swap.svg',
+      description: 'Safe Apps',
+      chainIds: ['1', '100'],
+      accessControl: { type: SafeAppAccessPolicyTypes.NoRestrictions },
+      tags: ['safe-apps'],
+      features: [SafeAppFeatures.BATCHED_TRANSACTIONS],
+      socialProfiles: [],
+      featured: false,
+    }),
+    [darkMode, cowSwapBaseUrl],
+  )
+
+  const listeners = useMemo<CowEventListeners>(() => {
+    return [
+      {
+        event: CowEvents.ON_TOAST_MESSAGE,
+        handler: (event) => {
+          console.info('[Swaps] message:', event)
+          const { messageType } = event
+
+          switch (messageType) {
+            case 'ORDER_CREATED':
+              dispatch(
+                setSwapOrder({
+                  orderUid: event.data.orderUid,
+                  status: 'created',
+                }),
+              )
+              break
+            case 'ORDER_PRESIGNED':
+              dispatch(
+                setSwapOrder({
+                  orderUid: event.data.orderUid,
+                  status: 'open',
+                }),
+              )
+              break
+            case 'ORDER_FULFILLED':
+              dispatch(
+                setSwapOrder({
+                  orderUid: event.data.orderUid,
+                  status: 'fulfilled',
+                }),
+              )
+              break
+            case 'ORDER_EXPIRED':
+              dispatch(
+                setSwapOrder({
+                  orderUid: event.data.orderUid,
+                  status: 'expired',
+                }),
+              )
+              break
+            case 'ORDER_CANCELLED':
+              dispatch(
+                setSwapOrder({
+                  orderUid: event.data.orderUid,
+                  status: 'cancelled',
+                }),
+              )
+              break
+          }
+        },
+      },
+      {
+        event: CowEvents.ON_CHANGE_TRADE_PARAMS,
+        handler: (newTradeParams: OnTradeParamsPayload) => {
+          const { orderType: tradeType, recipient, sellToken, buyToken } = newTradeParams
+
+          const newFeeBps = feeEnabled
+            ? calculateFeePercentageInBps(newTradeParams, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled)
+            : 0
+
+          setParams((params) => ({
+            ...params,
+            tradeType: UiOrderTypeToOrderType(tradeType),
+            partnerFee: {
+              recipient: SWAP_FEE_RECIPIENT,
+              bps: newFeeBps,
+            },
+            sell: {
+              asset: sellToken?.address,
+            },
+            buy: {
+              asset: buyToken?.address,
+            },
+          }))
+
+          if (recipient) {
+            setRecipientAddress(recipient)
+          }
+
+          dispatch(setSwapParams({ tradeType }))
+        },
+      },
+    ]
+  }, [dispatch, feeEnabled, nativeCowSwapFeeV2Enabled, isEurcvBoostEnabled])
+
+  useEffect(() => {
+    setParams((params) => ({
+      ...params,
+      chainId,
+      theme: {
+        baseTheme: darkMode ? 'dark' : 'light',
+        primary: palette.primary.main,
+        background: palette.background.main,
+        paper: palette.background.paper,
+        text: palette.text.primary,
+        danger: palette.error.dark,
+        info: palette.info.main,
+        success: palette.success.main,
+        warning: palette.warning.main,
+        alert: palette.warning.main,
+      },
+    }))
+  }, [palette, darkMode, chainId])
+
+  useEffect(() => {
+    if (!sell) return
+    setParams((params) => ({
+      ...params,
+      sell,
+    }))
+  }, [sell])
+
+  const chain = useCurrentChain()
+
+  const iframeRef: MutableRefObject<HTMLIFrameElement | null> = useRef<HTMLIFrameElement | null>(null)
+
+  useEffect(() => {
+    const iframeElement = document.querySelector('#swapWidget iframe')
+    if (iframeElement) {
+      iframeRef.current = iframeElement as HTMLIFrameElement
+    }
+  }, [params, isConsentAccepted, safeLoading])
+
+  useCustomAppCommunicator(iframeRef, appData, chain)
+
+  if (blockedAddress) {
+    return <BlockedAddress address={blockedAddress} featureTitle="embedded swaps feature with CoW Swap" />
+  }
+
+  if (!isConsentAccepted) {
+    return (
+      <Disclaimer
+        title="Note"
+        content={<WidgetDisclaimer widgetName="CoW Swap Widget" />}
+        onAccept={onAccept}
+        buttonText="Continue"
+      />
+    )
+  }
+
+  return (
+    <Box className={css.swapWidget} id="swapWidget">
+      <CowSwapWidget params={params} listeners={listeners} />
+    </Box>
+  )
+}
+
+export default SwapWidget

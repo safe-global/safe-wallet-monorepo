@@ -1,10 +1,14 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M9 2H4C2.89543 2 2 2.89543 2 4V9C2 10.1046 2.89543 11 4 11H9C10.1046 11 11 10.1046 11 9V4C11 2.89543 10.1046 2 9 2ZM4 9V4H9V9H4Z" fill="black"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M9 13H4C2.89543 13 2 13.8954 2 15V20C2 21.1046 2.89543 22 4 22H9C10.1046 22 11 21.1046 11 20V15C11 13.8954 10.1046 13 9 13ZM4 20V15H9V20H4Z" fill="black"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M20 2H15C13.8954 2 13 2.89543 13 4V9C13 10.1046 13.8954 11 15 11H20C21.1046 11 22 10.1046 22 9V4C22 2.89543 21.1046 2 20 2ZM15 9V4H20V9H15Z" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 16 13)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 22 13)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 19 16)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 22 19)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 16 19)" fill="black"/>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group">
+<g id="Rectangle Copy 13">
+</g>
+<path id="Rectangle" d="M6 1C6.55228 1 7 1.44772 7 2V6C7 6.55228 6.55228 7 6 7H2C1.44772 7 1 6.55228 1 6V2C1 1.44772 1.44772 1 2 1H6ZM3 5H5V3H3V5Z" fill="black"/>
+<path id="Rectangle Copy 3" d="M6 9C6.55228 9 7 9.44772 7 10V14C7 14.5523 6.55228 15 6 15H2C1.44772 15 1 14.5523 1 14V10C1 9.44772 1.44772 9 2 9H6ZM3 13H5V11H3V13Z" fill="black"/>
+<path id="Rectangle Copy 2" d="M14 1C14.5523 1 15 1.44772 15 2V6C15 6.55228 14.5523 7 14 7H10C9.44772 7 9 6.55228 9 6V2C9 1.44772 9.44772 1 10 1H14ZM11 5H13V3H11V5Z" fill="black"/>
+<path id="Path" d="M10.5 8.8H9.5C9.1134 8.8 8.8 9.1134 8.8 9.5V10.5C8.8 10.8866 9.1134 11.2 9.5 11.2H10.5C10.8866 11.2 11.2 10.8866 11.2 10.5V9.5C11.2 9.1134 10.8866 8.8 10.5 8.8Z" fill="black"/>
+<path id="Path_2" d="M14.5 8.8H13.5C13.1134 8.8 12.8 9.1134 12.8 9.5V10.5C12.8 10.8866 13.1134 11.2 13.5 11.2H14.5C14.8866 11.2 15.2 10.8866 15.2 10.5V9.5C15.2 9.1134 14.8866 8.8 14.5 8.8Z" fill="black"/>
+<path id="Path_3" d="M14.5 12.8H13.5C13.1134 12.8 12.8 13.1134 12.8 13.5V14.5C12.8 14.8866 13.1134 15.2 13.5 15.2H14.5C14.8866 15.2 15.2 14.8866 15.2 14.5V13.5C15.2 13.1134 14.8866 12.8 14.5 12.8Z" fill="black"/>
+<path id="Path_4" d="M10.5 12.8H9.5C9.1134 12.8 8.8 13.1134 8.8 13.5V14.5C8.8 14.8866 9.1134 15.2 9.5 15.2H10.5C10.8866 15.2 11.2 14.8866 11.2 14.5V13.5C11.2 13.1134 10.8866 12.8 10.5 12.8Z" fill="black"/>
+<path id="Path_5" d="M12.5 10.8H11.5C11.1134 10.8 10.8 11.1134 10.8 11.5V12.5C10.8 12.8866 11.1134 13.2 11.5 13.2H12.5C12.8866 13.2 13.2 12.8866 13.2 12.5V11.5C13.2 11.1134 12.8866 10.8 12.5 10.8Z" fill="black"/>
+</g>
 </svg>

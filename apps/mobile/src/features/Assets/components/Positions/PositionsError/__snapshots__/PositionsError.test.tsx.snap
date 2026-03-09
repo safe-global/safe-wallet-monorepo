@@ -118,7 +118,7 @@ exports[`PositionsError renders correctly 1`] = `
             ]
           }
         >
-          
+          
         </Text>
         <View
           pointerEvents="none"

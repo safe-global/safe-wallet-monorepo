@@ -14,7 +14,7 @@ import {
   isAnyEarnTxInfo,
 } from '@/utils/transaction-guards'
 import { BRIDGE_WIDGET_URL } from '@/features/bridge'
-import { SWAP_WIDGET_URL } from '@/features/swap/components/FallbackSwapWidget'
+import { SWAP_WIDGET_URL } from '@/features/swap'
 export const getTransactionTrackingType = (
   details: TransactionDetails | undefined,
   origin?: string,

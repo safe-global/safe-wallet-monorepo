@@ -8,7 +8,7 @@ const darkPalette: ColorPalette = {
   text: {
     primary: '#FFFFFF',
     secondary: '#636669',
-    disabled: '#636669',
+    disabled: 'rgba(255, 255, 255, 0.3)',
     contrast: '#000000',
   },
   primary: {

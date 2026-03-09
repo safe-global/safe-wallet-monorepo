@@ -1,5 +1,5 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
+import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
 import { Box, CircularProgress, Typography } from '@mui/material'
 

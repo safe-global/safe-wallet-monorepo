@@ -23,7 +23,6 @@ describe(
       )
       cy.visit(constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_23)
       cy.wait('@getHistory')
-      cy.contains('Received', { timeout: 10000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },

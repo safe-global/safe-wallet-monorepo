@@ -98,7 +98,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -201,10 +201,10 @@ exports[`StakingDeposit matches snapshot 1`] = `
         style={
           {
             "backgroundColor": "#FFFFFF",
-            "borderBottomLeftRadius": 7,
-            "borderBottomRightRadius": 7,
-            "borderTopLeftRadius": 7,
-            "borderTopRightRadius": 7,
+            "borderBottomLeftRadius": 6,
+            "borderBottomRightRadius": 6,
+            "borderTopLeftRadius": 6,
+            "borderTopRightRadius": 6,
             "flexDirection": "column",
             "gap": 20,
             "paddingBottom": 16,
@@ -633,7 +633,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                     ]
                   }
                 >
-                  
+                  
                 </Text>
               </View>
             </View>
@@ -691,7 +691,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -802,10 +802,10 @@ exports[`StakingDeposit matches snapshot 1`] = `
         style={
           {
             "backgroundColor": "#FFFFFF",
-            "borderBottomLeftRadius": 7,
-            "borderBottomRightRadius": 7,
-            "borderTopLeftRadius": 7,
-            "borderTopRightRadius": 7,
+            "borderBottomLeftRadius": 6,
+            "borderBottomRightRadius": 6,
+            "borderTopLeftRadius": 6,
+            "borderTopRightRadius": 6,
             "flexDirection": "column",
             "gap": 20,
             "paddingBottom": 16,
@@ -1003,7 +1003,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
               <Text
                 style={
