@@ -14,10 +14,9 @@ const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `multichain_${mcSafe
 
 interface SafeCardProps {
   safe: SafeItem | MultiChainSafeItem
-  alreadyAdded: boolean
 }
 
-const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
+const SafeCard = ({ safe }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
   const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
@@ -27,12 +26,10 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
   const safeId = isMultiChain ? getMultiChainSafeId(safe as MultiChainSafeItem) : getSafeId(safe as SafeItem)
 
   const watchedSubSafeIds = subSafeIds.map((id) => `selectedSafes.${id}` as const)
-  // @ts-ignore TODO: Check why this overload is not supported
-  const subSafeValues: boolean[] = isMultiChain ? watch(watchedSubSafeIds) : []
+  const subSafeValues = (isMultiChain ? watch(watchedSubSafeIds as readonly string[] as never) : []) as boolean[]
   const allSubSafesChecked = subSafeValues.every(Boolean) && subSafeValues.length > 0
 
   const handleMultiChainToggle = () => {
-    if (alreadyAdded) return
     const newValue = !allSubSafesChecked
     setValue(`selectedSafes.${safeId}`, newValue, { shouldValidate: true })
     subSafeIds.forEach((id) => {
@@ -44,8 +41,7 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
     return (
       <SafeCardLayout
         ref={elementRef as React.Ref<HTMLButtonElement>}
-        alreadyAdded={alreadyAdded}
-        checked={allSubSafesChecked || alreadyAdded}
+        checked={allSubSafesChecked}
         onToggle={handleMultiChainToggle}
         name={name}
         address={safe.address}
@@ -64,9 +60,8 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
       render={({ field }) => (
         <SafeCardLayout
           ref={elementRef as React.Ref<HTMLButtonElement>}
-          alreadyAdded={alreadyAdded}
-          checked={Boolean(field.value) || alreadyAdded}
-          onToggle={() => !alreadyAdded && field.onChange(!field.value)}
+          checked={Boolean(field.value)}
+          onToggle={() => field.onChange(!field.value)}
           onCheckedChange={(checked) => field.onChange(checked)}
           name={name}
           address={safe.address}
@@ -82,7 +77,6 @@ const SafeCard = ({ safe, alreadyAdded }: SafeCardProps) => {
 
 interface SafeCardLayoutProps {
   ref?: React.Ref<HTMLButtonElement>
-  alreadyAdded: boolean
   checked: boolean
   onToggle: () => void
   onCheckedChange?: (checked: boolean) => void
@@ -96,7 +90,6 @@ interface SafeCardLayoutProps {
 
 const SafeCardLayout = ({
   ref,
-  alreadyAdded,
   checked,
   onToggle,
   onCheckedChange,
@@ -111,7 +104,6 @@ const SafeCardLayout = ({
     ref={ref}
     type="button"
     onClick={onToggle}
-    disabled={alreadyAdded}
     className="flex w-full cursor-pointer items-center gap-2 rounded-3xl bg-card py-4 pl-2 pr-6 text-left transition-colors hover:bg-muted/50 disabled:opacity-60"
   >
     <div className="flex shrink-0 items-center px-2">
@@ -119,7 +111,6 @@ const SafeCardLayout = ({
         checked={checked}
         onCheckedChange={onCheckedChange ?? (() => onToggle())}
         onClick={(e) => e.stopPropagation()}
-        disabled={alreadyAdded}
       />
     </div>
 
