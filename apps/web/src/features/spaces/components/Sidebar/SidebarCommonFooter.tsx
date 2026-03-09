@@ -11,6 +11,7 @@ import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { LS_KEY } from '@/config/gateway'
+import { ApiCtaSidebar } from './ApiCtaSidebar'
 
 const HELP_URL = 'https://help.safe.global/en/'
 
@@ -30,7 +31,7 @@ export const SidebarCommonFooter = (): ReactElement => {
     <SidebarFooter data-testid="sidebar-common-footer">
       {/* Dev Toggles - only in non-production */}
       {!IS_PRODUCTION && (
-        <div className="flex flex-col gap-2 border-b border-sidebar-border px-3 py-2">
+        <div className="flex flex-col gap-2 border-b px-3 py-2">
           <Field orientation="horizontal">
             <Switch
               id="dark-mode-toggle"
@@ -45,6 +46,9 @@ export const SidebarCommonFooter = (): ReactElement => {
           </Field>
         </div>
       )}
+
+      {/* API CTA */}
+      <ApiCtaSidebar />
 
       {/* Help Button */}
       <SidebarMenu>
