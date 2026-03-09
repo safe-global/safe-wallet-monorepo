@@ -2,7 +2,8 @@ import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
 import type { UseFormSetValue, UseFormReturn } from 'react-hook-form'
 import { X } from 'lucide-react'
-import { validateAddress } from '@safe-global/utils/utils/validation'
+import { checksumAddress, isChecksummedAddress } from '@safe-global/utils/utils/addresses'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { Button } from '@/components/ui/button'
@@ -17,17 +18,23 @@ const ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.MEMBER]: 'Member',
 }
 
+const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
+
 interface MemberInviteRowProps {
   index: number
   control: UseFormReturn<InviteMembersFormValues>['control']
   register: UseFormReturn<InviteMembersFormValues>['register']
+  errors: UseFormReturn<InviteMembersFormValues>['formState']['errors']
   setValue: UseFormSetValue<InviteMembersFormValues>
   canRemove: boolean
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemove }: MemberInviteRowProps) => {
+const MemberInviteRow = ({ index, control, register, errors, setValue, canRemove, onRemove }: MemberInviteRowProps) => {
   const addressValue = useWatch({ control, name: `members.${index}.address` })
+  const fieldError = errors?.members?.[index]?.address
+  const debouncedError = useDebounce(fieldError, 500)
+  const displayError = fieldError ? debouncedError : undefined
 
   const handleAddressResolved = useCallback(
     (address: string) => {
@@ -37,7 +44,7 @@ const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemo
   )
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <EnsAddressIdenticon address={addressValue || ''} onAddressResolved={handleAddressResolved}>
         <Input
           {...register(`members.${index}.address`, {
@@ -45,11 +52,28 @@ const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemo
             validate: (value) => {
               if (!value.trim()) return undefined
               if (isDomain(value)) return undefined
-              return validateAddress(value)
+
+              if (!ADDRESS_RE.test(value)) return 'Invalid address'
+
+              const hex = value.slice(2)
+              const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
+
+              if (hasNoChecksumIntent) {
+                const checksummed = checksumAddress(value.toLowerCase())
+                if (checksummed !== value) {
+                  setValue(`members.${index}.address`, checksummed, { shouldValidate: true })
+                }
+                return undefined
+              }
+
+              if (!isChecksummedAddress(value)) {
+                return 'Invalid address checksum'
+              }
             },
           })}
           placeholder="Wallet address or ENS name"
           className="h-11 rounded-lg bg-card pl-12 pr-4"
+          error={displayError?.message}
           data-testid={`invite-address-input-${index}`}
         />
       </EnsAddressIdenticon>

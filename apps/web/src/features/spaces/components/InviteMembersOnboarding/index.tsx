@@ -54,6 +54,7 @@ const InviteMembersOnboarding = (): ReactElement => {
                 index={index}
                 control={control}
                 register={register}
+                errors={formState.errors}
                 setValue={setValue}
                 canRemove={fields.length > 1}
                 onRemove={() => remove(index)}

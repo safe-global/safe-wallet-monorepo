@@ -23,7 +23,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors },
     setValue,
   } = useForm<{ name: string }>({ mode: 'onChange' })
 
@@ -64,9 +64,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
                 className="h-11 rounded-lg bg-card px-4"
                 {...register('name', {
                   required: true,
-                  maxLength: 50,
+                  maxLength: { value: 50, message: 'Space name must be 50 characters or less' },
                   validate: (value) => value?.trim() !== '',
                 })}
+                error={errors.name?.message}
                 onBlur={(e) => {
                   setValue('name', e.target.value.trim(), { shouldValidate: true })
                 }}

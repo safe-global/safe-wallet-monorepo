@@ -21,7 +21,7 @@ const EnsAddressIdenticon = ({ address, onAddressResolved, children }: EnsAddres
   return (
     <div className="flex flex-1 flex-col gap-1">
       <div className="relative">
-        <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+        <div className="pointer-events-none absolute left-3 top-0 flex h-11 items-center">
           {resolving ? (
             <div className="flex size-8 items-center justify-center">
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
