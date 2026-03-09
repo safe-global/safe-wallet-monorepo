@@ -3,10 +3,9 @@ tags:
   - assets
   - smoke
 ---
-
 - runScript:
     file: ../../utils/scripts/defaults.js
-    
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
