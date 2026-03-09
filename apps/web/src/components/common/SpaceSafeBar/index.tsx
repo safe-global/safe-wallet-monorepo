@@ -9,7 +9,7 @@ function SpaceSafeBar() {
   if (!isQualifiedSafe) return null
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-background">
+    <div className="flex items-center gap-2 px-6 pt-4 pb-0 bg-muted">
       {/* TODO: backlink to space (left side) */}
       <SafeSelectorDropdown
         items={items}
