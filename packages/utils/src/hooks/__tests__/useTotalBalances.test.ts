@@ -290,6 +290,17 @@ describe('useTotalBalances', () => {
       expect(result.current.loading).toBe(true)
     })
 
+    it('should propagate isFetching in merged mode', () => {
+      const { result } = setupAndRender(allTokensParams, {
+        portfolio: { currentData: createMockPortfolio(), isFetching: true },
+        txService: { currentData: createMockTxServiceBalances() },
+      })
+
+      expect(result.current.isFetching).toBe(true)
+      expect(result.current.loading).toBe(false)
+      expect(result.current.data).toBeDefined()
+    })
+
     it('should show error when either source errors', () => {
       const mockPortfolio = createMockPortfolio()
 
