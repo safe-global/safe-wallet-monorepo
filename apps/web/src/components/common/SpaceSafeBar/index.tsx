@@ -1,6 +1,6 @@
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
 import { useIsQualifiedSafe } from '@/features/spaces'
-import { useSpaceSafeSelectorItems } from './useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 
 function SpaceSafeBar() {
   const isQualifiedSafe = useIsQualifiedSafe()

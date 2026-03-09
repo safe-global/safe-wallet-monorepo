@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useSpaceSafeSelectorItems } from '../useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems } from './useSpaceSafeSelectorItems'
 import type { SafeItem } from '@/hooks/safes/useAllSafes'
 import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
@@ -474,7 +474,13 @@ describe('useSpaceSafeSelectorItems', () => {
     setupDefaults({
       overviewsLoading: true,
       overviews: [
-        { address: { value: '0xSafe1' }, chainId: '1', fiatTotal: '5000', threshold: 2, owners: [{ value: '0xO1' }] },
+        {
+          address: { value: '0xSafe1' },
+          chainId: '1',
+          fiatTotal: '5000',
+          threshold: 2,
+          owners: [{ value: '0xOwner1' }],
+        },
       ],
     })
 
