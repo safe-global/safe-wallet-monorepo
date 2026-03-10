@@ -21,6 +21,10 @@ jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
 }))
 
+jest.mock('./hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: jest.fn(),
+}))
+
 jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => (
     <div
@@ -37,11 +41,25 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   return { __esModule: true, default: MockSafeSelectorDropdown }
 })
 
+jest.mock('./SpaceBackLink', () => {
+  const MockSpaceBackLink = (props: Record<string, unknown>) => (
+    <div
+      data-testid="space-back-link"
+      data-space-name={(props.space as { name: string })?.name}
+      data-has-on-click={String(typeof props.onClick === 'function')}
+    />
+  )
+  MockSpaceBackLink.displayName = 'SpaceBackLink'
+  return { __esModule: true, default: MockSpaceBackLink }
+})
+
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
+import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
+const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
 
 describe('SpaceSafeBar', () => {
   beforeEach(() => {
@@ -53,6 +71,10 @@ describe('SpaceSafeBar', () => {
       handleChainChange: jest.fn(),
       isError: false,
       refetch: jest.fn(),
+    })
+    mockUseSpaceBackLink.mockReturnValue({
+      space: undefined,
+      handleBackToSpace: jest.fn(),
     })
   })
 
@@ -118,5 +140,42 @@ describe('SpaceSafeBar', () => {
 
     const { container } = render(<SpaceSafeBar />)
     expect(container.innerHTML).toBe('')
+  })
+
+  it('renders SpaceBackLink when space data is available', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({
+      space: { id: 42, name: 'Acme Corp' },
+      handleBackToSpace: jest.fn(),
+    })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    const backLink = getByTestId('space-back-link')
+    expect(backLink).toBeInTheDocument()
+    expect(backLink.getAttribute('data-space-name')).toBe('Acme Corp')
+    expect(backLink.getAttribute('data-has-on-click')).toBe('true')
+  })
+
+  it('does not render SpaceBackLink when space data is undefined', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({
+      space: undefined,
+      handleBackToSpace: jest.fn(),
+    })
+
+    const { queryByTestId } = render(<SpaceSafeBar />)
+    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
+  })
+
+  it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({
+      space: { id: 1, name: 'Test Space' },
+      handleBackToSpace: jest.fn(),
+    })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('space-back-link')).toBeInTheDocument()
+    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
 })
