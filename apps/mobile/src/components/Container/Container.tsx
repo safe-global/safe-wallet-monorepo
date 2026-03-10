@@ -30,7 +30,7 @@ export const Container = (
       <StyledYStack
         bordered={!!bordered}
         borderRadius={'$3'}
-        paddingHorizontal={spaced ? '$4' : 0}
+        paddingHorizontal={spaced ? '$3' : 0}
         paddingVertical={'$4'}
         {...rest}
       >

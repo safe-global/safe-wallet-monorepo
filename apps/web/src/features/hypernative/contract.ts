@@ -18,13 +18,16 @@ import type HnPendingBanner from './components/HnPendingBanner'
 import type { HnQueueAssessmentBanner } from './components/HnQueueAssessmentBanner'
 import type { HnActivatedBannerForSettings } from './components/HnActivatedSettingsBanner'
 import type HnSecurityReportBtn from './components/HnSecurityReportBtn/HnSecurityReportBtn'
+import type HnSecuritySection from './components/HnSecuritySection'
 import type { HnLoginCard } from './components/HnLoginCard'
 import type HypernativeLogo from './components/HypernativeLogo'
 import type { HypernativeTooltip } from './components/HypernativeTooltip'
+import type { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
 import type { HnAnalysisGroupCard } from './components/HnAnalysisGroupCard'
 import type { HnCustomChecksCard } from './components/HnCustomChecksCard'
 import type { HnInfoCard } from './components/HnInfoCard'
 import type { isHypernativeGuard } from './services/hypernativeGuardCheck'
+import type { HnQueueAssessment } from './components/HnQueueAssessment'
 
 export interface HypernativeContract {
   // Banner Components (PascalCase → stub renders null)
@@ -33,15 +36,18 @@ export interface HypernativeContract {
   HnMiniTxBanner: typeof HnMiniTxBanner
   HnPendingBanner: typeof HnPendingBanner
   HnQueueAssessmentBanner: typeof HnQueueAssessmentBanner
+  HnQueueAssessment: typeof HnQueueAssessment
 
   // Settings Components (PascalCase → stub renders null)
   HnActivatedSettingsBanner: typeof HnActivatedBannerForSettings
   HnSecurityReportBtn: typeof HnSecurityReportBtn
+  HnSecuritySection: typeof HnSecuritySection
   HnLoginCard: typeof HnLoginCard
 
   // UI Components (PascalCase → stub renders null)
   HypernativeLogo: typeof HypernativeLogo
   HypernativeTooltip: typeof HypernativeTooltip
+  SafeHeaderHnTooltip: typeof SafeHeaderHnTooltip
   HnAnalysisGroupCard: typeof HnAnalysisGroupCard
   HnCustomChecksCard: typeof HnCustomChecksCard
   HnInfoCard: typeof HnInfoCard

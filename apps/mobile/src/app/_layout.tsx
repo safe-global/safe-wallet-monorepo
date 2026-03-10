@@ -7,12 +7,11 @@ import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
 import { Provider } from 'react-redux'
 import { persistor, store } from '@/src/store'
 import { PersistGate } from 'redux-persist/integration/react'
-import { isStorybookEnv } from '@/src/config/constants'
+import { isStorybookEnv, CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@tamagui/portal'
-import { View } from 'tamagui'
 import { NotificationsProvider } from '@/src/context/NotificationsContext'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated'
@@ -58,12 +57,79 @@ persistor.subscribe(() => {
   const { bootstrapped } = persistor.getState()
   if (bootstrapped) {
     // The chain config is persisted in the store, but might be outdated.
-    store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfig.initiate(undefined, { forceRefetch: true }))
+    store.dispatch(
+      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+    )
 
     // Run initial notification extension sync after store is rehydrated
     syncNotificationExtensionData(store)
   }
 })
+
+const transparentModalOptions = {
+  headerShown: false,
+  presentation: 'transparentModal' as const,
+  animation: 'fade' as const,
+}
+
+const hiddenHeaderModalOptions = {
+  headerShown: false,
+  presentation: 'modal' as const,
+  title: '',
+}
+
+function NavigationStack() {
+  return (
+    <Stack
+      screenOptions={({ navigation }) => ({
+        ...getDefaultScreenOptions(navigation.goBack),
+      })}
+    >
+      <Stack.Screen name="onboarding" options={{ header: OnboardingHeader }} />
+      <Stack.Screen name="get-started" options={transparentModalOptions} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(import-accounts)" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
+      <Stack.Screen name="execute-transaction" options={{ headerShown: false }} />
+      <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="notifications-center" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="notifications-settings" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="transaction-parameters" options={{ headerShown: true, title: 'Transaction Details' }} />
+      <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="history-transaction-details" options={{ headerShown: true, title: 'Transaction details' }} />
+      <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="signers" options={{ headerShown: false }} />
+      <Stack.Screen name="import-signers" options={{ headerShown: false }} />
+      <Stack.Screen name="(send)" options={{ headerShown: false }} />
+      <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="import-data" options={{ headerShown: false }} />
+      <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="conflict-transaction-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="accounts-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="networks-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="how-to-execute-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="notifications-opt-in" options={hiddenHeaderModalOptions} />
+      <Stack.Screen name="biometrics-opt-in" options={hiddenHeaderModalOptions} />
+      <Stack.Screen name="confirm-transaction" options={{ title: 'Confirm transaction' }} />
+      <Stack.Screen name="review-and-confirm" options={{ title: 'Review and confirm' }} />
+      <Stack.Screen name="review-and-execute" options={{ title: 'Review and execute' }} />
+      <Stack.Screen name="currency" options={{ headerShown: true, title: 'Currency' }} />
+      <Stack.Screen name="share" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="manage-tokens-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="protocol-detail-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="signing-error" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="signing-success" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="execution-error" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="execution-success" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>
+  )
+}
 
 function RootLayout() {
   useFreeRasp(config, actions)
@@ -84,191 +150,7 @@ function RootLayout() {
                         <SigningMonitor />
                         <ExecutingMonitor />
                         <TestCtrls />
-                        <Stack
-                          screenOptions={({ navigation }) => ({
-                            ...getDefaultScreenOptions(navigation.goBack),
-                          })}
-                        >
-                          <Stack.Screen
-                            name="onboarding"
-                            options={{
-                              header: OnboardingHeader,
-                            }}
-                          />
-                          <Stack.Screen
-                            name="get-started"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                          <Stack.Screen
-                            name="(import-accounts)"
-                            options={{ headerShown: false, presentation: 'modal' }}
-                          />
-                          <Stack.Screen name="sign-transaction" options={{ headerShown: false }} />
-                          <Stack.Screen name="execute-transaction" options={{ headerShown: false }} />
-                          <Stack.Screen name="pending-transactions" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen name="notifications-center" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen name="notifications-settings" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen
-                            name="transaction-parameters"
-                            options={{ headerShown: true, title: 'Transaction Details' }}
-                          />
-                          <Stack.Screen name="transaction-actions" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen name="action-details" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen
-                            name="history-transaction-details"
-                            options={{ headerShown: true, title: 'Transaction details' }}
-                          />
-                          <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen name="signers" options={{ headerShown: false }} />
-                          <Stack.Screen name="import-signers" options={{ headerShown: false }} />
-
-                          <Stack.Screen
-                            name="safe-shield-details-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="import-data"
-                            options={{
-                              headerShown: false,
-                            }}
-                          />
-                          <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
-                          <Stack.Screen
-                            name="conflict-transaction-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="accounts-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="networks-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="confirmations-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="change-signer-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="change-estimated-fee-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="how-to-execute-sheet"
-                            options={{
-                              headerShown: false,
-                              presentation: 'transparentModal',
-                              animation: 'fade',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="notifications-opt-in"
-                            options={{
-                              headerShown: false,
-                              presentation: 'modal',
-                              title: '',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="biometrics-opt-in"
-                            options={{
-                              headerShown: false,
-                              presentation: 'modal',
-                              title: '',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="confirm-transaction"
-                            options={{
-                              title: 'Confirm transaction',
-                              headerRight: () => <View width={16} />,
-                            }}
-                          />
-                          <Stack.Screen
-                            name="review-and-confirm"
-                            options={{
-                              title: 'Review and confirm',
-                              headerRight: () => <View width={16} />,
-                            }}
-                          />
-                          <Stack.Screen
-                            name="review-and-execute"
-                            options={{
-                              title: 'Review and execute',
-                              headerRight: () => <View width={16} />,
-                            }}
-                          />
-                          <Stack.Screen
-                            name="currency"
-                            options={{
-                              headerShown: true,
-                              title: 'Currency',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="share"
-                            options={{
-                              headerShown: false,
-                              presentation: 'modal',
-                            }}
-                          />
-                          <Stack.Screen
-                            name="manage-tokens-sheet"
-                            options={{ headerShown: false, presentation: 'transparentModal', animation: 'fade' }}
-                          />
-                          <Stack.Screen name="signing-error" options={{ headerShown: false, presentation: 'modal' }} />
-                          <Stack.Screen
-                            name="signing-success"
-                            options={{ headerShown: false, presentation: 'modal' }}
-                          />
-                          <Stack.Screen
-                            name="execution-error"
-                            options={{ headerShown: false, presentation: 'modal' }}
-                          />
-                          <Stack.Screen
-                            name="execution-success"
-                            options={{ headerShown: false, presentation: 'modal' }}
-                          />
-                          <Stack.Screen name="+not-found" />
-                        </Stack>
+                        <NavigationStack />
                         <SafeStatusBar />
                       </NavigationGuardHOC>
                     </SafeToastProvider>

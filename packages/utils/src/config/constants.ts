@@ -25,6 +25,14 @@ export const TENDERLY_PROJECT_NAME =
 export const TENDERLY_ORG_NAME =
   process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || process.env.EXPO_PUBLIC_TENDERLY_ORG_NAME || ''
 
+// Captcha — set to empty string to disable CAPTCHA entirely
+export const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ||
+  process.env.NEXT_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
+  process.env.EXPO_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
+  ''
+
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
 export const HelpCenterArticle = {
@@ -35,7 +43,7 @@ export const HelpCenterArticle = {
   CONFLICTING_TRANSACTIONS: `${HELP_CENTER_URL}/en/articles/40839-why-are-transactions-with-the-same-nonce-conflicting-with-each-other`,
   FALLBACK_HANDLER: `${HELP_CENTER_URL}/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe`,
   MOBILE_SAFE: `${HELP_CENTER_URL}/en/articles/40801-connect-to-web-with-mobile-safe`,
-  RECOVERY: `${HELP_CENTER_URL}/en/articles/110656-account-recovery-in-safe-wallet`,
+  RECOVERY: `${HELP_CENTER_URL}/en/articles/110656-account-recovery-with-safe-recoveryhub`,
   RELAYING: `${HELP_CENTER_URL}/en/articles/59203-what-is-gas-fee-sponsoring`,
   SAFE_SETUP: `${HELP_CENTER_URL}/en/articles/40835-what-safe-setup-should-i-use`,
   SIGNED_MESSAGES: `${HELP_CENTER_URL}/en/articles/40783-what-are-signed-messages`,
@@ -49,6 +57,7 @@ export const HelpCenterArticle = {
   VERIFY_TX_DETAILS: `${HELP_CENTER_URL}/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet`,
   BULK_IMPORT_OLD_DATA: `${HELP_CENTER_URL}/en/articles/359254-new-mobile-apps-bulk-import-of-old-app-data-ios-only`,
   SAFE_SHIELD: `${HELP_CENTER_URL}/en/articles/461021-understanding-safe-shield-transaction-checks`,
+  ADDRESS_POISONING: `${HELP_CENTER_URL}/en/articles/180783-what-is-address-poisoning-and-how-does-safe-wallet-battle-it`,
 } as const
 export const HelperCenterArticleTitles = {
   RECOVERY: 'Learn more about the Account recovery process',

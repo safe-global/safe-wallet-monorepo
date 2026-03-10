@@ -36,13 +36,14 @@ import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
-import { GATEWAY_URL, isTestingEnv } from '../config/constants'
+import { GATEWAY_URL, isTestingEnv, CONFIG_SERVICE_KEY } from '../config/constants'
 import { web3API } from './signersBalance'
 import { createFilter } from '@safe-global/store/utils/persistTransformFilter'
 import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
 import analyticsMiddleware from './middleware/analytics'
 import notificationSyncMiddleware from './middleware/notificationSync'
+import { migrate } from './migrations'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
@@ -56,8 +57,8 @@ setupMobileCookieHandling()
 
 export const cgwClientFilter = createFilter(
   cgwClient.reducerPath,
-  ['queries.getChainsConfig(undefined)', 'config'],
-  ['queries.getChainsConfig(undefined)', 'config'],
+  [`queries.getChainsConfigV2("${CONFIG_SERVICE_KEY}")`, 'config'],
+  [`queries.getChainsConfigV2("${CONFIG_SERVICE_KEY}")`, 'config'],
 )
 
 type QueryEntry = { status?: string } | undefined
@@ -102,10 +103,11 @@ export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransfo
 
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 2,
   storage: reduxStorage,
   blacklist: persistBlacklist,
   transforms: persistTransforms,
+  migrate,
 }
 
 export const rootReducer = combineReducers({

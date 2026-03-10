@@ -28,11 +28,11 @@ import {
 } from '@/utils/transaction-guards'
 import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
-import { SwapTx } from '@/features/swap/components/SwapTxInfo/SwapTx'
 import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
 import { Box } from '@mui/material'
 import css from './styles.module.css'
 import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
+import { SwapTx } from './SwapTx'
 
 export const TransferTx = ({
   info,

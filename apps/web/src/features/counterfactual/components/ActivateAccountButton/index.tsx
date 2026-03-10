@@ -31,11 +31,10 @@ const ActivateAccountButton = () => {
             <Button
               data-testid="activate-account-btn-cf"
               variant="contained"
-              size="small"
+              size="medium"
               fullWidth
               onClick={activateAccount}
               disabled={isProcessing || !isOk}
-              sx={{ minHeight: '40px' }}
             >
               {isProcessing ? (
                 <>

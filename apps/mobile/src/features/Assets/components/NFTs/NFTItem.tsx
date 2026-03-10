@@ -9,6 +9,7 @@ export function NFTItem({ item }: { item: Collectible }) {
       logoUri={item.logoUri}
       description={item.tokenName}
       rightNode={`#${item.id}`}
+      transparent={false}
     />
   )
 }

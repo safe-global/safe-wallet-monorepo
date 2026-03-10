@@ -11,7 +11,7 @@ import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 export function ExecuteError({ description }: { description?: string }) {
   const router = useRouter()
   const theme = useTheme()
-  const colors: [string, string] = [theme.errorDark?.get(), 'transparent']
+  const colors: [string, string] = [theme.errorDark.get(), 'transparent']
   const { bottom } = useSafeAreaInsets()
   return (
     <View flex={1} paddingBottom={Math.max(bottom, getTokenValue('$4'))}>

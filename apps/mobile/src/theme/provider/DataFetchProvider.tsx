@@ -2,16 +2,15 @@ import React from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { makeSafeId } from '@/src/utils/formatters'
-import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-import { SafeOverviewResult } from '@safe-global/store/gateway/types'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectCurrency } from '@/src/store/settingsSlice'
+import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
 
 export const DataFetchProvider = ({ children }: { children: React.ReactNode }) => {
   const chains = useAppSelector(selectAllChains)
   const activeSafe = useAppSelector(selectActiveSafe)
   const currency = useAppSelector(selectCurrency)
-  useSafesGetOverviewForManyQuery<SafeOverviewResult>(
+  useSafeOverviewsQuery(
     {
       safes: activeSafe ? chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)) : [],
       currency,

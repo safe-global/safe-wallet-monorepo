@@ -14,7 +14,7 @@ import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
 import ArrowIconSE from '@/public/images/common/arrow-down-left.svg'
 import { AppRoutes } from '@/config/routes'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { useIsSwapFeatureEnabled } from '@/features/swap'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
@@ -75,11 +75,10 @@ const Overview = (): ReactElement => {
                     {(isOk) => (
                       <Button
                         onClick={handleOnSend}
-                        size="compact"
+                        size="medium"
                         variant="contained"
                         disableElevation
                         startIcon={<ArrowIconNW fontSize="small" />}
-                        sx={{ height: '42px' }}
                         fullWidth
                         disabled={!isOk}
                       >
@@ -97,12 +96,11 @@ const Overview = (): ReactElement => {
                       const btn = (
                         <Button
                           data-testid="overview-swap-btn"
-                          size="compact"
+                          size="medium"
                           variant="contained"
                           color="background"
                           disableElevation
                           startIcon={<SwapIcon fontSize="small" />}
-                          sx={{ height: '42px' }}
                           fullWidth
                           disabled={!isOk}
                         >
@@ -130,12 +128,11 @@ const Overview = (): ReactElement => {
                 <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
                   <QrCodeButton>
                     <Button
-                      size="compact"
+                      size="medium"
                       variant="contained"
                       color="background"
                       disableElevation
                       startIcon={<ArrowIconSE fontSize="small" />}
-                      sx={{ height: '42px' }}
                       fullWidth
                     >
                       Receive

@@ -1,5 +1,6 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import SwapOrderConfirmation from '@/features/swap/components/SwapOrderConfirmationView'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import type { NarrowConfirmationViewProps } from '../types'
 
 interface SwapOrderProps extends NarrowConfirmationViewProps {
@@ -7,6 +8,8 @@ interface SwapOrderProps extends NarrowConfirmationViewProps {
 }
 
 function SwapOrder({ txInfo, txData }: SwapOrderProps) {
+  const { SwapOrderConfirmation } = useLoadFeature(SwapFeature)
+
   return (
     <SwapOrderConfirmation
       order={txInfo}

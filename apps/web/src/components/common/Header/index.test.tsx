@@ -38,12 +38,22 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Header', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    // Default: WalletConnect disabled - useLoadFeature always returns an object with stubs
-    mockUseLoadFeature.mockReturnValue({
-      $isLoading: false,
-      $isDisabled: true,
-      $isReady: false,
-      WalletConnectWidget: () => null,
+    // Default: BatchingFeature enabled, WalletConnect disabled
+    mockUseLoadFeature.mockImplementation((handle: { name: string }) => {
+      if (handle.name === 'batching') {
+        return {
+          $isDisabled: false,
+          $isReady: true,
+          BatchIndicator: ({ onClick }: { onClick?: () => void }) => <button title="Batch" onClick={onClick} />,
+          BatchSidebar: () => null,
+          BatchTxList: () => null,
+        }
+      }
+      return {
+        $isDisabled: true,
+        $isReady: false,
+        WalletConnectWidget: () => null,
+      }
     })
   })
 
@@ -110,9 +120,20 @@ describe('Header', () => {
   })
 
   it('renders the WalletConnect component when feature is enabled', () => {
-    mockUseLoadFeature.mockReturnValue({
-      name: 'walletconnect',
-      WalletConnectWidget: () => <div>WalletConnect</div>,
+    mockUseLoadFeature.mockImplementation((handle: { name: string }) => {
+      if (handle.name === 'batching') {
+        return {
+          $isDisabled: false,
+          $isReady: true,
+          BatchIndicator: () => null,
+          BatchSidebar: () => null,
+          BatchTxList: () => null,
+        }
+      }
+      return {
+        name: 'walletconnect',
+        WalletConnectWidget: () => <div>WalletConnect</div>,
+      }
     })
 
     render(<Header />)

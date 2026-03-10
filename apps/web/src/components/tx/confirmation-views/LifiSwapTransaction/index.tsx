@@ -2,7 +2,8 @@ import { DataTable } from '@/components/common/Table/DataTable'
 import { Stack, Typography } from '@mui/material'
 import { type SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import SwapTokens from '@/features/swap/components/SwapTokens'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -10,22 +11,26 @@ import TokenAmount from '@/components/common/TokenAmount'
 import ExternalLink from '@/components/common/ExternalLink'
 import css from './styles.module.css'
 
-const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
-  <div key="amount">
-    <SwapTokens
-      first={{
-        value: txInfo.fromAmount,
-        label: 'Sell',
-        tokenInfo: txInfo.fromToken,
-      }}
-      second={{
-        value: txInfo.toAmount,
-        label: 'For at least',
-        tokenInfo: txInfo.toToken,
-      }}
-    />
-  </div>
-)
+const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {
+  const { SwapTokens } = useLoadFeature(SwapFeature)
+
+  return (
+    <div key="amount">
+      <SwapTokens
+        first={{
+          value: txInfo.fromAmount,
+          label: 'Sell',
+          tokenInfo: txInfo.fromToken,
+        }}
+        second={{
+          value: txInfo.toAmount,
+          label: 'For at least',
+          tokenInfo: txInfo.toToken,
+        }}
+      />
+    </div>
+  )
+}
 
 const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
   <DataRow datatestid="amount" key="amount" title="Amount">

@@ -66,7 +66,7 @@ jobs:
         run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -87,7 +87,7 @@ jobs:
             ✅ Deploy successful!
 
             **Preview URL:**
-            https://${{ steps.extract_branch.outputs.branch }}--tx-builder.review.5afe.dev/tx-builder/
+            https://${{ steps.extract_branch.outputs.branch }}--tx-builder.review.5afe.dev/
           message-failure: |
             ## tx-builder Preview
             ❌ Deploy failed!
@@ -113,14 +113,14 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to staging
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/current/tx-builder
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/current
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
@@ -168,14 +168,14 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to production S3
         env:
-          BUCKET: s3://${{ secrets.AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 

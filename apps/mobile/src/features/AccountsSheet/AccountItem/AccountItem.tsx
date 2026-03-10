@@ -21,12 +21,12 @@ interface AccountItemProps {
   onSelect: (accountAddress: string) => void
 }
 
-const getRightNodeLayout = (isEdit: boolean, isActive: boolean) => {
+const getRightNodeLayout = (isEdit: boolean) => {
   if (isEdit) {
     return <SafeFontIcon name="rows" color="$backgroundPress" />
   }
 
-  return isActive ? <SafeFontIcon name="check" color="$color" /> : null
+  return null
 }
 
 export function AccountItem({ account, drag, chains, isDragging, activeAccount, onSelect }: AccountItemProps) {
@@ -37,7 +37,7 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
     onSelect(account.address.value)
   }
 
-  const rightNode = useMemo(() => getRightNodeLayout(isEdit, isActive), [isEdit, isActive])
+  const rightNode = useMemo(() => getRightNodeLayout(isEdit), [isEdit])
 
   const onDeleteSafePress = useCallback(() => {
     Alert.alert('Delete Safe', 'Are you sure you want to delete this safe?', [

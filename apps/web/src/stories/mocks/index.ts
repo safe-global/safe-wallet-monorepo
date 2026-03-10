@@ -37,31 +37,16 @@
 export { createMockStory, createMinimalDecorator } from './createMockStory'
 
 // Types
-export type {
-  MockStoryConfig,
-  MockStoryResult,
-  WalletPreset,
-  LayoutType,
-  FeatureFlags,
-  StoreOverrides,
-  MockContextProviderProps,
-  StoryDecoratorFn,
-} from './types'
+export type { MockStoryConfig, MockStoryResult, WalletPreset, LayoutType, FeatureFlags, StoreOverrides } from './types'
 
 // Context Provider (for custom composition)
 export { MockContextProvider, MockSDKProvider, mockTxModalContext } from './MockContextProvider'
 
 // Wallet utilities (for escape hatch)
-export {
-  walletPresets,
-  disconnectedWallet,
-  createConnectedWallet,
-  createNonOwnerWallet,
-  resolveWallet,
-} from './wallets'
+export { disconnectedWallet, createConnectedWallet, createNonOwnerWallet, resolveWallet } from './wallets'
 
 // Chain utilities (for escape hatch)
-export { createChainData, createChainsPageData, chainFeaturePresets, DEFAULT_FEATURES } from './chains'
+export { createChainData, createChainsPageData, DEFAULT_FEATURES } from './chains'
 
 // Handler utilities (for escape hatch)
 export {
@@ -77,7 +62,6 @@ export {
   createHandlers,
   createMockPendingTransactions,
   getFixtureData,
-  emptyTxQueue,
 } from './handlers'
 
 // State utilities (for escape hatch)

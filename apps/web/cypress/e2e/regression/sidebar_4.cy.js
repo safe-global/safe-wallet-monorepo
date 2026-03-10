@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -14,54 +15,42 @@ describe('Sidebar tests 4', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify that safes in the sidebar show the "bookmark" icon', () => {
+  it('Verify "Manage trusted Safes" button is displayed in the sidebar', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1],
-    })
-    wallet.connectSigner(signer)
-    sideBar.openSidebar()
-    sideBar.verifySafeBookmarkBtnExists(sideBar.sideBarSafes.safe1short)
-  })
-
-  it('Verify a safe can be added and removed from the pinned list', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1],
-    })
-    wallet.connectSigner(signer)
-    sideBar.openSidebar()
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe1short)
-    sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe1short)
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe1short)
-    sideBar.verifyPinnedListIsEmpty()
-  })
-
-  it('Verify CF safe can be added and removed from the pinned list', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, { 1: [], 100: [], 137: [], 11155111: [] })
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
-    wallet.connectSigner(signer)
-    sideBar.openSidebar()
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe4short)
-    sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe4short)
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe4short)
-    sideBar.verifyPinnedListIsEmpty()
-  })
-
-  it('Verify the "All account" list is always closed by whenever you open the sidebar', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1],
-    })
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
-    sideBar.verifyAccountsCollapsed()
+    cy.wait(500)
+    cy.get('[data-testid="add-more-safes-button"]').should('exist')
   })
 
-  it('Verify the empty state of Accounts shows "Connect" for a disconnected user', () => {
+  it('Verify a safe can be removed from the trusted list', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.reload()
+    wallet.connectSigner(signer)
     sideBar.openSidebar()
-    sideBar.verifyConnectBtnDisplayed()
+    sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe1short)
+    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe1short)
+    sideBar.verifySafeRemoved(sideBar.sideBarSafes.safe1short)
+  })
+
+  it('Verify undeployed safe appears when added to trusted list', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    cy.reload()
+    wallet.connectSigner(signer)
+    sideBar.openSidebar()
+    sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe4short)
+  })
+
+  it('Verify that untrusted safe can be added to trusted list from dashboard action required panel', () => {
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
+    wallet.connectSigner(signer)
+    dashboard.verifyActionRequiredCard({ messages: [dashboard.nonPinnedWarningTitle] })
+    dashboard.clickActionInPanel(dashboard.trustThisSafeButtonTestId)
+    dashboard.verifyTrustDialogVisible()
   })
 })

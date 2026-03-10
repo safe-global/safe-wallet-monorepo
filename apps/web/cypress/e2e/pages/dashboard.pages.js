@@ -12,18 +12,47 @@ const receiveStr = 'Receive'
 const viewAllStr = 'View all'
 const explorePossibleStr = "Explore what's possible"
 const swapSuggestion = 'Swap tokens instantly'
-export const copiedAppUrl = 'share/safe-app?appUrl'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
 const viewAllLink = '[data-testid="view-all-link"][href^="/transactions/queue"]'
 const noTxText = '[data-testid="no-tx-text"]'
+const actionRequiredPanel = '[data-testid="action-required-panel"]'
+const actionRequiredPanelToggle = '[data-testid="action-required-panel-toggle"]'
+const actionRequiredPanelContent = '[data-testid="action-required-panel-content"]'
 export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
 export const pendingTxItem = '[data-testid="tx-pending-item"]'
 export const assetsWidget = '[data-testid="assets-widget"]'
 const singleTxDetailsHeader = '[data-testid="tx-details"]'
+// Case #1 — Outdated official mastercopy (Info) → "Update"
+export const outdatedOfficialTitlePrefix = 'New Safe version is available'
+export const outdatedOfficialContent =
+  'Update now to take advantage of new features and the highest security standards available. You will need to confirm this update just like any other transaction.'
+export const mastercopyActions = {
+  update: '[data-testid="update-mastercopy-btn"]',
+  migrate: '[data-testid="migrate-mastercopy-btn"]',
+  getCli: '[data-testid="get-cli-link"]',
+}
+export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
+
+// Case #2 & #3 — Unsupported mastercopy (Warning)
+export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
+export const unsupportedMigratableContent =
+  'and may miss security fixes and improvements. You should migrate it to a compatible version.'
+export const unsupportedCliContent =
+  'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
+
+const migrateSafeSubtitle = 'Update Safe Account base contract'
+export const nonPinnedWarningTitle = 'Not in your trusted list'
+export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
+const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
 export function clickOnTxByIndex(index) {
+  // Wait for hydration to set the correct safe query param in the link href
+  cy.get(pendingTxItem)
+    .eq(index)
+    .should('have.attr', 'href')
+    .and('match', /safe=.{3,}/)
   cy.get(pendingTxItem).eq(index).click()
   cy.get(singleTxDetailsHeader).should('be.visible')
 }
@@ -141,4 +170,75 @@ export function verifyTxQueueWidget() {
 export function verifyExplorePossibleSection() {
   cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
   cy.get('@explorePossibleSection').contains(swapSuggestion)
+}
+
+export function expandActionRequiredPanel() {
+  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
+  cy.get(actionRequiredPanelToggle).click()
+  cy.get(actionRequiredPanelContent, { timeout: 10000 }).should('be.visible')
+}
+
+/**
+ * Verify the action required panel shows the expected message count.
+ * @param {number} expectedCount - Expected count displayed in the panel badge
+ */
+export function verifyActionRequiredPanelCount(expectedCount) {
+  cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
+  cy.get(actionRequiredPanel).contains('Action required').should('be.visible')
+  cy.get(actionRequiredPanel).invoke('text').should('include', String(expectedCount))
+}
+
+/**
+ * Verify a card in the action required panel by message(s) and/or action label.
+ * Uses main.verifyValuesExist for message verification (elements inside panel).
+ * @param {Object} options
+ * @param {boolean} [options.expandFirst=true] - Expand the panel before verifying
+ * @param {string[]} [options.messages=[]] - Text(s) that must be visible in the card (title, content)
+ * @param {string} [options.actionLabel] - Text on the action button/link to verify visible
+ */
+export function verifyActionRequiredCard({ expandFirst = true, messages = [], actionTestId } = {}) {
+  if (expandFirst) {
+    expandActionRequiredPanel()
+  }
+  if (messages.length > 0) {
+    main.verifyValuesExist(actionRequiredPanel, messages)
+  }
+  if (actionTestId) {
+    cy.get(actionRequiredPanel).within(() => {
+      cy.get(actionTestId).should('be.visible')
+    })
+  }
+}
+
+/**
+ * Click an action (button or link) in the action required panel by its label text.
+ * @param {string} actionLabel - Text on the button/link to click
+ */
+export function clickActionInPanel(actionTestId) {
+  cy.get(actionRequiredPanel).within(() => {
+    cy.get(actionTestId).click()
+  })
+}
+
+export function verifyMigrateSafeFlowOpened() {
+  cy.contains(migrateSafeSubtitle, { timeout: 30000 }).should('be.visible')
+}
+
+/** Verifies the "Get CLI" link is visible in the action required panel (Case #3). */
+export function verifyGetCliLinkInPanel() {
+  cy.get(actionRequiredPanel).within(() => {
+    cy.get(mastercopyActions.getCli, { timeout: 10000 }).should('be.visible')
+  })
+}
+
+export function verifyTrustDialogVisible() {
+  cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
+}
+
+/** Message in action-required-panel when signers differ across chains (dashboard) */
+const differentSignersAcrossChainsMsg = 'different signers across different networks'
+
+/** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
+export function checkInconsistentSignersMsgDisplayed() {
+  cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
 }

@@ -40,7 +40,13 @@ export function CancelRecoveryOverview(): ReactElement {
             Go back
           </Button>
 
-          <Button data-testid="cancel-proposal-btn" variant="contained" onClick={onNext} className={css.button}>
+          <Button
+            size="small"
+            data-testid="cancel-proposal-btn"
+            variant="contained"
+            onClick={onNext}
+            className={css.button}
+          >
             Yes, cancel proposal
           </Button>
         </Box>

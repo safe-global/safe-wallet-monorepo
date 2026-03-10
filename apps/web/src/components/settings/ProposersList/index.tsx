@@ -1,13 +1,16 @@
-import { Chip } from '@/components/common/Chip'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
-import OnlyOwner from '@/components/common/OnlyOwner'
+import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import UpsertProposer from '@/features/proposers/components/UpsertProposer'
 import DeleteProposerDialog from '@/features/proposers/components/DeleteProposerDialog'
 import EditProposerDialog from '@/features/proposers/components/EditProposerDialog'
+import PendingDelegationsList from '@/features/proposers/components/PendingDelegationsList'
+import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
+import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import AddIcon from '@/public/images/common/add.svg'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { Box, Button, Grid, Paper, SvgIcon, Typography } from '@mui/material'
@@ -36,12 +39,41 @@ const headCells = [
 ]
 const SafeNotActivated = 'You need to activate the Safe before transacting'
 
+const AddProposerButton = ({ onAdd, isUndeployedSafe }: { onAdd: () => void; isUndeployedSafe: boolean }) => (
+  <Box mb={2}>
+    <CheckWallet allowProposer={false}>
+      {(isOk) => (
+        <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
+          <Tooltip title={isUndeployedSafe ? SafeNotActivated : ''}>
+            <span>
+              <Button
+                data-testid="add-proposer-btn"
+                onClick={onAdd}
+                variant="text"
+                startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                disabled={!isOk || isUndeployedSafe}
+                size="medium"
+              >
+                Add proposer
+              </Button>
+            </span>
+          </Tooltip>
+        </Track>
+      )}
+    </CheckWallet>
+  </Box>
+)
+
 const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
   const proposers = useProposers()
   const isEnabled = useHasFeature(FEATURES.PROPOSERS)
   const { safe } = useSafeInfo()
   const isUndeployedSafe = !safe.deployed
+  const isNestedSafeOwner = useIsNestedSafeOwner()
+  const nestedSafeOwners = useNestedSafeOwners()
+  const { threshold: parentThreshold } = useParentSafeThreshold(nestedSafeOwners?.[0])
+  const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
   const rows = useMemo(() => {
     if (!proposers.data) return []
@@ -93,37 +125,16 @@ const ProposersList = () => {
         <Grid container spacing={3}>
           <Grid item xs>
             <Typography fontWeight="bold" mb={2}>
-              Proposers <Chip label="New" sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />
+              Proposers
             </Typography>
             <Typography mb={2}>
               Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
               transactions first. <ExternalLink href={HelpCenterArticle.PROPOSERS}>Learn more</ExternalLink>
             </Typography>
 
-            {isEnabled && (
-              <Box mb={2}>
-                <OnlyOwner>
-                  {(isOk) => (
-                    <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
-                      <Tooltip title={isUndeployedSafe ? SafeNotActivated : ''}>
-                        <span>
-                          <Button
-                            data-testid="add-proposer-btn"
-                            onClick={onAdd}
-                            variant="text"
-                            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-                            disabled={!isOk || isUndeployedSafe}
-                            size="compact"
-                          >
-                            Add proposer
-                          </Button>
-                        </span>
-                      </Tooltip>
-                    </Track>
-                  )}
-                </OnlyOwner>
-              </Box>
-            )}
+            {showPendingDelegations && <PendingDelegationsList />}
+
+            {isEnabled && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />}
 
             {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}
           </Grid>

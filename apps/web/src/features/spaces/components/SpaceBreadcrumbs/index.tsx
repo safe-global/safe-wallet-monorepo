@@ -6,14 +6,13 @@ import SpaceIcon from '@/public/images/spaces/space.svg'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
+import InitialsAvatar from '../InitialsAvatar'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import { useParentSafe } from '@/hooks/useParentSafe'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId, useIsQualifiedSafe } from '@/features/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 const SpaceBreadcrumbs = () => {
   const isQualifiedSafe = useIsQualifiedSafe()

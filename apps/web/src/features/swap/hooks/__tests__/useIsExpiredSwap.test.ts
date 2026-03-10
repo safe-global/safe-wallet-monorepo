@@ -1,6 +1,6 @@
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { act } from 'react'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
+import useIsExpiredSwap from '../useIsExpiredSwap'
 import { renderHook } from '@/tests/test-utils'
 import * as guards from '@/utils/transaction-guards'
 

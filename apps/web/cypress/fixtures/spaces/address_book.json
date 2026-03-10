@@ -1,0 +1,19 @@
+{
+  "spaceId": "1",
+  "data": [
+    {
+      "name": "Treasury",
+      "address": "0xA77DE01e157f9f57C7c4A326eeEbA7d043150Fa4",
+      "chainIds": ["11155111"],
+      "createdBy": "Admin User",
+      "lastUpdatedBy": "Admin User"
+    },
+    {
+      "name": "Operations",
+      "address": "0xB77DE01e157f9f57C7c4A326eeEbA7d043150Fa5",
+      "chainIds": ["11155111"],
+      "createdBy": "Admin User",
+      "lastUpdatedBy": "Team Member"
+    }
+  ]
+}

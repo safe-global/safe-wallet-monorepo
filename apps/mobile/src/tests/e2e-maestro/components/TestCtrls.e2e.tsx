@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
 import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
+import { setupPositionsTestSafe } from '../setup/positionsSetup'
 import {
   setupAllPendingTxSafes,
   setupPendingTxsSafe1,
@@ -14,6 +15,7 @@ import {
   setupSafeShieldSafe,
 } from '../setup/pendingTxSetup'
 import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
+import { appUpdateE2eState } from '@/src/features/AppUpdate/hooks/appUpdateE2eState'
 
 LogBox.ignoreAllLogs()
 
@@ -114,6 +116,12 @@ export function TestCtrls() {
           accessibilityRole="button"
           style={BTN}
         />
+        <Pressable
+          testID="e2ePositionsTestSafe"
+          onPress={() => setupPositionsTestSafe(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
 
         {/* Transaction History */}
         <Pressable
@@ -173,6 +181,32 @@ export function TestCtrls() {
         <Pressable
           testID="e2eSafeShieldSafe"
           onPress={() => setupSafeShieldSafe(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+
+        {/* App Update Scenarios */}
+        <Pressable
+          testID="e2eForceUpdate"
+          onPress={() =>
+            appUpdateE2eState.set({
+              requiresForceUpdate: true,
+              recommendsUpdate: false,
+              isLoading: false,
+            })
+          }
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eSoftUpdate"
+          onPress={() =>
+            appUpdateE2eState.set({
+              requiresForceUpdate: false,
+              recommendsUpdate: true,
+              isLoading: false,
+            })
+          }
           accessibilityRole="button"
           style={BTN}
         />
