@@ -47,7 +47,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: safeglobal/safe-wallet-web:staging
@@ -58,7 +58,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Deploy Develop
         if: github.ref == 'refs/heads/dev'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: safeglobal/safe-wallet-web:dev
@@ -69,7 +69,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Deploy Tag
         if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: |
