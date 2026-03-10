@@ -22,7 +22,7 @@ export const DeadlockAnalysis = ({
     return { ['0x']: deadlockResults }
   }, [deadlockResults])
 
-  if (!deadlockResults || !deadlockData || isEmpty(deadlockData)) {
+  if (!deadlockData || isEmpty(deadlockData)) {
     return null
   }
 

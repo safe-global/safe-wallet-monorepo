@@ -36,24 +36,18 @@ export const calculateAnalysisDelays = (
   }
 
   let threatAnalysisDelay = threatDelay
+  let simulationAnalysisDelay = simulationDelay
+
   if ((contractEmpty || recipientEmpty) && deadlockEmpty) {
     threatAnalysisDelay = contractDelay
-  }
-  if (!deadlockEmpty) {
-    threatAnalysisDelay = deadlockDelay + analysisVisibilityDelay
-  }
-  if (recipientEmpty && deadlockEmpty) {
-    threatAnalysisDelay += analysisVisibilityDelay
-  }
-
-  let simulationAnalysisDelay = simulationDelay
-  if ((contractEmpty || recipientEmpty) && deadlockEmpty) {
     simulationAnalysisDelay = threatDelay
   }
   if (!deadlockEmpty) {
+    threatAnalysisDelay = deadlockDelay + analysisVisibilityDelay
     simulationAnalysisDelay = deadlockDelay + simulationDelay
   }
   if (recipientEmpty && deadlockEmpty) {
+    threatAnalysisDelay += analysisVisibilityDelay
     simulationAnalysisDelay += analysisVisibilityDelay
   }
 

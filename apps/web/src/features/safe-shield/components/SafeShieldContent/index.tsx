@@ -43,7 +43,7 @@ export const SafeShieldContent = ({
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
-  deadlock?: AsyncResult<DeadlockAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
@@ -56,7 +56,7 @@ export const SafeShieldContent = ({
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
-  const [deadlockResults, _deadlockError, deadlockLoading = false] = deadlock || []
+  const [deadlockResults, _deadlockError, deadlockLoading = false] = deadlock
 
   const highlightedSeverity = overallStatus?.severity
   const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
@@ -66,7 +66,7 @@ export const SafeShieldContent = ({
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
-  const deadlockEmpty = !deadlockResults || isEmpty(deadlockResults?.DEADLOCK)
+  const deadlockEmpty = isEmpty(deadlockResults?.DEADLOCK)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
 
@@ -115,13 +115,11 @@ export const SafeShieldContent = ({
             showImage
           />
 
-          {deadlock && (
-            <DeadlockAnalysis
-              deadlock={deadlock}
-              delay={deadlockAnalysisDelay}
-              highlightedSeverity={highlightedSeverity}
-            />
-          )}
+          <DeadlockAnalysis
+            deadlock={deadlock}
+            delay={deadlockAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+          />
 
           <ThreatAnalysis
             threat={threat}

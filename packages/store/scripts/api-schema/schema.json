@@ -9054,7 +9054,7 @@
             }
           },
           "deadlock": {
-            "description": "Deadlock analysis results. Only present when the transaction targets an owner/threshold management function.",
+            "description": "Deadlock analysis results. Contains signing deadlock risk findings for owner/threshold management transactions.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DeadlockAnalysisDto"
@@ -9064,7 +9064,8 @@
         },
         "required": [
           "recipient",
-          "contract"
+          "contract",
+          "deadlock"
         ]
       },
       "ThreatAnalysisRequestDto": {

@@ -1,6 +1,7 @@
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { DeadlockAnalysisResults, AnalysisResult } from '../types'
-import { DeadlockStatus, Severity } from '../types'
+import { DeadlockStatus } from '../types'
+import { DeadlockAnalysisResultBuilder } from './deadlock-analysis-result.builder'
 
 export class DeadlockAnalysisBuilder {
   private deadlockAnalysis: DeadlockAnalysisResults
@@ -28,24 +29,13 @@ export class DeadlockAnalysisBuilder {
 
   static deadlockDetected() {
     return new DeadlockAnalysisBuilder()
-      .createDeadlock({
-        severity: Severity.CRITICAL,
-        type: DeadlockStatus.DEADLOCK_DETECTED,
-        title: 'Signing deadlock detected',
-        description:
-          'This transaction would create a signing deadlock in the nested Safe configuration, making future transactions impossible.',
-      })
+      .createDeadlock(DeadlockAnalysisResultBuilder.deadlockDetected().build())
       .build()
   }
 
   static nestedSafeWarning() {
     return new DeadlockAnalysisBuilder()
-      .createDeadlock({
-        severity: Severity.WARN,
-        type: DeadlockStatus.NESTED_SAFE_WARNING,
-        title: 'Nested Safe configuration warning',
-        description: 'This transaction modifies a nested Safe configuration. Review the changes carefully.',
-      })
+      .createDeadlock(DeadlockAnalysisResultBuilder.nestedSafeWarning().build())
       .build()
   }
 }

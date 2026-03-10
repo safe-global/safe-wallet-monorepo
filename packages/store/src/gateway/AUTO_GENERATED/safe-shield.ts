@@ -223,8 +223,8 @@ export type CounterpartyAnalysisDto = {
   contract: {
     [key: string]: ContractAnalysisDto
   }
-  /** Deadlock analysis results. Only present when the transaction targets an owner/threshold management function. */
-  deadlock?: DeadlockAnalysisDto
+  /** Deadlock analysis results. Contains signing deadlock risk findings for owner/threshold management transactions. */
+  deadlock: DeadlockAnalysisDto
 }
 export type CounterpartyAnalysisRequestDto = {
   /** Recipient address of the transaction. */

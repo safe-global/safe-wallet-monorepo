@@ -58,7 +58,7 @@ export const SafeShieldDisplay = ({
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   threat: AsyncResult<ThreatAnalysisResults>
-  deadlock?: AsyncResult<DeadlockAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean

@@ -2,6 +2,7 @@ export { ContractAnalysisResultBuilder } from './contract-analysis-result.builde
 export { ContractAddressBuilder } from './contract-address.builder'
 export { ContractAnalysisBuilder } from './contract-analysis.builder'
 export { DeadlockAnalysisBuilder } from './deadlock-analysis.builder'
+export { DeadlockAnalysisResultBuilder } from './deadlock-analysis-result.builder'
 export { FullAnalysisBuilder } from './full-analysis.builder'
 export { RecipientAnalysisBuilder } from './recipient-analysis.builder'
 export { RecipientAnalysisResultBuilder } from './recipient-analysis-result.builder'

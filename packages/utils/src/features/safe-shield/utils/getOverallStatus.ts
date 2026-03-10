@@ -13,8 +13,8 @@ import { isThreatAnalysisResult } from './mapVisibleAnalysisResults'
 /**
  * Determines the overall security status by analyzing all available analysis results.
  *
- * This function aggregates recipient analysis, contract analysis, and threat analysis results
- * to compute a single overall severity status. It flattens all analysis results across all
+ * This function aggregates recipient analysis, contract analysis, threat analysis results, and
+ * deadlock analysis results to compute a single overall severity status. It flattens all analysis results across all
  * addresses and groups, identifies the primary (highest severity) result, and returns a
  * standardized status object.
  * @param recipientResults - Optional recipient analysis results
@@ -22,6 +22,7 @@ import { isThreatAnalysisResult } from './mapVisibleAnalysisResults'
  * @param threatResults - Optional threat analysis result
  * @param hasSimulationError - Optional boolean indicating if the simulation has failed
  * @param hnLoginRequired - Optional boolean indicating if the Hypernative login is required
+ * @param deadlockResults - Optional deadlock analysis results
  * @returns An object containing the overall severity level and corresponding title, or undefined
  *          if no analysis results are provided. The severity is determined by the most severe
  *          finding across all analysis types.

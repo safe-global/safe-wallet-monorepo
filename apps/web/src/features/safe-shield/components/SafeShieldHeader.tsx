@@ -23,7 +23,7 @@ export const SafeShieldHeader = ({
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
-  deadlock?: AsyncResult<DeadlockAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
   overallStatus?: { severity: Severity; title: string }
 }): ReactElement => {
   const [_recipientResults, recipientError, recipientLoading = false] = recipient

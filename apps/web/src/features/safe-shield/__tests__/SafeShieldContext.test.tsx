@@ -1,6 +1,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
-import { Severity, StatusGroup, ThreatStatus, DeadlockStatus } from '@safe-global/utils/features/safe-shield/types'
+import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { DeadlockAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { ReactNode } from 'react'
@@ -81,10 +82,6 @@ const buildThreatResult = (severity: Severity) => [
   undefined,
   false,
 ]
-
-const buildDeadlockResult = (severity: Severity, type: DeadlockStatus) => ({
-  DEADLOCK: [{ severity, type, title: `${severity} deadlock`, description: 'Test deadlock' }],
-})
 
 describe('SafeShieldContext', () => {
   beforeEach(() => {
@@ -181,7 +178,7 @@ describe('SafeShieldContext', () => {
     mockUseCounterpartyAnalysis.mockReturnValue({
       recipient: [undefined, undefined, false],
       contract: [undefined, undefined, false],
-      deadlock: [buildDeadlockResult(Severity.CRITICAL, DeadlockStatus.DEADLOCK_DETECTED), undefined, false],
+      deadlock: DeadlockAnalysisBuilder.deadlockDetected(),
     })
 
     const wrapper = ({ children }: { children: ReactNode }) => (
@@ -211,7 +208,7 @@ describe('SafeShieldContext', () => {
     mockUseCounterpartyAnalysis.mockReturnValue({
       recipient: [undefined, undefined, false],
       contract: [undefined, undefined, false],
-      deadlock: [buildDeadlockResult(Severity.WARN, DeadlockStatus.NESTED_SAFE_WARNING), undefined, false],
+      deadlock: DeadlockAnalysisBuilder.nestedSafeWarning(),
     })
 
     const wrapper = ({ children }: { children: ReactNode }) => (

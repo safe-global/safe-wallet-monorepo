@@ -21,7 +21,7 @@ import {
   type SafeAnalysisResult,
   Severity,
 } from '@safe-global/utils/features/safe-shield/types'
-import { getPrimaryResult, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
+import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
 
 type SafeShieldContextType = {
@@ -69,12 +69,11 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
-    const hasCriticalThreat = !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+    const hasCriticalThreat = isSeverityHigherOrEqual(severity, Severity.CRITICAL)
 
     const primaryDeadlockResult = getPrimaryResult(deadlockResults?.DEADLOCK || [])
     const deadlockSeverity = primaryDeadlockResult?.severity
-    const hasCriticalDeadlock =
-      !!deadlockSeverity && SEVERITY_PRIORITY[deadlockSeverity] <= SEVERITY_PRIORITY[Severity.CRITICAL]
+    const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
 
     // Include Safe-level analysis and deadlock in risk confirmation
     const needsRiskConfirmation =
