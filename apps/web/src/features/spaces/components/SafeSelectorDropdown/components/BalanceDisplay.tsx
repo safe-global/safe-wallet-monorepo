@@ -1,5 +1,6 @@
 import { User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { ReactNode } from 'react'
 
@@ -16,7 +17,9 @@ const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold =
     {isLoading ? (
       <Skeleton className="h-3.5 w-14 rounded" />
     ) : (
-      <span className="text-xs font-medium text-muted-foreground">{balance}</span>
+      <Typography variant="paragraph-mini-medium" color="muted">
+        {balance}
+      </Typography>
     )}
     {showThreshold &&
       (isLoading ? (

@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 
 interface WidgetFooterProps {
@@ -27,7 +28,9 @@ const WidgetFooter = ({ count, text, className, onClick }: WidgetFooterProps): R
           <div className="size-8" />
         )}
       </div>
-      <span className="text-sm text-muted-foreground">{text}</span>
+      <Typography variant="paragraph-small" color="muted">
+        {text}
+      </Typography>
     </div>
   )
 }

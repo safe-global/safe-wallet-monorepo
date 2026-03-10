@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { isAddress } from 'ethers'
 import { blo } from 'blo'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Typography } from '@/components/ui/typography'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 
@@ -36,8 +37,10 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
           <AvatarFallback className="bg-[#f0fdf4] text-sm font-semibold">{getInitial(account.name)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col gap-0.5 text-left">
-          <span className="text-base leading-6 font-medium text-foreground">{account.name}</span>
-          <span className="text-xs leading-4 text-muted-foreground">{account.address}</span>
+          <Typography variant="paragraph-medium">{account.name}</Typography>
+          <Typography variant="paragraph-mini" color="muted">
+            {account.address}
+          </Typography>
         </div>
       </div>
 
