@@ -8,6 +8,7 @@ import type { WebhookEvent } from './webhook-types'
 
 const GATEWAY_URL_PRODUCTION = process.env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION || 'https://safe-client.safe.global'
 const GATEWAY_URL_STAGING = process.env.NEXT_PUBLIC_GATEWAY_URL_STAGING || 'https://safe-client.staging.5afe.dev'
+const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 'WALLET_WEB'
 
 // localStorage cannot be accessed in service workers so we reference the flag from the environment
 const GATEWAY_URL = FIREBASE_IS_PRODUCTION ? GATEWAY_URL_PRODUCTION : GATEWAY_URL_STAGING
@@ -36,7 +37,7 @@ const getLink = (data: WebhookEvent, shortName?: string) => {
 export const _parseServiceWorkerWebhookPushNotification = async (
   data: WebhookEvent,
 ): Promise<{ title: string; body: string; link: string } | undefined> => {
-  const chain = await getChainsConfig()
+  const chain = await getChainsConfig(CONFIG_SERVICE_KEY)
     .then(({ results }) => results.find((chain) => chain.chainId === data.chainId))
     .catch(() => undefined)
 

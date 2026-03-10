@@ -5,7 +5,7 @@ import { IconName } from '@/src/types/iconTypes'
 import { getVariable, useTheme } from 'tamagui'
 
 const SafeIcon = createIconSetFromIcoMoon(
-  require('@/assets/fonts/safe-icons/selection.json'),
+  require('@/assets/fonts/safe-icons/safe-icons.icomoon.json'),
   'SafeIcons',
   'safe-icons.ttf',
 )

@@ -6,7 +6,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses } from '../services/addressSimilarity'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useSafeSelectionModal.types'
 
 /**

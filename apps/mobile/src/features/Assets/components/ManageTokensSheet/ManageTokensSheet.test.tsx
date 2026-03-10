@@ -17,10 +17,11 @@ describe('ManageTokensSheet', () => {
     jest.clearAllMocks()
   })
 
-  it('should render the sheet with description', () => {
+  it('should render both toggle labels', () => {
     render(<ManageTokensSheet {...defaultProps} />)
 
-    expect(screen.getByText('Choose which tokens to display in your assets list.')).toBeTruthy()
+    expect(screen.getByText('Show all tokens')).toBeTruthy()
+    expect(screen.getByText('Hide tokens below $0.01')).toBeTruthy()
   })
 
   it('should render the "Show all tokens" toggle', () => {
@@ -30,10 +31,10 @@ describe('ManageTokensSheet', () => {
     expect(screen.getByTestId('toggle-show-all-tokens')).toBeTruthy()
   })
 
-  it('should render the "Hide small balances" toggle', () => {
+  it('should render the "Hide tokens below $0.01" toggle', () => {
     render(<ManageTokensSheet {...defaultProps} />)
 
-    expect(screen.getByText('Hide small balances')).toBeTruthy()
+    expect(screen.getByText('Hide tokens below $0.01')).toBeTruthy()
     expect(screen.getByTestId('toggle-hide-small-balances')).toBeTruthy()
   })
 

@@ -71,6 +71,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         tabIndex={0}
         aria-expanded={isExpanded}
         aria-label="Toggle action required panel"
+        data-testid="action-required-panel-toggle"
       >
         <Typography fontWeight={700} className={css.headerText}>
           Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
@@ -92,7 +93,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
       </Stack>
 
       <Collapse in={isExpanded}>
-        <div ref={containerRef} className={css.warningsContainer}>
+        <div ref={containerRef} className={css.warningsContainer} data-testid="action-required-panel-content">
           {children}
         </div>
       </Collapse>

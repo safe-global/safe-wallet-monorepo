@@ -113,3 +113,6 @@ apps/tx-builder/vite.config.d.ts
 # claude-workflows
 todos/*
 docs/
+
+.codemod
+.serena

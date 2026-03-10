@@ -11,9 +11,10 @@ import Footer from '../Footer'
 import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
-import BatchSidebar from '@/components/batch/BatchSidebar'
+import { useLoadFeature } from '@/features/__core__'
+import { BatchingFeature } from '@/features/batching'
 import { AppRoutes } from '@/config/routes'
-import Breadcrumbs from '@/components/common/Breadcrumbs'
+import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 
@@ -37,10 +38,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
+  const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
@@ -53,14 +56,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader &&
-        (isSpaceRoute ? (
-          <Topbar />
-        ) : (
-          <header className={css.header}>
-            <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-          </header>
-        ))}
+      {!hideHeader && isSpaceRoute && <Topbar onMenuToggle={menuToggleHandler} />}
+
+      {!hideHeader && !isSpaceRoute && (
+        <header className={css.header}>
+          <Header onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
+        </header>
+      )}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
@@ -73,7 +75,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {!hideHeader && !isSpaceRoute && <Breadcrumbs />}
+            {!hideHeader && !isSpaceRoute && <SpaceSafeBar />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div

@@ -1,5 +1,8 @@
-import type { TransactionDetails, ProposeTransactionDto } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { Operation } from '@safe-global/store/gateway/types'
+import type {
+  TransactionDetails,
+  ProposeTransactionDto,
+  Operation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getStoreInstance } from '@/store'
@@ -20,7 +23,7 @@ const proposeTx = async (
     value: tx.data.value?.toString() ?? '0',
     data: tx.data.data || undefined,
     nonce: tx.data.nonce.toString(),
-    operation: tx.data.operation as unknown as Operation,
+    operation: tx.data.operation as Operation,
     safeTxGas: tx.data.safeTxGas?.toString() ?? '0',
     baseGas: tx.data.baseGas?.toString() ?? '0',
     gasPrice: tx.data.gasPrice?.toString() ?? '0',

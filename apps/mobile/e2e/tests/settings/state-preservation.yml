@@ -24,7 +24,7 @@ tags:
 
 # Verify we're on Tokens tab by default
 - assertVisible:
-    id: 'tab-content-Tokens-0'
+    id: 'tokens-tab'
 
 # Switch to NFTs sub-tab
 - tapOn:
@@ -32,7 +32,7 @@ tags:
 
 # Verify NFTs tab content appears
 - assertVisible:
-    id: 'tab-content-NFTs-2'
+    id: 'nfts-tab'
 
 # Navigate to Settings tab
 - tapOn:
@@ -48,11 +48,11 @@ tags:
 
 # Verify we're still on NFTs sub-tab (not reset to Tokens)
 - assertVisible:
-    id: 'tab-content-NFTs-2'
+    id: 'nfts-tab'
 
 # Verify Tokens tab is NOT visible (confirming we're on NFTs)
 - assertNotVisible:
-    id: 'tab-content-Tokens-0'
+    id: 'tokens-tab'
 
 # ============================================
 # Test 2: Transaction History Scroll Position Preservation

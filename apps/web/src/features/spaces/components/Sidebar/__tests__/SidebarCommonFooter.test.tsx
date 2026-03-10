@@ -4,7 +4,6 @@ import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
 const mockUseDarkMode = jest.fn()
-const mockUseLocalStorage = jest.fn()
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockUseAppDispatch(),
@@ -12,11 +11,6 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => mockUseDarkMode(),
-}))
-
-jest.mock('@/services/local-storage/useLocalStorage', () => ({
-  __esModule: true,
-  default: () => mockUseLocalStorage(),
 }))
 
 // Mock sidebar UI components
@@ -101,7 +95,6 @@ describe('SidebarCommonFooter', () => {
     isProductionMock = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
-    mockUseLocalStorage.mockReturnValue([false, jest.fn()])
   })
 
   it('renders footer and help entry', () => {
@@ -126,7 +119,6 @@ describe('SidebarCommonFooter', () => {
     render(<SidebarCommonFooter />)
 
     expect(screen.queryByText('Dark mode')).not.toBeInTheDocument()
-    expect(screen.queryByText('Use prod CGW')).not.toBeInTheDocument()
   })
 
   describe('dev mode (IS_PRODUCTION = false)', () => {
@@ -138,12 +130,6 @@ describe('SidebarCommonFooter', () => {
       render(<SidebarCommonFooter />)
 
       expect(screen.getByRole('checkbox', { name: /Dark mode/i })).toBeInTheDocument()
-    })
-
-    it('renders the Use prod CGW toggle', () => {
-      render(<SidebarCommonFooter />)
-
-      expect(screen.getByRole('checkbox', { name: /Use prod CGW/i })).toBeInTheDocument()
     })
   })
 })

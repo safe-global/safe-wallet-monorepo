@@ -3,6 +3,9 @@ tags:
   - assets
   - smoke
 ---
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
@@ -19,7 +22,7 @@ tags:
 
 # Test Tokens Tab - Default view
 - assertVisible:
-    id: 'tab-content-Tokens-0'
+    id: 'tokens-tab'
 
 # Verify native token appears in the list
 - assertVisible:
@@ -44,7 +47,7 @@ tags:
 
 # Verify NFTs tab content appears
 - assertVisible:
-    id: 'tab-content-NFTs-2'
+    id: 'nfts-tab'
 
 # Verify NFT is visible and there are no NFTs
 - assertVisible:
@@ -56,7 +59,7 @@ tags:
 
 # Verify token list is preserved when switching back
 - assertVisible:
-    id: 'tab-content-Tokens-0'
+    id: 'tokens-tab'
 
 # Verify manage tokens button is still visible
 - assertVisible:
@@ -91,7 +94,7 @@ tags:
 
 # Verify we're back to the tokens list
 - assertVisible:
-    id: 'tab-content-Tokens-0'
+    id: 'tokens-tab'
 
 # Test completed successfully - Safe1
 
@@ -119,7 +122,7 @@ tags:
 
 # Verify NFTs tab content appears for Safe2
 - assertVisible:
-    id: 'tab-content-NFTs-2'
+    id: 'nfts-tab'
 
 # Verify NFTs are loaded (not the empty state)
 # Safe2 should have NFTs, so we check for NFT items or collection names

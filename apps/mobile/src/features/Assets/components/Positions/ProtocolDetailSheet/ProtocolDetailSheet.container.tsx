@@ -49,6 +49,7 @@ export const ProtocolDetailSheetContainer = () => {
       backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
       topInset={insets.top}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+      accessible={false}
     >
       <BottomSheetScrollView
         testID="protocol-detail-sheet"

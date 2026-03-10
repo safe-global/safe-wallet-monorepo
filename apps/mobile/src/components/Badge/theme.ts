@@ -77,4 +77,12 @@ export const badgeTheme = {
     background: 'transparent',
     borderColor: tokens.color.borderLightDark,
   },
+  light_badge_skeleton: {
+    background: tokens.color.backgroundSkeletonLight,
+    color: tokens.color.textPrimaryLight,
+  },
+  dark_badge_skeleton: {
+    background: tokens.color.backgroundSkeletonDark,
+    color: tokens.color.textPrimaryDark,
+  },
 }

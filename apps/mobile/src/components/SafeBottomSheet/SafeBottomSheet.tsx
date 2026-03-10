@@ -1,5 +1,5 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
-import { getTokenValue, getVariable, H5, useTheme, View } from 'tamagui'
+import { getTokenValue, getVariable, H4, useTheme, View } from 'tamagui'
 import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
@@ -73,9 +73,9 @@ export function SafeBottomSheet<T>({
         alignItems="center"
         backgroundColor="$backgroundSheet"
       >
-        <H5 fontWeight={700} tabIndex={0}>
+        <H4 fontWeight={600} tabIndex={0}>
           {title}
-        </H5>
+        </H4>
 
         {actions && (
           <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
