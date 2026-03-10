@@ -45,6 +45,7 @@ const guardRules: GuardRule[] = [
   {
     match: ({ hasSpaces, isOnboardingRoute }) => {
       const shouldRedirect = !hasSpaces && !isOnboardingRoute
+
       return shouldRedirect
     },
     action: () => redirect(AppRoutes.welcome.createSpace),
@@ -53,7 +54,6 @@ const guardRules: GuardRule[] = [
   // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
   {
     match: ({ hasSpaces, isOnboardingRoute, query }) => {
-      // query paramerters are only available on the client side
       const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
       return shouldRedirect
     },
@@ -74,7 +74,7 @@ const guardRules: GuardRule[] = [
 // ---------------------------------------------------------------------------
 
 export const useFlowActivationGuard: UseGuard = () => {
-  const { pathname, query } = useRouter()
+  const { pathname, query, isReady } = useRouter()
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
@@ -84,6 +84,11 @@ export const useFlowActivationGuard: UseGuard = () => {
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
   const activationGuard = useCallback(async () => {
+    // Next.js router query is {} until hydration completes — wait for it
+    if (!isReady) {
+      return { success: true }
+    }
+
     let hasSpaces = false
     let isPartOfSpaceUrl = true
 
@@ -109,7 +114,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isWalletReady, isSiweAuthenticated, fetchSpaces])
+  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, fetchSpaces])
 
   return {
     activationGuard,

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import StepIndicator from '@/features/spaces/components/StepIndicator'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
@@ -13,8 +15,9 @@ const ONBOARDING_STEP = 3
 const TOTAL_STEPS = 3
 
 const InviteMembersOnboarding = (): ReactElement => {
+  const isDarkMode = useDarkMode()
   const { spaceId, isReady, goBack, redirectToNextStep } = useInviteNavigation()
-  const { control, formState, register, setValue, fields, append, remove, onSubmit, error, isSubmitting } =
+  const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
   if (!isReady) {
@@ -22,7 +25,7 @@ const InviteMembersOnboarding = (): ReactElement => {
   }
 
   return (
-    <div className="shadcn-scope">
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
         <form onSubmit={onSubmit} className="flex w-full max-w-[400px] flex-col gap-6">
           <Button
@@ -54,9 +57,14 @@ const InviteMembersOnboarding = (): ReactElement => {
                 index={index}
                 control={control}
                 register={register}
+                errors={formState.errors}
                 setValue={setValue}
+                trigger={trigger}
                 canRemove={fields.length > 1}
-                onRemove={() => remove(index)}
+                onRemove={() => {
+                  remove(index)
+                  setTimeout(() => trigger('members'), 0)
+                }}
               />
             ))}
           </div>

@@ -1,8 +1,9 @@
 import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
-import type { UseFormSetValue, UseFormReturn } from 'react-hook-form'
+import type { UseFormSetValue, UseFormReturn, UseFormTrigger } from 'react-hook-form'
 import { X } from 'lucide-react'
-import { validateAddress } from '@safe-global/utils/utils/validation'
+import { checksumAddress, isChecksummedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { Button } from '@/components/ui/button'
@@ -17,17 +18,54 @@ const ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.MEMBER]: 'Member',
 }
 
+const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
+const ERROR_DEBOUNCE_MS = 500
+
+type AutoChecksumCallback = (checksummed: string) => void
+
+function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCallback): string | undefined {
+  if (!ADDRESS_RE.test(value)) return 'Invalid address'
+
+  const hex = value.slice(2)
+  const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
+
+  if (hasNoChecksumIntent) {
+    const checksummed = checksumAddress(value.toLowerCase())
+    if (checksummed !== value) onAutoChecksum(checksummed)
+    return undefined
+  }
+
+  if (!isChecksummedAddress(value)) return 'Invalid address checksum'
+
+  return undefined
+}
+
 interface MemberInviteRowProps {
   index: number
   control: UseFormReturn<InviteMembersFormValues>['control']
   register: UseFormReturn<InviteMembersFormValues>['register']
+  errors: UseFormReturn<InviteMembersFormValues>['formState']['errors']
   setValue: UseFormSetValue<InviteMembersFormValues>
+  trigger: UseFormTrigger<InviteMembersFormValues>
   canRemove: boolean
   onRemove: () => void
 }
 
-const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemove }: MemberInviteRowProps) => {
-  const addressValue = useWatch({ control, name: `members.${index}.address` })
+const MemberInviteRow = ({
+  index,
+  control,
+  register,
+  errors,
+  setValue,
+  trigger,
+  canRemove,
+  onRemove,
+}: MemberInviteRowProps) => {
+  const members = useWatch({ control, name: 'members' })
+  const addressValue = members?.[index]?.address ?? ''
+  const fieldErrorMessage = errors?.members?.[index]?.address?.message
+  const debouncedError = useDebounce(fieldErrorMessage, ERROR_DEBOUNCE_MS)
+  const displayError = fieldErrorMessage ? debouncedError : undefined
 
   const handleAddressResolved = useCallback(
     (address: string) => {
@@ -37,19 +75,35 @@ const MemberInviteRow = ({ index, control, register, setValue, canRemove, onRemo
   )
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex gap-2">
       <EnsAddressIdenticon address={addressValue || ''} onAddressResolved={handleAddressResolved}>
         <Input
           {...register(`members.${index}.address`, {
             required: index === 0,
+            onChange: () => {
+              const otherFields = members
+                ?.map((_, i) => (i !== index ? (`members.${i}.address` as const) : null))
+                .filter(Boolean) as `members.${number}.address`[]
+              if (otherFields?.length) trigger(otherFields)
+            },
             validate: (value) => {
-              if (!value.trim()) return undefined
+              if (!value?.trim()) return undefined
               if (isDomain(value)) return undefined
-              return validateAddress(value)
+
+              const addressError = validateEthereumAddress(value, (checksummed) => {
+                setValue(`members.${index}.address`, checksummed, { shouldValidate: true })
+              })
+              if (addressError) return addressError
+
+              const isDuplicate = members?.some(
+                (member, i) => i !== index && member.address && sameAddress(member.address, value),
+              )
+              if (isDuplicate) return 'Address already added'
             },
           })}
           placeholder="Wallet address or ENS name"
           className="h-11 rounded-lg bg-card pl-12 pr-4"
+          error={displayError}
           data-testid={`invite-address-input-${index}`}
         />
       </EnsAddressIdenticon>

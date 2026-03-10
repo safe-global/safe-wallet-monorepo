@@ -10,6 +10,8 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 
@@ -17,13 +19,14 @@ const ONBOARDING_TOTAL_STEPS = 3
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const wallet = useWallet()
+  const isDarkMode = useDarkMode()
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors },
     setValue,
   } = useForm<{ name: string }>({ mode: 'onChange' })
 
@@ -40,7 +43,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-      className="shadcn-scope"
+      className={cn('shadcn-scope', isDarkMode && 'dark')}
     >
       <div className="flex min-h-screen items-center justify-center bg-secondary p-3">
         <div className="flex w-[350px] flex-col items-center gap-6">
@@ -64,9 +67,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
                 className="h-11 rounded-lg bg-card px-4"
                 {...register('name', {
                   required: true,
-                  maxLength: 50,
+                  maxLength: { value: 50, message: 'Space name must be 50 characters or less' },
                   validate: (value) => value?.trim() !== '',
                 })}
+                error={errors.name?.message}
                 onBlur={(e) => {
                   setValue('name', e.target.value.trim(), { shouldValidate: true })
                 }}

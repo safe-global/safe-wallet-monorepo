@@ -31,7 +31,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     },
   })
 
-  const { handleSubmit, control, formState, register, setValue } = methods
+  const { handleSubmit, control, formState, register, setValue, trigger } = methods
   const { fields, append, remove } = useFieldArray({ control, name: 'members' })
 
   const onSubmit = handleSubmit(async (data) => {
@@ -96,6 +96,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     formState,
     register,
     setValue,
+    trigger,
     fields,
     append,
     remove,
