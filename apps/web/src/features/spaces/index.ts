@@ -49,6 +49,7 @@ export type { SpacesContract } from './contract'
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
 export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'
+export { default as useAuthRedirect } from './hooks/useAuthRedirect'
 export { useCurrentSpaceId } from './hooks/useCurrentSpaceId'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
