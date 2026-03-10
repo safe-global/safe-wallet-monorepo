@@ -9,5 +9,5 @@ export const TrezorFeature: FeatureHandle<TrezorContract> = {
   load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: TrezorContract }>,
 }
 
-export type { TransactionHash, TrezorHashState, ShowHashFunction, HideHashFunction } from './types'
+export type { TransactionHash, TrezorHashState } from './types'
 export { showTrezorHashComparison, hideTrezorHashComparison } from './store'

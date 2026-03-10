@@ -4,7 +4,6 @@ import type { Account, Asset, ScanAccountsOptions } from '@web3-onboard/hw-commo
 import type { EthereumSignTypedDataMessage, EthereumSignTypedDataTypes } from '@trezor/connect-web'
 import type { TrezorTransaction } from './types'
 import { TREZOR_LIVE_PATH, TREZOR_LEGACY_PATH, DEFAULT_BASE_PATHS, DEFAULT_ASSETS } from './constants'
-import { loadStoredAccount, saveStoredAccount, clearStoredAccount } from './storage'
 import { getTrezorSdk } from './sdk'
 
 export function trezorModule(): WalletInit {
@@ -32,18 +31,8 @@ export function trezorModule(): WalletInit {
         /*                                    State                                   */
         /* -------------------------------------------------------------------------- */
 
-        // Restore previously selected account so eth_accounts returns it immediately on page reload,
-        // avoiding a full re-authorization flow with the Trezor device.
-        const stored = loadStoredAccount()
-        const restoredChain = stored ? (chains.find((c) => c.id === stored.chainId) ?? DEFAULT_CHAIN) : DEFAULT_CHAIN
-        let currentChain = restoredChain
-        let currentAccount: Account | null = stored
-          ? {
-              address: stored.address as `0x${string}`,
-              derivationPath: stored.derivationPath,
-              balance: { asset: 'ETH', value: BigNumber.from(0) },
-            }
-          : null
+        let currentChain = DEFAULT_CHAIN
+        let currentAccount: Account | null = null
 
         function setCurrentChain(chainId: Chain['id']): void {
           const newChain = chains.find((chain) => chain.id === chainId)
@@ -59,13 +48,11 @@ export function trezorModule(): WalletInit {
 
         function setCurrentAccount(account: Account): void {
           currentAccount = account
-          saveStoredAccount(account, currentChain.id)
           eventEmitter.emit('accountsChanged', [currentAccount.address])
         }
 
         function clearCurrentAccount(): void {
           currentAccount = null
-          clearStoredAccount()
           eventEmitter.emit('accountsChanged', [])
         }
 
