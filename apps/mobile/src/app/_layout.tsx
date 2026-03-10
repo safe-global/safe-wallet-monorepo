@@ -139,31 +139,31 @@ function RootLayout() {
   return (
     <GestureHandlerRootView>
       <KeyboardProvider>
-      <Provider store={store}>
-        <DataFetchProvider>
-          <NotificationsProvider>
-            <PortalProvider shouldAddRootHost>
-              <PersistGate loading={null} persistor={persistor}>
-                <SafeThemeProvider>
-                  <BottomSheetModalProvider>
-                    <SafeToastProvider>
-                      <NavigationGuardHOC>
-                        <HooksInitializer />
-                        <SigningMonitor />
-                        <ExecutingMonitor />
-                        <TestCtrls />
-                        <NavigationStack />
-                        <SafeStatusBar />
-                      </NavigationGuardHOC>
-                    </SafeToastProvider>
-                  </BottomSheetModalProvider>
-                </SafeThemeProvider>
-              </PersistGate>
-            </PortalProvider>
-          </NotificationsProvider>
-        </DataFetchProvider>
-      </Provider>
-    </KeyboardProvider>
+        <Provider store={store}>
+          <DataFetchProvider>
+            <NotificationsProvider>
+              <PortalProvider shouldAddRootHost>
+                <PersistGate loading={null} persistor={persistor}>
+                  <SafeThemeProvider>
+                    <BottomSheetModalProvider>
+                      <SafeToastProvider>
+                        <NavigationGuardHOC>
+                          <HooksInitializer />
+                          <SigningMonitor />
+                          <ExecutingMonitor />
+                          <TestCtrls />
+                          <NavigationStack />
+                          <SafeStatusBar />
+                        </NavigationGuardHOC>
+                      </SafeToastProvider>
+                    </BottomSheetModalProvider>
+                  </SafeThemeProvider>
+                </PersistGate>
+              </PortalProvider>
+            </NotificationsProvider>
+          </DataFetchProvider>
+        </Provider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   )
 }
