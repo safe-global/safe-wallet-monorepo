@@ -10,6 +10,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { isStorybookEnv, CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@tamagui/portal'
 import { NotificationsProvider } from '@/src/context/NotificationsContext'
@@ -137,6 +138,7 @@ function RootLayout() {
 
   return (
     <GestureHandlerRootView>
+      <KeyboardProvider>
       <Provider store={store}>
         <DataFetchProvider>
           <NotificationsProvider>
@@ -161,6 +163,7 @@ function RootLayout() {
           </NotificationsProvider>
         </DataFetchProvider>
       </Provider>
+    </KeyboardProvider>
     </GestureHandlerRootView>
   )
 }
