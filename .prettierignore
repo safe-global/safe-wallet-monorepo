@@ -19,6 +19,7 @@ apps/mobile/.storybook
 apps/mobile/resources/
 
 # Web
+apps/web/storybook-static
 apps/web/.next
 apps/web/cypress/downloads
 apps/web/.swc
