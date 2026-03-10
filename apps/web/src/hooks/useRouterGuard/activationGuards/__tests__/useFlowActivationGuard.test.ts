@@ -186,20 +186,85 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should redirect to welcome when not authenticated via SIWE on a space route', async () => {
+    it('should allow access when not authenticated on a public route (no redirect)', async () => {
+      setupMocks({
+        pathname: '/home',
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // Spaces path without SIWE authentication → redirect to /welcome/spaces
+  // -----------------------------------------------------------------------
+
+  describe('spaces path without authentication', () => {
+    it('should redirect to welcome/spaces when not authenticated on /spaces', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,
         wallet: { address: '0x123' },
         walletContext: { isReady: true },
         isStoreHydrated: true,
         isAuthenticated: false,
-        isSpaceRoute: true,
       })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
+    it('should redirect to welcome/spaces when not authenticated on /spaces/settings', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.settings,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
+    it('should redirect to welcome/spaces when not authenticated on /spaces/members', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.members,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
+    it('should allow when store is not hydrated even on /spaces (no redirect before hydration)', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.index,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: false,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
     })
   })
 
