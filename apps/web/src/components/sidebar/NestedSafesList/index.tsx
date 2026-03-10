@@ -42,7 +42,16 @@ function NestedSafeItem({
   showWarning: boolean
   showSimilarityWarning: boolean
 }) {
-  const { AccountItem, $isReady } = useLoadFeature(MyAccountsFeature)
+  const {
+    AccountItemButton,
+    AccountItemLink,
+    AccountItemCheckbox,
+    AccountItemIcon,
+    AccountItemInfo,
+    AccountItemGroup,
+    AccountItemBalance,
+    $isReady,
+  } = useLoadFeature(MyAccountsFeature)
   const { href, name, threshold, owners, elementRef, trackingLabel } = useSafeItemData(safeItem, { safeOverview })
 
   if (!$isReady) return null
@@ -61,41 +70,41 @@ function NestedSafeItem({
 
   if (isManageMode) {
     return (
-      <AccountItem.Button onClick={onToggle} elementRef={elementRef}>
-        <AccountItem.Checkbox checked={isSelected} address={safeItem.address} />
-        <AccountItem.Icon
+      <AccountItemButton onClick={onToggle} elementRef={elementRef}>
+        <AccountItemCheckbox checked={isSelected} address={safeItem.address} />
+        <AccountItemIcon
           address={safeItem.address}
           threshold={threshold}
           owners={owners.length}
           chainId={safeItem.chainId}
         />
-        <AccountItem.Info
+        <AccountItemInfo
           address={safeItem.address}
           name={name}
           chainId={safeItem.chainId}
           fullAddress
           highlight4bytes={showSimilarityWarning}
         />
-        <AccountItem.Group>
-          <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
+        <AccountItemGroup>
+          <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
           {warningIcon}
-        </AccountItem.Group>
-      </AccountItem.Button>
+        </AccountItemGroup>
+      </AccountItemButton>
     )
   }
 
   return (
     <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.list}>
-      <AccountItem.Link href={href} onLinkClick={onClose} trackingLabel={trackingLabel} elementRef={elementRef}>
-        <AccountItem.Icon
+      <AccountItemLink href={href} onLinkClick={onClose} trackingLabel={trackingLabel} elementRef={elementRef}>
+        <AccountItemIcon
           address={safeItem.address}
           threshold={threshold}
           owners={owners.length}
           chainId={safeItem.chainId}
         />
-        <AccountItem.Info address={safeItem.address} name={name} chainId={safeItem.chainId} />
-        <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
-      </AccountItem.Link>
+        <AccountItemInfo address={safeItem.address} name={name} chainId={safeItem.chainId} />
+        <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
+      </AccountItemLink>
     </Track>
   )
 }
