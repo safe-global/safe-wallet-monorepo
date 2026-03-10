@@ -33,6 +33,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   const spaceName = selectedSpace?.name ?? ''
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
+  const selectedSpaceColor = selectedSpace ? getAvatarColor(selectedSpace.id) : undefined
   const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
 
   const handleSelectSpace = (spaceId: number) => {
@@ -69,7 +70,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         <Avatar className={css.spaceSelectorAvatar}>
           <AvatarFallback
             className={css.spaceSelectorAvatarFallback}
-            style={selectedSpace ? { backgroundColor: getAvatarColor(selectedSpace.id) } : undefined}
+            style={selectedSpaceColor ? { backgroundColor: selectedSpaceColor } : undefined}
           >
             {initial}
           </AvatarFallback>
@@ -97,7 +98,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
             <Avatar className={css.spaceSelectorAvatar}>
               <AvatarFallback
                 className={css.spaceSelectorAvatarFallback}
-                style={{ backgroundColor: getAvatarColor(selectedSpace.id) }}
+                style={{ backgroundColor: selectedSpaceColor }}
               >
                 {initial}
               </AvatarFallback>
