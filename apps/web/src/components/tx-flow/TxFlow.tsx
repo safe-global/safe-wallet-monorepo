@@ -12,6 +12,7 @@ import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import { useLoadFeature } from '@/features/__core__'
 import { LedgerFeature } from '@/features/ledger'
+import { TrezorFeature } from '@/features/trezor'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
@@ -55,6 +56,7 @@ export const TxFlow = <T extends unknown>({
   ...txLayoutProps
 }: TxFlowProps<T>) => {
   const { LedgerHashComparison } = useLoadFeature(LedgerFeature)
+  const { TrezorHashComparison } = useLoadFeature(TrezorFeature)
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
 
   const childrenArray = Array.isArray(children) ? children : [children]
@@ -118,6 +120,7 @@ export const TxFlow = <T extends unknown>({
                 </ConfirmTxReceipt>
               </TxFlowContent>
               <LedgerHashComparison />
+              <TrezorHashComparison />
             </TxFlowProvider>
           </SlotProvider>
         </SafeShieldProvider>
