@@ -289,6 +289,14 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
 
 7. **Pull requests**: fill out the PR template and ensure all checks pass.
 
+8. **PR poem**: Include a short poem at the very top of each PR description that summarizes the changes. Each poem must use a randomly chosen style (e.g., haiku, sonnet, limerick, free verse, tanka, villanelle) and a randomly chosen genre/movement (e.g., symbolism, futurism, post-modernism, romanticism, surrealism, imagism). The poem should be wrapped in a blockquote:
+
+   ```markdown
+   > Cache key dissolves slow,
+   > Redux dreams in melted clocks,
+   > State rehydrates whole.
+   ```
+
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
 ## Testing Guidelines
