@@ -20,7 +20,7 @@ const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
       {loading ? (
         <Skeleton className="h-[30px] w-48" />
       ) : (
-        <span className="font-medium leading-[1] tracking-tight text-foreground text-[30px]">{value}</span>
+        <span className="font-bold leading-[1] tracking-tight text-foreground text-[30px]">{value}</span>
       )}
     </div>
   )
