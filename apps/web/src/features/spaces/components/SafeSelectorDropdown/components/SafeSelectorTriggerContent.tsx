@@ -29,7 +29,7 @@ function SafeSelectorTriggerContent({
   )
 
   return (
-    <div className="flex items-center gap-4 w-full">
+    <div className="flex items-center gap-2 sm:gap-4 w-full">
       <Avatar size="sm">
         <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
