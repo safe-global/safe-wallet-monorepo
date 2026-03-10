@@ -41,7 +41,8 @@ function SafeSelectorDropdown({
   return (
     <div
       className={cn(
-        'flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-2xl p-2 overflow-hidden bg-card',
+        // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
+        'flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-lg p-2 overflow-hidden bg-card',
         variants.wrapperClass,
       )}
     >
