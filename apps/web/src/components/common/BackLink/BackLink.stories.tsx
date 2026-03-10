@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import BackLink from './index'
-import InitialsAvatar from '@/features/spaces/components/InitialsAvatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const meta = {
   component: BackLink,
@@ -23,6 +23,15 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     onClick: () => console.log('back clicked'),
-    children: <InitialsAvatar name="Acme Corp" size="medium" />,
+    children: (
+      <Avatar className="size-8 shrink-0">
+        <AvatarFallback
+          className="rounded-md text-primary-foreground text-sm font-semibold"
+          style={{ backgroundColor: 'hsl(137, 55%, 55%)' }}
+        >
+          A
+        </AvatarFallback>
+      </Avatar>
+    ),
   },
 }
