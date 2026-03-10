@@ -12,7 +12,10 @@ function SpaceSafeBar() {
   if (!isQualifiedSafe) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 sm:px-6 pt-4 pb-0" style={{ backgroundColor: 'var(--color-background-main)' }}>
+    <div
+      className="flex flex-wrap items-center gap-2 px-4 sm:px-6 pt-4 pb-0"
+      style={{ backgroundColor: 'var(--color-background-main)' }}
+    >
       {space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
       <SafeSelectorDropdown
         items={items}

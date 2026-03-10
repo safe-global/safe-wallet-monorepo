@@ -81,10 +81,7 @@ describe('useSpaceBackLink', () => {
 
     renderHook(() => useSpaceBackLink())
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
-      { id: 42 },
-      expect.objectContaining({ skip: true }),
-    )
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 42 }, expect.objectContaining({ skip: true }))
   })
 
   it('skips the query when spaceId is not available', () => {
@@ -92,10 +89,7 @@ describe('useSpaceBackLink', () => {
 
     renderHook(() => useSpaceBackLink())
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ skip: true }),
-    )
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
   })
 
   it('does not skip the query when both signed in and spaceId are available', () => {
@@ -103,10 +97,7 @@ describe('useSpaceBackLink', () => {
 
     renderHook(() => useSpaceBackLink())
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
-      { id: 10 },
-      expect.objectContaining({ skip: false }),
-    )
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 10 }, expect.objectContaining({ skip: false }))
   })
 
   it('returns undefined space when query has no data', () => {

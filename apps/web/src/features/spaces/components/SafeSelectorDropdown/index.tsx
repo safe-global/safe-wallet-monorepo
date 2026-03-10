@@ -28,7 +28,7 @@ function SafeSelectorDropdown({
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id
-  const safeItemSelect = onItemSelect ?? (() => { })
+  const safeItemSelect = onItemSelect ?? (() => {})
 
   if (!selectedItem) {
     return null
