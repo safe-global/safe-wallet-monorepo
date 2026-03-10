@@ -9,7 +9,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="flex items-stretch" style={{ height: 84, backgroundColor: '#f4f4f4', padding: 16, borderRadius: 8 }}>
+      <div className="flex flex-wrap items-center gap-2 px-4 sm:px-6 pt-4 pb-0">
         <Story />
       </div>
     ),
