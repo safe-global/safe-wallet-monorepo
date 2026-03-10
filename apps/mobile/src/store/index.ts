@@ -43,6 +43,7 @@ import { setupMobileCookieHandling } from './utils/cookieHandling'
 import notificationsMiddleware from './middleware/notifications'
 import analyticsMiddleware from './middleware/analytics'
 import notificationSyncMiddleware from './middleware/notificationSync'
+import { migrate } from './migrations'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
@@ -102,10 +103,11 @@ export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransfo
 
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 2,
   storage: reduxStorage,
   blacklist: persistBlacklist,
   transforms: persistTransforms,
+  migrate,
 }
 
 export const rootReducer = combineReducers({

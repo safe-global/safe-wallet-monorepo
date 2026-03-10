@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectAllContacts } from '@/src/store/addressBookSlice'
 import { selectSigners } from '@/src/store/signersSlice'
-import { selectAllSafes } from '@/src/store/safesSlice'
+import { selectAllSafes, SafesSlice } from '@/src/store/safesSlice'
 
 export interface RecipientOption {
   address: string
@@ -12,7 +11,15 @@ export interface RecipientOption {
   section: 'safes' | 'signers' | 'addressBook'
 }
 
-function buildContactLookup(
+function buildAllContactNames(contacts: { value: string; name: string }[]): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const c of contacts) {
+    map.set(c.value.toLowerCase(), c.name)
+  }
+  return map
+}
+
+function buildChainFilteredContactNames(
   contacts: { chainIds: string[]; value: string; name: string }[],
   chainId: string,
 ): Map<string, string> {
@@ -26,15 +33,15 @@ function buildContactLookup(
 }
 
 function buildSafeOptions(
-  allSafes: Record<string, unknown>,
-  activeAddress: string,
-  contactsByAddress: Map<string, string>,
+  allSafes: SafesSlice,
+  chainId: string,
+  namesByAddress: Map<string, string>,
 ): RecipientOption[] {
-  return Object.keys(allSafes)
-    .filter((addr) => !sameAddress(addr, activeAddress))
-    .map((addr) => ({
+  return Object.entries(allSafes)
+    .filter(([, chainMap]) => chainId in chainMap)
+    .map(([addr]) => ({
       address: addr,
-      name: contactsByAddress.get(addr.toLowerCase()) ?? 'My Safe',
+      name: namesByAddress.get(addr.toLowerCase()) ?? 'My Safe',
       section: 'safes' as const,
     }))
 }
@@ -83,14 +90,17 @@ export function useRecipientSearch(query: string): {
   const allSafes = useAppSelector(selectAllSafes)
 
   const allOptions = useMemo(() => {
-    const contactsByAddress = buildContactLookup(contacts, activeSafe.chainId)
-    const safeOptions = buildSafeOptions(allSafes, activeSafe.address, contactsByAddress)
+    const namesByAddress = buildAllContactNames(contacts)
+    const contactsByAddress = buildChainFilteredContactNames(contacts, activeSafe.chainId)
+    const safeOptions = buildSafeOptions(allSafes, activeSafe.chainId, namesByAddress)
 
-    const safeAddresses = new Set(safeOptions.map((s) => s.address.toLowerCase()))
-    const signerOptions = buildSignerOptions(signersMap, safeAddresses, contactsByAddress)
+    // Exclude all Safe addresses (including the active one) from other sections
+    const allSafeAddresses = new Set(Object.keys(allSafes).map((a) => a.toLowerCase()))
+    allSafeAddresses.add(activeSafe.address.toLowerCase())
+    const signerOptions = buildSignerOptions(signersMap, allSafeAddresses, contactsByAddress)
 
     const signerAddresses = new Set(signerOptions.map((s) => s.address.toLowerCase()))
-    const allExcluded = new Set([...safeAddresses, ...signerAddresses])
+    const allExcluded = new Set([...allSafeAddresses, ...signerAddresses])
     const contactOptions = buildContactOptions(contacts, activeSafe.chainId, allExcluded)
 
     return { safeOptions, signerOptions, contactOptions }
