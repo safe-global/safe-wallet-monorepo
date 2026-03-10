@@ -10,6 +10,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { isStorybookEnv, CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider } from '@tamagui/portal'
 import { NotificationsProvider } from '@/src/context/NotificationsContext'
@@ -137,30 +138,32 @@ function RootLayout() {
 
   return (
     <GestureHandlerRootView>
-      <Provider store={store}>
-        <DataFetchProvider>
-          <NotificationsProvider>
-            <PortalProvider shouldAddRootHost>
-              <PersistGate loading={null} persistor={persistor}>
-                <SafeThemeProvider>
-                  <BottomSheetModalProvider>
-                    <SafeToastProvider>
-                      <NavigationGuardHOC>
-                        <HooksInitializer />
-                        <SigningMonitor />
-                        <ExecutingMonitor />
-                        <TestCtrls />
-                        <NavigationStack />
-                        <SafeStatusBar />
-                      </NavigationGuardHOC>
-                    </SafeToastProvider>
-                  </BottomSheetModalProvider>
-                </SafeThemeProvider>
-              </PersistGate>
-            </PortalProvider>
-          </NotificationsProvider>
-        </DataFetchProvider>
-      </Provider>
+      <KeyboardProvider>
+        <Provider store={store}>
+          <DataFetchProvider>
+            <NotificationsProvider>
+              <PortalProvider shouldAddRootHost>
+                <PersistGate loading={null} persistor={persistor}>
+                  <SafeThemeProvider>
+                    <BottomSheetModalProvider>
+                      <SafeToastProvider>
+                        <NavigationGuardHOC>
+                          <HooksInitializer />
+                          <SigningMonitor />
+                          <ExecutingMonitor />
+                          <TestCtrls />
+                          <NavigationStack />
+                          <SafeStatusBar />
+                        </NavigationGuardHOC>
+                      </SafeToastProvider>
+                    </BottomSheetModalProvider>
+                  </SafeThemeProvider>
+                </PersistGate>
+              </PortalProvider>
+            </NotificationsProvider>
+          </DataFetchProvider>
+        </Provider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   )
 }
