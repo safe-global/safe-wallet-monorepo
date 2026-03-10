@@ -5,4 +5,8 @@ export default {
   'packages/utils/**/*.{js,jsx,ts,tsx}': ['yarn workspace @safe-global/utils prettier:fix'],
   'packages/theme/**/*.{js,jsx,ts,tsx}': ['yarn workspace @safe-global/theme prettier:fix'],
   'apps/tx-builder/**/*.{js,jsx,ts,tsx}': ['yarn workspace @safe-global/tx-builder prettier:fix'],
+  'apps/mobile/assets/fonts/safe-icons/safe-icons.icomoon.json': [
+    'node ./apps/mobile/scripts/generateIconTypes.js',
+    'git add ./apps/mobile/src/types/iconTypes.ts',
+  ],
 }
