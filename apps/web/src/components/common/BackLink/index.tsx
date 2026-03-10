@@ -8,15 +8,17 @@ type BackLinkProps = {
 
 function BackLink({ children, onClick }: BackLinkProps) {
   return (
-    <button
-      onClick={onClick}
-      // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
-      className="flex items-center gap-1 self-stretch min-h-[68px] border-0 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] pl-2 pr-2 cursor-pointer hover:bg-muted/30 transition-colors"
-      aria-label="Go back"
-    >
-      <ChevronLeft className="size-5" />
-      {children}
-    </button>
+    // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
+    <div className="flex self-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)]">
+      <button
+        onClick={onClick}
+        className="flex flex-1 items-center gap-1 min-h-[68px] border-0 rounded-lg bg-transparent pl-2 pr-2 cursor-pointer hover:bg-muted/30 transition-colors"
+        aria-label="Go back"
+      >
+        <ChevronLeft className="size-5" />
+        {children}
+      </button>
+    </div>
   )
 }
 
