@@ -43,6 +43,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
@@ -55,14 +56,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader &&
-        (isSpaceRoute ? (
-          <Topbar />
-        ) : (
-          <header className={css.header}>
-            <Header onMenuToggle={isSidebarRoute ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-          </header>
-        ))}
+      {!hideHeader && isSpaceRoute && <Topbar onMenuToggle={menuToggleHandler} />}
+
+      {!hideHeader && !isSpaceRoute && (
+        <header className={css.header}>
+          <Header onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
+        </header>
+      )}
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 

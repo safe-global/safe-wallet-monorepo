@@ -24,7 +24,7 @@ export const SidebarTopBar = (): ReactElement => {
           alt="Safe"
           width={24}
           height={24}
-          className="size-6"
+          className="size-6 dark:brightness-0 dark:invert"
           data-testid="logo-image"
         />
       </div>

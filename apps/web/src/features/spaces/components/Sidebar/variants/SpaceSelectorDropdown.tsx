@@ -15,6 +15,8 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
+
+export const getAvatarColor = (id: number): string => `hsl(${(id * 137.508) % 360}, 55%, 55%)`
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
 import { truncateSpaceName } from '../utils'
@@ -31,6 +33,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   const spaceName = selectedSpace?.name ?? ''
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
+  const selectedSpaceColor = selectedSpace ? getAvatarColor(selectedSpace.id) : undefined
   const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
 
   const handleSelectSpace = (spaceId: number) => {
@@ -65,7 +68,12 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         }
       >
         <Avatar className={css.spaceSelectorAvatar}>
-          <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+          <AvatarFallback
+            className={css.spaceSelectorAvatarFallback}
+            style={selectedSpaceColor ? { backgroundColor: selectedSpaceColor } : undefined}
+          >
+            {initial}
+          </AvatarFallback>
         </Avatar>
         <div className={css.spaceSelectorText}>
           {spaceName ? (
@@ -88,7 +96,12 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>
-              <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+              <AvatarFallback
+                className={css.spaceSelectorAvatarFallback}
+                style={{ backgroundColor: selectedSpaceColor }}
+              >
+                {initial}
+              </AvatarFallback>
             </Avatar>
             <div>
               <div className={css.textSmallBold}>{selectedSpace.name}</div>
@@ -102,7 +115,10 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         {spaces.map((space) => (
           <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
             <Avatar className="size-6 rounded-md shrink-0">
-              <AvatarFallback className="rounded-md bg-primary text-primary-foreground text-xs">
+              <AvatarFallback
+                className="rounded-md text-primary-foreground text-xs"
+                style={{ backgroundColor: getAvatarColor(space.id) }}
+              >
                 {space.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>

@@ -1,6 +1,7 @@
 import Topbar from './index'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import type { Notification } from '@/store/notificationsSlice'
 import type { RootState } from '@/store'
 
@@ -10,6 +11,11 @@ jest.mock('@/features/__core__', () => ({
 }))
 
 const mockWallet = { address: '0x1234567890abcdef1234567890abcdef12345678', balance: '0' }
+
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => mockUseIsMobile(),
+}))
 
 jest.mock('@/features/wallet', () => ({
   WalletFeature: { name: 'wallet' },
@@ -55,6 +61,7 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseIsMobile.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
     })
@@ -88,5 +95,31 @@ describe('Topbar', () => {
     render(<Topbar />, { initialReduxState })
 
     expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
+  })
+
+  describe('mobile', () => {
+    beforeEach(() => {
+      mockUseIsMobile.mockReturnValue(true)
+    })
+
+    it('shows the sidebar menu button when on mobile and onMenuToggle is provided', () => {
+      const onMenuToggle = jest.fn()
+      render(<Topbar onMenuToggle={onMenuToggle} />)
+      expect(screen.getByRole('button', { name: /open sidebar menu/i })).toBeInTheDocument()
+    })
+
+    it('calls onMenuToggle with a toggle function when the menu button is clicked', async () => {
+      const user = userEvent.setup()
+      const onMenuToggle = jest.fn()
+      render(<Topbar onMenuToggle={onMenuToggle} />)
+
+      await user.click(screen.getByRole('button', { name: /open sidebar menu/i }))
+
+      expect(onMenuToggle).toHaveBeenCalledTimes(1)
+      const setStateArg = onMenuToggle.mock.calls[0][0] as (prev: boolean) => boolean
+      expect(typeof setStateArg).toBe('function')
+      expect(setStateArg(false)).toBe(true)
+      expect(setStateArg(true)).toBe(false)
+    })
   })
 })
