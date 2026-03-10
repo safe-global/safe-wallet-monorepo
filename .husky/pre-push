@@ -1,20 +1,18 @@
 #!/bin/bash
 set -euo pipefail
 
-# Store the initial git status
-initial_status=$(git status --porcelain)
-
-# Run the lint command
-yarn run lint --fix
-
-# Store the status after running lint
-post_lint_status=$(git status --porcelain)
-
-# Compare the initial and post-lint statuses
-if [ "$initial_status" != "$post_lint_status" ]; then
+# Run prettier check
+if ! yarn prettier; then
   echo "===================================="
-  echo "Linters gonna lint!"
-  echo "Linting made changes. Please commit these changes before pushing or push with --no-verify flag to omit this check."
+  echo "Prettier check failed. Run 'yarn prettier:fix' and commit the changes."
+  echo "===================================="
+  exit 1
+fi
+
+# Run the lint command (check only, no --fix)
+if ! yarn run lint; then
+  echo "===================================="
+  echo "Linting failed. Please fix lint errors before pushing."
   echo "===================================="
   exit 1
 fi
