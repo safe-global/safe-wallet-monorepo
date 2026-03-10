@@ -93,19 +93,20 @@ const CreateSpaceOnboarding = (): ReactElement => {
         </motion.div>
 
         {/* Animated background orbs */}
-        <motion.div
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1, x: [0, 35, -20, 10, 0], y: [0, -30, 20, -10, 0] }}
-          transition={{
-            opacity: { duration: 1.4, ease: 'easeOut' },
-            scale: { duration: 1.4, ease: 'easeOut' },
-            x: { duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
-            y: { duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
-          }}
-        >
-          <div className="h-[560px] w-[560px] rounded-full bg-gradient-to-br from-green-200/40 via-green-100/20 to-transparent blur-3xl dark:from-green-900/25 dark:via-green-800/10 dark:to-transparent" />
-        </motion.div>
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1, x: [0, 35, -20, 10, 0], y: [0, -30, 20, -10, 0] }}
+            transition={{
+              opacity: { duration: 1.4, ease: 'easeOut' },
+              scale: { duration: 1.4, ease: 'easeOut' },
+              x: { duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
+              y: { duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
+            }}
+          >
+            <div className="h-[560px] w-[560px] rounded-full bg-gradient-to-br from-green-200/40 via-green-100/20 to-transparent blur-3xl dark:from-green-900/25 dark:via-green-800/10 dark:to-transparent" />
+          </motion.div>
+        </div>
 
         <motion.div
           className="pointer-events-none absolute bottom-1/4 right-1/4"
@@ -139,15 +140,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
               }}
             />
             {/* Floating icon */}
-            <motion.div
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <SvgIcon
-                component={SpacesIllustration}
-                inheritViewBox
-                sx={{ fontSize: 96, display: 'block' }}
-              />
+            <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+              <SvgIcon component={SpacesIllustration} inheritViewBox sx={{ fontSize: 96, display: 'block' }} />
             </motion.div>
           </motion.div>
 
@@ -162,10 +156,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             Create a space
           </motion.h2>
 
-          <motion.p
-            variants={itemVariants}
-            className="w-full text-center text-base leading-6 text-muted-foreground"
-          >
+          <motion.p variants={itemVariants} className="w-full text-center text-base leading-6 text-muted-foreground">
             Consolidate and organize safes, members and transaction activity.
           </motion.p>
 
