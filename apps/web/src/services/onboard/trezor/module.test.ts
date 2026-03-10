@@ -1,5 +1,5 @@
 import type { WalletHelpers, WalletModule } from '@web3-onboard/common'
-import { trezorModule } from './trezor-module'
+import { trezorModule } from './module'
 
 /* -------------------------------------------------------------------------- */
 /*                                    Mocks                                   */

@@ -6,7 +6,7 @@ import injectedWalletModule from '@web3-onboard/injected-wallets'
 import walletConnect from '@web3-onboard/walletconnect'
 import pkModule from '@/services/private-key-module'
 import { ledgerModule } from '@/services/onboard/ledger-module'
-import { trezorModule } from '@/services/onboard/trezor-module'
+import { trezorModule } from '@/services/onboard/trezor/module'
 
 import { CGW_NAMES, WALLET_KEYS } from './consts'
 
