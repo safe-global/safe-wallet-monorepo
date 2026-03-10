@@ -1,8 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import SpaceBackLink from './SpaceBackLink'
-import { getAvatarColor } from '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown'
+import { getAvatarColor } from '@/features/spaces'
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown', () => ({
+jest.mock('@/features/spaces', () => ({
+  ...jest.requireActual('@/features/spaces'),
   getAvatarColor: jest.fn((id: number) => `hsl(${id}, 55%, 55%)`),
 }))
 

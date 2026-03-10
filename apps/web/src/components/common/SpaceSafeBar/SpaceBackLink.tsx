@@ -1,6 +1,6 @@
 import BackLink from '@/components/common/BackLink'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getAvatarColor } from '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown'
+import { getAvatarColor } from '@/features/spaces'
 
 type SpaceBackLinkProps = {
   space: { id: number; name: string }
@@ -9,7 +9,7 @@ type SpaceBackLinkProps = {
 
 function SpaceBackLink({ space, onClick }: SpaceBackLinkProps) {
   return (
-    <BackLink onClick={onClick}>
+    <BackLink onClick={onClick} ariaLabel="Back to space">
       <Avatar className="size-8 shrink-0">
         <AvatarFallback
           className="rounded-md text-primary-foreground text-sm font-semibold"

@@ -75,3 +75,6 @@ export { useSpaceSafes } from './hooks/useSpaceSafes'
 
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
+
+// Utilities
+export { getAvatarColor } from './components/Sidebar/variants/SpaceSelectorDropdown'
