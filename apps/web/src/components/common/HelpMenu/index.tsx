@@ -4,10 +4,8 @@ import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText, SvgIcon } from 
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
-import CampaignIcon from '@mui/icons-material/Campaign'
 import { OpenInNewRounded } from '@mui/icons-material'
 import { useSupportChat } from '@/hooks/useSupportChat'
-import UnreadBadge from '@/components/common/UnreadBadge'
 import { SUPPORT_CHAT_APP_ID, SUPPORT_CHAT_ENABLED } from '@/config/constants'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import css from './styles.module.css'
@@ -19,7 +17,6 @@ const SupportChatDrawer = dynamic(
 )
 
 const HELP_CENTER_URL = 'https://help.safe.global'
-const WHATS_NEW_URL = '#'
 
 const HelpMenu = (): ReactElement | null => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -55,12 +52,6 @@ const HelpMenu = (): ReactElement | null => {
     setAnchorEl(null)
   }, [])
 
-  const handleWhatsNewClick = useCallback(() => {
-    if (WHATS_NEW_URL !== '#') {
-      window.open(WHATS_NEW_URL, '_blank', 'noopener,noreferrer')
-    }
-    setAnchorEl(null)
-  }, [])
 
   const handleSupportClose = useCallback(() => {
     setSupportOpen(false)
@@ -107,15 +98,6 @@ const HelpMenu = (): ReactElement | null => {
           </MenuItem>
         ) : null}
 
-        <MenuItem onClick={handleWhatsNewClick}>
-          <ListItemIcon>
-            <CampaignIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>What&apos;s new</ListItemText>
-          <UnreadBadge count={1} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-            <span />
-          </UnreadBadge>
-        </MenuItem>
       </Menu>
 
       {showSupport ? (

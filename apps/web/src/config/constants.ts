@@ -119,10 +119,10 @@ export const MIXPANEL_TOKEN = IS_PRODUCTION ? PROD_MIXPANEL_TOKEN : STAGING_MIXP
 
 // Support chat (Pylon)
 export const SUPPORT_CHAT_ALIAS_DOMAIN = process.env.NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN || 'anon.safe.global'
-export const SUPPORT_CHAT_URL = process.env.NEXT_PUBLIC_PYLON_CHAT_URL || 'https://help.safe.global/chat'
+export const SUPPORT_CHAT_URL = process.env.NEXT_PUBLIC_PYLON_CHAT_URL || 'https://safe-support.vercel.app/chat'
 export const SUPPORT_CHAT_ENABLED = process.env.NEXT_PUBLIC_SHOW_SUPPORT_CHAT === 'true'
 export const SUPPORT_CHAT_ALLOWED_PARENTS =
-  process.env.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS || 'https://app.safe.global https://safe.global http://localhost:3000'
+  process.env.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS || 'http://localhost https://app.safe.global https://safe-support.vercel.app/'
 export const SUPPORT_CHAT_APP_ID = process.env.NEXT_PUBLIC_PYLON_APP_ID || ''
 
 // Safe Apps tags
