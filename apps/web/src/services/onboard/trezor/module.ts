@@ -116,6 +116,7 @@ export function trezorModule(): WalletInit {
               return currentChain.id
             },
             eth_signTransaction: async (args) => {
+              const derivationPath = getAssertedDerivationPath()
               const txParams = args.params[0]
 
               const gasLimit = txParams.gas ?? txParams.gasLimit
@@ -125,7 +126,7 @@ export function trezorModule(): WalletInit {
                 ((await eip1193Provider.request({
                   method: 'eth_getTransactionCount',
                   // Take pending transactions into account
-                  params: [currentAccount!.address, 'pending'],
+                  params: [currentAccount?.address, 'pending'],
                 })) as string)
 
               const transaction = Transaction.from({
@@ -140,19 +141,18 @@ export function trezorModule(): WalletInit {
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              // const { keccak256 } = await import('ethers')
-              // const txHash = keccak256(transaction.unsignedSerialized)
-
-              // const { showTrezorHashComparison, hideTrezorHashComparison } = await import('@/features/trezor')
-              // showTrezorHashComparison(txHash)
+              const { keccak256 } = await import('ethers')
+              const txHash = keccak256(transaction.unsignedSerialized)
+              const { showTrezorHashComparison, hideTrezorHashComparison } = await import('@/features/trezor')
+              showTrezorHashComparison(txHash)
 
               try {
                 const trezorTx = buildTrezorTransaction(transaction, parseInt(currentChain.id, 16))
-                const { serializedTx } = await trezorSdk.signTransaction(getAssertedDerivationPath(), trezorTx)
-                // hideTrezorHashComparison()
+                const { serializedTx } = await trezorSdk.signTransaction(derivationPath, trezorTx)
+                hideTrezorHashComparison()
                 return (serializedTx.startsWith('0x') ? serializedTx : `0x${serializedTx}`) as `0x${string}`
               } catch (error) {
-                // hideTrezorHashComparison()
+                hideTrezorHashComparison()
                 throw error
               }
             },
@@ -167,10 +167,16 @@ export function trezorModule(): WalletInit {
               })) as string
             },
             eth_sign: async (args) => {
+              const [requestedAddress, message] = args.params
+              if (requestedAddress.toLowerCase() !== currentAccount?.address.toLowerCase()) {
+                throw new ProviderRpcError({
+                  code: ProviderRpcErrorCode.INVALID_PARAMS,
+                  message: `Requested address ${requestedAddress} does not match connected account`,
+                })
+              }
               // The Safe requires transactions be signed as bytes, but eth_sign is only used by
               // the Transaction Service, e.g. notification registration. We therefore sign
               // messages as is to avoid unreadable byte notation.
-              const message = args.params[1]
               const signature = await trezorSdk.signMessage(getAssertedDerivationPath(), message)
               return Signature.from(`${signature}`).serialized
             },

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { showTrezorHashComparison, hideTrezorHashComparison } from '../../store'
 import TrezorHashComparison from './index'
@@ -9,8 +9,8 @@ describe('TrezorHashComparison', () => {
   })
 
   it('should not render when no hash present', () => {
-    const { container } = render(<TrezorHashComparison />)
-    expect(container.firstChild).toBeNull()
+    render(<TrezorHashComparison />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('should render dialog when hash present', () => {
@@ -28,11 +28,10 @@ describe('TrezorHashComparison', () => {
 
   it('should close dialog when close button clicked', async () => {
     showTrezorHashComparison('0xtest')
-    const { container } = render(<TrezorHashComparison />)
+    render(<TrezorHashComparison />)
 
-    const closeButton = screen.getByRole('button', { name: /close/i })
-    await userEvent.click(closeButton)
+    await userEvent.click(screen.getByRole('button', { name: /close/i }))
 
-    expect(container.firstChild).toBeNull()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 })

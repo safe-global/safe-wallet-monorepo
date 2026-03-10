@@ -15,6 +15,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
 import trezorHashStore from '../../store/trezorHashStore'
+import { hideTrezorHashComparison } from '../../store'
 import {
   CLOSE_BUTTON_TEXT,
   DIALOG_DESCRIPTION,
@@ -28,9 +29,7 @@ const TrezorHashComparison = () => {
   const hash = trezorHashStore.useStore()
   const open = !!hash
 
-  const handleClose = () => {
-    trezorHashStore.setStore(undefined)
-  }
+  const handleClose = hideTrezorHashComparison
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth={DIALOG_MAX_WIDTH} fullWidth>
