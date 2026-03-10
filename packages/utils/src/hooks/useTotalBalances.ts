@@ -143,7 +143,7 @@ const buildMergedResult = (opts: {
     isAllTokensMode: true,
   }
 
-  return { data: mergedBalances, error: undefined, loading: false, isFetching: false, refetch: shared.refetch }
+  return { data: mergedBalances, error: undefined, loading: false, ...shared }
 }
 
 interface AggregateParams {
