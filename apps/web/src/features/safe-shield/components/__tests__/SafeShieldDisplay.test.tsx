@@ -51,7 +51,12 @@ describe('SafeShieldDisplay', () => {
   describe('Basic Rendering', () => {
     it('should render the component with all main elements', () => {
       const { container } = render(
-        <SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
@@ -59,7 +64,12 @@ describe('SafeShieldDisplay', () => {
 
     it('should render with empty props', () => {
       const { container } = render(
-        <SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(container.querySelector('.MuiCard-root')).toBeInTheDocument()
@@ -68,7 +78,12 @@ describe('SafeShieldDisplay', () => {
 
     it('should have correct layout structure', () => {
       const { container } = render(
-        <SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       // Check for Stack container
@@ -83,19 +98,40 @@ describe('SafeShieldDisplay', () => {
 
   describe('Header States', () => {
     it('should show "Checks passed" when all results are OK', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
     })
 
     it('should show "Risk detected" when there are critical issues', () => {
-      render(<SafeShieldDisplay recipient={mockCriticalRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockCriticalRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Risk detected')).toBeInTheDocument()
     })
 
     it('should show "Issues found" when there are warnings', () => {
-      render(<SafeShieldDisplay recipient={mockWarningRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockWarningRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Issues found')).toBeInTheDocument()
     })
@@ -104,7 +140,14 @@ describe('SafeShieldDisplay', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
       if (loadingRecipient) loadingRecipient[2] = true
 
-      render(<SafeShieldDisplay recipient={loadingRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={loadingRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Analyzing...')).toBeInTheDocument()
     })
@@ -113,7 +156,14 @@ describe('SafeShieldDisplay', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: AsyncResult<RecipientAnalysisResults> = [undefined, error, false]
 
-      render(<SafeShieldDisplay recipient={errorRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={errorRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Checks unavailable')).toBeInTheDocument()
     })
@@ -124,7 +174,14 @@ describe('SafeShieldDisplay', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
       if (loadingRecipient) loadingRecipient[2] = true
 
-      render(<SafeShieldDisplay recipient={loadingRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={loadingRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByRole('progressbar')).toBeInTheDocument()
     })
@@ -132,14 +189,28 @@ describe('SafeShieldDisplay', () => {
     it('should show error message in content', () => {
       const errorContract = ContractAnalysisBuilder.failedContract().build()
 
-      render(<SafeShieldDisplay recipient={emptyRecipient} contract={errorContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={errorContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.getByText('Contract analysis failed')).toBeInTheDocument()
       expect(screen.getByText('Contract analysis failed. Review before processing.')).toBeInTheDocument()
     })
 
     it('should show empty state when no results', () => {
-      render(<SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(
         screen.getByText('Transaction details will be automatically scanned for potential risks and will appear here.'),
@@ -147,7 +218,14 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should not show loading state when data is present', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
     })
@@ -155,7 +233,14 @@ describe('SafeShieldDisplay', () => {
 
   describe('Props Integration', () => {
     it('should handle recipient results', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       // Header should show status
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
@@ -168,7 +253,14 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should handle contract results', () => {
-      render(<SafeShieldDisplay recipient={emptyRecipient} contract={mockContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={mockContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       // Header should show status
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
@@ -181,7 +273,14 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should handle threat results', () => {
-      render(<SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={mockThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       // Threat data is displayed with appropriate status
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
@@ -195,7 +294,12 @@ describe('SafeShieldDisplay', () => {
 
     it('should handle all props together', () => {
       const { container } = render(
-        <SafeShieldDisplay recipient={mockRecipient} contract={mockContract} threat={mockThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
@@ -207,7 +311,14 @@ describe('SafeShieldDisplay', () => {
     it('should handle malicious threat results with critical recipient', () => {
       const maliciousThreat = ThreatAnalysisBuilder.maliciousThreat()
 
-      render(<SafeShieldDisplay threat={maliciousThreat} recipient={mockCriticalRecipient} contract={emptyContract} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          threat={maliciousThreat}
+          recipient={mockCriticalRecipient}
+          contract={emptyContract}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       // Header shows "Risk detected" from critical recipient, threat content is displayed
       expect(screen.getByText('Risk detected')).toBeInTheDocument()
@@ -218,7 +329,12 @@ describe('SafeShieldDisplay', () => {
   describe('Footer', () => {
     it('should always render the Safe Shield logo', () => {
       const { container } = render(
-        <SafeShieldDisplay recipient={emptyRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
@@ -229,7 +345,12 @@ describe('SafeShieldDisplay', () => {
       const errorRecipient: AsyncResult<RecipientAnalysisResults> = [undefined, error, false]
 
       const { container } = render(
-        <SafeShieldDisplay recipient={errorRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={errorRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
@@ -242,7 +363,12 @@ describe('SafeShieldDisplay', () => {
       }
 
       const { container } = render(
-        <SafeShieldDisplay recipient={loadingRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />,
+        <SafeShieldDisplay
+          recipient={loadingRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
       )
 
       expect(container.querySelector('.MuiSvgIcon-root')).toBeInTheDocument()
@@ -309,7 +435,14 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should not show authentication required when hypernativeAuth is not provided', () => {
-      render(<SafeShieldDisplay recipient={mockRecipient} contract={emptyContract} threat={emptyThreat} deadlock={emptyDeadlock} />)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={emptyContract}
+          threat={emptyThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
       expect(screen.getByText('Checks passed')).toBeInTheDocument()
