@@ -25,6 +25,11 @@
   padding-left: 0;
 }
 
+/* Spaces: use black background in dark mode (matches shadcn --background) */
+[data-theme='dark'] .mainSpace {
+  background-color: #000000;
+}
+
 .mainNoHeader {
   padding-top: 0;
 }

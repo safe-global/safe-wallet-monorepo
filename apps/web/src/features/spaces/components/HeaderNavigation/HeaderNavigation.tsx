@@ -47,7 +47,7 @@ export function HeaderNavigation({
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
 
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-sm bg-background p-[3px]')}>
+    <div className={cn('flex items-center gap-1.5 rounded-sm bg-background dark:bg-secondary p-[3px]')}>
       {showSearch && (
         <Button
           variant="secondary"
@@ -65,7 +65,7 @@ export function HeaderNavigation({
           variant="secondary"
           size="icon-lg"
           onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0 rounded-sm"
+          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
           aria-label="Notifications"
         >
           <Bell className="size-5 text-muted-foreground" />
@@ -83,7 +83,7 @@ export function HeaderNavigation({
         variant="secondary"
         size="lg"
         onClick={onWalletClick}
-        className="cursor-pointer gap-1.5 shrink-0 rounded-sm "
+        className="cursor-pointer gap-1.5 shrink-0 rounded-sm dark:bg-card"
         aria-label={`Wallet ${truncatedAddress}`}
       >
         <Wallet className="size-5 text-muted-foreground" />
