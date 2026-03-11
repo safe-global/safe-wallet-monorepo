@@ -100,11 +100,11 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const button = screen.getByRole('button')
-    fireEvent.click(button)
+    const checkboxes = screen.getAllByRole('checkbox')
+    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
+    fireEvent.click(cardButton)
 
-    const checkbox = screen.getByRole('checkbox')
-    expect(checkbox).toBeChecked()
+    expect(cardButton).toHaveAttribute('aria-checked', 'true')
   })
 
   it('renders multi-chain safe with chain badge', () => {
@@ -124,11 +124,10 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const button = screen.getByRole('button')
-    fireEvent.click(button)
+    const checkboxes = screen.getAllByRole('checkbox')
+    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
+    fireEvent.click(cardButton)
 
-    // After click, checkbox should be checked (all sub-safes toggled on)
-    const checkbox = screen.getByRole('checkbox')
-    expect(checkbox).toBeChecked()
+    expect(cardButton).toHaveAttribute('aria-checked', 'true')
   })
 })

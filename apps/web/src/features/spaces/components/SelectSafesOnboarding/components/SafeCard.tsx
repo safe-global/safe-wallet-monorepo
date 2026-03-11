@@ -110,6 +110,8 @@ const SafeCardLayout = ({
   <button
     ref={ref}
     type="button"
+    role="checkbox"
+    aria-checked={checked}
     onClick={onToggle}
     className="flex w-full cursor-pointer items-center gap-2 rounded-3xl bg-card py-4 pl-2 pr-6 text-left transition-colors hover:bg-muted/50 disabled:opacity-60"
   >
