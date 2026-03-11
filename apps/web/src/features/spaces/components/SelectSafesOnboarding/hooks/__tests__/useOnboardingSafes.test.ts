@@ -52,9 +52,7 @@ describe('useOnboardingSafes', () => {
     const { result } = renderHook(() => useOnboardingSafes())
 
     expect(result.current.ownedSafes).toHaveLength(2)
-    expect(result.current.ownedSafes.map((s) => s.address)).toEqual(
-      expect.arrayContaining(['0xOwned1', '0xOwned2']),
-    )
+    expect(result.current.ownedSafes.map((s) => s.address)).toEqual(expect.arrayContaining(['0xOwned1', '0xOwned2']))
   })
 
   it('includes undeployed safes in owned list', () => {
@@ -139,10 +137,7 @@ describe('useOnboardingSafes', () => {
 
     it('returns empty set when addresses are not similar', () => {
       const mockOwned = {
-        '1': [
-          '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-          '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-        ],
+        '1': ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
       }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
 

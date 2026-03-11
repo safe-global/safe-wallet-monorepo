@@ -37,9 +37,7 @@ jest.mock('../ThresholdBadge', () => ({
 
 jest.mock('@/features/myAccounts/components/AccountItem', () => ({
   AccountItem: {
-    ChainBadge: ({ safes }: { safes: SafeItem[] }) => (
-      <span data-testid="chain-badge">{safes.length} chains</span>
-    ),
+    ChainBadge: ({ safes }: { safes: SafeItem[] }) => <span data-testid="chain-badge">{safes.length} chains</span>,
   },
 }))
 
