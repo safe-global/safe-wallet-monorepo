@@ -128,20 +128,9 @@ export function trezorModule(): WalletInit {
                 value: txParams.value ? BigInt(txParams.value) : null,
               })
 
-              const { keccak256 } = await import('ethers')
-              const txHash = keccak256(transaction.unsignedSerialized)
-              const { showTrezorHashComparison, hideTrezorHashComparison } = await import('@/features/trezor')
-              showTrezorHashComparison(txHash)
-
-              try {
-                const trezorTx = buildTrezorTransaction(transaction, parseInt(currentChain.id, 16))
-                const { serializedTx } = await trezorSdk.signTransaction(derivationPath, trezorTx)
-                hideTrezorHashComparison()
-                return (serializedTx.startsWith('0x') ? serializedTx : `0x${serializedTx}`) as `0x${string}`
-              } catch (error) {
-                hideTrezorHashComparison()
-                throw error
-              }
+              const trezorTx = buildTrezorTransaction(transaction, parseInt(currentChain.id, 16))
+              const { serializedTx } = await trezorSdk.signTransaction(derivationPath, trezorTx)
+              return (serializedTx.startsWith('0x') ? serializedTx : `0x${serializedTx}`) as `0x${string}`
             },
             eth_sendTransaction: async (args) => {
               const signedTransaction = await eip1193Provider.request({

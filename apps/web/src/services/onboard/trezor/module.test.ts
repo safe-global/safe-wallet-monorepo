@@ -64,11 +64,6 @@ jest.mock('@/config/constants', () => ({
   TREZOR_EMAIL: 'support@safe.global',
 }))
 
-jest.mock('@/features/trezor', () => ({
-  showTrezorHashComparison: jest.fn(),
-  hideTrezorHashComparison: jest.fn(),
-}))
-
 // Mock account selection — returns the first account automatically
 jest.mock('@web3-onboard/hw-common', () => ({
   getHardwareWalletProvider: jest.fn().mockReturnValue({
@@ -347,43 +342,6 @@ describe('trezorModule', () => {
         }),
       )
     })
-
-    /*
-    it('shows hash comparison dialog before signing', async () => {
-      const { showTrezorHashComparison } = jest.requireMock('@/features/trezor')
-      const provider = await createProvider()
-      await provider.request({ method: 'eth_requestAccounts', params: [] })
-
-      await provider.request({ method: 'eth_signTransaction', params: [legacyTxParams] })
-
-      expect(showTrezorHashComparison).toHaveBeenCalledWith(expect.stringMatching(/^0x/))
-    })
-
-    it('hides hash comparison dialog after successful signing', async () => {
-      const { hideTrezorHashComparison } = jest.requireMock('@/features/trezor')
-      const provider = await createProvider()
-      await provider.request({ method: 'eth_requestAccounts', params: [] })
-
-      await provider.request({ method: 'eth_signTransaction', params: [legacyTxParams] })
-
-      expect(hideTrezorHashComparison).toHaveBeenCalled()
-    })
-
-    it('hides hash comparison dialog on signing error', async () => {
-      const { hideTrezorHashComparison } = jest.requireMock('@/features/trezor')
-      mockTrezorConnect.ethereumSignTransaction.mockResolvedValueOnce({
-        success: false,
-        payload: { error: 'Device disconnected', code: 'Device_NotFound' },
-      })
-
-      const provider = await createProvider()
-      await provider.request({ method: 'eth_requestAccounts', params: [] })
-
-      await expect(provider.request({ method: 'eth_signTransaction', params: [legacyTxParams] })).rejects.toThrow()
-
-      expect(hideTrezorHashComparison).toHaveBeenCalled()
-    })
-    */
 
     it('prepends 0x to serialized tx if missing', async () => {
       mockTrezorConnect.ethereumSignTransaction.mockResolvedValueOnce({
