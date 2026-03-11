@@ -1,6 +1,7 @@
 import { blo } from 'blo'
 import { Settings } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import ChainSelectorBlock from './ChainSelectorBlock'
 import SafeBalanceBlock from './SafeBalanceBlock'
@@ -36,10 +37,16 @@ function SafeSelectorTriggerContent({
       </Avatar>
       <div className="flex flex-col items-start flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-medium text-foreground truncate">{displayName}</span>
+          <Typography variant="paragraph-small-medium" className="truncate">
+            {displayName}
+          </Typography>
           <Settings className="size-3 text-muted-foreground shrink-0" />
         </div>
-        {showAddressLine && <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>}
+        {showAddressLine && (
+          <Typography variant="paragraph-mini" color="muted">
+            {addressWithPrefix}
+          </Typography>
+        )}
       </div>
       <div
         className="shrink-0"

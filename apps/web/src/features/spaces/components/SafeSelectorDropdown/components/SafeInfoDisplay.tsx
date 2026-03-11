@@ -1,5 +1,6 @@
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 
@@ -20,8 +21,12 @@ const SafeInfoDisplay = ({ name, address, chainShortName, className }: SafeInfoD
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        <span className="text-sm font-medium text-foreground">{displayName}</span>
-        {showAddressLine && <span className="text-xs text-muted-foreground">{addressWithPrefix}</span>}
+        <Typography variant="paragraph-small-medium">{displayName}</Typography>
+        {showAddressLine && (
+          <Typography variant="paragraph-mini" color="muted">
+            {addressWithPrefix}
+          </Typography>
+        )}
       </div>
     </div>
   )

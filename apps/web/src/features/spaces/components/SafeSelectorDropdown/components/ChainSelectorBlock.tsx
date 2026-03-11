@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Typography } from '@/components/ui/typography'
 import ChainLogo from './ChainLogo'
 import type { ChainInfo } from '@/features/spaces/types'
 
@@ -48,7 +49,7 @@ function ChainSelectorBlock({ hasMultipleChains, chains, selectedChainId, onChai
               className="gap-4 cursor-pointer"
             >
               <ChainLogo chainId={chainItem.chainId} />
-              <span className="text-sm font-medium">{chainItem.chainName}</span>
+              <Typography variant="paragraph-small-medium">{chainItem.chainName}</Typography>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
