@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { RefreshCw, TriangleAlert } from 'lucide-react'
+import { CircleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { WidgetEmptyState } from './WidgetEmptyState'
 
@@ -8,16 +8,16 @@ interface WidgetErrorStateProps {
   onRefresh?: () => void
 }
 
-const WidgetErrorState = ({ message = 'Failed to load data', onRefresh }: WidgetErrorStateProps): ReactElement => {
+const WidgetErrorState = ({ message = 'Unable to load content', onRefresh }: WidgetErrorStateProps): ReactElement => {
   return (
     <WidgetEmptyState
-      icon={<TriangleAlert className="size-6" />}
+      icon={<CircleAlert className="size-6" />}
       text={message}
+      subtitle="Try to reload the page."
       action={
         onRefresh && (
-          <Button variant="outline" size="sm" onClick={onRefresh}>
-            <RefreshCw className="size-4" />
-            Refresh
+          <Button className="px-6" onClick={onRefresh}>
+            Reload page
           </Button>
         )
       }
