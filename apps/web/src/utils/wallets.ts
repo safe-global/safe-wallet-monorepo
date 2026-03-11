@@ -87,25 +87,13 @@ export const isWalletUnlocked = async (walletName: string): Promise<boolean | un
 
   // Only MetaMask exposes a method to check if the wallet is unlocked
   if (METAMASK_LIKE.includes(walletName)) {
-    if (typeof window === 'undefined') return undefined
-
-    let targetProvider
-    if (Array.isArray(window.ethereum?.providers)) {
-      targetProvider = window.ethereum?.providers.find((provider: any) => provider.isMetaMask && provider._metamask)
-    } else if (window.ethereum?._metamask) {
-      targetProvider = window.ethereum
-    }
-
-    if (!targetProvider?._metamask) {
-      return undefined
-    }
-
+    if (typeof window === 'undefined' || !window.ethereum?._metamask) return false
     try {
-      return await targetProvider._metamask.isUnlocked()
+      return await window.ethereum?._metamask.isUnlocked()
     } catch {
-      return undefined
+      return false
     }
   }
 
-  return undefined
+  return false
 }
