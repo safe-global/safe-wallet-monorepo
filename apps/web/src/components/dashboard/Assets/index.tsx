@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { type CSSProperties, useMemo } from 'react'
 import { Box, Skeleton, Typography, Paper, Stack, Divider } from '@mui/material'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -44,6 +44,9 @@ const AssetsSkeleton = () => (
   </WidgetCard>
 )
 
+const TRANSLATE_SWAP_ENABLED = 80
+const TRANSLATE_SWAP_DISABLED = 44
+
 const AssetRow = ({
   item,
   chainId,
@@ -60,6 +63,8 @@ const AssetRow = ({
   const stake = useLoadFeature(StakeFeature)
   const { SwapButton } = useLoadFeature(SwapFeature)
 
+  const translateOffset = showSwap ? TRANSLATE_SWAP_ENABLED : TRANSLATE_SWAP_DISABLED
+
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
@@ -72,7 +77,7 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box className={css.valueContainer}>
+      <Box className={css.valueContainer} style={{ '--buttons-width': `${translateOffset}px` } as CSSProperties}>
         <Box className={css.valueContent}>
           <FiatBalance balanceItem={item} />
           <FiatChange balanceItem={item} inline />

@@ -28,7 +28,24 @@ type Story = StoryObj<typeof meta>
 /**
  * Swap enabled (Send + Swap). Values translated 80px right; hover to reveal buttons.
  */
-export const WithSwap: Story = {}
+export const WithSwap: Story = (() => {
+  const setup = createMockStory({
+    scenario: 'efSafe',
+    wallet: 'owner',
+    layout: 'none',
+  })
+  return {
+    parameters: { ...setup.parameters },
+    decorators: [
+      setup.decorator,
+      (Story) => (
+        <div style={{ padding: 24, overflow: 'hidden' }}>
+          <Story />
+        </div>
+      ),
+    ],
+  }
+})()
 
 /**
  * AssetsWidget with whale portfolio data.
@@ -102,7 +119,7 @@ export const DiversePortfolio: Story = (() => {
 })()
 
 /**
- * Swap disabled (Send only). BUG: 80px translate over-crops the value.
+ * Swap disabled (Send only). Values translated 44px right; hover to reveal button.
  */
 export const WithoutSwap: Story = (() => {
   const setup = createMockStory({
@@ -113,6 +130,13 @@ export const WithoutSwap: Story = (() => {
   })
   return {
     parameters: { ...setup.parameters },
-    decorators: [setup.decorator],
+    decorators: [
+      setup.decorator,
+      (Story) => (
+        <div style={{ padding: 24, overflow: 'hidden' }}>
+          <Story />
+        </div>
+      ),
+    ],
   }
 })()
