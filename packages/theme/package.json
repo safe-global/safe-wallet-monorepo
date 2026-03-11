@@ -17,7 +17,6 @@
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
   },
   "peerDependencies": {
-    "@mui/material": "^6.x",
     "tamagui": "^1.x"
   },
   "peerDependenciesMeta": {
@@ -26,6 +25,7 @@
     }
   },
   "devDependencies": {
+    "@mui/material": "^6.5.0",
     "@safe-global/test": "workspace:^",
     "@types/jest": "^29.5.14",
     "eslint": "^9.29.0",
