@@ -16,7 +16,7 @@ const TOTAL_STEPS = 3
 
 const SelectSafesOnboarding = (): ReactElement => {
   const { spaceId, isReady, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { displayedSafes, handleSearch } = useOnboardingSafes()
+  const { trustedSafes, ownedSafes, handleSearch } = useOnboardingSafes()
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
@@ -63,7 +63,7 @@ const SelectSafesOnboarding = (): ReactElement => {
             />
           </InputGroup>
 
-          <OnboardingSafesList safes={displayedSafes} />
+          <OnboardingSafesList trustedSafes={trustedSafes} ownedSafes={ownedSafes} />
 
           {error && (
             <Alert variant="destructive">
