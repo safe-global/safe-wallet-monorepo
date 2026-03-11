@@ -72,10 +72,4 @@
   .drawer {
     max-width: 90vw;
   }
-
-  .drawerButton {
-    width: 60px;
-    height: 60px;
-    margin-top: 44px;
-  }
 }

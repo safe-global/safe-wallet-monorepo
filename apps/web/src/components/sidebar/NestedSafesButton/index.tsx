@@ -53,8 +53,8 @@ export function NestedSafesButton({
           <IconButton
             className={headerCss.iconButton}
             sx={{
-              width: 'auto !important',
               minWidth: '32px !important',
+              flexShrink: 0,
               backgroundColor: anchorEl ? '#f2fecd !important' : undefined,
             }}
             onClick={onClick}
