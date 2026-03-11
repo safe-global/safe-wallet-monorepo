@@ -18,11 +18,14 @@ import type { FeatureFlags, MockStoryConfig } from './types'
 
 /**
  * Core chain configuration handlers
+ * Web app uses /v2/chains (getChainsConfigV2); mobile may use /v1/chains
  */
 export function coreHandlers(chainData: Chain): RequestHandler[] {
+  const chainsPageData = createChainsPageData(chainData)
   return [
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
-    http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(chainData))),
+    http.get(/\/v1\/chains$/, () => HttpResponse.json(chainsPageData)),
+    http.get(/\/v2\/chains(?:\?|$)/, () => HttpResponse.json(chainsPageData)),
   ]
 }
 

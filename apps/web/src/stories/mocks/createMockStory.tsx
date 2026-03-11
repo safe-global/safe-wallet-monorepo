@@ -1,10 +1,14 @@
 import React from 'react'
 import type { Decorator, StoryContext } from '@storybook/react'
 import { SAFE_ADDRESSES } from '../../../../../config/test/msw/fixtures'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
+import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { MockContextProvider } from './MockContextProvider'
 import { resolveWallet } from './wallets'
 import { createHandlers, getFixtureData } from './handlers'
 import { createInitialState } from './defaults'
+import { createChainData } from './chains'
 import type { MockStoryConfig, MockStoryResult } from './types'
 
 /**
@@ -86,6 +90,41 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     handlers: customHandlers,
   })
 
+  const chainData = createChainData(features)
+  const chainsPreload = {
+    queries: {
+      [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: {
+        status: 'fulfilled' as const,
+        endpointName: 'getChainsConfigV2' as const,
+        requestId: `mock-chains-${Date.now()}`,
+        originalArgs: CONFIG_SERVICE_KEY,
+        startedTimeStamp: Date.now(),
+        data: chainsAdapter.setAll(chainsInitialState, [chainData]),
+        fulfilledTimeStamp: Date.now(),
+        error: undefined,
+      },
+    },
+    mutations: {},
+    provided: { tags: {}, keys: {} },
+    subscriptions: {},
+    config: {
+      online: true,
+      focused: true,
+      middlewareRegistered: false,
+      refetchOnFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMountOrArgChange: false,
+      keepUnusedDataFor: 60,
+      reducerPath: cgwClient.reducerPath,
+      invalidationBehavior: 'delayed',
+    },
+  }
+
+  const storeOverridesWithChains = {
+    ...storeOverrides,
+    [cgwClient.reducerPath]: chainsPreload,
+  }
+
   // Create decorator function
   const decorator: Decorator = (Story, context: StoryContext) => {
     const isDarkMode = context.globals?.theme === 'dark'
@@ -97,7 +136,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     const initialState = createInitialState({
       safeData,
       isDarkMode,
-      overrides: storeOverrides,
+      overrides: storeOverridesWithChains,
       isAuthenticated,
     })
 
@@ -118,7 +157,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
   const initialState = createInitialState({
     safeData,
     isDarkMode: false,
-    overrides: storeOverrides,
+    overrides: storeOverridesWithChains,
     isAuthenticated,
   })
 

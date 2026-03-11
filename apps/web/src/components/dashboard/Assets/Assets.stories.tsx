@@ -26,13 +26,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Default AssetsWidget showing top 4 assets from EF Safe.
- * Displays token icons, names, balances, and fiat values.
- *
- * Note: Values are translated 80px right and reveal action buttons on hover.
- * Hover over a row to see the full values and action buttons.
+ * Swap enabled (Send + Swap). Values translated 80px right; hover to reveal buttons.
  */
-export const Default: Story = {}
+export const WithSwap: Story = {}
 
 /**
  * AssetsWidget with whale portfolio data.
@@ -92,9 +88,6 @@ export const Loading: Story = (() => {
 
 /**
  * Safe Token holder with diverse portfolio (25 tokens).
- *
- * Note: Values are translated 80px right and reveal action buttons on hover.
- * Hover over a row to see the full values and action buttons.
  */
 export const DiversePortfolio: Story = (() => {
   const setup = createMockStory({
@@ -109,13 +102,9 @@ export const DiversePortfolio: Story = (() => {
 })()
 
 /**
- * AssetsWidget without swap feature enabled.
- * Demonstrates how the widget looks on chains that don't support native swaps.
- *
- * Note: Without the swap button, values may appear clipped on hover due to
- * the translateX animation having fewer buttons to offset.
+ * Swap disabled (Send only). BUG: 80px translate over-crops the value.
  */
-export const WithoutSwapFeature: Story = (() => {
+export const WithoutSwap: Story = (() => {
   const setup = createMockStory({
     scenario: 'efSafe',
     wallet: 'owner',
