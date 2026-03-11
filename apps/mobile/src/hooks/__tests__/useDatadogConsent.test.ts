@@ -73,7 +73,7 @@ describe('useDatadogConsent', () => {
     expect(DdSdkReactNative.addUserExtraInfo).not.toHaveBeenCalled()
   })
 
-  it('should not set DD user when activeSafe is null', () => {
+  it('should clear safe context when consented but activeSafe is null', () => {
     let callIndex = 0
     useSelector.mockImplementation(() => {
       callIndex++
@@ -82,6 +82,9 @@ describe('useDatadogConsent', () => {
 
     renderHook(() => useDatadogConsent())
 
-    expect(DdSdkReactNative.addUserExtraInfo).not.toHaveBeenCalled()
+    expect(DdSdkReactNative.addUserExtraInfo).toHaveBeenCalledWith({
+      safeAddress: '',
+      chainId: '',
+    })
   })
 })

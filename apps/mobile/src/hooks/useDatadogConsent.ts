@@ -14,10 +14,19 @@ export const useDatadogConsent = () => {
   }, [consented])
 
   useEffect(() => {
-    if (consented && activeSafe?.address && activeSafe?.chainId) {
+    if (!consented) {
+      return
+    }
+
+    if (activeSafe?.address && activeSafe?.chainId) {
       DdSdkReactNative.addUserExtraInfo({
         safeAddress: activeSafe.address,
         chainId: activeSafe.chainId,
+      })
+    } else {
+      DdSdkReactNative.addUserExtraInfo({
+        safeAddress: '',
+        chainId: '',
       })
     }
   }, [consented, activeSafe?.address, activeSafe?.chainId])
