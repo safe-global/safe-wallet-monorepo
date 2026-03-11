@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import Image from 'next/image'
+import SafeLogo from '@/public/images/logo-no-text.svg'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 
 export const SidebarTopBar = (): ReactElement => {
@@ -19,13 +19,11 @@ export const SidebarTopBar = (): ReactElement => {
         className="relative shrink-0 size-6 flex items-center justify-center cursor-pointer"
         data-testid="logo-container"
       >
-        <Image
-          src="/images/logo-no-text.svg"
-          alt="Safe"
-          width={24}
-          height={24}
-          className="size-6 dark:brightness-0 dark:invert"
+        <SafeLogo
+          className="size-6 text-[#1B2030] dark:text-[var(--primary)]"
           data-testid="logo-image"
+          aria-label="Safe"
+          role="img"
         />
       </div>
       <SidebarTrigger
