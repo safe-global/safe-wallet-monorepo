@@ -1,7 +1,6 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { CircleAlert } from 'lucide-react'
 import SafeCard from './SafeCard'
+import SimilarAddressAlert from './SimilarAddressAlert'
 
 interface SafeListProps {
   trustedSafes: AllSafeItems
@@ -25,15 +24,7 @@ const SectionHeader = ({ label }: { label: string }) => (
 const OnboardingSafesList = ({ trustedSafes, ownedSafes, similarAddresses }: SafeListProps) => {
   return (
     <div className="flex max-h-[400px] flex-col gap-2 overflow-auto">
-      {similarAddresses.size > 0 && (
-        <Alert variant="warning">
-          <CircleAlert />
-          <AlertTitle>Similar addresses detected</AlertTitle>
-          <AlertDescription>
-            These addresses look very similar. Carefully verify the full address before confirming.
-          </AlertDescription>
-        </Alert>
-      )}
+      {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
       {trustedSafes.length > 0 && (
         <>
