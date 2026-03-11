@@ -17,6 +17,7 @@ import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } f
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -90,6 +91,15 @@ const useOnboardingSafes = () => {
     [allChainIds, allOwned, allUndeployed, walletAddress, allAdded, allVisitedSafes, allSafeNames, trustedSafeItems],
   )
 
+  // Detect similar addresses across all safes
+  const similarAddresses = useMemo<Set<string>>(() => {
+    const allItems = [...trustedSafeItems, ...ownedSafeItems]
+    const uniqueAddresses = [...new Set(allItems.map((s) => s.address))]
+    if (uniqueAddresses.length < 2) return new Set()
+    const result = detectSimilarAddresses(uniqueAddresses)
+    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+  }, [trustedSafeItems, ownedSafeItems])
+
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
     () => _groupAndSort(trustedSafeItems, sortComparator),
@@ -109,6 +119,7 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
+    similarAddresses,
     handleSearch,
   }
 }

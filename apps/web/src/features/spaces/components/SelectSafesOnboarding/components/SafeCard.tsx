@@ -6,6 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import useSafeCardData from '../hooks/useSafeCardData'
 import SafeAvatar from './SafeAvatar'
+import { Badge } from '@/components/ui/badge'
+import { TriangleAlert } from 'lucide-react'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
 
@@ -14,9 +16,10 @@ const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `multichain_${mcSafe
 
 interface SafeCardProps {
   safe: SafeItem | MultiChainSafeItem
+  isSimilar?: boolean
 }
 
-const SafeCard = ({ safe }: SafeCardProps) => {
+const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
   const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
@@ -49,6 +52,7 @@ const SafeCard = ({ safe }: SafeCardProps) => {
         fiatValue={fiatValue}
         threshold={threshold}
         ownersCount={ownersCount}
+        isSimilar={isSimilar}
       />
     )
   }
@@ -69,6 +73,7 @@ const SafeCard = ({ safe }: SafeCardProps) => {
           fiatValue={fiatValue}
           threshold={threshold}
           ownersCount={ownersCount}
+          isSimilar={isSimilar}
         />
       )}
     />
@@ -86,6 +91,7 @@ interface SafeCardLayoutProps {
   fiatValue: string | number | undefined
   threshold: number
   ownersCount: number
+  isSimilar?: boolean
 }
 
 const SafeCardLayout = ({
@@ -99,6 +105,7 @@ const SafeCardLayout = ({
   fiatValue,
   threshold,
   ownersCount,
+  isSimilar,
 }: SafeCardLayoutProps) => (
   <button
     ref={ref}
@@ -120,6 +127,12 @@ const SafeCardLayout = ({
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         <span className="text-xs text-muted-foreground">{shortenAddress(address)}</span>
+        {isSimilar && (
+          <Badge variant="warning">
+            <TriangleAlert data-icon="inline-start" />
+            High similarity
+          </Badge>
+        )}
       </div>
     </div>
 
