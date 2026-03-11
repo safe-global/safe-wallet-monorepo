@@ -60,14 +60,17 @@ describe('SignInButton tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks SPACES_SIWE_SUCCESS with spaceId on successful sign in', async () => {
+  it('tracks SPACES_SIWE_SUCCESS with spaceId sent to both GA (label) and Mixpanel (additionalParameters)', async () => {
     mockSignIn.mockResolvedValue({ token: 'abc' })
 
     render(<SignInButton />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_SUCCESS, { spaceId: '42' })
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: '42' }, // GA receives spaceId as label
+        { spaceId: '42' }, // Mixpanel receives spaceId as additionalParameters
+      )
     })
   })
 
@@ -105,7 +108,10 @@ describe('SignInButton tracking', () => {
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
-      expect(trackEvent).not.toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_SUCCESS, expect.anything())
+      expect(trackEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ action: SPACE_EVENTS.SPACES_SIWE_SUCCESS.action }),
+        expect.anything(),
+      )
     })
   })
 })

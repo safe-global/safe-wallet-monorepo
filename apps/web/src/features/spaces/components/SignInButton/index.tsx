@@ -31,7 +31,7 @@ const SignInButton = () => {
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
-        trackEvent(SPACE_EVENTS.SPACES_SIWE_SUCCESS, { spaceId })
+        trackEvent({ ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: spaceId ?? undefined }, { spaceId })
       }
     } catch (error) {
       trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
