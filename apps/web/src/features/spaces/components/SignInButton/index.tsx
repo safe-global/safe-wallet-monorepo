@@ -7,10 +7,12 @@ import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 
 const SignInButton = () => {
   const dispatch = useAppDispatch()
   const { signIn } = useSiwe()
+  const spaceId = useCurrentSpaceId()
 
   const handleLogin = () => {
     trackEvent({ ...OVERVIEW_EVENTS.OPEN_ONBOARD, label: OVERVIEW_LABELS.space_list_page })
@@ -29,8 +31,12 @@ const SignInButton = () => {
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
+        trackEvent(SPACE_EVENTS.SPACES_SIWE_SUCCESS, { spaceId })
       }
     } catch (error) {
+      trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
+        failure_reason: error instanceof Error ? error.message : String(error),
+      })
       logError(ErrorCodes._640)
 
       dispatch(
