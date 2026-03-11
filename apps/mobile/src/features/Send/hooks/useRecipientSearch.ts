@@ -94,13 +94,13 @@ export function useRecipientSearch(query: string): {
     const contactsByAddress = buildChainFilteredContactNames(contacts, activeSafe.chainId)
     const safeOptions = buildSafeOptions(allSafes, activeSafe.chainId, namesByAddress)
 
-    // Exclude all Safe addresses (including the active one) from other sections
-    const allSafeAddresses = new Set(Object.keys(allSafes).map((a) => a.toLowerCase()))
-    allSafeAddresses.add(activeSafe.address.toLowerCase())
-    const signerOptions = buildSignerOptions(signersMap, allSafeAddresses, contactsByAddress)
+    // Exclude Safes shown in "My Safe accounts" + the active Safe from other sections
+    const shownSafeAddresses = new Set(safeOptions.map((s) => s.address.toLowerCase()))
+    shownSafeAddresses.add(activeSafe.address.toLowerCase())
+    const signerOptions = buildSignerOptions(signersMap, shownSafeAddresses, contactsByAddress)
 
     const signerAddresses = new Set(signerOptions.map((s) => s.address.toLowerCase()))
-    const allExcluded = new Set([...allSafeAddresses, ...signerAddresses])
+    const allExcluded = new Set([...shownSafeAddresses, ...signerAddresses])
     const contactOptions = buildContactOptions(contacts, activeSafe.chainId, allExcluded)
 
     return { safeOptions, signerOptions, contactOptions }
