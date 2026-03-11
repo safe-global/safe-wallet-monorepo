@@ -44,52 +44,25 @@ const useOnboardingSafes = () => {
 
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Trusted safes: from addedSafes (user-pinned, stored in localStorage)
-  const trustedSafeItems = useMemo<SafeItem[]>(
-    () =>
-      allChainIds.flatMap((chainId) => {
-        const addedAddresses = Object.keys(allAdded[chainId] || {})
-        return addedAddresses.map((address) =>
-          _buildSafeItem(
-            chainId,
-            address,
-            walletAddress,
-            allAdded,
-            allOwned,
-            allUndeployed,
-            allVisitedSafes,
-            allSafeNames,
-          ),
-        )
-      }),
-    [allChainIds, allAdded, walletAddress, allOwned, allUndeployed, allVisitedSafes, allSafeNames],
-  )
+  const { trustedSafeItems, ownedSafeItems } = useMemo(() => {
+    const buildItem = (chainId: string, address: string) =>
+      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-  // Owned safes: from CGW API + undeployed, excluding safes already in trusted list
-  const ownedSafeItems = useMemo<SafeItem[]>(
-    () =>
-      allChainIds.flatMap((chainId) => {
-        const ownedAddresses = allOwned[chainId] || []
-        const undeployedAddresses = Object.keys(allUndeployed[chainId] || {})
-        const combined = [...new Set([...ownedAddresses, ...undeployedAddresses])]
+    // Trusted safes: from addedSafes (user-pinned, stored in localStorage)
+    const trusted = allChainIds.flatMap((chainId) =>
+      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
+    )
 
-        return combined
-          .filter((address) => !trustedSafeItems.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
-          .map((address) =>
-            _buildSafeItem(
-              chainId,
-              address,
-              walletAddress,
-              allAdded,
-              allOwned,
-              allUndeployed,
-              allVisitedSafes,
-              allSafeNames,
-            ),
-          )
-      }),
-    [allChainIds, allOwned, allUndeployed, walletAddress, allAdded, allVisitedSafes, allSafeNames, trustedSafeItems],
-  )
+    // Owned safes: from CGW API + undeployed, excluding safes already in trusted list
+    const owned = allChainIds.flatMap((chainId) => {
+      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
+      return combined
+        .filter((address) => !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
+        .map((address) => buildItem(chainId, address))
+    })
+
+    return { trustedSafeItems: trusted, ownedSafeItems: owned }
+  }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
 
   // Detect similar addresses across all safes
   const similarAddresses = useMemo<Set<string>>(() => {
