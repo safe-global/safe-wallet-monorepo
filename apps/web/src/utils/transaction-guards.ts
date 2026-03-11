@@ -444,7 +444,7 @@ export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
     isMultiSendCalldata(data.hexData) &&
     Boolean(
       Array.isArray(data.dataDecoded?.parameters?.[0]?.valueDecoded) &&
-      data.dataDecoded.parameters[0].valueDecoded.some((tx) => tx.dataDecoded?.method === 'changeMasterCopy'),
+        data.dataDecoded.parameters[0].valueDecoded.some((tx) => tx.dataDecoded?.method === 'changeMasterCopy'),
     )
   )
 }
