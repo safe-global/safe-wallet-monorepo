@@ -23,7 +23,6 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
-  isStoreHydrated: boolean
 }
 
 // ---------------------------------------------------------------------------

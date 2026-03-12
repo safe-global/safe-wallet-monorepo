@@ -33,14 +33,6 @@ const guardRules: GuardRule[] = [
     action: () => allow(),
   },
 
-  // If the store is not hydrated, don't redirect yet
-  {
-    match: ({ isStoreHydrated }) => {
-      return !isStoreHydrated
-    },
-    action: () => allow(),
-  },
-
   // Spaces routes require SIWE authentication → if not authenticated, redirect to welcome/spaces
   {
     match: ({ isSpacesPath, isSiweAuthenticated }) => isSpacesPath && !isSiweAuthenticated,
@@ -121,7 +113,6 @@ export const useFlowActivationGuard: UseGuard = () => {
       {
         pathname,
         query,
-        isStoreHydrated,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
