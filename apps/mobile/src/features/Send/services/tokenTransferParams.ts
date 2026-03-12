@@ -5,6 +5,9 @@ import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
+// Polygon native token wrapper (MRC20) — its payable transfer() requires msg.value == amount
+const POLYGON_MRC20 = '0x0000000000000000000000000000000000001010'
+
 const encodeErc20TransferData = (to: string, value: string): string => {
   const erc20Abi = ['function transfer(address to, uint256 value)']
   const iface = new Interface(erc20Abi)
@@ -16,9 +19,11 @@ export const createErc20TransferParams = (
   tokenAddress: string,
   value: string,
 ): MetaTransactionData => {
+  const isPayableNativeWrapper = sameAddress(tokenAddress, POLYGON_MRC20)
+
   return {
     to: tokenAddress,
-    value: '0',
+    value: isPayableNativeWrapper ? value : '0',
     data: encodeErc20TransferData(recipient, value),
   }
 }

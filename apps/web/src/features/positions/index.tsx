@@ -17,7 +17,7 @@ const Positions = () => {
   const { data: protocols, error, isLoading } = usePositions()
   const portfolio = useLoadFeature(PortfolioFeature)
 
-  if (isLoading || (!error && !protocols)) {
+  if (isLoading) {
     return <PositionsSkeleton />
   }
 

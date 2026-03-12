@@ -3,6 +3,7 @@ import { Interface } from 'ethers'
 import { generateChecksummedAddress } from '@safe-global/test'
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const POLYGON_MRC20 = '0x0000000000000000000000000000000000001010'
 
 describe('tokenTransferParams', () => {
   describe('createTokenTransferParams', () => {
@@ -69,6 +70,20 @@ describe('tokenTransferParams', () => {
 
       expect(result.value).toBe('1000000000000000')
     })
+
+    it('sets value equal to amount for Polygon MRC20 (0x...1010)', () => {
+      const recipient = generateChecksummedAddress()
+      const result = createTokenTransferParams(recipient, '5', 18, POLYGON_MRC20)
+
+      expect(result.to).toBe(POLYGON_MRC20)
+      expect(result.value).toBe('5000000000000000000')
+      expect(result.data).not.toBe('0x')
+
+      const iface = new Interface(['function transfer(address to, uint256 value)'])
+      const decoded = iface.decodeFunctionData('transfer', result.data)
+      expect(decoded[0]).toBe(recipient)
+      expect(decoded[1].toString()).toBe('5000000000000000000')
+    })
   })
 
   describe('createErc20TransferParams', () => {
@@ -81,6 +96,15 @@ describe('tokenTransferParams', () => {
       expect(result.value).toBe('0')
       expect(result.data).toBeDefined()
       expect(result.data.startsWith('0xa9059cbb')).toBe(true) // transfer selector
+    })
+
+    it('sets value for Polygon MRC20 payable native wrapper', () => {
+      const recipient = generateChecksummedAddress()
+      const result = createErc20TransferParams(recipient, POLYGON_MRC20, '5000000000000000000')
+
+      expect(result.to).toBe(POLYGON_MRC20)
+      expect(result.value).toBe('5000000000000000000')
+      expect(result.data.startsWith('0xa9059cbb')).toBe(true)
     })
   })
 

@@ -12,8 +12,6 @@ interface FooterActionProps {
   activeSigner: Signer | undefined
   availableSigners: Signer[]
   isSubmitting: boolean
-  keyboardVisible: boolean
-  bottomInset: number
   onReview: () => void
   onOpenSignerSheet: () => void
 }
@@ -24,15 +22,11 @@ export function FooterAction({
   activeSigner,
   availableSigners,
   isSubmitting,
-  keyboardVisible,
-  bottomInset,
   onReview,
   onOpenSignerSheet,
 }: FooterActionProps) {
-  const paddingBottom = keyboardVisible ? getTokenValue('$4') : Math.max(bottomInset, getTokenValue('$4'))
-
   return (
-    <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={paddingBottom} gap="$3">
+    <View paddingHorizontal="$4" paddingTop="$3" paddingBottom={getTokenValue('$4')} gap="$3">
       {activeSigner && (
         <SelectProposer
           address={activeSigner.value as Address}
@@ -41,24 +35,26 @@ export function FooterAction({
         />
       )}
 
-      {exceedsBalance ? (
-        <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
-      ) : !activeSigner && availableSigners.length === 0 ? (
-        <Alert
-          type="warning"
-          message="No signer keys found. Import a signer to propose transactions."
-          testID="no-signer-alert"
-        />
-      ) : (
-        <SafeButton
-          onPress={onReview}
-          disabled={!isValid || !activeSigner || isSubmitting}
-          loading={isSubmitting}
-          testID="review-button"
-        >
-          Review & confirm
-        </SafeButton>
-      )}
+      <View minHeight={52} justifyContent="center">
+        {exceedsBalance ? (
+          <Alert type="error" message="Insufficient balance" testID="insufficient-balance-alert" />
+        ) : !activeSigner && availableSigners.length === 0 ? (
+          <Alert
+            type="warning"
+            message="No signer keys found. Import a signer to propose transactions."
+            testID="no-signer-alert"
+          />
+        ) : (
+          <SafeButton
+            onPress={onReview}
+            disabled={!isValid || !activeSigner || isSubmitting}
+            loading={isSubmitting}
+            testID="review-button"
+          >
+            Review & confirm
+          </SafeButton>
+        )}
+      </View>
     </View>
   )
 }

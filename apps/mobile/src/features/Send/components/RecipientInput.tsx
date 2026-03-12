@@ -16,6 +16,7 @@ interface RecipientInputProps {
   validationState: RecipientValidationState
   contactName?: string
   selectedName?: string
+  chainName?: string
 }
 
 const borderColors: Record<RecipientValidationState, string> = {
@@ -26,6 +27,7 @@ const borderColors: Record<RecipientValidationState, string> = {
   invalid: '$error',
   'self-send': '$warning',
   suspicious: '$warning',
+  'known-other-chain': '$warning',
 }
 
 const labelConfig: Partial<
@@ -46,17 +48,31 @@ const labelConfig: Partial<
     textColor: '$color',
     text: 'Suspicious recipient',
   },
+  'known-other-chain': {
+    icon: 'alert',
+    iconColor: '$warning',
+    textColor: '$color',
+    text: 'Unknown recipient on this network',
+  },
 }
 
-function RecipientLabel({ validationState }: { validationState: RecipientValidationState }) {
+function RecipientLabel({
+  validationState,
+  chainName,
+}: {
+  validationState: RecipientValidationState
+  chainName?: string
+}) {
   const label = labelConfig[validationState]
 
   if (label) {
+    const text = validationState === 'known-other-chain' && chainName ? `Unknown recipient on ${chainName}` : label.text
+
     return (
       <>
         <SafeFontIcon name={label.icon as 'check'} size={16} color={label.iconColor} />
         <Text fontSize="$4" color={label.textColor}>
-          {label.text}
+          {text}
         </Text>
       </>
     )
@@ -104,12 +120,14 @@ function SelectedRecipient({
 function AddressInputField({
   value,
   hasAddress,
+  isEditable,
   onChangeText,
   onClear,
   onPaste,
 }: {
   value: string
   hasAddress: boolean
+  isEditable: boolean
   onChangeText: (text: string) => void
   onClear: () => void
   onPaste: () => void
@@ -117,11 +135,7 @@ function AddressInputField({
   return (
     <>
       <View flex={1} flexDirection="row" alignItems="center">
-        {hasAddress ? (
-          <Text fontSize="$4" color="$color" flex={1}>
-            {value}
-          </Text>
-        ) : (
+        {isEditable ? (
           <Input
             flex={1}
             value={value}
@@ -137,6 +151,10 @@ function AddressInputField({
             backgroundColor="transparent"
             testID="recipient-input"
           />
+        ) : (
+          <Text fontSize="$4" color="$color" flex={1}>
+            {value}
+          </Text>
         )}
       </View>
       {hasAddress ? (
@@ -169,6 +187,7 @@ export function RecipientInput({
   validationState,
   contactName,
   selectedName,
+  chainName,
 }: RecipientInputProps) {
   const handlePaste = useCallback(async () => {
     const text = await Clipboard.getString()
@@ -179,11 +198,12 @@ export function RecipientInput({
 
   const isSelected = !!selectedName && validationState !== 'empty' && validationState !== 'typing'
   const hasAddress = validationState !== 'empty' && validationState !== 'typing'
+  const isEditable = !hasAddress || validationState === 'invalid'
 
   return (
     <View gap="$2">
       <View flexDirection="row" alignItems="center" gap="$1" paddingLeft={4}>
-        <RecipientLabel validationState={validationState} />
+        <RecipientLabel validationState={validationState} chainName={chainName} />
       </View>
       <View
         flexDirection="row"
@@ -202,15 +222,20 @@ export function RecipientInput({
           <AddressInputField
             value={value}
             hasAddress={hasAddress}
+            isEditable={isEditable}
             onChangeText={onChangeText}
             onClear={onClear}
             onPaste={handlePaste}
           />
         )}
       </View>
-      {!isSelected && hasAddress && validationState !== 'unknown' && (
-        <RecipientValidationBadge state={validationState} contactName={contactName} />
-      )}
+      {!isSelected &&
+        hasAddress &&
+        validationState !== 'unknown' &&
+        validationState !== 'invalid' &&
+        validationState !== 'known-other-chain' && (
+          <RecipientValidationBadge state={validationState} contactName={contactName} />
+        )}
     </View>
   )
 }

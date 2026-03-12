@@ -9,8 +9,8 @@ exports[`Container applies the correct styles 1`] = `
   "borderTopRightRadius": 6,
   "flexDirection": "column",
   "paddingBottom": 16,
-  "paddingLeft": 16,
-  "paddingRight": 16,
+  "paddingLeft": 12,
+  "paddingRight": 12,
   "paddingTop": 16,
 }
 `;

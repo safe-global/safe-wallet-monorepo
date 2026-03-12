@@ -9,8 +9,12 @@ import { RecipientInput } from './components/RecipientInput'
 import { RecipientSections } from './components/RecipientSections'
 import { AddToAddressBookModal } from './components/AddToAddressBookModal'
 import { SuspiciousAddressComparison } from './components/SuspiciousAddressComparison'
+import { KnownOtherChainWarning } from './components/KnownOtherChainWarning'
 import { useRecipientValidation } from './hooks/useRecipientValidation'
 import { useRecipientSearch } from './hooks/useRecipientSearch'
+import { useAppSelector } from '@/src/store/hooks'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { selectChainById } from '@/src/store/chains'
 import { IconName } from '@/src/types/iconTypes'
 
 function IconRow({
@@ -49,6 +53,9 @@ export function SelectRecipientContainer() {
   const router = useRouter()
   const { bottom } = useSafeAreaInsets()
   const { scannedAddress } = useLocalSearchParams<{ scannedAddress?: string }>()
+  const activeSafe = useDefinedActiveSafe()
+  const chain = useAppSelector((state) => selectChainById(state, activeSafe.chainId))
+  const chainName = chain?.chainName ?? 'this network'
   const [address, setAddress] = useState('')
   const [recipientName, setRecipientName] = useState<string>()
   const [showAddContact, setShowAddContact] = useState(false)
@@ -68,10 +75,18 @@ export function SelectRecipientContainer() {
     setRecipientName(undefined)
   }, [])
 
-  const handleSelect = useCallback((selectedAddress: string, name?: string) => {
-    setAddress(selectedAddress)
-    setRecipientName(name)
-  }, [])
+  const handleSelect = useCallback(
+    (selectedAddress: string, name?: string) => {
+      router.push({
+        pathname: '/(send)/token',
+        params: {
+          recipientAddress: selectedAddress.trim(),
+          ...(name ? { recipientName: name } : {}),
+        },
+      })
+    },
+    [router],
+  )
 
   const handleClear = useCallback(() => {
     setAddress('')
@@ -115,6 +130,7 @@ export function SelectRecipientContainer() {
     setShowAddContact(false)
   }, [])
   const isSuspicious = validation.state === 'suspicious'
+  const isKnownOtherChain = validation.state === 'known-other-chain'
   const isSelected = !!displayName
   const hasAddress = validation.state !== 'empty' && validation.state !== 'typing'
   const showBrowseOptions = !isSelected && !hasAddress
@@ -148,7 +164,16 @@ export function SelectRecipientContainer() {
                 validationState={validation.state}
                 contactName={validation.contactName}
                 selectedName={displayName}
+                chainName={chainName}
               />
+
+              {isKnownOtherChain && validation.contactAddress && (
+                <KnownOtherChainWarning
+                  contactAddress={validation.contactAddress}
+                  chainId={activeSafe.chainId}
+                  chainName={chainName}
+                />
+              )}
 
               {showAddToAddressBook && (
                 <IconRow

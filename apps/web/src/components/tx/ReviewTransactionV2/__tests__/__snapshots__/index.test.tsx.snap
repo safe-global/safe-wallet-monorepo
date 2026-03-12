@@ -77,7 +77,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                       >
                         <button
                           aria-label="Copy to clipboard"
-                          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                          class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
                           tabindex="0"
                           type="button"
                         >
@@ -640,7 +640,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
             data-mui-internal-clone-element="true"
           >
             <button
-              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-2zc3nx-MuiButtonBase-root-MuiButton-root"
+              class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary css-bg329z-MuiButtonBase-root-MuiButton-root"
               data-testid="continue-sign-btn"
               disabled=""
               tabindex="-1"
