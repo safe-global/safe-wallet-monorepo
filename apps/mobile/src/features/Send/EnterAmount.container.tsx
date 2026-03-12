@@ -79,6 +79,7 @@ export function EnterAmountContainer() {
     currency,
     symbol: tokenSymbol,
     decimals,
+    onRawInputChange: setMax,
   })
 
   const { exceedsBalance, exceedsDecimals, isValid } = useTokenAmountValidation({
