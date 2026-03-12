@@ -50,9 +50,7 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
 
 jest.mock('@/components/welcome/WelcomeLogin/WalletLogin', () => ({
   __esModule: true,
-  default: ({ onContinue }: { onContinue: () => void }) => (
-    <button onClick={onContinue}>Sign in</button>
-  ),
+  default: ({ onContinue }: { onContinue: () => void }) => <button onClick={onContinue}>Sign in</button>,
 }))
 
 describe('SignInButton tracking', () => {
