@@ -22,27 +22,12 @@ export const buildHypernativeMessageRequestData = ({
   proposer,
   origin,
 }: BuildHypernativeMessageRequestDataParams): HypernativeMessageAssessmentRequestDto | undefined => {
-  //TODO: Remove this after testing
-  console.log('[buildHypernativeMessageRequestData] inputs:', {
-    safeAddress,
-    messageHash,
-    typedData,
-  })
-  //TODO: Remove this after testing
-
   if (!safeAddress || !messageHash || !typedData) {
-    console.log('[buildHypernativeMessageRequestData] missing required fields')
     return undefined
   }
 
   // Validate that typedData has required EIP-712 fields
-  if (!typedData.types || !typedData.domain || !typedData.message /*|| !typedData.primaryType*/) {
-    console.log('[buildHypernativeMessageRequestData] missing EIP-712 fields:', {
-      hasTypes: !!typedData.types,
-      hasDomain: !!typedData.domain,
-      hasMessage: !!typedData.message,
-      //hasPrimaryType: !!typedData.primaryType,
-    })
+  if (!typedData.types || !typedData.domain || !typedData.message) {
     return undefined
   }
 

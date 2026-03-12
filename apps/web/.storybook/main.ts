@@ -111,23 +111,6 @@ const config: StorybookConfig = {
       }
     }
 
-    config.cache = {
-      type: 'filesystem',
-      buildDependencies: {
-        config: [__filename],
-      },
-    }
-
-    if (process.env.NODE_ENV !== 'production' && process.env.STORYBOOK_LAZY !== 'false') {
-      config.experiments = {
-        ...config.experiments,
-        lazyCompilation: {
-          imports: true,
-          entries: false,
-        },
-      }
-    }
-
     // This modifies the existing image rule to exclude .svg files
     // since you want to handle those files with @svgr/webpack
     const imageRule = config.module.rules.find(

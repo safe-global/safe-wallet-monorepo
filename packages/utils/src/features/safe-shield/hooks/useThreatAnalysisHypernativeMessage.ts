@@ -50,19 +50,6 @@ export function useThreatAnalysisHypernativeMessage({
   // Parse origin if it's a JSON string containing url
   const origin = useParsedOrigin(originProp)
 
-  //TODO: Remove this after testing
-  console.log('typedData', typedData)
-  console.log('[useThreatAnalysisHypernativeMessage] inputs:', {
-    safeAddress,
-    messageHash,
-    typedData: !!typedData,
-    proposer,
-    origin,
-    authToken: !!authToken,
-    skip,
-  })
-  //TODO: Remove this after testing
-
   // Build Hypernative request payload
   const hypernativeRequest = useMemo(() => {
     if (skip || !typedData || !messageHash) {
@@ -77,13 +64,6 @@ export function useThreatAnalysisHypernativeMessage({
       origin,
     })
   }, [typedData, safeAddress, messageHash, proposer, origin, skip])
-
-  //TODO: Remove this after testing
-  console.log('[useThreatAnalysisHypernativeMessage] request built:', {
-    hasRequest: !!hypernativeRequest,
-    request: hypernativeRequest,
-  })
-  //TODO: Remove this after testing
 
   useEffect(() => {
     if (!skip && hypernativeRequest && authToken) {
@@ -100,14 +80,6 @@ export function useThreatAnalysisHypernativeMessage({
       })
     }
   }, [hypernativeRequest, authToken, triggerAssessment, skip])
-
-  //TODO: Remove this after testing
-  console.log('[useThreatAnalysisHypernativeMessage] API state:', {
-    hypernativeData,
-    error,
-    isLoading,
-  })
-  //TODO: Remove this after testing
 
   const fetchError = useMemo(() => {
     if (!error) return undefined
