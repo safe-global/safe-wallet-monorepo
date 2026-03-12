@@ -19,7 +19,7 @@
   min-height: 40px;
   padding: 32px 8px;
   border-radius: 8px;
-  background-color: var(--sidebar-accent);
+  background-color: var(--secondary);
   cursor: pointer;
 }
 

@@ -40,7 +40,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-5 group-data-[collapsible=icon]:hidden"
+      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-5 group-data-[collapsible=icon]:hidden"
       data-testid="api-cta-sidebar"
     >
       <div className="flex w-full items-start justify-between">

@@ -18,6 +18,7 @@ export interface GuardContext {
   query: ParsedUrlQuery
   isPublicRoute: boolean
   isOnboardingRoute: boolean
+  isSpacesPath: boolean
   isWalletReady: boolean
   isSiweAuthenticated: boolean
   hasSpaces: boolean

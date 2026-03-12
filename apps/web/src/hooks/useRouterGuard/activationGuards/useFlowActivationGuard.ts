@@ -33,12 +33,12 @@ const guardRules: GuardRule[] = [
     action: () => allow(),
   },
 
-  // Not connected or not signed in with SIWE → welcome
+  // Not connected or not signed in with SIWE → welcome (spaces path → welcome/spaces)
   {
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: () => redirect(AppRoutes.welcome.index),
+    action: ({ isSpacesPath }) => redirect(isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index),
   },
 
   // Authenticated but has no spaces → onboarding
@@ -101,12 +101,15 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
     }
 
+    const isSpacesPath = pathname.startsWith('/spaces')
+    const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
     return evaluateGuard(
       {
         pathname,
         query,
-        isPublicRoute: !ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)) && !isSpaceRoute,
-        isOnboardingRoute: ONBOARDING_ROUTES.some((route) => pathname.startsWith(route)),
+        isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
+        isOnboardingRoute,
+        isSpacesPath,
         isWalletReady,
         isSiweAuthenticated,
         hasSpaces,
@@ -114,7 +117,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, fetchSpaces])
+  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces])
 
   return {
     activationGuard,

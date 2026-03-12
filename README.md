@@ -218,6 +218,35 @@ For information on releasing the web app, see the [Automated Release Procedure](
 - [Prettier Documentation](https://prettier.io/)
 - [Safe Developer Docs](https://docs.safe.global/)
 
+## Ode to the repo
+
+```
+In ages past when Gnosis laid the founding stone,
+A vault was wrought that no single key could own.
+Where signatures must gather ere the gate will yield,
+M-of-N doth guard the treasure, sworn and sealed.
+
+Now Yarn doth wind its threads through hall and bower,
+Binding web and mobile in a single tower.
+Redux keeps the ledger, RTK Query rides afar,
+Returning with the fetched gold beneath the evening star.
+
+Chain by chain the watchers set their vigil wide,
+Across th' EVM kingdoms, ever at the Safe's own side.
+Storybook doth chronicle each component's tale,
+And Cypress walks the paths where lesser tests would fail.
+
+No `any` types shall darken these well-guarded lands —
+That ancient law doth hold by Prettier's own hands.
+Feature flags like waypoints mark what lies ahead,
+And lazy loads awaken only where the road doth tread.
+
+Long the name hath wandered — Gnosis once, now Safe it stands,
+Yet still the vow endureth, written into typed commands:
+That what you hold stays guarded, deep beyond all theft or flame,
+For this the codebase liveth — and security its name.
+```
+
 ---
 
 If you have any questions or run into issues, feel free to open a discussion or contact the maintainers. Happy coding!

@@ -11,12 +11,6 @@ declare global {
         isUnlocked: () => Promise<boolean>
       }
       isConnected?: () => boolean
-      providers?: Array<{
-        isMetaMask?: boolean
-        _metamask?: {
-          isUnlocked: () => Promise<boolean>
-        }
-      }>
     }
     beamer_config?: BeamerConfig
     Beamer?: BeamerMethods

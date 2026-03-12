@@ -6,6 +6,7 @@ import {
   selectContact,
   updateContact,
   addContacts,
+  mergeContactChainIds,
 } from '../addressBookSlice'
 import type { Contact } from '../addressBookSlice'
 
@@ -131,5 +132,47 @@ describe('addressBookSlice', () => {
     const state = addressBookSlice.reducer(initial, updateContact(contact))
 
     expect(state.contacts['0x1']).toBeUndefined()
+  })
+
+  describe('mergeContactChainIds', () => {
+    it('merges new chainIds into existing ones', () => {
+      const initial = {
+        contacts: { '0x1': { value: '0x1', name: 'Alice', chainIds: ['1', '137'] } },
+        selectedContact: null,
+      }
+      const state = addressBookSlice.reducer(initial, mergeContactChainIds({ value: '0x1', chainIds: ['10', '137'] }))
+
+      expect(state.contacts['0x1'].chainIds).toEqual(['1', '137', '10'])
+    })
+
+    it('does not restrict a global contact (chainIds: [])', () => {
+      const initial = {
+        contacts: { '0x1': { value: '0x1', name: 'Alice', chainIds: [] } },
+        selectedContact: null,
+      }
+      const state = addressBookSlice.reducer(initial, mergeContactChainIds({ value: '0x1', chainIds: ['1'] }))
+
+      expect(state.contacts['0x1'].chainIds).toEqual([])
+    })
+
+    it('does nothing if contact does not exist', () => {
+      const initial = {
+        contacts: {},
+        selectedContact: null,
+      }
+      const state = addressBookSlice.reducer(initial, mergeContactChainIds({ value: '0x1', chainIds: ['1'] }))
+
+      expect(state.contacts['0x1']).toBeUndefined()
+    })
+
+    it('handles empty chainIds payload', () => {
+      const initial = {
+        contacts: { '0x1': { value: '0x1', name: 'Alice', chainIds: ['1'] } },
+        selectedContact: null,
+      }
+      const state = addressBookSlice.reducer(initial, mergeContactChainIds({ value: '0x1', chainIds: [] }))
+
+      expect(state.contacts['0x1'].chainIds).toEqual(['1'])
+    })
   })
 })

@@ -6,6 +6,7 @@ import type {
   QueuedItemPage,
   TransactionQueuedItem,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { getTransactionType } from '@/src/hooks/useTransactionType'
 
 interface QueuedNonceItem {
   nonce: number
@@ -40,7 +41,7 @@ function resolveTransactionNonce(txItem: TransactionQueuedItem, fallbackNonce: n
 }
 
 function buildQueuedNonceItem(txItem: TransactionQueuedItem, nonce: number): QueuedNonceItem {
-  return { nonce, label: extractTxLabel(txItem.transaction.txInfo) }
+  return { nonce, label: extractTxLabel(txItem) }
 }
 
 function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
@@ -124,23 +125,15 @@ export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
   }
 }
 
-function extractTxLabel(
-  txInfo: {
-    type: string
-    methodName?: string | null
-    humanDescription?: string | null
-  } & Record<string, unknown>,
-): string {
-  switch (txInfo.type) {
-    case 'Transfer':
-      return 'Send transaction'
-    case 'SettingsChange':
-      return 'Settings change'
-    case 'Custom':
-      return (txInfo.methodName as string) ?? 'Contract interaction'
-    case 'MultiSend':
-      return 'Batch transaction'
-    default:
-      return txInfo.humanDescription ?? 'Transaction'
+function extractTxLabel(txItem: TransactionQueuedItem): string {
+  const { transaction } = txItem
+  const txInfo = transaction.txInfo as { humanDescription?: string | null }
+  if (txInfo.humanDescription) {
+    return txInfo.humanDescription
   }
+  const { text } = getTransactionType(transaction)
+  if (text.toLowerCase().endsWith('transaction')) {
+    return text
+  }
+  return `${text} transaction`
 }
