@@ -233,7 +233,8 @@ export function RecipientInput({
         hasAddress &&
         validationState !== 'unknown' &&
         validationState !== 'invalid' &&
-        validationState !== 'known-other-chain' && (
+        validationState !== 'known-other-chain' &&
+        validationState !== 'self-send' && (
           <RecipientValidationBadge state={validationState} contactName={contactName} />
         )}
     </View>

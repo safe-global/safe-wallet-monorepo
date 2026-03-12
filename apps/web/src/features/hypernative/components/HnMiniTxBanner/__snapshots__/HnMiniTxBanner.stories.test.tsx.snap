@@ -42,7 +42,7 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
       </div>
       <button
         aria-label="close"
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
