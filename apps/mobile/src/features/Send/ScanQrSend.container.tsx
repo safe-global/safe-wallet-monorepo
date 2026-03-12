@@ -74,7 +74,7 @@ export function ScanQrSendContainer() {
       setIsCameraActive(false)
       router.dismissTo({
         pathname: '/(send)/recipient',
-        params: { scannedAddress: address },
+        params: { scannedAddress: address, scanTimestamp: Date.now().toString() },
       })
     },
     [router],
