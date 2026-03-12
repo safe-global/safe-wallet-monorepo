@@ -71,6 +71,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
+          [css.mainSpace]: isSpaceRoute,
         })}
       >
         <div className={css.content}>

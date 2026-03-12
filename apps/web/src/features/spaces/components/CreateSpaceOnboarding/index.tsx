@@ -63,6 +63,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
               <Input
                 data-testid="space-name-input"
                 placeholder="Name your space"
+                autoComplete="off"
                 autoFocus={!isEditMode}
                 disabled={isCheckingAccess || isSpaceLoading}
                 className="h-11 rounded-lg bg-card px-4"
