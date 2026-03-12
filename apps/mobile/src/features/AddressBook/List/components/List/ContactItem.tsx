@@ -63,11 +63,6 @@ export const ContactItem: React.FC<ContactItemProps> = ({ contact, onPress, onMe
               <Identicon address={`${contact.value as Address}`} rounded size={40} />
             </View>
           }
-          rightNode={
-            <View>
-              <SafeFontIcon name={'options-horizontal'} />
-            </View>
-          }
         />
       </Pressable>
 

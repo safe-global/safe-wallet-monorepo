@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Identicon } from '@/src/components/Identicon'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { ThresholdBadge } from '@/src/components/ThresholdBadge'
+import { DropdownLabel } from '@/src/components/Dropdown'
 import { Image } from 'expo-image'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 import { shortenAddress } from '@/src/utils/formatters'
 import { useAppSelector } from '@/src/store/hooks'
@@ -100,8 +100,12 @@ export const Navbar = () => {
         paddingBottom={'$2'}
         backgroundColor={isDark ? '$background' : '$backgroundFocus'}
       >
-        <Pressable onPress={() => router.push('/accounts-sheet')} hitSlop={4} testID="account-selector">
-          <XStack gap="$3" alignItems="center">
+        <DropdownLabel
+          label={safeName}
+          labelProps={nameLabelProps}
+          onPress={() => router.push('/accounts-sheet')}
+          hitSlop={4}
+          leftNode={
             <BadgeWrapper
               badge={
                 <ThresholdBadge
@@ -117,24 +121,9 @@ export const Navbar = () => {
             >
               <Identicon address={activeSafe.address} size={30} />
             </BadgeWrapper>
-            <View>
-              <XStack alignItems="center" gap="$1">
-                <Text
-                  fontSize={nameLabelProps.fontSize}
-                  fontWeight={nameLabelProps.fontWeight}
-                  numberOfLines={1}
-                  maxWidth={170}
-                >
-                  {safeName}
-                </Text>
-                <SafeFontIcon name="chevron-down" size={16} />
-              </XStack>
-              <Text fontSize="$4" color="$colorSecondary" numberOfLines={1}>
-                {shortenAddress(activeSafe.address)}
-              </Text>
-            </View>
-          </XStack>
-        </Pressable>
+          }
+          subtitle={shortenAddress(activeSafe.address)}
+        />
 
         <XStack gap="$2" alignItems="center">
           <PendingTxBadge amount={amount} onPress={() => router.push('/pending-transactions')} />

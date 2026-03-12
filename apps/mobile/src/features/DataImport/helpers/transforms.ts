@@ -251,17 +251,31 @@ export const storeSafeContacts = (data: LegacyDataStructure, dispatch: AppDispat
 
   Logger.info(`Storing ${data.safes.length} safe addresses as contacts`)
 
+  // Group safes by address to collect all deployed chains
+  const safesByAddress = new Map<string, { name: string; chainIds: string[]; originalAddress: string }>()
+
   for (const safe of data.safes) {
-    dispatch(
-      _addContact({
-        value: safe.address,
+    const addressKey = safe.address.toLowerCase()
+    const existing = safesByAddress.get(addressKey)
+
+    if (existing) {
+      if (safe.chain && !existing.chainIds.includes(safe.chain)) {
+        existing.chainIds.push(safe.chain)
+      }
+    } else {
+      safesByAddress.set(addressKey, {
         name: safe.name,
-        chainIds: [],
-      }),
-    )
+        chainIds: safe.chain ? [safe.chain] : [],
+        originalAddress: safe.address,
+      })
+    }
   }
 
-  Logger.info(`Stored ${data.safes.length} safe contacts`)
+  for (const { name, chainIds, originalAddress } of safesByAddress.values()) {
+    dispatch(_addContact({ value: originalAddress, name, chainIds }))
+  }
+
+  Logger.info(`Stored ${safesByAddress.size} safe contacts from ${data.safes.length} entries`)
 }
 
 export const storeContacts = (data: LegacyDataStructure, dispatch: AppDispatch): void => {
@@ -402,6 +416,3 @@ export const storeKeysWithValidation = async (
   progressCallback?.(100, `Completed: ${importedCount} keys imported`)
   Logger.info(`Import validation complete: ${importedCount} keys imported, ${notImportedKeys.length} keys not imported`)
 }
-
-// Legacy function - keeping for backward compatibility
-export const fetchSafeOwnersInBatches = fetchAndStoreSafeOverviews

@@ -45,7 +45,8 @@ export const AddSignersFormContainer = () => {
     if (!currentData) {
       return
     }
-    dispatch(upsertContact({ value: params.safeAddress, name: params.safeName, chainIds: [] }))
+    const deployedChainIds = currentData.map((s) => s.chainId)
+    dispatch(upsertContact({ value: params.safeAddress, name: params.safeName, chainIds: deployedChainIds }))
     const info = currentData.reduce<Record<string, SafeOverview>>((acc, safe) => {
       acc[safe.chainId] = safe
       return acc
