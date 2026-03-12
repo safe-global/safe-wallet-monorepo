@@ -88,7 +88,7 @@ export const hypernativeApi = createApi({
       }),
       transformResponse: (
         response: HypernativeMessageAssessmentResponseDto,
-      ): HypernativeMessageAssessmentResponseDto['data'] => (response as HypernativeMessageAssessmentResponseDto).data,
+      ): HypernativeMessageAssessmentResponseDto['data'] => response.data,
       transformErrorResponse: (response: HypernativeMessageAssessmentResponseDto) => response.data,
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
