@@ -16,7 +16,9 @@ jobs:
     # Allow merged PRs (normal flow) and auto-closed release branch PRs (direct push to main)
     if: >-
       github.event.pull_request.merged == true ||
-      (github.event.action == 'closed' && startsWith(github.event.pull_request.head.ref, 'release'))
+      (github.event.action == 'closed' &&
+       startsWith(github.event.pull_request.head.ref, 'release') &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       actions: write
       contents: write
