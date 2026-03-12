@@ -177,6 +177,20 @@ describe('useFiatConversion', () => {
       expect(mockOnRawInputChange).toHaveBeenCalledWith('3000')
     })
 
+    it('produces fixed-point fiat string for very small token amounts (no scientific notation)', () => {
+      const { result, rerender } = renderHook(({ args }) => useFiatConversion(args), {
+        initialProps: { args: { ...defaultArgs, rawInput: '' } },
+      })
+      act(() => result.current.toggleMode())
+      mockOnRawInputChange.mockClear()
+
+      // Very small token amount: 0.000000000000000001 ETH * 2000 = 2e-15
+      rerender({ args: { ...defaultArgs, rawInput: '0.000000000000000001' } })
+      act(() => result.current.toggleMode())
+      // Should produce empty string (rounds to 0.00 at 2dp), NOT '2e-15'
+      expect(mockOnRawInputChange).toHaveBeenCalledWith('')
+    })
+
     it('does not call onRawInputChange when no fiat price', () => {
       const { result } = renderHook(() => useFiatConversion({ ...defaultArgs, rawInput: '10', fiatRate: undefined }))
       act(() => result.current.toggleMode())

@@ -164,7 +164,8 @@ export function useFiatConversion({
       onRawInputChange(tokenValue)
     } else {
       const fiatValue = validInput * rate
-      const formatted = fiatValue > 0 ? truncateToDecimals(fiatValue.toString(), 2) : ''
+      const fixed = fiatValue.toFixed(2).replace(/\.?0+$/, '')
+      const formatted = fixed && fixed !== '0' ? fixed : ''
       onRawInputChange(formatted)
     }
 
