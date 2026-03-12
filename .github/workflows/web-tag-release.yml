@@ -13,7 +13,10 @@ permissions: {}
 
 jobs:
   tag:
-    if: github.event.pull_request.merged == true
+    # Allow merged PRs (normal flow) and auto-closed release branch PRs (direct push to main)
+    if: >-
+      github.event.pull_request.merged == true ||
+      (github.event.action == 'closed' && startsWith(github.event.pull_request.head.ref, 'release'))
     permissions:
       actions: write
       contents: write
@@ -28,6 +31,18 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+
+      - name: Verify PR commits are in main
+        if: github.event.pull_request.merged != true
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git merge-base --is-ancestor "$PR_HEAD_SHA" HEAD; then
+            echo "PR head commit is in main - proceeding"
+          else
+            echo "::error::PR head commit is NOT in main - aborting"
+            exit 1
+          fi
 
       - name: Extract version
         id: version
