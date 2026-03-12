@@ -40,13 +40,13 @@ exports[`./EarnBanner.stories Default 1`] = `
           href="/earn?safe=eth%3A0x0000000000000000000000000000000000000001"
         >
           <button
-            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-87bahn-MuiButtonBase-root-MuiButton-root"
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorStatic bannerCtaText mui-style-1upwgwi-MuiButtonBase-root-MuiButton-root"
             tabindex="0"
             type="button"
           >
             Try now
             <span
-              class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeMedium mui-style-1vk8yuc-MuiButton-endIcon"
+              class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeMedium mui-style-1wyk03i-MuiButton-endIcon"
             >
               <svg
                 aria-hidden="true"
@@ -66,7 +66,7 @@ exports[`./EarnBanner.stories Default 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >

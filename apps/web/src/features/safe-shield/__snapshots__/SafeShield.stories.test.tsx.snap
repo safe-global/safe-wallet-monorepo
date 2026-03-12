@@ -64,7 +64,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -142,7 +142,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -220,7 +220,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -446,7 +446,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -524,7 +524,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -602,7 +602,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -752,7 +752,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -830,7 +830,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -980,7 +980,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1058,7 +1058,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1208,7 +1208,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1286,7 +1286,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1357,7 +1357,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -1405,7 +1405,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -1453,7 +1453,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -1623,7 +1623,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1793,7 +1793,7 @@ exports[`./SafeShield.stories Loading 1`] = `
                   role="progressbar"
                 >
                   <span
-                    class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+                    class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
                     style="transform: translateX(-70%);"
                   />
                 </span>
@@ -1921,7 +1921,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -1999,7 +1999,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2077,7 +2077,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2148,7 +2148,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -2196,7 +2196,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -2244,7 +2244,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           >
                                             <a
                                               aria-label=""
-                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                               data-mui-internal-clone-element="true"
                                               data-testid="explorer-btn"
                                               href="https://etherscan.io/address/0x1234567890123456789012345678901234567890"
@@ -2414,7 +2414,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2492,7 +2492,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2570,7 +2570,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2748,7 +2748,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2826,7 +2826,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -2904,7 +2904,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3071,7 +3071,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3149,7 +3149,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3227,7 +3227,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3377,7 +3377,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -3486,7 +3486,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
@@ -3588,7 +3588,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
@@ -3690,7 +3690,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
@@ -3729,7 +3729,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0x75a4a3378eb9be1d6cd40847aa7fac5d66b99cfe"
@@ -3831,7 +3831,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
@@ -3870,7 +3870,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0x9648b1e4ad3eecbae513afb45e7ea8b2918e91ff"
@@ -3924,7 +3924,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4066,7 +4066,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
@@ -4114,7 +4114,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xfafa1beaddbcd913f4de0ed3557a1f3d026de0a6"
@@ -4238,7 +4238,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
@@ -4287,7 +4287,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
@@ -4399,7 +4399,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
@@ -4448,7 +4448,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
@@ -4560,7 +4560,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
@@ -4609,7 +4609,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   >
                                                     <a
                                                       aria-label=""
-                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                                                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                                                       data-mui-internal-clone-element="true"
                                                       data-testid="explorer-btn"
                                                       href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
@@ -4663,7 +4663,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4830,7 +4830,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -4959,7 +4959,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5124,7 +5124,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5274,7 +5274,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5352,7 +5352,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5430,7 +5430,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5580,7 +5580,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5658,7 +5658,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -5823,7 +5823,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6024,7 +6024,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6102,7 +6102,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6180,7 +6180,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6330,7 +6330,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6449,7 +6449,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6599,7 +6599,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >
@@ -6677,7 +6677,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       </p>
                     </div>
                     <button
-                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1fkg3qi-MuiButtonBase-root-MuiIconButton-root"
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
                       tabindex="0"
                       type="button"
                     >

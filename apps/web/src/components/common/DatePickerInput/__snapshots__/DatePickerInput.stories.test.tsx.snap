@@ -13,8 +13,8 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r0»"
-        id="«r0»-label"
+        for="«r1»"
+        id="«r1»-label"
       >
         Expiry date
       </label>
@@ -25,7 +25,7 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r0»"
+          id="«r1»"
           inputmode="text"
           name="expiryDate"
           placeholder="DD/MM/YYYY"
@@ -37,7 +37,7 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
         >
           <button
             aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-gbdia3-MuiButtonBase-root-MuiIconButton-root"
+            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
             tabindex="0"
             type="button"
           >
@@ -56,10 +56,10 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
         </div>
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Expiry date
@@ -85,8 +85,8 @@ exports[`./DatePickerInput.stories Default 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r2»"
-        id="«r2»-label"
+        for="«r5»"
+        id="«r5»-label"
       >
         Birth date
       </label>
@@ -97,7 +97,7 @@ exports[`./DatePickerInput.stories Default 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r2»"
+          id="«r5»"
           inputmode="text"
           name="birthDate"
           placeholder="DD/MM/YYYY"
@@ -109,7 +109,7 @@ exports[`./DatePickerInput.stories Default 1`] = `
         >
           <button
             aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-gbdia3-MuiButtonBase-root-MuiIconButton-root"
+            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
             tabindex="0"
             type="button"
           >
@@ -128,10 +128,10 @@ exports[`./DatePickerInput.stories Default 1`] = `
         </div>
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Birth date
@@ -157,8 +157,8 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r4»"
-        id="«r4»-label"
+        for="«r9»"
+        id="«r9»-label"
       >
         Created date
       </label>
@@ -169,7 +169,7 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r4»"
+          id="«r9»"
           inputmode="text"
           name="createdDate"
           placeholder="DD/MM/YYYY"
@@ -181,7 +181,7 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
         >
           <button
             aria-label="Choose date"
-            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-gbdia3-MuiButtonBase-root-MuiIconButton-root"
+            class="MuiButtonBase-root MuiIconButton-root MuiIconButton-edgeEnd MuiIconButton-sizeMedium mui-style-1rayppb-MuiButtonBase-root-MuiIconButton-root"
             tabindex="0"
             type="button"
           >
@@ -200,10 +200,10 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
         </div>
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Created date
