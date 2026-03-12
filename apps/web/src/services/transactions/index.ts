@@ -37,13 +37,13 @@ export const getModuleTransactionId = async (chainId: string, safeAddress: strin
 export const getTransactionQueue = async (
   chainId: string,
   safeAddress: string,
-  options?: { trusted?: boolean },
+  options?: { trusted?: boolean; cursor?: string },
   pageUrl?: string,
 ): Promise<QueuedItemPage> => {
   const store = getStoreInstance()
 
-  // If pageUrl is provided, parse cursor from it
-  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+  // If pageUrl is provided, parse cursor from it; otherwise use options.cursor directly
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : options?.cursor
 
   const queryThunk = cgwApi.endpoints.transactionsGetTransactionQueueV1.initiate(
     {

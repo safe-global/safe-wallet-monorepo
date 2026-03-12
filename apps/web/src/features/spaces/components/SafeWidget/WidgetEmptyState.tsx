@@ -14,9 +14,7 @@ const WidgetEmptyState = ({ icon, text, subtitle, action }: WidgetEmptyStateProp
       <div className="flex size-10 items-center justify-center rounded-lg bg-muted">{icon}</div>
       <div className="flex flex-col items-center gap-1 text-center text-muted-foreground">
         <Typography variant="paragraph-bold">{text}</Typography>
-        {subtitle && (
-          <Typography variant="paragraph-small">{subtitle}</Typography>
-        )}
+        {subtitle && <Typography variant="paragraph-small">{subtitle}</Typography>}
       </div>
       {action}
     </div>
