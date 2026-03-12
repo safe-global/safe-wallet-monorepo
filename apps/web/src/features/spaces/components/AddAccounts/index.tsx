@@ -169,7 +169,7 @@ const AddAccounts = () => {
           <Button
             variant="outline"
             size="sm"
-            className="!border-[var(--color-border-light)]"
+            className="!border-[var(--color-border-light)] font-bold"
             disabled={!isAdmin}
             onClick={() => setOpen(true)}
           >

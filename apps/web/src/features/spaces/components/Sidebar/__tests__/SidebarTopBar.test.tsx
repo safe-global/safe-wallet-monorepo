@@ -12,7 +12,6 @@ jest.mock('@/components/ui/sidebar', () => ({
   })),
 }))
 
-
 describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
