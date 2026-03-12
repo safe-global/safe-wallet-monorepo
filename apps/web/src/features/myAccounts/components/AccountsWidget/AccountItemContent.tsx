@@ -19,7 +19,7 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
           <Identicon address={account.address} size={40} />
         </Avatar>
         <div className="flex flex-col gap-0.5 text-left">
-          <Typography variant="paragraph-medium">{account.name}</Typography>
+          <Typography variant="paragraph-bold">{account.name}</Typography>
           <Typography variant="paragraph-mini" color="muted">
             {shortenAddress(account.address, 4)}
           </Typography>
@@ -36,4 +36,3 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
 }
 
 export { AccountItemContent }
-export default AccountItemContent

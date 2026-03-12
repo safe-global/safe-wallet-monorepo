@@ -39,4 +39,3 @@ const AccountWidgetItem = ({ account, loading = false }: AccountWidgetItemProps)
 }
 
 export { AccountWidgetItem }
-export default AccountWidgetItem
