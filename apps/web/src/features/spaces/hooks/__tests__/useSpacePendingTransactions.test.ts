@@ -179,7 +179,7 @@ describe('useSpacePendingTransactions', () => {
     })
   })
 
-  it('should attach safeAddress to each transaction', async () => {
+  it('should attach safeAddress and chainId to each transaction', async () => {
     const tx1 = createQueuedItem(1000)
     const tx2 = createQueuedItem(2000)
 
@@ -194,7 +194,9 @@ describe('useSpacePendingTransactions', () => {
 
     await waitFor(() => {
       expect(result.current.transactions[0]).toHaveProperty('safeAddress', SAFE_ADDRESS_1)
+      expect(result.current.transactions[0]).toHaveProperty('chainId', '1')
       expect(result.current.transactions[1]).toHaveProperty('safeAddress', SAFE_ADDRESS_2)
+      expect(result.current.transactions[1]).toHaveProperty('chainId', '137')
     })
   })
 

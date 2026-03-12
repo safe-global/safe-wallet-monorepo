@@ -7,7 +7,7 @@ import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 
-type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string }
+type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
 
 export const useSpacePendingTransactions = (limit = 3) => {
   const spaceId = useCurrentSpaceId()
@@ -41,6 +41,7 @@ export const useSpacePendingTransactions = (limit = 3) => {
       const results = await Promise.all(
         safePairs.map(({ chainId, address }) =>
           getTransactionQueue(chainId, address, { trusted: true, cursor: `limit=${limit}&offset=0` }).then((page) => ({
+            chainId,
             address,
             transactions: getLatestTransactions(page.results),
           })),
@@ -48,7 +49,9 @@ export const useSpacePendingTransactions = (limit = 3) => {
       )
 
       const merged = results
-        .flatMap(({ address, transactions }) => transactions.map((tx) => ({ ...tx, safeAddress: address })))
+        .flatMap(({ chainId, address, transactions }) =>
+          transactions.map((tx) => ({ ...tx, safeAddress: address, chainId })),
+        )
         .sort((a, b) => a.transaction.timestamp - b.transaction.timestamp)
         .slice(0, limit)
 

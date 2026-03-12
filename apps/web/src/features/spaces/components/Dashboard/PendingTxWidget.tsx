@@ -9,10 +9,19 @@ import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import TxInfo from '@/components/transactions/TxInfo'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import Identicon from '@/components/common/Identicon'
+import { AppRoutes } from '@/config/routes'
+import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/config'
 import css from './styles.module.css'
 
-/** Transaction with safeAddress from the space pending-transactions API */
-type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string }
+type Chains = Record<string, string>
+
+const chainIdToShortName = networks.reduce<Chains>((result, { shortName, chainId }) => {
+  result[chainId.toString()] = shortName.toString()
+  return result
+}, {})
+
+/** Transaction with safeAddress and chainId from the space pending-transactions API */
+type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainId?: string }
 
 interface PendingTxWidgetProps {
   transactions: SpacePendingTxItem[]
@@ -71,25 +80,32 @@ const PendingTxWidget = ({
       ) : transactions.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
       ) : (
-        transactions.map((tx) => (
-          <SafeWidget.Item
-            key={tx.transaction.id}
-            className={css.widgetItem}
-            label={
-              <div className={css.widgetItemLabel}>
-                <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
-              </div>
-            }
-            info={formatTimeInWords(tx.transaction.timestamp)}
-            startNode={<TxIcon tx={tx} />}
-            featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
-            actionNode={
-              <div className="w-[200px] max-w-full flex justify-end">
-                <Badge variant="secondary">{getTxStatus(tx)}</Badge>
-              </div>
-            }
-          />
-        ))
+        transactions.map((tx) => {
+          const shortName = tx.chainId ? chainIdToShortName[tx.chainId] : undefined
+          const safeParam = shortName && tx.safeAddress ? `${shortName}:${tx.safeAddress}` : undefined
+          const href = safeParam ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}` : undefined
+
+          return (
+            <SafeWidget.Item
+              key={tx.transaction.id}
+              href={href}
+              className={css.widgetItem}
+              label={
+                <div className={css.widgetItemLabel}>
+                  <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
+                </div>
+              }
+              info={formatTimeInWords(tx.transaction.timestamp)}
+              startNode={<TxIcon tx={tx} />}
+              featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
+              actionNode={
+                <div className="w-[200px] max-w-full flex justify-end">
+                  <Badge variant="secondary">{getTxStatus(tx)}</Badge>
+                </div>
+              }
+            />
+          )
+        })
       )}
     </SafeWidget>
   )
