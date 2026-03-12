@@ -76,7 +76,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             >
               <button
                 aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
                 tabindex="0"
                 type="button"
               >
@@ -93,7 +93,7 @@ exports[`./SettingsChange.stories AddOwner 1`] = `
             >
               <a
                 aria-label="View on rinkeby.etherscan.io"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                 data-mui-internal-clone-element="true"
                 data-testid="explorer-btn"
                 href="https://rinkeby.etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
@@ -216,7 +216,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             >
               <button
                 aria-label="Copy to clipboard"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
                 tabindex="0"
                 type="button"
               >
@@ -233,7 +233,7 @@ exports[`./SettingsChange.stories SwapOwner 1`] = `
             >
               <a
                 aria-label="View on rinkeby.etherscan.io"
-                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-1vbp2rr-MuiButtonBase-root-MuiIconButton-root"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-ay7xk8-MuiButtonBase-root-MuiIconButton-root"
                 data-mui-internal-clone-element="true"
                 data-testid="explorer-btn"
                 href="https://rinkeby.etherscan.io/address/0x00000000"
