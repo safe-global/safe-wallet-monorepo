@@ -33,18 +33,12 @@ const guardRules: GuardRule[] = [
     action: () => allow(),
   },
 
-  // Spaces routes require SIWE authentication → if not authenticated, redirect to welcome/spaces
-  {
-    match: ({ isSpacesPath, isSiweAuthenticated }) => isSpacesPath && !isSiweAuthenticated,
-    action: () => redirect(AppRoutes.welcome.spaces),
-  },
-
-  // Not connected or not signed in with SIWE → welcome
+  // Not connected or not signed in with SIWE → welcome (spaces path → welcome/spaces)
   {
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: () => redirect(AppRoutes.welcome.index),
+    action: ({ isSpacesPath }) => redirect(isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index),
   },
 
   // Authenticated but has no spaces → onboarding
