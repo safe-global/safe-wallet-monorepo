@@ -15,6 +15,7 @@ const defaultSetup = createMockStory({
   pathname: '/spaces',
   features: { spaces: true },
   query: { spaceId: '1' },
+  shadcn: true,
 })
 
 const meta = {

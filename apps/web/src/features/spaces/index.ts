@@ -61,7 +61,7 @@ export { default as useTrackSpace } from './hooks/useTrackSpace'
 export {
   useSpaceMembersByStatus,
   useCurrentMembership,
-  useIsActiceMember,
+  useIsActiveMember,
   useIsAdmin,
   useIsInvited,
   isAdmin,
@@ -75,3 +75,6 @@ export { useSpaceSafes } from './hooks/useSpaceSafes'
 
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
+
+// Utilities
+export { getAvatarColor } from './components/Sidebar/variants/SpaceSelectorDropdown'

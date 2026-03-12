@@ -107,6 +107,7 @@
     "lodash": "^4.17.23",
     "lucide-react": "^0.563.0",
     "mixpanel-browser": "^2.66.0",
+    "motion": "^12.34.0",
     "next": "patch:next@15.5.8#../../.yarn/patches/next-npm-15.5.8-7d525d02b9.patch",
     "next-themes": "^0.4.6",
     "papaparse": "^5.3.2",

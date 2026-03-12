@@ -1,7 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
-import SpaceCreationModal from '../SpaceCreationModal'
 import SignInButton from '../SignInButton'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
@@ -18,24 +17,22 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { AppRoutes } from '@/config/routes'
+import NextLink from 'next/link'
 
 const AddSpaceButton = () => {
-  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
-
   return (
-    <>
-      <Button
-        data-testid="create-space-button"
-        disableElevation
-        variant="contained"
-        size="small"
-        onClick={() => setOpenCreationModal(true)}
-        sx={{ height: '36px' }}
-      >
-        <Box mt="1px">Create space</Box>
-      </Button>
-      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
-    </>
+    <Button
+      data-testid="create-space-button"
+      disableElevation
+      variant="contained"
+      size="small"
+      href={AppRoutes.welcome.createSpace}
+      LinkComponent={NextLink}
+      sx={{ height: '36px' }}
+    >
+      <Box mt="1px">Create space</Box>
+    </Button>
   )
 }
 
@@ -68,7 +65,6 @@ const SignedOutState = () => {
 
 const NoSpacesState = () => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-  const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
 
   return (
     <>
@@ -88,10 +84,7 @@ const NoSpacesState = () => {
           <AddSpaceButton />
         </Track>
       </Card>
-      {isInfoOpen && (
-        <SpaceInfoModal onCreateSpace={() => setOpenCreationModal(true)} onClose={() => setIsInfoOpen(false)} />
-      )}
-      {openCreationModal && <SpaceCreationModal onClose={() => setOpenCreationModal(false)} />}
+      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
   )
 }

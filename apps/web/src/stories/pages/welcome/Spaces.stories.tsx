@@ -12,6 +12,7 @@ const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
   features: { spaces: true },
+  shadcn: true,
 })
 
 const meta = {

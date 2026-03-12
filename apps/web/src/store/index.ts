@@ -145,6 +145,9 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
     }
 
+    // Mark the store as hydrated so guards wait for persisted auth state
+    nextState.auth = { ...nextState.auth, isStoreHydrated: true }
+
     return nextState
   }
   return rootReducer(state, action) as RootState
