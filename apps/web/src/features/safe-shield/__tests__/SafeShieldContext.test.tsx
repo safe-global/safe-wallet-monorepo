@@ -1,7 +1,10 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
-import { DeadlockAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
+import {
+  DeadlockAnalysisBuilder,
+  DeadlockAnalysisResultBuilder,
+} from '@safe-global/utils/features/safe-shield/builders'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { ReactNode } from 'react'
@@ -198,6 +201,47 @@ describe('SafeShieldContext', () => {
       () => {
         expect(result.current.needsRiskConfirmation).toBe(true)
         expect(result.current.isRiskConfirmed).toBe(false)
+      },
+      { timeout: 3000 },
+    )
+  })
+
+  it('should require risk confirmation when multi-send has CRITICAL deadlock across addresses', async () => {
+    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
+
+    const multiAddressDeadlock = new DeadlockAnalysisBuilder()
+      .addAddress(
+        '0x0000000000000000000000000000000000000001',
+        DeadlockAnalysisResultBuilder.nestedSafeWarning().build(),
+      )
+      .addAddress(
+        '0x0000000000000000000000000000000000000002',
+        DeadlockAnalysisResultBuilder.deadlockDetected().build(),
+      )
+      .build()
+
+    mockUseCounterpartyAnalysis.mockReturnValue({
+      recipient: [undefined, undefined, false],
+      contract: [undefined, undefined, false],
+      deadlock: multiAddressDeadlock,
+    })
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    const tx = buildSafeTransaction('0x1234')
+    act(() => {
+      result.current.setSafeTx(tx)
+    })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
       },
       { timeout: 3000 },
     )

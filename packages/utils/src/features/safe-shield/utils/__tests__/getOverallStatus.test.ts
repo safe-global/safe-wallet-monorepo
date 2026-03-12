@@ -5,6 +5,7 @@ import { RecipientAnalysisResultBuilder } from '../../builders/recipient-analysi
 import { ContractAnalysisResultBuilder } from '../../builders/contract-analysis-result.builder'
 import { ThreatAnalysisResultBuilder } from '../../builders/threat-analysis-result.builder'
 import { DeadlockAnalysisBuilder } from '../../builders/deadlock-analysis.builder'
+import { DeadlockAnalysisResultBuilder } from '../../builders/deadlock-analysis-result.builder'
 
 describe('getOverallStatus', () => {
   describe('undefined cases', () => {
@@ -463,6 +464,23 @@ describe('getOverallStatus', () => {
       const [deadlockResults] = DeadlockAnalysisBuilder.nestedSafeWarning()
 
       const result = getOverallStatus(undefined, undefined, threatResults, false, false, deadlockResults)
+
+      expect(result).toBeDefined()
+      expect(result!.severity).toBe(Severity.CRITICAL)
+      expect(result!.title).toBe('Risk detected')
+    })
+
+    it('should return CRITICAL when multiple addresses have mixed deadlock severities', () => {
+      const deadlockResults = {
+        '0xSafe1': {
+          DEADLOCK: [DeadlockAnalysisResultBuilder.nestedSafeWarning().build()],
+        },
+        '0xSafe2': {
+          DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()],
+        },
+      }
+
+      const result = getOverallStatus(undefined, undefined, undefined, false, false, deadlockResults)
 
       expect(result).toBeDefined()
       expect(result!.severity).toBe(Severity.CRITICAL)

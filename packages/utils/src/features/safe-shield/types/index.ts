@@ -232,4 +232,6 @@ export type ThreatAnalysisResults = {
   request_id?: string
 }
 
-export type DeadlockAnalysisResults = GroupedAnalysisResults<StatusGroup.DEADLOCK | StatusGroup.COMMON>
+export type DeadlockAnalysisResults = {
+  [address: string]: GroupedAnalysisResults<StatusGroup.DEADLOCK | StatusGroup.COMMON>
+}

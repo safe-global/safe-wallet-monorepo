@@ -9054,12 +9054,23 @@
             }
           },
           "deadlock": {
-            "description": "Deadlock analysis results. Contains signing deadlock risk findings for owner/threshold management transactions.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/DeadlockAnalysisDto"
+            "type": "object",
+            "description": "Deadlock analysis results mapped by Safe address. Contains signing deadlock risk findings for owner/threshold management transactions.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeadlockAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "DEADLOCK": [
+                  {
+                    "severity": "CRITICAL",
+                    "type": "DEADLOCK_DETECTED",
+                    "title": "Signing deadlock risk detected",
+                    "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+                  }
+                ]
               }
-            ]
+            }
           }
         },
         "required": [

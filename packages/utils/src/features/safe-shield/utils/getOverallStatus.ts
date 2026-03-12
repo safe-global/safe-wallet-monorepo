@@ -58,8 +58,8 @@ export const getOverallStatus = (
   // Flatten all AnalysisResult objects from contract, recipient, and threat into one array
   const allResults: AnalysisResult[] = []
 
-  // Add contract and recipient results
-  for (const data of [contractResults, recipientResults]) {
+  // Add contract, recipient, and deadlock results
+  for (const data of [contractResults, recipientResults, deadlockResults]) {
     if (data) {
       for (const addressResults of Object.values(data)) {
         for (const groupResults of Object.values(addressResults)) {
@@ -85,13 +85,6 @@ export const getOverallStatus = (
           allResults.push({ ...groupResults, title: SEVERITY_TO_TITLE[groupResults.severity as Severity] })
         }
       }
-    }
-  }
-
-  // Add deadlock results
-  if (deadlockResults?.DEADLOCK) {
-    for (const result of deadlockResults.DEADLOCK) {
-      allResults.push({ ...result, title: SEVERITY_TO_TITLE[result.severity as Severity] })
     }
   }
 

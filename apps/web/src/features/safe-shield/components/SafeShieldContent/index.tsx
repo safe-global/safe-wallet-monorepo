@@ -25,7 +25,6 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
-import { DeadlockAnalysis } from '../DeadlockAnalysis'
 
 export const SafeShieldContent = ({
   recipient,
@@ -56,7 +55,7 @@ export const SafeShieldContent = ({
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
   const [threatResults = {}, _threatError, threatLoading = false] = threat
-  const [deadlockResults, _deadlockError, deadlockLoading = false] = deadlock
+  const [deadlockResults = {}, _deadlockError, deadlockLoading = false] = deadlock
 
   const highlightedSeverity = overallStatus?.severity
   const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
@@ -66,7 +65,7 @@ export const SafeShieldContent = ({
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
   const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
-  const deadlockEmpty = isEmpty(deadlockResults?.DEADLOCK)
+  const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
 
@@ -115,10 +114,12 @@ export const SafeShieldContent = ({
             showImage
           />
 
-          <DeadlockAnalysis
-            deadlock={deadlock}
+          <AnalysisGroupCard
+            data-testid="deadlock-analysis-group-card"
+            data={deadlockResults}
             delay={deadlockAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
+            analyticsEvent={SAFE_SHIELD_EVENTS.DEADLOCK_ANALYZED}
           />
 
           <ThreatAnalysis

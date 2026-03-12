@@ -1,25 +1,28 @@
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { DeadlockAnalysisResults, AnalysisResult } from '../types'
-import { DeadlockStatus } from '../types'
+import type { DeadlockAnalysisResults, AnalysisResult, StatusGroupType } from '../types'
+import { DeadlockStatus, StatusGroup } from '../types'
 import { DeadlockAnalysisResultBuilder } from './deadlock-analysis-result.builder'
 
 export class DeadlockAnalysisBuilder {
-  private deadlockAnalysis: DeadlockAnalysisResults
+  private deadlockAnalysis: {
+    [address: string]: {
+      [StatusGroup.DEADLOCK]?: AnalysisResult<StatusGroupType<StatusGroup.DEADLOCK>>[]
+      [StatusGroup.COMMON]?: AnalysisResult<StatusGroupType<StatusGroup.COMMON>>[]
+    }
+  }
 
   constructor() {
     this.deadlockAnalysis = {}
   }
 
-  createDeadlock(result: AnalysisResult<DeadlockStatus>) {
-    this.deadlockAnalysis.DEADLOCK = [result]
-    return this
-  }
-
-  addDeadlock(result: AnalysisResult<DeadlockStatus>) {
-    if (!this.deadlockAnalysis.DEADLOCK) {
-      this.deadlockAnalysis.DEADLOCK = []
+  addAddress(address: string, result: AnalysisResult<DeadlockStatus>): this {
+    if (!this.deadlockAnalysis[address]) {
+      this.deadlockAnalysis[address] = {}
     }
-    this.deadlockAnalysis.DEADLOCK.push(result)
+    if (!this.deadlockAnalysis[address].DEADLOCK) {
+      this.deadlockAnalysis[address].DEADLOCK = []
+    }
+    this.deadlockAnalysis[address].DEADLOCK!.push(result)
     return this
   }
 
@@ -27,15 +30,15 @@ export class DeadlockAnalysisBuilder {
     return [this.deadlockAnalysis, undefined, false]
   }
 
-  static deadlockDetected() {
+  static deadlockDetected(address = '0x0000000000000000000000000000000000000001') {
     return new DeadlockAnalysisBuilder()
-      .createDeadlock(DeadlockAnalysisResultBuilder.deadlockDetected().build())
+      .addAddress(address, DeadlockAnalysisResultBuilder.deadlockDetected().build())
       .build()
   }
 
-  static nestedSafeWarning() {
+  static nestedSafeWarning(address = '0x0000000000000000000000000000000000000001') {
     return new DeadlockAnalysisBuilder()
-      .createDeadlock(DeadlockAnalysisResultBuilder.nestedSafeWarning().build())
+      .addAddress(address, DeadlockAnalysisResultBuilder.nestedSafeWarning().build())
       .build()
   }
 }

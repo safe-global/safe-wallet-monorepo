@@ -71,7 +71,9 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
     const severity = primaryThreatResult?.severity
     const hasCriticalThreat = isSeverityHigherOrEqual(severity, Severity.CRITICAL)
 
-    const primaryDeadlockResult = getPrimaryResult(deadlockResults?.DEADLOCK || [])
+    // Flatten address-keyed deadlock results to find the highest severity across all Safes
+    const allDeadlockResults = Object.values(deadlockResults || {}).flatMap((addr) => addr.DEADLOCK || [])
+    const primaryDeadlockResult = getPrimaryResult(allDeadlockResults)
     const deadlockSeverity = primaryDeadlockResult?.severity
     const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
 

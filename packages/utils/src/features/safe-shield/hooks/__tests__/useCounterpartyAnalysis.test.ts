@@ -711,7 +711,7 @@ describe('useCounterpartyAnalysis', () => {
   describe('deadlock results', () => {
     it('should return deadlock data when available', async () => {
       const deadlockData = {
-        DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()],
+        '0xAddr': { DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()] },
       }
 
       mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
@@ -813,13 +813,13 @@ describe('useCounterpartyAnalysis', () => {
       })
 
       const [data, error] = result.current.deadlock
-      expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] })
+      expect(data).toEqual({ [mockSafeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] } })
       expect(error).toEqual(new Error(errorMessage))
     })
 
     it('should return error placeholder even when stale deadlock data exists alongside error', async () => {
       const deadlockData = {
-        DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()],
+        '0xAddr': { DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()] },
       }
 
       const errorMessage = 'Backend error'
@@ -845,7 +845,7 @@ describe('useCounterpartyAnalysis', () => {
       })
 
       const [data, error] = result.current.deadlock
-      expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] })
+      expect(data).toEqual({ [mockSafeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] } })
       expect(data).not.toEqual(deadlockData)
       expect(error).toEqual(new Error(errorMessage))
     })

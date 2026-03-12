@@ -64,8 +64,13 @@ export class FullAnalysisBuilder {
   }
 
   deadlock(deadlockAnalysis: AsyncResult<DeadlockAnalysisResults>): this {
-    const [deadlockResult, error, loading = false] = deadlockAnalysis
-    this.response.deadlock = [deadlockResult, error, loading]
+    const [deadlockResult = {}, error, loading = false] = deadlockAnalysis
+    const [currentDeadlockResult = {}, currentError, currentLoading = false] = this.response.deadlock || []
+    this.response.deadlock = [
+      merge(currentDeadlockResult, deadlockResult),
+      currentError || error,
+      currentLoading || loading,
+    ]
     return this
   }
 
