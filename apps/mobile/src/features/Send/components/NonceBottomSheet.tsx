@@ -101,12 +101,12 @@ function QueuedNonceRow({
 function useRenderFooter(insets: { bottom: number }, onAddCustomNonce: () => void, onLayout: (height: number) => void) {
   return useCallback(
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
+      <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition} bottomInset={insets.bottom}>
         <View
           onLayout={(e) => onLayout(e.nativeEvent.layout.height)}
           backgroundColor="$backgroundSheet"
           paddingTop="$2"
-          paddingBottom={insets.bottom + 16}
+          paddingBottom={insets.bottom + 8}
           marginBottom={-insets.bottom}
         >
           <View height={1} backgroundColor="$borderLight" marginBottom="$2" />
