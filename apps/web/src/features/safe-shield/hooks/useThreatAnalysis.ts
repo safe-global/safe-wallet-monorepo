@@ -61,7 +61,7 @@ export function useThreatAnalysis(
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
     ...mainTxProps,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeEligible || !hypernativeAuthToken || isMessageAnalysis,
+    skip: !useHypernativeAnalysis || !hypernativeAuthToken || isMessageAnalysis,
   })
 
   // Use message-specific assessment for EIP-712 typed messages
@@ -71,17 +71,17 @@ export function useThreatAnalysis(
     typedData: safeMessage,
     origin: txOrigin,
     authToken: hypernativeAuthToken,
-    skip: !isHypernativeEligible || !hypernativeAuthToken || !isMessageAnalysis,
+    skip: !useHypernativeAnalysis || !hypernativeAuthToken || !isMessageAnalysis,
   })
 
   const threatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {
-    if (isHypernativeEligible) {
+    if (useHypernativeAnalysis) {
       // Use message assessment for messages, transaction assessment for transactions
       return isMessageAnalysis ? hypernativeMessageThreatAnalysis : hypernativeThreatAnalysis
     }
     return blockaidThreatAnalysis
   }, [
-    isHypernativeEligible,
+    useHypernativeAnalysis,
     isMessageAnalysis,
     hypernativeMessageThreatAnalysis,
     hypernativeThreatAnalysis,
