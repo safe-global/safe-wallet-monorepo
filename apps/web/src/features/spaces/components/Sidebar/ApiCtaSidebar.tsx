@@ -71,7 +71,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
       <Button
         size="sm"
-        className="w-auto self-start rounded-full"
+        className="w-auto self-start"
         render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
       >
         Try the API

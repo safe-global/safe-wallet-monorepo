@@ -137,6 +137,7 @@
  *   - [hidden] display:none
  */
 @layer base {
+
   /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
   .shadcn-scope,
   .shadcn-scope *,
