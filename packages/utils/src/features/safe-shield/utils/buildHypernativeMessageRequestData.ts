@@ -14,7 +14,7 @@ type BuildHypernativeMessageRequestDataParams = {
  * Builds a Hypernative EIP-712 message assessment request payload
  *
  * @param params - Parameters required to build the request
- * @returns HypernativeMessageAssessmentRequestDto or undefined if required data is missing
+ * @returns HypernativeMessageAssessmentRequestDto
  */
 export const buildHypernativeMessageRequestData = ({
   safeAddress,
@@ -23,16 +23,7 @@ export const buildHypernativeMessageRequestData = ({
   typedData,
   proposer,
   origin,
-}: BuildHypernativeMessageRequestDataParams): HypernativeMessageAssessmentRequestDto | undefined => {
-  if (!safeAddress || !messageHash || !typedData) {
-    return undefined
-  }
-
-  // Validate that typedData has required EIP-712 fields
-  if (!typedData.types || !typedData.domain || !typedData.message) {
-    return undefined
-  }
-
+}: BuildHypernativeMessageRequestDataParams): HypernativeMessageAssessmentRequestDto => {
   // Ensure EIP712Domain is present in types
   const types = typedData.types.EIP712Domain
     ? typedData.types
