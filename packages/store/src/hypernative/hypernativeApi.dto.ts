@@ -74,18 +74,24 @@ export type HypernativeBatchAssessmentErrorDto = {
   }
 }
 
-export function isHypernativeBatchAssessmentErrorResponse(error: unknown): error is HypernativeBatchAssessmentErrorDto {
+function isStatusFailedError(
+  error: unknown,
+): error is { status: 'FAILED'; error: { reason: string; message: string } } {
   return (
     typeof error === 'object' &&
     error != null &&
     'status' in error &&
     error.status === 'FAILED' &&
     'error' in error &&
-    typeof (error as HypernativeBatchAssessmentErrorDto).error === 'object' &&
-    (error as HypernativeBatchAssessmentErrorDto).error != null &&
-    'reason' in (error as HypernativeBatchAssessmentErrorDto).error &&
-    'message' in (error as HypernativeBatchAssessmentErrorDto).error
+    typeof (error as { error: unknown }).error === 'object' &&
+    (error as { error: unknown }).error != null &&
+    'reason' in (error as { error: object }).error &&
+    'message' in (error as { error: object }).error
   )
+}
+
+export function isHypernativeBatchAssessmentErrorResponse(error: unknown): error is HypernativeBatchAssessmentErrorDto {
+  return isStatusFailedError(error)
 }
 
 /**
@@ -190,15 +196,5 @@ export type HypernativeMessageAssessmentErrorDto = {
 export function isHypernativeMessageAssessmentErrorResponse(
   error: unknown,
 ): error is HypernativeMessageAssessmentErrorDto {
-  return (
-    typeof error === 'object' &&
-    error != null &&
-    'status' in error &&
-    error.status === 'FAILED' &&
-    'error' in error &&
-    typeof (error as HypernativeMessageAssessmentErrorDto).error === 'object' &&
-    (error as HypernativeMessageAssessmentErrorDto).error != null &&
-    'reason' in (error as HypernativeMessageAssessmentErrorDto).error &&
-    'message' in (error as HypernativeMessageAssessmentErrorDto).error
-  )
+  return isStatusFailedError(error)
 }
