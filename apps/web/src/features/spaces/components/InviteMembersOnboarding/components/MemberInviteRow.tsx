@@ -78,6 +78,7 @@ const MemberInviteRow = ({
     <div className="flex gap-2">
       <EnsAddressIdenticon address={addressValue || ''} onAddressResolved={handleAddressResolved}>
         <Input
+          autoComplete="off"
           {...register(`members.${index}.address`, {
             required: index === 0,
             onChange: () => {

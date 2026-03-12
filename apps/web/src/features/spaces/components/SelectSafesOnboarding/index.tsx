@@ -59,6 +59,7 @@ const SelectSafesOnboarding = (): ReactElement => {
             <InputGroupInput
               placeholder="Search for safes"
               aria-label="Search Safe list"
+              autoComplete="off"
               onChange={(e) => handleSearch(e.target.value)}
             />
           </InputGroup>
