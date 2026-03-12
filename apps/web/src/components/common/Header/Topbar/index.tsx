@@ -34,7 +34,7 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex items-center p-6 pb-0 bg-secondary dark:bg-background ${showMenuButton ? 'justify-between' : 'justify-end'}`}
+        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between' : 'justify-end'}`}
       >
         {showMenuButton ? (
           <Button

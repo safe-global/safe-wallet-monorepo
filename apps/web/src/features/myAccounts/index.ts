@@ -47,7 +47,6 @@ export { useMultiAccountItemData } from './hooks/useMultiAccountItemData'
 
 // Navigation and state
 export { useVisitedSafes } from './hooks/useVisitedSafes'
-export { default as useHasSafes } from './hooks/useHasSafes'
 export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
 
 // Space accounts data
