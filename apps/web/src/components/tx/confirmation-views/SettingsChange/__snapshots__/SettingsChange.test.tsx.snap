@@ -66,7 +66,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >
@@ -149,7 +149,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >
@@ -240,7 +240,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >

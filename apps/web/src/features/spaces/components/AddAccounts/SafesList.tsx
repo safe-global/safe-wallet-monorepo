@@ -62,8 +62,7 @@ function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
 }
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
-  const feature = useLoadFeature(MyAccountsFeature)
-  const { AccountItem } = feature
+  const { AccountItemChainBadge } = useLoadFeature(MyAccountsFeature)
   const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -125,11 +124,7 @@ const SafesList = ({ safes }: { safes: AllSafeItems }) => {
                 <Box className={css.safeRow} pr={4}>
                   <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
                   <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
-                    {feature.$isReady && AccountItem?.ChainBadge ? (
-                      <AccountItem.ChainBadge safes={safe.safes} />
-                    ) : (
-                      <ChainIndicator chainId={safe.safes[0]?.chainId} responsive onlyLogo />
-                    )}
+                    <AccountItemChainBadge safes={safe.safes} />
                   </Box>
                 </Box>
               </AccordionSummary>

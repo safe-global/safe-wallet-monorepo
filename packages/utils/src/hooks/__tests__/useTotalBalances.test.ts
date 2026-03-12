@@ -195,7 +195,7 @@ describe('useTotalBalances', () => {
       expect(item?.fiatBalance24hChange).toBe('0.05')
     })
 
-    it('should fallback to tx service when portfolio returns empty', () => {
+    it('should fallback to tx service when portfolio returns empty data', () => {
       const { result } = setupAndRender(portfolioParams, {
         portfolio: { currentData: createMockEmptyPortfolio() },
         txService: { currentData: createMockTxServiceBalances() },
@@ -203,15 +203,18 @@ describe('useTotalBalances', () => {
 
       expect(result.current.data?.fiatTotal).toBe('1000')
       expect(result.current.data?.tokensFiatTotal).toBe('1000')
+      expect(result.current.data?.positions).toEqual([])
+      expect(result.current.data?.positionsFiatTotal).toBe('0')
     })
 
-    it('should fallback to tx service when portfolio errors', () => {
+    it('should fallback to tx service when portfolio errors with positions unknown', () => {
       const { result } = setupAndRender(portfolioParams, {
         portfolio: { error: new Error('Portfolio error') },
         txService: { currentData: createMockTxServiceBalances() },
       })
 
       expect(result.current.data?.fiatTotal).toBe('1000')
+      expect(result.current.data?.positions).toBeUndefined()
     })
 
     it('should use counterfactual balances on fallback for undeployed safe', () => {
@@ -231,6 +234,8 @@ describe('useTotalBalances', () => {
       )
 
       expect(result.current.data?.fiatTotal).toBe('500')
+      expect(result.current.data?.positions).toEqual([])
+      expect(result.current.data?.positionsFiatTotal).toBe('0')
     })
 
     it('should handle loading state', () => {
@@ -288,6 +293,17 @@ describe('useTotalBalances', () => {
       const { result } = renderHook(() => useTotalBalances(allTokensParams))
 
       expect(result.current.loading).toBe(true)
+    })
+
+    it('should propagate isFetching in merged mode', () => {
+      const { result } = setupAndRender(allTokensParams, {
+        portfolio: { currentData: createMockPortfolio(), isFetching: true },
+        txService: { currentData: createMockTxServiceBalances() },
+      })
+
+      expect(result.current.isFetching).toBe(true)
+      expect(result.current.loading).toBe(false)
+      expect(result.current.data).toBeDefined()
     })
 
     it('should show error when either source errors', () => {

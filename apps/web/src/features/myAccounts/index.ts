@@ -11,8 +11,13 @@
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
- *   const myAccounts = useLoadFeature(MyAccountsFeature)
- *   return <myAccounts.AccountItem.Link ... />
+ *   const { AccountItemLink, AccountItemIcon, AccountItemInfo } = useLoadFeature(MyAccountsFeature)
+ *   return (
+ *     <AccountItemLink href={href}>
+ *       <AccountItemIcon address={address} chainId={chainId} />
+ *       <AccountItemInfo address={address} chainId={chainId} name={name} />
+ *     </AccountItemLink>
+ *   )
  * }
  *
  * // Shared Safe data hooks (moved to @/hooks/safes)

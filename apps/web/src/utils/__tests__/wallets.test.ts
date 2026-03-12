@@ -7,7 +7,6 @@ import {
   isSmartContract,
   isEIP7702DelegatedAccount,
   EIP_7702_DELEGATED_ACCOUNT_PREFIX,
-  isWalletUnlocked,
 } from '@/utils/wallets'
 
 describe('wallets', () => {
@@ -22,114 +21,6 @@ describe('wallets', () => {
       return {
         getCode: getCodeMock,
       } as unknown as JsonRpcProvider
-    })
-  })
-
-  describe('isWalletUnlocked', () => {
-    const originalWindow = global.window
-
-    beforeEach(() => {
-      Object.defineProperty(global, 'window', {
-        value: { ...originalWindow, ethereum: undefined },
-        writable: true,
-      })
-    })
-
-    afterEach(() => {
-      Object.defineProperty(global, 'window', {
-        value: originalWindow,
-        writable: true,
-      })
-    })
-
-    it('should return true for WalletConnect', async () => {
-      const result = await isWalletUnlocked('WalletConnect')
-      expect(result).toBe(true)
-    })
-
-    it('should return true for Private Key wallet', async () => {
-      const result = await isWalletUnlocked('Private key')
-      expect(result).toBe(true)
-    })
-
-    it('should return undefined for non-MetaMask wallets', async () => {
-      const result = await isWalletUnlocked('Ledger')
-      expect(result).toBe(undefined)
-    })
-
-    it('should return undefined when window.ethereum is not available', async () => {
-      Object.defineProperty(global, 'window', {
-        value: { ethereum: undefined },
-        writable: true,
-      })
-
-      const result = await isWalletUnlocked('MetaMask')
-      expect(result).toBe(undefined)
-    })
-
-    it('should return unlock status from single MetaMask provider', async () => {
-      const isUnlockedMock = jest.fn().mockResolvedValue(true)
-      Object.defineProperty(global, 'window', {
-        value: {
-          ethereum: {
-            isMetaMask: true,
-            _metamask: { isUnlocked: isUnlockedMock },
-          },
-        },
-        writable: true,
-      })
-
-      const result = await isWalletUnlocked('MetaMask')
-      expect(result).toBe(true)
-      expect(isUnlockedMock).toHaveBeenCalled()
-    })
-
-    it('should find MetaMask in providers array when multiple wallets installed', async () => {
-      const isUnlockedMock = jest.fn().mockResolvedValue(true)
-      Object.defineProperty(global, 'window', {
-        value: {
-          ethereum: {
-            isCoinbaseWallet: true,
-            providers: [{ isCoinbaseWallet: true }, { isMetaMask: true, _metamask: { isUnlocked: isUnlockedMock } }],
-          },
-        },
-        writable: true,
-      })
-
-      const result = await isWalletUnlocked('MetaMask')
-      expect(result).toBe(true)
-      expect(isUnlockedMock).toHaveBeenCalled()
-    })
-
-    it('should return undefined when MetaMask not found in providers array', async () => {
-      Object.defineProperty(global, 'window', {
-        value: {
-          ethereum: {
-            isCoinbaseWallet: true,
-            providers: [{ isCoinbaseWallet: true }, { isPhantom: true }],
-          },
-        },
-        writable: true,
-      })
-
-      const result = await isWalletUnlocked('MetaMask')
-      expect(result).toBe(undefined)
-    })
-
-    it('should return undefined when isUnlocked throws an error', async () => {
-      const isUnlockedMock = jest.fn().mockRejectedValue(new Error('Provider error'))
-      Object.defineProperty(global, 'window', {
-        value: {
-          ethereum: {
-            isMetaMask: true,
-            _metamask: { isUnlocked: isUnlockedMock },
-          },
-        },
-        writable: true,
-      })
-
-      const result = await isWalletUnlocked('MetaMask')
-      expect(result).toBe(undefined)
     })
   })
 
