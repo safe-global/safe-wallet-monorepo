@@ -19,7 +19,6 @@ export function useThreatAnalysis(
   overrideSafeTx?: SafeTransaction,
   hypernativeAuthToken?: string,
 ): AsyncResult<ThreatAnalysisResults> {
-  console.log('=== useThreatAnalysis CALLED ===')
   const {
     safe: { chainId, version },
     safeAddress,

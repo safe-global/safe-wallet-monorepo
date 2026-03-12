@@ -73,7 +73,6 @@ export function useThreatAnalysisHypernativeMessage({
       }
       lastTriggeredHashRef.current = hypernativeRequest.messageHash
 
-      console.log('[useThreatAnalysisHypernativeMessage] TRIGGERING ASSESSMENT!')
       triggerAssessment({
         ...hypernativeRequest,
         authToken,
