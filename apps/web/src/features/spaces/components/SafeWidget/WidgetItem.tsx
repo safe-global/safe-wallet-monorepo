@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRouter } from 'next/router'
+import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 
 interface WidgetItemProps {
@@ -48,19 +49,23 @@ const WidgetItem = ({
         {startNode}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
           {typeof label === 'string' ? (
-            <span className="overflow-hidden text-base leading-6 font-medium text-foreground whitespace-nowrap">
+            <Typography variant="paragraph-medium" className="overflow-hidden whitespace-nowrap">
               {label}
-            </span>
+            </Typography>
           ) : (
             label
           )}
           {typeof description === 'string' ? (
-            <span className="break-words text-sm leading-4 text-muted-foreground">{description}</span>
+            <Typography variant="paragraph-small" color="muted" className="break-words">
+              {description}
+            </Typography>
           ) : (
             description
           )}
           {typeof info === 'string' ? (
-            <span className="overflow-hidden text-xs leading-4 text-muted-foreground whitespace-nowrap">{info}</span>
+            <Typography variant="paragraph-mini" color="muted" className="overflow-hidden whitespace-nowrap">
+              {info}
+            </Typography>
           ) : (
             info
           )}

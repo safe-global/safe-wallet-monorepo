@@ -1,5 +1,54 @@
 # Figma to Code Reference
 
+## Typography (CRITICAL)
+
+**Never hardcode Tailwind classes for text.** Always use the `Typography` component with variants.
+
+```tsx
+import { Typography } from '@/components/ui/typography'
+
+// ✅ Correct
+<Typography variant="h2" align="center">Invite team members</Typography>
+<Typography variant="paragraph">Body text here.</Typography>
+<Typography variant="paragraph-medium">Emphasized text.</Typography>
+
+// ❌ Wrong — no raw Tailwind for text
+<p className="text-[30px] font-semibold">Invite team members</p>
+<h2 className="text-3xl font-semibold">Heading</h2>
+```
+
+### How to get the Figma style and map to Typography
+
+1. **Get style from node**: Call `get_variable_defs(fileKey, nodeId)` — returns variables used by that text node.
+
+2. **Extract style name**: Look for keys whose value is `Font(...)` — that key is the Figma style name.
+   - Example: `"heading 2": "Font(family: ...)"` → style name is `heading 2`
+   - Example: `"paragraph small/medium": "Font(...)"` → style name is `paragraph small/medium`
+
+3. **Map to variant**: Use the table below.
+
+### Figma style name → Typography variant mapping
+
+| Figma variable / style   | Typography variant                 |
+| ------------------------ | ---------------------------------- |
+| heading 1                | `variant="h1"`                     |
+| heading 2                | `variant="h2"`                     |
+| heading 3                | `variant="h3"`                     |
+| heading 4                | `variant="h4"`                     |
+| paragraph/regular        | `variant="paragraph"`              |
+| paragraph/medium         | `variant="paragraph-medium"`       |
+| paragraph/bold           | `variant="paragraph-bold"`         |
+| paragraph/small          | `variant="paragraph-small"`        |
+| paragraph/small + medium | `variant="paragraph-small-medium"` |
+| paragraph/mini           | `variant="paragraph-mini"`         |
+| paragraph/mini + medium  | `variant="paragraph-mini-medium"`  |
+| paragraph/mini + bold    | `variant="paragraph-mini-bold"`    |
+| monospaced               | `variant="code"`                   |
+
+**Align:** Use `align="center"` or `align="right"` when the design has centered/right-aligned text.
+
+**Color:** Use `color="muted"` for muted/secondary text (e.g. `text-muted-foreground`).
+
 ## Component Mappings
 
 | Figma Element     | shadcn Component   |

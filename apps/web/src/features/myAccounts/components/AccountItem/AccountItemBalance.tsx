@@ -1,7 +1,7 @@
 import { Skeleton } from '@mui/material'
 import FiatValue from '@/components/common/FiatValue'
+import { Typography } from '@/components/ui/typography'
 import css from '../AccountItems/styles.module.css'
-import { cn } from '@/utils/cn'
 
 export interface AccountItemBalanceProps {
   fiatTotal?: string | number
@@ -16,13 +16,15 @@ function AccountItemBalance({ fiatTotal, isLoading, hideBalance, 'data-testid': 
   }
 
   return (
-    <span className={cn(css.accountItemBalance, 'text-sm font-medium text-muted-foreground')} data-testid={testId}>
+    <div className={css.accountItemBalance} data-testid={testId}>
       {fiatTotal !== undefined ? (
-        <FiatValue value={fiatTotal} />
+        <Typography variant="paragraph-small-medium" color="muted">
+          <FiatValue value={fiatTotal} />
+        </Typography>
       ) : isLoading ? (
         <Skeleton variant="text" width={60} />
       ) : null}
-    </span>
+    </div>
   )
 }
 

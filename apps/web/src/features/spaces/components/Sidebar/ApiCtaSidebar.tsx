@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -60,9 +61,13 @@ export const ApiCtaSidebar = (): ReactElement => {
         </button>
       </div>
 
-      <p className="text-sm font-semibold leading-tight">Use API</p>
+      <Typography variant="paragraph-small-medium" className="leading-tight">
+        Use API
+      </Typography>
 
-      <p className="text-sm text-muted-foreground leading-snug">Start building with our new Safe API</p>
+      <Typography variant="paragraph-small" color="muted" className="leading-snug">
+        Start building with our new Safe API
+      </Typography>
 
       <Button
         size="sm"

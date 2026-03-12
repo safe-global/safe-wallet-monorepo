@@ -19,6 +19,7 @@
     "postinstall": "husky"
   },
   "resolutions": {
+    "motion": "12.34.0",
     "@ledgerhq/context-module/ethers": "6.14.3",
     "@gnosis.pm/zodiac/ethers": "6.14.3",
     "@ledgerhq/device-signer-kit-ethereum/ethers": "6.14.3",

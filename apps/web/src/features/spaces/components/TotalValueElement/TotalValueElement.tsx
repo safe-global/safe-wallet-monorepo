@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 
 /**
  * TotalValueElement
@@ -16,11 +17,15 @@ interface TotalValueElementProps {
 const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-muted-foreground">Total value</span>
+      <Typography variant="paragraph-mini-medium" color="muted">
+        Total value
+      </Typography>
       {loading ? (
         <Skeleton className="h-[30px] w-48" />
       ) : (
-        <span className="font-bold leading-[1] tracking-tight text-foreground text-[30px]">{value}</span>
+        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+          {value}
+        </Typography>
       )}
     </div>
   )

@@ -5,6 +5,7 @@ import { MemberStatus, useIsAdmin } from '@/features/spaces/hooks/useSpaceMember
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/features/spaces/components/InitialsAvatar'
 import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SpaceContextMenuNew from './SpaceContextMenuNew'
 
@@ -19,18 +20,18 @@ export const SpaceSummaryNew = ({
 }) => {
   return (
     <div className="flex flex-col gap-0.5">
-      <div className="text-sm font-semibold">{name}</div>
+      <Typography variant="paragraph-small-medium">{name}</Typography>
 
       <div className="mt-0.5 flex items-center gap-2">
-        <span className="text-muted-foreground text-xs">
+        <Typography variant="paragraph-mini" color="muted">
           {numberOfAccounts} Account{maybePlural(numberOfAccounts)}
-        </span>
+        </Typography>
 
         <div className="bg-border size-0.5 rounded-full" />
 
-        <span className="text-muted-foreground text-xs">
+        <Typography variant="paragraph-mini" color="muted">
           {numberOfMembers} Member{maybePlural(numberOfMembers)}
-        </span>
+        </Typography>
       </div>
     </div>
   )

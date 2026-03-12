@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from '@storybook/test'
+import { Typography } from '@/components/ui/typography'
 import { HeaderNavigation } from './HeaderNavigation'
 
 /**
@@ -117,22 +118,30 @@ export const AllVariations: Story = {
   render: () => (
     <div className="flex flex-col gap-8 p-8">
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-muted-foreground">Without Search</h3>
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-4">
+          Without Search
+        </Typography>
         <HeaderNavigation walletAddress="0xA77D...98b6" messages={0} showSearch={false} />
       </div>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-muted-foreground">With Search</h3>
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-4">
+          With Search
+        </Typography>
         <HeaderNavigation walletAddress="0xA77D...98b6" messages={0} showSearch={true} />
       </div>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-muted-foreground">With Notifications Badge</h3>
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-4">
+          With Notifications Badge
+        </Typography>
         <HeaderNavigation walletAddress="0xA77D...98b6" messages={3} showSearch={false} />
       </div>
 
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-muted-foreground">Full Configuration</h3>
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-4">
+          Full Configuration
+        </Typography>
         <HeaderNavigation walletAddress="0xA77D...98b6" messages={5} showSearch={true} />
       </div>
     </div>

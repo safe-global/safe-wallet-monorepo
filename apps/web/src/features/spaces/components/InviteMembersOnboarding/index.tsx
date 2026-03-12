@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { ChevronLeft, Plus } from 'lucide-react'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import StepIndicator from '@/features/spaces/components/StepIndicator'
@@ -42,13 +43,13 @@ const InviteMembersOnboarding = (): ReactElement => {
             <StepIndicator currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
           </div>
 
-          <h2 className="w-full text-center text-[30px] font-semibold leading-[30px] tracking-[-1px] text-foreground">
+          <Typography variant="h2" align="center">
             Invite team members
-          </h2>
+          </Typography>
 
-          <p className="mx-auto w-[93%] text-center text-base leading-6 text-muted-foreground">
+          <Typography variant="paragraph" align="center" color="muted" className="mx-auto w-[93%]">
             Add people to collaborate on this space.
-          </p>
+          </Typography>
 
           <div className="flex flex-col gap-3">
             {fields.map((field, index) => (
@@ -72,11 +73,11 @@ const InviteMembersOnboarding = (): ReactElement => {
           <button
             type="button"
             onClick={() => append({ address: '', role: MemberRole.MEMBER })}
-            className="flex cursor-pointer items-center justify-center gap-2 text-sm font-medium text-foreground"
+            className="flex cursor-pointer items-center justify-center gap-2"
             data-testid="add-another-member"
           >
             <Plus className="size-4" />
-            Add another
+            <Typography variant="paragraph-small-medium">Add another</Typography>
           </button>
 
           {error && (

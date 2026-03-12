@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Typography } from '@/components/ui/typography'
 import { motion } from 'motion/react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
@@ -49,13 +50,13 @@ const CreateSpaceOnboarding = (): ReactElement => {
         <div className="flex w-[350px] flex-col items-center gap-6">
           <StepIndicator totalSteps={ONBOARDING_TOTAL_STEPS} currentStep={1} />
 
-          <h2 className="w-full text-center text-[30px] font-semibold leading-[30px] tracking-[-1px] text-foreground">
+          <Typography variant="h2" align="center">
             Create a space
-          </h2>
+          </Typography>
 
-          <p className="w-full text-center text-base leading-6 text-muted-foreground">
+          <Typography variant="paragraph" align="center" color="muted">
             Consolidate and organize safes, members and transaction activity.
-          </p>
+          </Typography>
 
           <form onSubmit={onSubmit} className="flex w-full flex-col gap-6">
             <div className="relative">

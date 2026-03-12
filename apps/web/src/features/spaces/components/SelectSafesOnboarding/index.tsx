@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, Search, Loader2 } from 'lucide-react'
@@ -15,7 +16,7 @@ const TOTAL_STEPS = 3
 
 const SelectSafesOnboarding = (): ReactElement => {
   const { spaceId, isReady, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { displayedSafes, handleSearch } = useOnboardingSafes()
+  const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
@@ -43,13 +44,13 @@ const SelectSafesOnboarding = (): ReactElement => {
             <StepIndicator currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
           </div>
 
-          <h2 className="w-full text-center text-[30px] font-semibold leading-[30px] tracking-[-1px] text-foreground">
+          <Typography variant="h2" align="center">
             Select Safes for your Space
-          </h2>
+          </Typography>
 
-          <p className="text-center text-base leading-6 text-muted-foreground w-[93%] mx-auto">
+          <Typography variant="paragraph" align="center" color="muted" className="mx-auto w-[93%]">
             Consolidate and organize safes, members and transaction activity.
-          </p>
+          </Typography>
 
           <InputGroup className="bg-card px-2">
             <InputGroupAddon>
@@ -62,7 +63,11 @@ const SelectSafesOnboarding = (): ReactElement => {
             />
           </InputGroup>
 
-          <OnboardingSafesList safes={displayedSafes} />
+          <OnboardingSafesList
+            trustedSafes={trustedSafes}
+            ownedSafes={ownedSafes}
+            similarAddresses={similarAddresses}
+          />
 
           {error && (
             <Alert variant="destructive">
