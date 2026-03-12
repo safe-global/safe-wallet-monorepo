@@ -26,7 +26,7 @@ const AccountWidgetItem = ({ account, loading = false }: AccountWidgetItemProps)
       <AccountItemContent account={account}>
         <div className="flex flex-col items-center gap-2 min-w-16">
           <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
-          {(!account.subAccounts) && (
+          {!account.subAccounts && (
             <Badge variant="secondary">
               <UserRound className="size-3" />
               {account.owners}

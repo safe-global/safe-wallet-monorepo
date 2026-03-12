@@ -23,7 +23,7 @@ interface TxIconProps {
   tx: TransactionQueuedItem
 }
 
-const TxIcon = ({ tx }: TxIconProps): ReactElement => (
+export const TxIcon = ({ tx }: TxIconProps): ReactElement => (
   <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
     <TxTypeIcon tx={tx.transaction} />
   </div>

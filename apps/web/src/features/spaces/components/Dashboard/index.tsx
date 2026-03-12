@@ -1,7 +1,7 @@
 import MembersCard from './MembersCard'
 import SpacesCTACard from './SpacesCTACard'
 import AddressBookCard from './ImportAddressBookCard'
-import { Card, Grid2, Stack, Typography } from '@mui/material'
+import { Grid2, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { flattenSafeItems } from '@/hooks/safes'
 import {
@@ -10,14 +10,10 @@ import {
   useSpaceMembersByStatus,
   useIsInvited,
   useTrackSpace,
+  useSpacePendingTransactions,
 } from '@/features/spaces'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
-import type { LinkProps } from 'next/link'
-import NextLink from 'next/link'
-import { Link } from '@mui/material'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import DashboardMembersList from './DashboardMembersList'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
@@ -27,6 +23,7 @@ import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
+import PendingTxWidget from './PendingTxWidget'
 
 const AddActionsAction = () => {
   return (
@@ -36,26 +33,8 @@ const AddActionsAction = () => {
   )
 }
 
-const ViewAllLink = ({ url }: { url: LinkProps['href'] }) => {
-  return (
-    <NextLink href={url} passHref legacyBehavior>
-      <Link
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          textDecoration: 'none',
-          fontSize: '14px',
-          color: 'primary.main',
-        }}
-      >
-        View all <ChevronRightIcon fontSize="small" />
-      </Link>
-    </NextLink>
-  )
-}
-
 const DASHBOARD_LIST_DISPLAY_LIMIT = 3
+const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
@@ -64,11 +43,17 @@ const SpaceDashboard = () => {
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
   const isInvited = useIsInvited()
+  const {
+    transactions: pendingTxs,
+    count: pendingTxCount,
+    isLoading: isPendingTxLoading,
+    error: pendingTxError,
+    refetch: refetchPendingTxs,
+  } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
-  const membersToDisplay = activeMembers.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
   const { accounts, isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
   const remainingCount = Math.max(0, safeItems.length - DASHBOARD_LIST_DISPLAY_LIMIT)
@@ -78,6 +63,14 @@ const SpaceDashboard = () => {
       router.push({ pathname: AppRoutes.spaces.safeAccounts, query: { spaceId } })
     }
   }
+
+  const handleViewAllPendingTxs = () => {
+    if (spaceId) {
+      router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
+    }
+  }
+
+  const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
 
   return (
     <>
@@ -110,18 +103,15 @@ const SpaceDashboard = () => {
               )}
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ p: 2 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Typography variant="h5">Members ({activeMembers.length})</Typography>
-
-                  {spaceId && (
-                    <Track {...SPACE_EVENTS.VIEW_ALL_MEMBERS}>
-                      <ViewAllLink url={{ pathname: AppRoutes.spaces.members, query: { spaceId } }} />
-                    </Track>
-                  )}
-                </Stack>
-                <DashboardMembersList members={membersToDisplay} />
-              </Card>
+              <PendingTxWidget
+                transactions={pendingTxs}
+                loading={isPendingTxLoading}
+                error={pendingTxError ? String(pendingTxError) : undefined}
+                remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
+                onViewAll={handleViewAllPendingTxs}
+                onNavigate={handleViewAllPendingTxs}
+                onRefresh={refetchPendingTxs}
+              />
             </Grid>
           </Grid>
         </>
