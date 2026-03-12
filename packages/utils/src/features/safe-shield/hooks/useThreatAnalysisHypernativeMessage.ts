@@ -11,6 +11,7 @@ import { isHypernativeMessageAssessmentErrorResponse } from '@safe-global/store/
 
 type UseThreatAnalysisHypernativeMessageProps = {
   safeAddress: `0x${string}`
+  chainId: string
   messageHash: `0x${string}`
   typedData: TypedData | undefined
   proposer?: `0x${string}`
@@ -25,6 +26,7 @@ type UseThreatAnalysisHypernativeMessageProps = {
  * Requires an OAuth bearer token for authentication
  *
  * @param safeAddress - The Safe contract address
+ * @param chainId - The chain ID where the Safe is deployed
  * @param messageHash - The hash of the EIP-712 message
  * @param typedData - EIP-712 typed data to analyze for security threats
  * @param proposer - Optional address of the message proposer
@@ -35,6 +37,7 @@ type UseThreatAnalysisHypernativeMessageProps = {
  */
 export function useThreatAnalysisHypernativeMessage({
   safeAddress,
+  chainId,
   messageHash,
   typedData,
   proposer,
@@ -58,12 +61,13 @@ export function useThreatAnalysisHypernativeMessage({
 
     return buildHypernativeMessageRequestData({
       safeAddress,
+      chainId,
       messageHash,
       typedData,
       proposer,
       origin,
     })
-  }, [typedData, safeAddress, messageHash, proposer, origin, skip])
+  }, [typedData, safeAddress, chainId, messageHash, proposer, origin, skip])
 
   useEffect(() => {
     if (!skip && hypernativeRequest && authToken) {

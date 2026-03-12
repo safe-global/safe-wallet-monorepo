@@ -3,6 +3,7 @@ import type { HypernativeMessageAssessmentRequestDto } from '@safe-global/store/
 
 type BuildHypernativeMessageRequestDataParams = {
   safeAddress: `0x${string}`
+  chainId: string
   messageHash: `0x${string}`
   typedData: TypedData
   proposer?: `0x${string}`
@@ -17,6 +18,7 @@ type BuildHypernativeMessageRequestDataParams = {
  */
 export const buildHypernativeMessageRequestData = ({
   safeAddress,
+  chainId,
   messageHash,
   typedData,
   proposer,
@@ -50,6 +52,6 @@ export const buildHypernativeMessageRequestData = ({
     },
     ...(proposer ? { proposer } : {}),
     ...(origin ? { url: origin } : {}),
-    chain: typedData.domain.chainId ? typedData.domain.chainId.toString() : '1',
+    chain: typedData.domain.chainId ? typedData.domain.chainId.toString() : chainId,
   }
 }

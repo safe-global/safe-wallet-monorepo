@@ -67,6 +67,7 @@ export function useThreatAnalysis(
   // Use message-specific assessment for EIP-712 typed messages
   const hypernativeMessageThreatAnalysis = useThreatAnalysisHypernativeMessage({
     safeAddress: safeAddress as `0x${string}`,
+    chainId,
     messageHash: safeMessageHash as `0x${string}`,
     typedData: safeMessage,
     origin: txOrigin,
