@@ -27,9 +27,10 @@ interface WidgetDisplayProps {
   threat?: AsyncResult<ThreatAnalysisResults>
   loading?: boolean
   safeTx?: SafeTransaction
+  txId?: string
 }
 
-export function WidgetDisplay({ recipient, contract, threat, loading, safeTx }: WidgetDisplayProps) {
+export function WidgetDisplay({ recipient, contract, threat, loading, safeTx, txId }: WidgetDisplayProps) {
   // Extract data from AsyncResults
   const [recipientData = {}] = recipient || []
   const [contractData = {}] = contract || []
@@ -54,7 +55,7 @@ export function WidgetDisplay({ recipient, contract, threat, loading, safeTx }: 
     requestError,
     canSimulate,
     runSimulation,
-  } = useTransactionSimulation(safeTx)
+  } = useTransactionSimulation(safeTx, txId)
 
   const simulationSeverity = useMemo(
     () => getSeverity(isSuccess, simulationStatus.isFinished, hasError || isCallTraceError),

@@ -7,14 +7,17 @@ import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectChainById } from '@/src/store/chains'
 import { isTxSimulationEnabled, getSimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { selectCachedSimulation } from '@/src/store/txSimulationSlice'
+import { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 
-export const useTransactionSimulation = (safeTx?: SafeTransaction) => {
-  const simulation = useSimulation()
+export const useTransactionSimulation = (safeTx?: SafeTransaction, txId?: string) => {
+  const simulation = useSimulation(txId)
   const { safe } = useSafeInfo()
   const activeSafe = useAppSelector(selectActiveSafe)
   const activeSigner = useAppSelector((state) =>
     activeSafe ? selectActiveSigner(state, activeSafe.address) : undefined,
   )
+  const cachedSimulation = useAppSelector((state) => selectCachedSimulation(state, txId))
   const chain = useAppSelector((state) => (activeSafe ? selectChainById(state, activeSafe.chainId) : undefined))
 
   const simulationEnabled = chain ? isTxSimulationEnabled(chain) : false
@@ -57,14 +60,28 @@ export const useTransactionSimulation = (safeTx?: SafeTransaction) => {
       implementationVersionState: safe.implementationVersionState,
     }
 
-    await simulation.simulateTransaction({
+    simulation.simulateTransaction({
       safe: safeState,
       executionOwner,
       transactions: safeTx,
     })
   }, [canSimulate, safeTx, safe, executionOwner, activeSafe, simulation])
 
-  const simulationStatus = useMemo(() => getSimulationStatus(simulation), [simulation])
+  const simulationStatus = useMemo(
+    () =>
+      getSimulationStatus({
+        ...simulation,
+        simulationData: {
+          simulation: {
+            status: Boolean(cachedSimulation?.dataStatus),
+          },
+          transaction: {
+            call_trace: cachedSimulation?.callTrace || [],
+          },
+        },
+      } as UseSimulationReturn),
+    [simulation, cachedSimulation],
+  )
 
   return {
     enabled: simulationEnabled,
@@ -74,8 +91,8 @@ export const useTransactionSimulation = (safeTx?: SafeTransaction) => {
     isCallTraceError: simulationStatus.isCallTraceError,
     simulationStatus,
     simulationData: simulation.simulationData,
-    simulationLink: simulation.simulationLink,
-    requestError: simulation.requestError,
+    simulationLink: cachedSimulation?.link,
+    requestError: cachedSimulation?.error,
     canSimulate,
     runSimulation,
   }

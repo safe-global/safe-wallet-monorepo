@@ -24,6 +24,7 @@ interface AnalysisDetailsContentProps {
   contract?: AsyncResult<ContractAnalysisResults>
   threat?: AsyncResult<ThreatAnalysisResults>
   safeTx?: SafeTransaction
+  txId?: string
 }
 
 const AnalysisGroupWrapper = styled(View, {
@@ -38,7 +39,7 @@ const AnalysisGroupWrapper = styled(View, {
   },
 })
 
-export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: AnalysisDetailsContentProps) => {
+export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx, txId }: AnalysisDetailsContentProps) => {
   const [recipientData] = recipient || []
   const [contractData] = contract || []
   const [threatData] = threat || []
@@ -53,7 +54,7 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
     requestError,
     canSimulate,
     runSimulation,
-  } = useTransactionSimulation(safeTx)
+  } = useTransactionSimulation(safeTx, txId)
 
   const chain = useAppSelector(selectActiveChain)
 

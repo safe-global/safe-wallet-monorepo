@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { getSimulationPayload } from '@/src/features/TransactionChecks/tenderly/utils'
 import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -8,56 +8,65 @@ import {
   getSimulationLink,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectTenderly } from '@/src/store/settingsSlice'
 import Logger from '@/src/utils/logger'
+import { setTxSimulation } from '@/src/store/txSimulationSlice'
+import { selectCachedSimulation } from '@/src/store/txSimulationSlice'
 
-export const useSimulation = (): UseSimulationReturn => {
+export const useSimulation = (txId?: string): UseSimulationReturn => {
+  const dispatch = useAppDispatch()
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
-  const [simulationRequestStatus, setSimulationRequestStatus] = useState<FETCH_STATUS>(FETCH_STATUS.NOT_ASKED)
-  const [requestError, setRequestError] = useState<string | undefined>(undefined)
   const tenderly = useAppSelector(selectTenderly)
-
-  const simulationLink = useMemo(
-    () => getSimulationLink(simulation?.simulation.id || '', tenderly),
-    [simulation, tenderly],
-  )
+  const cachedSimulation = useAppSelector((state) => selectCachedSimulation(state, txId))
 
   const resetSimulation = useCallback(() => {
-    setSimulationRequestStatus(FETCH_STATUS.NOT_ASKED)
-    setRequestError(undefined)
+    dispatch(setTxSimulation({ txId, status: FETCH_STATUS.NOT_ASKED }))
     setSimulation(undefined)
-  }, [])
+  }, [dispatch, txId])
 
   const simulateTransaction = useCallback(
     async (params: SimulationTxParams) => {
-      setSimulationRequestStatus(FETCH_STATUS.LOADING)
-      setRequestError(undefined)
+      dispatch(setTxSimulation({ txId, status: FETCH_STATUS.LOADING }))
 
       try {
         const simulationPayload = await getSimulationPayload(params)
 
         const data = await getSimulation(simulationPayload, tenderly)
+        const link = getSimulationLink(data.simulation.id, tenderly)
 
         setSimulation(data)
-        setSimulationRequestStatus(FETCH_STATUS.SUCCESS)
+
+        dispatch(
+          setTxSimulation({
+            txId,
+            link,
+            status: FETCH_STATUS.SUCCESS,
+            callTrace: data.transaction.call_trace,
+            dataStatus: data.simulation.status,
+          }),
+        )
       } catch (error) {
         Logger.error(asError(error).message)
 
-        setRequestError(asError(error).message)
-        setSimulationRequestStatus(FETCH_STATUS.ERROR)
+        dispatch(
+          setTxSimulation({
+            txId,
+            error: asError(error).message,
+            status: FETCH_STATUS.ERROR,
+          }),
+        )
       }
     },
-    [tenderly],
+    [dispatch, tenderly, txId],
   )
 
   return {
+    simulationLink: cachedSimulation?.link,
     simulateTransaction,
-    // This is only used by the provider
-    _simulationRequestStatus: simulationRequestStatus,
+    _simulationRequestStatus: cachedSimulation?.status,
     simulationData: simulation,
-    simulationLink,
-    requestError,
+    requestError: cachedSimulation?.error,
     resetSimulation,
   } as UseSimulationReturn
 }

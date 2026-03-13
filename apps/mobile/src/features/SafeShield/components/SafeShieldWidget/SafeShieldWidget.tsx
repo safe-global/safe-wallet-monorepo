@@ -58,7 +58,14 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
       <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$background">
         <WidgetAction onPress={onPress} loading={loading} error={hasAnyError} status={overallStatus} />
 
-        <WidgetDisplay recipient={recipient} contract={contract} threat={threat} loading={loading} safeTx={safeTx} />
+        <WidgetDisplay
+          recipient={recipient}
+          contract={contract}
+          threat={threat}
+          loading={loading}
+          safeTx={safeTx}
+          txId={txId}
+        />
       </Stack>
     </Theme>
   )

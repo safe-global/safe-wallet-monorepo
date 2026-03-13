@@ -23,8 +23,6 @@ export const useSafeInfo = () => {
     },
   )
 
-  // console.log('safe data', currentData.address.value, activeSafe?.address)
-
   return {
     safe: currentData,
     safeAddress: activeSafe?.address,
