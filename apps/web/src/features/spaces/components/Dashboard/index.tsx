@@ -11,6 +11,7 @@ import {
   useIsInvited,
   useTrackSpace,
   useSpacePendingTransactions,
+  SpacesFeature,
 } from '@/features/spaces'
 import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
@@ -23,7 +24,6 @@ import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
-import PendingTxWidget from './PendingTxWidget'
 
 const AddActionsAction = () => {
   return (
@@ -38,6 +38,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
+  const { PendingTxWidget } = useLoadFeature(SpacesFeature)
   const { allSafes: safes } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
