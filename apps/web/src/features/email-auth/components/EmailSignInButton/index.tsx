@@ -4,6 +4,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isAuth0Configured } from '../../config/auth0'
 
 const EmailSignInButton = () => {
   const { loginWithRedirect } = useAuth0()
@@ -14,7 +15,7 @@ const EmailSignInButton = () => {
     loginWithRedirect()
   }
 
-  if (!isEmailAuthEnabled) return null
+  if (!isEmailAuthEnabled || !isAuth0Configured) return null
 
   return (
     <Button
