@@ -214,7 +214,6 @@ jest.mock('@/src/utils/logger', () => ({
     trace: jest.fn(),
     setLevel: jest.fn(),
     shouldLog: jest.fn(),
-    setShouldLogErrorToSentry: jest.fn(),
   },
   LogLevel: {
     TRACE: 0,

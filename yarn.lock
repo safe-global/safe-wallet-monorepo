@@ -13729,8 +13729,6 @@ __metadata:
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"
-    "@sentry/react": "npm:^7.91.0"
-    "@sentry/types": "npm:^7.74.0"
     "@storybook/addon-designs": "npm:^11.0.1"
     "@storybook/addon-docs": "npm:^10.2.6"
     "@storybook/addon-links": "npm:^10.2.6"
@@ -13928,66 +13926,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/feedback@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry-internal/feedback@npm:7.120.2"
-  dependencies:
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/b25036485d70967d45cc553fdfcfcd80aba187b369e26600b124de36e7412708f60344df0f8c49ddf21c55de06d57a6cc7ba1e6cd2e8ee5efc21b9baf0093e12
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay-canvas@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry-internal/replay-canvas@npm:7.120.2"
-  dependencies:
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/replay": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/c8f123227af25e818eef6d4ea12c1c3c7f0c3fadc83d219f768cef2929a1169db5aff62f1ccc4946743ae04628f30880f4df2d8be176667f9301c0bf7a56ddc3
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/tracing@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry-internal/tracing@npm:7.120.2"
-  dependencies:
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/24dbc1be80434431b78fbc6df58f600383e8e41e151237183ff1e59eb17823fec9e924102a9a3d439a0c003a9cf7335cc59902e671519274bfd7d802566ab089
-  languageName: node
-  linkType: hard
-
-"@sentry/browser@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry/browser@npm:7.120.2"
-  dependencies:
-    "@sentry-internal/feedback": "npm:7.120.2"
-    "@sentry-internal/replay-canvas": "npm:7.120.2"
-    "@sentry-internal/tracing": "npm:7.120.2"
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/integrations": "npm:7.120.2"
-    "@sentry/replay": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/6ed7d756a045ff878725ac94f8658d569874614b7638dfaf6f2dc51a18b70e3e0fc6fb32058e09e0787cb22e1f6addc1e29ec56aef8d9493c6bb9a1f3ff8131d
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry/core@npm:7.120.2"
-  dependencies:
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/6899da46ef74d767e716db3d9bc0da715ce2a8f4016695583058b497f909ccb09199ec2ab21ac280ea0cd6bae9ddd78f066cb624ce4965e608e4cb2caf0039ff
-  languageName: node
-  linkType: hard
-
 "@sentry/hub@npm:6.19.7":
   version: 6.19.7
   resolution: "@sentry/hub@npm:6.19.7"
@@ -13996,18 +13934,6 @@ __metadata:
     "@sentry/utils": "npm:6.19.7"
     tslib: "npm:^1.9.3"
   checksum: 10/ef2381ec399305ee56f7cff990c5bf0f221119193ac1b0862d237c42c9e214a8a3dcabe55085e197710c9667f1c541fffc3fe37e89d7562f3c86432c22d7f09a
-  languageName: node
-  linkType: hard
-
-"@sentry/integrations@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry/integrations@npm:7.120.2"
-  dependencies:
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-    localforage: "npm:^1.8.1"
-  checksum: 10/4fc6e78125258a9268781f260c234712789d48951481f383b156be82c251182a0a6742d26f5d15297a61b44411e0a129975a84497435d4efb4be628d66fa3a1e
   languageName: node
   linkType: hard
 
@@ -14022,44 +13948,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/react@npm:^7.91.0":
-  version: 7.120.2
-  resolution: "@sentry/react@npm:7.120.2"
-  dependencies:
-    "@sentry/browser": "npm:7.120.2"
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-    hoist-non-react-statics: "npm:^3.3.2"
-  peerDependencies:
-    react: 15.x || 16.x || 17.x || 18.x
-  checksum: 10/df8b039b2d9df2234dfe025a4a4b650e79042e1a8f5dd0bac2ccc0decf3917a8781f453125788944dbcbefd926069039536db52f03801cf274dd5f0790822faa
-  languageName: node
-  linkType: hard
-
-"@sentry/replay@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry/replay@npm:7.120.2"
-  dependencies:
-    "@sentry-internal/tracing": "npm:7.120.2"
-    "@sentry/core": "npm:7.120.2"
-    "@sentry/types": "npm:7.120.2"
-    "@sentry/utils": "npm:7.120.2"
-  checksum: 10/84b56a35f974308aa5ab576dee7294ebea870d697f419a788dc51d0c0135079a6fb939b85f6e3681ded6b7462da1e7c4ffa1c5fe81b3f3e73f589dc87e0eef0a
-  languageName: node
-  linkType: hard
-
 "@sentry/types@npm:6.19.7":
   version: 6.19.7
   resolution: "@sentry/types@npm:6.19.7"
   checksum: 10/f9f70e94c4a3876f6119f7e3979051ea2a054adce6f5583de9f70a08642c7d2c2f80a70a1f9fe5f9fad4e99315f4483340ded1110ae2e7c825c4c1f210fc2507
-  languageName: node
-  linkType: hard
-
-"@sentry/types@npm:7.120.2, @sentry/types@npm:^7.74.0":
-  version: 7.120.2
-  resolution: "@sentry/types@npm:7.120.2"
-  checksum: 10/aceaf08ea382ab6c7ac2a9fe7c3953998736aa56458f9ecc6d8ed304912abff505e2ca08f9b7563b02114eb812b1bf3aa6a2c78b6067f306b28c7c1f1425f25d
   languageName: node
   linkType: hard
 
@@ -14070,15 +13962,6 @@ __metadata:
     "@sentry/types": "npm:6.19.7"
     tslib: "npm:^1.9.3"
   checksum: 10/0ea94d32940705d77b019ca821e45a5866bb3d443e0f19b9bf5edf3d7ffed68c451803f3388913fec4da875e4b7df46b5f8a8681c4d69972fb3d775d864997b2
-  languageName: node
-  linkType: hard
-
-"@sentry/utils@npm:7.120.2":
-  version: 7.120.2
-  resolution: "@sentry/utils@npm:7.120.2"
-  dependencies:
-    "@sentry/types": "npm:7.120.2"
-  checksum: 10/9ac41322504d17d41b4b4b9216f0008539b80e5f6816d098ca52f4f8c51c5406f2beee9a3464ba0290874f643753f6a16bdfbbaeae76cda9ac41cbea4adcc5ec
   languageName: node
   linkType: hard
 
@@ -30395,7 +30278,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1, hoist-non-react-statics@npm:^3.3.2":
+"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.1":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
@@ -34270,7 +34153,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"localforage@npm:^1.10.0, localforage@npm:^1.8.1":
+"localforage@npm:^1.10.0":
   version: 1.10.0
   resolution: "localforage@npm:1.10.0"
   dependencies:

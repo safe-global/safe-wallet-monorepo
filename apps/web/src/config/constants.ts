@@ -31,7 +31,6 @@ export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
 export const DUST_THRESHOLD = 0.01
 
-export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN || ''
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
 export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
 
