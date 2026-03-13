@@ -1,8 +1,12 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
 import SignInButton from '../SignInButton'
+import { useLoadFeature } from '@/features/__core__'
+import { EmailAuthFeature } from '@/features/email-auth'
 
 const SignedOutState = () => {
+  const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
+
   return (
     <Box className={css.content}>
       <Box textAlign="center" className={css.contentWrapper}>
@@ -16,7 +20,10 @@ const SignedOutState = () => {
             in to continue.
           </Typography>
 
-          <SignInButton />
+          <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
+            <EmailSignInButton />
+            <SignInButton />
+          </Stack>
         </Box>
       </Box>
     </Box>

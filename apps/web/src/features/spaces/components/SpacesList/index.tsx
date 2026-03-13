@@ -6,7 +6,7 @@ import SignInButton from '../SignInButton'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import { Box, Button, Card, Grid2, Link, Stack, Typography } from '@mui/material'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -18,6 +18,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { EmailAuthFeature } from '@/features/email-auth'
 
 const AddSpaceButton = () => {
   const [openCreationModal, setOpenCreationModal] = useState<boolean>(false)
@@ -42,6 +43,7 @@ const AddSpaceButton = () => {
 const SignedOutState = () => {
   const wallet = useWallet()
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
 
   return (
     <>
@@ -59,7 +61,10 @@ const SignedOutState = () => {
           </Link>
         </Box>
 
-        <SignInButton />
+        <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
+          <EmailSignInButton />
+          <SignInButton />
+        </Stack>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} showButtons={false} />}
     </>

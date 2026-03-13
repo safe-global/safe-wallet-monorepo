@@ -53,6 +53,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.15.0",
     "@base-ui/react": "^1.1.0",
     "@cowprotocol/widget-react": "0.14.6",
     "@datadog/browser-rum": "^6.24.1",

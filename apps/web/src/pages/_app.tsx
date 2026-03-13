@@ -91,6 +91,7 @@ import { AddressBookSourceProvider } from '@/components/common/AddressBookSource
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
+import { Auth0ProviderWrapper } from '@/features/email-auth'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 // Initialize observability before React rendering starts
@@ -146,7 +147,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
       <GeoblockingProvider>
         <TxModalProvider>
           <AddressBookSourceProvider>
-            <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+            <Auth0ProviderWrapper>
+              <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+            </Auth0ProviderWrapper>
           </AddressBookSourceProvider>
         </TxModalProvider>
       </GeoblockingProvider>
