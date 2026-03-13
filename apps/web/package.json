@@ -55,7 +55,6 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@cowprotocol/widget-react": "0.14.6",
-    "@datadog/browser-logs": "^6.24.1",
     "@datadog/browser-rum": "^6.24.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/cache": "^11.13.5",

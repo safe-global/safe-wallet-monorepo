@@ -31,7 +31,6 @@ describe('DatadogProvider', () => {
 
       return {
         ...actualConstants,
-        DATADOG_CLIENT_TOKEN: '',
         DATADOG_RUM_APPLICATION_ID: '',
         DATADOG_RUM_CLIENT_TOKEN: '',
       }

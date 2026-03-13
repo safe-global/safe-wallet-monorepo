@@ -14,24 +14,13 @@ jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
 
-// Mock Datadog SDK to prevent it from loading during tests
-jest.mock('@datadog/browser-logs', () => ({
-  datadogLogs: {
-    init: jest.fn(),
-    logger: {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
-    },
-  },
-}))
-
+// Mock Datadog RUM SDK to prevent it from loading during tests
 jest.mock(
   '@datadog/browser-rum',
   () => ({
     datadogRum: {
       init: jest.fn(),
+      addAction: jest.fn(),
       addError: jest.fn(),
       setGlobalContextProperty: jest.fn(),
       getInitConfiguration: jest.fn(),
