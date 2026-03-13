@@ -3,6 +3,15 @@ import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import css from './styles.module.css'
+import {
+  getIsFirstTimeCuration,
+  getIsManageMode,
+  getPopoverWidth,
+  getSelectedCountLabel,
+  getSafesToShow,
+  getUncuratedCount,
+  getUncuratedCountLabel,
+} from './utils'
 import AddIcon from '@/public/images/common/add.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'
@@ -36,7 +45,7 @@ function PopoverHeaderAction({
   if (isManageMode) {
     return (
       <Typography variant="body2" color="text.secondary">
-        {selectedCount} {selectedCount === 1 ? 'safe' : 'safes'} selected
+        {getSelectedCountLabel(selectedCount)}
       </Typography>
     )
   }
@@ -81,7 +90,7 @@ function NormalModeActions({
             onClick={onManageClick}
             data-testid="more-nested-safes-indicator"
           >
-            +{uncuratedCount} more nested {uncuratedCount === 1 ? 'safe' : 'safes'} found
+            {getUncuratedCountLabel(uncuratedCount)}
           </Typography>
         </Track>
       )}
@@ -269,9 +278,9 @@ export function NestedSafesPopover({
     groupedSafes,
   } = useManageNestedSafes(allSafesWithStatus)
 
-  const isFirstTimeCuration = !hasCompletedCuration && rawNestedSafes.length > 0
+  const isFirstTimeCuration = getIsFirstTimeCuration(hasCompletedCuration, rawNestedSafes)
   const showIntroScreen = isFirstTimeCuration && showIntro
-  const isManageMode = userRequestedManage || (isFirstTimeCuration && !showIntro)
+  const isManageMode = getIsManageMode(userRequestedManage, isFirstTimeCuration, showIntro)
 
   const onAdd = () => {
     setTxFlow(<CreateNestedSafeFlow />)
@@ -291,8 +300,8 @@ export function NestedSafesPopover({
     onClose()
   }
 
-  const safesToShow = isManageMode ? allSafesWithStatus : visibleSafes
-  const uncuratedCount = rawNestedSafes.length - visibleSafes.length
+  const safesToShow = getSafesToShow(isManageMode, allSafesWithStatus, visibleSafes)
+  const uncuratedCount = getUncuratedCount(rawNestedSafes, visibleSafes)
   const canClose = !isManageMode
 
   return (
@@ -305,7 +314,7 @@ export function NestedSafesPopover({
       slotProps={{
         paper: {
           sx: {
-            width: isManageMode ? 'min(750px, calc(100vw - 32px))' : 'min(420px, calc(100vw - 32px))',
+            width: getPopoverWidth(isManageMode),
             height: 'calc(100vh - 100px)',
             maxHeight: 'calc(100vh - 100px)',
             display: 'flex',

@@ -27,12 +27,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
 import css from './styles.module.css'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
-
-const calculateProgress = (items: boolean[]) => {
-  const totalNumberOfItems = items.length
-  const completedItems = items.filter((item) => item)
-  return Math.round((completedItems.length / totalNumberOfItems) * 100)
-}
+import { calculateProgress } from './utils'
 
 const StatusCard = ({
   badge,

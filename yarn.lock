@@ -13506,6 +13506,8 @@ __metadata:
     "@storybook/builder-webpack5": "npm:^10.2.6"
     "@storybook/react": "npm:^10.2.6"
     "@yarnpkg/types": "npm:^4.0.1"
+    ajv: "npm:^8.18.0"
+    ajv-formats: "npm:^3.0.1"
     husky: "npm:^9.1.6"
     lint-staged: "npm:^16.2.7"
     msw: "npm:^2.7.3"
