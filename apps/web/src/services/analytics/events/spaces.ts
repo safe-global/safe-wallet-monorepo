@@ -177,6 +177,42 @@ export const SPACE_EVENTS = {
     action: 'Submit edit address',
     category: SPACE_CATEGORY,
   },
+  SPACES_ENTRY_VIEWED: {
+    action: 'Spaces entry viewed',
+    category: SPACE_CATEGORY,
+  },
+  SPACES_SIWE_SUCCESS: {
+    action: 'Spaces SIWE success',
+    category: SPACE_CATEGORY,
+  },
+  SPACES_SIWE_FAILURE: {
+    action: 'Spaces SIWE failure',
+    category: SPACE_CATEGORY,
+  },
+  SAFE_SELECTED: {
+    action: 'Safe selected in space',
+    category: SPACE_CATEGORY,
+  },
+  CHAIN_SWITCHED: {
+    action: 'Chain switched in space',
+    category: SPACE_CATEGORY,
+  },
+  ACCOUNTS_WIDGET_CLICKED: {
+    action: 'Accounts widget clicked',
+    category: SPACE_CATEGORY,
+  },
+  PENDING_TX_WIDGET_CLICKED: {
+    action: 'Pending TX widget clicked',
+    category: SPACE_CATEGORY,
+  },
+  WALLET_SWITCHED: {
+    action: 'Wallet switched in space',
+    category: SPACE_CATEGORY,
+  },
+  WALLET_DISCONNECTED: {
+    action: 'Wallet disconnected in space',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {
