@@ -237,6 +237,10 @@ export default {
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
+## Testing Requirements
+
+Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/docs/TESTING.md) for conventions, templates, and mock patterns.
+
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
