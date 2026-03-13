@@ -33,5 +33,3 @@ export interface GuardRule {
   match: (ctx: GuardContext) => boolean
   action: (ctx: GuardContext) => GuardResult
 }
-
-export type EvaluateGuard = (ctx: GuardContext, rules: GuardRule[]) => GuardResult

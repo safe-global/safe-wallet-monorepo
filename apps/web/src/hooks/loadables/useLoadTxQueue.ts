@@ -7,7 +7,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
 
-export const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
+const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
   const { safe, safeLoaded } = useSafeInfo()
   const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
   const { txQueuedTag, txHistoryTag } = safe
