@@ -208,6 +208,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@auth0/auth0-auth-js@npm:1.5.0":
+  version: 1.5.0
+  resolution: "@auth0/auth0-auth-js@npm:1.5.0"
+  dependencies:
+    jose: "npm:^6.0.8"
+    openid-client: "npm:^6.8.0"
+  checksum: 10/ec296b783a013d56629fc4f087214060b03b2aadc6811bd8bb0bf0b5e73442324578eaa4e8a1519198678cc130db17bc6948cd4302a3b95956d47b4413dad690
+  languageName: node
+  linkType: hard
+
+"@auth0/auth0-react@npm:^2.15.0":
+  version: 2.15.0
+  resolution: "@auth0/auth0-react@npm:2.15.0"
+  dependencies:
+    "@auth0/auth0-spa-js": "npm:^2.16.0"
+  peerDependencies:
+    react: ^16.11.0 || ^17 || ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
+    react-dom: ^16.11.0 || ^17 || ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
+  checksum: 10/2b066048b0aa00ed8ab6f615157f72cf179c897f356bf8e3adf410710fc9e6f8b3ae826a19e7724a2b08e9edac05455004fb98483f2f01939fffe41b55874189
+  languageName: node
+  linkType: hard
+
+"@auth0/auth0-spa-js@npm:^2.16.0":
+  version: 2.17.1
+  resolution: "@auth0/auth0-spa-js@npm:2.17.1"
+  dependencies:
+    "@auth0/auth0-auth-js": "npm:1.5.0"
+    browser-tabs-lock: "npm:1.3.0"
+    dpop: "npm:2.1.1"
+    es-cookie: "npm:1.3.2"
+  checksum: 10/7826a870f8758c59d97454a03cdaf46cac9c63c98bacc286b994cafa9921984cf17205bab08b8ae0ac8199d75662f51c747a88ce41ca71c6fa5c703150bdd219
+  languageName: node
+  linkType: hard
+
 "@babel/cli@npm:^7.23.4":
   version: 7.27.2
   resolution: "@babel/cli@npm:7.27.2"
@@ -13674,6 +13708,7 @@ __metadata:
   resolution: "@safe-global/web@workspace:apps/web"
   dependencies:
     "@argos-ci/cypress": "npm:6.2.11"
+    "@auth0/auth0-react": "npm:^2.15.0"
     "@base-ui/react": "npm:^1.1.0"
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
@@ -22716,6 +22751,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"browser-tabs-lock@npm:1.3.0":
+  version: 1.3.0
+  resolution: "browser-tabs-lock@npm:1.3.0"
+  dependencies:
+    lodash: "npm:>=4.17.21"
+  checksum: 10/2a6eba3d4ed168203b6303b201c5001553d854a33d0ce12dcc289315e5554c7154608d5d80f2e91ab40746c4cd54df58eb92c65a1e54e24823a1ccbfbc5da3c5
+  languageName: node
+  linkType: hard
+
 "browserify-aes@npm:^1.0.4, browserify-aes@npm:^1.2.0":
   version: 1.2.0
   resolution: "browserify-aes@npm:1.2.0"
@@ -25757,6 +25801,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dpop@npm:2.1.1":
+  version: 2.1.1
+  resolution: "dpop@npm:2.1.1"
+  checksum: 10/dfecbe6d5278dd07124b5b5be9ff1cc0cc9f3b3a1b84f441ae9c9666dfdc5d7ae1e703afa9b50fece70fdb636933755a75bb9bf5dea3a7ed8349e91be3152ea0
+  languageName: node
+  linkType: hard
+
 "dunder-proto@npm:^1.0.0, dunder-proto@npm:^1.0.1":
   version: 1.0.1
   resolution: "dunder-proto@npm:1.0.1"
@@ -26219,6 +26270,13 @@ __metadata:
     unbox-primitive: "npm:^1.1.0"
     which-typed-array: "npm:^1.1.19"
   checksum: 10/64e07a886f7439cf5ccfc100f9716e6173e10af6071a50a5031afbdde474a3dbc9619d5965da54e55f8908746a9134a46be02af8c732d574b7b81ed3124e2daf
+  languageName: node
+  linkType: hard
+
+"es-cookie@npm:1.3.2":
+  version: 1.3.2
+  resolution: "es-cookie@npm:1.3.2"
+  checksum: 10/e0a60e5406f6326f1ad9007b1ad2659684e1603d293be4e9eace1be8aae2bcc694ffdf868e777bda947ad7eddf4079b6acd47a236d361fa8a3bc741bff05ba88
   languageName: node
   linkType: hard
 
@@ -33163,6 +33221,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.0.8":
+  version: 6.2.1
+  resolution: "jose@npm:6.2.1"
+  checksum: 10/12f06a76ac743eb48314e662e02b141f6e4644dbcbdb1cd083c3867b1f72f1e148a67ebf4978d0d5adeb62f4be1572feee76f1849cbc32f8af1457ec9f788299
+  languageName: node
+  linkType: hard
+
 "jose@npm:^6.1.3":
   version: 6.1.3
   resolution: "jose@npm:6.1.3"
@@ -34303,7 +34368,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.23":
+"lodash@npm:>=4.17.21, lodash@npm:^4.17.23":
   version: 4.17.23
   resolution: "lodash@npm:4.17.23"
   checksum: 10/82504c88250f58da7a5a4289f57a4f759c44946c005dd232821c7688b5fcfbf4a6268f6a6cdde4b792c91edd2f3b5398c1d2a0998274432cff76def48735e233
@@ -37255,6 +37320,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"oauth4webapi@npm:^3.8.4":
+  version: 3.8.5
+  resolution: "oauth4webapi@npm:3.8.5"
+  checksum: 10/5c39d4dbd95b795438e79444a1d710631b3f8311e8b8913150b385b5815857b32f617a49d4869a4476b2318f614adfbc9d19510360df198719973f6f69a2e75b
+  languageName: node
+  linkType: hard
+
 "oazapfts@npm:^6.1.0":
   version: 6.1.0
   resolution: "oazapfts@npm:6.1.0"
@@ -37582,6 +37654,16 @@ __metadata:
   bin:
     opener: bin/opener-bin.js
   checksum: 10/0504efcd6546e14c016a261f58a68acf9f2e5c23d84865d7d5470d5169788327ceaa5386253682f533b3fba4821748aa37ecb395f3dae7acb3261b9b22e36814
+  languageName: node
+  linkType: hard
+
+"openid-client@npm:^6.8.0":
+  version: 6.8.2
+  resolution: "openid-client@npm:6.8.2"
+  dependencies:
+    jose: "npm:^6.1.3"
+    oauth4webapi: "npm:^3.8.4"
+  checksum: 10/5d30ff2419c4847d0037c43cf136dd7189b16399aaee98faaad5bcea105c4e1e4e43d2dac1141ea77049b446b50d1b26f2bb882f717b3e38a5f996645abfc1d0
   languageName: node
   linkType: hard
 
