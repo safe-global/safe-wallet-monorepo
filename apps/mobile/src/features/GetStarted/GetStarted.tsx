@@ -9,6 +9,9 @@ import { getCrashlytics } from '@react-native-firebase/crashlytics'
 import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
 import { isAndroid, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/src/config/constants'
 import { Platform } from 'react-native'
+import { useDispatch } from 'react-redux'
+import { setDataCollectionConsented } from '@/src/store/settingsSlice'
+import { DdSdkReactNative, TrackingConsent } from 'expo-datadog'
 
 const StyledText = styled(Text, {
   fontSize: '$3',
@@ -18,19 +21,22 @@ const StyledText = styled(Text, {
 export const GetStarted = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const dispatch = useDispatch()
 
-  const enableCrashlytics = async () => {
+  const enableDataCollection = async () => {
     await getCrashlytics().setCrashlyticsCollectionEnabled(true)
     await setAnalyticsCollectionEnabled(true)
+    dispatch(setDataCollectionConsented(true))
+    DdSdkReactNative.setTrackingConsent(TrackingConsent.GRANTED)
   }
 
   const onPressAddAccount = useCallback(async () => {
-    await enableCrashlytics()
+    await enableDataCollection()
     router.navigate('/(import-accounts)')
   }, [])
 
   const onPressImportAccount = useCallback(async () => {
-    await enableCrashlytics()
+    await enableDataCollection()
     router.navigate('/import-data')
   }, [router])
 

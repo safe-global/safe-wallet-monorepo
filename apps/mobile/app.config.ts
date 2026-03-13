@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.8',
+  version: '1.0.9',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -83,6 +83,17 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'expo-datadog',
+      {
+        errorTracking: {
+          iosDsyms: !!process.env.EAS_BUILD,
+          iosSourcemaps: !!process.env.EAS_BUILD,
+          androidSourcemaps: !!process.env.EAS_BUILD,
+          androidProguardMappingFiles: !!process.env.EAS_BUILD,
+        },
+      },
+    ],
     [
       'react-native-ble-plx',
       {

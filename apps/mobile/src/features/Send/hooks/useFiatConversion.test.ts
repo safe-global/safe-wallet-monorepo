@@ -3,7 +3,7 @@ import { useFiatConversion, getCurrencySymbol, truncateToDecimals } from './useF
 
 // Mock formatCurrency to keep tests focused on this hook's logic
 jest.mock('@safe-global/utils/utils/formatNumber', () => ({
-  formatCurrency: (value: string, currency: string) => `${currency} ${value}`,
+  formatCurrencyPrecise: (value: string, currency: string) => `${currency} ${value}`,
 }))
 
 describe('getCurrencySymbol', () => {
@@ -40,12 +40,19 @@ describe('truncateToDecimals', () => {
 })
 
 describe('useFiatConversion', () => {
+  const mockOnRawInputChange = jest.fn()
+
+  beforeEach(() => {
+    mockOnRawInputChange.mockClear()
+  })
+
   const defaultArgs = {
     rawInput: '',
     fiatRate: '2000',
     currency: 'USD',
     symbol: 'ETH',
     decimals: 18,
+    onRawInputChange: mockOnRawInputChange,
   }
 
   describe('initialization', () => {
@@ -146,6 +153,48 @@ describe('useFiatConversion', () => {
       act(() => result.current.toggleMode())
       // Should remain the same since hasFiatPrice is false
       expect(result.current.isFiatMode).toBe(true)
+    })
+
+    it('converts fiat to token value when toggling from fiat to token mode', () => {
+      const { result } = renderHook(() => useFiatConversion({ ...defaultArgs, rawInput: '2000' }))
+      act(() => result.current.toggleMode())
+      // 2000 USD / 2000 rate = 1 ETH
+      expect(mockOnRawInputChange).toHaveBeenCalledWith('1')
+    })
+
+    it('converts token to fiat value when toggling from token to fiat mode', () => {
+      // Start in token mode by toggling first with empty input
+      const { result, rerender } = renderHook(({ args }) => useFiatConversion(args), {
+        initialProps: { args: { ...defaultArgs, rawInput: '' } },
+      })
+      act(() => result.current.toggleMode())
+      mockOnRawInputChange.mockClear()
+
+      // Now in token mode with rawInput '1.5'
+      rerender({ args: { ...defaultArgs, rawInput: '1.5' } })
+      act(() => result.current.toggleMode())
+      // 1.5 ETH * 2000 rate = 3000 USD
+      expect(mockOnRawInputChange).toHaveBeenCalledWith('3000')
+    })
+
+    it('produces fixed-point fiat string for very small token amounts (no scientific notation)', () => {
+      const { result, rerender } = renderHook(({ args }) => useFiatConversion(args), {
+        initialProps: { args: { ...defaultArgs, rawInput: '' } },
+      })
+      act(() => result.current.toggleMode())
+      mockOnRawInputChange.mockClear()
+
+      // Very small token amount: 0.000000000000000001 ETH * 2000 = 2e-15
+      rerender({ args: { ...defaultArgs, rawInput: '0.000000000000000001' } })
+      act(() => result.current.toggleMode())
+      // Should produce empty string (rounds to 0.00 at 2dp), NOT '2e-15'
+      expect(mockOnRawInputChange).toHaveBeenCalledWith('')
+    })
+
+    it('does not call onRawInputChange when no fiat price', () => {
+      const { result } = renderHook(() => useFiatConversion({ ...defaultArgs, rawInput: '10', fiatRate: undefined }))
+      act(() => result.current.toggleMode())
+      expect(mockOnRawInputChange).not.toHaveBeenCalled()
     })
   })
 

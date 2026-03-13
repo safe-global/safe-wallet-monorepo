@@ -98,8 +98,39 @@ const migrateV2 = (state: PersistedState): PersistedState => {
   return state
 }
 
+/**
+ * Migration v3: Backfill dataCollectionConsented for existing users.
+ *
+ * Users who already have an `activeSafe` must have gone through the
+ * GetStarted screen (where Crashlytics/analytics consent is granted).
+ * Set `dataCollectionConsented = true` so Datadog consent is restored
+ * without requiring them to re-consent.
+ */
+const migrateV3 = (state: PersistedState): PersistedState => {
+  const root = state as PersistedRootState & {
+    activeSafe?: unknown
+    settings?: { dataCollectionConsented?: boolean }
+  }
+  if (!root) {
+    return state
+  }
+
+  if (!root.settings) {
+    return state
+  }
+
+  if (root.activeSafe) {
+    root.settings.dataCollectionConsented = true
+  } else {
+    root.settings.dataCollectionConsented = false
+  }
+
+  return state
+}
+
 const migrations: MigrationManifest = {
   2: migrateV2,
+  3: migrateV3,
 }
 
 export const migrate = createMigrate(migrations, { debug: __DEV__ })

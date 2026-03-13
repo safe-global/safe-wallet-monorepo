@@ -35,6 +35,8 @@ import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
+import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
+import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -49,6 +51,7 @@ const HooksInitializer = () => {
   useInitWeb3()
   useInitSafeCoreSDK()
   useAnalytics() // Tracks activeSafe changes, but only once analytics is enabled in GetStarted screen
+  useDatadogConsent() // Restores DD tracking consent from persisted settings
   useNotificationHandler()
   usePendingTxsMonitor()
   return null
@@ -137,34 +140,36 @@ function RootLayout() {
   useScreenTracking()
 
   return (
-    <GestureHandlerRootView>
-      <KeyboardProvider>
-        <Provider store={store}>
-          <DataFetchProvider>
-            <NotificationsProvider>
-              <PortalProvider shouldAddRootHost>
-                <PersistGate loading={null} persistor={persistor}>
-                  <SafeThemeProvider>
-                    <BottomSheetModalProvider>
-                      <SafeToastProvider>
-                        <NavigationGuardHOC>
-                          <HooksInitializer />
-                          <SigningMonitor />
-                          <ExecutingMonitor />
-                          <TestCtrls />
-                          <NavigationStack />
-                          <SafeStatusBar />
-                        </NavigationGuardHOC>
-                      </SafeToastProvider>
-                    </BottomSheetModalProvider>
-                  </SafeThemeProvider>
-                </PersistGate>
-              </PortalProvider>
-            </NotificationsProvider>
-          </DataFetchProvider>
-        </Provider>
-      </KeyboardProvider>
-    </GestureHandlerRootView>
+    <DatadogWrapper>
+      <GestureHandlerRootView>
+        <KeyboardProvider>
+          <Provider store={store}>
+            <DataFetchProvider>
+              <NotificationsProvider>
+                <PortalProvider shouldAddRootHost>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <SafeThemeProvider>
+                      <BottomSheetModalProvider>
+                        <SafeToastProvider>
+                          <NavigationGuardHOC>
+                            <HooksInitializer />
+                            <SigningMonitor />
+                            <ExecutingMonitor />
+                            <TestCtrls />
+                            <NavigationStack />
+                            <SafeStatusBar />
+                          </NavigationGuardHOC>
+                        </SafeToastProvider>
+                      </BottomSheetModalProvider>
+                    </SafeThemeProvider>
+                  </PersistGate>
+                </PortalProvider>
+              </NotificationsProvider>
+            </DataFetchProvider>
+          </Provider>
+        </KeyboardProvider>
+      </GestureHandlerRootView>
+    </DatadogWrapper>
   )
 }
 
