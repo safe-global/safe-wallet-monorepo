@@ -1,9 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import TxNonce from '../index'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import * as usePreviousNonces from '@/hooks/usePreviousNonces'
-import * as useSafeInfo from '@/hooks/useSafeInfo'
-import * as useQueuedTxByNonce from '@/hooks/useTxQueue'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/hooks/useSafeInfo')
