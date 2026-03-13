@@ -237,6 +237,39 @@ export default {
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
+## Testing Requirements
+
+Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/docs/TESTING.md) for the full testing conventions guide with copy-paste templates.
+
+### What requires tests
+
+- New hooks, utilities, services, and Redux slices
+- Components with conditional logic or user interaction
+- Bug fixes (regression test that fails without the fix)
+
+### What does NOT require tests
+
+- Pure layout components with zero logic
+- Type-only files, barrel re-exports, Storybook stories
+- Auto-generated files
+
+### Running tests
+
+```bash
+# Run a specific test file
+yarn workspace @safe-global/web test -- --testPathPattern=path/to/file
+
+# Run all tests
+yarn workspace @safe-global/web test
+
+# Coverage report
+yarn workspace @safe-global/web test:coverage
+```
+
+### Test file location
+
+Colocate tests with source files using `*.test.ts(x)` naming or a `__tests__/` subdirectory. Always import `render`/`renderHook` from `@/tests/test-utils` (NOT `@testing-library/react` directly).
+
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).

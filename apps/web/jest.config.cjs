@@ -41,6 +41,14 @@ const customJestConfig = {
     customExportConditions: ['node'],
   },
   coveragePathIgnorePatterns: ['/node_modules/', '/src/tests/', '/src/types/contracts/'],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.stories.{ts,tsx}',
+    '!src/**/*.test.{ts,tsx}',
+    '!src/**/index.ts',
+    '!src/types/**',
+    '!src/tests/**',
+  ],
   // Exclude storybook snapshot tests from main test run - they have their own CI workflow
   testPathIgnorePatterns: ['/node_modules/', '/.next/', '\\.stories\\.test\\.tsx$'],
 }
