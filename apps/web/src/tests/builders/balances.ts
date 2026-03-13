@@ -26,11 +26,11 @@ export const erc20TokenBuilder = (): IBuilder<Erc20Token> => {
   })
 }
 
-export const tokenInfoBuilder = erc20TokenBuilder
+export const tokenInfoBuilder = (): IBuilder<Erc20Token> => erc20TokenBuilder()
 
 export const balanceBuilder = (): IBuilder<Balance> => {
   return Builder.new<Balance>().with({
-    balance: faker.string.numeric({ length: { min: 1, max: 20 } }),
+    balance: faker.number.bigInt({ min: 1n, max: 10n ** 20n }).toString(),
     fiatBalance: faker.finance.amount(),
     fiatConversion: faker.finance.amount(),
     tokenInfo: erc20TokenBuilder().build(),

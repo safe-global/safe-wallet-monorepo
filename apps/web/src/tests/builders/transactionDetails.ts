@@ -7,7 +7,12 @@ import type {
   AddressInfo,
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TransactionInfoType, TransferDirection, TransactionTokenType } from '@safe-global/store/gateway/types'
+import {
+  TransactionInfoType,
+  TransactionStatus,
+  TransferDirection,
+  TransactionTokenType,
+} from '@safe-global/store/gateway/types'
 
 import { Builder, type IBuilder } from '../Builder'
 
@@ -68,7 +73,7 @@ export const transactionDetailsBuilder = (): IBuilder<TransactionDetails> => {
   return Builder.new<TransactionDetails>().with({
     txId: `multisig_0x${faker.string.hexadecimal({ length: 40 })}_0x${faker.string.hexadecimal({ length: 64 })}`,
     safeAddress: checksumAddress(faker.finance.ethereumAddress()),
-    txStatus: 'AWAITING_CONFIRMATIONS' as const,
+    txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
     txInfo: {
       type: TransactionInfoType.TRANSFER,
       sender: addressInfoBuilder().build(),
@@ -76,7 +81,7 @@ export const transactionDetailsBuilder = (): IBuilder<TransactionDetails> => {
       direction: TransferDirection.OUTGOING,
       transferInfo: {
         type: TransactionTokenType.NATIVE_COIN,
-        value: faker.string.numeric({ length: { min: 1, max: 20 } }),
+        value: faker.number.bigInt({ min: 1n, max: 10n ** 18n }).toString(),
       },
     },
     txData: transactionDataBuilder().build(),
