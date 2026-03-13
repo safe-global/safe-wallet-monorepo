@@ -25,8 +25,7 @@ function convertNullable(obj: Record<string, unknown>): void {
       obj.type = [obj.type, 'null']
     } else if (!obj.type && (obj.$ref || obj.oneOf || obj.anyOf || obj.allOf)) {
       // nullable ref or composed type — wrap in anyOf with null
-      const existing = { ...obj }
-      delete existing.nullable
+      const { nullable: _, ...existing } = obj
       Object.keys(obj).forEach((k) => delete obj[k])
       obj.anyOf = [existing, { type: 'null' }]
       return
@@ -216,15 +215,15 @@ describe('Fixture-schema validation', () => {
       ;(data as unknown[]).forEach((item, index) => {
         const valid = validate!(item)
         if (!valid) {
-          fail(
-            `Item [${index}] in ${fixture} failed validation:\n${ajv.errorsText(validate!.errors, { separator: '\n' })}`,
-          )
+          const fields = validate!.errors?.map((e) => `  ${e.instancePath || '/'}: ${e.message}`).join('\n')
+          fail(`Item [${index}] in ${fixture} failed ${schemaRef} validation:\n${fields}`)
         }
       })
     } else {
       const valid = validate!(data)
       if (!valid) {
-        fail(`${fixture} failed validation:\n${ajv.errorsText(validate!.errors, { separator: '\n' })}`)
+        const fields = validate!.errors?.map((e) => `  ${e.instancePath || '/'}: ${e.message}`).join('\n')
+        fail(`${fixture} failed ${schemaRef} validation:\n${fields}`)
       }
     }
   })

@@ -160,6 +160,8 @@ function mockUseHasFeature(returnValue: boolean | undefined) {
 
 // ── Cleanup ───────────────────────────────────────────────────────
 
+// Each test creates handles via jest.requireActual which register in a global Map.
+// Without resetting, subsequent tests see stale entries and can't re-register handles.
 afterEach(() => {
   _resetFeatureRegistry()
   jest.clearAllMocks()

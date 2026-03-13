@@ -10,7 +10,7 @@ import {
   _sanitizeNotifiableSafes,
   _shouldRegisterSelectedSafes,
   _shouldUnregisterDevice,
-  _shouldUnregsiterSelectedSafes,
+  _shouldUnregisterSelectedSafes,
   _transformAddedSafes,
   _transformCurrentSubscribedSafes,
 } from './GlobalPushNotifications.utils'
@@ -332,13 +332,13 @@ describe('_shouldRegisterSelectedSafes', () => {
   })
 })
 
-describe('_shouldUnregsiterSelectedSafes', () => {
+describe('_shouldUnregisterSelectedSafes', () => {
   it('returns true when a currently notified safe is not in selected', () => {
     const safeAddr = addr()
     const selected: NotifiableSafes = {}
     const current: NotifiableSafes = { '1': [safeAddr] }
 
-    expect(_shouldUnregsiterSelectedSafes(selected, current)).toBe(true)
+    expect(_shouldUnregisterSelectedSafes(selected, current)).toBe(true)
   })
 
   it('returns false when all current safes are still selected', () => {
@@ -346,11 +346,11 @@ describe('_shouldUnregsiterSelectedSafes', () => {
     const selected: NotifiableSafes = { '1': [safeAddr] }
     const current: NotifiableSafes = { '1': [safeAddr] }
 
-    expect(_shouldUnregsiterSelectedSafes(selected, current)).toBe(false)
+    expect(_shouldUnregisterSelectedSafes(selected, current)).toBe(false)
   })
 
   it('returns false when currentNotifiedSafes is undefined', () => {
-    expect(_shouldUnregsiterSelectedSafes({}, undefined)).toBe(false)
+    expect(_shouldUnregisterSelectedSafes({}, undefined)).toBe(false)
   })
 })
 

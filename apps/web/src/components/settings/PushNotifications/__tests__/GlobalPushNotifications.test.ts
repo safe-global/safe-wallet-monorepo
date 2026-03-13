@@ -7,7 +7,7 @@ import {
   _areAllSafesSelected,
   _getTotalSignaturesRequired,
   _shouldRegisterSelectedSafes,
-  _shouldUnregsiterSelectedSafes,
+  _shouldUnregisterSelectedSafes,
   _getSafesToRegister,
   _getSafesToUnregister,
   _shouldUnregisterDevice,
@@ -436,7 +436,7 @@ describe('GlobalPushNotifications', () => {
         '4': ['0x789'],
       }
 
-      const result = _shouldUnregsiterSelectedSafes(selectedSafes, currentNotifiedSafes)
+      const result = _shouldUnregisterSelectedSafes(selectedSafes, currentNotifiedSafes)
       expect(result).toBe(true)
     })
 
@@ -450,7 +450,7 @@ describe('GlobalPushNotifications', () => {
         '1': ['0x123', '0x456'],
       }
 
-      const result = _shouldUnregsiterSelectedSafes(selectedSafes, currentNotifiedSafes)
+      const result = _shouldUnregisterSelectedSafes(selectedSafes, currentNotifiedSafes)
       expect(result).toBe(true)
     })
 
@@ -464,7 +464,7 @@ describe('GlobalPushNotifications', () => {
         '1': ['0x123'],
       }
 
-      const result = _shouldUnregsiterSelectedSafes(selectedSafes, currentNotifiedSafes)
+      const result = _shouldUnregisterSelectedSafes(selectedSafes, currentNotifiedSafes)
       expect(result).toBe(true)
     })
 
@@ -479,7 +479,7 @@ describe('GlobalPushNotifications', () => {
         '4': ['0x789'],
       }
 
-      const result = _shouldUnregsiterSelectedSafes(selectedSafes, currentNotifiedSafes)
+      const result = _shouldUnregisterSelectedSafes(selectedSafes, currentNotifiedSafes)
       expect(result).toBe(false)
     })
   })

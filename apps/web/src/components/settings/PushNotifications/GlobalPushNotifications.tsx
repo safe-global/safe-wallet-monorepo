@@ -45,7 +45,7 @@ import {
   _areAllSafesSelected,
   _getTotalSignaturesRequired,
   _shouldRegisterSelectedSafes,
-  _shouldUnregsiterSelectedSafes,
+  _shouldUnregisterSelectedSafes,
   _getSafesToRegister,
   _getSafesToUnregister,
   _shouldUnregisterDevice,
@@ -61,7 +61,7 @@ export {
   _areAllSafesSelected,
   _getTotalSignaturesRequired,
   _shouldRegisterSelectedSafes,
-  _shouldUnregsiterSelectedSafes,
+  _shouldUnregisterSelectedSafes,
   _getSafesToRegister,
   _getSafesToUnregister,
   _shouldUnregisterDevice,
@@ -140,7 +140,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
   const canSave = useMemo(() => {
     return (
       _shouldRegisterSelectedSafes(selectedSafes, currentNotifiedSafes) ||
-      _shouldUnregsiterSelectedSafes(selectedSafes, currentNotifiedSafes)
+      _shouldUnregisterSelectedSafes(selectedSafes, currentNotifiedSafes)
     )
   }, [selectedSafes, currentNotifiedSafes])
 

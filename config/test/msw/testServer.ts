@@ -70,6 +70,6 @@ export function createTestServer(options: TestServerOptions = {}) {
         ? fixtureHandlers[scenario](gatewayUrl)
         : []
 
-  // Priority order (highest first): extra → scenario → base
+  // MSW uses first-match: extraHandlers override scenario & base, scenario overrides base
   return setupServer(...extraHandlers, ...scenarioHandlers, ...baseHandlers(gatewayUrl))
 }

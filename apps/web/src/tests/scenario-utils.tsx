@@ -100,6 +100,8 @@ export function renderWithScenario(
 ) {
   const { routerProps, storeOverrides, handlers } = options
 
+  // 'empty' uses efSafe data for store initialization (always available as a static JSON import);
+  // the actual "empty" behavior comes from MSW handlers returning empty responses.
   const safeData = scenario === 'empty' ? safeFixtures.efSafe : safeFixtures[scenario]
 
   const initialState = createInitialState({ safeData, isDarkMode: false })

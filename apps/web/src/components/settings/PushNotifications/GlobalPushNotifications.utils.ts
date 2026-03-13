@@ -93,7 +93,7 @@ export const _mergeNotifiableSafes = (
 
 export const _getTotalNotifiableSafes = (notifiableSafes: NotifiableSafes): number => {
   return Object.values(notifiableSafes).reduce((acc, safeAddresses) => {
-    return (acc += safeAddresses.length)
+    return acc + safeAddresses.length
   }, 0)
 }
 
@@ -138,7 +138,7 @@ export const _shouldRegisterSelectedSafes = (
   })
 }
 
-export const _shouldUnregsiterSelectedSafes = (
+export const _shouldUnregisterSelectedSafes = (
   selectedSafes: NotifiableSafes,
   currentNotifiedSafes?: NotifiableSafes,
 ) => {
