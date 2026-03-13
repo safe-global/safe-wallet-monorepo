@@ -40,14 +40,6 @@ jest.mock(
   { virtual: true },
 )
 
-// Mock Sentry SDK to prevent it from loading during tests
-jest.mock('@sentry/react', () => ({
-  init: jest.fn(),
-  captureException: jest.fn(),
-  captureMessage: jest.fn(),
-  ErrorBoundary: ({ children }) => children,
-}))
-
 const mockOnboardState = {
   chains: [],
   walletModules: [],
