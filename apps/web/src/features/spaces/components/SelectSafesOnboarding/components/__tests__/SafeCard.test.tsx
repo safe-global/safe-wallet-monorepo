@@ -16,9 +16,9 @@ jest.mock('../../hooks/useSafeCardData', () => ({
   }),
 }))
 
-jest.mock('../SafeAvatar', () => ({
+jest.mock('@/components/common/Identicon', () => ({
   __esModule: true,
-  default: ({ address }: { address: string }) => <div data-testid={`avatar-${address}`} />,
+  default: ({ address }: { address: string }) => <div data-testid={`identicon-${address}`} />,
 }))
 
 jest.mock('../FiatBalance', () => ({
@@ -71,6 +71,41 @@ describe('SafeCard', () => {
     expect(screen.getByText('Test Safe')).toBeInTheDocument()
     expect(screen.getByTestId('fiat-balance')).toHaveTextContent('1000')
     expect(screen.getByTestId('threshold-badge')).toHaveTextContent('2/3')
+  })
+
+  it('shows full address as subtitle', () => {
+    const address = '0xabc1234567890def'
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe(address)} />
+      </FormWrapper>,
+    )
+
+    expect(screen.getByText(address)).toBeInTheDocument()
+  })
+
+  it('bolds first and last 4 chars of address when isSimilar', () => {
+    const address = '0xABCDEF1234567890abcdef'
+    const { container } = render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe(address)} isSimilar />
+      </FormWrapper>,
+    )
+
+    const boldElements = container.querySelectorAll('b')
+    expect(boldElements).toHaveLength(2)
+    expect(boldElements[0].textContent).toBe(address.slice(2, 6))
+    expect(boldElements[1].textContent).toBe(address.slice(-4))
+  })
+
+  it('does not bold address when not similar', () => {
+    const { container } = render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} />
+      </FormWrapper>,
+    )
+
+    expect(container.querySelectorAll('b')).toHaveLength(0)
   })
 
   it('does not show similarity badge when isSimilar is false', () => {
