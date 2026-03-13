@@ -32,8 +32,6 @@ export const LS_NAMESPACE = 'SAFE_v2__'
 export const DUST_THRESHOLD = 0.01
 
 export const BEAMER_ID = process.env.NEXT_PUBLIC_BEAMER_ID || ''
-export const DATADOG_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || ''
-
 // Datadog RUM
 export const DATADOG_RUM_APPLICATION_ID = process.env.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID || ''
 export const DATADOG_RUM_CLIENT_TOKEN = process.env.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN || ''
@@ -51,12 +49,6 @@ export const DATADOG_RUM_TRACE_SAMPLE_RATE =
   process.env.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE !== undefined && !Number.isNaN(parsedTraceSampleRate)
     ? parsedTraceSampleRate
     : 20
-
-const parsedLogsSampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE)
-export const DATADOG_LOGS_SAMPLE_RATE =
-  process.env.NEXT_PUBLIC_DATADOG_LOGS_SAMPLE_RATE !== undefined && !Number.isNaN(parsedLogsSampleRate)
-    ? parsedLogsSampleRate
-    : 100
 
 const parsedSessionReplaySampleRate = Number(process.env.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE)
 export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
