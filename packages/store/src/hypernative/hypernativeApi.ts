@@ -6,6 +6,8 @@ import type {
   HypernativeBatchAssessmentRequestWithAuthDto,
   HypernativeTokenExchangeResponseDto,
   HypernativeTokenExchangeRequestDto,
+  HypernativeMessageAssessmentResponseDto,
+  HypernativeMessageAssessmentRequestWithAuthDto,
 } from './hypernativeApi.dto'
 import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 
@@ -68,6 +70,26 @@ export const hypernativeApi = createApi({
         response: HypernativeBatchAssessmentResponseDto,
       ): HypernativeBatchAssessmentResponseDto['data'] => (response as HypernativeBatchAssessmentResponseDto).data,
       transformErrorResponse: (response: HypernativeBatchAssessmentResponseDto) => response.data,
+      invalidatesTags: ['hypernative-threat-analysis'],
+    }),
+    assessMessage: build.mutation<
+      HypernativeMessageAssessmentResponseDto['data'],
+      HypernativeMessageAssessmentRequestWithAuthDto
+    >({
+      query: ({ authToken, ...request }) => ({
+        url: '/safe/eip712/assessment',
+        method: 'POST',
+        body: request,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: authToken,
+        },
+      }),
+      transformResponse: (
+        response: HypernativeMessageAssessmentResponseDto,
+      ): HypernativeMessageAssessmentResponseDto['data'] => response.data,
+      transformErrorResponse: (response: HypernativeMessageAssessmentResponseDto) => response.data,
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
   }),

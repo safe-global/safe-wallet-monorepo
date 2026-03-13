@@ -1,6 +1,7 @@
 import {
   useThreatAnalysis as useThreatAnalysisUtils,
   useThreatAnalysisHypernative,
+  useThreatAnalysisHypernativeMessage,
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { useContext, useMemo } from 'react'
@@ -23,7 +24,7 @@ export function useThreatAnalysis(
     safeAddress,
   } = useSafeInfo()
   const signer = useSigner()
-  const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, safeMessage, safeMessageHash, txOrigin } = useContext(SafeTxContext)
   const walletAddress = signer?.address ?? ''
   const isHypernativeFeatureEnabled = useIsHypernativeFeatureEnabled()
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
@@ -33,6 +34,9 @@ export function useThreatAnalysis(
 
   const chain = useCurrentChain()
   const txToAnalyze = overrideSafeTx || safeTx || safeMessage
+
+  // Determine if we're analyzing a message or a transaction
+  const isMessageAnalysis = !overrideSafeTx && !safeTx && !!safeMessage && !!safeMessageHash
 
   const safeTxToCheck = (txToAnalyze && 'data' in txToAnalyze ? txToAnalyze : undefined) as SafeTransaction | undefined
   const { isNested, isNestedLoading } = useNestedTransaction(safeTxToCheck, chain)
@@ -57,14 +61,33 @@ export function useThreatAnalysis(
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
     ...mainTxProps,
     authToken: hypernativeAuthToken,
-    skip: !useHypernativeAnalysis || !hypernativeAuthToken,
+    skip: !useHypernativeAnalysis || !hypernativeAuthToken || isMessageAnalysis,
   })
 
-  const threatAnalysis = useMemo(
-    (): AsyncResult<ThreatAnalysisResults> =>
-      useHypernativeAnalysis ? hypernativeThreatAnalysis : blockaidThreatAnalysis,
-    [useHypernativeAnalysis, hypernativeThreatAnalysis, blockaidThreatAnalysis],
-  )
+  // Use message-specific assessment for EIP-712 typed messages
+  const hypernativeMessageThreatAnalysis = useThreatAnalysisHypernativeMessage({
+    safeAddress: safeAddress as `0x${string}`,
+    chainId,
+    messageHash: safeMessageHash as `0x${string}`,
+    typedData: safeMessage,
+    origin: txOrigin,
+    authToken: hypernativeAuthToken,
+    skip: !useHypernativeAnalysis || !hypernativeAuthToken || !isMessageAnalysis,
+  })
+
+  const threatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {
+    if (useHypernativeAnalysis) {
+      // Use message assessment for messages, transaction assessment for transactions
+      return isMessageAnalysis ? hypernativeMessageThreatAnalysis : hypernativeThreatAnalysis
+    }
+    return blockaidThreatAnalysis
+  }, [
+    useHypernativeAnalysis,
+    isMessageAnalysis,
+    hypernativeMessageThreatAnalysis,
+    hypernativeThreatAnalysis,
+    blockaidThreatAnalysis,
+  ])
 
   const nestedThreatAnalysis = useNestedThreatAnalysis(safeTxToCheck, hypernativeAuthToken)
 

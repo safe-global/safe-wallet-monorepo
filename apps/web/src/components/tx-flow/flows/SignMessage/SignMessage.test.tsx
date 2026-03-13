@@ -725,6 +725,8 @@ describe('SignMessage', () => {
         setSafeTx: jest.fn(),
         safeMessage: undefined,
         setSafeMessage: mockSetSafeMessage,
+        safeMessageHash: undefined,
+        setSafeMessageHash: jest.fn(),
         safeTxError: undefined,
         setSafeTxError: jest.fn(),
         nonce: undefined,

@@ -251,7 +251,8 @@ export type SignMessageProps = BaseProps & {
 const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactElement => {
   // Hooks & variables
   const { setTxFlow } = useContext(TxModalContext)
-  const { setSafeMessage: setContextSafeMessage } = useContext(SafeTxContext)
+  const { setSafeMessage: setContextSafeMessage, setSafeMessageHash: setContextSafeMessageHash } =
+    useContext(SafeTxContext)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const { palette } = useTheme()
   const { safe } = useSafeInfo()
@@ -260,6 +261,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   useHighlightHiddenTab()
 
   const { decodedMessage, safeMessageMessage, safeMessageHash } = useDecodedSafeMessage(message, safe)
+
   const [safeMessage, setSafeMessage] = useSafeMessage(safeMessageHash)
   const domainHash = getDomainHash({
     chainId: safe.chainId,
@@ -314,8 +316,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   useEffect(() => {
     if (isEip712) {
       setContextSafeMessage(decodedMessage)
+      setContextSafeMessageHash(safeMessageHash as `0x${string}`)
     }
-  }, [decodedMessage, isEip712, setContextSafeMessage])
+  }, [decodedMessage, isEip712, setContextSafeMessage, setContextSafeMessageHash, safeMessageHash])
 
   return (
     <>
