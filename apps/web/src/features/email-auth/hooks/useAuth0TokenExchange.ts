@@ -39,7 +39,7 @@ export function useAuth0TokenExchange(
         await verifyAuth0({ id_token: claims.__raw }).unwrap()
         dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
       } catch (err) {
-        logError(ErrorCodes._640, err)
+        logError(ErrorCodes._640, err instanceof Error ? err.message : 'Auth0 token exchange failed')
         dispatch(
           showNotification({
             message: 'Something went wrong while signing in with email',

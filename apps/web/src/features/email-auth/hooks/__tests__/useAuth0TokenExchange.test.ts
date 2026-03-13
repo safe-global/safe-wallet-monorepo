@@ -105,7 +105,7 @@ describe('useAuth0TokenExchange', () => {
     renderHook(() => useAuth0TokenExchange(true, getIdTokenClaims))
 
     await waitFor(() => {
-      expect(logError).toHaveBeenCalledWith(expect.any(String), error)
+      expect(logError).toHaveBeenCalledWith(expect.any(String), 'verify failed')
       expect(showNotificationSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Something went wrong while signing in with email',
