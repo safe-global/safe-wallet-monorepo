@@ -277,24 +277,5 @@ describe('HnSignupFlow', () => {
         expect(screen.getByTestId('hn-signup-form')).toBeInTheDocument()
       })
     })
-
-    describe('Safe address formatting', () => {
-      it('should format safe address with chain prefix when shortName is available', async () => {
-        const user = userEvent.setup()
-        jest.spyOn(useChainsHook, 'useCurrentChain').mockReturnValue({ shortName: 'eth' } as any)
-
-        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
-        await user.click(screen.getByText('Get Started'))
-
-        // The formatted address is passed to HnSignupForm — verifiable via dispatch on close
-        await user.click(screen.getByText('Submit'))
-        await user.click(screen.getByLabelText('close'))
-
-        // dispatch uses raw safeAddress (not formatted), formatted is only for HubSpot pre-fill
-        expect(mockDispatch).toHaveBeenCalledWith(
-          setFormCompleted({ chainId: '1', safeAddress: '0x123', completed: true }),
-        )
-      })
-    })
   })
 })

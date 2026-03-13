@@ -38,10 +38,7 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
           redirectUrl: '', // Prevent HubSpot's redirect
           onFormReady: (form: HTMLFormElement) => {
             try {
-              // Hide loader when form is ready
               setIsLoading(false)
-
-              // Pre-populate safe address field using native DOM API
               if (safeAddress && form.elements) {
                 const safeAddressField = form.elements.namedItem('safe_address') as HTMLInputElement
                 if (safeAddressField) {
@@ -68,7 +65,6 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
             }
           },
           onFormSubmitted: ($form: any, data: any) => {
-            // Track form submission event (sent to mixpanel as well via the GA_TO_MIXPANEL_MAPPING in services/analytics/)
             trackEvent(HYPERNATIVE_EVENTS.GUARDIAN_FORM_SUBMITTED)
 
             if (data) {
@@ -110,8 +106,6 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
       }
       scriptLoadedRef.current = false
     }
-    // onSubmit and safeAddress are intentionally excluded from deps as they're only used in callbacks
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portalId, formId, region])
 
   return (
