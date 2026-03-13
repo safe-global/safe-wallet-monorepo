@@ -66,7 +66,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             {...HYPERNATIVE_EVENTS.GUARDIAN_FORM_STARTED}
           >
             <Button variant="contained" fullWidth onClick={onGetStarted} className={css.primaryButton}>
-              See how it works
+              Get started
             </Button>
           </Track>
           <Button variant="text" fullWidth onClick={onClose} className={css.secondaryButton}>
