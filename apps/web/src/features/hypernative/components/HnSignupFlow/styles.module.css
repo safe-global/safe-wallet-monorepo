@@ -35,7 +35,15 @@
 
 .cancelButtonWrapper {
   z-index: 1;
-  margin-top: -86px;
+  margin-top: -80px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .cancelButtonWrapper {
+    margin-top: -63px;
+  }
 }
 
 .cancelButton {
