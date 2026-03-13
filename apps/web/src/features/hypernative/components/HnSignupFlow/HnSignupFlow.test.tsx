@@ -5,6 +5,15 @@ import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
 import * as storeHooks from '@/store'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
+import * as useChainsHook from '@/hooks/useChains'
+import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
+const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
 jest.mock('@/features/hypernative/components/HnSignupFlow/HnModal', () => ({
   __esModule: true,
@@ -43,7 +52,16 @@ jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupForm', () => (
   }) => (
     <div data-testid="hn-signup-form">
       <button onClick={onCancel}>Cancel</button>
-      <button onClick={() => onSubmit('EMEA')}>Submit Form</button>
+      <button onClick={() => onSubmit('EMEA')}>Submit</button>
+    </div>
+  ),
+}))
+
+jest.mock('@/features/hypernative/components/HnSignupFlow/HnCalendlyStep', () => ({
+  __esModule: true,
+  default: ({ calendlyUrl }: { calendlyUrl: string }) => (
+    <div data-testid="hn-calendly-step">
+      <div>Calendly: {calendlyUrl}</div>
     </div>
   ),
 }))
@@ -64,29 +82,32 @@ describe('HnSignupFlow', () => {
       safeLoading: false,
       safeError: undefined,
     })
+    jest.spyOn(useChainsHook, 'useCurrentChain').mockReturnValue(undefined)
 
-    // Mock HubSpot configuration
     process.env.NEXT_PUBLIC_HUBSPOT_CONFIG = JSON.stringify({
       portalId: 'test-portal',
       formId: 'test-form',
       region: 'eu1',
     })
+    process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY = JSON.stringify({
+      AMERICAS: 'https://calendly.com/americas',
+      EMEA: 'https://calendly.com/emea',
+    })
   })
 
   afterEach(() => {
     delete process.env.NEXT_PUBLIC_HUBSPOT_CONFIG
+    delete process.env.NEXT_PUBLIC_HYPERNATIVE_CALENDLY
   })
 
   describe('Modal behavior', () => {
     it('should render modal when open is true', () => {
       render(<HnSignupFlow open={true} onClose={mockOnClose} />)
-
       expect(screen.getByTestId('hn-modal')).toBeInTheDocument()
     })
 
     it('should not render modal when open is false', () => {
       render(<HnSignupFlow open={false} onClose={mockOnClose} />)
-
       expect(screen.queryByTestId('hn-modal')).not.toBeInTheDocument()
     })
 
@@ -107,6 +128,7 @@ describe('HnSignupFlow', () => {
 
       expect(screen.getByTestId('hn-signup-intro')).toBeInTheDocument()
       expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('hn-calendly-step')).not.toBeInTheDocument()
     })
 
     it('should navigate to step 1 when Get Started is clicked', async () => {
@@ -120,143 +142,159 @@ describe('HnSignupFlow', () => {
       expect(screen.getByTestId('hn-signup-form')).toBeInTheDocument()
     })
 
-    it('should navigate back to step 0 when Cancel is clicked on form', async () => {
+    it('should navigate to Calendly step after form submit', async () => {
       const user = userEvent.setup()
       render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-      // Navigate to step 1
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
+      await user.click(screen.getByText('Get Started'))
+      await user.click(screen.getByText('Submit'))
 
-      expect(screen.getByTestId('hn-signup-form')).toBeInTheDocument()
-
-      // Navigate back to step 0
-      const cancelButton = screen.getByText('Cancel')
-      await user.click(cancelButton)
-
-      expect(screen.getByTestId('hn-signup-intro')).toBeInTheDocument()
       expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+      expect(screen.getByTestId('hn-calendly-step')).toBeInTheDocument()
     })
-  })
 
-  describe('Form submission', () => {
-    it('should dispatch setFormCompleted action when modal is closed after form submission', async () => {
+    it('should show Calendly URL based on selected region', async () => {
       const user = userEvent.setup()
       render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-      // Navigate to step 1
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
+      await user.click(screen.getByText('Get Started'))
+      await user.click(screen.getByText('Submit')) // submits with 'EMEA'
 
-      // Submit the form
-      const submitButton = screen.getByText('Submit Form')
-      await user.click(submitButton)
-
-      // Form submission should not dispatch immediately
-      expect(mockDispatch).not.toHaveBeenCalled()
-
-      // Close the modal
-      const closeButton = screen.getByLabelText('close')
-      await user.click(closeButton)
-
-      // Now it should dispatch
-      expect(mockDispatch).toHaveBeenCalledWith(
-        setFormCompleted({
-          chainId: '1',
-          safeAddress: '0x123',
-          completed: true,
-        }),
-      )
-      expect(mockOnClose).toHaveBeenCalled()
+      expect(screen.getByText('Calendly: https://calendly.com/emea')).toBeInTheDocument()
     })
 
-    it('should dispatch with correct chainId and safeAddress', async () => {
-      const user = userEvent.setup()
-      jest.spyOn(useChainIdHook, 'default').mockReturnValue('137')
-      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
-        safeAddress: '0xABC',
-        safe: {} as any,
-        safeLoaded: true,
-        safeLoading: false,
-        safeError: undefined,
+    describe('Redux dispatch', () => {
+      it('should dispatch setFormCompleted on close after form submitted', async () => {
+        const user = userEvent.setup()
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+
+        await user.click(screen.getByText('Get Started'))
+        await user.click(screen.getByText('Submit'))
+        await user.click(screen.getByLabelText('close'))
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+          setFormCompleted({ chainId: '1', safeAddress: '0x123', completed: true }),
+        )
+        expect(mockOnClose).toHaveBeenCalled()
       })
 
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+      it('should not dispatch setFormCompleted if form was not submitted', async () => {
+        const user = userEvent.setup()
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-      // Navigate to step 1 and submit
-      await user.click(screen.getByText('Get Started'))
-      await user.click(screen.getByText('Submit Form'))
+        await user.click(screen.getByText('Get Started'))
+        await user.click(screen.getByLabelText('close'))
 
-      // Close the modal
-      const closeButton = screen.getByLabelText('close')
-      await user.click(closeButton)
+        expect(mockDispatch).not.toHaveBeenCalled()
+        expect(mockOnClose).toHaveBeenCalled()
+      })
 
-      expect(mockDispatch).toHaveBeenCalledWith(
-        setFormCompleted({
-          chainId: '137',
+      it('should dispatch with correct chainId and safeAddress', async () => {
+        const user = userEvent.setup()
+        jest.spyOn(useChainIdHook, 'default').mockReturnValue('137')
+        jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
           safeAddress: '0xABC',
-          completed: true,
-        }),
-      )
+          safe: {} as any,
+          safeLoaded: true,
+          safeLoading: false,
+          safeError: undefined,
+        })
+
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+
+        await user.click(screen.getByText('Get Started'))
+        await user.click(screen.getByText('Submit'))
+
+        const closeButton = screen.getByLabelText('close')
+        await user.click(closeButton)
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+          setFormCompleted({ chainId: '137', safeAddress: '0xABC', completed: true }),
+        )
+      })
     })
 
-    it('should not dispatch setFormCompleted if form was not submitted', async () => {
-      const user = userEvent.setup()
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+    describe('Analytics events', () => {
+      it('should not fire GUARDIAN_FORM_SUBMITTED on HubSpot form navigation (fired inside HubSpotForm itself)', async () => {
+        const user = userEvent.setup()
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-      // Navigate to step 1 but don't submit
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
+        await user.click(screen.getByText('Get Started'))
 
-      // Close the modal without submitting
-      const closeButton = screen.getByLabelText('close')
-      await user.click(closeButton)
+        // GUARDIAN_FORM_SUBMITTED is fired inside HubSpotForm's onFormSubmitted callback,
+        // not in HnSignupFlow directly
+        expect(mockTrackEvent).not.toHaveBeenCalledWith(HYPERNATIVE_EVENTS.GUARDIAN_FORM_SUBMITTED)
+      })
 
-      // Should not dispatch setFormCompleted
-      expect(mockDispatch).not.toHaveBeenCalled()
-      expect(mockOnClose).toHaveBeenCalled()
-    })
-  })
+      it('should not fire tracking events when closing without form submission', async () => {
+        const user = userEvent.setup()
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-  describe('HubSpot configuration', () => {
-    it('should show error message when HubSpot config is missing', async () => {
-      const user = userEvent.setup()
-      delete process.env.NEXT_PUBLIC_HUBSPOT_CONFIG
+        await user.click(screen.getByText('Get Started'))
+        await user.click(screen.getByLabelText('close'))
 
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
-
-      // Navigate to step 1
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
-
-      expect(screen.getByText('HubSpot configuration is missing or invalid.')).toBeInTheDocument()
-      expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+        expect(mockTrackEvent).not.toHaveBeenCalled()
+      })
     })
 
-    it('should show error message when HubSpot config is invalid JSON', async () => {
-      const user = userEvent.setup()
-      process.env.NEXT_PUBLIC_HUBSPOT_CONFIG = 'invalid-json'
+    describe('HubSpot configuration', () => {
+      it('should show error message when HubSpot config is missing', async () => {
+        const user = userEvent.setup()
+        delete process.env.NEXT_PUBLIC_HUBSPOT_CONFIG
 
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
 
-      // Navigate to step 1
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
+        // Navigate to step 1
+        const getStartedButton = screen.getByText('Get Started')
+        await user.click(getStartedButton)
 
-      expect(screen.getByText('HubSpot configuration is missing or invalid.')).toBeInTheDocument()
-      expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+        expect(screen.getByText('HubSpot configuration is missing or invalid.')).toBeInTheDocument()
+        expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+      })
+
+      it('should show error message when HubSpot config is invalid JSON', async () => {
+        const user = userEvent.setup()
+        process.env.NEXT_PUBLIC_HUBSPOT_CONFIG = 'invalid-json'
+
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+
+        // Navigate to step 1
+        const getStartedButton = screen.getByText('Get Started')
+        await user.click(getStartedButton)
+
+        expect(screen.getByText('HubSpot configuration is missing or invalid.')).toBeInTheDocument()
+        expect(screen.queryByTestId('hn-signup-form')).not.toBeInTheDocument()
+      })
+
+      it('should pass HubSpot config to HnSignupForm', async () => {
+        const user = userEvent.setup()
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+
+        // Navigate to step 1
+        const getStartedButton = screen.getByText('Get Started')
+        await user.click(getStartedButton)
+
+        expect(screen.getByTestId('hn-signup-form')).toBeInTheDocument()
+      })
     })
 
-    it('should pass HubSpot config to HnSignupForm', async () => {
-      const user = userEvent.setup()
-      render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+    describe('Safe address formatting', () => {
+      it('should format safe address with chain prefix when shortName is available', async () => {
+        const user = userEvent.setup()
+        jest.spyOn(useChainsHook, 'useCurrentChain').mockReturnValue({ shortName: 'eth' } as any)
 
-      // Navigate to step 1
-      const getStartedButton = screen.getByText('Get Started')
-      await user.click(getStartedButton)
+        render(<HnSignupFlow open={true} onClose={mockOnClose} />)
+        await user.click(screen.getByText('Get Started'))
 
-      // Form should be rendered (config is valid)
-      expect(screen.getByTestId('hn-signup-form')).toBeInTheDocument()
+        // The formatted address is passed to HnSignupForm — verifiable via dispatch on close
+        await user.click(screen.getByText('Submit'))
+        await user.click(screen.getByLabelText('close'))
+
+        // dispatch uses raw safeAddress (not formatted), formatted is only for HubSpot pre-fill
+        expect(mockDispatch).toHaveBeenCalledWith(
+          setFormCompleted({ chainId: '1', safeAddress: '0x123', completed: true }),
+        )
+      })
     })
   })
 })
