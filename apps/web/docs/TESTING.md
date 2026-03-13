@@ -76,12 +76,11 @@ import { render } from '@testing-library/react'
 ```typescript
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
-const safe = extendedSafeInfoBuilder()
-  .with({ threshold: 2, deployed: true })
-  .build()
+const safe = extendedSafeInfoBuilder().with({ threshold: 2, deployed: true }).build()
 ```
 
 Available builders:
+
 - `@/tests/builders/safe` — `safeInfoBuilder`, `extendedSafeInfoBuilder`, `addressExBuilder`
 - `@/tests/builders/chains` — `chainBuilder`
 - `@/tests/builders/wallet` — `connectedWalletBuilder`
@@ -300,10 +299,7 @@ describe('mySlice', () => {
   describe('myAction', () => {
     it('should update state', () => {
       const initialState = { items: [] }
-      const state = mySlice.reducer(
-        initialState,
-        myAction({ item: 'new' }),
-      )
+      const state = mySlice.reducer(initialState, myAction({ item: 'new' }))
       expect(state.items).toEqual(['new'])
     })
 
