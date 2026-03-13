@@ -18,6 +18,15 @@ import {
   relaySafeCreation,
 } from '@/components/new-safe/create/logic'
 import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
+import {
+  buildTransactionOptions,
+  getDeploymentType,
+  getNetworkLabel,
+  getPaymentMethodLabel,
+  getThresholdLabel,
+  getWillRelay,
+  shouldShowNetworkWarning,
+} from '@/components/new-safe/create/steps/ReviewStep/utils'
 import css from '@/components/new-safe/create/steps/ReviewStep/styles.module.css'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -99,7 +108,7 @@ export const SafeSetupOverview = ({
   return (
     <Grid container spacing={3}>
       <ReviewRow
-        name={networks.length > 1 ? 'Networks' : 'Network'}
+        name={getNetworkLabel(networks.length)}
         value={
           <Tooltip
             title={
@@ -152,9 +161,7 @@ export const SafeSetupOverview = ({
       <ReviewRow
         name="Threshold"
         value={
-          <Typography data-testid="review-step-threshold">
-            {threshold} out of {owners.length} {owners.length > 1 ? 'signers' : 'signer'}
-          </Typography>
+          <Typography data-testid="review-step-threshold">{getThresholdLabel(threshold, owners.length)}</Typography>
         }
       />
     </Grid>
@@ -184,7 +191,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   // Every owner has remaining relays and relay method is selected
   const canRelay = hasRemainingRelays(minRelays)
-  const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
+  const willRelay = getWillRelay(canRelay, executionMethod)
 
   const newSafeProps = useMemo(
     () =>
@@ -302,14 +309,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
       [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
       [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]:
-        isCounterfactualEnabled && payMethod === PayMethod.PayLater ? 'Counterfactual' : 'Direct',
-      [MixpanelEventParams.PAYMENT_METHOD]:
-        isCounterfactualEnabled && payMethod === PayMethod.PayLater
-          ? 'Pay-later'
-          : willRelay
-            ? 'Sponsored'
-            : 'Self-paid',
+      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, payMethod),
+      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(isCounterfactualEnabled, payMethod, willRelay),
     })
 
     try {
@@ -322,13 +323,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         return { chain, safeAddress, success: true }
       }
 
-      const options: TransactionOptions = isEIP1559
-        ? {
-            maxFeePerGas: maxFeePerGas?.toString(),
-            maxPriorityFeePerGas: maxPriorityFeePerGas?.toString(),
-            gasLimit: gasLimit?.toString(),
-          }
-        : { gasPrice: maxFeePerGas?.toString(), gasLimit: gasLimit?.toString() }
+      const options: TransactionOptions = buildTransactionOptions(
+        !!isEIP1559,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        gasLimit,
+      )
 
       const onSubmitCallback = async (taskId?: string, txHash?: string) => {
         // Create a counterfactual Safe
@@ -385,9 +385,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     return { chain, safeAddress, success: true }
   }
 
-  const showNetworkWarning =
-    (isWrongChain && payMethod === PayMethod.PayNow && !willRelay && !isMultiChainDeployment) ||
-    (isWrongChain && !isCounterfactualEnabled && !isMultiChainDeployment)
+  const showNetworkWarning = shouldShowNetworkWarning(
+    isWrongChain,
+    payMethod,
+    willRelay,
+    isMultiChainDeployment,
+    isCounterfactualEnabled,
+  )
 
   const isDisabled = showNetworkWarning || isCreating
 
