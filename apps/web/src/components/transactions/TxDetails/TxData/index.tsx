@@ -38,7 +38,7 @@ import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
 import { VaultDepositTxDetails, VaultRedeemTxDetails } from '@/features/earn'
 import DecodedData from './DecodedData'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
@@ -144,9 +144,9 @@ const TxData = ({
       <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
 
       {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
-        <ErrorBoundary fallback={<div>Error parsing data</div>}>
+        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
           <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
-        </ErrorBoundary>
+        </ObservabilityErrorBoundary>
       )}
     </>
   )
