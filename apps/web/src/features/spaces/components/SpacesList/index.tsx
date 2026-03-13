@@ -43,7 +43,9 @@ const SignedOutState = () => {
   return (
     <>
       <Card sx={{ p: 5, textAlign: 'center' }}>
-        <SpacesIcon />
+        <Box display="flex" justifyContent="center">
+          <SpacesIcon />
+        </Box>
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
@@ -69,7 +71,9 @@ const NoSpacesState = () => {
   return (
     <>
       <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <SpacesIcon />
+        <Box display="flex" justifyContent="center">
+          <SpacesIcon />
+        </Box>
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
