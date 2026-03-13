@@ -14,6 +14,7 @@ interface Props {
 }
 
 const FIRST_BYTES = 10
+const ZEROES_PATTERN = /^0+$/
 
 const SHOW_MORE = 'Show more'
 const SHOW_LESS = 'Show less'
@@ -41,7 +42,7 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i]
     if (!part) continue
-    if (/^0+$/.test(part) && part.length >= 18) {
+    if (ZEROES_PATTERN.test(part) && part.length >= 18) {
       dimmedZeroes.push(
         <span className={css.zeroes} key={i}>
           {part}
