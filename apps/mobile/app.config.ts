@@ -84,6 +84,17 @@ const config: ExpoConfig = {
   },
   plugins: [
     [
+      'expo-datadog',
+      {
+        errorTracking: {
+          iosDsyms: !!process.env.EAS_BUILD,
+          iosSourcemaps: !!process.env.EAS_BUILD,
+          androidSourcemaps: !!process.env.EAS_BUILD,
+          androidProguardMappingFiles: !!process.env.EAS_BUILD,
+        },
+      },
+    ],
+    [
       'react-native-ble-plx',
       {
         isBackgroundEnabled: false,

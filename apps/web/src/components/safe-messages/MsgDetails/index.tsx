@@ -4,7 +4,7 @@ import { Accordion, AccordionSummary, Typography, AccordionDetails, Box } from '
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CodeIcon from '@mui/icons-material/Code'
 import classNames from 'classnames'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -70,9 +70,9 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
               </>
             }
           >
-            <ErrorBoundary fallback={<div>Error decoding message</div>}>
+            <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
               <DecodedMsg message={msg.message} />
-            </ErrorBoundary>
+            </ObservabilityErrorBoundary>
           </InfoDetails>
         </div>
 

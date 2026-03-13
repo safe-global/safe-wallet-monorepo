@@ -48,19 +48,17 @@ Unless otherwise stated in this Privacy Policy, the terms used here have the mea
 
 [5.7. WalletConnect](#walletconnect)
 
-[5.8. Sentry](#sentry)
+[5.8. Beamer](#beamer)
 
-[5.9. Beamer](#beamer)
+[5.9. Node providers](#node-providers)
 
-[5.10. Node providers](#node-providers)
+[5.10. Tenderly](#tenderly)
 
-[5.11. Tenderly](#tenderly)
+[5.11. MoonPay](#moonpay)
 
-[5.12. MoonPay](#moonpay)
+[5.12. Spindl](#spindl)
 
-[5.13. Spindl](#spindl)
-
-[5.14. Fingerprint](#fingerprint)
+[5.13. Fingerprint](#fingerprint)
 
 [6\. Personal data transfers to third countries](#personal-data-transfers-to-third-countries)
 
@@ -450,17 +448,13 @@ We use the following [**Google Firebase**](https://firebase.google.com/) service
 
 [**WalletConnect**](https://walletconnect.com/) is used to connect wallets to dapps using end-to-end encryption by scanning a QR code. We do not store any information collected by WalletConnect.
 
-## 5.8. Sentry {#sentry}
-
-We use [**Sentry**](https://sentry.io/) to collect error reports and crashes to improve our services and user experience.
-
-## 5.9. Beamer {#beamer}
+## 5.8. Beamer {#beamer}
 
 We use [**Beamer**](https://www.getbeamer.com/) providing updates to the user about changes in the app.Beamer's purpose and function are further explained under the following link [**https://www.getbeamer.com/showcase/notification-center**](https://www.getbeamer.com/showcase/notification-center).
 
 We do not store any information collected by Beamer.
 
-## 5.10. Node providers {#node-providers}
+## 5.9. Node providers {#node-providers}
 
 We use [**Infura**](https://www.infura.io/) and [**Nodereal**](https://nodereal.io/) to query public blockchain data from our backend services. All Safes are monitored, no personalization is happening and no user IP addresses are forwarded. Personal data processed are:
 
@@ -468,7 +462,7 @@ We use [**Infura**](https://www.infura.io/) and [**Nodereal**](https://nodereal.
 * transaction id/hash, and  
 * Transaction data.
 
-## 5.11. Tenderly {#tenderly}
+## 5.10. Tenderly {#tenderly}
 
 We use [**Tenderly**](https://tenderly.co/) to simulate blockchain transactions before they are executed. For that we send your smart contract address of your Safe Account and transaction data to Tenderly.
 
@@ -480,15 +474,15 @@ We use the following tools for internal communication.
 * [**Google Workspace**](https://workspace.google.com/)  
 * [**Notion**](https://notion.so/)
 
-## 5.12 MoonPay {#moonpay}
+## 5.11 MoonPay {#moonpay}
 
 We use MoonPay to offer on-ramp and off-ramp services. For that purpose personal data is required for KYC/AML or other financial regulatory requirements. This data is encrypted by MoonPay.
 
-## 5.13 Spindl {#spindl}
+## 5.12 Spindl {#spindl}
 
 We use [**Spindl**](https://www.spindl.xyz/), a measurement and attribution solution for web3 that assists us in comprehending how users interact with different decentralized applications and our Safe{Mobile} app and to enhance your experience with Safe{Wallet}. For enhanced privacy, data is stored for a period of 7 days after which it is securely deleted.
 
-## 5.14 Fingerprint {#fingerprint}
+## 5.13 Fingerprint {#fingerprint}
 
 This tool enables the processing in sections 3.5.8 and 3.5.9.
 
