@@ -80,4 +80,4 @@ export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions
 export { mapSpaceContactsToAddressBookState } from './utils'
 
 // Utilities
-export { getAvatarColor } from './components/Sidebar/variants/SpaceSelectorDropdown'
+export { getDeterministicColor } from './components/InitialsAvatar'

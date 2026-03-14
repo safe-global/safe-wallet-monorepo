@@ -3,7 +3,8 @@ import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
-import { SpaceSelectorDropdown, getAvatarColor } from '../variants/SpaceSelectorDropdown'
+import { getDeterministicColor } from '@/features/spaces'
+import { SpaceSelectorDropdown } from '../variants/SpaceSelectorDropdown'
 
 const mockPush = jest.fn()
 jest.mock('next/router', () => ({
@@ -202,17 +203,13 @@ describe('SpaceSelectorDropdown', () => {
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
   })
 
-  describe('getAvatarColor', () => {
-    it('returns an hsl color string', () => {
-      expect(getAvatarColor(1)).toMatch(/^hsl\(/)
+  describe('getDeterministicColor (avatar color from name)', () => {
+    it('returns the same color for the same name', () => {
+      expect(getDeterministicColor('My Space')).toBe(getDeterministicColor('My Space'))
     })
 
-    it('returns the same color for the same id', () => {
-      expect(getAvatarColor(5)).toBe(getAvatarColor(5))
-    })
-
-    it('returns different colors for different ids', () => {
-      const colors = [1, 2, 3, 4, 5].map(getAvatarColor)
+    it('returns different colors for different names', () => {
+      const colors = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'].map(getDeterministicColor)
       expect(new Set(colors).size).toBe(colors.length)
     })
   })

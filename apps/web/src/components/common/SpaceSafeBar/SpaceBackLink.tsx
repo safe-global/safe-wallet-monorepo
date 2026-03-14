@@ -1,6 +1,6 @@
 import BackLink from '@/components/common/BackLink'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getAvatarColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/features/spaces'
 
 type SpaceBackLinkProps = {
   space: { id: number; name: string }
@@ -13,7 +13,7 @@ function SpaceBackLink({ space, onClick }: SpaceBackLinkProps) {
       <Avatar className="size-8 shrink-0">
         <AvatarFallback
           className="rounded-md text-primary-foreground text-sm font-semibold"
-          style={{ backgroundColor: getAvatarColor(space.id) }}
+          style={{ backgroundColor: getDeterministicColor(space.name) }}
         >
           {space.name.charAt(0).toUpperCase()}
         </AvatarFallback>
