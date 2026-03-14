@@ -1,17 +1,47 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { PendingTxWidget } from './PendingTxWidget'
-import type { PendingTransaction } from './PendingTxWidget'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-const MOCK_PENDING_TRANSACTIONS: PendingTransaction[] = [
-  { id: '1', label: 'Send 5 ETH', info: 'Jan 21', status: '1 signature needed' },
-  { id: '2', label: 'Send 5 ETH', info: 'Jan 21', status: 'Execution needed' },
-  { id: '3', label: 'Send 5 ETH', info: 'Jan 21', status: '1 signature needed' },
-]
+const createMockTx = (
+  id: string,
+  description: string,
+  confirmationsSubmitted: number,
+  confirmationsRequired: number,
+): TransactionQueuedItem =>
+  ({
+    type: 'TRANSACTION',
+    transaction: {
+      txInfo: {
+        type: 'Transfer',
+        humanDescription: description,
+        sender: { value: '0xaaaa567890abcdef1234567890abcdef12345678' },
+        recipient: { value: '0xcccc567890abcdef1234567890abcdef12345678' },
+        direction: 'OUTGOING',
+        transferInfo: {
+          type: 'NATIVE_COIN',
+          value: '5000000000000000000',
+        },
+      },
+      id,
+      txHash: null,
+      timestamp: 1705852800000,
+      txStatus: 'AWAITING_CONFIRMATIONS',
+      executionInfo: {
+        type: 'MULTISIG',
+        nonce: 1,
+        confirmationsRequired,
+        confirmationsSubmitted,
+        missingSigners: [],
+      },
+      safeAppInfo: null,
+    },
+    conflictType: 'None',
+  }) as TransactionQueuedItem
 
-const MOCK_PENDING_TRANSACTIONS_WITH_INITIALS: PendingTransaction[] = [
-  { id: '1', label: 'Send 5 ETH', info: 'Jan 21', status: '1 signature needed', initials: 'CN' },
-  { id: '2', label: 'Send 5 ETH', info: 'Jan 21', status: '1 signature needed', initials: 'CN' },
-  { id: '3', label: 'Send 5 ETH', info: 'Jan 21', status: '1 signature needed', initials: 'CN' },
+const MOCK_PENDING_TRANSACTIONS: TransactionQueuedItem[] = [
+  createMockTx('1', 'Send 5 ETH', 1, 2),
+  createMockTx('2', 'Send 5 ETH', 2, 2),
+  createMockTx('3', 'Send 5 ETH', 1, 2),
 ]
 
 const meta: Meta<typeof PendingTxWidget> = {
@@ -44,17 +74,16 @@ export const FewTransactions: Story = {
   },
 }
 
-export const WithInitials: Story = {
-  args: {
-    transactions: MOCK_PENDING_TRANSACTIONS_WITH_INITIALS,
-    remainingCount: 14,
-  },
-}
-
 export const Loading: Story = {
   args: {
     transactions: [],
     loading: true,
+  },
+}
+
+export const Empty: Story = {
+  args: {
+    transactions: [],
   },
 }
 

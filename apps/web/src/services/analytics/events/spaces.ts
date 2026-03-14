@@ -186,7 +186,6 @@ export enum SPACE_LABELS {
   space_selector = 'space_selector',
   accounts_page = 'accounts_page',
   preview_banner = 'preview_banner',
-  space_dashboard = 'space_dashboard',
   space_dashboard_card = 'space_dashboard_card',
   members_page = 'members_page',
   member_list = 'member_list',

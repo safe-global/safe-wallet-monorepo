@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": ["src/pages/**/*.tsx", "src/pages/**/*.ts", "src/app/**/*.tsx", "src/app/**/*.ts"],
+  "entry": ["src/pages/**/*.tsx", "src/features/**/feature.ts"],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
     "**/*.test.{ts,tsx}",
@@ -13,7 +13,9 @@
     "src/features/counterfactual/contract.ts",
     "src/features/ledger/types.ts",
     "src/features/multichain/types.ts",
-    "src/store/**/*Slice.ts"
+    "src/store/**/*Slice.ts",
+    "src/components/ui/**",
+    ".storybook/mocks/querystring.ts"
   ],
   "ignoreDependencies": [
     "@storybook/*",

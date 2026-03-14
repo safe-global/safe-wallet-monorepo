@@ -56,4 +56,3 @@ const ExpandableAccountItem = ({ account, loading = false }: ExpandableAccountIt
 }
 
 export { ExpandableAccountItem }
-export default ExpandableAccountItem

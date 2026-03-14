@@ -68,12 +68,11 @@ describe('AccountsWidget', () => {
     expect(screen.getByText('1/1')).toBeInTheDocument()
   })
 
-  it('renders avatar initials for each account', () => {
-    render(<AccountsWidget accounts={mockAccounts} />)
+  it('renders an identicon for each account', () => {
+    const { container } = render(<AccountsWidget accounts={mockAccounts} />)
 
-    expect(screen.getByText('M')).toBeInTheDocument()
-    expect(screen.getByText('T')).toBeInTheDocument()
-    expect(screen.getByText('V')).toBeInTheDocument()
+    const avatars = container.querySelectorAll('[data-slot="avatar"]')
+    expect(avatars).toHaveLength(mockAccounts.length)
   })
 
   it('renders skeletons when loading', () => {
@@ -136,14 +135,14 @@ describe('AccountsWidget', () => {
   it('renders the refresh button in error state when onRefresh is provided', () => {
     render(<AccountsWidget accounts={[]} error="Something went wrong" onRefresh={jest.fn()} />)
 
-    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /reload page/i })).toBeInTheDocument()
   })
 
   it('calls onRefresh when the refresh button is clicked', async () => {
     const onRefresh = jest.fn()
     render(<AccountsWidget accounts={[]} error="Something went wrong" onRefresh={onRefresh} />)
 
-    await userEvent.click(screen.getByRole('button', { name: /refresh/i }))
+    await userEvent.click(screen.getByRole('button', { name: /reload page/i }))
 
     expect(onRefresh).toHaveBeenCalledTimes(1)
   })

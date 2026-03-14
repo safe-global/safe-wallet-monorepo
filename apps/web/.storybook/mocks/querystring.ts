@@ -37,6 +37,3 @@ export function stringify(obj: Record<string, unknown>): string {
 
   return params.toString()
 }
-
-const querystring = { parse, stringify }
-export default querystring
