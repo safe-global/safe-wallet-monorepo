@@ -89,19 +89,22 @@ function isExternal(href: string): boolean {
 const NextLink = forwardRef<HTMLAnchorElement, LinkProps>(function NextLink(
   {
     href,
-    as: _as,
+    as: asProp,
     replace: replaceProp = false,
-    scroll: _scroll,
-    shallow: _shallow,
-    passHref: _passHref,
-    prefetch: _prefetch,
-    locale: _locale,
+    scroll,
+    shallow,
+    passHref,
+    prefetch,
+    locale,
     legacyBehavior = false,
     children,
     ...rest
   },
   ref,
 ) {
+  // Next.js-specific props — accepted but ignored in the SPA shim
+  ;(void asProp, void scroll, void shallow, void passHref, void prefetch, void locale)
+
   const resolved = resolveHref(href)
 
   // legacyBehavior: clone the single child element with the href prop

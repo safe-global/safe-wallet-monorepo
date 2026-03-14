@@ -16,7 +16,8 @@ export interface DocumentInitialProps {
 }
 
 class Document extends React.Component {
-  static getInitialProps(_ctx: DocumentContext): Promise<DocumentInitialProps> {
+  static getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
+    void ctx
     return Promise.resolve({ html: '' })
   }
 

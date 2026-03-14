@@ -17,8 +17,9 @@ type Loader<P> = () => Promise<{ default: ComponentType<P> }>
 
 function dynamic<P extends Record<string, unknown> = Record<string, unknown>>(
   loader: Loader<P>,
-  _options?: DynamicOptions,
+  options?: DynamicOptions,
 ): ComponentType<P> {
+  void options
   return lazy(loader)
 }
 

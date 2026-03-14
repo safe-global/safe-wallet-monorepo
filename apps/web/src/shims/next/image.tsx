@@ -35,17 +35,21 @@ const Image = forwardRef<HTMLImageElement, ImageProps>(function Image(
   {
     src,
     fill,
-    priority: _priority,
-    quality: _quality,
-    placeholder: _placeholder,
-    blurDataURL: _blurDataURL,
-    unoptimized: _unoptimized,
-    loader: _loader,
+    // Next.js-specific props — accepted but ignored in the SPA shim
+    priority,
+    quality,
+    placeholder,
+    blurDataURL,
+    unoptimized,
+    loader,
     style,
     ...rest
   },
   ref,
 ) {
+  // Suppress unused warnings — these props are part of the next/image API
+  ;(void priority, void quality, void placeholder, void blurDataURL, void unoptimized, void loader)
+
   const resolvedSrc = typeof src === 'string' ? src : src.src
 
   const fillStyle: CSSProperties | undefined = fill
@@ -60,7 +64,7 @@ const Image = forwardRef<HTMLImageElement, ImageProps>(function Image(
       }
     : style
 
-  return <img ref={ref} src={resolvedSrc} style={fillStyle} {...rest} />
+  return <img ref={ref} src={resolvedSrc} alt="" style={fillStyle} {...rest} />
 })
 
 export default Image
