@@ -264,12 +264,15 @@ describe('AccountsWidget', () => {
   })
 
   it('fires trackEvent with spaceId and safeAddress for both GA and Mixpanel exactly once on account row click', async () => {
-    const spaceId = 'space-123'
+    const spaceId = '123'
     const onItemClick = (safeAddress: string) => {
-      trackEvent({ ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId }, {
-        spaceId,
-        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-      })
+      trackEvent(
+        { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
+        {
+          spaceId,
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        },
+      )
     }
 
     render(<AccountsWidget accounts={[mockAccounts[1]]} onItemClick={onItemClick} />, {

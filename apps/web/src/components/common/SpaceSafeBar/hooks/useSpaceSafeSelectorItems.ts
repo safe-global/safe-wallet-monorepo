@@ -141,11 +141,14 @@ export function useSpaceSafeSelectorItems() {
       const address = itemId.slice(colonIndex + 1)
       const chain = chainConfigs.find((c) => c.chainId === chainId)
       if (!chain) return
-      trackEvent({ ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined }, {
-        spaceId,
-        [MixpanelEventParams.SAFE_ADDRESS]: address,
-        [MixpanelEventParams.CHAIN_ID]: chainId,
-      })
+      trackEvent(
+        { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined },
+        {
+          spaceId,
+          [MixpanelEventParams.SAFE_ADDRESS]: address,
+          [MixpanelEventParams.CHAIN_ID]: chainId,
+        },
+      )
       router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
     },
     [chainConfigs, router, spaceId],
@@ -155,11 +158,14 @@ export function useSpaceSafeSelectorItems() {
     (chainId: string) => {
       const chain = chainConfigs.find((c) => c.chainId === chainId)
       if (!chain) return
-      trackEvent({ ...SPACE_EVENTS.CHAIN_SWITCHED, label: spaceId ?? undefined }, {
-        spaceId,
-        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-        [MixpanelEventParams.CHAIN_ID]: chainId,
-      })
+      trackEvent(
+        { ...SPACE_EVENTS.CHAIN_SWITCHED, label: spaceId ?? undefined },
+        {
+          spaceId,
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+          [MixpanelEventParams.CHAIN_ID]: chainId,
+        },
+      )
       router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
     },
     [chainConfigs, router, safeAddress, spaceId],
