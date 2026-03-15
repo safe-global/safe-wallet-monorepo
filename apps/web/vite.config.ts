@@ -12,11 +12,25 @@ import remarkHeadingId from 'remark-heading-id'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { defineConfig, type PluginOption } from 'vite'
+import vitePrerender from 'vite-plugin-prerender'
 import svgr from 'vite-plugin-svgr'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const pkg = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf-8'))
+
+// Extract all route strings from AppRoutes for pre-rendering
+function collectRoutes(obj: Record<string, unknown>): string[] {
+  const routes: string[] = []
+  for (const value of Object.values(obj)) {
+    if (typeof value === 'string') {
+      routes.push(value)
+    } else if (typeof value === 'object' && value !== null) {
+      routes.push(...collectRoutes(value as Record<string, unknown>))
+    }
+  }
+  return routes
+}
 
 let commitHash = process.env.NEXT_PUBLIC_COMMIT_HASH
 if (!commitHash) {
@@ -72,6 +86,94 @@ export default defineConfig({
           visualizer({
             open: true,
             filename: 'bundle-stats.html',
+          }) as PluginOption,
+        ]
+      : []),
+    ...(process.env.SKIP_PRERENDER !== '1'
+      ? [
+          vitePrerender({
+            staticDir: path.join(__dirname, 'out'),
+            routes: collectRoutes(
+              // Inline the route map — kept in sync with src/config/routes.ts
+              // Using inline avoids importing TS source from vite.config
+              {
+                '403': '/403',
+                '404': '/404',
+                wc: '/wc',
+                userSettings: '/user-settings',
+                terms: '/terms',
+                safeLabsTerms: '/safe-labs-terms',
+                swap: '/swap',
+                stake: '/stake',
+                privacy: '/privacy',
+                licenses: '/licenses',
+                index: '/',
+                imprint: '/imprint',
+                home: '/home',
+                earn: '/earn',
+                cookie: '/cookie',
+                bridge: '/bridge',
+                addressBook: '/address-book',
+                hypernative: { oauthCallback: '/hypernative/oauth-callback' },
+                addOwner: '/addOwner',
+                _offline: '/_offline',
+                apps: {
+                  open: '/apps/open',
+                  index: '/apps',
+                  custom: '/apps/custom',
+                  bookmarked: '/apps/bookmarked',
+                },
+                balances: {
+                  positions: '/balances/positions',
+                  nfts: '/balances/nfts',
+                  index: '/balances',
+                },
+                newSafe: {
+                  load: '/new-safe/load',
+                  create: '/new-safe/create',
+                  advancedCreate: '/new-safe/advanced-create',
+                },
+                settings: {
+                  setup: '/settings/setup',
+                  security: '/settings/security',
+                  notifications: '/settings/notifications',
+                  modules: '/settings/modules',
+                  index: '/settings',
+                  environmentVariables: '/settings/environment-variables',
+                  data: '/settings/data',
+                  cookies: '/settings/cookies',
+                  appearance: '/settings/appearance',
+                  safeApps: { index: '/settings/safe-apps' },
+                },
+                share: { safeApp: '/share/safe-app' },
+                spaces: {
+                  settings: '/spaces/settings',
+                  safeAccounts: '/spaces/safe-accounts',
+                  members: '/spaces/members',
+                  index: '/spaces',
+                  addressBook: '/spaces/address-book',
+                },
+                transactions: {
+                  tx: '/transactions/tx',
+                  queue: '/transactions/queue',
+                  msg: '/transactions/msg',
+                  messages: '/transactions/messages',
+                  index: '/transactions',
+                  history: '/transactions/history',
+                },
+                welcome: {
+                  spaces: '/welcome/spaces',
+                  index: '/welcome',
+                  accounts: '/welcome/accounts',
+                },
+              },
+            ),
+            // @ts-expect-error -- no type declarations for renderer-puppeteer
+            renderer: new (await import('@prerenderer/renderer-puppeteer')).default({
+              maxConcurrentRoutes: 4,
+              renderAfterElementExists: '#root > *',
+              skipThirdPartyRequests: true,
+            }),
           }) as PluginOption,
         ]
       : []),
