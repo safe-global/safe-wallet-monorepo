@@ -3,6 +3,14 @@ import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
 import AccountsWidget from '../AccountsWidget'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockSafeItem = (chainId: string, address: string): SafeItem => ({
   chainId,
@@ -253,5 +261,30 @@ describe('AccountsWidget', () => {
     await userEvent.click(subAccountRows[subAccountRows.length - 1])
 
     expect(mockPush).toHaveBeenCalled()
+  })
+
+  it('fires trackEvent with spaceId and safeAddress for both GA and Mixpanel exactly once on account row click', async () => {
+    const spaceId = 'space-123'
+    const onItemClick = (safeAddress: string) => {
+      trackEvent({ ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId }, {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      })
+    }
+
+    render(<AccountsWidget accounts={[mockAccounts[1]]} onItemClick={onItemClick} />, {
+      routerProps: { push: jest.fn() },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /Treasury/i }))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: mockAccounts[1].address,
+      },
+    )
   })
 })
