@@ -9,18 +9,24 @@ import type { Account } from './types'
 interface AccountWidgetItemProps {
   account: Account
   loading?: boolean
+  onItemClick?: (safeAddress: string) => void
 }
 
-const AccountWidgetItem = ({ account, loading = false }: AccountWidgetItemProps): ReactElement => {
+const AccountWidgetItem = ({ account, loading = false, onItemClick }: AccountWidgetItemProps): ReactElement => {
   const router = useRouter()
+
+  const handleClick = () => {
+    onItemClick?.(account.address)
+    router.push(account.href)
+  }
 
   return (
     <div
       data-slot="widget-item"
       role="button"
       tabIndex={0}
-      onClick={() => router.push(account.href)}
-      onKeyDown={(e) => e.key === 'Enter' && router.push(account.href)}
+      onClick={handleClick}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       className="flex items-center justify-between rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50"
     >
       <AccountItemContent account={account}>

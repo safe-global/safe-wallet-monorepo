@@ -1,4 +1,4 @@
-import { EventType } from '@/services/analytics'
+import { EventType } from '@/services/analytics/types'
 
 const SPACE_CATEGORY = 'spaces'
 

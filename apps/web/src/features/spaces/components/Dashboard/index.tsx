@@ -20,7 +20,9 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import DashboardMembersList from './DashboardMembersList'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
+import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
@@ -79,6 +81,16 @@ const SpaceDashboard = () => {
     }
   }
 
+  const handleItemClick = (safeAddress: string) => {
+    trackEvent(
+      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId ?? undefined },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      },
+    )
+  }
+
   return (
     <>
       {isInvited && <PreviewInvite />}
@@ -99,6 +111,7 @@ const SpaceDashboard = () => {
                   loading={isOverviewLoading}
                   remainingCount={remainingCount > 0 ? remainingCount : undefined}
                   onViewAll={handleViewAll}
+                  onItemClick={handleItemClick}
                   action={<AddActionsAction />}
                   error={error}
                   onRefresh={refetch}

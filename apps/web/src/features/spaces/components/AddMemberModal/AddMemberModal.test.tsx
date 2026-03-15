@@ -86,10 +86,7 @@ describe('AddMemberModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.ADD_MEMBER, label: '42' },
-        { spaceId: '42' },
-      )
+      expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADD_MEMBER, label: '42' }, { spaceId: '42' })
     })
   })
 })
