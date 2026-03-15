@@ -160,12 +160,26 @@ const config: StorybookConfig = {
       }),
     )
 
-    // Add resolve aliases to match webpack config
+    // Add resolve aliases to match vite.config.ts and webpack config
     // Note: @/public is NOT aliased here - it's handled by publicAssetsPlugin
     // which transforms SVGs via SVGR (aliases would bypass the plugin)
+    const shimsDir = path.resolve(__dirname, '../src/shims/next')
     config.resolve = config.resolve || {}
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
+      // Next.js shims (same as vite.config.ts)
+      'next/dist/client/resolve-href': path.resolve(shimsDir, 'resolve-href.ts'),
+      'next/dist/client/link': path.resolve(shimsDir, 'link.tsx'),
+      'next/compat/router': path.resolve(shimsDir, 'compat-router.ts'),
+      'next/router': path.resolve(shimsDir, 'router.ts'),
+      'next/navigation': path.resolve(shimsDir, 'navigation.ts'),
+      'next/link': path.resolve(shimsDir, 'link.tsx'),
+      'next/head': path.resolve(shimsDir, 'head.tsx'),
+      'next/dynamic': path.resolve(shimsDir, 'dynamic.tsx'),
+      'next/script': path.resolve(shimsDir, 'script.tsx'),
+      'next/app': path.resolve(shimsDir, 'app.ts'),
+      'next/document': path.resolve(shimsDir, 'document.tsx'),
+      '@next/third-parties/google': path.resolve(shimsDir, 'third-parties-google.tsx'),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
       // Mock next/image to bypass the image loader stub
