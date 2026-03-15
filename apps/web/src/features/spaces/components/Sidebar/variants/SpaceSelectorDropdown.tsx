@@ -15,6 +15,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { getDeterministicColor } from '@/features/spaces'
+import { cn } from '@/utils/cn'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
@@ -113,9 +114,9 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
 
         {spaces.map((space) => (
           <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
-            <Avatar className="size-6 rounded-md shrink-0">
+            <Avatar className={cn('size-6 shrink-0', css.spaceSelectorItemAvatar)}>
               <AvatarFallback
-                className="rounded-md text-primary-foreground text-xs"
+                className={cn('text-primary-foreground text-xs', css.spaceSelectorItemAvatarFallback)}
                 style={{ backgroundColor: getDeterministicColor(space.name) }}
               >
                 {space.name.charAt(0).toUpperCase()}
