@@ -82,6 +82,9 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action]: MixpanelEvent.PENDING_TX_WIDGET_CLICKED,
   [SPACE_EVENTS.WALLET_SWITCHED.action]: MixpanelEvent.WALLET_SWITCHED,
   [SPACE_EVENTS.WALLET_DISCONNECTED.action]: MixpanelEvent.WALLET_DISCONNECTED,
+  [SPACE_EVENTS.ADD_MEMBER.action]: MixpanelEvent.SPACE_INVITE_SENT,
+  [SPACE_EVENTS.ACCEPT_INVITE_SUBMIT.action]: MixpanelEvent.SPACE_INVITE_ACCEPTED,
+  [SPACE_EVENTS.DECLINE_INVITE_SUBMIT.action]: MixpanelEvent.SPACE_INVITE_DECLINED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

@@ -33,7 +33,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    trackEvent({ ...SPACE_EVENTS.ACCEPT_INVITE_SUBMIT })
+    trackEvent({ ...SPACE_EVENTS.ACCEPT_INVITE_SUBMIT, label: String(space.id) }, { spaceId: String(space.id) })
 
     try {
       setIsSubmitting(true)

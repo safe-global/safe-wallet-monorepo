@@ -55,7 +55,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setIsSubmitting(true)
 
     try {
-      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER })
+      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER, label: spaceId ?? undefined }, { spaceId })
 
       const usersToInvite = validMembers.map((member) => ({
         address: member.address,
