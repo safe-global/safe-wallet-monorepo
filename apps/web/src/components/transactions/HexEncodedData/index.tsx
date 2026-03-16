@@ -14,6 +14,7 @@ interface Props {
 }
 
 const FIRST_BYTES = 10
+const ZEROES_PATTERN = /^0+$/
 
 const SHOW_MORE = 'Show more'
 const SHOW_LESS = 'Show less'
@@ -37,18 +38,20 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   const restBytes = highlightFirstBytes ? hexData.slice(FIRST_BYTES) : hexData
 
   const dimmedZeroes: ReactElement[] = []
-  let index = 0
-  const remainder = restBytes.replace(/(.*?)(0{18,})/g, (_, p1, p2) => {
-    dimmedZeroes.push(
-      <Fragment key={index++}>{p1}</Fragment>,
-      <span className={css.zeroes} key={index++}>
-        {p2}
-      </span>,
-    )
-    return ''
-  })
-
-  dimmedZeroes.push(<Fragment key={index++}>{remainder}</Fragment>)
+  const parts = restBytes.split(/(0{18,})/)
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i]
+    if (!part) continue
+    if (ZEROES_PATTERN.test(part) && part.length >= 18) {
+      dimmedZeroes.push(
+        <span className={css.zeroes} key={i}>
+          {part}
+        </span>,
+      )
+    } else {
+      dimmedZeroes.push(<Fragment key={i}>{part}</Fragment>)
+    }
+  }
 
   const fullData = dimmedZeroes.length ? dimmedZeroes : restBytes
 

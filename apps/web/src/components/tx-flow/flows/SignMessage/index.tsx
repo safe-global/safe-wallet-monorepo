@@ -5,7 +5,7 @@ import { selectSwapParams } from '@/features/swap/store'
 import { useAppSelector } from '@/store'
 import { Box, SvgIcon, Typography } from '@mui/material'
 import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { SWAP_TITLE } from '@/features/swap/constants'
 import { STAKE_TITLE, getStakeTitle } from '@/features/stake'
@@ -78,9 +78,9 @@ const SignMessageFlow = ({ message, ...props }: SignMessageProps) => {
       isMessage
       hideSafeShield={!isEip712}
     >
-      <ErrorBoundary fallback={<div>Error signing message</div>}>
+      <ObservabilityErrorBoundary fallback={<div>Error signing message</div>}>
         <SignMessage message={message} {...props} />
-      </ErrorBoundary>
+      </ObservabilityErrorBoundary>
     </TxLayout>
   )
 }

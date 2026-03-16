@@ -4,7 +4,7 @@ import type { ILogger } from './types'
 const observabilityProvider = createObservabilityProvider()
 
 /**
- * Initialize observability providers (Datadog RUM, Sentry, etc.)
+ * Initialize observability providers (Datadog RUM, etc.)
  * Must be called explicitly at app startup to enable error tracking and monitoring.
  *
  * This function should be called once at the application entry point (_app.tsx)
