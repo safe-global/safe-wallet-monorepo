@@ -1,18 +1,8 @@
-import nextVitals from 'eslint-config-next/core-web-vitals'
+import baseConfig from '../../config/eslint/base.mjs'
 
-const eslintConfig = [
-  ...nextVitals,
-  {
-    rules: {
-      '@next/next/no-html-link-for-pages': 'off',
-      'react-hooks/set-state-in-effect': 'off',
-      'react-hooks/preserve-manual-memoization': 'off',
-      'react-hooks/refs': 'off',
-    },
-  },
+export default [
+  ...baseConfig,
   {
     ignores: ['**/node_modules/'],
   },
 ]
-
-export default eslintConfig
