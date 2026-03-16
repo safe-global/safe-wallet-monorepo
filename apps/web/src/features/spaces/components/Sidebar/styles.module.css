@@ -57,6 +57,17 @@
   color: var(--primary-foreground);
 }
 
+.spaceSelectorItemAvatar {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.spaceSelectorItemAvatarFallback {
+  border-radius: 8px;
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
+}
+
 .spaceSelectorText {
   display: flex;
   flex-direction: column;

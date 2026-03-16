@@ -14,9 +14,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { getDeterministicColor } from '@/features/spaces'
+import { cn } from '@/utils/cn'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
-
-export const getAvatarColor = (id: number): string => `hsl(${(id * 137.508) % 360}, 55%, 55%)`
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
 import { truncateSpaceName } from '../utils'
@@ -33,7 +33,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   const spaceName = selectedSpace?.name ?? ''
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
-  const selectedSpaceColor = selectedSpace ? getAvatarColor(selectedSpace.id) : undefined
+  const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
 
   const handleSelectSpace = (spaceId: number) => {
@@ -114,10 +114,10 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
 
         {spaces.map((space) => (
           <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
-            <Avatar className="size-6 rounded-md shrink-0">
+            <Avatar className={cn('size-6 shrink-0', css.spaceSelectorItemAvatar)}>
               <AvatarFallback
-                className="rounded-md text-primary-foreground text-xs"
-                style={{ backgroundColor: getAvatarColor(space.id) }}
+                className={css.spaceSelectorItemAvatarFallback}
+                style={{ backgroundColor: getDeterministicColor(space.name) }}
               >
                 {space.name.charAt(0).toUpperCase()}
               </AvatarFallback>
