@@ -1,3 +1,4 @@
+import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -37,7 +38,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 jest.mock('@/components/common/NameInput', () => ({
   __esModule: true,
   default: ({ name, label }: { name: string; label: string }) => {
-    const rhf = jest.requireActual('react-hook-form') as typeof import('react-hook-form')
+    const rhf = jest.requireActual('react-hook-form') as typeof ReactHookForm
     const { register } = rhf.useFormContext()
     return <input aria-label={label} {...register(name, { required: true })} data-testid="space-name-input" />
   },

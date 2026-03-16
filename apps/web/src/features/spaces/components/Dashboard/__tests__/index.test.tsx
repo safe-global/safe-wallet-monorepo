@@ -75,14 +75,17 @@ jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('@/features/spaces/components/AddAccounts', () => () => null)
-jest.mock('@/components/common/Track', () => ({ children }: { children: React.ReactNode }) => <>{children}</>)
+jest.mock('@/components/common/Track', () => {
+  const Track = ({ children }: { children: React.ReactNode }) => <>{children}</>
+  Track.displayName = 'Track'
+  return Track
+})
 
 // ---- Helpers ----
 
 /** A minimal PendingTxWidget stub that exposes one clickable row per tx entry */
-const makeMockPendingTxWidget =
-  (txEntries: Array<{ safeAddress: string; txId: string }>) =>
-  ({ onItemClick }: { onItemClick?: (safeAddress: string, txId: string) => void }) => (
+const makeMockPendingTxWidget = (txEntries: Array<{ safeAddress: string; txId: string }>) => {
+  const MockPendingTxWidget = ({ onItemClick }: { onItemClick?: (safeAddress: string, txId: string) => void }) => (
     <>
       {txEntries.map(({ safeAddress, txId }) => (
         <div
@@ -96,6 +99,9 @@ const makeMockPendingTxWidget =
       ))}
     </>
   )
+  MockPendingTxWidget.displayName = 'MockPendingTxWidget'
+  return MockPendingTxWidget
+}
 
 function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: string }> = []) {
   ;(useLoadFeature as jest.Mock).mockReturnValue({

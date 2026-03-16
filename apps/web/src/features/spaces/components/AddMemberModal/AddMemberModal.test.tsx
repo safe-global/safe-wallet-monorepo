@@ -1,3 +1,4 @@
+import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -52,7 +53,7 @@ jest.mock('./MemberInfoForm', () => ({
 jest.mock('@/components/common/AddressBookInput', () => ({
   __esModule: true,
   default: ({ name }: { name: string }) => {
-    const { register } = (jest.requireActual('react-hook-form') as typeof import('react-hook-form')).useFormContext()
+    const { register } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
     return <input {...register(name, { required: true })} data-testid="member-address-input" />
   },
 }))
