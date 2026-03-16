@@ -16,7 +16,7 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
     <>
       <div className="flex w-[220px] items-center gap-4">
         <Avatar>
-          <Identicon address={account.address} size={40} />
+          <Identicon address={account.id} size={40} />
         </Avatar>
         <div className="flex flex-col gap-0.5 text-left">
           <Typography variant="paragraph-bold">{account.name}</Typography>

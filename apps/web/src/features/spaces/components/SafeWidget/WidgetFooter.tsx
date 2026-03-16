@@ -17,7 +17,10 @@ const WidgetFooter = ({ count, text, className, onClick }: WidgetFooterProps): R
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
-      className={cn('mt-auto flex cursor-pointer items-center gap-4 rounded-lg py-1 pl-4 pr-6', className)}
+      className={cn(
+        'mt-auto flex cursor-pointer items-center gap-4 rounded-lg py-1 pl-4 pr-6 transition-colors hover:bg-muted/50',
+        className,
+      )}
     >
       <div className="p-1">
         {count !== undefined ? (

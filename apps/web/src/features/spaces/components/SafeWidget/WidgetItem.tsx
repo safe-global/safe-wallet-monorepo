@@ -39,7 +39,7 @@ const WidgetItem = ({
       onClick={handleClick}
       onKeyDown={href ? (e) => e.key === 'Enter' && handleClick?.() : undefined}
       className={cn(
-        'flex items-center justify-between rounded-sm py-4 pl-4 pr-6',
+        'flex items-center justify-between rounded-sm py-4 px-6',
         href && 'cursor-pointer transition-colors hover:bg-muted/50',
         highlighted && 'bg-background',
         className,
@@ -72,7 +72,7 @@ const WidgetItem = ({
         </div>
       </div>
 
-      {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
+      {featuredNode && <div className="flex items-center justify-center flex-1">{featuredNode}</div>}
 
       {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
     </div>
