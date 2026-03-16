@@ -20,7 +20,7 @@ const WidgetFooter = ({ count, text, className, onClick, showLeadingSlot = true 
       onClick={onClick}
       onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
       className={cn(
-        'mt-auto flex cursor-pointer items-center rounded-lg py-1 pl-4 pr-6 transition-colors hover:bg-muted/50',
+        'mt-auto flex cursor-pointer items-center rounded-lg py-1 px-6 transition-colors hover:bg-muted/50',
         showLeadingSlot ? 'gap-4' : 'gap-0',
         !showLeadingSlot && 'min-h-10',
         className,

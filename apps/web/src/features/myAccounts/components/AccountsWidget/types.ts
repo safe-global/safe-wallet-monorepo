@@ -7,7 +7,6 @@ export interface SubAccount {
 }
 
 export interface Account {
-  id: string
   name: string
   address: string
   href: string

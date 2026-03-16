@@ -21,7 +21,7 @@ const ExpandableAccountItem = ({ account, loading = false }: ExpandableAccountIt
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
         className={cn(
-          'flex w-full items-center justify-between rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
+          'flex w-full items-center justify-between rounded-sm py-4 px-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',
         )}
       >
