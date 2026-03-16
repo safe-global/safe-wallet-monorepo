@@ -11,9 +11,18 @@ type WalletPopoverProps = {
   open: boolean
   anchorEl: HTMLButtonElement | null
   onClose: () => void
+  onWalletSwitch?: () => void
+  onWalletDisconnect?: () => void
 }
 
-const WalletPopover = ({ wallet, open, anchorEl, onClose }: WalletPopoverProps): ReactElement => {
+const WalletPopover = ({
+  wallet,
+  open,
+  anchorEl,
+  onClose,
+  onWalletSwitch,
+  onWalletDisconnect,
+}: WalletPopoverProps): ReactElement => {
   return (
     <Popover
       open={open}
@@ -25,7 +34,13 @@ const WalletPopover = ({ wallet, open, anchorEl, onClose }: WalletPopoverProps):
       transitionDuration={0}
     >
       <Paper className={walletCss.popoverContainer}>
-        <WalletInfo wallet={wallet} balance={wallet.balance} handleClose={onClose} />
+        <WalletInfo
+          wallet={wallet}
+          balance={wallet.balance}
+          handleClose={onClose}
+          onSwitch={onWalletSwitch}
+          onDisconnect={onWalletDisconnect}
+        />
       </Paper>
     </Popover>
   )

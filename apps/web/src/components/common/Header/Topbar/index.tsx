@@ -10,6 +10,9 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
+import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -28,6 +31,15 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   const { WalletPopover } = useLoadFeature(WalletFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
+  const spaceId = useCurrentSpaceId()
+
+  const handleWalletSwitch = () => {
+    trackEvent({ ...SPACE_EVENTS.WALLET_SWITCHED, label: spaceId ?? undefined }, { spaceId })
+  }
+
+  const handleWalletDisconnect = () => {
+    trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId ?? undefined }, { spaceId })
+  }
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isMobile)
 
@@ -57,7 +69,14 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
       <NotificationsPopover ref={notificationsRef} />
 
       {wallet && (
-        <WalletPopover wallet={wallet} open={walletOpen} anchorEl={walletAnchorEl} onClose={handleWalletClose} />
+        <WalletPopover
+          wallet={wallet}
+          open={walletOpen}
+          anchorEl={walletAnchorEl}
+          onClose={handleWalletClose}
+          onWalletSwitch={handleWalletSwitch}
+          onWalletDisconnect={handleWalletDisconnect}
+        />
       )}
     </>
   )
