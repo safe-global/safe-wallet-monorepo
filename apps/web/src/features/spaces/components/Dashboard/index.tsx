@@ -83,6 +83,17 @@ const SpaceDashboard = () => {
     }
   }
 
+  const handlePendingTxItemClick = (safeAddress: string, txId: string) => {
+    trackEvent(
+      { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: spaceId ?? undefined },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        [MixpanelEventParams.TX_ID]: txId,
+      },
+    )
+  }
+
   const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
 
   return (
@@ -125,6 +136,7 @@ const SpaceDashboard = () => {
                 onViewAll={handleViewAllPendingTxs}
                 onNavigate={handleViewAllPendingTxs}
                 onRefresh={refetchPendingTxs}
+                onItemClick={handlePendingTxItemClick}
               />
             </Grid>
           </Grid>

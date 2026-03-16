@@ -31,6 +31,7 @@ interface PendingTxWidgetProps {
   onViewAll?: () => void
   onNavigate?: () => void
   onRefresh?: () => void
+  onItemClick?: (safeAddress: string, txId: string) => void
 }
 
 const SKELETON_COUNT = 3
@@ -53,6 +54,7 @@ const PendingTxWidget = ({
   error,
   onNavigate,
   onRefresh,
+  onItemClick,
 }: PendingTxWidgetProps): ReactElement => {
   const isEmpty = transactions.length === 0 && !loading
   const hasError = !!error && !loading
@@ -89,6 +91,7 @@ const PendingTxWidget = ({
             <SafeWidget.Item
               key={tx.transaction.id}
               href={href}
+              onClick={tx.safeAddress ? () => onItemClick?.(tx.safeAddress!, tx.transaction.id) : undefined}
               className={css.widgetItem}
               label={
                 <div className={css.widgetItemLabel}>

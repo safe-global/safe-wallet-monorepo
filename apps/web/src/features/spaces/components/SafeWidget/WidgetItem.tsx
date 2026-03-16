@@ -9,6 +9,7 @@ interface WidgetItemProps {
   /** Optional second line (e.g. amount + recipient); can wrap so full text is visible. */
   description?: string | ReactNode
   href?: string
+  onClick?: () => void
   startNode?: ReactNode
   featuredNode?: ReactNode
   actionNode?: ReactNode
@@ -21,6 +22,7 @@ const WidgetItem = ({
   info,
   description,
   href,
+  onClick,
   startNode,
   featuredNode,
   actionNode,
@@ -29,18 +31,24 @@ const WidgetItem = ({
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
-  const handleClick = href ? () => router.push(href) : undefined
+  const handleClick =
+    href || onClick
+      ? () => {
+          onClick?.()
+          href && router.push(href)
+        }
+      : undefined
 
   return (
     <div
       data-slot="widget-item"
-      role={href ? 'button' : undefined}
-      tabIndex={href ? 0 : undefined}
+      role={handleClick ? 'button' : undefined}
+      tabIndex={handleClick ? 0 : undefined}
       onClick={handleClick}
-      onKeyDown={href ? (e) => e.key === 'Enter' && handleClick?.() : undefined}
+      onKeyDown={handleClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
       className={cn(
         'flex items-center justify-between rounded-sm py-4 pl-4 pr-6',
-        href && 'cursor-pointer transition-colors hover:bg-muted/50',
+        handleClick && 'cursor-pointer transition-colors hover:bg-muted/50',
         highlighted && 'bg-background',
         className,
       )}
