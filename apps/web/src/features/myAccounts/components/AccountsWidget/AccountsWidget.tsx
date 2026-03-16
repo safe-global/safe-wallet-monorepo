@@ -57,7 +57,7 @@ const AccountsWidget = ({
             ),
           )}
       {!loading && remainingCount !== undefined && (
-        <SafeWidget.Footer count={remainingCount} text="View all accounts" onClick={onViewAll} />
+        <SafeWidget.Footer text="View all accounts" onClick={onViewAll} showLeadingSlot={false} />
       )}
     </SafeWidget>
   )
