@@ -61,7 +61,7 @@ export const _GasParams = ({
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
-  const hideNativeToken = chain ? hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) : false
+  const hideNativeToken = chain?.features ? hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) : false
 
   if (hideNativeToken) {
     return <></>
