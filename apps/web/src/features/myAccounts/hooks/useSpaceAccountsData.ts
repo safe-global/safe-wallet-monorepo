@@ -51,9 +51,8 @@ const formatMultichainAccount = (
   })
 
   return {
-    id: safe.address,
     name,
-    address: shortenAddress(safe.address),
+    address: safe.address,
     href: getSafeHref(firstChain, safe.address),
     safes: safe.safes,
     fiatTotal: safeOverviews.length > 0 ? totalFiat.toString() : undefined,
@@ -73,7 +72,6 @@ const formatSingleSafe = (
   const name = safe.name || shortenAddress(safe.address)
 
   return {
-    id: `${safe.chainId}:${safe.address}`,
     name,
     address: safe.address,
     href: getSafeHref(chain, safe.address),
