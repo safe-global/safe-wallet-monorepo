@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect } from 'react'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { WalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
 import useWcUri from '../../hooks/useWcUri'
@@ -39,11 +39,11 @@ const WalletConnectWidget = () => {
 }
 
 const WalletConnectUi = () => (
-  <ErrorBoundary>
+  <ObservabilityErrorBoundary>
     <WalletConnectProvider>
       <WalletConnectWidget />
     </WalletConnectProvider>
-  </ErrorBoundary>
+  </ObservabilityErrorBoundary>
 )
 
 export default WalletConnectUi

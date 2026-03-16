@@ -103,7 +103,7 @@ export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransfo
 
 const persistConfig = {
   key: 'root',
-  version: 2,
+  version: 3,
   storage: reduxStorage,
   blacklist: persistBlacklist,
   transforms: persistTransforms,

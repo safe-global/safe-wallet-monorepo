@@ -26,8 +26,6 @@ const formatMessage = (
 
 class Logger {
   private level: LogLevel = LogLevel.ERROR
-  private shouldLogErrorToSentry = false
-
   setLevel = (level: LogLevel): void => {
     this.level = level
   }
@@ -74,15 +72,7 @@ class Logger {
         console.error(value)
       }
       console.groupEnd()
-
-      if (this.shouldLogErrorToSentry) {
-        // TODO: implement Sentry error logging
-      }
     }
-  }
-
-  setShouldLogErrorToSentry = (shouldLogErrorToSentry: boolean): void => {
-    this.shouldLogErrorToSentry = shouldLogErrorToSentry
   }
 }
 
