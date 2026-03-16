@@ -15,17 +15,12 @@ const getFirstChainId = (item: SafeItemData | undefined) => {
   return item?.chains?.[0]?.chainId ?? ''
 }
 
-const hasMultipleChains = (item: SafeItemData | undefined) => {
-  return (item?.chains?.length ?? 0) > 1
-}
-
 export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: UseSafeSelectorStateProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedChainId, setSelectedChainId] = useState<string>('')
 
   const selectedItem = useMemo(() => getSelectedItem(items, selectedItemId), [items, selectedItemId])
   const isSingleSafe = items.length <= 1
-  const hasChains = hasMultipleChains(selectedItem)
 
   useEffect(() => {
     const chainId = getFirstChainId(selectedItem)
