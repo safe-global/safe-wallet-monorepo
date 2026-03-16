@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import MembersCard from './MembersCard'
 import SpacesCTACard from './SpacesCTACard'
 import AddressBookCard from './ImportAddressBookCard'
@@ -55,6 +56,11 @@ const SpaceDashboard = () => {
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: spaceId }, { spaceId })
+  }, [spaceId])
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
