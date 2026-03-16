@@ -5,7 +5,6 @@ import Skeleton from '@mui/material/Skeleton'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import SafeIcon from '@/components/common/SafeIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -28,9 +27,7 @@ const SafeHeaderInfo = (): ReactElement => {
   const { SafeHeaderHnTooltip } = useLoadFeature(HypernativeFeature)
   const { isHypernativeGuard } = useIsHypernativeGuard()
   const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
-  const firstBalanceItem = balances.items[0]
-  const isNativeToken = firstBalanceItem?.tokenInfo.type === TokenType.NATIVE_TOKEN
-  const shouldHideNativeTokenValue = !safe.deployed && hideNativeToken === true && isNativeToken
+  const shouldHideNativeTokenValue = !safe.deployed && hideNativeToken === true
 
   return (
     <div data-testid="safe-header-info" className={css.safe}>

@@ -1,8 +1,10 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import classnames from 'classnames'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import {
+  Box,
   FormControl,
   FormControlLabel,
   List,
@@ -31,6 +33,7 @@ const PayNowPayLater = ({
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
 }) => {
   const chain = useCurrentChain()
+  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
 
   const onChoosePayMethod = (_: ChangeEvent<HTMLInputElement>, newPayMethod: string) => {
     setPayMethod(newPayMethod as PayMethod)
@@ -46,6 +49,14 @@ const PayNowPayLater = ({
           You will need to <b>activate your account</b> separately on each network. Make sure you have funds on your
           wallet to pay the network fee.
         </ErrorMessage>
+      )}
+      {hideNativeToken && (
+        <Box mt={2}>
+          <ErrorMessage level="info">
+            This network uses USD stablecoins for transaction fees instead of a native token. Ensure your connected
+            wallet holds a supported stablecoin to cover fees.
+          </ErrorMessage>
+        </Box>
       )}
       <List>
         {isMultiChain && (
@@ -92,15 +103,17 @@ const PayNowPayLater = ({
               label={
                 <>
                   <Typography className={css.radioTitle}>Pay now</Typography>
-                  <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                    {canRelay ? (
-                      'Sponsored free transaction'
-                    ) : (
-                      <>
-                        &asymp; {totalFee} {chain?.nativeCurrency.symbol}
-                      </>
-                    )}
-                  </Typography>
+                  {!hideNativeToken && (
+                    <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
+                      {canRelay ? (
+                        'Sponsored free transaction'
+                      ) : (
+                        <>
+                          &asymp; {totalFee} {chain?.nativeCurrency.symbol}
+                        </>
+                      )}
+                    </Typography>
+                  )}
                 </>
               }
               control={<Radio />}

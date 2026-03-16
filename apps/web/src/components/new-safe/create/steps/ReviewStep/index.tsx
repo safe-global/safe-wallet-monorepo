@@ -176,6 +176,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
+  const hideNativeToken = chain && hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN)
 
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)
@@ -444,9 +445,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     mt: 2,
                   }}
                 >
-                  You will have to confirm a transaction and pay an estimated fee of{' '}
-                  <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} inline /> with your connected
-                  wallet
+                  {hideNativeToken ? (
+                    'You will have to confirm a transaction with your connected wallet'
+                  ) : (
+                    <>
+                      You will have to confirm a transaction and pay an estimated fee of{' '}
+                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} inline /> with your connected
+                      wallet
+                    </>
+                  )}
                 </Typography>
               </Grid>
             )}
@@ -479,32 +486,34 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Grid>
             )}
 
-            <Grid data-testid="network-fee-section" container spacing={3}>
-              <ReviewRow
-                name="Est. network fee"
-                value={
-                  <>
-                    <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
+            {!hideNativeToken && (
+              <Grid data-testid="network-fee-section" container spacing={3}>
+                <ReviewRow
+                  name="Est. network fee"
+                  value={
+                    <>
+                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
 
-                    {!willRelay && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'text.secondary',
-                          mt: 1,
-                        }}
-                      >
-                        You will have to confirm a transaction with your connected wallet.
-                      </Typography>
-                    )}
-                  </>
-                }
-              />
-            </Grid>
+                      {!willRelay && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            mt: 1,
+                          }}
+                        >
+                          You will have to confirm a transaction with your connected wallet.
+                        </Typography>
+                      )}
+                    </>
+                  }
+                />
+              </Grid>
+            )}
 
             {showNetworkWarning && <NetworkWarning action="create a Safe Account" />}
 
-            {!walletCanPay && !willRelay && (
+            {!walletCanPay && !willRelay && !hideNativeToken && (
               <ErrorMessage>
                 Your connected wallet doesn&apos;t have enough funds to execute this transaction
               </ErrorMessage>
