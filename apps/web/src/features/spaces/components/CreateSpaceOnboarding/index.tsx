@@ -69,7 +69,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
                 className="h-11 rounded-lg bg-card px-4"
                 {...register('name', {
                   required: true,
-                  maxLength: { value: 50, message: 'Space name must be 50 characters or less' },
+                  maxLength: { value: 30, message: 'Space name must be 30 characters or less' },
+                  pattern: {
+                    value: /^[a-zA-Z0-9 ]+$/,
+                    message: 'Space name must not contain special characters',
+                  },
                   validate: (value) => value?.trim() !== '',
                 })}
                 error={errors.name?.message}

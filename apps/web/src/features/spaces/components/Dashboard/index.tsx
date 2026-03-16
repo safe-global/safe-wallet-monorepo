@@ -140,7 +140,6 @@ const SpaceDashboard = () => {
                 error={pendingTxError ? String(pendingTxError) : undefined}
                 remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
                 onViewAll={handleViewAllPendingTxs}
-                onNavigate={handleViewAllPendingTxs}
                 onRefresh={refetchPendingTxs}
                 onItemClick={handlePendingTxItemClick}
               />

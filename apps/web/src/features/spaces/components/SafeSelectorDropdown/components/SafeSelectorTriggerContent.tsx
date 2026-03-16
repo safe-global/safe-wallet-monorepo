@@ -1,5 +1,4 @@
 import { blo } from 'blo'
-import { Settings } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
@@ -40,7 +39,6 @@ function SafeSelectorTriggerContent({
           <Typography variant="paragraph-small-medium" className="truncate">
             {displayName}
           </Typography>
-          <Settings className="size-3 text-muted-foreground shrink-0" />
         </div>
         {showAddressLine && (
           <Typography variant="paragraph-mini" color="muted">

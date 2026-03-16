@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { PendingTxWidget } from './PendingTxWidget'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { withMockProvider } from '@/storybook/preview'
 
 const createMockTx = (
   id: string,
@@ -48,6 +49,7 @@ const meta: Meta<typeof PendingTxWidget> = {
   component: PendingTxWidget,
   tags: ['autodocs'],
   decorators: [
+    withMockProvider(),
     (Story) => (
       <div style={{ backgroundColor: 'var(--color-background-default, #f4f4f4)', padding: '2rem' }}>
         <div style={{ maxWidth: '560px' }}>

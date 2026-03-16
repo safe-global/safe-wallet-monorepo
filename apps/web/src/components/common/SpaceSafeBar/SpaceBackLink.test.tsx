@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import SpaceBackLink from './SpaceBackLink'
-import { getAvatarColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/features/spaces'
 
 jest.mock('@/features/spaces', () => ({
   ...jest.requireActual('@/features/spaces'),
-  getAvatarColor: jest.fn((id: number) => `hsl(${id}, 55%, 55%)`),
+  getDeterministicColor: jest.fn((name: string) => `#${name.length.toString(16).padStart(6, '0')}`),
 }))
 
 describe('SpaceBackLink', () => {
@@ -24,10 +24,10 @@ describe('SpaceBackLink', () => {
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 
-  it('uses getAvatarColor with space.id for the avatar background', () => {
+  it('uses getDeterministicColor with space.name for the avatar background', () => {
     render(<SpaceBackLink space={mockSpace} onClick={jest.fn()} />)
 
-    expect(getAvatarColor).toHaveBeenCalledWith(42)
+    expect(getDeterministicColor).toHaveBeenCalledWith('Acme Corp')
   })
 
   it('handles single-character space name', () => {

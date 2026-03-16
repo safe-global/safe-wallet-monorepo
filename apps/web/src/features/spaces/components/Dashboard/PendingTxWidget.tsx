@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
-import { ChevronRight, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getTxStatus } from '@/features/transactions/utils'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
@@ -29,7 +28,6 @@ interface PendingTxWidgetProps {
   remainingCount?: number
   error?: string
   onViewAll?: () => void
-  onNavigate?: () => void
   onRefresh?: () => void
   onItemClick?: (safeAddress: string, txId: string) => void
 }
@@ -42,17 +40,10 @@ const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
   </div>
 )
 
-const ActionButton = ({ onNavigate }: { onNavigate?: () => void }) => (
-  <Button variant="ghost" size="icon-sm" onClick={onNavigate}>
-    <ChevronRight className="size-6" />
-  </Button>
-)
-
 const PendingTxWidget = ({
   transactions,
   loading = false,
   error,
-  onNavigate,
   onRefresh,
   onItemClick,
 }: PendingTxWidgetProps): ReactElement => {
@@ -61,7 +52,7 @@ const PendingTxWidget = ({
 
   if (hasError) {
     return (
-      <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+      <SafeWidget title="Pending">
         <SafeWidget.ErrorState message="Unable to load content" onRefresh={onRefresh} />
       </SafeWidget>
     )
@@ -69,14 +60,14 @@ const PendingTxWidget = ({
 
   if (isEmpty) {
     return (
-      <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+      <SafeWidget title="Pending">
         <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No pending transactions" />
       </SafeWidget>
     )
   }
 
   return (
-    <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+    <SafeWidget title="Pending">
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (

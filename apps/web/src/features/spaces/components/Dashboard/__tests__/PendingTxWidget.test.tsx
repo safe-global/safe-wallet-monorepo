@@ -67,8 +67,8 @@ const createMockTx = (id: string, safeAddress?: string, chainId?: string): Space
   chainId,
 })
 
-/** Returns only the widget-item rows (excludes the ActionButton chevron). */
-const getTxRows = () => screen.getAllByRole('button').filter((el) => el.getAttribute('data-slot') === 'widget-item')
+/** Returns only the widget-item rows. */
+const getTxRows = () => screen.queryAllByRole('button').filter((el) => el.getAttribute('data-slot') === 'widget-item')
 
 // ---- Tests ----
 
