@@ -55,7 +55,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
           </Typography>
 
           <Typography variant="paragraph" align="center" color="muted">
-            Consolidate and organize safes, members and transaction activity.
+            Choose which safes you want to manage in this space. You can add more later.
           </Typography>
 
           <form onSubmit={onSubmit} className="flex w-full flex-col gap-6">
