@@ -3,10 +3,11 @@ import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
+import SpaceChainSelector from './SpaceChainSelector'
 
 function SpaceSafeBar() {
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { items, selectedItemId, handleItemSelect, handleChainChange, isError, refetch } = useSpaceSafeSelectorItems()
+  const { items, selectedItemId, handleItemSelect, isError, refetch } = useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
 
   if (!isQualifiedSafe) return null
@@ -17,11 +18,11 @@ function SpaceSafeBar() {
       style={{ backgroundColor: 'var(--color-background-main)' }}
     >
       {space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
+      <SpaceChainSelector />
       <SafeSelectorDropdown
         items={items}
         selectedItemId={selectedItemId}
         onItemSelect={handleItemSelect}
-        onChainChange={handleChainChange}
         isError={isError}
         onRetry={refetch}
       />

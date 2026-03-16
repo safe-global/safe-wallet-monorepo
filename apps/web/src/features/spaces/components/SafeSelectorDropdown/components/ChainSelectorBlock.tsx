@@ -29,7 +29,7 @@ function ChainSelectorBlock({ hasMultipleChains, chains, selectedChainId, onChai
             <span
               role="button"
               tabIndex={0}
-              className="flex items-center gap-1.5 bg-muted rounded-full pl-0.5 pr-2 py-0.5 shrink-0 cursor-pointer hover:bg-muted/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="w-16 flex items-center justify-between px-2 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onKeyDown={handleChainTriggerKeyDown}
             >
               <ChainLogo chainId={displayChainId} />
@@ -58,7 +58,7 @@ function ChainSelectorBlock({ hasMultipleChains, chains, selectedChainId, onChai
   }
 
   return (
-    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+    <span className="w-16 inline-flex items-center justify-center rounded-lg shrink-0">
       <ChainLogo chainId={chains[0]?.chainId} />
     </span>
   )

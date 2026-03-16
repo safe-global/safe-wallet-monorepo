@@ -331,31 +331,6 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(mockPush).not.toHaveBeenCalled()
   })
 
-  // ── chain change triggers navigation ──
-
-  it('navigates to the same safe on a different chain when chain changes', () => {
-    const { result } = renderHook(() => useSpaceSafeSelectorItems())
-
-    act(() => {
-      result.current.handleChainChange('137')
-    })
-
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/home',
-      query: { safe: 'matic:0xSafe1' },
-    })
-  })
-
-  it('does not navigate on chain change when chain config is not found', () => {
-    const { result } = renderHook(() => useSpaceSafeSelectorItems())
-
-    act(() => {
-      result.current.handleChainChange('999')
-    })
-
-    expect(mockPush).not.toHaveBeenCalled()
-  })
-
   // ── skipToken when no safes ──
 
   it('passes skipToken to overview query when there are no flat safes', () => {

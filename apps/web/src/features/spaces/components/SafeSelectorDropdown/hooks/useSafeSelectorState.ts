@@ -5,7 +5,6 @@ interface UseSafeSelectorStateProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
-  onChainChange?: (chainId: string) => void
 }
 
 const getSelectedItem = (items: SafeItemData[], selectedItemId?: string) => {
@@ -20,12 +19,7 @@ const hasMultipleChains = (item: SafeItemData | undefined) => {
   return (item?.chains?.length ?? 0) > 1
 }
 
-export const useSafeSelectorState = ({
-  items,
-  selectedItemId,
-  onItemSelect,
-  onChainChange,
-}: UseSafeSelectorStateProps) => {
+export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: UseSafeSelectorStateProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedChainId, setSelectedChainId] = useState<string>('')
 
@@ -45,15 +39,6 @@ export const useSafeSelectorState = ({
     [isSingleSafe],
   )
 
-  const handleChainSelect = useCallback(
-    (chainId: string, event?: React.MouseEvent) => {
-      event?.stopPropagation()
-      setSelectedChainId(chainId)
-      onChainChange?.(chainId)
-    },
-    [onChainChange],
-  )
-
   const handleSafeChange = useCallback(
     (value: string | null) => {
       const itemId = value ?? ''
@@ -67,9 +52,7 @@ export const useSafeSelectorState = ({
     selectedChainId,
     selectedItem,
     isSingleSafe,
-    hasMultipleChains: hasChains,
     handleOpenChange,
-    handleChainSelect,
     handleSafeChange,
   }
 }
