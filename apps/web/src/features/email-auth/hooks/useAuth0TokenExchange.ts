@@ -25,6 +25,7 @@ export function useAuth0TokenExchange(
   const isCgwAuthenticated = useAppSelector(selectIsAuthenticated)
   const [verifyAuth0] = useAuthVerifyV2Mutation()
   const exchangingRef = useRef(false)
+  const lastIdTokenRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
     if (!isAuth0Authed || isCgwAuthenticated || exchangingRef.current || !getIdTokenClaims) return
@@ -34,7 +35,10 @@ export function useAuth0TokenExchange(
     const exchange = async () => {
       try {
         const claims = await getIdTokenClaims()
-        if (!claims?.__raw) return
+        // Skip if the id_token hasn't changed since the last exchange
+        if (!claims?.__raw || claims.__raw === lastIdTokenRef.current) return
+
+        lastIdTokenRef.current = claims.__raw
 
         await verifyAuth0({ id_token: claims.__raw }).unwrap()
         dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))

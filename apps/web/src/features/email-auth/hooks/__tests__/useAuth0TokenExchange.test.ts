@@ -128,4 +128,77 @@ describe('useAuth0TokenExchange', () => {
       expect(getIdTokenClaims).toHaveBeenCalledTimes(1)
     })
   })
+
+  it('should skip verify when the id_token has not changed since last exchange', async () => {
+    const mockClaims = { __raw: 'same-token' } as IdToken
+    const getIdTokenClaims = jest.fn().mockResolvedValue(mockClaims)
+
+    const { rerender } = renderHook(
+      ({ authed, getClaims }: { authed: boolean; getClaims: typeof getIdTokenClaims }) =>
+        useAuth0TokenExchange(authed, getClaims),
+      { initialProps: { authed: true, getClaims: getIdTokenClaims } },
+    )
+
+    // Wait for the first exchange to complete
+    await waitFor(() => {
+      expect(mockVerifyAuth0).toHaveBeenCalledTimes(1)
+    })
+
+    // Simulate CGW session expiring so the hook can attempt exchange again
+    jest.spyOn(authSlice, 'isAuthenticated').mockReturnValue(false)
+
+    // Provide a new function reference that still returns the same token
+    const newGetIdTokenClaims = jest.fn().mockResolvedValue(mockClaims)
+    rerender({ authed: true, getClaims: newGetIdTokenClaims })
+
+    await waitFor(() => {
+      expect(newGetIdTokenClaims).toHaveBeenCalled()
+    })
+
+    // verify should still only have been called once — same token, no extra call
+    expect(mockVerifyAuth0).toHaveBeenCalledTimes(1)
+  })
+
+  it('should exchange again when the id_token changes', async () => {
+    const firstClaims = { __raw: 'token-1' } as IdToken
+    const getIdTokenClaims = jest.fn().mockResolvedValue(firstClaims)
+
+    const { rerender } = renderHook(
+      ({ authed, getClaims }: { authed: boolean; getClaims: typeof getIdTokenClaims }) =>
+        useAuth0TokenExchange(authed, getClaims),
+      { initialProps: { authed: true, getClaims: getIdTokenClaims } },
+    )
+
+    // Wait for first exchange
+    await waitFor(() => {
+      expect(mockVerifyAuth0).toHaveBeenCalledWith({ id_token: 'token-1' })
+    })
+
+    // Simulate CGW session expiring
+    jest.spyOn(authSlice, 'isAuthenticated').mockReturnValue(false)
+
+    // Provide a new function reference that returns a different token
+    const secondClaims = { __raw: 'token-2' } as IdToken
+    const newGetIdTokenClaims = jest.fn().mockResolvedValue(secondClaims)
+    rerender({ authed: true, getClaims: newGetIdTokenClaims })
+
+    await waitFor(() => {
+      expect(mockVerifyAuth0).toHaveBeenCalledWith({ id_token: 'token-2' })
+    })
+
+    expect(mockVerifyAuth0).toHaveBeenCalledTimes(2)
+  })
+
+  it('should use fallback error message for non-Error exceptions', async () => {
+    mockUnwrap.mockRejectedValue('string-error')
+
+    const mockClaims = { __raw: 'test-id-token' } as IdToken
+    const getIdTokenClaims = jest.fn().mockResolvedValue(mockClaims)
+
+    renderHook(() => useAuth0TokenExchange(true, getIdTokenClaims))
+
+    await waitFor(() => {
+      expect(logError).toHaveBeenCalledWith(expect.any(String), 'Auth0 token exchange failed')
+    })
+  })
 })
