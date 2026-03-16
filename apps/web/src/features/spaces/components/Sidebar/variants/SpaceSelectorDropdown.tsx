@@ -116,7 +116,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
             <Avatar className={cn('size-6 shrink-0', css.spaceSelectorItemAvatar)}>
               <AvatarFallback
-                className={cn('text-primary-foreground text-xs', css.spaceSelectorItemAvatarFallback)}
+                className={css.spaceSelectorItemAvatarFallback}
                 style={{ backgroundColor: getDeterministicColor(space.name) }}
               >
                 {space.name.charAt(0).toUpperCase()}

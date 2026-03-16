@@ -64,6 +64,8 @@
 
 .spaceSelectorItemAvatarFallback {
   border-radius: 8px;
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
 }
 
 .spaceSelectorText {
