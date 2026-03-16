@@ -40,7 +40,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-[8px] bg-sidebar-accent p-5 group-data-[collapsible=icon]:hidden"
+      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-5 group-data-[collapsible=icon]:hidden"
       data-testid="api-cta-sidebar"
     >
       <div className="flex w-full items-start justify-between">
@@ -71,7 +71,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
       <Button
         size="sm"
-        className="w-auto self-start rounded-full"
+        className="w-auto self-start"
         render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
       >
         Try the API

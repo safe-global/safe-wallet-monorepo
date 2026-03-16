@@ -22,6 +22,7 @@ import type SpaceSettings from './components/SpaceSettings'
 import type UserSettings from './components/UserSettings'
 import type SpaceSafeContextMenu from './components/SafeAccounts/SpaceSafeContextMenu'
 import type SendTransactionButton from './components/SafeAccounts/SendTransactionButton'
+import type PendingTxWidget from './components/Dashboard/PendingTxWidget'
 import type SpaceDashboardPage from './components/Dashboard/Page'
 import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
@@ -50,6 +51,7 @@ export interface SpacesContract {
   UserSettings: typeof UserSettings
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
+  PendingTxWidget: typeof PendingTxWidget
 
   // Page components (PascalCase) - stub renders null
   SpaceDashboardPage: typeof SpaceDashboardPage

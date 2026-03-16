@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@cowprotocol/app-data": "^3.1.0",
+    "@datadog/mobile-react-native": "^3.1.2",
     "@ethersproject/shims": "^5.7.0",
     "@expo/config-plugins": "~54.0.1",
     "@expo/vector-icons": "^15.1.1",
@@ -84,12 +85,13 @@
     "burnt": "^0.12.2",
     "date-fns": "^4.1.0",
     "deepmerge": "^4.3.1",
-    "ethers": "^6.14.3",
+    "ethers": "6.14.3",
     "expo": "^54.0.0",
     "expo-application": "~7.0.7",
     "expo-blur": "~15.0.7",
     "expo-build-properties": "~1.0.9",
     "expo-constants": "~18.0.9",
+    "expo-datadog": "^54.0.0",
     "expo-dev-client": "~6.0.12",
     "expo-device": "~8.0.8",
     "expo-document-picker": "~14.0.7",
@@ -118,6 +120,7 @@
     "react-native-device-info": "^14.0.1",
     "react-native-draggable-flatlist": "^4.0.1",
     "react-native-gesture-handler": "~2.28.0",
+    "react-native-keyboard-controller": "1.18.5",
     "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^3.3.3",
     "react-native-pager-view": "6.9.1",
@@ -147,6 +150,8 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.26.3",
+    "@datadog/datadog-ci": "^5.9.0",
+    "@datadog/mobile-react-native-babel-plugin": "^3.1.2",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^9.0.3",
     "@rtk-query/codegen-openapi": "^2.0.0",

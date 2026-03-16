@@ -6,7 +6,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Box, Chip, CircularProgress, Grid, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import ArrowDownwardIcon from '@/public/images/transactions/incoming.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -204,9 +204,9 @@ export const BalanceChanges = () => {
           </span>
         </Tooltip>
       </Typography>
-      <ErrorBoundary fallback={<div>Error showing balance changes</div>}>
+      <ObservabilityErrorBoundary fallback={<div>Error showing balance changes</div>}>
         <BalanceChangesDisplay />
-      </ErrorBoundary>
+      </ObservabilityErrorBoundary>
     </div>
   )
 }

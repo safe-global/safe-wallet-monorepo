@@ -18,6 +18,7 @@ export interface GuardContext {
   query: ParsedUrlQuery
   isPublicRoute: boolean
   isOnboardingRoute: boolean
+  isSpacesPath: boolean
   isWalletReady: boolean
   isSiweAuthenticated: boolean
   hasSpaces: boolean
@@ -32,5 +33,3 @@ export interface GuardRule {
   match: (ctx: GuardContext) => boolean
   action: (ctx: GuardContext) => GuardResult
 }
-
-export type EvaluateGuard = (ctx: GuardContext, rules: GuardRule[]) => GuardResult

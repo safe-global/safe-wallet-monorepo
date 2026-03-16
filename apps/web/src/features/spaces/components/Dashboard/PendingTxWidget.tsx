@@ -1,75 +1,116 @@
 import type { ReactElement } from 'react'
-import { ArrowUpRight, ChevronRight } from 'lucide-react'
+import { ChevronRight, Users } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { getTxStatus } from '@/features/transactions/utils'
+import { formatTimeInWords } from '@safe-global/utils/utils/date'
+import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
+import TxInfo from '@/components/transactions/TxInfo'
+import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import Identicon from '@/components/common/Identicon'
+import { AppRoutes } from '@/config/routes'
+import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/config'
+import css from './styles.module.css'
 
-interface PendingTransaction {
-  id: string
-  label: string
-  info: string
-  status: string
-  initials?: string
-}
+type Chains = Record<string, string>
+
+const chainIdToShortName = networks.reduce<Chains>((result, { shortName, chainId }) => {
+  result[chainId.toString()] = shortName.toString()
+  return result
+}, {})
+
+/** Transaction with safeAddress and chainId from the space pending-transactions API */
+type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainId?: string }
 
 interface PendingTxWidgetProps {
-  transactions: PendingTransaction[]
+  transactions: SpacePendingTxItem[]
   loading?: boolean
   remainingCount?: number
+  error?: string
   onViewAll?: () => void
   onNavigate?: () => void
+  onRefresh?: () => void
 }
 
 const SKELETON_COUNT = 3
 
-const TxIcon = (): ReactElement => (
+const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
   <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
-    <ArrowUpRight className="size-5 text-foreground" />
+    <TxTypeIcon tx={tx.transaction} />
   </div>
+)
+
+const ActionButton = ({ onNavigate }: { onNavigate?: () => void }) => (
+  <Button variant="ghost" size="icon-sm" onClick={onNavigate}>
+    <ChevronRight className="size-6" />
+  </Button>
 )
 
 const PendingTxWidget = ({
   transactions,
   loading = false,
-  remainingCount,
-  onViewAll,
+  error,
   onNavigate,
+  onRefresh,
 }: PendingTxWidgetProps): ReactElement => {
+  const isEmpty = transactions.length === 0 && !loading
+  const hasError = !!error && !loading
+
+  if (hasError) {
+    return (
+      <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+        <SafeWidget.ErrorState message="Unable to load content" onRefresh={onRefresh} />
+      </SafeWidget>
+    )
+  }
+
+  if (isEmpty) {
+    return (
+      <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+        <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No pending transactions" />
+      </SafeWidget>
+    )
+  }
+
   return (
-    <SafeWidget
-      title="Pending"
-      action={
-        <Button variant="ghost" size="icon-sm" onClick={onNavigate}>
-          <ChevronRight className="size-6" />
-        </Button>
-      }
-    >
-      {loading
-        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : transactions.map((tx) => (
+    <SafeWidget title="Pending" action={<ActionButton onNavigate={onNavigate} />}>
+      {loading ? (
+        Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
+      ) : transactions.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
+      ) : (
+        transactions.map((tx) => {
+          const shortName = tx.chainId ? chainIdToShortName[tx.chainId] : undefined
+          const safeParam = shortName && tx.safeAddress ? `${shortName}:${tx.safeAddress}` : undefined
+          const href = safeParam ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}` : undefined
+
+          return (
             <SafeWidget.Item
-              key={tx.id}
-              label={tx.label}
-              info={tx.info}
-              startNode={<TxIcon />}
-              featuredNode={
-                tx.initials ? (
-                  <Avatar size="xs">
-                    <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">{tx.initials}</AvatarFallback>
-                  </Avatar>
-                ) : undefined
+              key={tx.transaction.id}
+              href={href}
+              className={css.widgetItem}
+              label={
+                <div className={css.widgetItemLabel}>
+                  <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
+                </div>
               }
-              actionNode={<Badge variant="secondary">{tx.status}</Badge>}
+              info={formatTimeInWords(tx.transaction.timestamp)}
+              startNode={<TxIcon tx={tx} />}
+              featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
+              actionNode={
+                <div className="w-[200px] max-w-full flex justify-end">
+                  <Badge variant="secondary">{getTxStatus(tx)}</Badge>
+                </div>
+              }
             />
-          ))}
-      {!loading && remainingCount !== undefined && (
-        <SafeWidget.Footer count={remainingCount} text="View all pending transactions" onClick={onViewAll} />
+          )
+        })
       )}
     </SafeWidget>
   )
 }
 
 export { PendingTxWidget }
-export type { PendingTxWidgetProps, PendingTransaction }
+export type { PendingTxWidgetProps }
 export default PendingTxWidget

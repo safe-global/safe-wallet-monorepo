@@ -30,7 +30,7 @@ jest.mock('../context/DataImportProvider', () => ({
 
 jest.mock('../helpers/transforms', () => ({
   ...jest.requireActual('../helpers/transforms'),
-  fetchSafeOwnersInBatches: jest.fn(),
+  fetchAndStoreSafeOverviews: jest.fn(),
   storeKeysWithValidation: jest.fn(),
   storeSafes: jest.fn(),
   storeContacts: jest.fn(),
@@ -59,7 +59,7 @@ describe('ImportProgressScreen', () => {
     })
 
     // Mock transforms functions
-    jest.mocked(transforms.fetchSafeOwnersInBatches).mockResolvedValue(new Set(['0x2']))
+    jest.mocked(transforms.fetchAndStoreSafeOverviews).mockResolvedValue(new Set(['0x2']))
     jest.mocked(transforms.storeKeysWithValidation).mockResolvedValue(undefined)
     jest.mocked(transforms.storeContacts).mockImplementation(jest.fn())
   })

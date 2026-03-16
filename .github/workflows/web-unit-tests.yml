@@ -49,6 +49,16 @@ jobs:
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
+      - name: Upload coverage to Datadog
+        if: success() && github.event_name == 'push'
+        uses: ./.github/actions/upload-coverage
+        with:
+          api-key: ${{ secrets.DATADOG_API_KEY }}
+          site: datadoghq.eu
+          coverage-path: apps/web/coverage
+          base-path: apps/web
+          flag: workspace:web
+
       - name: Notify Slack on failure
         if: failure() && github.event_name == 'push'
         uses: slackapi/slack-github-action@v2.1.1

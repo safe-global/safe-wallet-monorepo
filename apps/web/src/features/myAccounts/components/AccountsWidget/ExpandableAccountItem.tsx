@@ -61,4 +61,3 @@ const ExpandableAccountItem = ({ account, loading = false, onItemClick }: Expand
 }
 
 export { ExpandableAccountItem }
-export default ExpandableAccountItem

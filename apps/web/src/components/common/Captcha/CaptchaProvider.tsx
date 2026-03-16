@@ -23,19 +23,21 @@ export function CaptchaProvider({ children }: { children: ReactNode }) {
     <>
       {children}
       {TURNSTILE_SITE_KEY && (
-        <Script
-          src={TURNSTILE_SCRIPT_URL}
-          strategy="afterInteractive"
-          onReady={() => setIsScriptReady(true)}
-          onError={resolveCaptchaReady}
-        />
+        <>
+          <Script
+            src={TURNSTILE_SCRIPT_URL}
+            strategy="afterInteractive"
+            onReady={() => setIsScriptReady(true)}
+            onError={resolveCaptchaReady}
+          />
+          <CaptchaModal
+            open={captcha.isModalOpen}
+            onWidgetContainerReady={captcha.onWidgetContainerReady}
+            error={captcha.error}
+            onRetry={captcha.refreshToken}
+          />
+        </>
       )}
-      <CaptchaModal
-        open={captcha.isModalOpen}
-        onWidgetContainerReady={captcha.onWidgetContainerReady}
-        error={captcha.error}
-        onRetry={captcha.refreshToken}
-      />
     </>
   )
 }

@@ -1,23 +1,8 @@
-import { formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import type { RecoveryQueueItem } from '@/features/recovery'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { isExecutable, isSignableBy } from '@/utils/transaction-guards'
-
-const MAX_DECIMALS = 4
-
-/**
- * Rounds decimal numbers in a string to a max number of decimal places (e.g. for compact labels).
- * Uses shared formatAmountPrecise for consistent locale-aware formatting.
- */
-export function formatAmountsInLabel(text: string, maxDecimals = MAX_DECIMALS): string {
-  return text.replace(/\d+\.\d+/g, (match) => {
-    const num = parseFloat(match)
-    if (Number.isNaN(num)) return match
-    return formatAmountPrecise(num, maxDecimals)
-  })
-}
 
 export function getTxStatus(tx: TransactionQueuedItem): string {
   if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) return ''
@@ -29,19 +14,6 @@ export function getTxStatus(tx: TransactionQueuedItem): string {
 
   const missing = confirmationsRequired - confirmationsSubmitted
   return `${missing} signature${missing > 1 ? 's' : ''} needed`
-}
-
-export function getTxLabel(tx: TransactionQueuedItem): string {
-  const { txInfo } = tx.transaction
-  let label: string
-  if ('humanDescription' in txInfo && txInfo.humanDescription) {
-    label = txInfo.humanDescription
-  } else if ('methodName' in txInfo && txInfo.methodName) {
-    label = txInfo.methodName
-  } else {
-    label = txInfo.type
-  }
-  return formatAmountsInLabel(label, MAX_DECIMALS)
 }
 
 export function formatTxDate(timestamp: number): string {

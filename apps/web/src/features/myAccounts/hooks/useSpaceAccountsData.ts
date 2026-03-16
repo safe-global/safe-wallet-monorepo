@@ -75,7 +75,7 @@ const formatSingleSafe = (
   return {
     id: `${safe.chainId}:${safe.address}`,
     name,
-    address: shortenAddress(safe.address),
+    address: safe.address,
     href: getSafeHref(chain, safe.address),
     safes: [safe],
     fiatTotal: overview?.fiatTotal,

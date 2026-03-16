@@ -662,13 +662,13 @@ export function verifySummaryByName(name, token, data, alt, altToken) {
 
     const $element = $elements.first()
 
-    // Verify data text content
+    // Verify data text content (use cy.wrap for retryability, e.g. async status like "Expired")
     if (Array.isArray(data)) {
       data.forEach((text) => {
-        expect($element.text()).to.include(text)
+        cy.wrap($element).should('contain.text', text)
       })
     } else if (data) {
-      expect($element.text()).to.include(data)
+      cy.wrap($element).should('contain.text', data)
     }
 
     // Verify transaction type icon (alt parameter)

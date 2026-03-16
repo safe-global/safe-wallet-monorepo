@@ -29,7 +29,7 @@ exports[`./PageHeader.stories LongTitle 1`] = `
       Transaction queue and history overview
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-876fro-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary mui-style-1ndpwxp-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >
@@ -68,12 +68,12 @@ exports[`./PageHeader.stories WithButton 1`] = `
       Address book
     </h3>
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary mui-style-1t6wehw-MuiButtonBase-root-MuiButton-root"
+      class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-colorPrimary mui-style-131imct-MuiButtonBase-root-MuiButton-root"
       tabindex="0"
       type="button"
     >
       <span
-        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium mui-style-dm569u-MuiButton-startIcon"
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium mui-style-1v1j2p3-MuiButton-startIcon"
       >
         <svg
           aria-hidden="true"
@@ -106,7 +106,7 @@ exports[`./PageHeader.stories WithIconButton 1`] = `
       Settings
     </h3>
     <button
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >

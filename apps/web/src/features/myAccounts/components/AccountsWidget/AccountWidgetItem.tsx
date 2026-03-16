@@ -45,4 +45,3 @@ const AccountWidgetItem = ({ account, loading = false, onItemClick }: AccountWid
 }
 
 export { AccountWidgetItem }
-export default AccountWidgetItem

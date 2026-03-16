@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
-import Image from 'next/image'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
+import { cn } from '@/utils/cn'
+import css from './SidebarTopBar.module.css'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
@@ -19,13 +20,20 @@ export const SidebarTopBar = (): ReactElement => {
         className="relative shrink-0 size-6 flex items-center justify-center cursor-pointer"
         data-testid="logo-container"
       >
-        <Image
+        <img
           src="/images/logo-no-text.svg"
           alt="Safe"
           width={24}
           height={24}
-          className="size-6 dark:brightness-0 dark:invert"
+          className="size-6 dark:hidden"
           data-testid="logo-image"
+          role="img"
+          aria-label="Safe"
+        />
+        <span
+          className={cn('hidden dark:block size-6 shrink-0 rounded-[2px]', css.logoPrimaryFill)}
+          role="img"
+          aria-label="Safe"
         />
       </div>
       <SidebarTrigger

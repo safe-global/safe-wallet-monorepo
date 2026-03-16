@@ -1,0 +1,5 @@
+.logoPrimaryFill {
+  background-color: var(--primary);
+  mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+  -webkit-mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+}

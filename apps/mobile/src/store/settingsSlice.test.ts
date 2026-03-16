@@ -21,6 +21,7 @@ const createMockStore = (initialState?: Partial<SettingsState>) => {
         currency: 'usd',
         tokenList: TOKEN_LISTS.TRUSTED,
         hideDust: true,
+        dataCollectionConsented: false,
         env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
         ...initialState,
       },

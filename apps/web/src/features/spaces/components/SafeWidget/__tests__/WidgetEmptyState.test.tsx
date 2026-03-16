@@ -20,4 +20,18 @@ describe('WidgetEmptyState', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
+
+  it('renders the subtitle when provided', () => {
+    render(<WidgetEmptyState icon={<span />} text="Error occurred" subtitle="Please try again." />)
+
+    expect(screen.getByText('Error occurred')).toBeInTheDocument()
+    expect(screen.getByText('Please try again.')).toBeInTheDocument()
+  })
+
+  it('does not render the subtitle when not provided', () => {
+    render(<WidgetEmptyState icon={<span />} text="No items found" />)
+
+    expect(screen.getByText('No items found')).toBeInTheDocument()
+    expect(screen.queryByText('Please try again.')).not.toBeInTheDocument()
+  })
 })

@@ -237,6 +237,10 @@ export default {
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
+## Testing Requirements
+
+Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/docs/TESTING.md) for conventions, templates, and mock patterns.
+
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
@@ -288,6 +292,14 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
    - `apps/mobile/docs/code-style.md` for the mobile app.
 
 7. **Pull requests**: fill out the PR template and ensure all checks pass.
+
+8. **PR poem**: Include a short technical poem at the very top of each PR description that acts as a concise summary of what the PR actually changes. The poem should prioritize clarity over artistry — a reader should understand the gist of the PR from the poem alone. Use a randomly chosen short form (e.g., haiku, limerick, free verse, tanka) and keep it to 2–4 lines. Wrap in a blockquote:
+
+   ```markdown
+   > Strip Sentry SDK and config,
+   > no more error tracking calls,
+   > bundle shrinks, tests pass clean.
+   ```
 
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
