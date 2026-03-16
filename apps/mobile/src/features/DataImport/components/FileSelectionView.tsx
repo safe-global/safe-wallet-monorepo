@@ -1,9 +1,10 @@
 import React from 'react'
 import { Text, YStack, Image, styled, H2 } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
+import { ColorScheme } from '@/src/types/theme'
 import ImportDataSelectFilesDark from '@/assets/images/import-data-select-files-dark.png'
 import ImportDataSelectFilesLight from '@/assets/images/import-data-select-files-light.png'
-import { ColorSchemeName, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 
 const StyledText = styled(Text, {
   fontSize: '$4',
@@ -12,7 +13,7 @@ const StyledText = styled(Text, {
 })
 
 interface FileSelectionViewProps {
-  colorScheme: ColorSchemeName
+  colorScheme: ColorScheme
   bottomInset: number
   onFileSelect: () => void
   onImagePress: () => void

@@ -8,7 +8,7 @@ import { View, Text, ScrollView, YStack, getTokenValue } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Controller, useFormContext } from 'react-hook-form'
+import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { FormValues } from '@/src/features/ImportReadOnly/types'
 import SafeAccountInput from '@/src/components/SafeAccountInput'
 
@@ -21,10 +21,9 @@ export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({ is
   const {
     control,
     formState: { errors, isValid, dirtyFields },
-    watch,
   } = useFormContext<FormValues>()
   const { top, bottom } = useSafeAreaInsets()
-  const result = watch('importedSafeResult')
+  const result = useWatch({ name: 'importedSafeResult' })
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>Import Safe account</NavBarTitle>,

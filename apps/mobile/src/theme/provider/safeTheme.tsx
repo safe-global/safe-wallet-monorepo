@@ -17,12 +17,13 @@ interface SafeThemeProviderProps {
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
   const { colorScheme, isDark, themePreference } = useTheme()
 
-  // Sync native iOS appearance with the app theme so native components
-  // (RefreshControl, context menus, etc.) match the app's color scheme.
-  // In auto mode, pass null to let the OS control the appearance.
+  // Sync native iOS appearance so native components (RefreshControl, context
+  // menus, etc.) match the app theme. In auto mode, pass 'unspecified' to
+  // follow the OS. Fixed by .yarn/patches/react-native-npm-0.83.4-* which
+  // resolves the actual OS scheme instead of storing 'unspecified' as-is.
   useEffect(() => {
-    Appearance.setColorScheme(themePreference === 'auto' ? null : (colorScheme ?? null))
-  }, [colorScheme, themePreference])
+    Appearance.setColorScheme(themePreference === 'auto' ? 'unspecified' : themePreference)
+  }, [themePreference])
 
   const themeProvider = isStorybookEnv ? (
     <View

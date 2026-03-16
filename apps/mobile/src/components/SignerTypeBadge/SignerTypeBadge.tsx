@@ -1,6 +1,6 @@
 import React from 'react'
 import { Badge } from '@/src/components/Badge'
-import { Skeleton } from 'moti/skeleton'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { BadgeThemeTypes } from '@/src/components/Badge/Badge'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
@@ -28,7 +28,7 @@ export const SignerTypeBadge = ({
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
 
   if (isLoading) {
-    return <Skeleton colorMode="dark" radius="round" height={size} width={size} />
+    return <SafeSkeleton radius="round" height={size} width={size} />
   }
 
   if (signer?.type === 'ledger') {
