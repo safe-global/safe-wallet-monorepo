@@ -5,7 +5,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import useSafeCardData from '../hooks/useSafeCardData'
-import SafeAvatar from './SafeAvatar'
+import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'
 import FiatBalance from './FiatBalance'
@@ -124,21 +124,35 @@ const SafeCardLayout = ({
     </div>
 
     <div className="flex min-w-0 flex-1 items-center gap-4">
-      <SafeAvatar name={name} address={address} />
+      <Identicon address={address} />
 
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
-        <span className="text-xs text-muted-foreground">{shortenAddress(address)}</span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         {isSimilar && (
-          <Badge variant="warning">
+          <Badge variant="warning" className="self-start -ml-px">
             <TriangleAlert data-icon="inline-start" />
             High similarity
           </Badge>
         )}
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
+          <div className="ml-auto shrink-0 pl-4">
+            <AccountItem.ChainBadge safes={safes} />
+          </div>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {isSimilar ? (
+            <>
+              {address.slice(0, 2)}
+              <b>{address.slice(2, 6)}</b>
+              {address.slice(6, -4)}
+              <b>{address.slice(-4)}</b>
+            </>
+          ) : (
+            address
+          )}
+        </span>
       </div>
     </div>
-
-    <AccountItem.ChainBadge safes={safes} />
 
     <div className="flex shrink-0 flex-col min-w-16 items-end gap-2">
       <FiatBalance value={fiatValue} />
