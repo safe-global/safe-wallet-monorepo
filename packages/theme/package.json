@@ -17,9 +17,13 @@
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
   },
   "peerDependencies": {
+    "@mui/material": "^6.5.0",
     "tamagui": "^1.x"
   },
   "peerDependenciesMeta": {
+    "@mui/material": {
+      "optional": true
+    },
     "tamagui": {
       "optional": true
     }

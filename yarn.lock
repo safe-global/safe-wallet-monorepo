@@ -10427,7 +10427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^6.5.0":
+"@mui/material@npm:6.5.0":
   version: 6.5.0
   resolution: "@mui/material@npm:6.5.0"
   dependencies:
@@ -13653,8 +13653,11 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.31.1"
   peerDependencies:
+    "@mui/material": ^6.5.0
     tamagui: ^1.x
   peerDependenciesMeta:
+    "@mui/material":
+      optional: true
     tamagui:
       optional: true
   languageName: unknown
@@ -13708,8 +13711,8 @@ __metadata:
     localforage: "npm:^1.10.0"
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
-    react: "npm:19.1.0"
-    react-dom: "npm:19.1.0"
+    react: "npm:19.2.0"
+    react-dom: "npm:19.2.0"
     react-hook-form: "npm:^7.54.2"
     react-is: "npm:^19.1.0"
     react-media: "npm:^1.10.0"
@@ -13891,9 +13894,9 @@ __metadata:
     postcss: "npm:^8.5.6"
     prettier: "npm:^3.6.2"
     qrcode.react: "npm:^3.1.0"
-    react: "npm:19.1.0"
+    react: "npm:19.2.0"
     react-day-picker: "npm:^9.13.0"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.2.0"
     react-dropzone: "npm:^14.2.3"
     react-hook-form: "npm:7.41.1"
     react-papaparse: "npm:^4.0.2"
@@ -39218,17 +39221,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react-dom@npm:19.1.0"
-  dependencies:
-    scheduler: "npm:^0.26.0"
-  peerDependencies:
-    react: ^19.1.0
-  checksum: 10/c5b58605862c7b0bb044416b01c73647bb8e89717fb5d7a2c279b11815fb7b49b619fe685c404e59f55eb52c66831236cc565c25ee1c2d042739f4a2cc538aa2
-  languageName: node
-  linkType: hard
-
 "react-dom@npm:19.2.0, react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
   version: 19.2.0
   resolution: "react-dom@npm:19.2.0"
@@ -40052,13 +40044,6 @@ __metadata:
   version: 19.2.0
   resolution: "react@npm:19.2.0"
   checksum: 10/e13bcdb8e994c3cfa922743cb75ca8deb60531bf02f584d2d8dab940a8132ce8a2e6ef16f8ed7f372b4072e7a7eeff589b2812dabbedfa73e6e46201dac8a9d0
-  languageName: node
-  linkType: hard
-
-"react@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react@npm:19.1.0"
-  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
   languageName: node
   linkType: hard
 
@@ -41430,13 +41415,6 @@ __metadata:
   version: 0.25.0
   resolution: "scheduler@npm:0.25.0"
   checksum: 10/e661e38503ab29a153429a99203fefa764f28b35c079719eb5efdd2c1c1086522f6653d8ffce388209682c23891a6d1d32fa6badf53c35fb5b9cd0c55ace42de
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.26.0":
-  version: 0.26.0
-  resolution: "scheduler@npm:0.26.0"
-  checksum: 10/1ecf2e5d7de1a7a132796834afe14a2d589ba7e437615bd8c06f3e0786a3ac3434655e67aac8755d9b14e05754c177e49c064261de2673aaa3c926bc98caa002
   languageName: node
   linkType: hard
 
