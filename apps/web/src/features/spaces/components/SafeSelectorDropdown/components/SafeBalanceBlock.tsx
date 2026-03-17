@@ -12,7 +12,7 @@ export interface SafeBalanceBlockProps {
 
 function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDisplay }: SafeBalanceBlockProps) {
   return (
-    <div className="flex flex-col items-end gap-2 py-2 min-w-0 shrink sm:min-w-[90px] sm:shrink-0">
+    <div className="flex flex-col items-end gap-1 py-2 min-w-0 shrink sm:min-w-[90px] sm:shrink-0">
       {isLoading ? (
         <Skeleton className="h-4 w-16 rounded" />
       ) : (
@@ -24,7 +24,7 @@ function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDi
         (isLoading ? (
           <Skeleton className="h-5 w-12 rounded-full" />
         ) : (
-          <BalanceDisplay balance="" threshold={threshold} owners={owners} showThreshold={true} />
+          <BalanceDisplay threshold={threshold} owners={owners} />
         ))}
     </div>
   )
