@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 const chains = {
@@ -19,6 +20,7 @@ const meta = {
   title: 'Features/Spaces/SpaceChainSelector',
   parameters: { layout: 'centered' },
   decorators: [
+    withMockProvider(),
     (Story) => (
       <div className="flex items-center gap-2 px-4 pt-4 pb-0">
         <Story />
