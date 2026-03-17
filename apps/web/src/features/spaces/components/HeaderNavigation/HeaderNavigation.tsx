@@ -60,24 +60,22 @@ export function HeaderNavigation({
         </Button>
       )}
 
-      <div className="relative">
-        <Button
-          variant="secondary"
-          size="icon-lg"
-          onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
-          aria-label="Notifications"
-        >
-          <Bell className="size-5 text-muted-foreground" />
-        </Button>
+      <Button
+        variant="secondary"
+        size="icon-lg"
+        onClick={onNotificationsClick}
+        className="relative cursor-pointer shrink-0 rounded-sm dark:bg-card"
+        aria-label="Notifications"
+      >
+        <Bell className="size-5 text-muted-foreground" />
 
         {messages > 0 && (
           <span
-            className="absolute -right-0.5 -top-0.5 z-10 flex size-2 items-center justify-center rounded-full border border-white bg-[#4ADE80]"
+            className="absolute right-1.5 top-1.5 z-10 flex size-2 items-center justify-center rounded-full bg-[#4ADE80]"
             aria-label={`${messages} unread messages`}
           />
         )}
-      </div>
+      </Button>
 
       <Button
         variant="secondary"

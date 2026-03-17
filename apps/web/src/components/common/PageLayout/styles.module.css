@@ -25,6 +25,29 @@
   padding-left: 0;
 }
 
+/* Spaces: full-viewport flex layout */
+.spaceLayout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.spaceMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mainSpace {
+  flex: 1;
+  min-height: 0;
+  padding-top: 0;
+  padding-left: 0;
+  overflow: hidden;
+}
+
 /* Spaces: use black background in dark mode (matches shadcn --background) */
 [data-theme='dark'] .mainSpace {
   background-color: #000000;
@@ -36,10 +59,15 @@
 
 .content {
   flex: 1;
+  min-height: 0;
   position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+}
+
+.mainSpace .content {
+  overflow-y: auto;
 }
 
 .content main {

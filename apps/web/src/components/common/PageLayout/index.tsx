@@ -54,11 +54,58 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
 
+  const mainContent = (
+    <div
+      className={classnames(css.main, {
+        [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
+        [css.mainAnimated]: isSidebarRoute && isAnimated,
+        [css.mainNoHeader]: hideHeader,
+        [css.mainSpace]: isSpaceRoute,
+      })}
+    >
+      <div className={css.content}>
+        <SafeLoadingError>
+          {!hideHeader && !isSpaceRoute && <SpaceSafeBar />}
+          {isOnboardingRoute ? (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          ) : (
+            children
+          )}
+        </SafeLoadingError>
+      </div>
+
+      <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
+
+      {!isSafeLabsTermsPage && <Footer />}
+    </div>
+  )
+
+  if (isSpaceRoute) {
+    return (
+      <div className={css.spaceLayout}>
+        {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
+
+        <div className={css.spaceMain}>
+          {!hideHeader && <Topbar onMenuToggle={menuToggleHandler} />}
+          {mainContent}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
-      {!hideHeader && isSpaceRoute && <Topbar onMenuToggle={menuToggleHandler} />}
-
-      {!hideHeader && !isSpaceRoute && (
+      {!hideHeader && (
         <header className={css.header}>
           <Header onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </header>
@@ -66,39 +113,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
       {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
 
-      <div
-        className={classnames(css.main, {
-          [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
-          [css.mainAnimated]: isSidebarRoute && isAnimated,
-          [css.mainNoHeader]: hideHeader,
-          [css.mainSpace]: isSpaceRoute,
-        })}
-      >
-        <div className={css.content}>
-          <SafeLoadingError>
-            {!hideHeader && !isSpaceRoute && <SpaceSafeBar />}
-            {isOnboardingRoute ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={pathname}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              children
-            )}
-          </SafeLoadingError>
-        </div>
-
-        <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
-
-        {!isSafeLabsTermsPage && <Footer />}
-      </div>
+      {mainContent}
     </>
   )
 }
