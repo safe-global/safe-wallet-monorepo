@@ -12,6 +12,7 @@ const mockGetNonDeclinedSpaces = jest.fn()
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
+  useSidebar: () => ({ open: true }),
 }))
 
 jest.mock('../hooks/useSidebarHydrated', () => ({

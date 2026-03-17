@@ -69,10 +69,9 @@ describe('ApiCtaSidebar', () => {
       expect(images[0]).toHaveAttribute('src', '/images/spaces/api-sidebar.svg')
     })
 
-    it('renders the title and description', () => {
+    it('renders the description', () => {
       render(<ApiCtaSidebar />)
 
-      expect(screen.getByText('Use API')).toBeInTheDocument()
       expect(screen.getByText('Start building with our new Safe API')).toBeInTheDocument()
     })
 
