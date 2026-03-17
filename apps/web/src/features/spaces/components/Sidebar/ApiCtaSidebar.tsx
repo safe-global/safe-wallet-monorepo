@@ -20,7 +20,7 @@ export const ApiCtaSidebar = (): ReactElement => {
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp)}
+            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
             onClick={() => setIsCollapsed(false)}
             data-testid="api-cta-collapsed"
           >

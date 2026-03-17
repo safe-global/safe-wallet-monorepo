@@ -41,7 +41,7 @@ export const SidebarCommonFooter = (): ReactElement => {
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp)}
+            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
             render={<a href={HELP_URL} target="_blank" rel="noopener noreferrer" />}
             data-testid="list-item-need-help"
           >
