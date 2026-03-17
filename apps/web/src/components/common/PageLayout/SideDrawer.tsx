@@ -16,9 +16,10 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
+  onSidebarOpenChange?: (open: boolean) => void
 }
 
-const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
@@ -63,7 +64,11 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
       >
         <aside>
           {isSpaceRoute ? (
-            <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
+            <SpacesEnhancedSidebar
+              isDrawerOpen={isOpen}
+              onDrawerClose={() => onToggle(false)}
+              onOpenChange={onSidebarOpenChange}
+            />
           ) : (
             <Sidebar />
           )}

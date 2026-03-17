@@ -120,7 +120,7 @@
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
-:global(.group[data-collapsible='icon']) .spaceSelector>div:last-of-type {
+:global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
   display: none !important;
 }
 
