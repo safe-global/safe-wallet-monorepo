@@ -9,6 +9,7 @@ describe('settingsSlice', () => {
     currency: 'usd',
     tokenList: TOKEN_LISTS.TRUSTED,
     hideDust: true,
+    preferFiatInput: true,
     env: {
       rpc: {},
       tenderly: {

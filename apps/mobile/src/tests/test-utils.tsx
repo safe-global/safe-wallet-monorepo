@@ -25,6 +25,7 @@ const defaultSettings: SettingsState = {
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
   hideDust: true,
+  preferFiatInput: true,
   env: {
     rpc: {},
     tenderly: {
@@ -114,7 +115,11 @@ function customRenderHook<Result, Props>(render: (initialProps: Props) => Result
   }
 }
 
-function renderHookWithStore<Result, Props>(render: (initialProps: Props) => Result, store: TestStore) {
+function renderHookWithStore<Result, Props>(
+  render: (initialProps: Props) => Result,
+  store: TestStore,
+  options?: { initialProps: Props },
+) {
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <BottomSheetModalProvider>
@@ -125,7 +130,7 @@ function renderHookWithStore<Result, Props>(render: (initialProps: Props) => Res
     )
   }
 
-  const result = renderHook(render, { wrapper })
+  const result = renderHook(render, { wrapper, ...options })
 
   return {
     ...result,

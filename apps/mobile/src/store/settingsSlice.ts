@@ -16,6 +16,7 @@ export interface SettingsState {
   currency: string
   tokenList: TOKEN_LISTS
   hideDust: boolean
+  preferFiatInput: boolean
   env: EnvState
 }
 
@@ -25,6 +26,7 @@ const initialState: SettingsState = {
   currency: 'usd',
   tokenList: TOKEN_LISTS.TRUSTED,
   hideDust: true,
+  preferFiatInput: true,
   env: {
     rpc: {},
     tenderly: {
@@ -52,6 +54,9 @@ const settingsSlice = createSlice({
     },
     setHideDust: (state, { payload }: PayloadAction<boolean>) => {
       state.hideDust = payload
+    },
+    setPreferFiatInput: (state, { payload }: PayloadAction<boolean>) => {
+      state.preferFiatInput = payload
     },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
@@ -84,11 +89,14 @@ export const selectTokenList = createSelector(
 
 export const selectHideDust = createSelector(selectSettingsState, (settings) => settings.hideDust ?? true)
 
+export const selectPreferFiatInput = createSelector(selectSettingsState, (settings) => settings.preferFiatInput ?? true)
+
 export const selectRpc = createSelector(selectSettingsState, (settings) => {
   return settings?.env?.rpc
 })
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
-export const { updateSettings, resetSettings, setCurrency, setTokenList, setHideDust } = settingsSlice.actions
+export const { updateSettings, resetSettings, setCurrency, setTokenList, setHideDust, setPreferFiatInput } =
+  settingsSlice.actions
 export default settingsSlice.reducer
