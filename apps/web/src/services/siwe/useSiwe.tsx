@@ -31,7 +31,7 @@ export const useSiwe = () => {
         signature = await signer.signMessage(signableMessage)
       }
 
-      return verifyAuthMutation({ siweDto: { message: signableMessage, signature } })
+      return verifyAuthMutation({ body: { message: signableMessage, signature } })
     } catch (error) {
       logError(ErrorCodes._640)
     }
