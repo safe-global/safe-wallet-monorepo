@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Auth0Provider } from '@auth0/auth0-react'
-import { AUTH0_DOMAIN, AUTH0_CLIENT_ID, isAuth0Configured } from '../../config/auth0'
+import { AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_AUDIENCE, isAuth0Configured } from '../../config/auth0'
 import Auth0TokenExchangeHandler from '../Auth0TokenExchangeHandler'
 
 /**
@@ -23,7 +23,10 @@ export function Auth0ProviderWrapper({ children }: { children: ReactNode }) {
       domain={AUTH0_DOMAIN}
       clientId={AUTH0_CLIENT_ID}
       cacheLocation="memory"
-      authorizationParams={{ redirect_uri: typeof window !== 'undefined' ? window.location.href : '' }}
+      authorizationParams={{
+        redirect_uri: typeof window !== 'undefined' ? window.location.href : '',
+        audience: AUTH0_AUDIENCE,
+      }}
     >
       <Auth0TokenExchangeHandler>{children}</Auth0TokenExchangeHandler>
     </Auth0Provider>
