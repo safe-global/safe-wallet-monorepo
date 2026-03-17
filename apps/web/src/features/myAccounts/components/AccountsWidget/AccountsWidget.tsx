@@ -53,13 +53,18 @@ const AccountsWidget = ({
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
         : accounts.map((account) =>
             account.safes.length > 1 ? (
-              <ExpandableAccountItem key={account.id} account={account} loading={loading} onItemClick={onItemClick} />
+              <ExpandableAccountItem
+                key={account.address}
+                account={account}
+                loading={loading}
+                onItemClick={onItemClick}
+              />
             ) : (
-              <AccountWidgetItem key={account.id} account={account} loading={loading} onItemClick={onItemClick} />
+              <AccountWidgetItem key={account.address} account={account} loading={loading} onItemClick={onItemClick} />
             ),
           )}
       {!loading && remainingCount !== undefined && (
-        <SafeWidget.Footer count={remainingCount} text="View all accounts" onClick={onViewAll} />
+        <SafeWidget.Footer text="View all accounts" onClick={onViewAll} showLeadingSlot={false} />
       )}
     </SafeWidget>
   )
