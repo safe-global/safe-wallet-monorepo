@@ -43,7 +43,7 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
 import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
 import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
@@ -327,9 +327,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           <DialogHeader threshold={safe.threshold} />
 
           {isEip712 && (
-            <ErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
               <ApprovalEditor safeMessage={decodedMessage} />
-            </ErrorBoundary>
+            </ObservabilityErrorBoundary>
           )}
 
           <BlindSigningWarning

@@ -55,7 +55,6 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@cowprotocol/widget-react": "0.14.6",
-    "@datadog/browser-logs": "^6.24.1",
     "@datadog/browser-rum": "^6.24.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emotion/cache": "^11.13.5",
@@ -80,7 +79,6 @@
     "@safe-global/safe-modules-deployments": "^2.2.24",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
-    "@sentry/react": "^7.91.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@trezor/connect-web": "9.7.2",
     "@walletconnect/core": "^2.21.10",
@@ -145,7 +143,6 @@
     "@rspack/plugin-react-refresh": "^1.0.0",
     "@safe-global/test": "workspace:^",
     "@safe-global/types-kit": "^1.0.5",
-    "@sentry/types": "^7.74.0",
     "@storybook/addon-designs": "^11.0.1",
     "@storybook/addon-docs": "^10.2.6",
     "@storybook/addon-links": "^10.2.6",

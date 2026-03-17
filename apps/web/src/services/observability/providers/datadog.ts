@@ -1,10 +1,7 @@
 import type { ILogger, IObservabilityProvider } from '../types'
-import { datadogLogs } from '@datadog/browser-logs'
 import { datadogRum } from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
-  DATADOG_CLIENT_TOKEN,
-  DATADOG_LOGS_SAMPLE_RATE,
   DATADOG_RUM_APPLICATION_ID,
   DATADOG_RUM_CLIENT_TOKEN,
   DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
@@ -30,57 +27,23 @@ type DatadogSite =
   | 'ddog-gov.com'
   | 'ap1.datadoghq.com'
 
-export const isDatadogLogsEnabled = Boolean(DATADOG_CLIENT_TOKEN)
-export const isDatadogRumEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
-export const isDatadogEnabled = isDatadogLogsEnabled || isDatadogRumEnabled
+export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
 
 export class DatadogProvider implements IObservabilityProvider {
   readonly name = 'Datadog'
-  private isLogsInitialized = false
-  private isRumInitialized = false
+  private isInitialized = false
 
   async init(): Promise<void> {
     const isClient = typeof window !== 'undefined'
-    if (!isClient) {
+    if (!isClient || !isDatadogEnabled || this.isInitialized) {
       return
     }
 
-    const hasLogsToInit = isDatadogLogsEnabled && !this.isLogsInitialized
-    const hasRumToInit = isDatadogRumEnabled && !this.isRumInitialized
-
-    if (!hasLogsToInit && !hasRumToInit) {
-      return
-    }
-
-    if (hasLogsToInit) {
-      this.initLogs()
-    }
-
-    if (hasRumToInit) {
-      this.initRum()
-    }
-  }
-
-  private initLogs(): void {
-    try {
-      datadogLogs.init({
-        clientToken: DATADOG_CLIENT_TOKEN,
-        site: DATADOG_RUM_SITE as DatadogSite,
-        forwardErrorsToLogs: true,
-        sessionSampleRate: DATADOG_LOGS_SAMPLE_RATE,
-      })
-      this.isLogsInitialized = true
-    } catch (error) {
-      console.warn('Failed to initialize Datadog Logs (might be already initialized):', error)
-    }
-  }
-
-  private initRum(): void {
     try {
       const getInitConfiguration = datadogRum.getInitConfiguration
       const isAlreadyInitialized = typeof getInitConfiguration === 'function' && Boolean(getInitConfiguration())
       if (isAlreadyInitialized) {
-        this.isRumInitialized = true
+        this.isInitialized = true
         return
       }
 
@@ -106,7 +69,7 @@ export class DatadogProvider implements IObservabilityProvider {
         }),
       })
 
-      this.isRumInitialized = true
+      this.isInitialized = true
     } catch (error) {
       console.warn('Failed to initialize Datadog RUM (might be already initialized):', error)
     }
@@ -115,30 +78,30 @@ export class DatadogProvider implements IObservabilityProvider {
   getLogger(): ILogger {
     return {
       info: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.info(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'info', ...context })
         }
       },
       warn: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.warn(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'warn', ...context })
         }
       },
       error: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.error(message, context)
+        if (this.isInitialized) {
+          datadogRum.addError(new Error(message), context)
         }
       },
       debug: (message: string, context?: Record<string, unknown>) => {
-        if (this.isLogsInitialized) {
-          datadogLogs.logger.debug(message, context)
+        if (this.isInitialized) {
+          datadogRum.addAction(message, { level: 'debug', ...context })
         }
       },
     }
   }
 
   captureException(error: Error, context?: Record<string, unknown>): void {
-    if (this.isRumInitialized) {
+    if (this.isInitialized) {
       datadogRum.addError(error, context)
     }
   }
