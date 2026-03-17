@@ -11,6 +11,14 @@
   border-radius: var(--rounded-md, 8px);
 }
 
+.sidebarNavItem {
+  font-weight: 700;
+}
+
+.sidebarHeader {
+  padding: 24px 12px 12px;
+}
+
 .spaceSelector {
   display: flex;
   align-items: center;
@@ -112,7 +120,7 @@
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
-:global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
+:global(.group[data-collapsible='icon']) .spaceSelector>div:last-of-type {
   display: none !important;
 }
 
@@ -127,8 +135,8 @@
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
-  width: 1rem;
-  height: 1rem;
+  width: 32px;
+  height: 32px;
 }
 
 :global(.group[data-collapsible='icon']) .transactionsBadge {
@@ -160,6 +168,18 @@
 
 .navItemActive {
   background-color: var(--sidebar-accent);
+}
+
+:global(.dark) .sidebarInteractive:hover,
+:global(.shadcn-scope.dark) .sidebarInteractive:hover {
+  background-color: var(--secondary) !important;
+}
+
+:global(.dark) .sidebarInteractive[data-active='true'],
+:global(.shadcn-scope.dark) .sidebarInteractive[data-active='true'],
+:global(.dark) .sidebarInteractive[data-active],
+:global(.shadcn-scope.dark) .sidebarInteractive[data-active] {
+  background-color: var(--secondary) !important;
 }
 
 .groupLabel {

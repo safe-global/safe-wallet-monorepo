@@ -18,7 +18,7 @@ export const SidebarCommonFooter = (): ReactElement => {
   const isDarkMode = useDarkMode()
 
   return (
-    <SidebarFooter data-testid="sidebar-common-footer">
+    <SidebarFooter data-testid="sidebar-common-footer" className={css.sidebarFooter}>
       {/* Dev Toggles - only in non-production */}
       {!IS_PRODUCTION && (
         <div className="flex flex-col gap-2 px-3 py-2 group-data-[collapsible=icon]:hidden">
