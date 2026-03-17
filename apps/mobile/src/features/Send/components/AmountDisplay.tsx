@@ -11,9 +11,10 @@ interface AmountDisplayProps {
   secondaryDisplay: string
   onToggle: () => void
   canToggle: boolean
+  hasValue: boolean
 }
 
-export function AmountDisplay({ primaryDisplay, secondaryDisplay, onToggle, canToggle }: AmountDisplayProps) {
+export function AmountDisplay({ primaryDisplay, secondaryDisplay, onToggle, canToggle, hasValue }: AmountDisplayProps) {
   const display = primaryDisplay
 
   const fontSize = useMemo(() => {
@@ -32,7 +33,7 @@ export function AmountDisplay({ primaryDisplay, secondaryDisplay, onToggle, canT
         <Text
           fontSize={fontSize}
           fontWeight={600}
-          color="$color"
+          color={hasValue ? '$color' : '$colorSecondary'}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={MIN_FONT_SIZE / MAX_FONT_SIZE}

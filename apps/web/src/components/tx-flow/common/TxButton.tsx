@@ -13,7 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { useIsSwapFeatureEnabled } from '@/features/swap'
 
 const buttonSx = {
   '& svg path': { fill: 'currentColor' },

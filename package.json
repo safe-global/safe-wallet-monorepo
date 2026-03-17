@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "lint": "yarn workspaces foreach --all -pt run lint",
+    "type-check": "yarn workspaces foreach --all -pt run type-check",
     "test": "yarn workspaces foreach --all -pt run test",
     "test:scripts": "yarn workspace @safe-global/web jest --config ../../scripts/jest.config.cjs",
     "eslint": "yarn workspaces foreach --all -pt run eslint",

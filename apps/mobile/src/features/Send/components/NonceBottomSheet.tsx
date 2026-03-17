@@ -38,19 +38,18 @@ function RecommendedNonceRow({
       <View
         flexDirection="row"
         alignItems="center"
-        height={64}
+        paddingVertical="$1"
         paddingHorizontal="$3"
         borderRadius={8}
-        backgroundColor={isSelected ? '$backgroundLightgray' : '$backgroundPaper'}
+        backgroundColor={isSelected ? '$borderLight' : undefined}
+        gap="$1"
       >
-        <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
+        <Text fontSize="$4" fontWeight={600} color="$color" width={40} textAlign="right">
           {nonce}
         </Text>
-        <View flex={1}>
-          <Text fontSize="$4" fontWeight={600} color="$color">
-            New transaction
-          </Text>
-        </View>
+        <Text fontSize="$4" color="$colorSecondary">
+          New transaction
+        </Text>
       </View>
     </Pressable>
   )
@@ -82,19 +81,18 @@ function QueuedNonceRow({
       <View
         flexDirection="row"
         alignItems="center"
-        height={64}
+        paddingVertical="$3"
         paddingHorizontal="$3"
         borderRadius={8}
-        backgroundColor={isSelected ? '$backgroundLightgray' : undefined}
+        backgroundColor={isSelected ? '$borderLight' : undefined}
+        gap="$1"
       >
-        <Text fontSize="$4" fontWeight={600} color="$color" width={40}>
+        <Text fontSize="$4" fontWeight={600} color="$color" width={40} textAlign="right" fontVariant={['tabular-nums']}>
           {item.nonce}
         </Text>
-        <View flex={1}>
-          <Text fontSize="$4" fontWeight={600} color="$color">
-            {item.label}
-          </Text>
-        </View>
+        <Text fontSize="$4" color="$colorSecondary">
+          {item.label}
+        </Text>
       </View>
     </Pressable>
   )
@@ -103,18 +101,25 @@ function QueuedNonceRow({
 function useRenderFooter(insets: { bottom: number }, onAddCustomNonce: () => void, onLayout: (height: number) => void) {
   return useCallback(
     (props: BottomSheetFooterProps) => (
-      <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition}>
+      <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition} bottomInset={insets.bottom}>
         <View
           onLayout={(e) => onLayout(e.nativeEvent.layout.height)}
           backgroundColor="$backgroundSheet"
-          paddingHorizontal="$4"
           paddingTop="$2"
-          paddingBottom={insets.bottom + 16}
+          paddingBottom={insets.bottom + 8}
           marginBottom={-insets.bottom}
         >
           <View height={1} backgroundColor="$borderLight" marginBottom="$2" />
           <Pressable onPress={onAddCustomNonce} testID="nonce-add-custom">
-            <View flexDirection="row" alignItems="center" height={64} paddingHorizontal="$3" borderRadius={8} gap="$3">
+            <View
+              flexDirection="row"
+              alignItems="center"
+              marginHorizontal="$4"
+              paddingVertical="$1"
+              paddingHorizontal="$3"
+              borderRadius={8}
+              gap="$3"
+            >
               <View
                 width={40}
                 height={40}
@@ -193,7 +198,7 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
           <H5 fontWeight={700}>Recommended nonce</H5>
         </View>
 
-        <View paddingHorizontal="$4" gap="$4">
+        <View paddingHorizontal="$4">
           {recommendedNonce !== undefined && (
             <RecommendedNonceRow
               nonce={recommendedNonce}
@@ -214,7 +219,7 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
           ))}
 
           {isFetchingMore && (
-            <View height={64} alignItems="center" justifyContent="center">
+            <View paddingVertical="$2" alignItems="center" justifyContent="center">
               <Loader size={24} color="$color" />
             </View>
           )}

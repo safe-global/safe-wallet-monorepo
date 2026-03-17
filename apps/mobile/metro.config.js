@@ -1,11 +1,11 @@
 const path = require('path')
 
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require('expo/metro-config')
+const { getDatadogExpoConfig } = require('@datadog/mobile-react-native/metro')
 const withStorybook = require('@storybook/react-native/metro/withStorybook')
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname)
+const config = getDatadogExpoConfig(__dirname)
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   const defaultResolveResult = context.resolveRequest(context, moduleName, platform)

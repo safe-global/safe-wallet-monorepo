@@ -1,4 +1,4 @@
-import { useIsTWAPFallbackHandler } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
+import { useIsTWAPFallbackHandler } from '../useIsTWAPFallbackHandler'
 import { renderHook } from '@/tests/test-utils'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'

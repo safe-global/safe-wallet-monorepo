@@ -34,7 +34,7 @@ export const ReadOnly = ({
           alignItems="center"
           gap="$3"
         >
-          <SafeFontIcon name="eye-n" color="$color" size={24} />
+          <SafeFontIcon name="view-only" color="$color" size={24} />
           <View flex={1}>
             <Text fontSize="$4" fontWeight={600} lineHeight={20} letterSpacing={0.15}>
               You are in read-only mode

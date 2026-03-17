@@ -27,6 +27,12 @@ const stateConfig: Record<
     icon: 'alert',
     label: 'Suspicious recipient',
   },
+  'known-other-chain': {
+    color: '$warning',
+    bg: '$warningBackground',
+    icon: 'alert',
+    label: 'Known on another network',
+  },
 }
 
 export function RecipientValidationBadge({ state, contactName }: RecipientValidationBadgeProps) {

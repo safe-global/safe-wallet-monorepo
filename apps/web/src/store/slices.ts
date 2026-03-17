@@ -13,7 +13,7 @@ export * from '@/features/spending-limits/store/spendingLimitsSlice'
 export * from './safeAppsSlice'
 export { safeMessagesListener } from './safeMessagesSlice'
 export * from './pendingSafeMessagesSlice'
-export * from './batchSlice'
+export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store/batchSlice'
 export {
   undeployedSafesSlice,
   addUndeployedSafe,
@@ -23,7 +23,7 @@ export {
   selectUndeployedSafe,
   selectIsUndeployedSafe,
 } from '@/features/counterfactual/store'
-export * from '@/features/swap/store/swapParamsSlice'
+export * from '@/features/swap/store'
 export * from './swapOrderSlice'
 export * from './api/gateway'
 export * from './api/gateway/safeOverviews'

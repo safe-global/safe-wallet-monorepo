@@ -10,11 +10,20 @@ import { selectSigners } from '@/src/store/signersSlice'
 import { selectAllSafes } from '@/src/store/safesSlice'
 import { useSuspiciousAddressDetection, type SuspiciousAddressMatch } from './useSuspiciousAddressDetection'
 
-export type RecipientValidationState = 'empty' | 'typing' | 'known' | 'unknown' | 'invalid' | 'self-send' | 'suspicious'
+export type RecipientValidationState =
+  | 'empty'
+  | 'typing'
+  | 'known'
+  | 'unknown'
+  | 'invalid'
+  | 'self-send'
+  | 'suspicious'
+  | 'known-other-chain'
 
 export interface RecipientValidationResult {
   state: RecipientValidationState
   contactName?: string
+  contactAddress?: string
   isValid: boolean
   canContinue: boolean
   suspiciousMatch?: SuspiciousAddressMatch
@@ -84,6 +93,24 @@ const UNKNOWN_RESULT: RecipientValidationResult = {
   canContinue: true,
 }
 
+function resolveCrossChainContact(
+  trimmed: string,
+  contacts: Record<string, Contact>,
+  chainId: string,
+): { contactName: string; contactAddress: string } | undefined {
+  const contact = findContact(contacts, trimmed)
+  if (!contact) {
+    return undefined
+  }
+  if (contact.chainIds.length === 0) {
+    return undefined
+  }
+  if (contact.chainIds.includes(chainId)) {
+    return undefined
+  }
+  return { contactName: contact.name, contactAddress: contact.value }
+}
+
 function resolveAddressState(trimmed: string, ctx: AddressContext): RecipientValidationResult {
   return resolveIncompleteAddress(trimmed) ?? resolveKnownAddress(trimmed, ctx) ?? UNKNOWN_RESULT
 }
@@ -104,7 +131,13 @@ export function useRecipientValidation(address: string): RecipientValidationResu
     }
   }, [addressBookState.contacts])
 
-  const ownedSafes = useMemo(() => Object.keys(allSafes), [allSafes])
+  const ownedSafes = useMemo(
+    () =>
+      Object.entries(allSafes)
+        .filter(([, chainMap]) => activeSafe.chainId in chainMap)
+        .map(([addr]) => addr),
+    [allSafes, activeSafe.chainId],
+  )
 
   const trimmed = address.trim()
   const isValidAddress = trimmed.length >= 42 && isAddress(trimmed)
@@ -121,17 +154,38 @@ export function useRecipientValidation(address: string): RecipientValidationResu
       signers,
     })
 
-    if (baseResult.state === 'unknown' && suspiciousDetection.isSuspicious) {
-      return {
-        ...baseResult,
-        state: 'suspicious',
-        canContinue: false,
-        suspiciousMatch: suspiciousDetection.match,
+    if (baseResult.state === 'unknown') {
+      const crossChain = resolveCrossChainContact(trimmed, addressBookState.contacts, activeSafe.chainId)
+      if (crossChain) {
+        return {
+          state: 'known-other-chain',
+          contactName: crossChain.contactName,
+          contactAddress: crossChain.contactAddress,
+          isValid: true,
+          canContinue: true,
+        }
+      }
+
+      if (suspiciousDetection.isSuspicious) {
+        return {
+          ...baseResult,
+          state: 'suspicious',
+          canContinue: false,
+          suspiciousMatch: suspiciousDetection.match,
+        }
       }
     }
 
     return baseResult
-  }, [trimmed, activeSafe.address, addressBookCheck, addressBookState.contacts, signers, suspiciousDetection])
+  }, [
+    trimmed,
+    activeSafe.address,
+    activeSafe.chainId,
+    addressBookCheck,
+    addressBookState.contacts,
+    signers,
+    suspiciousDetection,
+  ])
 
   return result
 }

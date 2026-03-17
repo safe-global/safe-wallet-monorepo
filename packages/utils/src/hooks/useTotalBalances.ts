@@ -143,13 +143,14 @@ const buildMergedResult = (opts: {
     isAllTokensMode: true,
   }
 
-  return { data: mergedBalances, error: undefined, loading: false, isFetching: false, refetch: shared.refetch }
+  return { data: mergedBalances, error: undefined, loading: false, ...shared }
 }
 
 interface AggregateParams {
   hasPortfolioFeature: boolean
   isAllTokensSelected: boolean
   needsPortfolioFallback: boolean
+  isPortfolioEmpty: boolean
   isCounterfactual: boolean
   txService: TxServiceState
   counterfactual: CounterfactualState
@@ -164,7 +165,13 @@ const aggregateBalances = (p: AggregateParams): TotalBalancesResult => {
   const useTxServiceOnly = !p.hasPortfolioFeature || (p.needsPortfolioFallback && !p.isAllTokensSelected)
 
   if (useTxServiceOnly) {
-    return buildTxServiceResult(p.txService, p.counterfactual, p.isCounterfactual, p.shared)
+    const result = buildTxServiceResult(p.txService, p.counterfactual, p.isCounterfactual, p.shared)
+
+    if (result.data && p.isPortfolioEmpty) {
+      return { ...result, data: { ...result.data, positions: [], positionsFiatTotal: '0' } }
+    }
+
+    return result
   }
 
   if (!p.isAllTokensSelected) {
@@ -254,6 +261,7 @@ const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult =
       hasPortfolioFeature: params.hasPortfolioFeature,
       isAllTokensSelected: params.isAllTokensSelected,
       needsPortfolioFallback: !!needsPortfolioFallback,
+      isPortfolioEmpty: !!isPortfolioEmpty,
       isCounterfactual,
       txService: { balances: txServiceBalances, error: txServiceError, loading: txServiceLoading },
       counterfactual: { data: cfData, error: cfError, loading: cfLoading },
@@ -265,6 +273,7 @@ const useTotalBalances = (params: UseTotalBalancesParams): TotalBalancesResult =
     params.hasPortfolioFeature,
     params.isAllTokensSelected,
     needsPortfolioFallback,
+    isPortfolioEmpty,
     isCounterfactual,
     cfData,
     cfError,

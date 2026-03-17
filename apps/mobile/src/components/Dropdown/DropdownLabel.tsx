@@ -5,6 +5,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 type DropdownLabelProps = {
   label: string
+  subtitle?: string
   leftNode?: React.ReactNode
   labelProps?: {
     fontSize?: '$4' | '$5' | GetThemeValueForKey<'fontSize'>
@@ -21,6 +22,7 @@ const defaultLabelProps = {
 
 export const DropdownLabel = ({
   label,
+  subtitle,
   displayDropDownIcon = true,
   leftNode,
   onPress,
@@ -33,16 +35,20 @@ export const DropdownLabel = ({
         {leftNode}
 
         <View justifyContent={'center'}>
-          <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight} numberOfLines={1} maxWidth={170}>
-            {label}
-          </Text>
-        </View>
+          <View flexDirection="row" alignItems="center" columnGap="$1">
+            <Text fontSize={labelProps.fontSize} fontWeight={labelProps.fontWeight} numberOfLines={1} maxWidth={170}>
+              {label}
+            </Text>
 
-        {displayDropDownIcon && (
-          <View>
-            <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />
+            {displayDropDownIcon && <SafeFontIcon testID="dropdown-arrow" name="chevron-down" size={16} />}
           </View>
-        )}
+
+          {subtitle && (
+            <Text fontSize="$4" color="$colorSecondary" numberOfLines={1}>
+              {subtitle}
+            </Text>
+          )}
+        </View>
       </View>
     </Pressable>
   )

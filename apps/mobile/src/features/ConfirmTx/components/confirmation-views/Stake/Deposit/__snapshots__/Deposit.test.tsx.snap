@@ -98,7 +98,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -633,7 +633,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                     ]
                   }
                 >
-                  
+                  
                 </Text>
               </View>
             </View>
@@ -691,7 +691,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
             </View>
           </View>
@@ -1003,7 +1003,7 @@ exports[`StakingDeposit matches snapshot 1`] = `
                   ]
                 }
               >
-                
+                
               </Text>
               <Text
                 style={

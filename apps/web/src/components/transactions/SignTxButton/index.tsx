@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
+import { useIsExpiredSwap } from '@/features/swap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
 import { useContext, type ReactElement } from 'react'

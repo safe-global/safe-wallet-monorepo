@@ -1,6 +1,6 @@
 import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { AddressInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { getOrderClass } from '@/features/swap/helpers/utils'
+import { getOrderClass } from '@/features/swap'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import SwapIcon from '@/public/images/common/swap.svg'

@@ -6,6 +6,7 @@ import injectedWalletModule from '@web3-onboard/injected-wallets'
 import walletConnect from '@web3-onboard/walletconnect'
 import pkModule from '@/services/private-key-module'
 import { ledgerModule } from '@/services/onboard/ledger-module'
+import { trezorModule } from '@/services/onboard/trezor/module'
 
 import { CGW_NAMES, WALLET_KEYS } from './consts'
 
@@ -41,6 +42,7 @@ const WALLET_MODULES: Partial<{ [_key in WALLET_KEYS]: (chain: Chain) => WalletI
   [WALLET_KEYS.WALLETCONNECT_V2]: (chain) => walletConnectV2(chain) as WalletInit,
   [WALLET_KEYS.COINBASE]: () => coinbaseModule({ darkMode: prefersDarkMode() }) as WalletInit,
   [WALLET_KEYS.LEDGER]: () => ledgerModule(),
+  [WALLET_KEYS.TREZOR]: () => trezorModule(),
   [WALLET_KEYS.PK]: (chain) => pkModule(chain.chainId, chain.rpcUri) as WalletInit,
 }
 

@@ -21,6 +21,7 @@ export function AssetsContainer() {
     const items = [
       {
         label: 'Tokens',
+        testID: 'tokens-tab',
         Component: TokensContainer,
       },
     ]
@@ -28,12 +29,14 @@ export function AssetsContainer() {
     if (hasPositions) {
       items.push({
         label: 'Positions',
+        testID: 'positions-tab',
         Component: PositionsContainer,
       })
     }
 
     items.push({
       label: 'NFTs',
+      testID: 'nfts-tab',
       Component: NFTsContainer,
     })
 

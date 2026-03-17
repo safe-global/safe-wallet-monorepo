@@ -1,8 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
+import { useAppDispatch } from '@/src/store/hooks'
 import { proposeSendTransaction } from '../services/proposeSendTransaction'
 import logger from '@/src/utils/logger'
 
@@ -13,11 +12,11 @@ interface UseSendTransactionArgs {
   decimals: number
   isValid: boolean
   selectedNonce: number | undefined
+  sender: string | undefined
 }
 
 interface UseSendTransactionResult {
   submitError: string | undefined
-  activeSigner: ReturnType<typeof selectActiveSigner>
   handleReview: () => Promise<void>
   isSubmitting: boolean
 }
@@ -29,11 +28,11 @@ export function useSendTransaction({
   decimals,
   isValid,
   selectedNonce,
+  sender,
 }: UseSendTransactionArgs): UseSendTransactionResult {
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
   const dispatch = useAppDispatch()
-  const activeSigner = useAppSelector((state) => selectActiveSigner(state, activeSafe.address))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
   const [submitError, setSubmitError] = useState<string>()
@@ -43,7 +42,7 @@ export function useSendTransaction({
       return
     }
 
-    const cannotSubmit = !isValid || isSubmitting || !activeSigner
+    const cannotSubmit = !isValid || isSubmitting || !sender
     if (cannotSubmit) {
       return
     }
@@ -53,13 +52,13 @@ export function useSendTransaction({
 
     try {
       const txId = await proposeSendTransaction({
-        recipient: recipientAddress ?? '',
-        tokenAddress: tokenAddress ?? '',
+        recipient: recipientAddress,
+        tokenAddress: tokenAddress,
         amount: tokenAmount,
         decimals,
         chainId: activeSafe.chainId,
         safeAddress: activeSafe.address,
-        sender: activeSigner.value,
+        sender,
         dispatch,
         nonce: selectedNonce,
       })
@@ -79,7 +78,7 @@ export function useSendTransaction({
   }, [
     isValid,
     isSubmitting,
-    activeSigner,
+    sender,
     recipientAddress,
     tokenAddress,
     tokenAmount,
@@ -90,5 +89,5 @@ export function useSendTransaction({
     selectedNonce,
   ])
 
-  return { submitError, activeSigner, handleReview, isSubmitting }
+  return { submitError, handleReview, isSubmitting }
 }
