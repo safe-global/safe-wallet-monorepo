@@ -37,7 +37,7 @@ function ChainSelectorBlock({ hasMultipleChains, chains, selectedChainId, onChai
             </span>
           }
         />
-        <DropdownMenuContent align="end" className="w-[200px] bg-card text-foreground">
+        <DropdownMenuContent align="end" className="w-[200px] bg-card text-foreground ring-0">
           {chains.map((chainItem) => (
             <DropdownMenuItem
               key={chainItem.chainId}
