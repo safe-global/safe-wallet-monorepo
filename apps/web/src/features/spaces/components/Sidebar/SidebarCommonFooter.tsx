@@ -33,7 +33,6 @@ export const SidebarCommonFooter = (): ReactElement => {
         </div>
       )}
 
-      {/* API CTA */}
       <ApiCtaSidebar />
 
       {/* Help Button */}
