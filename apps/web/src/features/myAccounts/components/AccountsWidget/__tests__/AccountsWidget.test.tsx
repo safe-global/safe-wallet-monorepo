@@ -15,33 +15,33 @@ const mockSafeItem = (chainId: string, address: string): SafeItem => ({
 
 const mockAccounts: Account[] = [
   {
-    id: '1',
     name: 'My account',
-    address: '0x8675...a19b',
-    href: '/home?safe=eth:0x8675309a19b',
-    safes: [mockSafeItem('1', '0x8675309a19b'), mockSafeItem('137', '0x8675309a19b')],
+    address: '0x8675309a19b00000000000000000000000000000',
+    href: '/home?safe=eth:0x8675309a19b00000000000000000000000000000',
+    safes: [
+      mockSafeItem('1', '0x8675309a19b00000000000000000000000000000'),
+      mockSafeItem('137', '0x8675309a19b00000000000000000000000000000'),
+    ],
     fiatTotal: '39950000',
     owners: '3/5',
     subAccounts: [
-      { chainId: '1', fiatTotal: '20000000', href: '/home?safe=eth:0x8675309a19b' },
-      { chainId: '137', fiatTotal: '19950000', href: '/home?safe=matic:0x8675309a19b' },
+      { chainId: '1', fiatTotal: '20000000', href: '/home?safe=eth:0x8675309a19b00000000000000000000000000000' },
+      { chainId: '137', fiatTotal: '19950000', href: '/home?safe=matic:0x8675309a19b00000000000000000000000000000' },
     ],
   },
   {
-    id: '2',
     name: 'Treasury',
-    address: '0xabcd...ef01',
-    href: '/home?safe=eth:0xabcdef01',
-    safes: [mockSafeItem('1', '0xabcdef01')],
+    address: '0xabcdef0123456789abcdef0123456789abcdef01',
+    href: '/home?safe=eth:0xabcdef0123456789abcdef0123456789abcdef01',
+    safes: [mockSafeItem('1', '0xabcdef0123456789abcdef0123456789abcdef01')],
     fiatTotal: '1200000',
     owners: '2/3',
   },
   {
-    id: '3',
     name: 'Vault',
-    address: '0x1234...5678',
-    href: '/home?safe=eth:0x12345678',
-    safes: [mockSafeItem('1', '0x12345678')],
+    address: '0x1234567890abcdef1234567890abcdef12345678',
+    href: '/home?safe=eth:0x1234567890abcdef1234567890abcdef12345678',
+    safes: [mockSafeItem('1', '0x1234567890abcdef1234567890abcdef12345678')],
     fiatTotal: '500000',
     owners: '1/1',
   },
@@ -58,7 +58,7 @@ describe('AccountsWidget', () => {
     render(<AccountsWidget accounts={mockAccounts} />)
 
     expect(screen.getByText('My account')).toBeInTheDocument()
-    expect(screen.getByText('0x8675...a19b')).toBeInTheDocument()
+    expect(screen.getByText('0x8675...0000')).toBeInTheDocument()
 
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('0xabcd...ef01')).toBeInTheDocument()
@@ -182,7 +182,7 @@ describe('AccountsWidget', () => {
     const item = screen.getByRole('button', { name: /Treasury/i })
     await userEvent.click(item)
 
-    expect(mockPush).toHaveBeenCalledWith('/home?safe=eth:0xabcdef01')
+    expect(mockPush).toHaveBeenCalledWith('/home?safe=eth:0xabcdef0123456789abcdef0123456789abcdef01')
   })
 
   it('expands a multi-chain account to show sub-items on click', async () => {

@@ -15,7 +15,6 @@ describe('[VISUAL] Stake page screenshots', { defaultCommandTimeout: 60000, ...c
   })
 
   it('[VISUAL] Screenshot stake page', () => {
-    main.enableChainFeature(constants.chainFeatures.staking)
     cy.visit(constants.stakingUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.awaitVisualStability()
   })
