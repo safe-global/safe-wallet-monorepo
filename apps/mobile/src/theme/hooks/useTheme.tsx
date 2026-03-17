@@ -3,7 +3,7 @@ import { useColorScheme } from 'react-native'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { ThemePreference } from '@/src/types/theme'
+import type { ColorScheme, ThemePreference } from '@/src/types/theme'
 
 export const useTheme = () => {
   const dispatch = useAppDispatch()
@@ -21,7 +21,8 @@ export const useTheme = () => {
     [dispatch],
   )
 
-  const colorScheme = themePreference === 'auto' ? colorSchemeOS : themePreference
+  const colorSchemeRaw = themePreference === 'auto' ? colorSchemeOS : themePreference
+  const colorScheme: ColorScheme = colorSchemeRaw === 'light' ? 'light' : 'dark'
 
   return {
     themePreference,

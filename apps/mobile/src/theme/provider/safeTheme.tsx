@@ -38,8 +38,8 @@ export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
 
   return (
     <FontProvider>
-      <TamaguiProvider config={config} defaultTheme={colorScheme ?? 'light'}>
-        <View testID={`theme-${colorScheme ?? 'light'}`} style={{ flex: 1 }}>
+      <TamaguiProvider config={config} defaultTheme={colorScheme}>
+        <View testID={`theme-${colorScheme}`} style={{ flex: 1 }}>
           {themeProvider}
         </View>
       </TamaguiProvider>
