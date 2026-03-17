@@ -56,7 +56,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && isSpaceRoute && <Topbar onMenuToggle={menuToggleHandler} />}
+      {!hideHeader && isSpaceRoute && (
+        <div className={css.topbar}>
+          <Topbar onMenuToggle={menuToggleHandler} />
+        </div>
+      )}
 
       {!hideHeader && !isSpaceRoute && (
         <header className={css.header}>

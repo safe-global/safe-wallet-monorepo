@@ -1,3 +1,16 @@
+@reference '../../../styles/shadcn.css';
+
+.topbar {
+  @apply absolute top-0 right-0 z-[1];
+}
+
+.mainSpace {
+  /* we need it in order to have higher importance than the .main class */
+  && {
+    @apply pt-14;
+  }
+}
+
 .header {
   position: fixed;
   left: 0;
