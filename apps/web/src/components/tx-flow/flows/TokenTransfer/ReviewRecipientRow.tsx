@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import useBalances from '@/hooks/useBalances'
+import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import SendToBlock from '@/components/tx/SendToBlock'
 import type { TokenTransferParams } from '.'
@@ -8,11 +8,11 @@ import { Stack } from '@mui/material'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; name: string }) => {
-  const { balances } = useBalances()
+  const [balances] = useTrustedTokenBalances()
 
   const token = useMemo(
-    () => balances.items.find(({ tokenInfo }) => sameAddress(tokenInfo.address, params.tokenAddress)),
-    [balances.items, params.tokenAddress],
+    () => balances?.items.find(({ tokenInfo }) => sameAddress(tokenInfo.address, params.tokenAddress)),
+    [balances, params.tokenAddress],
   )
 
   const amountInWei = useMemo(

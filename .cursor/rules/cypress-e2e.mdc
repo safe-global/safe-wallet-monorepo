@@ -106,17 +106,27 @@ describe('Dashboard tests', () => {
 - **NEVER** use CSS selectors based on styling: `'.red-button'`
 - **NEVER** use element position: `'button:nth-child(2)'`
 - **NEVER** use generic selectors: `'div'`, `'span'`, `'button'`
+- **NEVER** select links by tag and then assert URL/target: e.g. `cy.contains('a', 'Get CLI')`, `.should('have.attr', 'href', url)`, `.and('have.attr', 'target', '_blank')`. Use **data-testid** on the link in the component and select by that in the page object instead.
 
 ### Preferred Selectors (in order of preference)
 
-1. **data-testid attributes**: `'[data-testid="send-button"]'`
+1. **data-testid attributes**: `'[data-testid="send-button"]'`, `'[data-testid="get-cli-link"]'` — use for links and CTAs as well; add `data-testid` (or `actionTestId` on ActionCard) in the component when missing.
 2. **Semantic HTML**: `'[role="button"]'`, `'[type="submit"]'`
-3. **Text content**: `cy.contains('Send')`
+3. **Text content**: `cy.contains('Send')` (for non-link elements when no testid exists)
 4. **ARIA labels**: `'[aria-label="Send transaction"]'`
+
+### Links and external CTAs
+
+- **Prefer data-testid**: For links (e.g. "Get CLI", "Learn more", external docs), add a `data-testid` (or `actionTestId` when using ActionCard) in the React component and use `cy.get('[data-testid="…"]')` in the page object. Verify visibility or behavior via the testid, not via `href`/`target`.
+- **Avoid**: `cy.contains('a', 'Label')`, `.should('have.attr', 'href', ...)`, `.and('have.attr', 'target', '_blank')` and similar tag/attribute patterns. If you need to assert a link, add a testid and assert the element is visible (or that the correct flow runs after click).
+
+### Reuse existing test IDs
+
+- **MANDATORY**: If an element or its container already has a `data-testid` (or the component already passes `testId` / `actionTestId`), **do not add a new one**. Reuse the existing testid in the page object and in assertions. Add new test IDs only when the element currently has none.
 
 ### Adding Test IDs to Components
 
-When test IDs are missing, add them to React components:
+When test IDs are missing, add them to React components. If a testid already exists on the element or a parent, use that instead of adding another.
 
 ```jsx
 // Component.tsx
@@ -476,7 +486,7 @@ When creating or updating tests, ensure:
 - [ ]  Functions are created for element interactions
 - [ ]  No direct selector usage in test files
 - [ ]  No class-based selectors used
-- [ ]  data-testid attributes added to components when missing
+- [ ]  data-testid: reuse existing test IDs; add new ones only when the element has none (including links/CTAs; do not use `cy.contains('a', ...)` or `.should('have.attr', 'href'/'target')`)
 - [ ]  **Functions: search page files first; reuse. New: 3+ pages → main.page.js; else → that page's .pages.js**
 - [ ]  **Reuse existing functions instead of creating duplicates**
 - [ ]  **Test data/setup: use support + fixtures (constants, localstorage_data.js, getSafes, addToLocalStorage/addToAppLocalStorage); do not add new setup helpers or inline large payloads**

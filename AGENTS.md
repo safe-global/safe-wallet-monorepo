@@ -32,6 +32,42 @@ yarn workspace @safe-global/web storybook
 
 The monorepo uses **Yarn 4 workspaces** to manage dependencies and enables sharing code between web and mobile applications.
 
+### Key Entry Points
+
+Stable architectural landmarks for fast orientation:
+
+| Area           | Path                                         | Purpose                                              |
+| -------------- | -------------------------------------------- | ---------------------------------------------------- |
+| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
+| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
+| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
+| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
+| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
+| Theme package  | `packages/theme/src/`                        | Palettes, spacing, typography tokens                 |
+| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                              |
+
+### AST-Based Code Search
+
+If `ast-grep` (aka `sg`) is installed, prefer it over text-based grep for structural code searches. It understands TypeScript/TSX syntax so it won't match inside comments or strings.
+
+```bash
+# Find all components using useAppSelector
+sg -p 'useAppSelector($$$)' --lang tsx apps/web/src/
+
+# Find all createSlice calls
+sg -p 'createSlice({ name: $NAME, $$$})' --lang ts apps/web/src/
+
+# Find all default exports of a function component
+sg -p 'export default function $NAME($$$) { $$$}' --lang tsx apps/web/src/
+
+# Find useMemo with specific dependency
+sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
+```
+
+Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
@@ -201,6 +237,10 @@ export default {
 
 See `apps/web/docs/feature-architecture.md` for the complete guide including proxy-based stubs and meta properties (`$isDisabled`, `$isReady`, `$error`).
 
+## Testing Requirements
+
+Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/docs/TESTING.md) for conventions, templates, and mock patterns.
+
 ## Workflow
 
 1. **Install dependencies**: `yarn install` (from the repository root).
@@ -252,6 +292,14 @@ See `apps/web/docs/feature-architecture.md` for the complete guide including pro
    - `apps/mobile/docs/code-style.md` for the mobile app.
 
 7. **Pull requests**: fill out the PR template and ensure all checks pass.
+
+8. **PR poem**: Include a short technical poem at the very top of each PR description that acts as a concise summary of what the PR actually changes. The poem should prioritize clarity over artistry — a reader should understand the gist of the PR from the poem alone. Use a randomly chosen short form (e.g., haiku, limerick, free verse, tanka) and keep it to 2–4 lines. Wrap in a blockquote:
+
+   ```markdown
+   > Strip Sentry SDK and config,
+   > no more error tracking calls,
+   > bundle shrinks, tests pass clean.
+   ```
 
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 

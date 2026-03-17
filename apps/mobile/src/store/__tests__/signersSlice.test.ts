@@ -1,5 +1,5 @@
 import signersReducer, { addSigner, selectSigners, selectTotalSignerCount } from '../signersSlice'
-import { addSignerWithEffects } from '../signerThunks'
+import { addSignerWithEffects, computeSignerChainIds } from '../signerThunks'
 import { selectActiveSigner } from '../activeSignerSlice'
 import { selectAllContacts, selectContactByAddress } from '../addressBookSlice'
 import type { RootState } from '../index'
@@ -297,6 +297,124 @@ describe('signersSlice', () => {
       expect(contact?.value).toBe(mockSigner.value)
       expect(contact?.name).toBe('Test Signer') // Uses the provided name
       expect(contact?.chainIds).toEqual([])
+    })
+  })
+
+  describe('computeSignerChainIds', () => {
+    const signerAddress = '0xABCDef1234567890abcdef1234567890ABCDEF12'
+
+    const makeOverview = (chainId: string, owners: string[]) => ({
+      address: { value: generateEthereumAddress() },
+      chainId,
+      threshold: 1,
+      owners: owners.map((value) => ({ value })),
+      fiatTotal: '0',
+      queued: 0,
+    })
+
+    it('should return all chain IDs where signer is an owner', () => {
+      const safeAddress = generateEthereumAddress()
+      const initialState: TestStoreState = {
+        safes: {
+          [safeAddress]: {
+            '1': makeOverview('1', [signerAddress]),
+            '137': makeOverview('137', [signerAddress]),
+            '10': makeOverview('10', [signerAddress]),
+          },
+        },
+      }
+
+      const store = createTestStore(initialState)
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toHaveLength(3)
+      expect(result).toContain('1')
+      expect(result).toContain('137')
+      expect(result).toContain('10')
+    })
+
+    it('should return empty array when signer is not an owner of any safe', () => {
+      const safeAddress = generateEthereumAddress()
+      const otherOwner = generateEthereumAddress()
+      const initialState: TestStoreState = {
+        safes: {
+          [safeAddress]: {
+            '1': makeOverview('1', [otherOwner]),
+          },
+        },
+      }
+
+      const store = createTestStore(initialState)
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toEqual([])
+    })
+
+    it('should return empty array when safes state is empty', () => {
+      const store = createTestStore({ safes: {} })
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toEqual([])
+    })
+
+    it('should return single chain when signer is owner on one chain only', () => {
+      const safeAddress = generateEthereumAddress()
+      const otherOwner = generateEthereumAddress()
+      const initialState: TestStoreState = {
+        safes: {
+          [safeAddress]: {
+            '1': makeOverview('1', [signerAddress]),
+            '137': makeOverview('137', [otherOwner]),
+          },
+        },
+      }
+
+      const store = createTestStore(initialState)
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toEqual(['1'])
+    })
+
+    it('should use case-insensitive address comparison', () => {
+      const safeAddress = generateEthereumAddress()
+      const lowerCaseAddress = signerAddress.toLowerCase()
+      const initialState: TestStoreState = {
+        safes: {
+          [safeAddress]: {
+            '1': makeOverview('1', [lowerCaseAddress]),
+          },
+        },
+      }
+
+      const store = createTestStore(initialState)
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toEqual(['1'])
+    })
+
+    it('should deduplicate chain IDs across multiple safes', () => {
+      const safeAddress1 = generateEthereumAddress()
+      const safeAddress2 = generateEthereumAddress()
+      const initialState: TestStoreState = {
+        safes: {
+          [safeAddress1]: {
+            '1': makeOverview('1', [signerAddress]),
+            '137': makeOverview('137', [signerAddress]),
+          },
+          [safeAddress2]: {
+            '1': makeOverview('1', [signerAddress]),
+            '10': makeOverview('10', [signerAddress]),
+          },
+        },
+      }
+
+      const store = createTestStore(initialState)
+      const result = computeSignerChainIds(signerAddress, store.getState())
+
+      expect(result).toHaveLength(3)
+      expect(result).toContain('1')
+      expect(result).toContain('137')
+      expect(result).toContain('10')
     })
   })
 

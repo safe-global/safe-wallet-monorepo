@@ -15,7 +15,7 @@ exports[`./index.stories Default 1`] = `
       style="display: inline-flex;"
     >
       <button
-        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
         tabindex="0"
         type="button"
       >
@@ -51,12 +51,12 @@ exports[`./index.stories WithLabel 1`] = `
       style="display: inline-flex;"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary mui-style-41604e-MuiButtonBase-root-MuiButton-root"
+        class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary mui-style-15lql7u-MuiButtonBase-root-MuiButton-root"
         tabindex="0"
         type="button"
       >
         <span
-          class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-6rkz1o-MuiButton-startIcon"
+          class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
         >
           <svg
             aria-hidden="true"

@@ -10,7 +10,8 @@ import { TxNote, SignerSelect, BalanceChanges, RiskConfirmation } from './featur
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
-import LedgerHashComparison from '@/features/ledger'
+import { useLoadFeature } from '@/features/__core__'
+import { LedgerFeature } from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
 type SubmitCallbackProps = { txId?: string; isExecuted?: boolean }
@@ -53,6 +54,7 @@ export const TxFlow = <T extends unknown>({
   eventCategory,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
+  const { LedgerHashComparison } = useLoadFeature(LedgerFeature)
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
 
   const childrenArray = Array.isArray(children) ? children : [children]

@@ -1,4 +1,5 @@
 import { renderHook, waitFor, act } from '@/src/tests/test-utils'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { useTransactionSigning } from './useTransactionSigning'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
@@ -105,7 +106,7 @@ const createMockState = (overrides?: Partial<RootState>): Partial<RootState> => 
     // Mock the cgwClient API slice state structure
     api: {
       queries: {
-        'getChainsConfig(undefined)': {
+        [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: {
           status: 'fulfilled' as const,
           data: {
             results: [mockChain],

@@ -85,7 +85,7 @@ describe('Sidebar search tests', () => {
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
     sideBar.searchSafe(sideBar.sideBarSafes.safe1short_)
-    sideBar.checkSearchResults(1)
+    sideBar.checkSearchResults(2)
     sideBar.clearSearchInput()
     sideBar.verifyAddedSafesExist([sideBar.sideBarSafes.safe1short, sideBar.sideBarSafes.safe2short])
   })

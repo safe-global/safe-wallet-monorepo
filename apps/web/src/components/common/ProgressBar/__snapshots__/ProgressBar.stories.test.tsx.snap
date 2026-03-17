@@ -15,7 +15,7 @@ exports[`./ProgressBar.stories AlmostComplete 1`] = `
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
         style="transform: translateX(-15%);"
       />
     </span>
@@ -38,7 +38,7 @@ exports[`./ProgressBar.stories Complete 1`] = `
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
         style="transform: translateX(0%);"
       />
     </span>
@@ -61,7 +61,7 @@ exports[`./ProgressBar.stories Empty 1`] = `
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
         style="transform: translateX(-100%);"
       />
     </span>
@@ -84,7 +84,7 @@ exports[`./ProgressBar.stories Partial 1`] = `
       role="progressbar"
     >
       <span
-        class="MuiLinearProgress-bar MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-3vqet8-MuiLinearProgress-bar1"
+        class="MuiLinearProgress-bar MuiLinearProgress-bar1 MuiLinearProgress-barColorSecondary MuiLinearProgress-bar1Determinate mui-style-1qczc9n-MuiLinearProgress-bar1"
         style="transform: translateX(-55%);"
       />
     </span>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Theme, View } from 'tamagui'
+import { Text, Theme } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { MultiSend } from '@safe-global/store/gateway/types'
 import { CustomTransactionInfo, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -19,7 +19,7 @@ export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxCo
     <SafeListItem
       label={label}
       icon={logoUri ? 'transaction-contract' : undefined}
-      type={safeAppInfo?.name || txInfo.methodName || ''}
+      type={safeAppInfo?.name || 'Contract interaction'}
       leftNode={
         <Theme name="logo">
           <Logo
@@ -32,11 +32,9 @@ export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxCo
         </Theme>
       }
       rightNode={
-        <View flex={1} alignItems="flex-end">
-          <Text numberOfLines={1} ellipsizeMode="tail">
-            {txInfo.methodName}
-          </Text>
-        </View>
+        <Text numberOfLines={1} ellipsizeMode="tail">
+          {txInfo.methodName}
+        </Text>
       }
       {...rest}
     />

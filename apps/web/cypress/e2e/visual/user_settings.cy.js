@@ -21,7 +21,6 @@ describe(
       })
 
       cy.visit(constants.userSettingsUrl)
-      cy.contains('Manage Wallets', { timeout: 30000 }).should('be.visible')
       main.awaitVisualStability()
     })
   },

@@ -26,7 +26,7 @@ import {
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useUpdateBatch } from '@/hooks/useDraftBatch'
+import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
 
 type TxActions = {

@@ -15,25 +15,20 @@ type WcChainSwitchModalProps = {
 }
 
 function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
-  const feature = useLoadFeature(MyAccountsFeature)
-  const { AccountItem } = feature
+  const { AccountItemButton, AccountItemIcon, AccountItemInfo, AccountItemBalance } = useLoadFeature(MyAccountsFeature)
   const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
 
-  if (!feature.$isReady || !AccountItem?.Button) {
-    return null
-  }
-
   return (
-    <AccountItem.Button onClick={onSelect} elementRef={elementRef}>
-      <AccountItem.Icon
+    <AccountItemButton onClick={onSelect} elementRef={elementRef}>
+      <AccountItemIcon
         address={safeItem.address}
         chainId={safeItem.chainId}
         threshold={threshold}
         owners={owners.length}
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={name} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
-    </AccountItem.Button>
+      <AccountItemInfo address={safeItem.address} chainId={safeItem.chainId} name={name} />
+      <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
+    </AccountItemButton>
   )
 }
 

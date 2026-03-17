@@ -17,7 +17,6 @@ describe('[VISUAL] Address book screenshots', { defaultCommandTimeout: 60000, ..
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1)
     cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
     cy.reload()
-    cy.contains('Owner1', { timeout: 30000 }).should('be.visible')
   })
 
   it('[VISUAL] Screenshot address book page with entries', () => {

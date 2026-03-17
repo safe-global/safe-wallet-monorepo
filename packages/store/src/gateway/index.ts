@@ -8,6 +8,7 @@ export { useGetTxsHistoryInfiniteQuery, useGetPendingTxsInfiniteQuery } from './
 export { useGetCollectiblesInfiniteQuery } from './collectibles'
 export {
   useGetChainsConfigQuery,
+  useGetChainsConfigV2Query,
   chainsAdapter,
   apiSliceWithChainsConfig,
   initialState as chainsInitialState,

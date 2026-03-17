@@ -6,13 +6,23 @@
 const fs = require('fs')
 const path = require('path')
 
-const selectionFilePath = path.join(__dirname, '../assets/fonts/safe-icons/selection.json')
+const configFilePath = path.join(__dirname, '../assets/fonts/safe-icons/safe-icons.icomoon.json')
 
-// Read the selection.json file
-const selection = JSON.parse(fs.readFileSync(selectionFilePath, 'utf8'))
+// Read the IcoMoon config file
+const config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'))
 
-// Get the icon names
-const iconNames = selection.icons.map((icon) => icon.icon.tags[0]).filter(Boolean)
+// Get the icon names (support both old and new IcoMoon formats)
+let iconNames
+
+if ('icons' in config) {
+  // Old format (selection.json)
+  iconNames = config.icons.map((icon) => icon.icon.tags[0]).filter(Boolean)
+} else if ('glyphs' in config) {
+  // New format (icomoon.json)
+  iconNames = config.glyphs.map((glyph) => glyph.extras.name).filter(Boolean)
+} else {
+  throw new Error('Invalid IcoMoon config: expected "icons" or "glyphs"')
+}
 
 // Create TypeScript union type
 const typeDef = `export type IconName =\n  ${iconNames.map((name) => `| '${name}'`).join('\n  ')}\n`

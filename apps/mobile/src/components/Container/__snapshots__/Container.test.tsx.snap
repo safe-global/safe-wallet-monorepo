@@ -3,14 +3,14 @@
 exports[`Container applies the correct styles 1`] = `
 {
   "backgroundColor": "#FFFFFF",
-  "borderBottomLeftRadius": 7,
-  "borderBottomRightRadius": 7,
-  "borderTopLeftRadius": 7,
-  "borderTopRightRadius": 7,
+  "borderBottomLeftRadius": 6,
+  "borderBottomRightRadius": 6,
+  "borderTopLeftRadius": 6,
+  "borderTopRightRadius": 6,
   "flexDirection": "column",
   "paddingBottom": 16,
-  "paddingLeft": 16,
-  "paddingRight": 16,
+  "paddingLeft": 12,
+  "paddingRight": 12,
   "paddingTop": 16,
 }
 `;
