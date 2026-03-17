@@ -6,11 +6,10 @@ type HubSpotFormProps = {
   portalId: string
   formId: string
   region?: string
-  safeAddress?: string
   onSubmit?: (region: string) => void
 }
 
-const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }: HubSpotFormProps) => {
+const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotFormProps) => {
   const formContainerRef = useRef<HTMLDivElement>(null)
   const scriptLoadedRef = useRef(false)
   const selectedRegionRef = useRef<string>('AMERICAS')
@@ -39,13 +38,12 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', safeAddress, onSubmit }
           onFormReady: (form: HTMLFormElement) => {
             try {
               setIsLoading(false)
-              if (safeAddress && form.elements) {
-                const safeAddressField = form.elements.namedItem('safe_address') as HTMLInputElement
-                if (safeAddressField) {
-                  safeAddressField.value = safeAddress
-                  // Trigger change event for HubSpot's internal tracking
+              if (form.elements) {
+                const urlField = form.elements.namedItem('conversion_page_url') as HTMLInputElement
+                if (urlField) {
+                  urlField.value = window.location.href
                   const changeEvent = new Event('change', { bubbles: true })
-                  safeAddressField.dispatchEvent(changeEvent)
+                  urlField.dispatchEvent(changeEvent)
                 }
               }
 
