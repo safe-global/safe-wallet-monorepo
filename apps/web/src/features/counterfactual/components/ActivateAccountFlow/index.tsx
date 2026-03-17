@@ -34,7 +34,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import CheckWallet from '@/components/common/CheckWallet'
 import { getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import type { TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
@@ -82,7 +82,7 @@ const ActivateAccountFlow = () => {
   const wallet = useWallet()
   const { options, totalFee, walletCanPay } = useActivateAccount(undeployedSafe)
   const isWrongChain = useIsWrongChain()
-  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
+  const { showGasFeeEstimation, showInsufficientFundsWarning } = useNativeTokenDisplay()
 
   const undeployedSafeSetup = useMemo(
     () => extractCounterfactualSafeSetup(undeployedSafe, chainId),
@@ -173,7 +173,7 @@ const ActivateAccountFlow = () => {
           networks={chain ? [chain] : []}
         />
 
-        {!hideNativeToken && <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />}
+        {showGasFeeEstimation && <Divider sx={{ mx: -3, mt: 2, mb: 1 }} />}
         <Box display="flex" flexDirection="column" gap={3}>
           {canRelay && (
             <Grid container spacing={3}>
@@ -190,7 +190,7 @@ const ActivateAccountFlow = () => {
             </Grid>
           )}
 
-          {!hideNativeToken && (
+          {showGasFeeEstimation && (
             <Grid data-testid="network-fee-section" container spacing={3}>
               <ReviewRow
                 name="Est. network fee"
@@ -217,7 +217,7 @@ const ActivateAccountFlow = () => {
             </Box>
           )}
           {isWrongChain && <NetworkWarning />}
-          {!walletCanPay && !willRelay && !hideNativeToken && (
+          {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
             <ErrorMessage>
               Your connected wallet doesn&apos;t have enough funds to execute this transaction
             </ErrorMessage>

@@ -67,6 +67,45 @@ export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): b
   return (chain.features as string[]).includes(feature)
 }
 
+export type NativeTokenDisplay = {
+  showNativeInBalances: boolean
+  showGasFeeEstimation: boolean
+  showWalletBalance: boolean
+  showInsufficientFundsWarning: boolean
+  showFeeInConfirmationText: boolean
+  showUndeployedNativeValue: boolean
+  showStablecoinFeeInfo: boolean
+}
+
+export const NATIVE_TOKEN_DISPLAY_DEFAULT: NativeTokenDisplay = {
+  showNativeInBalances: true,
+  showGasFeeEstimation: true,
+  showWalletBalance: true,
+  showInsufficientFundsWarning: true,
+  showFeeInConfirmationText: true,
+  showUndeployedNativeValue: true,
+  showStablecoinFeeInfo: false,
+}
+
+const HIDE_NATIVE: NativeTokenDisplay = {
+  showNativeInBalances: false,
+  showGasFeeEstimation: false,
+  showWalletBalance: false,
+  showInsufficientFundsWarning: false,
+  showFeeInConfirmationText: false,
+  showUndeployedNativeValue: false,
+  showStablecoinFeeInfo: true,
+}
+
+/**
+ * Derives granular display capabilities from the HIDE_NATIVE_TOKEN chain feature.
+ * Use with components that already have a chain object.
+ * For React hooks, use useNativeTokenDisplay from apps/web/src/hooks/.
+ */
+export const getNativeTokenDisplay = (chain: Pick<Chain, 'features'>): NativeTokenDisplay => {
+  return hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) ? HIDE_NATIVE : NATIVE_TOKEN_DISPLAY_DEFAULT
+}
+
 export const getBlockExplorerLink = (
   chain: Pick<Chain, 'blockExplorerUriTemplate'>,
   address: string,

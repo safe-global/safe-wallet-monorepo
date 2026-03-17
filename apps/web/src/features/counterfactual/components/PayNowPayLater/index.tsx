@@ -1,7 +1,7 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import classnames from 'classnames'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import {
   Box,
@@ -33,7 +33,7 @@ const PayNowPayLater = ({
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
 }) => {
   const chain = useCurrentChain()
-  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
+  const { showGasFeeEstimation, showStablecoinFeeInfo } = useNativeTokenDisplay()
 
   const onChoosePayMethod = (_: ChangeEvent<HTMLInputElement>, newPayMethod: string) => {
     setPayMethod(newPayMethod as PayMethod)
@@ -50,7 +50,7 @@ const PayNowPayLater = ({
           wallet to pay the network fee.
         </ErrorMessage>
       )}
-      {hideNativeToken && (
+      {showStablecoinFeeInfo && (
         <Box mt={2}>
           <ErrorMessage level="info">
             This network uses USD stablecoins for transaction fees instead of a native token. Ensure your connected
@@ -103,7 +103,7 @@ const PayNowPayLater = ({
               label={
                 <>
                   <Typography className={css.radioTitle}>Pay now</Typography>
-                  {!hideNativeToken && (
+                  {showGasFeeEstimation && (
                     <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
                       {canRelay ? (
                         'Sponsored free transaction'

@@ -6,8 +6,7 @@ import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useMemo } from 'react'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import { TokenType } from '@safe-global/store/gateway/types'
 
 export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
@@ -28,7 +27,7 @@ export const useVisibleTokens = () => {
   const spendingLimits = useAppSelector(selectSpendingLimits)
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
-  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
+  const { showNativeInBalances } = useNativeTokenDisplay()
 
   return useMemo(() => {
     if (!balances) {
@@ -37,7 +36,7 @@ export const useVisibleTokens = () => {
 
     let items = filterHiddenTokens(balances.items, hiddenTokens)
 
-    if (hideNativeToken) {
+    if (!showNativeInBalances) {
       items = items.filter((item) => item.tokenInfo.type !== TokenType.NATIVE_TOKEN)
     }
 
@@ -50,5 +49,5 @@ export const useVisibleTokens = () => {
     }
 
     return items
-  }, [balances, hiddenTokens, hideNativeToken, isOnlySpendingLimitBeneficiary, spendingLimits, wallet?.address])
+  }, [balances, hiddenTokens, showNativeInBalances, isOnlySpendingLimitBeneficiary, spendingLimits, wallet?.address])
 }
