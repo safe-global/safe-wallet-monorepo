@@ -58,7 +58,12 @@ import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import { FEATURES, hasFeature, getNativeTokenDisplay } from '@safe-global/utils/utils/chains'
+import {
+  FEATURES,
+  hasFeature,
+  getNativeTokenDisplay,
+  NATIVE_TOKEN_DISPLAY_DEFAULT,
+} from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
@@ -178,11 +183,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
-    : {
-        showGasFeeEstimation: true,
-        showInsufficientFundsWarning: true,
-        showFeeInConfirmationText: true,
-      }
+    : NATIVE_TOKEN_DISPLAY_DEFAULT
 
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)

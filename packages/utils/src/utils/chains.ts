@@ -77,7 +77,7 @@ export type NativeTokenDisplay = {
   showStablecoinFeeInfo: boolean
 }
 
-const SHOW_ALL: NativeTokenDisplay = {
+export const NATIVE_TOKEN_DISPLAY_DEFAULT: NativeTokenDisplay = {
   showNativeInBalances: true,
   showGasFeeEstimation: true,
   showWalletBalance: true,
@@ -103,7 +103,7 @@ const HIDE_NATIVE: NativeTokenDisplay = {
  * For React hooks, use useNativeTokenDisplay from apps/web/src/hooks/.
  */
 export const getNativeTokenDisplay = (chain: Pick<Chain, 'features'>): NativeTokenDisplay => {
-  return hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) ? HIDE_NATIVE : SHOW_ALL
+  return hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) ? HIDE_NATIVE : NATIVE_TOKEN_DISPLAY_DEFAULT
 }
 
 export const getBlockExplorerLink = (

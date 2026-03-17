@@ -8,7 +8,7 @@ import WalletIcon from '@/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useChain } from '@/hooks/useChains'
 import WalletBalance from '@/components/common/WalletBalance'
-import { getNativeTokenDisplay } from '@safe-global/utils/utils/chains'
+import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
 import css from './styles.module.css'
 
@@ -36,7 +36,7 @@ const WalletOverview = ({
 }): ReactElement => {
   const walletChain = useChain(wallet.chainId)
   const prefix = walletChain?.shortName
-  const { showWalletBalance } = walletChain ? getNativeTokenDisplay(walletChain) : { showWalletBalance: true }
+  const { showWalletBalance } = walletChain ? getNativeTokenDisplay(walletChain) : NATIVE_TOKEN_DISPLAY_DEFAULT
 
   return (
     <Box className={css.container}>
