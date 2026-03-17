@@ -2,6 +2,7 @@ import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
 
@@ -13,8 +14,10 @@ export interface SafeSelectorTriggerContentProps {
 function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelectorTriggerContentProps) {
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
+
+  const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
-    selectedItem.name,
+    resolvedName,
     selectedItem.address,
     chainShortName,
   )
