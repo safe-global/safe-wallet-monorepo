@@ -7,8 +7,8 @@ import { useAuth0TokenExchange } from '../../hooks/useAuth0TokenExchange'
  * Must be rendered inside Auth0Provider to access Auth0 context.
  */
 function Auth0TokenExchangeHandler({ children }: { children: ReactNode }) {
-  const { isAuthenticated, getIdTokenClaims } = useAuth0()
-  useAuth0TokenExchange(isAuthenticated, getIdTokenClaims)
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0()
+  useAuth0TokenExchange(isAuthenticated, getAccessTokenSilently)
   return <>{children}</>
 }
 
