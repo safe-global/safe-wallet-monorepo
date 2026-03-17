@@ -17,7 +17,8 @@ const SafeDropdownContainer = ({ items, selectedItemId }: SafeDropdownContainerP
       side="bottom"
       alignItemWithTrigger={false}
       className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[14rem] overflow-y-auto bg-card border-0 rounded-3xl px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      sideOffset={8}
+      sideOffset={20}
+      alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
       {filteredItems.map((item) => (
