@@ -86,27 +86,29 @@ const InviteMembersOnboarding = (): ReactElement => {
             </Alert>
           )}
 
-          <Button
-            data-testid="invite-members-continue-button"
-            type="submit"
-            size="lg"
-            disabled={!formState.isValid || isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? <Spinner /> : 'Continue'}
-          </Button>
+          <div className="flex flex-col gap-5">
+            <Button
+              data-testid="invite-members-continue-button"
+              type="submit"
+              size="lg"
+              disabled={!formState.isValid || isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? <Spinner /> : 'Finish'}
+            </Button>
 
-          <Button
-            data-testid="invite-members-skip-button"
-            type="button"
-            variant="ghost"
-            size="lg"
-            onClick={redirectToNextStep}
-            disabled={isSubmitting}
-            className="w-full"
-          >
-            Skip
-          </Button>
+            <Button
+              data-testid="invite-members-skip-button"
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={redirectToNextStep}
+              disabled={isSubmitting}
+              className="w-full hover:bg-card"
+            >
+              Skip
+            </Button>
+          </div>
         </form>
       </div>
     </div>

@@ -2,6 +2,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NetworkLogosList } from '@/features/multichain'
 import type { SafeItem } from '@/hooks/safes'
+import { cn } from '@/utils/cn'
 
 export interface AccountItemChainBadgeProps {
   /** Single chain mode */
@@ -9,13 +10,14 @@ export interface AccountItemChainBadgeProps {
   /** Multi-chain mode - renders network logos with tooltip */
   safes?: SafeItem[]
   imageSize?: number
+  className?: string
 }
 
-function AccountItemChainBadge({ chainId, safes, imageSize = 24 }: AccountItemChainBadgeProps) {
+function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: AccountItemChainBadgeProps) {
   // Multi-chain mode: render NetworkLogosList with tooltip
   if (safes && safes.length > 0) {
     return (
-      <div className="flex shrink-0 justify-end">
+      <div className={cn('flex shrink-0 justify-end', className)}>
         <Tooltip>
           <TooltipTrigger render={<span />} className="flex items-center">
             <NetworkLogosList networks={safes} showHasMore />
