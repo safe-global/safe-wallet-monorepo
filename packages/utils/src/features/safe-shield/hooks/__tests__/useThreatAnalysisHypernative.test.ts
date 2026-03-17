@@ -20,12 +20,16 @@ jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
 jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
   hypernativeApi: {
     useAssessTransactionMutation: jest.fn(),
+    useAssessMessageMutation: jest.fn(),
   },
 }))
 
 const mockIsSafeTransaction = isSafeTransaction as jest.MockedFunction<typeof isSafeTransaction>
 const mockUseAssessTransactionMutation = hypernativeApi.useAssessTransactionMutation as jest.MockedFunction<
   typeof hypernativeApi.useAssessTransactionMutation
+>
+const mockUseAssessMessageMutation = hypernativeApi.useAssessMessageMutation as jest.MockedFunction<
+  typeof hypernativeApi.useAssessMessageMutation
 >
 
 // Import the mocked function
@@ -113,6 +117,10 @@ describe('useThreatAnalysisHypernative', () => {
     mockCalculateSafeTransactionHash.mockReturnValue(mockSafeTxHash as `0x${string}`)
     mockUseAssessTransactionMutation.mockReturnValue([
       mockTriggerAssessment,
+      { data: undefined, error: undefined, isLoading: false },
+    ] as any)
+    mockUseAssessMessageMutation.mockReturnValue([
+      jest.fn(),
       { data: undefined, error: undefined, isLoading: false },
     ] as any)
   })
