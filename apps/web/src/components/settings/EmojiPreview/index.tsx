@@ -10,7 +10,7 @@ const EmojiPreview = () => (
     <Alert severity="success" sx={{ marginTop: 2, borderColor: 'secondary.main' }} icon={<></>}>
       <SvgIcon component={InfoIcon} sx={{ marginRight: 1, verticalAlign: 'middle' }} color="secondary" />
 
-      <Typography component="span">Enable emojis for all Ethereum addresses and your Safe Accounts.</Typography>
+      <Typography component="span">Enable emojis for your Safe Accounts.</Typography>
 
       <Box mt={1} display="flex" alignItems="center" gap={1}>
         <SafeIcon address={ZeroAddress} />
