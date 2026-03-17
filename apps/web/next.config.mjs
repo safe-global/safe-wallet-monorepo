@@ -138,8 +138,6 @@ const nextConfig = {
       'bn.js': path.resolve('../../node_modules/bn.js/lib/bn.js'),
       'mainnet.json': path.resolve('../..node_modules/@ethereumjs/common/dist.browser/genesisStates/mainnet.json'),
       '@mui/material$': path.resolve('./src/components/common/Mui'),
-      '@emotion/react': path.resolve('./node_modules/@emotion/react'),
-      '@emotion/styled': path.resolve('./node_modules/@emotion/styled'),
     }
 
     if (dev) {

@@ -27,8 +27,6 @@ const customJestConfig = {
     '^.+\\.(svg)$': '<rootDir>/mocks/svg.js',
     '^.+/markdown/terms/terms\\.md$': '<rootDir>/mocks/terms.md.js',
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
-    '^@emotion/react$': '<rootDir>/node_modules/@emotion/react',
-    '^@emotion/styled$': '<rootDir>/node_modules/@emotion/styled',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
     '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
   },
