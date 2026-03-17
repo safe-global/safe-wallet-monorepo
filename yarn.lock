@@ -4153,20 +4153,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/browser-logs@npm:^6.24.1":
-  version: 6.24.1
-  resolution: "@datadog/browser-logs@npm:6.24.1"
-  dependencies:
-    "@datadog/browser-core": "npm:6.24.1"
-  peerDependencies:
-    "@datadog/browser-rum": 6.24.1
-  peerDependenciesMeta:
-    "@datadog/browser-rum":
-      optional: true
-  checksum: 10/753a7c76e93cf6fa876413241cbc623a9d178728892f259706898fdd608bbe8d5598b6190ecd470e8d4b59630620a82787379e190ad320699e144dcb748a9a80
-  languageName: node
-  linkType: hard
-
 "@datadog/browser-rum-core@npm:6.24.1":
   version: 6.24.1
   resolution: "@datadog/browser-rum-core@npm:6.24.1"
@@ -13692,7 +13678,6 @@ __metadata:
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
     "@cowprotocol/widget-react": "npm:0.14.6"
-    "@datadog/browser-logs": "npm:^6.24.1"
     "@datadog/browser-rum": "npm:^6.24.1"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.13.5"
