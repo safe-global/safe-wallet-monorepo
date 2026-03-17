@@ -11,7 +11,7 @@ const injectedRtkApi = api
         providesTags: ['auth'],
       }),
       authVerifyV1: build.mutation<AuthVerifyV1ApiResponse, AuthVerifyV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/auth/verify`, method: 'POST', body: queryArg.siweDto }),
+        query: (queryArg) => ({ url: `/v1/auth/verify`, method: 'POST', body: queryArg.body }),
         invalidatesTags: ['auth'],
       }),
       authLogoutV1: build.mutation<AuthLogoutV1ApiResponse, AuthLogoutV1ApiArg>({
@@ -26,8 +26,8 @@ export type AuthGetNonceV1ApiResponse = /** status 200 Unique nonce generated fo
 export type AuthGetNonceV1ApiArg = void
 export type AuthVerifyV1ApiResponse = unknown
 export type AuthVerifyV1ApiArg = {
-  /** Sign-In with Ethereum message and signature for verification */
-  siweDto: SiweDto
+  /** Sign-In with Ethereum message and signature, or Auth0 access token for verification */
+  body: SiweDto | Auth0Dto
 }
 export type AuthLogoutV1ApiResponse = unknown
 export type AuthLogoutV1ApiArg = void
@@ -37,6 +37,9 @@ export type AuthNonce = {
 export type SiweDto = {
   message: string
   signature: string
+}
+export type Auth0Dto = {
+  access_token: string
 }
 export const { useAuthGetNonceV1Query, useLazyAuthGetNonceV1Query, useAuthVerifyV1Mutation, useAuthLogoutV1Mutation } =
   injectedRtkApi
