@@ -79,7 +79,7 @@
     "@safe-global/safe-deployments": "^1.37.52",
     "@safe-global/safe-modules-deployments": "^2.2.24",
     "@safe-global/store": "workspace:^",
-    "@safe-global/support-chat-embed": "link:../../../safe-support/packages/support-chat-embed",
+    "@safe-global/support-chat-embed": "^1.0.2",
     "@safe-global/theme": "workspace:^",
     "@sentry/react": "^7.91.0",
     "@tailwindcss/postcss": "^4.1.18",
