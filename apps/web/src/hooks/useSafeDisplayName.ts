@@ -3,11 +3,12 @@ import { useAddressResolver } from '@/hooks/useAddressResolver'
 
 /**
  * Resolves the display name for a Safe address.
- * Priority: space address book > local address book > ENS
+ * Priority: preferredName > address book > ENS
  */
-export const useSafeDisplayName = (address: string, chainId: string): string => {
+export const useSafeDisplayName = (address: string, chainId: string, preferredName?: string): string => {
   const addressBookItem = useAddressBookItem(address, chainId)
-  const { ens } = useAddressResolver(addressBookItem?.name ? undefined : address)
+  const existingName = preferredName || addressBookItem?.name
+  const { ens } = useAddressResolver(existingName ? undefined : address)
 
-  return addressBookItem?.name || ens || ''
+  return existingName || ens || ''
 }

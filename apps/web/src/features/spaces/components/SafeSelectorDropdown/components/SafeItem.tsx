@@ -6,12 +6,12 @@ import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
 import type { SafeItemData } from '../types'
 
-const SafeItem = ({ address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {
+const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {
   const isNested = Boolean(parentSafeId)
   const chainId = chains[0]?.chainId ?? ''
   const chainShortName = chains[0]?.shortName ?? ''
 
-  const resolvedName = useSafeDisplayName(address, chainId)
+  const resolvedName = useSafeDisplayName(address, chainId, name)
 
   return (
     <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')}>
