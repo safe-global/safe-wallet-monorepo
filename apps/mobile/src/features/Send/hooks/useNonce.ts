@@ -8,7 +8,7 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTransactionType } from '@/src/hooks/useTransactionType'
 
-interface QueuedNonceItem {
+export interface QueuedNonceItem {
   nonce: number
   label: string
 }
@@ -25,7 +25,7 @@ interface UseNonceResult {
   fetchMore: () => void
 }
 
-function flattenPages(pages: QueuedItemPage[] | undefined): QueuedItem[] {
+export function flattenPages(pages: QueuedItemPage[] | undefined): QueuedItem[] {
   if (!pages) {
     return []
   }
@@ -44,7 +44,7 @@ function buildQueuedNonceItem(txItem: TransactionQueuedItem, nonce: number): Que
   return { nonce, label: extractTxLabel(txItem) }
 }
 
-function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
+export function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
   const result: QueuedNonceItem[] = []
   let conflictNonce: number | undefined
 
@@ -70,7 +70,7 @@ function collectQueuedNonces(items: QueuedItem[]): QueuedNonceItem[] {
     }
   }
 
-  return result.sort((a, b) => b.nonce - a.nonce)
+  return result.sort((a, b) => a.nonce - b.nonce)
 }
 
 function deriveLoadingState(
@@ -87,10 +87,10 @@ function deriveLoadingState(
 }
 
 export function useNonce(chainId: string, safeAddress: string): UseNonceResult {
-  const { data: noncesData, isLoading: isNoncesLoading } = useSafesGetNoncesV1Query({
-    chainId,
-    safeAddress,
-  })
+  const { data: noncesData, isLoading: isNoncesLoading } = useSafesGetNoncesV1Query(
+    { chainId, safeAddress },
+    { refetchOnMountOrArgChange: true },
+  )
 
   const {
     currentData,
