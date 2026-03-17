@@ -75,7 +75,7 @@ const SpaceDashboard = () => {
 
   const handleItemClick = (safeAddress: string) => {
     trackEvent(
-      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId ?? undefined },
+      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
       {
         spaceId,
         [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
@@ -91,7 +91,7 @@ const SpaceDashboard = () => {
 
   const handlePendingTxItemClick = (safeAddress: string, txId: string) => {
     trackEvent(
-      { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: spaceId ?? undefined },
+      { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: spaceId },
       {
         spaceId,
         [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,

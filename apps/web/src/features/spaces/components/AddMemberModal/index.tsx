@@ -108,7 +108,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER, label: spaceId ?? undefined }, { spaceId })
+      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER, label: spaceId }, { spaceId })
       const response = await inviteMembers({
         spaceId: Number(spaceId),
         inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
