@@ -27,7 +27,7 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
     <div
       className={cn(
         // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
-        'w-full sm:w-[430px] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-lg p-2 overflow-hidden bg-card',
+        'w-full sm:w-[430px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-lg p-2 overflow-hidden bg-card hover:bg-muted/30 focus:ring-0',
         variants.wrapperClass,
       )}
     >
@@ -39,7 +39,7 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
       >
         <SelectTrigger
           className={cn(
-            '-m-4 flex-1 h-[68px] min-h-[calc(68px+2rem)] rounded-2xl border-0 shadow-none bg-transparent py-0 pl-6 hover:bg-muted/30 focus:ring-0 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0',
+            '-m-4 flex-1 border-0 shadow-none bg-transparent py-0 pl-6 data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0',
             variants.triggerClass,
           )}
           size="default"

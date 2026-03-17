@@ -13,7 +13,7 @@ export interface BalanceDisplayProps {
 }
 
 const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold = true }: BalanceDisplayProps) => (
-  <div className="flex flex-col items-end gap-2 min-w-0 shrink sm:w-[100px] sm:shrink-0">
+  <div className="flex flex-col items-end min-w-0 shrink sm:w-[100px] sm:shrink-0">
     {isLoading ? (
       <Skeleton className="h-3.5 w-14 rounded" />
     ) : (
