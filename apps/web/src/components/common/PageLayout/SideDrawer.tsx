@@ -57,8 +57,7 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
-          // [M1 only] z-index to make the sidebar appear above the Spaces Topbar
-          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 9000 } } : {}),
+          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 1250 } } : {}),
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
