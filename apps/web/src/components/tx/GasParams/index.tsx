@@ -14,7 +14,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
-import { hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
+import { getNativeTokenDisplay } from '@safe-global/utils/utils/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type AdvancedParameters } from '../AdvancedParams/types'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
@@ -61,9 +61,9 @@ export const _GasParams = ({
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
-  const hideNativeToken = chain?.features ? hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) : false
+  const { showGasFeeEstimation } = chain?.features ? getNativeTokenDisplay(chain) : { showGasFeeEstimation: true }
 
-  if (hideNativeToken) {
+  if (!showGasFeeEstimation) {
     return <></>
   }
 

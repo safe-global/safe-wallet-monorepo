@@ -14,7 +14,7 @@ import useChainId from '@/hooks/useChainId'
 import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { setUnauthenticated } from '@/store/authSlice'
 import { logError, Errors } from '@/services/exceptions'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { getNativeTokenDisplay } from '@safe-global/utils/utils/chains'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -30,7 +30,7 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
   const dispatch = useAppDispatch()
   const chainInfo = useChain(wallet.chainId)
   const prefix = chainInfo?.shortName
-  const hideNativeToken = chainInfo ? hasFeature(chainInfo, FEATURES.HIDE_NATIVE_TOKEN) : false
+  const { showWalletBalance } = chainInfo ? getNativeTokenDisplay(chainInfo) : { showWalletBalance: true }
 
   const handleSwitchWallet = () => {
     if (onboard) {
@@ -79,7 +79,7 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
           <Typography variant="body2">{wallet.label}</Typography>
         </Box>
 
-        {!hideNativeToken && (
+        {showWalletBalance && (
           <Box className={css.row}>
             <Typography variant="body2" color="primary.light">
               Balance

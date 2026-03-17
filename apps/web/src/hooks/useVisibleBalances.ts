@@ -7,8 +7,7 @@ import { useAppSelector } from '@/store'
 import { selectHideDust } from '@/store/settingsSlice'
 import { DUST_THRESHOLD } from '@/config/constants'
 import useSafeInfo from './useSafeInfo'
-import { useHasFeature } from './useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useNativeTokenDisplay } from './useNativeTokenDisplay'
 import { TokenType } from '@safe-global/store/gateway/types'
 
 const PRECISION = 18
@@ -83,12 +82,12 @@ export const useVisibleBalances = (): {
   const hiddenTokens = useHiddenTokens()
   // Disable dust filtering for counterfactual safes
   const hideDust = useAppSelector(selectHideDust) && safe.deployed
-  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
+  const { showNativeInBalances } = useNativeTokenDisplay()
 
   return useMemo(() => {
     let items = filterHiddenTokens(data.balances.items, hiddenTokens)
 
-    if (hideNativeToken) {
+    if (!showNativeInBalances) {
       items = items.filter((item) => item.tokenInfo.type !== TokenType.NATIVE_TOKEN)
     }
 
@@ -106,5 +105,5 @@ export const useVisibleBalances = (): {
         positionsFiatTotal: data.balances.positionsFiatTotal,
       },
     }
-  }, [data, hiddenTokens, hideDust, hideNativeToken])
+  }, [data, hiddenTokens, hideDust, showNativeInBalances])
 }

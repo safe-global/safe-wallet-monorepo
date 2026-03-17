@@ -3,8 +3,7 @@ import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import SafeIcon from '@/components/common/SafeIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -26,8 +25,8 @@ const SafeHeaderInfo = (): ReactElement => {
   const { ens } = useAddressResolver(safeAddress)
   const { SafeHeaderHnTooltip } = useLoadFeature(HypernativeFeature)
   const { isHypernativeGuard } = useIsHypernativeGuard()
-  const hideNativeToken = useHasFeature(FEATURES.HIDE_NATIVE_TOKEN)
-  const shouldHideNativeTokenValue = !safe.deployed && hideNativeToken === true
+  const { showUndeployedNativeValue } = useNativeTokenDisplay()
+  const shouldHideNativeTokenValue = !safe.deployed && !showUndeployedNativeValue
 
   return (
     <div data-testid="safe-header-info" className={css.safe}>

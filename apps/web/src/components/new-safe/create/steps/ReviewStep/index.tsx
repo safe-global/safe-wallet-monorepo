@@ -58,7 +58,7 @@ import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, hasFeature, getNativeTokenDisplay } from '@safe-global/utils/utils/chains'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
@@ -176,7 +176,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
-  const hideNativeToken = chain && hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN)
+  const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
+    ? getNativeTokenDisplay(chain)
+    : {
+        showGasFeeEstimation: true,
+        showInsufficientFundsWarning: true,
+        showFeeInConfirmationText: true,
+      }
 
   const ownerAddresses = useMemo(() => data.owners.map((owner) => owner.address), [data.owners])
   const [minRelays] = useLeastRemainingRelays(ownerAddresses)
@@ -445,7 +451,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     mt: 2,
                   }}
                 >
-                  {hideNativeToken ? (
+                  {!showFeeInConfirmationText ? (
                     'You will have to confirm a transaction with your connected wallet'
                   ) : (
                     <>
@@ -486,7 +492,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Grid>
             )}
 
-            {!hideNativeToken && (
+            {showGasFeeEstimation && (
               <Grid data-testid="network-fee-section" container spacing={3}>
                 <ReviewRow
                   name="Est. network fee"
@@ -513,7 +519,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
             {showNetworkWarning && <NetworkWarning action="create a Safe Account" />}
 
-            {!walletCanPay && !willRelay && !hideNativeToken && (
+            {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
               <ErrorMessage>
                 Your connected wallet doesn&apos;t have enough funds to execute this transaction
               </ErrorMessage>
