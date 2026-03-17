@@ -34,7 +34,7 @@ interface PendingTxWidgetProps {
 const SKELETON_COUNT = 3
 
 const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
-  <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
+  <div className={`${css.iconBG} flex shrink-0 items-center justify-center`}>
     <TxTypeIcon tx={tx.transaction} />
   </div>
 )
