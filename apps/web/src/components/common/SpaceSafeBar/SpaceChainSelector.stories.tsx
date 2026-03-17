@@ -34,7 +34,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="self-stretch flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-lg bg-card">
+  <div className="self-stretch flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)] rounded-lg bg-card min-w-[64px] min-h-[68px]">
     {children}
   </div>
 )
