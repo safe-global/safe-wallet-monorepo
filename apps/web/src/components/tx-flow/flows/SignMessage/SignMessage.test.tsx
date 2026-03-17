@@ -768,7 +768,7 @@ describe('SignMessage', () => {
       expect(capturedSafeMessage).toEqual(EXAMPLE_EIP712_MESSAGE)
     })
 
-    it('does not set plain text messages in SafeTxContext (not EIP-712)', async () => {
+    it('clears SafeTxContext for plain text messages (not EIP-712)', async () => {
       const { getByText } = render(
         <SafeTxContext.Provider value={mockSafeTxContext}>
           <SafeShieldProvider>
@@ -781,7 +781,7 @@ describe('SignMessage', () => {
         expect(getByText('Hello world!')).toBeInTheDocument()
       })
 
-      expect(mockSetSafeMessage).not.toHaveBeenCalled()
+      expect(mockSetSafeMessage).toHaveBeenCalledWith(undefined)
     })
 
     it('disables Sign button when risk confirmation is needed but not confirmed', async () => {
