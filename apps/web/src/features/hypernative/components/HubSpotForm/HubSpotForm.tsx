@@ -47,12 +47,25 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
                 }
               }
 
-              // Track region field changes
+              // Track region field changes and default to AMERICAS when empty
               const regionField = form.elements.namedItem('region') as HTMLSelectElement
               if (regionField) {
                 const initialValue = regionField.value
                 if (initialValue) {
                   selectedRegionRef.current = String(initialValue).toUpperCase()
+                } else {
+                  const defaultRegion = 'AMERICAS'
+                  const option = Array.from(regionField.options).find(
+                    (opt) =>
+                      String(opt.value).toUpperCase() === defaultRegion ||
+                      String(opt.text).toUpperCase().trim() === defaultRegion,
+                  )
+                  if (option) {
+                    regionField.value = option.value
+                    const changeEvent = new Event('change', { bubbles: true })
+                    regionField.dispatchEvent(changeEvent)
+                    selectedRegionRef.current = defaultRegion
+                  }
                 }
                 regionField.addEventListener('change', (e) => {
                   selectedRegionRef.current = String((e.target as HTMLSelectElement).value || '').toUpperCase()

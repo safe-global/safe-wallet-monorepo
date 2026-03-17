@@ -80,4 +80,64 @@ describe('HubSpotForm', () => {
 
     expect(urlField.value).toBe(window.location.href)
   })
+
+  it('should default region field to AMERICAS when empty and option exists', () => {
+    const createMock = jest.fn()
+    ;(window as Window & { hbspt?: HbsptMock }).hbspt = {
+      forms: { create: createMock },
+    }
+
+    render(<HubSpotForm {...defaultProps} />)
+    const script = document.querySelector('script[src*="hsforms"]') as HTMLScriptElement | null
+    script?.onload?.(new Event('load'))
+
+    const config = createMock.mock.calls[0]?.[0] as { onFormReady: (form: HTMLFormElement) => void }
+    const form = document.createElement('form')
+    const regionField = document.createElement('select')
+    regionField.name = 'region'
+    const emptyOption = document.createElement('option')
+    emptyOption.value = ''
+    emptyOption.textContent = 'Select region'
+    const americasOption = document.createElement('option')
+    americasOption.value = 'AMERICAS'
+    americasOption.textContent = 'Americas'
+    regionField.appendChild(emptyOption)
+    regionField.appendChild(americasOption)
+    form.appendChild(regionField)
+
+    config.onFormReady(form)
+
+    expect(regionField.value).toBe('AMERICAS')
+  })
+
+  it('should not override region field when it already has a value', () => {
+    const createMock = jest.fn()
+    ;(window as Window & { hbspt?: HbsptMock }).hbspt = {
+      forms: { create: createMock },
+    }
+
+    render(<HubSpotForm {...defaultProps} />)
+    const script = document.querySelector('script[src*="hsforms"]') as HTMLScriptElement | null
+    script?.onload?.(new Event('load'))
+
+    const config = createMock.mock.calls[0]?.[0] as { onFormReady: (form: HTMLFormElement) => void }
+    const form = document.createElement('form')
+    const regionField = document.createElement('select')
+    regionField.name = 'region'
+    const emeaOption = document.createElement('option')
+    emeaOption.value = 'EMEA'
+    emeaOption.textContent = 'EMEA'
+    const americasOption = document.createElement('option')
+    americasOption.value = 'AMERICAS'
+    americasOption.textContent = 'Americas'
+    regionField.appendChild(emeaOption)
+    regionField.appendChild(americasOption)
+    regionField.value = 'EMEA'
+
+    form.appendChild(regionField)
+
+    config.onFormReady(form)
+
+    expect(regionField.value).toBe('EMEA')
+  })
 })
