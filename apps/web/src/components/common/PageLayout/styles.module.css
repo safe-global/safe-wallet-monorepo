@@ -27,7 +27,12 @@
 
 /* Spaces: use black background in dark mode (matches shadcn --background) */
 [data-theme='dark'] .mainSpace {
-  background-color: #000000;
+  background-color: var(--color-background-main);
+}
+
+/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
+.mainSpaceCollapsed {
+  padding-left: 4rem;
 }
 
 .mainNoHeader {

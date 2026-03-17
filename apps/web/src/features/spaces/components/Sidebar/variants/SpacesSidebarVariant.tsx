@@ -29,7 +29,7 @@ const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
       isActive={item.isActive}
       disabled={item.disabled}
       data-testid={getSidebarItemTestId(item.label)}
-      className={css.sidebarInteractive}
+      className={`${css.sidebarInteractive} ${css.sidebarNavItem}`}
       // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
       render={!item.disabled ? <Link href={item.link} /> : undefined}
     >
@@ -54,8 +54,8 @@ export const SpacesSidebarVariant = ({
   setupGroup,
 }: SpacesSidebarVariantProps): ReactElement => {
   return (
-    <SidebarContent>
-      <SidebarGroup>
+    <SidebarContent className={css.sidebarContent}>
+      <SidebarGroup className={css.sidebarGroup}>
         <SidebarMenu>
           <SidebarMenuItem>
             <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
@@ -64,7 +64,7 @@ export const SpacesSidebarVariant = ({
       </SidebarGroup>
 
       {/* Main Navigation */}
-      <SidebarGroup>
+      <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
           <SidebarMenu>
             {mainNavItems.map((item) => (
@@ -75,7 +75,7 @@ export const SpacesSidebarVariant = ({
       </SidebarGroup>
 
       {/* Setup Group */}
-      <SidebarGroup>
+      <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupLabel>{setupGroup.label}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>

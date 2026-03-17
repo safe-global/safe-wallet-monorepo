@@ -40,9 +40,9 @@ export const SafeSidebarVariant = ({
   }
 
   return (
-    <SidebarContent>
+    <SidebarContent className={css.sidebarContent}>
       {spaceId && (
-        <SidebarGroup>
+        <SidebarGroup className={css.sidebarGroup}>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -66,7 +66,7 @@ export const SafeSidebarVariant = ({
       )}
 
       {/* Main Navigation */}
-      <SidebarGroup>
+      <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
           <SidebarMenu>
             {mainNavItems.map((item) => (
@@ -78,7 +78,7 @@ export const SafeSidebarVariant = ({
 
       {/* DeFi Group - only show if has items */}
       {defiGroup.items.length > 0 && (
-        <SidebarGroup>
+        <SidebarGroup className={css.sidebarGroup}>
           <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
