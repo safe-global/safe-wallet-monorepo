@@ -13,6 +13,7 @@ const baseSettings = {
   env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
   signing: { onChainSigning: false, blindSigning: false },
   transactionExecution: true,
+  addressEmojis: true,
 }
 
 const meta: Meta<typeof ManageTokensButton> = {

@@ -15,6 +15,7 @@ const createInitialState = () => ({
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },
     transactionExecution: true,
+    addressEmojis: true,
   },
   chains: {
     data: [

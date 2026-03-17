@@ -20,6 +20,7 @@ export function createDefaultSettings(isDarkMode: boolean) {
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },
     transactionExecution: true,
+    addressEmojis: true,
   }
 }
 

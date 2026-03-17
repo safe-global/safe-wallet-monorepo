@@ -29,6 +29,7 @@ const meta: Meta<typeof RefreshPositionsButton> = {
             env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
             signing: { onChainSigning: false, blindSigning: false },
             transactionExecution: true,
+            addressEmojis: true,
           },
           safeInfo: {
             data: {

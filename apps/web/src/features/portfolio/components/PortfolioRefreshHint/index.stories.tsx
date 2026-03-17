@@ -17,6 +17,7 @@ const baseInitialState = {
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },
     transactionExecution: true,
+    addressEmojis: true,
     tokenList: TOKEN_LISTS.TRUSTED,
   },
   safeInfo: {

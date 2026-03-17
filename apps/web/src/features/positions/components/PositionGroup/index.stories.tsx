@@ -97,6 +97,7 @@ const meta: Meta<typeof PositionGroup> = {
             env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
             signing: { onChainSigning: false, blindSigning: false },
             transactionExecution: true,
+            addressEmojis: true,
           },
         }}
       >

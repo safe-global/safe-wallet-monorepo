@@ -3,6 +3,7 @@ import { Box, Skeleton } from '@mui/material'
 
 import css from './styles.module.css'
 import Identicon, { type IdenticonProps } from '../Identicon'
+import AddressEmoji from '../AddressEmoji'
 import { useChain } from '@/hooks/useChains'
 
 interface ThresholdProps {
@@ -53,6 +54,7 @@ const SafeIcon = ({
     <div data-testid="safe-icon" className={css.container}>
       {threshold && owners ? <Threshold threshold={threshold} owners={owners} /> : null}
       {isMultiChainItem && chainId ? <ChainIcon chainId={chainId} /> : <Identicon address={address} size={size} />}
+      <AddressEmoji address={address} size={size} />
     </div>
   )
 }

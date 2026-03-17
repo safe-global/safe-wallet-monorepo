@@ -13,12 +13,14 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { Emoji } from '../../AddressEmoji'
 
 export type EthHashInfoProps = {
   address: string
   chainId?: string
   name?: string | null
   showAvatar?: boolean
+  showEmoji?: boolean
   onlyName?: boolean
   showCopyButton?: boolean
   prefix?: string
@@ -48,6 +50,7 @@ const SrcEthHashInfo = ({
   shortAddress = true,
   copyAddress = true,
   showAvatar = true,
+  showEmoji,
   onlyName = false,
   avatarSize,
   name,
@@ -105,6 +108,7 @@ const SrcEthHashInfo = ({
           ) : (
             identicon
           )}
+          {showEmoji && <Emoji address={address} size={avatarSize} />}
         </div>
       )}
 
