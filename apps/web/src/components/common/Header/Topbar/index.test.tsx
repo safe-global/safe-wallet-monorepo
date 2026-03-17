@@ -164,12 +164,13 @@ describe('Topbar', () => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
     })
 
-    it('uses undefined label when spaceId is null', () => {
+    it('does not fire when spaceId is null (outside Spaces)', () => {
       mockUseCurrentSpaceId.mockReturnValue(null)
       render(<Topbar />)
       screen.getByText('trigger-switch').click()
+      screen.getByText('trigger-disconnect').click()
 
-      expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.WALLET_SWITCHED, label: undefined }, { spaceId: null })
+      expect(trackEvent).not.toHaveBeenCalled()
     })
   })
 

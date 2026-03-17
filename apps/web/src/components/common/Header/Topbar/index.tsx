@@ -34,11 +34,13 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   const spaceId = useCurrentSpaceId()
 
   const handleWalletSwitch = () => {
-    trackEvent({ ...SPACE_EVENTS.WALLET_SWITCHED, label: spaceId ?? undefined }, { spaceId })
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.WALLET_SWITCHED, label: spaceId }, { spaceId })
   }
 
   const handleWalletDisconnect = () => {
-    trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId ?? undefined }, { spaceId })
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
   }
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isMobile)
