@@ -13,7 +13,7 @@ import {
 import { useSpaceAccountsData } from '@/features/myAccounts'
 import SpaceDashboard from '../index'
 
-const MOCK_SPACE_ID = 'space-42'
+const MOCK_SPACE_ID = '42'
 const MOCK_SAFE_ADDRESS = '0xaaaa567890abcdef1234567890abcdef12345678'
 const MOCK_TX_ID = 'multisig_0xbbbb_123'
 
@@ -191,6 +191,22 @@ describe('SpaceDashboard – SPACES_ENTRY_VIEWED tracking', () => {
 
     const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
     expect(calls).toHaveLength(1)
+  })
+
+  it('fires SPACES_ENTRY_VIEWED exactly once more when spaceId changes, with the new spaceId', () => {
+    const spaceIdMock = useCurrentSpaceId as jest.Mock
+    const { rerender } = render(<SpaceDashboard />)
+
+    spaceIdMock.mockReturnValue('99')
+    rerender(<SpaceDashboard />)
+
+    const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
+    expect(calls).toHaveLength(2)
+    expect(calls[0]).toEqual([
+      { ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: MOCK_SPACE_ID },
+      { spaceId: MOCK_SPACE_ID },
+    ])
+    expect(calls[1]).toEqual([{ ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: '99' }, { spaceId: '99' }])
   })
 })
 
