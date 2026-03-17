@@ -72,13 +72,17 @@ describe('ApiCtaSidebar', () => {
     it('renders the description', () => {
       render(<ApiCtaSidebar />)
 
-      expect(screen.getByText('Start building with our new Safe API')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.',
+        ),
+      ).toBeInTheDocument()
     })
 
     it('renders the CTA link with correct attributes', () => {
       render(<ApiCtaSidebar />)
 
-      const link = screen.getByRole('link', { name: /Try the API/i })
+      const link = screen.getByRole('link', { name: /Get API key/i })
       expect(link).toHaveAttribute('href', 'https://developer.safe.global/login')
       expect(link).toHaveAttribute('target', '_blank')
       expect(link).toHaveAttribute('rel', 'noopener noreferrer')

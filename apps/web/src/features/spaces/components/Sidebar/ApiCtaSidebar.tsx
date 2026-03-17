@@ -42,7 +42,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-5 group-data-[collapsible=icon]:hidden"
+      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-3 group-data-[collapsible=icon]:hidden"
       data-testid="api-cta-sidebar"
     >
       <div className="flex w-full items-start justify-between">
@@ -64,7 +64,7 @@ export const ApiCtaSidebar = (): ReactElement => {
       </div>
 
       <Typography variant="paragraph-small" color="muted" className="leading-snug">
-        Start building with our new Safe API
+        Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
       </Typography>
 
       <Button
@@ -73,7 +73,7 @@ export const ApiCtaSidebar = (): ReactElement => {
         className="w-auto self-start !bg-background hover:!bg-muted"
         render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
       >
-        Try the API
+        Get API key
       </Button>
     </div>
   )

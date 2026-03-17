@@ -48,7 +48,10 @@ export const SidebarTopBar = (): ReactElement => {
         />
       </button>
       <SidebarTrigger
-        className="shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+        className={cn(
+          'shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
+          isCollapsed && 'mt-2',
+        )}
         data-testid="sidebar-trigger"
       />
     </div>
