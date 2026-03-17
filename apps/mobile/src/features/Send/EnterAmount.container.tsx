@@ -129,8 +129,6 @@ export function EnterAmountContainer() {
             <AmountDisplay
               primaryDisplay={fiatConversion.primaryDisplay}
               secondaryDisplay={fiatConversion.secondaryDisplay}
-              onToggle={fiatConversion.toggleMode}
-              canToggle={fiatConversion.hasFiatPrice}
               hasValue={rawInput.length > 0}
             />
 
@@ -196,6 +194,7 @@ export function EnterAmountContainer() {
         onAddCustomNonce={nonce.handleAddCustomNonce}
         onEndReached={nonce.fetchMore}
         isFetchingMore={nonce.isFetchingMore}
+        onChange={nonce.handleNonceSheetChange}
       />
 
       <CustomNonceModal
