@@ -157,6 +157,20 @@ describe('useSpaceChainSelector', () => {
     expect(result.current.chains).toHaveLength(1)
   })
 
+  it('falls back to null for chainLogoUri when chain config exists but chainLogoUri is missing', () => {
+    ;(useChains as jest.Mock).mockReturnValue({
+      configs: [{ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }],
+    })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+    expect(result.current.chains[0]).toMatchObject({
+      chainId: '1',
+      chainName: 'Ethereum',
+      shortName: 'eth',
+      chainLogoUri: null,
+    })
+  })
+
   it('falls back to chainId for chainName/shortName when chain config is missing', () => {
     const unknownSafe: SafeItem = {
       chainId: '42161',

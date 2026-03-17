@@ -24,7 +24,7 @@ function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDi
         (isLoading ? (
           <Skeleton className="h-5 w-12 rounded-full" />
         ) : (
-          <BalanceDisplay balance="" threshold={threshold} owners={owners} showThreshold={true} />
+          <BalanceDisplay threshold={threshold} owners={owners} />
         ))}
     </div>
   )
