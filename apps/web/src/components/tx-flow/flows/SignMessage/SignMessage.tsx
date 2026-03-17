@@ -317,6 +317,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
     if (isEip712) {
       setContextSafeMessage(decodedMessage)
       setContextSafeMessageHash(safeMessageHash as `0x${string}`)
+    } else {
+      setContextSafeMessage(undefined)
+      setContextSafeMessageHash(undefined)
     }
   }, [decodedMessage, isEip712, setContextSafeMessage, setContextSafeMessageHash, safeMessageHash])
 
