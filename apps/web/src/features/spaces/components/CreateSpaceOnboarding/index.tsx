@@ -16,6 +16,7 @@ import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import SafeLogo from '@/public/images/logo-no-text.svg'
+import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import { containerVariants, itemVariants, iconVariants } from './utils'
@@ -86,7 +87,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => router.back()}
+            onClick={() => router.push(AppRoutes.welcome.spaces)}
             className="self-start rounded-md border border-card shadow-sm"
           >
             <ChevronLeft className="size-5" />
