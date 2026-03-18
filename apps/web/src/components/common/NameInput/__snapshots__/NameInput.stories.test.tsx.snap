@@ -13,8 +13,8 @@ exports[`./NameInput.stories Default 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r0»"
-        id="«r0»-label"
+        for="_r_1_"
+        id="_r_1_-label"
       >
         Owner name
       </label>
@@ -24,16 +24,16 @@ exports[`./NameInput.stories Default 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r0»"
+          id="_r_1_"
           name="ownerName"
           type="text"
         />
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Owner name
@@ -59,8 +59,8 @@ exports[`./NameInput.stories Disabled 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-disabled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r1»"
-        id="«r1»-label"
+        for="_r_3_"
+        id="_r_3_-label"
       >
         Owner name
       </label>
@@ -71,16 +71,16 @@ exports[`./NameInput.stories Disabled 1`] = `
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input Mui-disabled mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
           disabled=""
-          id="«r1»"
+          id="_r_3_"
           name="ownerName"
           type="text"
         />
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Owner name
@@ -106,8 +106,8 @@ exports[`./NameInput.stories Required 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary Mui-required MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r2»"
-        id="«r2»-label"
+        for="_r_5_"
+        id="_r_5_-label"
       >
         Owner name
         <span
@@ -124,17 +124,17 @@ exports[`./NameInput.stories Required 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r2»"
+          id="_r_5_"
           name="ownerName"
           required=""
           type="text"
         />
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Owner name
@@ -162,8 +162,8 @@ exports[`./NameInput.stories WithPlaceholder 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r3»"
-        id="«r3»-label"
+        for="_r_7_"
+        id="_r_7_-label"
       >
         Owner name
       </label>
@@ -173,17 +173,17 @@ exports[`./NameInput.stories WithPlaceholder 1`] = `
         <input
           aria-invalid="false"
           class="MuiInputBase-input MuiOutlinedInput-input mui-style-1eoo0u4-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r3»"
+          id="_r_7_"
           name="ownerName"
           placeholder="Enter owner name"
           type="text"
         />
         <fieldset
           aria-hidden="true"
-          class="MuiOutlinedInput-notchedOutline mui-style-1focg1t-MuiOutlinedInput-notchedOutline"
+          class="MuiOutlinedInput-notchedOutline mui-style-oct7z5-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
         >
           <legend
-            class="mui-style-81qg8w"
+            class="mui-style-1n64csd-MuiNotchedOutlined-root"
           >
             <span>
               Owner name

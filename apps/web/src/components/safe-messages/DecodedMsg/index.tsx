@@ -5,7 +5,7 @@ import { isByte } from '@/utils/transaction-guards'
 import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Box, Typography } from '@mui/material'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
 import type { ReactElement } from 'react'
@@ -92,10 +92,10 @@ export const DecodedMsg = ({
         borderRadius: (theme) => `${theme.shape.borderRadius}px`,
       }}
     >
-      <ErrorBoundary fallback={<div>Error decoding message</div>}>
+      <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={EIP712_DOMAIN_TYPE} />
         <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={normalizedMsg.primaryType} />
-      </ErrorBoundary>
+      </ObservabilityErrorBoundary>
     </Box>
   )
 }

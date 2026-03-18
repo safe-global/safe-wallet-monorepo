@@ -356,18 +356,6 @@ const SafeLicenses = () => (
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>@sentry/react</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/getsentry/sentry-javascript/blob/develop/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>@sentry/tracing</TableCell>
-              <TableCell>
-                <ExternalLink href="https://github.com/getsentry/sentry-javascript/blob/develop/LICENSE" />
-              </TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell>@web3-onboard/coinbase</TableCell>
               <TableCell>
                 <ExternalLink href="https://github.com/blocknative/web3-onboard/blob/main/LICENSE" />

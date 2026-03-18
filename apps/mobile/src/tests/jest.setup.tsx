@@ -214,7 +214,6 @@ jest.mock('@/src/utils/logger', () => ({
     trace: jest.fn(),
     setLevel: jest.fn(),
     shouldLog: jest.fn(),
-    setShouldLogErrorToSentry: jest.fn(),
   },
   LogLevel: {
     TRACE: 0,
@@ -271,6 +270,11 @@ jest.mock('@react-native-firebase/crashlytics', () => {
     },
   }
 })
+
+jest.mock('@datadog/mobile-react-native', () => require('@datadog/mobile-react-native/jest'))
+jest.mock('expo-datadog', () => require('@datadog/mobile-react-native/jest'))
+
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'))
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

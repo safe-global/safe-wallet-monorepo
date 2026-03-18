@@ -24,6 +24,7 @@ const createMockStore = (initialState?: Partial<SettingsState>) => {
         tokenList: TOKEN_LISTS.TRUSTED,
         hideDust: true,
         preferFiatInput: true,
+        dataCollectionConsented: false,
         env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
         ...initialState,
       },

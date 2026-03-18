@@ -26,6 +26,7 @@ const defaultSettings: SettingsState = {
   tokenList: TOKEN_LISTS.TRUSTED,
   hideDust: true,
   preferFiatInput: true,
+  dataCollectionConsented: false,
   env: {
     rpc: {},
     tenderly: {

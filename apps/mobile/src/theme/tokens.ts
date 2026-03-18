@@ -1,6 +1,8 @@
 import { createTokens } from 'tamagui'
 import { zIndex } from '@tamagui/themes'
-import { generateTamaguiColorTokens, radius, generateTamaguiFontSizes, spacingMobile } from '@safe-global/theme'
+import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-global/theme/generators/tamagui'
+import { radius } from '@safe-global/theme/tokens/radius'
+import { spacingMobile } from '@safe-global/theme/tokens/spacing'
 
 // Generate color tokens from unified palettes
 const colors = generateTamaguiColorTokens()
