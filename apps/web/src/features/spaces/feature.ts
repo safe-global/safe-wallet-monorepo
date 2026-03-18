@@ -32,6 +32,7 @@ import SpaceMembersPage from './components/Members/Page'
 import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import SpaceSettingsPage from './components/SpaceSettings/Page'
+import AddToSpaceButton from './components/AddToSpaceButton'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -55,6 +56,7 @@ const feature: SpacesContract = {
   SpaceSafeContextMenu,
   SendTransactionButton,
   PendingTxWidget,
+  AddToSpaceButton,
 
   // Page components
   SpaceDashboardPage,

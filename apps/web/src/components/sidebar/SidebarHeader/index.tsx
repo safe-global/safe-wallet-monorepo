@@ -1,4 +1,5 @@
 import { CounterfactualFeature } from '@/features/counterfactual'
+import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement } from 'react'
 import IconButton from '@mui/material/IconButton'
@@ -6,7 +7,6 @@ import Tooltip from '@mui/material/Tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NewTxButton from '@/components/sidebar/NewTxButton'
-import AddToSpaceButton from '@/components/sidebar/AddToSpaceButton'
 import { useAppSelector } from '@/store'
 
 import css from './styles.module.css'
@@ -36,6 +36,7 @@ const SafeHeader = (): ReactElement => {
   const chain = useCurrentChain()
   const settings = useAppSelector(selectSettings)
   const { CounterfactualStatusButton } = useLoadFeature(CounterfactualFeature)
+  const { AddToSpaceButton } = useLoadFeature(SpacesFeature)
 
   const addressCopyText = settings.shortName.copy && chain ? `${chain.shortName}:${safeAddress}` : safeAddress
 

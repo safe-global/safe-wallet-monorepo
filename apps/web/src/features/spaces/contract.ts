@@ -28,6 +28,7 @@ import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import type SpaceSettingsPage from './components/SpaceSettings/Page'
+import type AddToSpaceButton from './components/AddToSpaceButton'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -52,6 +53,7 @@ export interface SpacesContract {
   SpaceSafeContextMenu: typeof SpaceSafeContextMenu
   SendTransactionButton: typeof SendTransactionButton
   PendingTxWidget: typeof PendingTxWidget
+  AddToSpaceButton: typeof AddToSpaceButton
 
   // Page components (PascalCase) - stub renders null
   SpaceDashboardPage: typeof SpaceDashboardPage
