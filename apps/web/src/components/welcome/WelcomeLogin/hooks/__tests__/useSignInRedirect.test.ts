@@ -2,8 +2,6 @@ import { renderHook, act } from '@/tests/test-utils'
 import { useSignInRedirect } from '../useSignInRedirect'
 import * as router from 'next/router'
 import * as store from '@/store'
-import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
 
 // ---------------------------------------------------------------------------
@@ -24,47 +22,43 @@ jest.mock('next/router', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-const mockTriggerSpacesQuery = jest.fn()
-const mockDispatch = jest.fn()
-
-interface SetupOptions {
-  currentSpaceId?: string | null
-  isAuthenticated?: boolean
-  reactiveSpaces?: Array<{ id: number; name: string }> | undefined
-  routerQuery?: Record<string, string>
+interface DefaultProps {
+  spacesAmount: number
+  inviteAmount: number
+  isSpacesLoading: boolean
+  error: Error | undefined
 }
 
-const setupMocks = ({
-  currentSpaceId = null,
-  isAuthenticated = true,
-  reactiveSpaces = undefined,
-  routerQuery = {},
-}: SetupOptions = {}) => {
+const defaultProps: DefaultProps = {
+  spacesAmount: 0,
+  inviteAmount: 0,
+  isSpacesLoading: false,
+  error: undefined,
+}
+
+interface SetupOptions {
+  isAuthenticated?: boolean
+  routerQuery?: Record<string, string>
+  props?: Partial<DefaultProps>
+}
+
+const setupMocks = ({ isAuthenticated = true, routerQuery = {} }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({
     pathname: '/welcome',
     query: routerQuery,
     push: mockPush,
   })
 
-  jest.spyOn(store, 'useAppDispatch').mockReturnValue(mockDispatch)
   jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
-        lastUsedSpace: currentSpaceId,
+        lastUsedSpace: null,
         isStoreHydrated: true,
       },
     }
     return selector(fakeState as unknown as store.RootState)
   })
-
-  jest.spyOn(spacesQueries, 'useSpacesGetV1Query').mockReturnValue({
-    data: reactiveSpaces,
-  } as unknown as ReturnType<typeof spacesQueries.useSpacesGetV1Query>)
-
-  jest
-    .spyOn(spacesQueries, 'useLazySpacesGetV1Query')
-    .mockReturnValue([mockTriggerSpacesQuery] as unknown as ReturnType<typeof spacesQueries.useLazySpacesGetV1Query>)
 }
 
 // ---------------------------------------------------------------------------
@@ -76,70 +70,44 @@ describe('useSignInRedirect', () => {
     jest.clearAllMocks()
   })
 
-  it('should return redirect function and spaces data', () => {
+  it('should return setHasSignedIn and redirectLoading', () => {
     setupMocks()
 
-    const { result } = renderHook(() => useSignInRedirect())
+    const { result } = renderHook(() => useSignInRedirect(defaultProps))
 
-    expect(result.current.redirect).toBeDefined()
-    expect(typeof result.current.redirect).toBe('function')
-    expect(result.current.spaces).toBeUndefined()
-  })
-
-  it('should return reactive spaces when authenticated', () => {
-    const spaces = [{ id: 1, name: 'My Space' }]
-    setupMocks({ isAuthenticated: true, reactiveSpaces: spaces })
-
-    const { result } = renderHook(() => useSignInRedirect())
-
-    expect(result.current.spaces).toEqual(spaces)
+    expect(result.current.setHasSignedIn).toBeDefined()
+    expect(typeof result.current.setHasSignedIn).toBe('function')
+    expect(result.current.redirectLoading).toBe(false)
   })
 
   // -----------------------------------------------------------------------
-  // Redirect when user has no spaces
+  // Redirect for new users (no spaces, no invites)
   // -----------------------------------------------------------------------
 
-  describe('when user has no spaces', () => {
-    it('should redirect to create space page when spaces are empty', async () => {
+  describe('when user is new (no spaces, no invites)', () => {
+    it('should redirect to create space page after sign-in', async () => {
       setupMocks()
-      mockTriggerSpacesQuery.mockResolvedValue({ data: [] })
 
-      const { result } = renderHook(() => useSignInRedirect())
+      const { result } = renderHook(() => useSignInRedirect(defaultProps))
 
       await act(async () => {
-        await result.current.redirect()
+        result.current.setHasSignedIn(true)
       })
 
       expect(mockPush).toHaveBeenCalledWith({
         pathname: AppRoutes.welcome.createSpace,
         query: {},
       })
-    })
-
-    it('should redirect to create space page when spaces data is undefined', async () => {
-      setupMocks()
-      mockTriggerSpacesQuery.mockResolvedValue({ data: undefined })
-
-      const { result } = renderHook(() => useSignInRedirect())
-
-      await act(async () => {
-        await result.current.redirect()
-      })
-
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.welcome.createSpace,
-        query: {},
-      })
+      expect(result.current.redirectLoading).toBe(true)
     })
 
     it('should preserve query parameters when redirecting to create space', async () => {
       setupMocks({ routerQuery: { chain: 'eth' } })
-      mockTriggerSpacesQuery.mockResolvedValue({ data: [] })
 
-      const { result } = renderHook(() => useSignInRedirect())
+      const { result } = renderHook(() => useSignInRedirect(defaultProps))
 
       await act(async () => {
-        await result.current.redirect()
+        result.current.setHasSignedIn(true)
       })
 
       expect(mockPush).toHaveBeenCalledWith({
@@ -150,107 +118,111 @@ describe('useSignInRedirect', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Redirect when user has spaces but no last used space
+  // Redirect when spaces endpoint returns 404
   // -----------------------------------------------------------------------
 
-  describe('when user has spaces but no last used space', () => {
-    it('should redirect to the first space and set it as last used', async () => {
-      const spaces = [
-        { id: 10, name: 'First Space' },
-        { id: 20, name: 'Second Space' },
-      ]
-      setupMocks({ currentSpaceId: null })
-      mockTriggerSpacesQuery.mockResolvedValue({ data: spaces })
+  describe('when spaces endpoint returns 404', () => {
+    it('should redirect to create space page', async () => {
+      setupMocks()
+      const notFoundError = { status: 404, data: 'Not Found' } as unknown as Error
 
-      const { result } = renderHook(() => useSignInRedirect())
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, error: notFoundError }))
 
       await act(async () => {
-        await result.current.redirect()
+        result.current.setHasSignedIn(true)
       })
 
-      expect(mockDispatch).toHaveBeenCalledWith(setLastUsedSpace('10'))
       expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.spaces.index,
-        query: { spaceId: '10' },
+        pathname: AppRoutes.welcome.createSpace,
+        query: {},
       })
     })
   })
 
   // -----------------------------------------------------------------------
-  // Redirect when user has spaces and a valid last used space
+  // No redirect when not signed in
   // -----------------------------------------------------------------------
 
-  describe('when user has spaces and a valid last used space', () => {
-    it('should redirect to the last used space', async () => {
-      const spaces = [
-        { id: 10, name: 'First Space' },
-        { id: 20, name: 'Second Space' },
-      ]
-      setupMocks({ currentSpaceId: '20' })
-      mockTriggerSpacesQuery.mockResolvedValue({ data: spaces })
+  describe('when user has not signed in yet', () => {
+    it('should not redirect if hasSignedIn is false', () => {
+      setupMocks()
 
-      const { result } = renderHook(() => useSignInRedirect())
+      renderHook(() => useSignInRedirect(defaultProps))
 
-      await act(async () => {
-        await result.current.redirect()
-      })
-
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.spaces.index,
-        query: { spaceId: '20' },
-      })
-      // Should NOT dispatch setLastUsedSpace since it is already correct
-      expect(mockDispatch).not.toHaveBeenCalledWith(setLastUsedSpace(expect.anything()))
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
   // -----------------------------------------------------------------------
-  // Redirect when last used space is no longer valid
+  // No redirect when user has spaces
   // -----------------------------------------------------------------------
 
-  describe('when last used space is no longer valid', () => {
-    it('should fall back to the first space and update last used', async () => {
-      const spaces = [
-        { id: 10, name: 'First Space' },
-        { id: 20, name: 'Second Space' },
-      ]
-      setupMocks({ currentSpaceId: '999' })
-      mockTriggerSpacesQuery.mockResolvedValue({ data: spaces })
+  describe('when user has existing spaces', () => {
+    it('should not redirect to create space page', async () => {
+      setupMocks()
 
-      const { result } = renderHook(() => useSignInRedirect())
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
 
       await act(async () => {
-        await result.current.redirect()
+        result.current.setHasSignedIn(true)
       })
 
-      expect(mockDispatch).toHaveBeenCalledWith(setLastUsedSpace('10'))
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.spaces.index,
-        query: { spaceId: '10' },
-      })
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
   // -----------------------------------------------------------------------
-  // Query parameter preservation
+  // No redirect when user has invites
   // -----------------------------------------------------------------------
 
-  describe('query parameter preservation', () => {
-    it('should preserve existing query parameters when redirecting to spaces', async () => {
-      const spaces = [{ id: 5, name: 'Space' }]
-      setupMocks({ currentSpaceId: null, routerQuery: { safe: 'eth:0x123' } })
-      mockTriggerSpacesQuery.mockResolvedValue({ data: spaces })
+  describe('when user has pending invites', () => {
+    it('should not redirect to create space page', async () => {
+      setupMocks()
 
-      const { result } = renderHook(() => useSignInRedirect())
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, inviteAmount: 1 }))
 
       await act(async () => {
-        await result.current.redirect()
+        result.current.setHasSignedIn(true)
       })
 
-      expect(mockPush).toHaveBeenCalledWith({
-        pathname: AppRoutes.spaces.index,
-        query: { safe: 'eth:0x123', spaceId: '5' },
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // No redirect on non-404 errors
+  // -----------------------------------------------------------------------
+
+  describe('when there is a non-404 error', () => {
+    it('should not redirect', async () => {
+      setupMocks()
+      const serverError = { status: 500, data: 'Server Error' } as unknown as Error
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, error: serverError }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
       })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // No redirect while spaces are loading
+  // -----------------------------------------------------------------------
+
+  describe('when spaces are still loading', () => {
+    it('should not redirect', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, isSpacesLoading: true }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 })

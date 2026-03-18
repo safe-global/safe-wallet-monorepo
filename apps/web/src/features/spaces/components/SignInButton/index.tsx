@@ -8,9 +8,14 @@ import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 
-const SignInButton = () => {
+interface SignInButtonProps {
+  redirectLoading: boolean
+  afterSignIn: () => void
+}
+
+const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProps) => {
   const dispatch = useAppDispatch()
-  const { signIn } = useSiwe()
+  const { signIn, loading } = useSiwe()
 
   const handleLogin = () => {
     trackEvent({ ...OVERVIEW_EVENTS.OPEN_ONBOARD, label: OVERVIEW_LABELS.space_list_page })
@@ -29,6 +34,7 @@ const SignInButton = () => {
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
+        afterSignIn()
       }
     } catch (error) {
       logError(ErrorCodes._640)
@@ -43,7 +49,14 @@ const SignInButton = () => {
     }
   }
 
-  return <WalletLogin onLogin={handleLogin} onContinue={handleSignIn} buttonText="Sign in with" />
+  return (
+    <WalletLogin
+      onLogin={handleLogin}
+      onContinue={handleSignIn}
+      isLoading={loading || redirectLoading}
+      buttonText="Sign in with"
+    />
+  )
 }
 
 export default SignInButton
