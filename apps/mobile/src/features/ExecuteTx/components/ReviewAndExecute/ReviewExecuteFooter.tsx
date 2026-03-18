@@ -7,8 +7,7 @@ import { SelectExecutor } from '@/src/components/SelectExecutor'
 import { EstimatedNetworkFee } from '../EstimatedNetworkFee'
 import { Container } from '@/src/components/Container'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { Skeleton } from 'moti/skeleton'
-import { useTheme } from '@/src/theme/hooks/useTheme'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { getSubmitButtonText } from './helpers'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -44,7 +43,6 @@ export function ReviewExecuteFooter({
   onConfirmPress,
 }: ReviewExecuteFooterProps) {
   const insets = useSafeAreaInsets()
-  const { colorScheme } = useTheme()
 
   const isButtonDisabled = !hasSufficientFunds || isExecuting
   const buttonText = isExecuting ? 'Executing...' : getSubmitButtonText(hasSufficientFunds)
@@ -79,9 +77,9 @@ export function ReviewExecuteFooter({
       </Container>
 
       {isCheckingFunds ? (
-        <Skeleton.Group show>
-          <Skeleton colorMode={colorScheme} height={44} width="100%" radius={12} />
-        </Skeleton.Group>
+        <SafeSkeleton.Group show>
+          <SafeSkeleton height={44} width="100%" radius={12} />
+        </SafeSkeleton.Group>
       ) : (
         <SafeButton onPress={onConfirmPress} width="100%" disabled={isButtonDisabled} loading={isExecuting}>
           {buttonText}

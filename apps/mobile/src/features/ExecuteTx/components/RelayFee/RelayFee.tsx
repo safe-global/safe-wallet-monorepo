@@ -1,8 +1,7 @@
 import { GradientText } from '@/src/components/GradientText'
-import { useTheme } from '@/src/theme/hooks/useTheme'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 
-import { Skeleton } from 'moti/skeleton'
 import { getTokenValue, Text, View } from 'tamagui'
 import { CanNotEstimate } from '../CanNotEstimate'
 import { TouchableOpacity } from 'react-native'
@@ -15,8 +14,6 @@ interface RelayFeeProps {
 }
 
 export const RelayFee = ({ isLoadingRelays, willFail, relaysRemaining, onFailTextPress }: RelayFeeProps) => {
-  const { colorScheme } = useTheme()
-
   return (
     <View alignItems="flex-end" flexDirection="row" justifyContent="center" gap="$2">
       {willFail ? (
@@ -32,7 +29,7 @@ export const RelayFee = ({ isLoadingRelays, willFail, relaysRemaining, onFailTex
           </View>
 
           {isLoadingRelays ? (
-            <Skeleton colorMode={colorScheme} height={16} width={80} />
+            <SafeSkeleton height={16} width={80} />
           ) : (
             relaysRemaining && <Text fontWeight={700}>{relaysRemaining.remaining} left / day</Text>
           )}

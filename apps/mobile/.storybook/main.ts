@@ -1,8 +1,12 @@
 import type { StorybookConfig as WebStorybookConfig } from '@storybook/react-webpack5'
 import type { StorybookConfig as RNStorybookConfig } from '@storybook/react-native'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import { globSync } from 'glob'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 let config: WebStorybookConfig | RNStorybookConfig
 const isWeb = process.env.STORYBOOK_WEB
@@ -29,8 +33,6 @@ if (isWeb) {
   config = {
     stories: [...getStories()],
     addons: [
-      '@storybook/addon-essentials',
-      '@storybook/addon-interactions',
       {
         name: '@storybook/addon-react-native-web',
         options: {
@@ -38,7 +40,6 @@ if (isWeb) {
           modulesToTranspile: [],
         },
       },
-      '@storybook/addon-webpack5-compiler-babel',
     ],
     /**
      * Use standard framework configuration instead of path resolution.

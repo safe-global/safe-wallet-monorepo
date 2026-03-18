@@ -106,6 +106,7 @@ exports[`PositionItem renders correctly 1`] = `
                 onLoadStart={[Function]}
                 onProgress={[Function]}
                 placeholder={[]}
+                sfEffect={null}
                 source={
                   [
                     {
@@ -119,6 +120,8 @@ exports[`PositionItem renders correctly 1`] = `
                     "flex": 1,
                   }
                 }
+                symbolSize={null}
+                symbolWeight={null}
                 testID="logo-image"
                 transition={null}
               />
