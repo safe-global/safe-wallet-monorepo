@@ -166,7 +166,14 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button size="sm" className="font-bold" disabled={!isAdmin} onClick={() => setOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="!border-[var(--color-border-light)] font-bold"
+            disabled={!isAdmin}
+            onClick={() => setOpen(true)}
+            data-testid="add-space-account-button"
+          >
             <Plus className="size-4" />
             Add account
           </Button>

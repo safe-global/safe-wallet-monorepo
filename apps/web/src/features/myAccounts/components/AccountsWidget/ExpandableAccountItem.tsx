@@ -11,15 +11,17 @@ import type { Account } from './types'
 interface ExpandableAccountItemProps {
   account: Account
   loading?: boolean
+  testId?: string
 }
 
-const ExpandableAccountItem = ({ account, loading = false }: ExpandableAccountItemProps): ReactElement => {
+const ExpandableAccountItem = ({ account, loading = false, testId }: ExpandableAccountItemProps): ReactElement => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
+        data-testid={testId}
         className={cn(
           'flex w-full items-center justify-between rounded-sm py-4 px-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',

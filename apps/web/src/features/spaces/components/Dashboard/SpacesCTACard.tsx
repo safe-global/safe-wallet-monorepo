@@ -32,6 +32,7 @@ const SpacesCTACard = () => {
               right: 0,
             }}
             aria-label="Invite team members"
+            data-testid="learn-more-button"
           >
             Learn more
           </Button>

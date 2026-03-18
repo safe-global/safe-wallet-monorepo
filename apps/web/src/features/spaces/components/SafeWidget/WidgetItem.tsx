@@ -14,6 +14,7 @@ interface WidgetItemProps {
   actionNode?: ReactNode
   highlighted?: boolean
   className?: string
+  testId?: string
 }
 
 const WidgetItem = ({
@@ -26,6 +27,7 @@ const WidgetItem = ({
   actionNode,
   highlighted = false,
   className,
+  testId,
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
@@ -34,6 +36,7 @@ const WidgetItem = ({
   return (
     <div
       data-slot="widget-item"
+      data-testid={testId}
       role={href ? 'button' : undefined}
       tabIndex={href ? 0 : undefined}
       onClick={handleClick}

@@ -52,6 +52,7 @@ const AddressBookCard = () => {
               size="medium"
               sx={{ position: 'absolute', top: 0, right: 0 }}
               aria-label="Import address book"
+              data-testid="import-address-book-button"
             >
               Import address book
             </Button>

@@ -12,11 +12,13 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 interface AccountWidgetItemProps {
   account: Account
   loading?: boolean
+  testId?: string
 }
 
-const AccountWidgetItem = ({ account, loading = false }: AccountWidgetItemProps): ReactElement => {
+const AccountWidgetItem = ({ account, loading = false, testId }: AccountWidgetItemProps): ReactElement => {
   return (
     <WidgetItem
+      testId={testId}
       href={account.href}
       label={<Typography variant="paragraph-bold">{account.name}</Typography>}
       info={

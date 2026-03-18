@@ -49,11 +49,21 @@ const AccountsWidget = ({
     <SafeWidget title="Accounts" action={action}>
       {loading
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : accounts.map((account) =>
+        : accounts.map((account, index) =>
             account.safes.length > 1 ? (
-              <ExpandableAccountItem key={account.address} account={account} loading={loading} />
+              <ExpandableAccountItem
+                key={account.address}
+                account={account}
+                loading={loading}
+                testId={`account-item-${index}`}
+              />
             ) : (
-              <AccountWidgetItem key={account.address} account={account} loading={loading} />
+              <AccountWidgetItem
+                key={account.address}
+                account={account}
+                loading={loading}
+                testId={`account-item-${index}`}
+              />
             ),
           )}
       {!loading && remainingCount !== undefined && (

@@ -61,13 +61,13 @@ const PendingTxWidget = ({ transactions, loading = false, error, onRefresh }: Pe
   }
 
   return (
-    <SafeWidget title="Pending">
+    <SafeWidget title="Pending" testId="pending-tx-widget">
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
       ) : (
-        transactions.map((tx) => {
+        transactions.map((tx, index) => {
           const shortName = tx.chainId ? chainIdToShortName[tx.chainId] : undefined
           const safeParam = shortName && tx.safeAddress ? `${shortName}:${tx.safeAddress}` : undefined
           const href = safeParam ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}` : undefined
@@ -75,6 +75,7 @@ const PendingTxWidget = ({ transactions, loading = false, error, onRefresh }: Pe
           return (
             <SafeWidget.Item
               key={tx.transaction.id}
+              testId={`pending-tx-item-${index}`}
               href={href}
               className={css.widgetItem}
               label={
