@@ -13,7 +13,7 @@ export const useSpaceSafesWithQueue = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const currency = useAppSelector(selectCurrency)
 
-  const { currentData: spaceSafes, isLoading: isLoadingSafes } = useSpaceSafesGetV1Query(
+  const { currentData: spaceSafes, isFetching: isLoadingSafes } = useSpaceSafesGetV1Query(
     { spaceId: Number(spaceId) },
     { skip: !isUserSignedIn || !spaceId },
   )
@@ -21,7 +21,7 @@ export const useSpaceSafesWithQueue = () => {
   const safesParam = useMemo(() => {
     if (!spaceSafes?.safes) return ''
     return Object.entries(spaceSafes.safes)
-      .flatMap(([chainId, addresses]) => addresses.map((address) => `${chainId}:${address}`))
+      .flatMap(([chainId, addresses]: [string, string[]]) => addresses.map((address) => `${chainId}:${address}`))
       .join(',')
   }, [spaceSafes?.safes])
 

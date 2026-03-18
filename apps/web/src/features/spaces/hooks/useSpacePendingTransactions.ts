@@ -5,6 +5,10 @@ import { getLatestTransactions } from '@/utils/tx-list'
 import { useSpaceSafesWithQueue } from './useSpaceSafesWithQueue'
 
 type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
+type SafeQueueResult = { chainId: string; address: string; transactions: TransactionQueuedItem[] }
+
+const BATCH_SIZE = 3
+const BATCH_DELAY_MS = 300
 
 export const useSpacePendingTransactions = (limit = 3) => {
   const { safesWithQueue, isLoading: isLoadingQueue } = useSpaceSafesWithQueue()
@@ -22,25 +26,25 @@ export const useSpacePendingTransactions = (limit = 3) => {
     setError(undefined)
 
     try {
-      const results = await safesWithQueue.reduce<
-        Promise<Array<{ chainId: string; address: string; transactions: TransactionQueuedItem[] }>>
-      >(async (accPromise, { chainId, address }, index) => {
-        const acc = await accPromise
+      const results: SafeQueueResult[] = []
 
-        if (index > 0) {
-          // Wait for 300ms between requests to avoid rate limiting
-          await new Promise((resolve) => setTimeout(resolve, 300))
+      for (let i = 0; i < safesWithQueue.length; i += BATCH_SIZE) {
+        if (i > 0) {
+          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
         }
 
-        const page = await getTransactionQueue(chainId, address, {
-          trusted: true,
-          cursor: `limit=${limit}&offset=0`,
-        })
-
-        acc.push({ chainId, address, transactions: getLatestTransactions(page.results) })
-
-        return acc
-      }, Promise.resolve([]))
+        const batch = safesWithQueue.slice(i, i + BATCH_SIZE)
+        const batchResults = await Promise.all(
+          batch.map(async ({ chainId, address }) => {
+            const page = await getTransactionQueue(chainId, address, {
+              trusted: true,
+              cursor: `limit=${limit}&offset=0`,
+            })
+            return { chainId, address, transactions: getLatestTransactions(page.results) }
+          }),
+        )
+        results.push(...batchResults)
+      }
 
       const merged = results
         .flatMap(({ chainId, address, transactions }) =>
