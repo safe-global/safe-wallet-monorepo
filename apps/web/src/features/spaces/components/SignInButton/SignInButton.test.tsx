@@ -44,7 +44,7 @@ jest.mock('@safe-global/utils/services/exceptions/ErrorCodes', () => ({
   default: { _640: '_640' },
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
@@ -81,7 +81,7 @@ describe('SignInButton tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
-        failure_reason: 'User rejected',
+        'Failure Reason': 'User rejected',
       })
     })
   })
@@ -94,7 +94,7 @@ describe('SignInButton tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
-        failure_reason: 'Signature failed',
+        'Failure Reason': 'Signature failed',
       })
     })
   })

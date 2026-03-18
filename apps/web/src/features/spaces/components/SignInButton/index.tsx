@@ -7,7 +7,8 @@ import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 const SignInButton = () => {
   const dispatch = useAppDispatch()
@@ -35,7 +36,7 @@ const SignInButton = () => {
       }
     } catch (error) {
       trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
-        failure_reason: error instanceof Error ? error.message : String(error),
+        [MixpanelEventParams.FAILURE_REASON]: error instanceof Error ? error.message : String(error),
       })
       logError(ErrorCodes._640)
 
