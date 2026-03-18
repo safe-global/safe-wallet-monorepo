@@ -1,11 +1,22 @@
 name: 'Yarn'
 
-description: 'Install the dependencies'
+description: 'Set up Node.js and install dependencies'
+
+inputs:
+  after-install:
+    description: 'Run web after-install step to generate contract types'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
     - uses: ./.github/actions/corepack
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '24.14.0'
+        cache: 'yarn'
 
     - name: Restore Yarn Cache & Types
       id: restore-yarn-types
@@ -24,7 +35,7 @@ runs:
       run: yarn install --immutable
 
     - name: Yarn after-install to generate contracts types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
+      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && inputs.after-install == 'true'
       shell: bash
       run: yarn workspace @safe-global/web after-install
 
