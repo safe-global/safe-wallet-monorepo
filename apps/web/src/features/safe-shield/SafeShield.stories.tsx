@@ -148,6 +148,7 @@ export const Loading: Story = {
     recipient: [undefined, undefined, true],
     contract: [undefined, undefined, true],
     threat: [undefined, undefined, true],
+    deadlock: [undefined, undefined, true],
   },
   parameters: {
     docs: {

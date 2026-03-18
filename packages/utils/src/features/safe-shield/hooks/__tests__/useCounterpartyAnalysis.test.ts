@@ -9,7 +9,8 @@ import {
 } from '../address-analysis/address-book-check/useAddressBookCheck'
 import { useAddressActivity, type AddressActivityResult } from '../address-analysis/address-activity/useAddressActivity'
 import { StatusGroup } from '../../types'
-import { RecipientAnalysisResultBuilder } from '../../builders'
+import { RecipientAnalysisResultBuilder, DeadlockAnalysisResultBuilder } from '../../builders'
+import { getErrorInfo, ErrorType } from '../../utils/errors'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 // Mock dependencies
@@ -704,6 +705,171 @@ describe('useCounterpartyAnalysis', () => {
 
       expect(result.current.recipient).toBeDefined()
       expect(result.current.contract).toBeDefined()
+    })
+  })
+
+  describe('deadlock results', () => {
+    it('should return deadlock data when available', async () => {
+      const deadlockData = {
+        '0xAddr': { DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()] },
+      }
+
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { deadlock: deadlockData }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(result.current.deadlock).toBeDefined()
+      })
+
+      const [data, error, loading] = result.current.deadlock
+      expect(data).toEqual(deadlockData)
+      expect(error).toBeUndefined()
+      expect(loading).toBe(false)
+    })
+
+    it('should return undefined for deadlock when no counterparty data', () => {
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: undefined, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      const [data] = result.current.deadlock
+      expect(data).toBeUndefined()
+    })
+
+    it('should return empty deadlock when counterpartyData has empty deadlock object', async () => {
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { deadlock: {} }, error: undefined, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(result.current.deadlock).toBeDefined()
+      })
+
+      const [data] = result.current.deadlock
+      expect(data).toEqual({})
+    })
+
+    it('should return error placeholder when fetchError occurs', async () => {
+      const errorMessage = 'Backend error'
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: undefined, error: { error: errorMessage }, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(result.current.deadlock).toBeDefined()
+      })
+
+      const [data, error] = result.current.deadlock
+      expect(data).toEqual({ [mockSafeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] } })
+      expect(error).toEqual(new Error(errorMessage))
+    })
+
+    it('should return error placeholder even when stale deadlock data exists alongside error', async () => {
+      const deadlockData = {
+        '0xAddr': { DEADLOCK: [DeadlockAnalysisResultBuilder.deadlockDetected().build()] },
+      }
+
+      const errorMessage = 'Backend error'
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: { deadlock: deadlockData }, error: { error: errorMessage }, isLoading: false },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      await waitFor(() => {
+        expect(result.current.deadlock).toBeDefined()
+      })
+
+      const [data, error] = result.current.deadlock
+      expect(data).toEqual({ [mockSafeAddress]: { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.DEADLOCK)] } })
+      expect(data).not.toEqual(deadlockData)
+      expect(error).toEqual(new Error(errorMessage))
+    })
+
+    it('should propagate loading state from mutation to deadlock', () => {
+      mockUseSafeShieldAnalyzeCounterpartyV1Mutation.mockReturnValue([
+        mockTriggerAnalysis,
+        { data: undefined, error: undefined, isLoading: true },
+      ] as any)
+
+      const mockSafeTx = createMockSafeTx(mockRecipientAddress1)
+
+      const { result } = renderHook(() =>
+        useCounterpartyAnalysis({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          safeTx: mockSafeTx,
+          isInAddressBook: mockIsInAddressBook,
+          ownedSafes: mockOwnedSafes,
+        }),
+      )
+
+      const [, , loading] = result.current.deadlock
+      expect(loading).toBe(true)
     })
   })
 

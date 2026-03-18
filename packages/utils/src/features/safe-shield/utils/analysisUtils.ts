@@ -8,6 +8,10 @@ import isEmpty from 'lodash/isEmpty'
  */
 export const SEVERITY_PRIORITY: Record<Severity, number> = { CRITICAL: 0, ERROR: 1, WARN: 1, INFO: 2, OK: 3 }
 
+export const isSeverityHigherOrEqual = (severity: Severity | undefined, threshold: Severity): boolean => {
+  return !!severity && SEVERITY_PRIORITY[severity] <= SEVERITY_PRIORITY[threshold]
+}
+
 /**
  * Sort analysis results by severity (highest severity first)
  * Returns a new array sorted by severity priority: CRITICAL > WARN > INFO > OK
