@@ -81,7 +81,7 @@ const setupDefaults = ({
 
   mockUseSpaceSafesGetV1Query.mockReturnValue({
     currentData: spaceSafes,
-    isLoading: isLoadingSafes,
+    isFetching: isLoadingSafes,
   })
   mockUseSafesGetSafeOverviewV1Query.mockReturnValue({
     currentData: overviews,
