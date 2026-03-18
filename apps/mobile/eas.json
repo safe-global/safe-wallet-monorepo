@@ -60,6 +60,7 @@
       }
     },
     "build-and-maestro-test": {
+      "extends": "base",
       "withoutCredentials": true,
       "environment": "development",
       "env": {
@@ -68,13 +69,10 @@
       },
       "config": "build-and-maestro-test.yml",
       "android": {
-        "buildType": "apk",
-        "image": "latest"
+        "buildType": "apk"
       },
-
       "ios": {
         "simulator": true,
-        "image": "latest",
         "resourceClass": "large"
       }
     }
