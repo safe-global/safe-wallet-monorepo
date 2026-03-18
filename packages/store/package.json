@@ -14,7 +14,8 @@
     "generate-api": "npx @rtk-query/codegen-openapi scripts/openapi-config.ts",
     "build": "yarn fetch-schema && yarn generate-api",
     "build:dev": "NODE_ENV=dev yarn fetch-schema && yarn generate-api",
-    "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api"
+    "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api",
+    "check-sync": "npx tsx scripts/check-auto-generated-sync.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

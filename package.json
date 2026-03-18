@@ -33,6 +33,8 @@
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.2.6",
     "@storybook/react": "^10.2.6",
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
