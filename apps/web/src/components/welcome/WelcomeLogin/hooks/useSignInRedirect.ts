@@ -1,42 +1,40 @@
-import { useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { isAuthenticated, lastUsedSpace, setLastUsedSpace } from '@/store/authSlice'
-import { useLazySpacesGetV1Query, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
-export const useSignInRedirect = () => {
+type RtkError = FetchBaseQueryError | SerializedError
+
+interface UseSignInRedirectProps {
+  spacesAmount: number
+  inviteAmount: number
+  isSpacesLoading: boolean
+  error: RtkError | undefined
+}
+
+const hasNotFoundSpaces = (error?: RtkError) => {
+  return error && 'status' in error && error.status === 404
+}
+
+export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading, error }: UseSignInRedirectProps) => {
+  const [hasSignedIn, setHasSignedIn] = useState(false)
   const router = useRouter()
-  const dispatch = useAppDispatch()
-  const currentSpaceId = useAppSelector(lastUsedSpace)
-  const isSiweAuthenticated = useAppSelector(isAuthenticated)
+  const [redirectLoading, setRedirectLoading] = useState(false)
+  const isUserSignedIn = useAppSelector(isAuthenticated)
 
-  // Reactive query for template UI (skipped until authenticated)
-  const { data: spaces } = useSpacesGetV1Query(undefined, { skip: !isSiweAuthenticated })
+  useEffect(() => {
+    const isNewUser = !inviteAmount && !isSpacesLoading && spacesAmount === 0 && isUserSignedIn
 
-  // Lazy query to fetch fresh spaces data at redirect time
-  const [triggerSpacesQuery] = useLazySpacesGetV1Query()
+    if (error && !hasNotFoundSpaces(error)) return
 
-  const redirect = useCallback(async () => {
-    // Fetch spaces fresh – auth cookie is now set after SIWE
-    const { data: spaces } = await triggerSpacesQuery()
-    const hasSpaces = spaces && spaces.length > 0
-
-    if (!hasSpaces) {
+    if (hasSignedIn && (isNewUser || hasNotFoundSpaces(error))) {
+      setRedirectLoading(true)
       router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
-      return
     }
+  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error])
 
-    // Use last used space if the user is still a member, otherwise fall back to the first space
-    const isInLastUsedSpace = spaces.some((space) => String(space.id) === currentSpaceId)
-    const targetSpaceId = isInLastUsedSpace && currentSpaceId ? currentSpaceId : String(spaces[0].id)
-
-    if (!isInLastUsedSpace || !currentSpaceId) {
-      dispatch(setLastUsedSpace(targetSpaceId))
-    }
-
-    router.push({ pathname: AppRoutes.spaces.index, query: { ...router.query, spaceId: targetSpaceId } })
-  }, [triggerSpacesQuery, currentSpaceId, dispatch, router])
-
-  return { redirect, spaces }
+  return { setHasSignedIn, redirectLoading }
 }

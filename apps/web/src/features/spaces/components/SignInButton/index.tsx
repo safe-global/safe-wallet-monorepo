@@ -10,9 +10,14 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
 
-const SignInButton = () => {
+interface SignInButtonProps {
+  redirectLoading: boolean
+  afterSignIn: () => void
+}
+
+const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProps) => {
   const dispatch = useAppDispatch()
-  const { signIn } = useSiwe()
+  const { signIn, loading } = useSiwe()
   const spaceId = useCurrentSpaceId()
 
   const handleLogin = () => {
@@ -33,6 +38,7 @@ const SignInButton = () => {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
         trackEvent({ ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: spaceId ?? undefined }, { spaceId })
+        afterSignIn()
       }
     } catch (error) {
       trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
@@ -50,7 +56,14 @@ const SignInButton = () => {
     }
   }
 
-  return <WalletLogin onLogin={handleLogin} onContinue={handleSignIn} buttonText="Sign in with" />
+  return (
+    <WalletLogin
+      onLogin={handleLogin}
+      onContinue={handleSignIn}
+      isLoading={loading || redirectLoading}
+      buttonText="Sign in with"
+    />
+  )
 }
 
 export default SignInButton
