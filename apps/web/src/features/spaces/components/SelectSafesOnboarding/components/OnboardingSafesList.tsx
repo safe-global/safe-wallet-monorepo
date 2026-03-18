@@ -23,7 +23,7 @@ const SectionHeader = ({ label }: { label: string }) => (
 
 const OnboardingSafesList = ({ trustedSafes, ownedSafes, similarAddresses }: SafeListProps) => {
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-2 overflow-y-auto overflow-x-hidden overscroll-contain">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-2 overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]">
       {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
       {trustedSafes.length > 0 && (
