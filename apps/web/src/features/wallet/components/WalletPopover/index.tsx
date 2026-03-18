@@ -30,7 +30,7 @@ const WalletPopover = ({
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      sx={{ '& > .MuiPaper-root': { top: 'var(--header-height) !important' } }}
+      sx={{ mt: 1 }}
       transitionDuration={0}
     >
       <Paper className={walletCss.popoverContainer}>

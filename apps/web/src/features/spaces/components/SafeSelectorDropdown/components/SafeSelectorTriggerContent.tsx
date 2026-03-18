@@ -2,31 +2,26 @@ import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
-import ChainSelectorBlock from './ChainSelectorBlock'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
   selectedChainId: string
-  hasMultipleChains: boolean
-  onChainSelect: (chainId: string, event?: React.MouseEvent) => void
 }
 
-function SafeSelectorTriggerContent({
-  selectedItem,
-  selectedChainId,
-  hasMultipleChains,
-  onChainSelect,
-}: SafeSelectorTriggerContentProps) {
-  const stopPropagation = (e: React.MouseEvent) => e.stopPropagation()
+function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelectorTriggerContentProps) {
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
+
+  const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId, selectedItem.name)
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
-    selectedItem.name,
+    resolvedName,
     selectedItem.address,
     chainShortName,
   )
+  const isSingleChain = selectedItem.chains.length <= 1
 
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
@@ -46,26 +41,12 @@ function SafeSelectorTriggerContent({
           </Typography>
         )}
       </div>
-      <div
-        className="shrink-0"
-        onMouseDown={stopPropagation}
-        onClick={stopPropagation}
-        role="group"
-        aria-label={hasMultipleChains ? 'Chain selector' : undefined}
-      >
-        <ChainSelectorBlock
-          hasMultipleChains={hasMultipleChains}
-          chains={selectedItem.chains}
-          selectedChainId={selectedChainId}
-          onChainSelect={onChainSelect}
-        />
-      </div>
       <SafeBalanceBlock
         isLoading={selectedItem.isLoading ?? false}
         balance={selectedItem.balance}
         threshold={selectedItem.threshold}
         owners={selectedItem.owners}
-        showBalanceDisplay={!hasMultipleChains}
+        showBalanceDisplay={isSingleChain}
       />
     </div>
   )

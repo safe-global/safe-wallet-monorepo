@@ -154,28 +154,10 @@ export function useSpaceSafeSelectorItems() {
     [chainConfigs, router, spaceId],
   )
 
-  const handleChainChange = useCallback(
-    (chainId: string) => {
-      const chain = chainConfigs.find((c) => c.chainId === chainId)
-      if (!chain) return
-      trackEvent(
-        { ...SPACE_EVENTS.CHAIN_SWITCHED, label: spaceId ?? undefined },
-        {
-          spaceId,
-          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-          [MixpanelEventParams.CHAIN_ID]: chainId,
-        },
-      )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
-    },
-    [chainConfigs, router, safeAddress, spaceId],
-  )
-
   return {
     items,
     selectedItemId,
     handleItemSelect,
-    handleChainChange,
     isError: overviewsError,
     refetch: refetchOverviews,
   }

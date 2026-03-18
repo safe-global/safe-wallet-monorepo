@@ -30,7 +30,6 @@ const meta = {
     items: { control: 'object' },
     selectedItemId: { control: 'text' },
     onItemSelect: { action: 'Item selected' },
-    onChainChange: { action: 'Chain changed' },
   },
 } satisfies Meta<typeof SafeSelectorDropdown>
 
@@ -110,7 +109,6 @@ const InteractiveWrapper = ({ items, initialItemId }: { items: SafeItemData[]; i
         action('Item selected')(itemId)
         setSelectedItemId(itemId)
       }}
-      onChainChange={action('Chain changed')}
     />
   )
 }

@@ -16,9 +16,10 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
+  onSidebarOpenChange?: (open: boolean) => void
 }
 
-const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
@@ -56,14 +57,17 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
-          // [M1 only] z-index to make the sidebar appear above the Spaces Topbar
-          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 9000 } } : {}),
+          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 1250 } } : {}),
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
           {isSpaceRoute ? (
-            <SpacesEnhancedSidebar isDrawerOpen={isOpen} onDrawerClose={() => onToggle(false)} />
+            <SpacesEnhancedSidebar
+              isDrawerOpen={isOpen}
+              onDrawerClose={() => onToggle(false)}
+              onOpenChange={onSidebarOpenChange}
+            />
           ) : (
             <Sidebar />
           )}

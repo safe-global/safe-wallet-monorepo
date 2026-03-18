@@ -14,8 +14,6 @@ import useChainId from '@/hooks/useChainId'
 import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { setUnauthenticated } from '@/store/authSlice'
 import { logError, Errors } from '@/services/exceptions'
-import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -41,7 +39,6 @@ export const WalletInfo = ({
   const [authLogout] = useAuthLogoutV1Mutation()
   const dispatch = useAppDispatch()
   const chainInfo = useChain(wallet.chainId)
-  const router = useRouter()
   const prefix = chainInfo?.shortName
 
   const handleSwitchWallet = () => {
@@ -60,8 +57,6 @@ export const WalletInfo = ({
     try {
       await authLogout()
       dispatch(setUnauthenticated())
-
-      router.push(AppRoutes.welcome.index)
     } catch (error) {
       logError(Errors._108, error)
     }

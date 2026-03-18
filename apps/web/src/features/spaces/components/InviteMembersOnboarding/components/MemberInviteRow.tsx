@@ -78,6 +78,7 @@ const MemberInviteRow = ({
     <div className="flex gap-2">
       <EnsAddressIdenticon address={addressValue || ''} onAddressResolved={handleAddressResolved}>
         <Input
+          address
           autoComplete="off"
           {...register(`members.${index}.address`, {
             required: index === 0,
@@ -117,7 +118,7 @@ const MemberInviteRow = ({
             <SelectTrigger className="min-w-[120px] cursor-pointer rounded-lg bg-card data-[size=default]:h-11">
               <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent alignItemWithTrigger={false} align="start">
               <SelectItem value={MemberRole.ADMIN}>{ROLE_LABELS[MemberRole.ADMIN]}</SelectItem>
               <SelectItem value={MemberRole.MEMBER}>{ROLE_LABELS[MemberRole.MEMBER]}</SelectItem>
             </SelectContent>

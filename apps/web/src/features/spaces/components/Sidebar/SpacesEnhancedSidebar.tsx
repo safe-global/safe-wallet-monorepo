@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactElement } from 'react'
-import { SidebarProvider } from '@/components/ui/sidebar'
+import { useEffect, type CSSProperties, type ReactElement } from 'react'
+import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from './index'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -16,11 +16,23 @@ interface SpacesEnhancedSidebarProps {
   isDrawerOpen?: boolean
   /** Called when the mobile Sheet is closed so the parent can sync (e.g. close the drawer). */
   onDrawerClose?: () => void
+  /** Called when the sidebar expands or collapses (icon mode). */
+  onOpenChange?: (open: boolean) => void
+}
+
+/** Reports sidebar open/collapsed state to parent without interfering with internal state. */
+const SidebarStateReporter = ({ onOpenChange }: { onOpenChange?: (open: boolean) => void }): null => {
+  const { open } = useSidebar()
+  useEffect(() => {
+    onOpenChange?.(open)
+  }, [open, onOpenChange])
+  return null
 }
 
 export const SpacesEnhancedSidebar = ({
   isDrawerOpen,
   onDrawerClose,
+  onOpenChange,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isHydrated = useSidebarHydrated()
   const spacesSidebarWidth = 'min(230px, 100%)'
@@ -29,12 +41,9 @@ export const SpacesEnhancedSidebar = ({
     <SidebarProvider
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
-      style={
-        {
-          '--sidebar-width': spacesSidebarWidth,
-        } as CSSProperties
-      }
+      style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
     >
+      <SidebarStateReporter onOpenChange={onOpenChange} />
       {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
     </SidebarProvider>
   )

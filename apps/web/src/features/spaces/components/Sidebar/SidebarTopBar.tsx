@@ -1,11 +1,20 @@
 import type { ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import css from './SidebarTopBar.module.css'
+import { AppRoutes } from '@/config/routes'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
+  const router = useRouter()
+
+  const logoHref = router.pathname === AppRoutes.welcome.accounts ? AppRoutes.welcome.index : AppRoutes.welcome.accounts
+
+  const handleLogoClick = () => {
+    router.push(logoHref)
+  }
 
   return (
     <div
@@ -16,7 +25,9 @@ export const SidebarTopBar = (): ReactElement => {
           : 'flex items-center justify-between w-full'
       }
     >
-      <div
+      <button
+        type="button"
+        onClick={handleLogoClick}
         className="relative shrink-0 size-6 flex items-center justify-center cursor-pointer"
         data-testid="logo-container"
       >
@@ -35,9 +46,12 @@ export const SidebarTopBar = (): ReactElement => {
           role="img"
           aria-label="Safe"
         />
-      </div>
+      </button>
       <SidebarTrigger
-        className="shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+        className={cn(
+          'shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
+          isCollapsed && 'mt-2',
+        )}
         data-testid="sidebar-trigger"
       />
     </div>

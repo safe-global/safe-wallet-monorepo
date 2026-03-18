@@ -64,11 +64,13 @@ const SelectSafesOnboarding = (): ReactElement => {
             />
           </InputGroup>
 
-          <OnboardingSafesList
-            trustedSafes={trustedSafes}
-            ownedSafes={ownedSafes}
-            similarAddresses={similarAddresses}
-          />
+          <div className="relative after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-20 after:bg-gradient-to-t after:from-secondary after:to-transparent">
+            <OnboardingSafesList
+              trustedSafes={trustedSafes}
+              ownedSafes={ownedSafes}
+              similarAddresses={similarAddresses}
+            />
+          </div>
 
           {error && (
             <Alert variant="destructive">
@@ -76,27 +78,29 @@ const SelectSafesOnboarding = (): ReactElement => {
             </Alert>
           )}
 
-          <Button
-            data-testid="select-safes-continue-button"
-            type="submit"
-            size="lg"
-            disabled={selectedSafesLength === 0 || isSubmitting}
-            className="w-full"
-          >
-            {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}
-          </Button>
+          <div className="flex flex-col gap-5">
+            <Button
+              data-testid="select-safes-continue-button"
+              type="submit"
+              size="lg"
+              disabled={selectedSafesLength === 0 || isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}
+            </Button>
 
-          <Button
-            data-testid="select-safes-skip-button"
-            type="button"
-            variant="secondary"
-            size="lg"
-            onClick={handleSkip}
-            disabled={isSubmitting}
-            className="w-full"
-          >
-            Skip
-          </Button>
+            <Button
+              data-testid="select-safes-skip-button"
+              type="button"
+              variant="secondary"
+              size="lg"
+              onClick={handleSkip}
+              disabled={isSubmitting}
+              className="w-full hover:bg-card"
+            >
+              Skip
+            </Button>
+          </div>
         </form>
       </FormProvider>
     </div>
