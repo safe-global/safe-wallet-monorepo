@@ -44,7 +44,7 @@ export const useTxTokenInfo = (
         transferValue: value,
         tokenInfo: nativeTokenInfo,
       }
-    } catch (error) {
+    } catch {
       return
     }
   }, [isERC20Transfer, isNativeTransfer, value, nativeTokenInfo, to, data, tokenInfoIndex])
