@@ -1,7 +1,7 @@
 // Storybook stories for SafeButton component - test mobile screenshots workflow
 import type { Meta, StoryObj } from '@storybook/react'
 import { SafeButton } from '@/src/components/SafeButton'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import { YStack, Text, XStack, ScrollView } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import React from 'react'

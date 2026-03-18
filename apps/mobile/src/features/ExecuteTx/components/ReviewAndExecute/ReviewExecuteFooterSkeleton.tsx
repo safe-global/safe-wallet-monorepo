@@ -1,16 +1,14 @@
 import React from 'react'
 import { Stack, View } from 'tamagui'
-import { Skeleton } from 'moti/skeleton'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { Container } from '@/src/components/Container'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useTheme } from '@/src/theme/hooks/useTheme'
 
 export function ReviewExecuteFooterSkeleton() {
   const insets = useSafeAreaInsets()
-  const { colorScheme } = useTheme()
 
   return (
-    <Skeleton.Group show={true}>
+    <SafeSkeleton.Group show={true}>
       <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
         <Container
           backgroundColor="transparent"
@@ -22,19 +20,19 @@ export function ReviewExecuteFooterSkeleton() {
           {/* EstimatedNetworkFee skeleton */}
           <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingHorizontal="$4">
             <View gap="$2">
-              <Skeleton colorMode={colorScheme} height={14} width={100} />
-              <Skeleton colorMode={colorScheme} height={12} width={140} />
+              <SafeSkeleton height={14} width={100} />
+              <SafeSkeleton height={12} width={140} />
             </View>
             <View alignItems="flex-end" gap="$2">
-              <Skeleton colorMode={colorScheme} height={16} width={60} />
-              <Skeleton colorMode={colorScheme} height={12} width={80} />
+              <SafeSkeleton height={16} width={60} />
+              <SafeSkeleton height={12} width={80} />
             </View>
           </View>
         </Container>
 
         {/* Button skeleton */}
-        <Skeleton colorMode={colorScheme} height={48} width="100%" radius={12} />
+        <SafeSkeleton height={48} width="100%" radius={12} />
       </Stack>
-    </Skeleton.Group>
+    </SafeSkeleton.Group>
   )
 }
