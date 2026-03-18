@@ -41,7 +41,7 @@ export const SafeCardLayout = ({
     role="checkbox"
     aria-checked={checked}
     onClick={onToggle}
-    className="flex w-full cursor-pointer items-center gap-2 rounded-3xl bg-card py-4 pl-2 pr-6 text-left transition-colors border-2 border-card hover:bg-muted/50 disabled:opacity-60"
+    className="box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-2 pr-3 text-left transition-colors hover:bg-muted/50 disabled:opacity-60 sm:gap-2 sm:pr-6"
   >
     <div className="flex shrink-0 items-center px-2">
       <Checkbox
@@ -51,8 +51,10 @@ export const SafeCardLayout = ({
       />
     </div>
 
-    <div className="flex min-w-0 flex-1 items-center gap-4">
-      <Identicon address={address} />
+    <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+      <span className="inline-flex shrink-0">
+        <Identicon address={address} />
+      </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         {isSimilar && (
@@ -64,7 +66,7 @@ export const SafeCardLayout = ({
         <div className="flex min-w-0 items-center gap-2">
           <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="block min-w-0 break-all text-xs text-muted-foreground">
           {isSimilar ? (
             <>
               {address.slice(0, 2)}
@@ -79,11 +81,11 @@ export const SafeCardLayout = ({
       </div>
     </div>
 
-    <div className="ml-auto flex-1 items-center justify-center shrink-0 pl-4">
-      <AccountItem.ChainBadge safes={safes} className="justify-center" />
+    <div className="ml-auto flex shrink-0 items-center justify-end pl-1 sm:pl-2">
+      <AccountItem.ChainBadge safes={safes} className="justify-end" />
     </div>
 
-    <div className="flex shrink-0 flex-col min-w-16 items-end gap-2">
+    <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
       <FiatBalance value={fiatValue} />
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>

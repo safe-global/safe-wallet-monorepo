@@ -23,7 +23,7 @@ const SectionHeader = ({ label }: { label: string }) => (
 
 const OnboardingSafesList = ({ trustedSafes, ownedSafes, similarAddresses }: SafeListProps) => {
   return (
-    <div className="flex max-h-[400px] flex-col gap-2 overflow-auto">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-2 overflow-y-auto overflow-x-hidden overscroll-contain">
       {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
       {trustedSafes.length > 0 && (
