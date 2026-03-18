@@ -30,6 +30,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -75,6 +76,7 @@ const AddAccounts = () => {
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const spaceId = useCurrentSpaceId()
+  const theme = useTheme()
 
   const allSafes = useMemo<AllSafeItems>(
     () => [...manualSafes, ...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
@@ -166,7 +168,13 @@ const AddAccounts = () => {
     <>
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
-          <Button size="sm" className="font-bold" disabled={!isAdmin} onClick={() => setOpen(true)}>
+          <Button
+            size="sm"
+            className="font-bold"
+            variant={theme.palette.mode === 'light' ? 'outline' : undefined}
+            disabled={!isAdmin}
+            onClick={() => setOpen(true)}
+          >
             <Plus className="size-4" />
             Add account
           </Button>
