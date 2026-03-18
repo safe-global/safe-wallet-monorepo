@@ -8,6 +8,7 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - expo-plugins/**
 
 jobs:
   build:

@@ -7,10 +7,12 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - expo-plugins/**
   pull_request:
     paths:
       - apps/mobile/**
       - packages/**
+      - expo-plugins/**
 
 jobs:
   build:
