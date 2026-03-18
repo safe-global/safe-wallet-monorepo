@@ -16,7 +16,7 @@ const WidgetErrorState = ({ message = 'Unable to load content', onRefresh }: Wid
       subtitle="Try to reload the page."
       action={
         onRefresh && (
-          <Button className="px-6" onClick={onRefresh}>
+          <Button variant="secondary" className="px-6" onClick={onRefresh}>
             Reload page
           </Button>
         )

@@ -16,7 +16,6 @@ export interface SafeSelectorDropdownProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
-  onChainChange?: (chainId: string) => void
   isError?: boolean
   onRetry?: () => void
 }

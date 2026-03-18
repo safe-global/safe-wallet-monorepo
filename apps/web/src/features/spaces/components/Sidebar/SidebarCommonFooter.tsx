@@ -18,7 +18,7 @@ export const SidebarCommonFooter = (): ReactElement => {
   const isDarkMode = useDarkMode()
 
   return (
-    <SidebarFooter data-testid="sidebar-common-footer">
+    <SidebarFooter data-testid="sidebar-common-footer" className={css.sidebarFooter}>
       {/* Dev Toggles - only in non-production */}
       {!IS_PRODUCTION && (
         <div className="flex flex-col gap-2 px-3 py-2 group-data-[collapsible=icon]:hidden">
@@ -33,7 +33,6 @@ export const SidebarCommonFooter = (): ReactElement => {
         </div>
       )}
 
-      {/* API CTA */}
       <ApiCtaSidebar />
 
       {/* Help Button */}
@@ -41,7 +40,7 @@ export const SidebarCommonFooter = (): ReactElement => {
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp)}
+            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
             render={<a href={HELP_URL} target="_blank" rel="noopener noreferrer" />}
             data-testid="list-item-need-help"
           >

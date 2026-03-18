@@ -1,5 +1,14 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { SidebarTopBar } from '../SidebarTopBar'
+import { AppRoutes } from '@/config/routes'
+
+const mockPush = jest.fn()
+const mockUseRouter = jest.fn()
+
+jest.mock('next/router', () => ({
+  useRouter: () => mockUseRouter(),
+}))
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarTrigger: ({ className, 'data-testid': testId }: { className?: string; 'data-testid'?: string }) => (
@@ -15,6 +24,7 @@ jest.mock('@/components/ui/sidebar', () => ({
 describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.accounts })
   })
 
   it('renders all required elements', () => {
@@ -52,5 +62,27 @@ describe('SidebarTopBar', () => {
 
     const topBar = screen.getByTestId('sidebar-top-bar')
     expect(topBar).toHaveClass('flex-col', 'items-center', 'justify-center', 'gap-2')
+  })
+
+  it('navigates to /welcome when on /welcome/accounts', async () => {
+    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.accounts })
+    const user = userEvent.setup()
+
+    render(<SidebarTopBar />)
+
+    await user.click(screen.getByTestId('logo-container'))
+
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.index)
+  })
+
+  it('navigates to /welcome/accounts when not on /welcome/accounts', async () => {
+    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.index })
+    const user = userEvent.setup()
+
+    render(<SidebarTopBar />)
+
+    await user.click(screen.getByTestId('logo-container'))
+
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.accounts)
   })
 })

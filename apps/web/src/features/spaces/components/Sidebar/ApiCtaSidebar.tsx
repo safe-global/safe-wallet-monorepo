@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
@@ -20,7 +21,7 @@ export const ApiCtaSidebar = (): ReactElement => {
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp)}
+            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
             onClick={() => setIsCollapsed(false)}
             data-testid="api-cta-collapsed"
           >
@@ -31,7 +32,8 @@ export const ApiCtaSidebar = (): ReactElement => {
               height={16}
               className="dark:brightness-0 dark:invert"
             />
-            <span>API</span>
+            <span className="flex-1">API</span>
+            <Badge className="text-[10px] px-1 py-0 leading-none">New</Badge>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -40,7 +42,7 @@ export const ApiCtaSidebar = (): ReactElement => {
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-5 group-data-[collapsible=icon]:hidden"
+      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-3 group-data-[collapsible=icon]:hidden"
       data-testid="api-cta-sidebar"
     >
       <div className="flex w-full items-start justify-between">
@@ -61,20 +63,17 @@ export const ApiCtaSidebar = (): ReactElement => {
         </button>
       </div>
 
-      <Typography variant="paragraph-small-medium" className="leading-tight">
-        Use API
-      </Typography>
-
       <Typography variant="paragraph-small" color="muted" className="leading-snug">
-        Start building with our new Safe API
+        Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
       </Typography>
 
       <Button
+        variant="outline"
         size="sm"
-        className="w-auto self-start"
+        className="w-auto self-start !bg-background hover:!bg-muted"
         render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
       >
-        Try the API
+        Get API key
       </Button>
     </div>
   )

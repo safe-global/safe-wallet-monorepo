@@ -36,6 +36,7 @@ const NO_HEADER_ROUTES = [
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
   const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
+  const [isSpacesSidebarExpanded, setSpacesSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
@@ -56,7 +57,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && isSpaceRoute && <Topbar onMenuToggle={menuToggleHandler} />}
+      {!hideHeader && isSpaceRoute && (
+        <div className={css.topbar}>
+          <Topbar onMenuToggle={menuToggleHandler} />
+        </div>
+      )}
 
       {!hideHeader && !isSpaceRoute && (
         <header className={css.header}>
@@ -64,7 +69,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         </header>
       )}
 
-      {isSidebarRoute ? <SideDrawer isOpen={isSidebarVisible} onToggle={setSidebarOpen} /> : null}
+      {isSidebarRoute ? (
+        <SideDrawer
+          isOpen={isSidebarVisible}
+          onToggle={setSidebarOpen}
+          onSidebarOpenChange={isSpaceRoute ? setSpacesSidebarExpanded : undefined}
+        />
+      ) : null}
 
       <div
         className={classnames(css.main, {
@@ -72,11 +83,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: isSpaceRoute,
+          [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
-            {!hideHeader && !isSpaceRoute && <SpaceSafeBar />}
+            {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div

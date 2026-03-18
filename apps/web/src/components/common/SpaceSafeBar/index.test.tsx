@@ -25,6 +25,12 @@ jest.mock('./hooks/useSpaceBackLink', () => ({
   useSpaceBackLink: jest.fn(),
 }))
 
+jest.mock('./SpaceChainSelector', () => {
+  const MockSpaceChainSelector = () => <div data-testid="space-chain-selector" />
+  MockSpaceChainSelector.displayName = 'SpaceChainSelector'
+  return { __esModule: true, default: MockSpaceChainSelector }
+})
+
 jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => (
     <div
@@ -33,7 +39,6 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
       data-error={String(props.isError)}
       data-selected-item-id={props.selectedItemId as string}
       data-has-on-item-select={String(typeof props.onItemSelect === 'function')}
-      data-has-on-chain-change={String(typeof props.onChainChange === 'function')}
       data-has-on-retry={String(typeof props.onRetry === 'function')}
     />
   )
@@ -68,7 +73,6 @@ describe('SpaceSafeBar', () => {
       items: mockItems,
       selectedItemId: '1:0xSafe1',
       handleItemSelect: jest.fn(),
-      handleChainChange: jest.fn(),
       isError: false,
       refetch: jest.fn(),
     })
@@ -92,6 +96,13 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
 
+  it('renders SpaceChainSelector when useIsQualifiedSafe returns true', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('space-chain-selector')).toBeInTheDocument()
+  })
+
   it('passes items from the hook to SafeSelectorDropdown', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
 
@@ -106,7 +117,6 @@ describe('SpaceSafeBar', () => {
       items: [],
       selectedItemId: '',
       handleItemSelect: jest.fn(),
-      handleChainChange: jest.fn(),
       isError: true,
       refetch: jest.fn(),
     })
@@ -115,7 +125,7 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('safe-selector-dropdown').getAttribute('data-error')).toBe('true')
   })
 
-  it('passes selectedItemId, onItemSelect, onChainChange, and onRetry to SafeSelectorDropdown', () => {
+  it('passes selectedItemId, onItemSelect, and onRetry to SafeSelectorDropdown', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
 
     const { getByTestId } = render(<SpaceSafeBar />)
@@ -123,7 +133,6 @@ describe('SpaceSafeBar', () => {
 
     expect(dropdown.getAttribute('data-selected-item-id')).toBe('1:0xSafe1')
     expect(dropdown.getAttribute('data-has-on-item-select')).toBe('true')
-    expect(dropdown.getAttribute('data-has-on-chain-change')).toBe('true')
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
@@ -133,7 +142,6 @@ describe('SpaceSafeBar', () => {
       items: [],
       selectedItemId: '',
       handleItemSelect: jest.fn(),
-      handleChainChange: jest.fn(),
       isError: false,
       refetch: jest.fn(),
     })

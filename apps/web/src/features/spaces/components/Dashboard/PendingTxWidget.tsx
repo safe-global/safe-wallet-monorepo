@@ -10,6 +10,7 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import Identicon from '@/components/common/Identicon'
 import { AppRoutes } from '@/config/routes'
 import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/config'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
 type Chains = Record<string, string>
@@ -34,7 +35,7 @@ interface PendingTxWidgetProps {
 const SKELETON_COUNT = 3
 
 const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
-  <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
+  <div className={cn(css.iconBG, 'flex shrink-0 items-center justify-center')}>
     <TxTypeIcon tx={tx.transaction} />
   </div>
 )

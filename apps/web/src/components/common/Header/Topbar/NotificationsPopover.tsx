@@ -59,7 +59,7 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
       onClose={handleClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      sx={{ '& > .MuiPaper-root': { top: 'var(--header-height) !important' } }}
+      sx={{ mt: 1 }}
       transitionDuration={0}
     >
       <Paper className={notificationCss.popoverContainer}>

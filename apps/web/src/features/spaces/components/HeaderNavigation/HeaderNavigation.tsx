@@ -73,7 +73,7 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute -right-0.5 -top-0.5 z-10 flex size-2 items-center justify-center rounded-full border border-white bg-[#4ADE80]"
+            className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-secondary bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
             aria-label={`${messages} unread messages`}
           />
         )}
