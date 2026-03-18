@@ -21,11 +21,13 @@ export const useAddressResolver = (address?: string) => {
 
   const [ens, _, isResolving] = useAsync<string | undefined>(() => {
     if (!shouldResolve) return
+    // Wait for debounce to settle so we never resolve a stale address
+    if (debouncedValue !== address) return
     if (chainId && debouncedValue && cache[chainId]?.[debouncedValue]) {
       return Promise.resolve(cache[chainId][debouncedValue])
     }
     return lookupAddress(ethersProvider, debouncedValue)
-  }, [chainId, ethersProvider, debouncedValue, shouldResolve])
+  }, [chainId, ethersProvider, debouncedValue, shouldResolve, address])
 
   const resolving = (shouldResolve && isResolving) || false
 
