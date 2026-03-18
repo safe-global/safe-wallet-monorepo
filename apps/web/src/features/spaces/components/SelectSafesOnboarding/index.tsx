@@ -5,6 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, Search, Loader2 } from 'lucide-react'
+import css from './styles.module.css'
 import StepIndicator from './components/StepIndicator'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
@@ -27,12 +28,9 @@ const SelectSafesOnboarding = (): ReactElement => {
   }
 
   return (
-    <div className="box-border flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-hidden overflow-x-hidden bg-secondary p-4">
+    <div className={css.container}>
       <FormProvider {...formMethods}>
-        <form
-          onSubmit={onSubmit}
-          className="mx-auto flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-4 sm:max-w-[520px]"
-        >
+        <form onSubmit={onSubmit} className={css.form}>
           <div className="flex shrink-0 flex-col gap-4">
             <Button
               type="button"
@@ -69,10 +67,7 @@ const SelectSafesOnboarding = (): ReactElement => {
             </InputGroup>
           </div>
 
-          <div
-            className="relative min-h-0 min-w-0 w-full flex-1 overflow-hidden overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent"
-            data-testid="onboarding-safes-list-scroll-region"
-          >
+          <div className={css.safesListRegion} data-testid="onboarding-safes-list-scroll-region">
             <OnboardingSafesList
               trustedSafes={trustedSafes}
               ownedSafes={ownedSafes}
