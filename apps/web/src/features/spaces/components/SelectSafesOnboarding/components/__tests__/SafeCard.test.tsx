@@ -73,7 +73,7 @@ describe('SafeCard', () => {
     expect(screen.getByTestId('threshold-badge')).toHaveTextContent('2/3')
   })
 
-  it('shows full address as subtitle', () => {
+  it('shows shortened address as subtitle', () => {
     const address = '0xabc1234567890def'
     render(
       <FormWrapper>
@@ -81,7 +81,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(screen.getByText(address)).toBeInTheDocument()
+    expect(screen.getByText('0xabc1...0def')).toBeInTheDocument()
   })
 
   it('bolds first and last 4 chars of address when isSimilar', () => {

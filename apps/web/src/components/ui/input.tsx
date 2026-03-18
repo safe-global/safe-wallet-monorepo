@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
+import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
 import { cn } from '@/utils/cn'
 
@@ -35,7 +36,21 @@ function sanitizeInputValue(value: string): string {
   return value.replace(SCRIPT_TAG_REGEX, '').replace(EVENT_HANDLER_REGEX, '')
 }
 
-function Input({ className, type, onChange, error, ...props }: React.ComponentProps<'input'> & { error?: string }) {
+function stripChainPrefix(value: string): string {
+  const cleaned = cleanInputValue(value)
+  const { address } = parsePrefixedAddress(cleaned)
+  return address
+}
+
+function Input({
+  className,
+  type,
+  onChange,
+  onPaste,
+  error,
+  address,
+  ...props
+}: React.ComponentProps<'input'> & { error?: string; address?: boolean }) {
   const [hasScriptInjection, setHasScriptInjection] = React.useState(false)
 
   const handleChange = React.useCallback(
@@ -54,6 +69,21 @@ function Input({ className, type, onChange, error, ...props }: React.ComponentPr
     [onChange],
   )
 
+  const handlePaste = React.useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (address) {
+        e.preventDefault()
+        const pasted = e.clipboardData.getData('text')
+        const stripped = stripChainPrefix(pasted)
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+        nativeInputValueSetter?.call(e.currentTarget, stripped)
+        e.currentTarget.dispatchEvent(new Event('input', { bubbles: true }))
+      }
+      onPaste?.(e)
+    },
+    [address, onPaste],
+  )
+
   return (
     <div className="w-full">
       <InputPrimitive
@@ -66,6 +96,7 @@ function Input({ className, type, onChange, error, ...props }: React.ComponentPr
         )}
         {...props}
         onChange={handleChange}
+        onPaste={handlePaste}
       />
       {hasScriptInjection ? (
         <p role="alert" data-slot="field-error" className="mt-1 text-sm text-destructive">

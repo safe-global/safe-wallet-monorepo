@@ -9,9 +9,11 @@ const mockUseIsSpaceRoute = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
 const mockGetNonDeclinedSpaces = jest.fn()
+const mockUseSidebar = jest.fn()
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
+  useSidebar: () => mockUseSidebar(),
 }))
 
 jest.mock('../hooks/useSidebarHydrated', () => ({
@@ -56,6 +58,7 @@ describe('SpacesEnhancedSidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    mockUseSidebar.mockReturnValue({ open: true })
     mockUseAppSelector.mockReturnValue(true)
     mockUseCurrentSpaceId.mockReturnValue('1')
     mockUseIsSpaceRoute.mockReturnValue(true)
@@ -89,5 +92,42 @@ describe('SpacesEnhancedSidebar', () => {
     render(<SpacesEnhancedSidebar />)
 
     expect(screen.getByTestId('enhanced-sidebar')).toHaveTextContent('safe:Core Space')
+  })
+})
+
+describe('SidebarStateReporter', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseSidebarHydrated.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
+    mockUseCurrentSpaceId.mockReturnValue(undefined)
+    mockUseIsSpaceRoute.mockReturnValue(false)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({})
+    mockUseSpacesGetV1Query.mockReturnValue({})
+    mockGetNonDeclinedSpaces.mockReturnValue([])
+  })
+
+  it('calls onOpenChange with true when sidebar is open', () => {
+    mockUseSidebar.mockReturnValue({ open: true })
+    const onOpenChange = jest.fn()
+
+    render(<SpacesEnhancedSidebar onOpenChange={onOpenChange} />)
+
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+  })
+
+  it('calls onOpenChange with false when sidebar is collapsed', () => {
+    mockUseSidebar.mockReturnValue({ open: false })
+    const onOpenChange = jest.fn()
+
+    render(<SpacesEnhancedSidebar onOpenChange={onOpenChange} />)
+
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('does not throw when onOpenChange is not provided', () => {
+    mockUseSidebar.mockReturnValue({ open: true })
+
+    expect(() => render(<SpacesEnhancedSidebar />)).not.toThrow()
   })
 })
