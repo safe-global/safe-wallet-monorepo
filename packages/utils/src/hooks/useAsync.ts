@@ -52,7 +52,8 @@ const useAsync = <T>(
 
 export default useAsync
 
-export const useAsyncCallback = <T extends (...args: any) => Promise<any>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const useAsyncCallback = <T extends (...args: any[]) => Promise<any>>(
   callback: T,
 ): {
   asyncCallback: (...args: Parameters<T>) => Promise<ReturnType<T>> | undefined

@@ -55,7 +55,7 @@ const getTenderlyProjectFromUrl = (tenderlyUrl?: string): { org: string; project
         return { org, project }
       }
     }
-  } catch (error) {
+  } catch {
     // Ignore URL parsing errors and fall back to defaults
   }
 }

@@ -18,7 +18,7 @@ export const getEncodedSafeTx = (
 ): string | undefined => {
   const EXEC_TX_METHOD = 'execTransaction'
 
-  // @ts-ignore union type is too complex
+  // @ts-expect-error union type is too complex
   return safeSDK
     .getContractManager()
     .safeContract?.encode(EXEC_TX_METHOD, [
@@ -97,7 +97,7 @@ export const getGasLimitForZkSync = async (
   // 2. Add a simulate call to the predicted SafeProxy as second transaction
   const transactionDataToEstimate: string = simulateTxAccessorContract.encode('simulate', [
     safeTx.data.to,
-    // @ts-ignore
+    // @ts-expect-error value type mismatch
     safeTx.data.value,
     safeTx.data.data as `0x${string}`,
     safeTx.data.operation,

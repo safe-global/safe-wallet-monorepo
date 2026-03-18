@@ -35,7 +35,7 @@ export const getSafeTxMessageHash = ({
   const SafeTx = getEip712TxTypes(safeVersion).SafeTx
 
   // Clone to not modify the original
-  const tx: any = { ...safeTxData }
+  const tx: Record<string, unknown> = { ...safeTxData }
 
   if (!usesBaseGas) {
     tx.dataGas = tx.baseGas

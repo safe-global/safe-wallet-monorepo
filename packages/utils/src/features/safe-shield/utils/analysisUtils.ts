@@ -34,7 +34,7 @@ export const normalizeThreatData = (
   threat?: AsyncResult<ThreatAnalysisResults>,
 ): Record<string, GroupedAnalysisResults> => {
   const [result] = threat || []
-  const { BALANCE_CHANGE: _, ...groupedThreatResults } = result || {}
+  const { BALANCE_CHANGE: _BALANCE_CHANGE, ...groupedThreatResults } = result || {}
 
   if (Object.keys(groupedThreatResults).length === 0) {
     return {}

@@ -342,7 +342,7 @@ describe('useThreatAnalysisHypernative', () => {
       ]
 
       // Apply changes rapidly (within debounce window)
-      changes.forEach((change, index) => {
+      changes.forEach((change) => {
         rerender({ data: change })
         jest.advanceTimersByTime(100) // Less than 300ms debounce
       })
