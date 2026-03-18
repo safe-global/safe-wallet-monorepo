@@ -37,12 +37,15 @@ export const useAddressResolver = (address?: string) => {
     }
   }, [chainId, debouncedValue, ens])
 
+  // Clear stale ENS while debounce catches up to the new address
+  const isStale = debouncedValue !== address
+
   return useMemo(
     () => ({
-      ens,
+      ens: isStale ? undefined : ens,
       name: addressBookName,
       resolving,
     }),
-    [ens, addressBookName, resolving],
+    [ens, addressBookName, resolving, isStale],
   )
 }
