@@ -21,7 +21,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('@/services/siwe/useSiwe', () => ({
-  useSiwe: () => ({ signIn: mockSignIn }),
+  useSiwe: () => ({ signIn: mockSignIn, loading: false }),
 }))
 
 jest.mock('@/store', () => ({
@@ -61,7 +61,7 @@ describe('SignInButton tracking', () => {
   it('tracks SPACES_SIWE_SUCCESS with spaceId sent to both GA (label) and Mixpanel (additionalParameters)', async () => {
     mockSignIn.mockResolvedValue({ token: 'abc' })
 
-    render(<SignInButton />)
+    render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('SignInButton tracking', () => {
     const error = new Error('User rejected')
     mockSignIn.mockRejectedValue(error)
 
-    render(<SignInButton />)
+    render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
@@ -89,7 +89,7 @@ describe('SignInButton tracking', () => {
   it('tracks SPACES_SIWE_FAILURE when signIn returns an error object', async () => {
     mockSignIn.mockResolvedValue({ error: new Error('Signature failed') })
 
-    render(<SignInButton />)
+    render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
@@ -102,7 +102,7 @@ describe('SignInButton tracking', () => {
   it('does not track SPACES_SIWE_SUCCESS when signIn returns null', async () => {
     mockSignIn.mockResolvedValue(null)
 
-    render(<SignInButton />)
+    render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
