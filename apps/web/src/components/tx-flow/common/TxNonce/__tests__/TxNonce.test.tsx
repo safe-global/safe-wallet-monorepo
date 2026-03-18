@@ -20,6 +20,8 @@ const defaultSafeTxContext: SafeTxContextParams = {
   setSafeTx: jest.fn(),
   safeMessage: undefined,
   setSafeMessage: jest.fn(),
+  safeMessageHash: undefined,
+  setSafeMessageHash: jest.fn(),
   safeTxError: undefined,
   setSafeTxError: jest.fn(),
   nonce: 5,
