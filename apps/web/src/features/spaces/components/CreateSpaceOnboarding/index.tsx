@@ -25,9 +25,7 @@ const ONBOARDING_TOTAL_STEPS = 3
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
-  const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const isUserAuthenticated = useAppSelector(isAuthenticated)
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
   const {
@@ -39,10 +37,6 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading } = useExistingSpace(setValue)
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
-
-  if (!wallet || !isUserAuthenticated) {
-    return <></>
-  }
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>

@@ -18,16 +18,12 @@ const TOTAL_STEPS = 3
 
 const SelectSafesOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()
-  const { spaceId, isReady, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
+  const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
   )
-
-  if (!isReady) {
-    return <></>
-  }
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>

@@ -17,13 +17,9 @@ const TOTAL_STEPS = 3
 
 const InviteMembersOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()
-  const { spaceId, isReady, goBack, redirectToNextStep } = useInviteNavigation()
+  const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
-
-  if (!isReady) {
-    return <></>
-  }
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
