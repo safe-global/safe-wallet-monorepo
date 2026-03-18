@@ -4,7 +4,7 @@ import { zeroPadValue } from 'ethers'
 import * as domains from '@/services/ens'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as useChains from '@/hooks/useChains'
-import { renderHook, waitFor } from '@/tests/test-utils'
+import { renderHook, waitFor, act } from '@/tests/test-utils'
 import { JsonRpcProvider } from 'ethers'
 
 const ADDRESS1 = zeroPadValue('0x01', 20)
@@ -53,13 +53,15 @@ describe('useAddressResolver', () => {
   })
 
   it('clears stale ENS when switching to a different address', async () => {
+    jest.useFakeTimers()
+
     // Use unique addresses to avoid module-level cache from other tests
     const ADDR_WITH_ENS = zeroPadValue('0xaa', 20)
     const ADDR_WITHOUT_ENS = zeroPadValue('0xbb', 20)
 
     jest.spyOn(addressBook, 'default').mockReturnValue({})
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(domains, 'lookupAddress').mockImplementation((_provider, address) => {
+    const lookupMock = jest.spyOn(domains, 'lookupAddress').mockImplementation((_provider, address) => {
       if (address === ADDR_WITH_ENS) return Promise.resolve('first.eth')
       return Promise.resolve(undefined)
     })
@@ -68,10 +70,13 @@ describe('useAddressResolver', () => {
       initialProps: { address: ADDR_WITH_ENS },
     })
 
-    // Wait for first ENS to resolve
-    await waitFor(() => {
-      expect(result.current.ens).toBe('first.eth')
+    // Advance past debounce and flush microtasks for first resolve
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(200)
     })
+
+    expect(result.current.ens).toBe('first.eth')
+    expect(lookupMock).toHaveBeenCalledWith(mockProvider, ADDR_WITH_ENS)
 
     // Switch to a different address
     rerender({ address: ADDR_WITHOUT_ENS })
@@ -79,10 +84,16 @@ describe('useAddressResolver', () => {
     // ENS should be cleared immediately, not show stale 'first.eth'
     expect(result.current.ens).toBeUndefined()
 
-    // After debounce settles, should still be undefined (no ENS for ADDRESS2)
-    await waitFor(() => {
-      expect(result.current.ens).toBeUndefined()
+    // Advance past debounce so the new address resolves
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(200)
     })
+
+    // Verify lookup was called for the new address and ENS is still undefined
+    expect(lookupMock).toHaveBeenCalledWith(mockProvider, ADDR_WITHOUT_ENS)
+    expect(result.current.ens).toBeUndefined()
+
+    jest.useRealTimers()
   })
 
   it('does not resolve ENS domain if feature is disabled', async () => {
