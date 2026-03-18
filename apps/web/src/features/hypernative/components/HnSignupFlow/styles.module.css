@@ -17,6 +17,39 @@
   background-color: var(--color-background-default);
 }
 
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: var(--space-4) var(--space-5) var(--space-1) var(--space-6);
+  background-color: var(--color-static-primary);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.formWrapper {
+  margin: 0 auto;
+  width: 100%;
+  min-height: 620px;
+}
+
+.cancelButtonWrapper {
+  z-index: 1;
+  margin-top: -80px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .cancelButtonWrapper {
+    margin-top: -63px;
+  }
+}
+
+.cancelButton {
+  color: var(--color-static-main) !important;
+}
+
 .calendlyColumn {
   display: flex;
   flex-direction: column;
