@@ -93,6 +93,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
               <AnimatePresence mode="wait">
                 <motion.div
                   key={pathname}
+                  className={css.onboardingMotion}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
