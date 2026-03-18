@@ -24,15 +24,10 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useIsEarnPromoEnabled } from '@/features/earn'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 import { EarnBanner, earnBannerID } from '@/components/dashboard/NewsCarousel/banners/EarnBanner'
-import { SpacesBanner, spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import { StakeBanner, stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
-import {
-  NoFeeCampaignFeature,
-  useNoFeeCampaignEligibility,
-  useIsNoFeeCampaignEnabled,
-} from '@/features/no-fee-campaign'
+import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
 import {
   useBannerVisibility,
   BannerType,
@@ -60,10 +55,8 @@ const Dashboard = (): ReactElement => {
   }, [balances.items])
 
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
-  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isStakingBannerVisible = useIsStakingBannerVisible()
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
-  const { isEligible } = useNoFeeCampaignEligibility()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
@@ -76,11 +69,6 @@ const Dashboard = (): ReactElement => {
       element: NoFeeCampaignBanner,
     },
     isEarnPromoEnabled && { id: earnBannerID, element: EarnBanner },
-    isSpacesFeatureEnabled && {
-      id: spacesBannerID,
-      element: SpacesBanner,
-      eligibilityState: isEligible === false,
-    },
     isStakingBannerVisible && { id: stakeBannerID, element: StakeBanner },
   ].filter(Boolean) as BannerItem[]
 

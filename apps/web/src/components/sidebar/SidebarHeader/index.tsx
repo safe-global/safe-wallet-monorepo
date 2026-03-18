@@ -6,6 +6,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NewTxButton from '@/components/sidebar/NewTxButton'
+import AddToSpaceButton from '@/components/sidebar/AddToSpaceButton'
 import { useAppSelector } from '@/store'
 
 import css from './styles.module.css'
@@ -91,6 +92,8 @@ const SafeHeader = (): ReactElement => {
           <EnvHintButton />
         </div>
       </div>
+
+      <AddToSpaceButton />
 
       <NewTxButton />
     </div>
