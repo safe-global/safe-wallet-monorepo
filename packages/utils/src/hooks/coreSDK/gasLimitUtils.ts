@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { SafeProvider } from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -18,7 +19,7 @@ export const getEncodedSafeTx = (
 ): string | undefined => {
   const EXEC_TX_METHOD = 'execTransaction'
 
-  // @ts-expect-error union type is too complex
+  // @ts-ignore union type is too complex
   return safeSDK
     .getContractManager()
     .safeContract?.encode(EXEC_TX_METHOD, [
@@ -97,7 +98,7 @@ export const getGasLimitForZkSync = async (
   // 2. Add a simulate call to the predicted SafeProxy as second transaction
   const transactionDataToEstimate: string = simulateTxAccessorContract.encode('simulate', [
     safeTx.data.to,
-    // @ts-expect-error value type mismatch
+    // @ts-ignore value type mismatch
     safeTx.data.value,
     safeTx.data.data as `0x${string}`,
     safeTx.data.operation,
