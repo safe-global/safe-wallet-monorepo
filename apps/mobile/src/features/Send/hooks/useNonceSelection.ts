@@ -25,6 +25,7 @@ interface UseNonceSelectionResult {
   handleAddCustomNonce: () => void
   handleSaveCustomNonce: (nonce: number) => void
   handleCancelCustomNonce: () => void
+  handleNonceSheetChange: (index: number) => void
 }
 
 export function useNonceSelection({ chainId, safeAddress, inputRef }: UseNonceSelectionArgs): UseNonceSelectionResult {
@@ -75,6 +76,15 @@ export function useNonceSelection({ chainId, safeAddress, inputRef }: UseNonceSe
     refocusInput()
   }, [refocusInput])
 
+  const handleNonceSheetChange = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        refocusInput()
+      }
+    },
+    [refocusInput],
+  )
+
   return {
     nonceSheetRef,
     recommendedNonce,
@@ -90,5 +100,6 @@ export function useNonceSelection({ chainId, safeAddress, inputRef }: UseNonceSe
     handleAddCustomNonce,
     handleSaveCustomNonce,
     handleCancelCustomNonce,
+    handleNonceSheetChange,
   }
 }

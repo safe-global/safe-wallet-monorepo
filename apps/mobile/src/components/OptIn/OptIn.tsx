@@ -1,5 +1,6 @@
 import React from 'react'
-import { ColorSchemeName, ImageSourcePropType, Platform, StyleSheet } from 'react-native'
+import { ImageSourcePropType, Platform, StyleSheet } from 'react-native'
+import { ColorScheme } from '@/src/types/theme'
 import { H2, Image, Text, getTokenValue, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
@@ -23,7 +24,7 @@ interface OptInProps {
   testID?: string
   isVisible?: boolean
   isLoading?: boolean
-  colorScheme: ColorSchemeName
+  colorScheme: ColorScheme
   infoMessage?: string
 }
 

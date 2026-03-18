@@ -1,4 +1,4 @@
-import { ConfigPlugin } from '@expo/config-plugins'
+import { ConfigPlugin } from 'expo/config-plugins'
 import { validateProps } from './utils'
 import { NotifeeExpoPluginProps } from './types'
 import NotifeeIos from './ios'

@@ -27,11 +27,14 @@
     "@ethersproject/signing-key/elliptic": "^6.6.1",
     "stylus": "0.64.0",
     "viem": "2.21.55",
-    "webpack": "5.97.1"
+    "webpack": "5.97.1",
+    "@tamagui/static/react-native-web": "0.21.1"
   },
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.2.6",
     "@storybook/react": "^10.2.6",
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { WidgetAction } from './WidgetAction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_TO_TITLE } from '@safe-global/utils/features/safe-shield/constants'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 import { View } from 'tamagui'
 
 const meta: Meta<typeof WidgetAction> = {

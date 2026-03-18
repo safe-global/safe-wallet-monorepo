@@ -1,6 +1,6 @@
 import React from 'react'
 import { Text, View, XStack, YStack } from 'tamagui'
-import { Skeleton } from 'moti/skeleton'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { Logo } from '@/src/components/Logo'
 import { Fiat } from '@/src/components/Fiat'
 import { useAppSelector } from '@/src/store/hooks'
@@ -53,7 +53,7 @@ export const ChainIndicator = ({
   const noChains = !allChains || allChains.length === 0
   const finalChainConfig = chainConfig || (showUnknown ? fallbackChainConfig : null)
   if (isLoading || noChains) {
-    return <Skeleton width={onlyLogo ? 24 : 115} height={22} radius={4} />
+    return <SafeSkeleton width={onlyLogo ? 24 : 115} height={22} radius={4} />
   }
 
   if (!finalChainConfig) {

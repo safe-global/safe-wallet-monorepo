@@ -173,10 +173,6 @@ function RootLayout() {
   )
 }
 
-let AppEntryPoint = RootLayout
+import StorybookUI from '../../.storybook'
 
-if (isStorybookEnv) {
-  AppEntryPoint = require('../../.storybook').default
-}
-
-export default AppEntryPoint
+export default isStorybookEnv ? StorybookUI : RootLayout

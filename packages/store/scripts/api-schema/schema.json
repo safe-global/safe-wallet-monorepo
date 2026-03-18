@@ -2720,6 +2720,52 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/relay/status/{taskId}": {
+      "get": {
+        "description": "Retrieves the status of a relay task from the relay provider. This is a proxy endpoint to securely query task status without exposing the API key.",
+        "operationId": "relayGetTaskStatusV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID associated with the relay task",
+            "schema": {
+              "example": "11155111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "description": "Task ID returned from the relay transaction",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayTaskStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found"
+          }
+        },
+        "summary": "Get relay task status",
+        "tags": [
+          "relay"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
         "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain.",
@@ -8216,7 +8262,7 @@
           "gasLimit": {
             "type": "string",
             "nullable": true,
-            "description": "If specified, a gas buffer of 150k will be added on top of the expected gas usage for the transaction.\n      This is for the <a href=\"https://docs.gelato.network/developer-services/relay/quick-start/optional-parameters\" target=\"_blank\">\n      Gelato Relay execution overhead</a>, reducing the chance of the task cancelling before it is executed on-chain."
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
           }
         },
         "required": [
@@ -8234,6 +8280,46 @@
         },
         "required": [
           "taskId"
+        ]
+      },
+      "RelayTaskStatusReceipt": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
+          }
+        },
+        "required": [
+          "transactionHash"
+        ]
+      },
+      "RelayTaskStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
+            "enum": [
+              100,
+              110,
+              200,
+              400,
+              500
+            ],
+            "example": 200
+          },
+          "receipt": {
+            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "RelaysRemaining": {
@@ -8948,6 +9034,69 @@
           }
         }
       },
+      "DeadlockAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Deadlock analysis status code",
+            "enum": [
+              "DEADLOCK_DETECTED",
+              "NESTED_SAFE_WARNING",
+              "FAILED"
+            ],
+            "example": "DEADLOCK_DETECTED"
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "DeadlockAnalysisDto": {
+        "type": "object",
+        "properties": {
+          "DEADLOCK": {
+            "description": "Deadlock analysis findings. Identifies signing deadlock risks in nested Safe configurations.",
+            "example": [
+              {
+                "severity": "CRITICAL",
+                "type": "DEADLOCK_DETECTED",
+                "title": "Signing deadlock risk detected",
+                "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeadlockAnalysisResultDto"
+            }
+          }
+        }
+      },
       "CounterpartyAnalysisDto": {
         "type": "object",
         "properties": {
@@ -8989,11 +9138,31 @@
                 ]
               }
             }
+          },
+          "deadlock": {
+            "type": "object",
+            "description": "Deadlock analysis results mapped by Safe address. Contains signing deadlock risk findings for owner/threshold management transactions.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeadlockAnalysisDto"
+            },
+            "example": {
+              "0x0000000000000000000000000000000000000000": {
+                "DEADLOCK": [
+                  {
+                    "severity": "CRITICAL",
+                    "type": "DEADLOCK_DETECTED",
+                    "title": "Signing deadlock risk detected",
+                    "description": "This change may create a signing cycle between Safes and can permanently lock funds. You will not be allowed to proceed forward."
+                  }
+                ]
+              }
+            }
           }
         },
         "required": [
           "recipient",
-          "contract"
+          "contract",
+          "deadlock"
         ]
       },
       "ThreatAnalysisRequestDto": {
