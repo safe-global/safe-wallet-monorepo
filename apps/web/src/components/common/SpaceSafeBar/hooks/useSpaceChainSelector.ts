@@ -10,6 +10,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ChainInfo } from '@/features/spaces/types'
 
 export function useSpaceChainSelector() {
@@ -20,10 +21,11 @@ export function useSpaceChainSelector() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
 
-  const { chains, hasMultipleChains } = useMemo(() => {
-    const currentSafe = allSafes.find((s) => s.address.toLowerCase() === safeAddress.toLowerCase())
+  const { deployedChains, deployedChainIds, safeName } = useMemo(() => {
+    const currentSafe = allSafes.find((s) => sameAddress(s.address, safeAddress))
 
-    if (!currentSafe) return { chains: [] as ChainInfo[], hasMultipleChains: false }
+    if (!currentSafe)
+      return { deployedChains: [] as ChainInfo[], deployedChainIds: [] as string[], safeName: undefined }
 
     const chainIds = isMultiChainSafeItem(currentSafe) ? currentSafe.safes.map((s) => s.chainId) : [currentSafe.chainId]
 
@@ -37,8 +39,19 @@ export function useSpaceChainSelector() {
       }
     })
 
-    return { chains: resolvedChains, hasMultipleChains: chainIds.length > 1 }
+    return { deployedChains: resolvedChains, deployedChainIds: chainIds, safeName: currentSafe.name }
   }, [allSafes, safeAddress, chainConfigs])
+
+  const availableChains: ChainInfo[] = useMemo(() => {
+    return chainConfigs
+      .filter((c) => !deployedChainIds.includes(c.chainId))
+      .map((c) => ({
+        chainId: c.chainId,
+        chainName: c.chainName,
+        chainLogoUri: c.chainLogoUri ?? null,
+        shortName: c.shortName,
+      }))
+  }, [chainConfigs, deployedChainIds])
 
   const handleChainChange = useCallback(
     (chainId: string) => {
@@ -57,5 +70,13 @@ export function useSpaceChainSelector() {
     [chainConfigs, router, safeAddress, spaceId],
   )
 
-  return { chains, selectedChainId, hasMultipleChains, handleChainChange }
+  return {
+    deployedChains,
+    availableChains,
+    selectedChainId,
+    deployedChainIds,
+    safeAddress,
+    safeName,
+    handleChainChange,
+  }
 }
