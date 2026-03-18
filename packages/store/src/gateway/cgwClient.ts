@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 import { REHYDRATE } from 'redux-persist'
 import type { UnknownAction } from '@reduxjs/toolkit'
@@ -10,7 +10,7 @@ export const CREDENTIAL_ROUTES = [
   /\/v1\/spaces/,
   /\/v1\/auth/,
   /\/v2\/register\/notifications$/,
-  /\/v2\/chains\/[^\/]+\/notifications\/devices/,
+  /\/v2\/chains\/[^/]+\/notifications\/devices/,
 ]
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
@@ -95,7 +95,7 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   // Check for credential override in extraOptions (this is where RTK Query passes the options)
   const forceOmitCredentials =
     extraOptions && typeof extraOptions === 'object' && 'forceOmitCredentials' in extraOptions
-      ? (extraOptions as any).forceOmitCredentials
+      ? (extraOptions as Record<string, unknown>).forceOmitCredentials
       : false
 
   const shouldIncludeCredentials = !forceOmitCredentials && isCredentialRoute(urlEnd)
@@ -119,7 +119,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 export const cgwClient = createApi({
   baseQuery: dynamicBaseQuery,
   endpoints: () => ({}),
-  extractRehydrationInfo: (action: UnknownAction, { reducerPath }): CombinedState<{}, never, 'api'> | undefined => {
+  extractRehydrationInfo: (
+    action: UnknownAction,
+    { reducerPath },
+  ): CombinedState<Record<string, never>, never, 'api'> | undefined => {
     if (action.type === REHYDRATE && action.payload) {
       // Use type assertion to tell TypeScript the expected structure
       const payload = action.payload as {
@@ -127,7 +130,7 @@ export const cgwClient = createApi({
       }
 
       if (payload[reducerPath] && 'api' in payload[reducerPath]) {
-        return payload[reducerPath].api as CombinedState<{}, never, 'api'>
+        return payload[reducerPath].api as CombinedState<Record<string, never>, never, 'api'>
       }
     }
     return undefined
