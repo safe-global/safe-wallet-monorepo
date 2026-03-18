@@ -562,6 +562,22 @@ describe('useLedgerAddresses', () => {
       expect(resultLegacy.current.addresses).toEqual(legacyAddresses)
     })
 
+    it('should fetch addresses with bip44 derivation path', async () => {
+      const sessionId = createMockSessionId()
+      const mockAddresses = createMockAddresses(3)
+      mockLedgerDMKService.getCurrentSession.mockReturnValue(sessionId)
+      mockLedgerEthereumService.getEthereumAddresses.mockResolvedValue(mockAddresses)
+
+      const { result } = renderHook(() => useLedgerAddresses({ sessionId, derivationPathType: 'bip44' }))
+
+      await act(async () => {
+        await result.current.fetchAddresses(3)
+      })
+
+      expect(mockLedgerEthereumService.getEthereumAddresses).toHaveBeenCalledWith(sessionId, 3, 0, 'bip44')
+      expect(result.current.addresses).toEqual(mockAddresses)
+    })
+
     it('should handle errors with legacy-ledger derivation', async () => {
       const sessionId = createMockSessionId()
       const error = new Error('Ledger device error')
