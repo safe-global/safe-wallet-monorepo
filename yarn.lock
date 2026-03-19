@@ -39197,19 +39197,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-quick-base64@npm:^2.0.5":
-  version: 2.1.2
-  resolution: "react-native-quick-base64@npm:2.1.2"
-  dependencies:
-    base64-js: "npm:^1.5.1"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10/20b205612417a6c39452ad3ebd205d74fcfaa244832ec9e717b87ee075bf28076bf2445e8f690aad8cf0be6f3da89b4148eb8379d0b71d1c953bd06f66cc7c56
-  languageName: node
-  linkType: hard
-
-"react-native-quick-base64@npm:^2.2.2":
+"react-native-quick-base64@npm:2.2.2":
   version: 2.2.2
   resolution: "react-native-quick-base64@npm:2.2.2"
   peerDependencies:
