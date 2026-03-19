@@ -34,7 +34,10 @@ type HeaderProps = {
 }
 
 export function getLogoLink(router: ReturnType<typeof useRouter>, spaceId?: string | null): Url {
-  if (router.pathname !== AppRoutes.home && router.query.safe) {
+  if (router.query.safe) {
+    if (router.pathname === AppRoutes.home) {
+      return AppRoutes.welcome.accounts
+    }
     return { pathname: AppRoutes.home, query: { safe: router.query.safe } }
   }
   if (spaceId) {

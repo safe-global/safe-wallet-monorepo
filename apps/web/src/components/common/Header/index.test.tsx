@@ -1,4 +1,4 @@
-import Header from '@/components/common/Header/index'
+import Header, { getLogoLink } from '@/components/common/Header/index'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
@@ -7,6 +7,8 @@ import * as contracts from '@/features/__core__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
+import type { NextRouter } from 'next/router'
 
 jest.mock(
   '@/components/common/SafeTokenWidget',
@@ -34,6 +36,44 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 }))
 
 const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
+
+const mockRouter = (pathname: string, query: Record<string, string> = {}): ReturnType<typeof useRouter> =>
+  ({ pathname, query }) as unknown as ReturnType<typeof useRouter>
+
+describe('getLogoLink', () => {
+  const safeAddress = faker.finance.ethereumAddress()
+  const spaceId = 'space-1'
+
+  it('redirects to /welcome/accounts when on home page with a safe', () => {
+    const router = mockRouter(AppRoutes.home, { safe: safeAddress })
+    expect(getLogoLink(router)).toEqual(AppRoutes.welcome.accounts)
+  })
+
+  it('redirects to /welcome/accounts when on home page with a safe and a spaceId', () => {
+    const router = mockRouter(AppRoutes.home, { safe: safeAddress })
+    expect(getLogoLink(router, spaceId)).toEqual(AppRoutes.welcome.accounts)
+  })
+
+  it('redirects to home with safe when not on home page and safe is in query', () => {
+    const router = mockRouter(AppRoutes.transactions.history, { safe: safeAddress })
+    expect(getLogoLink(router)).toEqual({ pathname: AppRoutes.home, query: { safe: safeAddress } })
+  })
+
+  it('redirects to spaces when spaceId is set and no safe in query', () => {
+    const router = mockRouter(AppRoutes.welcome.accounts)
+    expect(getLogoLink(router, spaceId)).toEqual({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+  })
+
+  it('redirects to /welcome/accounts when on welcome index with no safe or spaceId', () => {
+    const router = mockRouter(AppRoutes.welcome.index)
+    expect(getLogoLink(router)).toEqual(AppRoutes.welcome.accounts)
+  })
+
+  it('redirects to /welcome when already on /welcome/accounts with no safe or spaceId', () => {
+    const router = mockRouter(AppRoutes.welcome.accounts)
+    expect(getLogoLink(router)).toEqual(AppRoutes.welcome.index)
+  })
+})
 
 describe('Header', () => {
   beforeEach(() => {
