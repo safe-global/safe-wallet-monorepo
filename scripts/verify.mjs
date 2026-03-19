@@ -8,11 +8,11 @@
  *
  * Flags:
  *   --workspace=<name>  Workspace to check (default: "web")
- *   --changed           Only check files changed since the base branch (TODO)
+ *   --changed           Only check files changed since the base branch
  *   --compact           Capture output and print summary instead of streaming
  */
 
-import { spawn } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import { createInterface } from 'node:readline'
 
 // ---------------------------------------------------------------------------
@@ -32,9 +32,61 @@ const workspace = getFlag('workspace') ?? 'web'
 const isCompact = args.includes('--compact')
 const isChanged = args.includes('--changed')
 
-// TODO: implement --changed incremental mode (Task 2)
-if (isChanged) {
-  // Placeholder — will filter checks to only changed files in a future task.
+// ---------------------------------------------------------------------------
+// Changed-file detection (--changed mode)
+// ---------------------------------------------------------------------------
+
+function gitDiff(...diffArgs) {
+  try {
+    const out = execFileSync('git', ['diff', '--name-only', '--diff-filter=d', ...diffArgs], {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+    return out
+      .trim()
+      .split('\n')
+      .filter((l) => l.length > 0)
+  } catch {
+    return []
+  }
+}
+
+function getMergeBase() {
+  const targets = ['dev', 'origin/dev', 'main']
+  for (const target of targets) {
+    try {
+      return execFileSync('git', ['merge-base', 'HEAD', target], {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim()
+    } catch {
+      // try next
+    }
+  }
+  return ''
+}
+
+const SOURCE_EXT_RE = /\.(ts|tsx|js|jsx)$/
+
+function getChangedFiles(ws, { quiet = false } = {}) {
+  const mergeBase = getMergeBase()
+  const committed = mergeBase ? gitDiff(`${mergeBase}...HEAD`) : []
+  const unstaged = gitDiff()
+  const staged = gitDiff('--cached')
+
+  const all = [...new Set([...committed, ...unstaged, ...staged])].filter((f) => SOURCE_EXT_RE.test(f))
+
+  if (!ws) return all
+
+  const prefix = `apps/${ws}/`
+  const outside = all.filter((f) => !f.startsWith(prefix))
+  const inside = all.filter((f) => f.startsWith(prefix)).map((f) => f.slice(prefix.length))
+
+  if (outside.length > 0 && !quiet) {
+    console.log(`ℹ ${outside.length} changed file(s) outside apps/${ws}/ — skipped`)
+  }
+
+  return inside
 }
 
 // ---------------------------------------------------------------------------
@@ -52,28 +104,87 @@ const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
 // Check definitions
 // ---------------------------------------------------------------------------
 
-const checks = [
-  {
-    label: 'types',
-    cmd: 'yarn',
-    args: ['workspace', workspacePkg, 'type-check'],
-  },
-  {
-    label: 'lint',
-    cmd: 'yarn',
-    args: ['workspace', workspacePkg, 'lint'],
-  },
-  {
-    label: 'prettier',
-    cmd: 'yarn',
-    args: ['workspace', workspacePkg, 'prettier'],
-  },
-  {
-    label: 'tests',
-    cmd: 'yarn',
-    args: ['workspace', workspacePkg, 'test', '--watchAll=false'],
-  },
-]
+function buildChecks() {
+  if (isChanged) {
+    const changedFiles = getChangedFiles(workspace, { quiet: isCompact })
+
+    if (changedFiles.length === 0) {
+      console.log('No changed files detected — nothing to verify.')
+      process.exit(0)
+    }
+
+    if (changedFiles.length > 50) {
+      console.log(`Note: 50+ files changed (${changedFiles.length}) — running full verify.`)
+      return buildFullChecks()
+    }
+
+    const lintableFiles = changedFiles.filter((f) => SOURCE_EXT_RE.test(f))
+    const testableFiles = changedFiles.filter((f) => !f.endsWith('.d.ts'))
+
+    const checks = [
+      {
+        label: 'types',
+        cmd: 'yarn',
+        args: ['workspace', workspacePkg, 'type-check'],
+      },
+    ]
+
+    if (lintableFiles.length > 0) {
+      checks.push({
+        label: 'lint',
+        cmd: 'yarn',
+        args: ['workspace', workspacePkg, 'eslint', ...lintableFiles],
+      })
+    }
+
+    if (changedFiles.length > 0) {
+      checks.push({
+        label: 'prettier',
+        cmd: 'yarn',
+        args: ['workspace', workspacePkg, 'prettier', '--check', ...changedFiles],
+      })
+    }
+
+    if (testableFiles.length > 0) {
+      checks.push({
+        label: 'tests',
+        cmd: 'yarn',
+        args: ['workspace', workspacePkg, 'test', '--findRelatedTests', ...testableFiles, '--watchAll=false'],
+      })
+    }
+
+    return checks
+  }
+
+  return buildFullChecks()
+}
+
+function buildFullChecks() {
+  return [
+    {
+      label: 'types',
+      cmd: 'yarn',
+      args: ['workspace', workspacePkg, 'type-check'],
+    },
+    {
+      label: 'lint',
+      cmd: 'yarn',
+      args: ['workspace', workspacePkg, 'lint'],
+    },
+    {
+      label: 'prettier',
+      cmd: 'yarn',
+      args: ['workspace', workspacePkg, 'prettier'],
+    },
+    {
+      label: 'tests',
+      cmd: 'yarn',
+      args: ['workspace', workspacePkg, 'test', '--watchAll=false'],
+    },
+  ]
+}
+
+const checks = buildChecks()
 
 // ---------------------------------------------------------------------------
 // Runner
