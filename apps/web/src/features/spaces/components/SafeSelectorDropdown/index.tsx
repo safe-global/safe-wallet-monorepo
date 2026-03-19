@@ -40,7 +40,7 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
       >
         <SelectTrigger
           className={cn(
-            '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0 relative z-10',
+            '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0 relative',
             variants.triggerClass,
           )}
           size="default"
