@@ -23,29 +23,26 @@ const AddToSpaceButton = (): ReactElement | null => {
 
   return (
     <CheckWallet allowNonOwner allowUndeployedSafe>
-      {(ok) =>
-        ok ? (
-          <Box mb={1}>
-            <Track {...SPACE_EVENTS.ADD_SAFE_TO_SPACE} label={SPACE_LABELS.safe_dashboard_banner}>
-              <Link href={{ pathname: AppRoutes.welcome.spaces, query: router.query }} passHref>
-                <Button
-                  data-testid="add-to-space-btn"
-                  variant="contained"
-                  color="background"
-                  size="medium"
-                  fullWidth
-                  disableElevation
-                  startIcon={<AddIcon />}
-                >
-                  Add to Space
-                </Button>
-              </Link>
-            </Track>
-          </Box>
-        ) : (
-          <></>
-        )
-      }
+      {(ok) => (
+        <Box mb={1}>
+          <Track {...SPACE_EVENTS.ADD_SAFE_TO_SPACE} label={SPACE_LABELS.safe_dashboard_banner}>
+            <Link href={{ pathname: AppRoutes.welcome.spaces, query: router.query }} passHref>
+              <Button
+                data-testid="add-to-space-btn"
+                variant="contained"
+                color="background"
+                size="medium"
+                fullWidth
+                disableElevation
+                disabled={!ok}
+                startIcon={<AddIcon />}
+              >
+                Add to Space
+              </Button>
+            </Link>
+          </Track>
+        </Box>
+      )}
     </CheckWallet>
   )
 }

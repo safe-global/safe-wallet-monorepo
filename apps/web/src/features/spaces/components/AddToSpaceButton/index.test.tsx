@@ -70,13 +70,13 @@ describe('AddToSpaceButton', () => {
     expect(queryByTestId('add-to-space-btn')).not.toBeInTheDocument()
   })
 
-  it('does not render when wallet is not connected', () => {
+  it('is disabled when wallet is not connected', () => {
     setupMocks()
     mockCheckWalletOk.mockReturnValue(false)
 
-    const { queryByTestId } = render(<AddToSpaceButton />)
+    const { getByTestId } = render(<AddToSpaceButton />)
 
-    expect(queryByTestId('add-to-space-btn')).not.toBeInTheDocument()
+    expect(getByTestId('add-to-space-btn')).toBeDisabled()
   })
 
   it('links to the Spaces welcome page', () => {
