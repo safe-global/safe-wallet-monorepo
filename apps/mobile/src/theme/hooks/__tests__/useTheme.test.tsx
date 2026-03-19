@@ -60,14 +60,14 @@ describe('useTheme', () => {
       },
     )
 
-    it('should return undefined when OS color scheme is null and themePreference is auto', () => {
-      mockUseColorScheme.mockReturnValue(null)
+    it('should normalize unspecified OS color scheme to dark when themePreference is auto', () => {
+      mockUseColorScheme.mockReturnValue('unspecified')
       mockUseAppSelector.mockReturnValue('auto')
 
       const { result } = renderHook(() => useTheme())
 
-      expect(result.current.colorScheme).toBe(undefined)
-      expect(result.current.isDark).toBe(false)
+      expect(result.current.colorScheme).toBe('dark')
+      expect(result.current.isDark).toBe(true)
       expect(result.current.themePreference).toBe('auto')
     })
 

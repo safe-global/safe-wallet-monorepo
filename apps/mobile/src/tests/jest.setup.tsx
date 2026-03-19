@@ -274,6 +274,8 @@ jest.mock('@react-native-firebase/crashlytics', () => {
 jest.mock('@datadog/mobile-react-native', () => require('@datadog/mobile-react-native/jest'))
 jest.mock('expo-datadog', () => require('@datadog/mobile-react-native/jest'))
 
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'))
+
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())

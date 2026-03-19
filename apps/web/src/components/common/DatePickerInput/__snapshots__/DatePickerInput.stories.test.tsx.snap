@@ -13,8 +13,8 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r1»"
-        id="«r1»-label"
+        for="_r_1_"
+        id="_r_1_-label"
       >
         Expiry date
       </label>
@@ -25,7 +25,7 @@ exports[`./DatePickerInput.stories AllowFutureDates 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r1»"
+          id="_r_1_"
           inputmode="text"
           name="expiryDate"
           placeholder="DD/MM/YYYY"
@@ -85,8 +85,8 @@ exports[`./DatePickerInput.stories Default 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r5»"
-        id="«r5»-label"
+        for="_r_5_"
+        id="_r_5_-label"
       >
         Birth date
       </label>
@@ -97,7 +97,7 @@ exports[`./DatePickerInput.stories Default 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r5»"
+          id="_r_5_"
           inputmode="text"
           name="birthDate"
           placeholder="DD/MM/YYYY"
@@ -157,8 +157,8 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
       <label
         class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeMedium MuiInputLabel-outlined mui-style-ll8nw6-MuiFormLabel-root-MuiInputLabel-root"
         data-shrink="false"
-        for="«r9»"
-        id="«r9»-label"
+        for="_r_9_"
+        id="_r_9_-label"
       >
         Created date
       </label>
@@ -169,7 +169,7 @@ exports[`./DatePickerInput.stories DisableFutureDates 1`] = `
           aria-invalid="false"
           autocomplete="off"
           class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputAdornedEnd mui-style-f423sj-MuiInputBase-input-MuiOutlinedInput-input"
-          id="«r9»"
+          id="_r_9_"
           inputmode="text"
           name="createdDate"
           placeholder="DD/MM/YYYY"

@@ -8,6 +8,7 @@ import type { HypernativeEligibility } from '@/features/hypernative'
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
   useThreatAnalysisHypernative: jest.fn(),
+  useThreatAnalysisHypernativeMessage: jest.fn(),
 }))
 
 jest.mock('../../components/useNestedTransaction', () => ({
@@ -35,6 +36,7 @@ jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
     _currentValue: {
       safeTx: undefined,
       safeMessage: undefined,
+      safeMessageHash: undefined,
       txOrigin: undefined,
     },
   },
@@ -64,6 +66,9 @@ const mockUseThreatAnalysisUtils = jest.requireMock('@safe-global/utils/features
 const mockUseThreatAnalysisHypernative = jest.requireMock(
   '@safe-global/utils/features/safe-shield/hooks',
 ).useThreatAnalysisHypernative
+const mockUseThreatAnalysisHypernativeMessage = jest.requireMock(
+  '@safe-global/utils/features/safe-shield/hooks',
+).useThreatAnalysisHypernativeMessage
 const mockUseNestedTransaction = jest.requireMock('../../components/useNestedTransaction').useNestedTransaction
 const mockUseNestedThreatAnalysis = jest.requireMock('../useNestedThreatAnalysis').useNestedThreatAnalysis
 
@@ -119,6 +124,7 @@ describe('useThreatAnalysis - Nested Transaction Detection', () => {
     jest.clearAllMocks()
     mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
+    mockUseThreatAnalysisHypernativeMessage.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
   })
 
@@ -340,6 +346,7 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     jest.clearAllMocks()
     mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
     mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
+    mockUseThreatAnalysisHypernativeMessage.mockReturnValue([undefined, undefined, false])
     mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
     mockUseNestedTransaction.mockReturnValue({
       nestedSafeInfo: undefined,

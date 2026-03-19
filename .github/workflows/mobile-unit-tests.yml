@@ -23,22 +23,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      # Set up Node.js
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/yarn
         with:
-          node-version: '22.11.0' # jod
-          cache: 'yarn'
-
-      # Install dependencies
-      - name: Install dependencies
-        run: yarn install --immutable
+          after-install: 'false'
 
       # Run tests with coverage
       - name: Run Jest tests with coverage

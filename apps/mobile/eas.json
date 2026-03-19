@@ -5,12 +5,12 @@
   },
   "build": {
     "base": {
-      "node": "22.11.0",
+      "node": "24.14.0",
       "android": {
-        "image": "sdk-52"
+        "image": "sdk-55"
       },
       "ios": {
-        "image": "sdk-52"
+        "image": "sdk-55"
       }
     },
     "development": {
@@ -21,7 +21,7 @@
         "APP_VARIANT": "development"
       },
       "android": {
-        "image": "sdk-52"
+        "image": "sdk-55"
       }
     },
     "preview-ios-simulator": {
@@ -60,6 +60,7 @@
       }
     },
     "build-and-maestro-test": {
+      "extends": "base",
       "withoutCredentials": true,
       "environment": "development",
       "env": {
@@ -68,13 +69,10 @@
       },
       "config": "build-and-maestro-test.yml",
       "android": {
-        "buildType": "apk",
-        "image": "latest"
+        "buildType": "apk"
       },
-
       "ios": {
         "simulator": true,
-        "image": "latest",
         "resourceClass": "large"
       }
     }

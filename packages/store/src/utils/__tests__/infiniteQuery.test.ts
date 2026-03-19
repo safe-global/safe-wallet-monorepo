@@ -3,7 +3,7 @@ import { getNextPageParam, getPreviousPageParam } from '../infiniteQuery'
 
 describe('getNextPageParam', () => {
   it('should return undefined for null lastPage', () => {
-    expect(getNextPageParam(null as any)).toBeUndefined()
+    expect(getNextPageParam(null as unknown as Parameters<typeof getNextPageParam>[0])).toBeUndefined()
   })
 
   it('should return undefined for lastPage without next', () => {
@@ -75,7 +75,7 @@ describe('getNextPageParam', () => {
 
 describe('getPreviousPageParam', () => {
   it('should return undefined for null firstPage', () => {
-    expect(getPreviousPageParam(null as any)).toBeUndefined()
+    expect(getPreviousPageParam(null as unknown as Parameters<typeof getPreviousPageParam>[0])).toBeUndefined()
   })
 
   it('should return undefined for firstPage without previous', () => {

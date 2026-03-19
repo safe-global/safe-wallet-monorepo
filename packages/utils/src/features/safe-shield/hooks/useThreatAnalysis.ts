@@ -48,8 +48,8 @@ export function useThreatAnalysis({
   // We don't want to update the data if it's a SafeTransaction and only the nonce has changed
   useEffect(() => {
     if (isSafeTransaction(dataProp) && isSafeTransaction(data)) {
-      const { nonce: _nonce, ...dataWithoutNonce } = dataProp.data
-      const { nonce: _prevNonce, ...prevDataWithoutNonce } = data.data
+      const { nonce: _, ...dataWithoutNonce } = dataProp.data
+      const { nonce: __, ...prevDataWithoutNonce } = data.data
       if (isEqual(dataWithoutNonce, prevDataWithoutNonce)) return
     }
 

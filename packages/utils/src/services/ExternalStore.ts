@@ -4,7 +4,7 @@ type Listener = () => void
 type Undefinable<T> = T | undefined
 
 // Singleton with getter/setter whose hook triggers a re-render
-class ExternalStore<T extends unknown> {
+class ExternalStore<T> {
   private store: T | undefined
   private listeners: Set<Listener> = new Set()
 

@@ -4,6 +4,7 @@ export enum ErrorType {
   RECIPIENT = 'recipient',
   CONTRACT = 'contract',
   THREAT = 'threat',
+  DEADLOCK = 'deadlock',
 }
 
 export const ERROR_INFO_MAPPER = {
@@ -24,6 +25,12 @@ export const ERROR_INFO_MAPPER = {
     description: 'Threat analysis failed. Review before processing.',
     severity: Severity.WARN,
     type: CommonSharedStatus.FAILED,
+  },
+  [ErrorType.DEADLOCK]: {
+    title: 'Deadlock analysis failed',
+    description: 'The analysis failed. Please try again later.',
+    type: CommonSharedStatus.FAILED,
+    severity: Severity.WARN,
   },
 }
 

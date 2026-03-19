@@ -1,4 +1,4 @@
-import { ethers, toBeHex, ZeroAddress } from 'ethers'
+import { toBeHex, ZeroAddress } from 'ethers'
 import {
   getStateOverwrites,
   THRESHOLD_STORAGE_POSITION,

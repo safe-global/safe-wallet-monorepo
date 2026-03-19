@@ -15,6 +15,7 @@ import { fireEvent, waitFor } from '@testing-library/react'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
+  DeadlockAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 
@@ -52,6 +53,7 @@ describe('ExecuteForm', () => {
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
       threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
+      deadlock: [undefined, undefined, false] as AsyncResult<DeadlockAnalysisResults>,
       nestedThreat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
       isNested: false,
       needsRiskConfirmation: false,

@@ -12,6 +12,7 @@ const useAsync = <T>(
   const [loading, setLoading] = useState<boolean>(false)
 
   // Dependencies passed manually to avoid stale closures
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const callback = useCallback(asyncCall, dependencies)
 
   useEffect(() => {

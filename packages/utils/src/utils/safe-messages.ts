@@ -28,7 +28,7 @@ const isHash = (payload: string) => /^0x[a-f0-9]+$/i.test(payload)
  * Typeguard for EIP712TypedData
  *
  */
-export const isEIP712TypedData = (obj: any): obj is TypedData => {
+export const isEIP712TypedData = (obj: unknown): obj is TypedData => {
   return typeof obj === 'object' && obj != null && 'domain' in obj && 'types' in obj && 'message' in obj
 }
 
