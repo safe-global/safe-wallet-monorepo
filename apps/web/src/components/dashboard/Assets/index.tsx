@@ -28,7 +28,9 @@ const MAX_ASSETS = 4
 
 const NoAssets = () => (
   <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-    <NoAssetsIcon />
+    <Box display="flex" justifyContent="center">
+      <NoAssetsIcon />
+    </Box>
 
     <Typography mb={0.5} mt={3}>
       No assets yet
