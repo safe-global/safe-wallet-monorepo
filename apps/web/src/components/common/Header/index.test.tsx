@@ -1,4 +1,4 @@
-import Header from '@/components/common/Header/index'
+import Header, { getLogoLink } from '@/components/common/Header/index'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
@@ -7,6 +7,7 @@ import * as contracts from '@/features/__core__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 
 jest.mock(
   '@/components/common/SafeTokenWidget',
@@ -34,6 +35,12 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 }))
 
 const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
+
+describe('getLogoLink', () => {
+  it('always redirects to /welcome/accounts', () => {
+    expect(getLogoLink()).toEqual(AppRoutes.welcome.accounts)
+  })
+})
 
 describe('Header', () => {
   beforeEach(() => {

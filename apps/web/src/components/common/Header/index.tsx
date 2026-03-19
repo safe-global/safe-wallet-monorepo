@@ -25,22 +25,14 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
-import { useAppSelector } from '@/store'
-import { lastUsedSpace } from '@/store/authSlice'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
   onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-export function getLogoLink(router: ReturnType<typeof useRouter>, spaceId?: string | null): Url {
-  if (router.pathname !== AppRoutes.home && router.query.safe) {
-    return { pathname: AppRoutes.home, query: { safe: router.query.safe } }
-  }
-  if (spaceId) {
-    return { pathname: AppRoutes.spaces.index, query: { spaceId } }
-  }
-  return router.pathname === AppRoutes.welcome.accounts ? AppRoutes.welcome.index : AppRoutes.welcome.accounts
+export function getLogoLink(): Url {
+  return AppRoutes.welcome.accounts
 }
 
 const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
@@ -52,10 +44,8 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const { BatchIndicator } = useLoadFeature(BatchingFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
-  const spaceId = useAppSelector(lastUsedSpace)
 
-  // If on the home page, the logo should link back to the space (if any), else to accounts
-  const logoHref = getLogoLink(router, spaceId)
+  const logoHref = getLogoLink()
 
   const handleMenuToggle = () => {
     if (onMenuToggle) {
