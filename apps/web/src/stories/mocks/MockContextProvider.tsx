@@ -5,6 +5,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import PageLayout from '@/components/common/PageLayout'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import type { StoryContext } from '@storybook/react'
 import type { LayoutType } from './types'
 import {
@@ -62,6 +63,8 @@ interface MockContextProviderProps {
   layout?: LayoutType
   /** Custom pathname for PageLayout */
   pathname?: string
+  /** Wrap with ShadcnProvider for shadcn component support */
+  shadcn?: boolean
 }
 
 /**
@@ -74,35 +77,45 @@ function LayoutWrapper({
   pathname,
   children,
   storyId,
+  isDark,
+  shadcn,
 }: {
   layout: LayoutType
   pathname: string
   children: ReactNode
   storyId?: string
+  isDark?: boolean
+  shadcn?: boolean
 }) {
+  // fullPage/withSidebar layouts include the sidebar which uses shadcn components,
+  // so they always need ShadcnProvider. Other layouts opt in via the shadcn flag.
+  const needsShadcn = shadcn || layout === 'fullPage' || layout === 'withSidebar'
+
+  const wrapShadcn = (content: ReactNode) =>
+    needsShadcn ? <ShadcnProvider dark={isDark}>{content}</ShadcnProvider> : content
+
   switch (layout) {
     case 'paper':
-      return <Paper sx={{ p: 2 }}>{children}</Paper>
+      return wrapShadcn(<Paper sx={{ p: 2 }}>{children}</Paper>)
 
     case 'fullPage':
-      return (
+      return wrapShadcn(
         <PageLayout key={storyId} pathname={pathname}>
           {children as ReactElement}
-        </PageLayout>
+        </PageLayout>,
       )
 
     case 'withSidebar':
-      // Same as fullPage but could be customized in the future
-      return (
+      return wrapShadcn(
         <PageLayout key={storyId} pathname={pathname}>
           {children as ReactElement}
-        </PageLayout>
+        </PageLayout>,
       )
 
     case 'none':
     default:
       // Mimic PageLayout's .content main { padding: var(--space-3) } rule
-      return (
+      return wrapShadcn(
         <Box
           sx={{
             backgroundColor: 'background.default',
@@ -111,7 +124,7 @@ function LayoutWrapper({
           }}
         >
           <main>{children}</main>
-        </Box>
+        </Box>,
       )
   }
 }
@@ -142,14 +155,17 @@ export function MockContextProvider({
   context,
   layout = 'none',
   pathname = '/home',
+  shadcn = false,
 }: MockContextProviderProps) {
+  const isDark = context?.globals?.theme === 'dark'
+
   return (
     <MockSDKProvider>
       <WalletContext.Provider value={wallet}>
         <TxModalContext.Provider value={mockTxModalContext}>
           <QueueAssessmentContext.Provider value={mockQueueAssessmentContext}>
             <StoreDecorator initialState={initialState} context={context}>
-              <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id}>
+              <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id} isDark={isDark} shadcn={shadcn}>
                 {children}
               </LayoutWrapper>
             </StoreDecorator>

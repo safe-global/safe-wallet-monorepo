@@ -10,7 +10,7 @@ export default function SpaceSettingsPage() {
   const spaces = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
-  if (!router.isReady || !spaceId || typeof spaceId !== 'string') return null
+  if (!router.isReady || !spaceId) return null
 
   return (
     <>
@@ -19,7 +19,7 @@ export default function SpaceSettingsPage() {
       </Head>
 
       <main>
-        <spaces.SpaceSettingsPage spaceId={spaceId} />
+        <spaces.SpaceSettingsPage spaceId={spaceId as string} />
       </main>
     </>
   )

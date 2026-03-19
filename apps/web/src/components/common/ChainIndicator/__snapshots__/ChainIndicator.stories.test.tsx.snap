@@ -17,6 +17,7 @@ exports[`./ChainIndicator.stories Default 1`] = `
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 24px;"
         width="24"
       />
       <div
@@ -61,6 +62,7 @@ exports[`./ChainIndicator.stories Inline 1`] = `
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 24px;"
         width="24"
       />
       <div
@@ -94,6 +96,7 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
         height="36"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 36px;"
         width="36"
       />
       <div
@@ -154,6 +157,7 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 24px;"
         width="24"
       />
     </span>
@@ -178,6 +182,7 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 24px;"
         width="24"
       />
       <div
@@ -211,6 +216,7 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
         height="16"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 16px;"
         width="16"
       />
       <div
@@ -275,6 +281,7 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+        style="min-width: 24px;"
         width="24"
       />
       <div

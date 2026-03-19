@@ -19,7 +19,7 @@ const UnauthorizedState = () => {
           </Typography>
 
           <Link href={AppRoutes.welcome.spaces} passHref>
-            <Button variant="outlined">Back to overview</Button>
+            <Button variant="outlined">Back to homepage</Button>
           </Link>
         </Box>
       </Box>

@@ -15,7 +15,6 @@ describe('[VISUAL] Swap page screenshots', { defaultCommandTimeout: 60000, ...co
   })
 
   it('[VISUAL] Screenshot swap page', () => {
-    main.enableChainFeature(constants.chainFeatures.nativeSwaps)
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_2)
     main.awaitVisualStability()
   })

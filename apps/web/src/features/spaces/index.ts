@@ -61,7 +61,7 @@ export { default as useTrackSpace } from './hooks/useTrackSpace'
 export {
   useSpaceMembersByStatus,
   useCurrentMembership,
-  useIsActiceMember,
+  useIsActiveMember,
   useIsAdmin,
   useIsInvited,
   isAdmin,
@@ -73,5 +73,11 @@ export {
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
 
+// Hooks from useSpacePendingTransactions.ts
+export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
+
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
+
+// Utilities
+export { getDeterministicColor } from './components/InitialsAvatar'

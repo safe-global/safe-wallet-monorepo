@@ -71,6 +71,7 @@ For shadcn Figma libraries, extract props from **attributes only**:
 
 - CSS variable **names**: `--general/primary`, `--general/secondary`
 - `data-name` for component type
+- **Text:** Use `get_variable_defs` — map Figma text styles (e.g. `heading 2`, `paragraph/regular`) to Typography variants (see reference.md)
 
 **What to IGNORE:**
 
@@ -82,6 +83,8 @@ For shadcn Figma libraries, extract props from **attributes only**:
 1. `data-name` with variant (e.g., "Button/Secondary/sm")
 2. CSS variable names → variant (`--general/secondary` → `variant="secondary"`)
 3. **Omitted = default**
+
+**Typography:** NEVER use hardcoded Tailwind for text. Always use `<Typography variant="…" />` from `@/components/ui/typography`. Map Figma variable names (e.g. `heading 2`, `paragraph-bold`) to Typography variants (e.g. `h2`, `paragraph-bold`).
 
 ## Step 5: Build the Component
 
@@ -105,9 +108,10 @@ export function MyComponent({ ...props }: MyComponentProps) {
 DO:
 
 - Use shadcn variants (`variant="outline"`, `size="sm"`)
-- Use Tailwind for layout: `flex`, `grid`, `gap-*`, `p-*`
+- Use **Typography** with variants for all text — never raw Tailwind for typography
+- Use Tailwind for layout only: `flex`, `grid`, `gap-*`, `p-*`
 - Match layout ratios from Figma exactly (e.g., `grid-cols-2` for 50/50 split, or specific column ratios)
-- Prefer using wrapper classes for layout, to use pure shadcn components without added tailwing classes
+- Prefer using wrapper classes for layout, to use pure shadcn components without added tailwind classes
 - Use CSS variables from shadcn for colors
 
 DON'T:
@@ -116,6 +120,7 @@ DON'T:
 - Override shadcn styles
 - Hardcode pixel values
 - Wrap icons in divs inside buttons (icons should be direct children)
+- Hardcode Tailwind for text
 
 ## Step 6: Create Storybook Stories
 

@@ -1,3 +1,6 @@
+/**
+ * @usedBy features/hypernative/components/HnBanner/HnBannerForCarousel.tsx (type NewsBannerProps)
+ */
 import React, { createElement, useMemo, useRef, useState } from 'react'
 import classnames from 'classnames'
 import { Box, Stack } from '@mui/material'

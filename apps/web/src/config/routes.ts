@@ -60,6 +60,9 @@ export const AppRoutes = {
     members: '/spaces/members',
     index: '/spaces',
     addressBook: '/spaces/address-book',
+    createSpace: '/spaces/create-space',
+    transactions: '/spaces/transactions',
+    security: '/spaces/security',
   },
   transactions: {
     tx: '/transactions/tx',
@@ -73,6 +76,11 @@ export const AppRoutes = {
     spaces: '/welcome/spaces',
     index: '/welcome',
     accounts: '/welcome/accounts',
+
+    // Onboarding routes
+    createSpace: '/welcome/create-space',
+    selectSafes: '/welcome/select-safes',
+    inviteMembers: '/welcome/invite-members',
   },
 }
 

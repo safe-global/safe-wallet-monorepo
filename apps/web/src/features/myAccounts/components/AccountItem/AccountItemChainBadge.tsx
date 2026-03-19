@@ -1,47 +1,47 @@
-import { Box, Tooltip, Typography } from '@mui/material'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { NetworkLogosList } from '@/features/multichain'
 import type { SafeItem } from '@/hooks/safes'
-import css from '../AccountItems/styles.module.css'
+import { cn } from '@/utils/cn'
 
 export interface AccountItemChainBadgeProps {
   /** Single chain mode */
   chainId?: string
   /** Multi-chain mode - renders network logos with tooltip */
   safes?: SafeItem[]
+  imageSize?: number
+  className?: string
 }
 
-function AccountItemChainBadge({ chainId, safes }: AccountItemChainBadgeProps) {
+function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: AccountItemChainBadgeProps) {
   // Multi-chain mode: render NetworkLogosList with tooltip
   if (safes && safes.length > 0) {
     return (
-      <Box className={css.multiChains}>
-        <Tooltip
-          title={
-            <Box data-testid="multichain-tooltip">
-              <Typography fontSize="14px">Multichain account on:</Typography>
-              {safes.map((safeItem) => (
-                <Box key={safeItem.chainId} sx={{ p: '4px 0px' }}>
-                  <ChainIndicator chainId={safeItem.chainId} />
-                </Box>
-              ))}
-            </Box>
-          }
-          arrow
-        >
-          <Box>
+      <div className={cn('flex shrink-0 justify-end', className)}>
+        <Tooltip>
+          <TooltipTrigger render={<span />} className="flex items-center">
             <NetworkLogosList networks={safes} showHasMore />
-          </Box>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div data-testid="multichain-tooltip">
+              <p className="text-sm">Multichain account on:</p>
+              {safes.map((safeItem) => (
+                <div key={safeItem.chainId} className="py-1">
+                  <ChainIndicator imageSize={imageSize} chainId={safeItem.chainId} />
+                </div>
+              ))}
+            </div>
+          </TooltipContent>
         </Tooltip>
-      </Box>
+      </div>
     )
   }
 
   // Single chain mode: render ChainIndicator
   if (chainId) {
     return (
-      <div className={css.accountItemChainBadge}>
-        <ChainIndicator chainId={chainId} responsive onlyLogo className={css.chainIndicator} />
+      <div className="shrink-0">
+        <ChainIndicator chainId={chainId} responsive onlyLogo className="justify-end" />
       </div>
     )
   }

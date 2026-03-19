@@ -21,7 +21,6 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import {
   Alert,
   Box,
-  Button,
   Card,
   Container,
   DialogActions,
@@ -31,6 +30,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -38,6 +38,8 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { showNotification } from '@/store/notificationsSlice'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -74,6 +76,7 @@ const AddAccounts = () => {
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const spaceId = useCurrentSpaceId()
+  const theme = useTheme()
 
   const allSafes = useMemo<AllSafeItems>(
     () => [...manualSafes, ...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
@@ -166,13 +169,14 @@ const AddAccounts = () => {
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
           <Button
-            data-testid="add-space-account-button"
-            variant="contained"
-            onClick={() => setOpen(true)}
+            size="sm"
+            className="font-bold"
+            variant={theme.palette.mode === 'light' ? 'outline' : undefined}
             disabled={!isAdmin}
-            sx={{ whiteSpace: 'nowrap' }}
+            onClick={() => setOpen(true)}
           >
-            Add accounts
+            <Plus className="size-4" />
+            Add account
           </Button>
         </Box>
       </Tooltip>
@@ -246,7 +250,7 @@ const AddAccounts = () => {
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button
                       data-testid="add-accounts-button"
-                      variant="contained"
+                      variant="default"
                       disabled={selectedSafesLength === 0}
                       type="submit"
                     >

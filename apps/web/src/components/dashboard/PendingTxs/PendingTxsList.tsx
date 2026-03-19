@@ -83,6 +83,7 @@ const PendingTxsList = (): ReactElement | null => {
   const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
+
   const recoveryQueue = useRecoveryQueue()
   const queueSize = useQueuedTxsLength()
 
