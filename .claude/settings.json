@@ -1,9 +1,14 @@
 {
   "hooks": {
-    "stop": [
+    "Stop": [
       {
         "matcher": "",
-        "command": "node scripts/verify-changed-hook.mjs"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/verify-changed-hook.mjs"
+          }
+        ]
       }
     ]
   }
