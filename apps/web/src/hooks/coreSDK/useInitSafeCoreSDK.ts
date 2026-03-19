@@ -10,11 +10,13 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { useChain } from '@/hooks/useChains'
 
 export const useInitSafeCoreSDK = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const dispatch = useAppDispatch()
   const web3ReadOnly = useWeb3ReadOnly()
+  const chain = useChain(safe.chainId)
 
   const { query } = useRouter()
   const prefixedAddress = Array.isArray(query.safe) ? query.safe[0] : query.safe
@@ -37,6 +39,8 @@ export const useInitSafeCoreSDK = () => {
       implementationVersionState: safe.implementationVersionState,
       implementation: safe.implementation.value,
       undeployedSafe,
+      isL2Chain: chain?.l2,
+      isZkChain: chain?.zk,
     })
       .then(setSafeSDK)
       .catch((_e) => {
@@ -53,6 +57,8 @@ export const useInitSafeCoreSDK = () => {
       })
   }, [
     address,
+    chain?.l2,
+    chain?.zk,
     dispatch,
     safe.address.value,
     safe.chainId,

@@ -4,8 +4,10 @@ import {
   hasCanonicalDeployment,
   hasMatchingDeployment,
   isCanonicalDeployment,
+  isChainAgnosticVersion,
   getCanonicalMultiSendCallOnlyAddress,
   getCanonicalMultiSendAddress,
+  resolveChainAgnosticContractAddresses,
 } from '../../contracts/deployments'
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
 
@@ -176,6 +178,94 @@ describe('deployments utils', () => {
     it('falls back to 1.3.0 for null version', () => {
       const address = getCanonicalMultiSendAddress(null)
       expect(address).toBe('0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761')
+    })
+  })
+
+  describe('isChainAgnosticVersion', () => {
+    it('returns true for version 1.4.1', () => {
+      expect(isChainAgnosticVersion('1.4.1')).toBe(true)
+    })
+
+    it('returns true for version 1.5.0', () => {
+      expect(isChainAgnosticVersion('1.5.0')).toBe(true)
+    })
+
+    it('returns false for version 1.3.0', () => {
+      expect(isChainAgnosticVersion('1.3.0')).toBe(false)
+    })
+
+    it('returns false for version 1.0.0', () => {
+      expect(isChainAgnosticVersion('1.0.0')).toBe(false)
+    })
+
+    it('strips version metadata before checking', () => {
+      expect(isChainAgnosticVersion('1.4.1+L2')).toBe(true)
+      expect(isChainAgnosticVersion('1.3.0+L2')).toBe(false)
+    })
+  })
+
+  describe('resolveChainAgnosticContractAddresses', () => {
+    it('resolves all canonical addresses for version 1.4.1 on L2 chains', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+      expect(result!.multiSendAddress).toBeDefined()
+      expect(result!.multiSendCallOnlyAddress).toBeDefined()
+      expect(result!.safeProxyFactoryAddress).toBeDefined()
+      expect(result!.fallbackHandlerAddress).toBeDefined()
+      expect(result!.signMessageLibAddress).toBeDefined()
+      expect(result!.createCallAddress).toBeDefined()
+      expect(result!.simulateTxAccessorAddress).toBeDefined()
+    })
+
+    it('resolves all canonical addresses for version 1.4.1 on L1 chains', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1', false, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+    })
+
+    it('returns different singleton addresses for L1 vs L2', () => {
+      const l1Result = resolveChainAgnosticContractAddresses('1.4.1', false, false)
+      const l2Result = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(l1Result).toBeDefined()
+      expect(l2Result).toBeDefined()
+      expect(l1Result!.safeSingletonAddress).not.toBe(l2Result!.safeSingletonAddress)
+    })
+
+    it('resolves zksync deployment type addresses when isZk is true', () => {
+      const canonicalResult = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+      const zkResult = resolveChainAgnosticContractAddresses('1.4.1', true, true)
+
+      expect(canonicalResult).toBeDefined()
+      expect(zkResult).toBeDefined()
+      // zkSync uses different addresses than canonical
+      expect(zkResult!.safeSingletonAddress).not.toBe(canonicalResult!.safeSingletonAddress)
+    })
+
+    it('strips version metadata before resolving', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1+L2', true, false)
+      const directResult = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBe(directResult!.safeSingletonAddress)
+    })
+
+    it('returns undefined when deployment type has no addresses', () => {
+      // Version 1.4.1 has no eip155 deployments — force an invalid type via casting
+      // to verify the function returns undefined for missing deployment types
+      const result = resolveChainAgnosticContractAddresses('0.0.1', true, false)
+      expect(result).toBeUndefined()
+    })
+
+    it('resolves addresses for version 1.3.0 canonical', () => {
+      const result = resolveChainAgnosticContractAddresses('1.3.0', true, false)
+
+      // 1.3.0 has canonical deployments
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
     })
   })
 })

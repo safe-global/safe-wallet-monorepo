@@ -1,17 +1,25 @@
 import semverSatisfies from 'semver/functions/satisfies'
 import {
   getSafeSingletonDeployment,
+  getSafeSingletonDeployments,
   getSafeL2SingletonDeployment,
+  getSafeL2SingletonDeployments,
   getMultiSendCallOnlyDeployment,
   getMultiSendCallOnlyDeployments,
   getMultiSendDeployment,
   getMultiSendDeployments,
   getFallbackHandlerDeployment,
+  getCompatibilityFallbackHandlerDeployments,
   getProxyFactoryDeployment,
+  getProxyFactoryDeployments,
   getSignMessageLibDeployment,
+  getSignMessageLibDeployments,
   getCreateCallDeployment,
+  getCreateCallDeployments,
+  getSimulateTxAccessorDeployments,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
+import type { ContractNetworkConfig } from '@safe-global/protocol-kit'
 import { _SAFE_L2_DEPLOYMENTS } from '@safe-global/safe-deployments/dist/deployments'
 import type { SingletonDeploymentJSON } from '@safe-global/safe-deployments/dist/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -254,4 +262,59 @@ export const getCanonicalMultiSendAddress = (version: SafeState['version']): str
   const safeVersion = version ?? '1.3.0'
   const deployment = getMultiSendDeployments({ version: safeVersion })
   return deployment?.deployments.canonical?.address
+}
+
+type DeploymentType = 'canonical' | 'eip155' | 'zksync'
+type DeploymentGetter = (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined
+
+const BASE_DEPLOYMENT_GETTERS: Record<string, DeploymentGetter> = {
+  multiSendAddress: getMultiSendDeployments,
+  multiSendCallOnlyAddress: getMultiSendCallOnlyDeployments,
+  safeProxyFactoryAddress: getProxyFactoryDeployments,
+  fallbackHandlerAddress: getCompatibilityFallbackHandlerDeployments,
+  signMessageLibAddress: getSignMessageLibDeployments,
+  createCallAddress: getCreateCallDeployments,
+  simulateTxAccessorAddress: getSimulateTxAccessorDeployments,
+}
+
+const CHAIN_AGNOSTIC_VERSIONS = '>=1.4.1'
+
+export const isChainAgnosticVersion = (version: string | null | undefined): boolean => {
+  if (!version) return false
+  const [cleanVersion] = version.split('+')
+  return semverSatisfies(cleanVersion, CHAIN_AGNOSTIC_VERSIONS)
+}
+
+/**
+ * Resolves all contract addresses chain-agnostically by version + deployment type.
+ * Works for any chain without needing safe-deployments to register it.
+ *
+ * Only works for versions >= 1.4.1 (all new chains use these).
+ * Returns undefined if any required address cannot be resolved.
+ */
+export const resolveChainAgnosticContractAddresses = (
+  version: string,
+  isL2: boolean,
+  isZk: boolean,
+): ContractNetworkConfig | undefined => {
+  const [cleanVersion] = version.split('+')
+  const deploymentType: DeploymentType = isZk ? 'zksync' : 'canonical'
+
+  const singletonGetter: DeploymentGetter = isL2 ? getSafeL2SingletonDeployments : getSafeSingletonDeployments
+
+  const resolved: Record<string, string> = {}
+
+  // Resolve singleton
+  const singletonAddress = singletonGetter({ version: cleanVersion })?.deployments[deploymentType]?.address
+  if (!singletonAddress) return undefined
+  resolved.safeSingletonAddress = singletonAddress
+
+  // Resolve all auxiliary contracts
+  for (const [field, getter] of Object.entries(BASE_DEPLOYMENT_GETTERS)) {
+    const address = getter({ version: cleanVersion })?.deployments[deploymentType]?.address
+    if (!address) return undefined
+    resolved[field] = address
+  }
+
+  return resolved as ContractNetworkConfig
 }
