@@ -13346,7 +13346,7 @@ __metadata:
     "@react-navigation/native-stack": "npm:^7.14.4"
     "@reduxjs/toolkit": "npm:^2.11.0"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^5.2.25"
+    "@safe-global/protocol-kit": "npm:^5.2.26"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
@@ -13465,14 +13465,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.25":
-  version: 5.2.25
-  resolution: "@safe-global/protocol-kit@npm:5.2.25"
+"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.26":
+  version: 5.2.26
+  resolution: "@safe-global/protocol-kit@npm:5.2.26"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
     "@safe-global/safe-deployments": "npm:^1.37.51"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.23"
+    "@safe-global/safe-modules-deployments": "npm:^2.2.25"
     "@safe-global/types-kit": "npm:^1.0.5"
     abitype: "npm:^1.0.2"
     semver: "npm:^7.6.3"
@@ -13482,7 +13482,7 @@ __metadata:
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/e3225881121e48deb32ac9f15efbf735e9ba0f746b3350cfa22d1af6f2a64dda906eb66aa7bf3afaeb5937a8cd9d847934784634f479fd72ac0b82fa7a558250
+  checksum: 10/3040589b970ac415adea57735b0ac9b76ccb29510d8c2275cb4f51d2ee1e1f6c157d6fc5dae0bd958188cac72930f9e51582bc643e1364b1a14130ceb059c3ad
   languageName: node
   linkType: hard
 
@@ -13517,12 +13517,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.51, @safe-global/safe-deployments@npm:^1.37.52":
-  version: 1.37.52
-  resolution: "@safe-global/safe-deployments@npm:1.37.52"
+"@safe-global/safe-deployments@npm:^1.37.51, @safe-global/safe-deployments@npm:^1.37.53":
+  version: 1.37.53
+  resolution: "@safe-global/safe-deployments@npm:1.37.53"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/b1b873390dad0041b9e8c1ec49d81de2f7b159e62e82372a7eb3885ee6334b555d160d7c7629ff9bdefaca339c6cfb1a5ae6ce73964a46b657d7cfd26b525b1b
+  checksum: 10/4a8626ab2f46c9cdcdab98e87322ba9cc3c9923effda8eb86ac75b769660e8b945bf740fb61f7c95b84d4b06b71db6b2da89ab36f9fb9ff42c75743c279b0deb
   languageName: node
   linkType: hard
 
@@ -13540,10 +13540,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.23, @safe-global/safe-modules-deployments@npm:^2.2.24":
-  version: 2.2.24
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.24"
-  checksum: 10/d10a39dc939f6f5522a98367eb42948befffd310d063757325a77e0e6ec60d7df6b4c63ca3a0e84bfb75b6624373a867e08372f84c2a64319f35cbce1375fffd
+"@safe-global/safe-modules-deployments@npm:^2.2.25":
+  version: 2.2.25
+  resolution: "@safe-global/safe-modules-deployments@npm:2.2.25"
+  checksum: 10/94d67d96c9e09f423aebab7cadf37eeec9f7a291bbf692ac4c60c5a1fa3a68b9dc847ca1ac2a45d264db3717ca0c50bc7eb74270a66fc6d46bb8f8d97d3e6e79
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-modules-deployments@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.1"
+  checksum: 10/cb4ab566c3dd7e1b91c2cd3fa8df68132a3acfe15ff3c10485a8d1450a8f69be3ef47f8163860ff16880d8d44b7cb46bd07820f2d173cc622a7bf988a6379039
   languageName: node
   linkType: hard
 
@@ -13653,7 +13660,7 @@ __metadata:
     "@safe-global/safe-apps-provider": "npm:^0.18.5"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.52"
+    "@safe-global/safe-deployments": "npm:^1.37.53"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -13769,10 +13776,10 @@ __metadata:
     "@reown/walletkit": "npm:^1.2.7"
     "@rspack/plugin-react-refresh": "npm:^1.0.0"
     "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^5.2.25"
+    "@safe-global/protocol-kit": "npm:^5.2.26"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.52"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.24"
+    "@safe-global/safe-deployments": "npm:^1.37.53"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.1"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
