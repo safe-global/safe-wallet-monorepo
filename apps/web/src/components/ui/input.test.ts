@@ -43,6 +43,12 @@ describe('sanitizeInputValue', () => {
     expect(sanitizeInputValue('<SCRIPT>alert(1)</SCRIPT>')).toBe('')
     expect(sanitizeInputValue('<Script>alert(1)</Script>')).toBe('')
   })
+
+  it('should handle nested patterns that reconstruct after a single pass', () => {
+    expect(sanitizeInputValue('ononclickclick="steal()"')).toBe('')
+    expect(sanitizeInputValue('<scr<script></script>ipt>alert(1)</script>')).toBe('')
+    expect(sanitizeInputValue('ononloadload="malicious()"')).toBe('')
+  })
 })
 
 describe('containsScriptInjection', () => {
