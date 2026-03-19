@@ -72,7 +72,13 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
+              <NameInput
+                inputProps={{ 'data-testid': 'space-name-input' }}
+                label="Name"
+                autoFocus
+                name="name"
+                required
+              />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

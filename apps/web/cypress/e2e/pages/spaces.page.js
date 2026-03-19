@@ -66,21 +66,15 @@ export function clickOnCreateSpaceModalBtn() {
 }
 
 export function typeSpaceName(name) {
-  cy.get(orgSpaceInput).find('input').clear().type(name)
+  cy.get(orgSpaceInput).clear().type(name)
 }
 
 export function clickOnSpaceSelector() {
-  cy.get(spaceSelectorBtn).click()
+  cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
 }
 
 export function spaceExists(name) {
   cy.get(spaceSelectorMenu).contains(name).should('be.visible')
-}
-
-export function createSpace(name) {
-  clickOnCreateSpaceBtn()
-  typeSpaceName(name)
-  clickOnCreateSpaceModalBtn()
 }
 
 export function getSpaceId() {
@@ -134,6 +128,22 @@ export function deleteAllSpaces() {
         }
       })
     }
+  })
+}
+
+/**
+ * Ensures the app is ready to create a space. Handles two post-login states:
+ * - If spaces exist: deletes all spaces and verifies Create space button is visible.
+ * - If no spaces: verifies Create space button is visible on the "No spaces found" page.
+ */
+export function ensureReadyToCreateSpace() {
+  cy.wait(2000)
+  cy.get('body').then(($body) => {
+    const hasSpaces = $body.find(spaceCard).length > 0
+    if (hasSpaces) {
+      deleteAllSpaces()
+    }
+    main.verifyElementsIsVisible([createSpaceBtn])
   })
 }
 
@@ -214,102 +224,49 @@ export function addMember(name, address) {
 }
 
 // ===========================================
-// Dashboard selectors
+// Onboarding selectors & labels
 // ===========================================
 
-// Test data constants
-export const testSpaceId = '2343'
-export const emptySpaceId = '2362'
-export const testSpaceName = 'Automation Test Space'
-export const firstAccountAddress = '0x1694...23C7'
-export const secondAccountAddress = '0x0596...197b'
-export const secondAccountName = 'Space addressbook name'
-export const pendingTxName = 'addOwnerWithThre'
-export const pendingTxStatus = 'Execution needed'
-export const pendingTxBatchLabel = 'Batch'
-export const txDetailsLabel = 'Transaction details'
-export const gettingStartedLabel = 'Getting started'
-export const addSafeAccountsLabel = 'Add your Safe Accounts'
-export const addAccountsModalLabel = 'Add accounts'
-export const importAddressBookLabel = 'Import address book'
-export const inviteMemberLabel = 'Invite member'
-export const exploreSpacesLabel = 'Explore spaces'
-export const viewAllAccountsLabel = 'View all accounts'
+export const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
+export const selectSafesContinueBtn = '[data-testid="select-safes-continue-button"]'
+export const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
+export const inviteMembersContinueBtn = '[data-testid="invite-members-continue-button"]'
+export const createSpaceLabel = 'Create a space'
+export const selectSafesLabel = 'Select Safes for your Space'
+export const inviteTeamMembersLabel = 'Invite team members'
 
-export const widgetItem = '[data-slot="widget-item"]'
-export const safeWidget = '[data-slot="safe-widget"]'
-export const pendingTxWidget = '[data-testid="pending-tx-widget"]'
-export const backToSpaceBtn = '[aria-label="Back to space"]'
-
-export function getPendingTxItem(index) {
-  return `[data-testid="pending-tx-item-${index}"]`
-}
-
-export function getAccountItem(index) {
-  return `[data-testid="account-item-${index}"]`
-}
-export const headerWalletBtn = '[data-testid="header-wallet-btn"]'
-export const importAddressBookBtn = '[data-testid="import-address-book-button"]'
-export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
-export const learnMoreBtn = '[data-testid="learn-more-button"]'
-export const addAccountBtn = '[data-testid="add-space-account-button"]'
-export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
-export const sidebarItemAccounts = '[data-testid="sidebar-item-accounts"]'
-export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
-export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
-export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
+// Onboarding route paths
+const onboardingCreateSpacePath = '/welcome/create-space'
+const onboardingSelectSafesPath = '/welcome/select-safes'
+const onboardingInviteMembersPath = '/welcome/invite-members'
 
 // ===========================================
-// Login & Navigation helpers
+// Onboarding helpers
 // ===========================================
 
-export function loginWithSiwe() {
-  clickOnSignInBtn()
-  // Wait for the spaces page to load after SIWE authentication
-  cy.get(spaceSelectorBtn).should('be.visible')
-  cy.url().should('include', '/spaces')
-}
-
-export function openSpace(spaceName) {
-  cy.wait(2000)
+export function createSpaceViaOnboardingWithSkip(name) {
   cy.get('body').then(($body) => {
-    if ($body.find(spaceSelectorBtn).length > 0) {
-      clickOnSpaceSelector()
-      cy.get(spaceSelectorMenu).contains(spaceName).click()
-    } else {
-      cy.contains(spaceName).click()
+    if (!$body.text().includes(createSpaceLabel)) {
+      clickOnCreateSpaceBtn()
     }
   })
-}
+  // Step 1: Create a space — name and submit
+  cy.url().should('include', onboardingCreateSpacePath)
+  cy.contains(createSpaceLabel).should('be.visible')
+  typeSpaceName(name)
+  clickOnCreateSpaceBtn()
 
-export function goToSpaceDashboard() {
-  getSpaceId().then((spaceId) => {
-    cy.visit(constants.spaceDashboardUrl + spaceId)
-  })
-}
+  // Step 2: Select Safes — wait for API to create space and navigate
+  cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath)
+  cy.url().should('include', 'spaceId=')
+  cy.get(selectSafesSkipBtn).should('be.visible').click()
 
-export function goToSpaceAccounts() {
-  getSpaceId().then((spaceId) => {
-    cy.visit(constants.spaceSafeAccountsUrl + spaceId)
-  })
-}
+  // Step 3: Invite Members — wait for navigation
+  cy.url().should('include', onboardingInviteMembersPath)
+  cy.url().should('include', 'spaceId=')
+  cy.get(inviteMembersSkipBtn).should('be.visible').click()
 
-export function goToSpaceAddressBook() {
-  getSpaceId().then((spaceId) => {
-    cy.visit(constants.spaceAddressBookUrl + spaceId)
-  })
-}
-
-export function verifySidebarItemNavigates(sidebarSelector, expectedPath) {
-  cy.get(sidebarSelector).click()
-  cy.url().should('include', expectedPath)
-}
-
-export function verifyWidgetVisible(widgetTitle) {
-  cy.contains(widgetTitle, { timeout: 30000 }).should('be.visible')
-}
-
-export function disconnectFromSpaceLevel() {
-  cy.get(headerWalletBtn).click()
-  cy.get('button').contains('Disconnect').click()
+  // Wait for space dashboard to fully load
+  cy.url().should('include', constants.spaceDashboardUrl)
+  cy.url().should('include', 'spaceId=')
 }
