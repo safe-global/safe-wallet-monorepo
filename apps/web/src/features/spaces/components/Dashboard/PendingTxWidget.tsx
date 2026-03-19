@@ -94,7 +94,7 @@ const PendingTxWidget = ({
               startNode={<TxIcon tx={tx} />}
               featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
               actionNode={
-                <div className="w-[200px] max-w-full flex justify-end">
+                <div className="flex justify-end">
                   <Badge variant="secondary">{getTxStatus(tx)}</Badge>
                 </div>
               }

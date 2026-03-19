@@ -4,6 +4,12 @@
   @apply absolute top-0 right-0 z-[1];
 }
 
+@media (max-width: 767px) {
+  .topbar {
+    @apply left-0;
+  }
+}
+
 .mainSpace {
   /* we need it in order to have higher importance than the .main class */
   && {
