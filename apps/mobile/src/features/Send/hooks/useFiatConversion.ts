@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { selectPreferFiatInput, setPreferFiatInput } from '@/src/store/settingsSlice'
 
 interface UseFiatConversionArgs {
   rawInput: string
@@ -135,7 +137,8 @@ export function useFiatConversion({
   decimals,
   onRawInputChange,
 }: UseFiatConversionArgs): UseFiatConversionResult {
-  const [isFiatMode, setIsFiatMode] = useState(true)
+  const dispatch = useAppDispatch()
+  const isFiatMode = useAppSelector(selectPreferFiatInput)
 
   const rate = fiatRate ? parseFloat(fiatRate) : 0
   const hasFiatPrice = rate > 0
@@ -169,8 +172,8 @@ export function useFiatConversion({
       onRawInputChange(formatted)
     }
 
-    setIsFiatMode((prev) => !prev)
-  }, [hasFiatPrice, rawInput, isFiatMode, rate, decimals, onRawInputChange])
+    dispatch(setPreferFiatInput(!isFiatMode))
+  }, [hasFiatPrice, rawInput, isFiatMode, rate, decimals, onRawInputChange, dispatch])
 
   return {
     ...result,

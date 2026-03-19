@@ -7,6 +7,8 @@ import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 interface SignInButtonProps {
   redirectLoading: boolean
@@ -16,6 +18,7 @@ interface SignInButtonProps {
 const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProps) => {
   const dispatch = useAppDispatch()
   const { signIn, loading } = useSiwe()
+  const spaceId = useCurrentSpaceId()
 
   const handleLogin = () => {
     trackEvent({ ...OVERVIEW_EVENTS.OPEN_ONBOARD, label: OVERVIEW_LABELS.space_list_page })
@@ -34,9 +37,13 @@ const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProp
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
+        trackEvent({ ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: spaceId ?? undefined }, { spaceId })
         afterSignIn()
       }
     } catch (error) {
+      trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
+        [MixpanelEventParams.FAILURE_REASON]: error instanceof Error ? error.message : String(error),
+      })
       logError(ErrorCodes._640)
 
       dispatch(

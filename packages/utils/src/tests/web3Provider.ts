@@ -46,7 +46,7 @@ export const createMockWeb3Provider = (
       return new Network('mock', BigInt(chainId ?? 1))
     }),
     call: jest.fn((tx: { data: string; to: string }) => {
-      const multiCallSignature = MULTI_CALL_INTERFACE.getFunction('aggregate3')?.selector!
+      const multiCallSignature = MULTI_CALL_INTERFACE.getFunction('aggregate3')!.selector
       // Auto handle multicalls
       if (
         tx.data.startsWith(multiCallSignature) &&
@@ -56,7 +56,7 @@ export const createMockWeb3Provider = (
         const calls = MULTI_CALL_INTERFACE.decodeFunctionData('aggregate3', tx.data)[0]
         const results: { success: boolean; returnData: string }[] = []
         for (const call of calls) {
-          const [target, allowFailure, callData] = call
+          const [target, _allowFailure, callData] = call
           const matchedImplementation = findImplementation(callData, target)
           if (!matchedImplementation) {
             console.log('No matched implementation for call', callData)

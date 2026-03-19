@@ -43,7 +43,7 @@ export const useAddressActivity = (
     previousRecipientsRef.current = new Set(addresses)
   }, [addresses])
 
-  const [fetchedResults, error, loading] = useAsyncDeepCompare<AddressActivityResult | undefined>(async () => {
+  const [fetchedResults, error, _loading] = useAsyncDeepCompare<AddressActivityResult | undefined>(async () => {
     if (!web3ReadOnly || !addressesToFetch.length) {
       return undefined
     }

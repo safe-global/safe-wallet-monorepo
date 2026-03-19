@@ -1,26 +1,11 @@
-// Main exports for @safe-global/theme package
+// This package uses sub-path imports exclusively.
+// Import from specific modules instead of this barrel file:
+//
+//   import { lightPalette } from '@safe-global/theme/palettes/light'
+//   import { generateMuiTheme } from '@safe-global/theme/generators/mui'
+//   import { generateTamaguiColorTokens } from '@safe-global/theme/generators/tamagui'
+//   import { spacingMobile } from '@safe-global/theme/tokens/spacing'
+//
+// See package.json "exports" field for available sub-paths.
 
-// MUI type extensions (side-effect import for TypeScript module augmentation)
-import './generators/mui-extensions'
-
-// Palettes
-export { default as lightPalette } from './palettes/light'
-export { default as darkPalette } from './palettes/dark'
-export { default as staticColors } from './palettes/static'
-export type { ColorPalette, StaticColors } from './palettes/types'
-
-// Tokens
-export * from './tokens'
-
-// Generators
-export { generateMuiTheme } from './generators/mui'
-export {
-  generateTamaguiColorTokens,
-  generateTamaguiTokens,
-  generateTamaguiThemes,
-  generateTamaguiFontSizes,
-} from './generators/tamagui'
-export { generateCSSVars } from './generators/css-vars'
-
-// Utilities
-export { flattenPalette } from './utils/flatten'
+export {}

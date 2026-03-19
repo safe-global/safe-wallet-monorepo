@@ -89,7 +89,7 @@ describe('multicall', () => {
     const mockProvider = createMockWeb3Provider(
       [
         {
-          signature: MULTICALL_INTERFACE.getFunction('aggregate3')?.selector!,
+          signature: MULTICALL_INTERFACE.getFunction('aggregate3')!.selector,
           returnType: 'raw',
           returnValue: MULTICALL_INTERFACE.encodeFunctionResult('aggregate3', [expectedResults]),
         },

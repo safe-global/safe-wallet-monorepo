@@ -1,15 +1,12 @@
 import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
+import { useAppDispatch } from '@/store'
+import { setLastUsedSpace } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
-import useWallet from '@/hooks/wallets/useWallet'
 
 const useOnboardingNavigation = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const wallet = useWallet()
-  const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = router.query.spaceId as string | undefined
 
   useEffect(() => {
@@ -36,11 +33,8 @@ const useOnboardingNavigation = () => {
     router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
   }, [router, spaceId])
 
-  const isReady = Boolean(wallet && isUserAuthenticated && spaceId)
-
   return {
     spaceId,
-    isReady,
     handleBack,
     handleSkip,
     redirectToNextStep,

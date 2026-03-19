@@ -1,4 +1,4 @@
-export function invariant<T extends unknown>(condition: T, error: string): asserts condition {
+export function invariant<T>(condition: T, error: string): asserts condition {
   if (condition) {
     return
   }

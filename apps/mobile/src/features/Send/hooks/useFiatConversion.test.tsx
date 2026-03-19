@@ -1,5 +1,7 @@
-import { renderHook, act } from '@testing-library/react-native'
+import { act } from '@testing-library/react-native'
+import { renderHook, renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { useFiatConversion, getCurrencySymbol, truncateToDecimals } from './useFiatConversion'
+import { selectPreferFiatInput } from '@/src/store/settingsSlice'
 
 // Mock formatCurrency to keep tests focused on this hook's logic
 jest.mock('@safe-global/utils/utils/formatNumber', () => ({
@@ -56,10 +58,15 @@ describe('useFiatConversion', () => {
   }
 
   describe('initialization', () => {
-    it('starts in fiat mode when fiat price is available', () => {
+    it('starts in fiat mode by default (preferFiatInput: true)', () => {
       const { result } = renderHook(() => useFiatConversion(defaultArgs))
       expect(result.current.isFiatMode).toBe(true)
       expect(result.current.hasFiatPrice).toBe(true)
+    })
+
+    it('starts in token mode when preferFiatInput is false', () => {
+      const { result } = renderHook(() => useFiatConversion(defaultArgs), { settings: { preferFiatInput: false } })
+      expect(result.current.isFiatMode).toBe(false)
     })
 
     it('returns empty tokenAmount for empty input', () => {
@@ -163,10 +170,13 @@ describe('useFiatConversion', () => {
     })
 
     it('converts token to fiat value when toggling from token to fiat mode', () => {
+      const store = createTestStore()
       // Start in token mode by toggling first with empty input
-      const { result, rerender } = renderHook(({ args }) => useFiatConversion(args), {
-        initialProps: { args: { ...defaultArgs, rawInput: '' } },
-      })
+      const { result, rerender } = renderHookWithStore(
+        ({ args }: { args: typeof defaultArgs }) => useFiatConversion(args),
+        store,
+        { initialProps: { args: { ...defaultArgs, rawInput: '' } } },
+      )
       act(() => result.current.toggleMode())
       mockOnRawInputChange.mockClear()
 
@@ -178,9 +188,12 @@ describe('useFiatConversion', () => {
     })
 
     it('produces fixed-point fiat string for very small token amounts (no scientific notation)', () => {
-      const { result, rerender } = renderHook(({ args }) => useFiatConversion(args), {
-        initialProps: { args: { ...defaultArgs, rawInput: '' } },
-      })
+      const store = createTestStore()
+      const { result, rerender } = renderHookWithStore(
+        ({ args }: { args: typeof defaultArgs }) => useFiatConversion(args),
+        store,
+        { initialProps: { args: { ...defaultArgs, rawInput: '' } } },
+      )
       act(() => result.current.toggleMode())
       mockOnRawInputChange.mockClear()
 
@@ -195,6 +208,18 @@ describe('useFiatConversion', () => {
       const { result } = renderHook(() => useFiatConversion({ ...defaultArgs, rawInput: '10', fiatRate: undefined }))
       act(() => result.current.toggleMode())
       expect(mockOnRawInputChange).not.toHaveBeenCalled()
+    })
+
+    it('persists mode preference to Redux store', () => {
+      const store = createTestStore()
+      const { result } = renderHookWithStore(() => useFiatConversion(defaultArgs), store)
+      expect(selectPreferFiatInput(store.getState())).toBe(true)
+
+      act(() => result.current.toggleMode())
+      expect(selectPreferFiatInput(store.getState())).toBe(false)
+
+      act(() => result.current.toggleMode())
+      expect(selectPreferFiatInput(store.getState())).toBe(true)
     })
   })
 

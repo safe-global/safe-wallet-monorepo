@@ -20,6 +20,7 @@ const AccountWidgetItem = ({ account, loading = false, testId }: AccountWidgetIt
     <WidgetItem
       testId={testId}
       href={account.href}
+      onClick={onItemClick ? () => onItemClick(account.address) : undefined}
       label={<Typography variant="paragraph-bold">{account.name}</Typography>}
       info={
         <Typography variant="paragraph-mini" color="muted">

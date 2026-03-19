@@ -38,7 +38,7 @@ function isPriceImprovementFee(fee: v1_4_0.PartnerFee): fee is PriceImprovementF
  * Right now it doesn't look like we need the surplus and price improvement fees.
  * and that's why we don't use this function yet.
  */
-function resolveNewPartnerFeeBps(fee: v1_4_0.PartnerFee): number | null {
+function _resolveNewPartnerFeeBps(fee: v1_4_0.PartnerFee): number | null {
   if (isVolumeFee(fee)) {
     return fee.volumeBps
   }

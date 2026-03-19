@@ -137,7 +137,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
               tabindex="0"
               type="button"
             >
-              See how it works
+              Get started
             </button>
           </span>
           <button

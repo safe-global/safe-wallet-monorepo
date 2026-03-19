@@ -30,17 +30,24 @@ interface PendingTxWidgetProps {
   error?: string
   onViewAll?: () => void
   onRefresh?: () => void
+  onItemClick?: (safeAddress: string, txId: string) => void
 }
 
-const SKELETON_COUNT = 3
+const SKELETON_COUNT = 4
 
 const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
-  <div className={cn(css.iconBG, 'flex shrink-0 items-center justify-center')}>
+  <div className={cn(css.iconBG, 'flex shrink-0 items-center justify-center', '!mb-0')}>
     <TxTypeIcon tx={tx.transaction} />
   </div>
 )
 
-const PendingTxWidget = ({ transactions, loading = false, error, onRefresh }: PendingTxWidgetProps): ReactElement => {
+const PendingTxWidget = ({
+  transactions,
+  loading = false,
+  error,
+  onRefresh,
+  onItemClick,
+}: PendingTxWidgetProps): ReactElement => {
   const isEmpty = transactions.length === 0 && !loading
   const hasError = !!error && !loading
 
@@ -77,6 +84,7 @@ const PendingTxWidget = ({ transactions, loading = false, error, onRefresh }: Pe
               key={tx.transaction.id}
               testId={`pending-tx-item-${index}`}
               href={href}
+              onClick={tx.safeAddress ? () => onItemClick?.(tx.safeAddress!, tx.transaction.id) : undefined}
               className={css.widgetItem}
               label={
                 <div className={css.widgetItemLabel}>
@@ -87,7 +95,7 @@ const PendingTxWidget = ({ transactions, loading = false, error, onRefresh }: Pe
               startNode={<TxIcon tx={tx} />}
               featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
               actionNode={
-                <div className="w-[200px] max-w-full flex justify-end">
+                <div className="flex justify-end">
                   <Badge variant="secondary">{getTxStatus(tx)}</Badge>
                 </div>
               }

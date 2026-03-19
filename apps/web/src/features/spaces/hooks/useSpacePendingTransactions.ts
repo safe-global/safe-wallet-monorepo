@@ -1,35 +1,23 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useState, useEffect, useCallback } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTransactionQueue } from '@/services/transactions'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import { useSpaceSafesWithQueue } from './useSpaceSafesWithQueue'
 
 type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
+type SafeQueueResult = { chainId: string; address: string; transactions: TransactionQueuedItem[] }
+
+const BATCH_SIZE = 3
+const BATCH_DELAY_MS = 300
 
 export const useSpacePendingTransactions = (limit = 3) => {
-  const spaceId = useCurrentSpaceId()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { safesWithQueue, isLoading: isLoadingQueue } = useSpaceSafesWithQueue()
   const [allTransactions, setAllTransactions] = useState<SpacePendingTxItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>()
 
-  const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
-    { spaceId: Number(spaceId) },
-    { skip: !isUserSignedIn || !spaceId },
-  )
-
-  const safePairs = useMemo(() => {
-    if (!spaceSafes?.safes) return []
-    return Object.entries(spaceSafes.safes).flatMap(([chainId, addresses]) =>
-      addresses.map((address) => ({ chainId, address })),
-    )
-  }, [spaceSafes?.safes])
-
   const fetchAll = useCallback(async () => {
-    if (safePairs.length === 0) {
+    if (safesWithQueue.length === 0) {
       setAllTransactions([])
       return
     }
@@ -38,15 +26,25 @@ export const useSpacePendingTransactions = (limit = 3) => {
     setError(undefined)
 
     try {
-      const results = await Promise.all(
-        safePairs.map(({ chainId, address }) =>
-          getTransactionQueue(chainId, address, { trusted: true, cursor: `limit=${limit}&offset=0` }).then((page) => ({
-            chainId,
-            address,
-            transactions: getLatestTransactions(page.results),
-          })),
-        ),
-      )
+      const results: SafeQueueResult[] = []
+
+      for (let i = 0; i < safesWithQueue.length; i += BATCH_SIZE) {
+        if (i > 0) {
+          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
+        }
+
+        const batch = safesWithQueue.slice(i, i + BATCH_SIZE)
+        const batchResults = await Promise.all(
+          batch.map(async ({ chainId, address }) => {
+            const page = await getTransactionQueue(chainId, address, {
+              trusted: true,
+              cursor: `limit=${limit}&offset=0`,
+            })
+            return { chainId, address, transactions: getLatestTransactions(page.results) }
+          }),
+        )
+        results.push(...batchResults)
+      }
 
       const merged = results
         .flatMap(({ chainId, address, transactions }) =>
@@ -61,7 +59,7 @@ export const useSpacePendingTransactions = (limit = 3) => {
     } finally {
       setIsLoading(false)
     }
-  }, [safePairs, limit])
+  }, [safesWithQueue, limit])
 
   useEffect(() => {
     fetchAll()
@@ -70,7 +68,7 @@ export const useSpacePendingTransactions = (limit = 3) => {
   return {
     transactions: allTransactions,
     count: allTransactions.length,
-    isLoading,
+    isLoading: isLoadingQueue || isLoading,
     error,
     refetch: fetchAll,
   }

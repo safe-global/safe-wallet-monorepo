@@ -40,6 +40,19 @@ export enum MixpanelEvent {
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
   FALSE_RESULT_REPORTED = 'False Result Reported',
+  SPACES_ENTRY_VIEWED = 'Spaces Entry Viewed',
+  SPACES_SIWE_SUCCESS = 'Spaces SIWE Success',
+  SPACES_SIWE_FAILURE = 'Spaces SIWE Failure',
+  SPACE_CREATED = 'Space Created',
+  SPACE_INVITE_SENT = 'Space Invite Sent',
+  SPACE_INVITE_ACCEPTED = 'Space Invite Accepted',
+  SPACE_INVITE_DECLINED = 'Space Invite Declined',
+  SAFE_SELECTED = 'Safe Selected',
+  CHAIN_SWITCHED = 'Chain Switched',
+  ACCOUNTS_WIDGET_CLICKED = 'Accounts Widget Clicked',
+  PENDING_TX_WIDGET_CLICKED = 'Pending TX Widget Clicked',
+  WALLET_SWITCHED = 'Wallet Switched',
+  WALLET_DISCONNECTED = 'Wallet Disconnected',
 }
 
 export enum MixpanelUserProperty {
@@ -81,6 +94,10 @@ export enum MixpanelEventParams {
   RESULT = 'Result',
   SOURCE = 'Source',
   TRANSACTION_TYPE = 'Transaction Type',
+  SPACE_ID = 'Space ID',
+  FAILURE_REASON = 'Failure Reason',
+  CHAIN_ID = 'Chain ID',
+  TX_ID = 'TX ID',
 }
 
 export enum SafeAppLaunchLocation {

@@ -22,6 +22,7 @@ interface NonceBottomSheetProps {
   onAddCustomNonce: () => void
   onEndReached?: () => void
   isFetchingMore?: boolean
+  onChange?: (index: number) => void
 }
 
 function RecommendedNonceRow({
@@ -143,7 +144,16 @@ function useRenderFooter(insets: { bottom: number }, onAddCustomNonce: () => voi
 }
 
 export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetProps>(function NonceBottomSheet(
-  { recommendedNonce, queuedNonces, selectedNonce, onSelectNonce, onAddCustomNonce, onEndReached, isFetchingMore },
+  {
+    recommendedNonce,
+    queuedNonces,
+    selectedNonce,
+    onSelectNonce,
+    onAddCustomNonce,
+    onEndReached,
+    isFetchingMore,
+    onChange,
+  },
   ref,
 ) {
   const theme = useTheme()
@@ -188,6 +198,7 @@ export const NonceBottomSheet = forwardRef<BottomSheetModal, NonceBottomSheetPro
       }}
       accessible={false}
       footerComponent={renderFooter}
+      onChange={onChange}
     >
       <BottomSheetScrollView
         contentContainerStyle={{ paddingBottom: footerHeight + 16 }}

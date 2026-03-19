@@ -10,6 +10,9 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
+import { useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -28,13 +31,24 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   const { WalletPopover } = useLoadFeature(WalletFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
+  const spaceId = useCurrentSpaceId()
+
+  const handleWalletSwitch = () => {
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.WALLET_SWITCHED, label: spaceId }, { spaceId })
+  }
+
+  const handleWalletDisconnect = () => {
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
+  }
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isMobile)
 
   return (
     <>
       <header
-        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between' : 'justify-end'}`}
+        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between pl-2' : 'justify-end'}`}
       >
         {showMenuButton ? (
           <Button
@@ -57,7 +71,14 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
       <NotificationsPopover ref={notificationsRef} />
 
       {wallet && (
-        <WalletPopover wallet={wallet} open={walletOpen} anchorEl={walletAnchorEl} onClose={handleWalletClose} />
+        <WalletPopover
+          wallet={wallet}
+          open={walletOpen}
+          anchorEl={walletAnchorEl}
+          onClose={handleWalletClose}
+          onWalletSwitch={handleWalletSwitch}
+          onWalletDisconnect={handleWalletDisconnect}
+        />
       )}
     </>
   )

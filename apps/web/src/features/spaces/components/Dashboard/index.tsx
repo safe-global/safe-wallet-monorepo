@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import MembersCard from './MembersCard'
 import SpacesCTACard from './SpacesCTACard'
 import AddressBookCard from './ImportAddressBookCard'
@@ -17,7 +18,9 @@ import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
+import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
@@ -54,6 +57,11 @@ const SpaceDashboard = () => {
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
 
+  useEffect(() => {
+    if (!spaceId) return
+    trackEvent({ ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: spaceId }, { spaceId })
+  }, [spaceId])
+
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
   const { accounts, isLoading: isOverviewLoading, error, refetch } = useSpaceAccountsData(safesToDisplay)
@@ -65,10 +73,31 @@ const SpaceDashboard = () => {
     }
   }
 
+  const handleItemClick = (safeAddress: string) => {
+    trackEvent(
+      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      },
+    )
+  }
+
   const handleViewAllPendingTxs = () => {
     if (spaceId) {
       router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
     }
+  }
+
+  const handlePendingTxItemClick = (safeAddress: string, txId: string) => {
+    trackEvent(
+      { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: spaceId },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        [MixpanelEventParams.TX_ID]: txId,
+      },
+    )
   }
 
   const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
@@ -93,6 +122,7 @@ const SpaceDashboard = () => {
                   loading={isOverviewLoading}
                   remainingCount={remainingCount > 0 ? remainingCount : undefined}
                   onViewAll={handleViewAll}
+                  onItemClick={handleItemClick}
                   action={<AddActionsAction />}
                   error={error}
                   onRefresh={refetch}
@@ -111,6 +141,7 @@ const SpaceDashboard = () => {
                 remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
                 onViewAll={handleViewAllPendingTxs}
                 onRefresh={refetchPendingTxs}
+                onItemClick={handlePendingTxItemClick}
               />
             </Grid>
           </Grid>

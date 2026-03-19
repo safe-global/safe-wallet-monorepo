@@ -7,6 +7,11 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: jest.fn(),
+  useCurrentSpaceId: jest.fn(),
+}))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
@@ -50,7 +55,10 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useSpaceSafes } from '@/features/spaces'
+import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -102,6 +110,7 @@ function setupDefaults(
     allSafes?: Array<SafeItem | MultiChainSafeItem>
     safeAddress?: string
     currentChainId?: string
+    spaceId?: string | null
     overviews?: Array<{
       address: { value: string }
       chainId: string
@@ -116,6 +125,7 @@ function setupDefaults(
   ;(useSpaceSafes as jest.Mock).mockReturnValue({
     allSafes: overrides.allSafes ?? [singleChainSafe],
   })
+  ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
     safe: { threshold: 2, owners: [{ value: '0xOwner1' }, { value: '0xOwner2' }] },
     safeAddress: overrides.safeAddress ?? '0xSafe1',
@@ -501,6 +511,26 @@ describe('useSpaceSafeSelectorItems', () => {
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked
     expect(result.current.items[0].threshold).toBe(3)
     expect(result.current.items[0].owners).toBe(3)
+  })
+
+  // ── tracking:
+
+  it('fires SAFE_SELECTED trackEvent exactly once with correct params on item select', () => {
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+    act(() => {
+      result.current.handleItemSelect('1:0xNewSafe')
+    })
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SPACE_EVENTS.SAFE_SELECTED, label: '42' },
+      {
+        spaceId: '42',
+        [MixpanelEventParams.SAFE_ADDRESS]: '0xNewSafe',
+        [MixpanelEventParams.CHAIN_ID]: '1',
+      },
+    )
   })
 
   // ── wallet is null ──

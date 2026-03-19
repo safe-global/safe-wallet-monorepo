@@ -2,18 +2,11 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { useSpacePendingTransactions } from '../useSpacePendingTransactions'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import * as transactionsService from '@/services/transactions'
 import * as txList from '@/utils/tx-list'
 
-jest.mock('../useCurrentSpaceId', () => ({
-  useCurrentSpaceId: jest.fn(),
-}))
-jest.mock('@/store', () => ({
-  useAppSelector: jest.fn(),
-}))
-jest.mock('@/store/authSlice', () => ({
-  isAuthenticated: jest.fn(),
+jest.mock('../useSpaceSafesWithQueue', () => ({
+  useSpaceSafesWithQueue: jest.fn(),
 }))
 jest.mock('@/services/transactions', () => ({
   getTransactionQueue: jest.fn(),
@@ -22,8 +15,7 @@ jest.mock('@/utils/tx-list', () => ({
   getLatestTransactions: jest.fn(),
 }))
 
-import { useCurrentSpaceId } from '../useCurrentSpaceId'
-import { useAppSelector } from '@/store'
+import { useSpaceSafesWithQueue } from '../useSpaceSafesWithQueue'
 
 const createQueuedItem = (
   timestamp: number,
@@ -62,21 +54,19 @@ const SAFE_ADDRESS_2 = faker.finance.ethereumAddress()
 describe('useSpacePendingTransactions', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    ;(useCurrentSpaceId as jest.Mock).mockReturnValue('1')
-    ;(useAppSelector as jest.Mock).mockReturnValue(true)
-    jest.spyOn(spacesQueries, 'useSpaceSafesGetV1Query').mockReturnValue({
-      currentData: {
-        safes: { '1': [SAFE_ADDRESS_1], '137': [SAFE_ADDRESS_2] },
-      },
-      refetch: jest.fn(),
+    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
+      safesWithQueue: [
+        { chainId: '1', address: SAFE_ADDRESS_1 },
+        { chainId: '137', address: SAFE_ADDRESS_2 },
+      ],
+      isLoading: false,
     })
   })
 
-  it('should return empty transactions when user is not signed in', async () => {
-    ;(useAppSelector as jest.Mock).mockReturnValue(false)
-    jest.spyOn(spacesQueries, 'useSpaceSafesGetV1Query').mockReturnValue({
-      currentData: undefined,
-      refetch: jest.fn(),
+  it('should return empty transactions when no safes have queued txs', async () => {
+    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
+      safesWithQueue: [],
+      isLoading: false,
     })
 
     const { result } = renderHook(() => useSpacePendingTransactions())
@@ -88,33 +78,15 @@ describe('useSpacePendingTransactions', () => {
     })
   })
 
-  it('should return empty transactions when there is no space id', async () => {
-    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(undefined)
-    jest.spyOn(spacesQueries, 'useSpaceSafesGetV1Query').mockReturnValue({
-      currentData: undefined,
-      refetch: jest.fn(),
+  it('should reflect loading state from useSpaceSafesWithQueue', () => {
+    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
+      safesWithQueue: [],
+      isLoading: true,
     })
 
     const { result } = renderHook(() => useSpacePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.transactions).toEqual([])
-      expect(result.current.count).toBe(0)
-    })
-  })
-
-  it('should return empty transactions when space has no safes', async () => {
-    jest.spyOn(spacesQueries, 'useSpaceSafesGetV1Query').mockReturnValue({
-      currentData: { safes: {} },
-      refetch: jest.fn(),
-    })
-
-    const { result } = renderHook(() => useSpacePendingTransactions())
-
-    await waitFor(() => {
-      expect(result.current.transactions).toEqual([])
-      expect(result.current.count).toBe(0)
-    })
+    expect(result.current.isLoading).toBe(true)
   })
 
   it('should fetch and merge transactions from multiple safes', async () => {

@@ -42,7 +42,7 @@ describe('cgwClient hooks', () => {
   })
 
   it('should call custom prepareHeadersHook and set header when fetchBaseQuery is used', async () => {
-    const mockHeaderFunction = jest.fn((headers: Headers, _url: string, _endpoint: string) => {
+    const mockHeaderFunction = jest.fn((headers: Headers) => {
       headers.set('X-Test-Header', 'test-value')
       return headers
     })

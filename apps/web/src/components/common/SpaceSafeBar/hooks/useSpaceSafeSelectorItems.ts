@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafes } from '@/features/spaces'
+import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -13,6 +13,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { AppRoutes } from '@/config/routes'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -106,6 +109,7 @@ export function useSpaceSafeSelectorItems() {
   const router = useRouter()
   const currency = useAppSelector(selectCurrency)
   const { address: walletAddress } = useWallet() || {}
+  const spaceId = useCurrentSpaceId()
 
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
 
@@ -137,9 +141,17 @@ export function useSpaceSafeSelectorItems() {
       const address = itemId.slice(colonIndex + 1)
       const chain = chainConfigs.find((c) => c.chainId === chainId)
       if (!chain) return
+      trackEvent(
+        { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined },
+        {
+          spaceId,
+          [MixpanelEventParams.SAFE_ADDRESS]: address,
+          [MixpanelEventParams.CHAIN_ID]: chainId,
+        },
+      )
       router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
     },
-    [chainConfigs, router],
+    [chainConfigs, router, spaceId],
   )
 
   return {

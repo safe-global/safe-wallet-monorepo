@@ -33,7 +33,15 @@ function containsScriptInjection(value: string): boolean {
 }
 
 function sanitizeInputValue(value: string): string {
-  return value.replace(SCRIPT_TAG_REGEX, '').replace(EVENT_HANDLER_REGEX, '')
+  let previous: string
+  let sanitized = value
+  do {
+    previous = sanitized
+    SCRIPT_TAG_REGEX.lastIndex = 0
+    EVENT_HANDLER_REGEX.lastIndex = 0
+    sanitized = sanitized.replace(SCRIPT_TAG_REGEX, '').replace(EVENT_HANDLER_REGEX, '')
+  } while (sanitized !== previous)
+  return sanitized
 }
 
 function stripChainPrefix(value: string): string {

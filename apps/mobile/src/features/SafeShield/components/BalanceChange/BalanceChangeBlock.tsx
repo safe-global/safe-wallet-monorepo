@@ -1,13 +1,12 @@
 import React from 'react'
 import { Text, XStack, YStack } from 'tamagui'
-import { Skeleton } from 'moti/skeleton'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { InfoSheet } from '@/src/components/InfoSheet'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { BalanceChangeItem } from './BalanceChangeItem'
 import { Container } from '@/src/components/Container'
-import { useTheme } from '@/src/theme/hooks/useTheme'
 
 interface BalanceChangeBlockProps {
   threat?: AsyncResult<ThreatAnalysisResults>
@@ -17,7 +16,6 @@ const BALANCE_CHANGE_INFO =
   'The balance change gives an overview of the implications of a transaction. You can see which assets will be sent and received after the transaction is executed.'
 
 export function BalanceChangeBlock({ threat }: BalanceChangeBlockProps) {
-  const { colorScheme } = useTheme()
   const [threatData, threatError, threatLoading = false] = threat || []
 
   const balanceChanges = threatData?.BALANCE_CHANGE || []
@@ -27,7 +25,7 @@ export function BalanceChangeBlock({ threat }: BalanceChangeBlockProps) {
     if (threatLoading) {
       return (
         <YStack gap="$2" marginTop="$2">
-          <Skeleton colorMode={colorScheme} height={24} radius={4} width="100%" />
+          <SafeSkeleton height={24} radius={4} width="100%" />
         </YStack>
       )
     }

@@ -23,9 +23,9 @@
   justify-content: flex-end;
   gap: 16px;
   flex: 1;
-  /* 80px = width of action buttons container (up to 3 buttons × 28px + gaps)
-     This slides content right to hide buttons, revealing them on hover */
-  transform: translateX(80px);
+  /* Offset = gap + button strip width
+     so buttons are fully hidden and the balance is never cropped */
+  transform: translateX(var(--asset-buttons-offset, 80px));
   transition: transform 0.2s ease-out;
 }
 

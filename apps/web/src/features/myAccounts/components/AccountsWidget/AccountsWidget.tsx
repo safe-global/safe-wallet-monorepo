@@ -10,6 +10,7 @@ interface AccountsWidgetProps {
   loading?: boolean
   remainingCount?: number
   onViewAll?: () => void
+  onItemClick?: (safeAddress: string) => void
   action?: ReactNode
   error?: string
   onRefresh?: () => void
@@ -22,6 +23,7 @@ const AccountsWidget = ({
   loading = false,
   remainingCount,
   onViewAll,
+  onItemClick,
   action,
   error,
   onRefresh,

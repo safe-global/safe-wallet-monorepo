@@ -23,7 +23,7 @@ const ExpandableAccountItem = ({ account, loading = false, testId }: ExpandableA
       <CollapsibleTrigger
         data-testid={testId}
         className={cn(
-          'flex w-full items-center justify-between rounded-sm py-4 px-6 cursor-pointer transition-colors hover:bg-muted/50',
+          'flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',
         )}
       >
@@ -44,8 +44,12 @@ const ExpandableAccountItem = ({ account, loading = false, testId }: ExpandableA
               key={sub.chainId}
               role="button"
               tabIndex={0}
-              onClick={() => router.push(sub.href)}
-              onKeyDown={(e) => e.key === 'Enter' && router.push(sub.href)}
+              data-testid="sub-account-row"
+              onClick={() => {
+                onItemClick?.(account.address)
+                router.push(sub.href)
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && (onItemClick?.(account.address), router.push(sub.href))}
               className="flex items-center justify-between py-3 pl-8 pr-6 cursor-pointer transition-colors hover:bg-muted/50"
             >
               <ChainIndicator chainId={sub.chainId} imageSize={34} fiatValue={sub.fiatTotal} />

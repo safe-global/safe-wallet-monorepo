@@ -23,7 +23,7 @@ export function useThreatAnalysis(
     safeAddress,
   } = useSafeInfo()
   const signer = useSigner()
-  const { safeTx, safeMessage, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, safeMessage, safeMessageHash, txOrigin } = useContext(SafeTxContext)
   const walletAddress = signer?.address ?? ''
   const isHypernativeFeatureEnabled = useIsHypernativeFeatureEnabled()
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
@@ -57,14 +57,13 @@ export function useThreatAnalysis(
   const hypernativeThreatAnalysis = useThreatAnalysisHypernative({
     ...mainTxProps,
     authToken: hypernativeAuthToken,
+    messageHash: safeMessageHash,
     skip: !useHypernativeAnalysis || !hypernativeAuthToken,
   })
 
-  const threatAnalysis = useMemo(
-    (): AsyncResult<ThreatAnalysisResults> =>
-      useHypernativeAnalysis ? hypernativeThreatAnalysis : blockaidThreatAnalysis,
-    [useHypernativeAnalysis, hypernativeThreatAnalysis, blockaidThreatAnalysis],
-  )
+  const threatAnalysis = useMemo((): AsyncResult<ThreatAnalysisResults> => {
+    return useHypernativeAnalysis ? hypernativeThreatAnalysis : blockaidThreatAnalysis
+  }, [useHypernativeAnalysis, hypernativeThreatAnalysis, blockaidThreatAnalysis])
 
   const nestedThreatAnalysis = useNestedThreatAnalysis(safeTxToCheck, hypernativeAuthToken)
 

@@ -1,5 +1,3 @@
-import React from 'react'
-
 const icon = (
   <svg xmlns="http://www.w3.org/2000/svg" width="108" height="96" viewBox="0 0 108 96">
     <g fill="none" fillRule="evenodd">

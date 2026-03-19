@@ -9,6 +9,7 @@ interface WidgetItemProps {
   /** Optional second line (e.g. amount + recipient); can wrap so full text is visible. */
   description?: string | ReactNode
   href?: string
+  onClick?: () => void
   startNode?: ReactNode
   featuredNode?: ReactNode
   actionNode?: ReactNode
@@ -22,6 +23,7 @@ const WidgetItem = ({
   info,
   description,
   href,
+  onClick,
   startNode,
   featuredNode,
   actionNode,
@@ -31,7 +33,13 @@ const WidgetItem = ({
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
-  const handleClick = href ? () => router.push(href) : undefined
+  const handleClick =
+    href || onClick
+      ? () => {
+          onClick?.()
+          href && router.push(href)
+        }
+      : undefined
 
   return (
     <div
@@ -40,15 +48,15 @@ const WidgetItem = ({
       role={href ? 'button' : undefined}
       tabIndex={href ? 0 : undefined}
       onClick={handleClick}
-      onKeyDown={href ? (e) => e.key === 'Enter' && handleClick?.() : undefined}
+      onKeyDown={handleClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
       className={cn(
-        'flex items-center justify-between rounded-sm py-4 px-6',
-        href && 'cursor-pointer transition-colors hover:bg-muted/50',
+        'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6',
+        handleClick && 'cursor-pointer transition-colors hover:bg-muted/50',
         highlighted && 'bg-background',
         className,
       )}
     >
-      <div className="flex min-w-[220px] flex-1 items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         {startNode}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
           {typeof label === 'string' ? (
@@ -75,9 +83,12 @@ const WidgetItem = ({
         </div>
       </div>
 
-      {featuredNode && <div className="flex items-center justify-center flex-1">{featuredNode}</div>}
-
-      {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
+      {(featuredNode || actionNode) && (
+        <div className="ml-auto flex shrink-0 items-center gap-4">
+          {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
+          {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
+        </div>
+      )}
     </div>
   )
 }

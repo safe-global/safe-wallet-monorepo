@@ -14,11 +14,11 @@ interface AccountItemContentProps {
 const AccountItemContent = ({ account, children }: AccountItemContentProps): ReactElement => {
   return (
     <>
-      <div className="flex w-[220px] items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         <Avatar>
           <Identicon address={account.address} size={40} />
         </Avatar>
-        <div className="flex flex-col gap-0.5 text-left">
+        <div className="flex min-w-0 flex-col gap-0.5 text-left">
           <Typography variant="paragraph-bold">{account.name}</Typography>
           <Typography variant="paragraph-mini" color="muted">
             {shortenAddress(account.address, 4)}
@@ -26,11 +26,12 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
-        <AccountItem.ChainBadge safes={account.safes} />
+      <div className="ml-auto flex shrink-0 items-center gap-4">
+        <div className="flex items-center justify-center">
+          <AccountItem.ChainBadge safes={account.safes} />
+        </div>
+        {children}
       </div>
-
-      {children}
     </>
   )
 }
