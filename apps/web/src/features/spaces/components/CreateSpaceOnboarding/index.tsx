@@ -9,9 +9,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import { ChevronLeft } from 'lucide-react'
 import StepIndicator from '@/features/spaces/components/StepIndicator'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import useWallet from '@/hooks/wallets/useWallet'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
@@ -25,9 +22,7 @@ const ONBOARDING_TOTAL_STEPS = 3
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
-  const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const isUserAuthenticated = useAppSelector(isAuthenticated)
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
   const {
@@ -39,10 +34,6 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading } = useExistingSpace(setValue)
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
-
-  if (!wallet || !isUserAuthenticated) {
-    return <></>
-  }
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>

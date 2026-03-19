@@ -1,14 +1,9 @@
 import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
-import useWallet from '@/hooks/wallets/useWallet'
 
 const useInviteNavigation = () => {
   const router = useRouter()
-  const wallet = useWallet()
-  const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = router.query.spaceId as string | undefined
 
   useEffect(() => {
@@ -25,11 +20,8 @@ const useInviteNavigation = () => {
     router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
   }, [router, spaceId])
 
-  const isReady = Boolean(wallet && isUserAuthenticated && spaceId)
-
   return {
     spaceId,
-    isReady,
     goBack,
     redirectToNextStep,
   }
