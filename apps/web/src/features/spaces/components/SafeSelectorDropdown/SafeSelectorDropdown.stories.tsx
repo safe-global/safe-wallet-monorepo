@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks'
-import { action } from '@storybook/addon-actions'
+import { fn } from 'storybook/test'
 import { useState } from 'react'
+
+const action = (name: string) => fn().mockName(name)
 import SafeSelectorDropdown from './index'
 import type { SafeItemData } from './types'
 
