@@ -31,7 +31,7 @@ const SafeLabsTerms = () => {
 
   const canAccept = acceptTerms && acknowledgeLiability
 
-  const logoHref = getLogoLink(router)
+  const logoHref = getLogoLink()
 
   const handleAcceptAndContinue = () => {
     trackEvent({ ...TERMS_EVENTS.ACCEPT_SAFE_LABS_TERMS, label: requestDataTransfer }, { requestDataTransfer })
