@@ -31,7 +31,7 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
         variants.wrapperClass,
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-muted/30 opacity-0 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-1 rounded-md bg-muted/30 opacity-0 group-hover:opacity-100" />
       <Select
         value={safeSelectValue}
         onValueChange={handleSafeChange}

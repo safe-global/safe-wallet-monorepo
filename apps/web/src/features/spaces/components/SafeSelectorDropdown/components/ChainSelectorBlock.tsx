@@ -69,9 +69,9 @@ function ChainSelectorBlock({
         </div>
 
         {availableChains.length > 0 && (
-          <Accordion defaultValue={['all-networks']}>
+          <Accordion defaultValue={[]}>
             <AccordionItem value="all-networks" className="border-0">
-              <AccordionTrigger className="bg-muted/50 rounded-lg pl-4 pr-2 py-2 hover:no-underline text-muted-foreground cursor-pointer">
+              <AccordionTrigger className="rounded-lg pl-4 pr-2 py-2 hover:no-underline hover:bg-muted/30 text-muted-foreground cursor-pointer">
                 <Typography variant="paragraph-small-medium" className="text-muted-foreground">
                   All networks
                 </Typography>
