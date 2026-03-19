@@ -57,7 +57,7 @@ const SelectSafesOnboarding = (): ReactElement => {
               </Typography>
 
               <Typography variant="paragraph" align="center" color="muted" className="mx-auto w-[93%]">
-                Consolidate and organize safes, members and transaction activity.
+                Choose which Safes you want to manage in this Space. You can add more later.
               </Typography>
 
               {wallet && (

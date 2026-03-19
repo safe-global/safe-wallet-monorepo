@@ -105,13 +105,13 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
           <motion.div variants={itemVariants}>
             <Typography variant="h2" align="center">
-              Create a space
+              Create a Space
             </Typography>
           </motion.div>
 
           <motion.div variants={itemVariants}>
             <Typography variant="paragraph" align="center" color="muted">
-              Choose which safes you want to manage in this space. You can add more later.
+              Consolidate and organize Safes, members and transaction activity.
             </Typography>
           </motion.div>
 
