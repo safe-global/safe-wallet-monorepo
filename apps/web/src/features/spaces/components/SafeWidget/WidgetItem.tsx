@@ -47,13 +47,13 @@ const WidgetItem = ({
       onClick={handleClick}
       onKeyDown={handleClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
       className={cn(
-        'flex items-center justify-between rounded-sm py-4 pl-4 pr-6',
+        'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6',
         handleClick && 'cursor-pointer transition-colors hover:bg-muted/50',
         highlighted && 'bg-background',
         className,
       )}
     >
-      <div className="flex min-w-[220px] flex-1 items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-4">
         {startNode}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
           {typeof label === 'string' ? (
@@ -80,9 +80,12 @@ const WidgetItem = ({
         </div>
       </div>
 
-      {featuredNode && <div className="flex items-center justify-center flex-1">{featuredNode}</div>}
-
-      {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
+      {(featuredNode || actionNode) && (
+        <div className="ml-auto flex shrink-0 items-center gap-4">
+          {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
+          {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
+        </div>
+      )}
     </div>
   )
 }
