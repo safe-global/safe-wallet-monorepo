@@ -1,1 +1,10 @@
-{}
+{
+  "hooks": {
+    "stop": [
+      {
+        "matcher": "",
+        "command": "node scripts/verify-changed-hook.mjs"
+      }
+    ]
+  }
+}
