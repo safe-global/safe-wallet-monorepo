@@ -10,6 +10,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isEmailLoginPending } from '@/features/email-auth'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const dispatch = useAppDispatch()
@@ -17,6 +18,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
+  const emailLoginPending = isEmailLoginPending()
 
   const isCurrentUserDeclined = currentData?.members.some(
     (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
@@ -28,7 +30,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   if (!isSpacesFeatureEnabled) return null
 
-  if (isLoading) return <LoadingState />
+  if (isLoading || emailLoginPending) return <LoadingState />
 
   if (!isUserSignedIn) return <SignedOutState />
 

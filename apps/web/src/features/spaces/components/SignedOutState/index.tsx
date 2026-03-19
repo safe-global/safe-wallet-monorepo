@@ -1,6 +1,8 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
 import SignInButton from '../SignInButton'
+import { EmailAuthFeature } from '@/features/email-auth'
+import { useLoadFeature } from '@/features/__core__'
 
 interface SignedOutStateProps {
   afterSignIn?: () => void
@@ -8,6 +10,8 @@ interface SignedOutStateProps {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
+  const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
+
   return (
     <Box className={css.content}>
       <Box textAlign="center" className={css.contentWrapper}>
@@ -17,11 +21,14 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
           </Typography>
 
           <Typography color="text.secondary" mb={2}>
-            To view and interact with spaces, you need to sign in with the wallet, that is a member of the space. Sign
-            in to continue.
+            To view and interact with spaces, you need to sign in with the wallet that is a member of the space, or sign
+            in with email. Sign in to continue.
           </Typography>
 
-          <SignInButton afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
+          <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
+            <EmailSignInButton />
+            <SignInButton afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
+          </Stack>
         </Box>
       </Box>
     </Box>
