@@ -8,7 +8,7 @@ import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
-import type { NextRouter } from 'next/router'
+import { useRouter } from 'next/router'
 
 jest.mock(
   '@/components/common/SafeTokenWidget',
