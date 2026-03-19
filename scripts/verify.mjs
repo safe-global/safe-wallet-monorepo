@@ -206,7 +206,15 @@ function buildChecks() {
       checks.push({
         label: 'tests',
         cmd: 'yarn',
-        args: ['workspace', workspacePkg, 'test', '--findRelatedTests', ...testableFiles, '--watchAll=false'],
+        args: [
+          'workspace',
+          workspacePkg,
+          'test',
+          '--findRelatedTests',
+          ...testableFiles,
+          '--watchAll=false',
+          '--passWithNoTests',
+        ],
       })
     }
 
