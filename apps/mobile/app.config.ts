@@ -142,6 +142,7 @@ const config: ExpoConfig = {
           forceStaticLinking: ['RNFBApp'],
         },
         android: {
+          minSdkVersion: 34,
           extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
         },
       },
