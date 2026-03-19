@@ -22,9 +22,20 @@ type WalletInfoProps = {
   onboard: ReturnType<typeof useOnboard>
   addressBook: ReturnType<typeof useAddressBook>
   handleClose: () => void
+  onSwitch?: () => void
+  onDisconnect?: () => void
 }
 
-export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBook, handleClose }: WalletInfoProps) => {
+export const WalletInfo = ({
+  wallet,
+  balance,
+  currentChainId,
+  onboard,
+  addressBook,
+  handleClose,
+  onSwitch,
+  onDisconnect,
+}: WalletInfoProps) => {
   const [authLogout] = useAuthLogoutV1Mutation()
   const dispatch = useAppDispatch()
   const chainInfo = useChain(wallet.chainId)
@@ -32,12 +43,14 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
 
   const handleSwitchWallet = () => {
     if (onboard) {
+      onSwitch?.()
       handleClose()
       switchWallet(onboard)
     }
   }
 
   const handleDisconnect = async () => {
+    onDisconnect?.()
     onboard?.disconnectWallet({
       label: wallet.label,
     })

@@ -4,6 +4,8 @@ import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { Notification } from '@/store/notificationsSlice'
 import type { RootState } from '@/store'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -35,6 +37,18 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
   OVERVIEW_EVENTS: { NOTIFICATION_CENTER: 'notification_center' },
+}))
+
+jest.mock('@/services/analytics/events/spaces', () => ({
+  SPACE_EVENTS: {
+    WALLET_SWITCHED: { action: 'wallet_switched', category: 'spaces' },
+    WALLET_DISCONNECTED: { action: 'wallet_disconnected', category: 'spaces' },
+  },
+}))
+
+const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
 jest.mock(
@@ -95,6 +109,69 @@ describe('Topbar', () => {
     render(<Topbar />, { initialReduxState })
 
     expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
+  })
+
+  describe('wallet tracking', () => {
+    beforeEach(() => {
+      mockUseCurrentSpaceId.mockReturnValue('space-42')
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: ({
+          onWalletSwitch,
+          onWalletDisconnect,
+        }: {
+          onWalletSwitch?: () => void
+          onWalletDisconnect?: () => void
+        }) => (
+          <>
+            <button onClick={onWalletSwitch}>trigger-switch</button>
+            <button onClick={onWalletDisconnect}>trigger-disconnect</button>
+          </>
+        ),
+      })
+    })
+
+    it('fires WALLET_SWITCHED with spaceId as GA label and Mixpanel param', () => {
+      render(<Topbar />)
+      screen.getByText('trigger-switch').click()
+
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.WALLET_SWITCHED, label: 'space-42' },
+        { spaceId: 'space-42' },
+      )
+    })
+
+    it('fires WALLET_DISCONNECTED with spaceId as GA label and Mixpanel param', () => {
+      render(<Topbar />)
+      screen.getByText('trigger-disconnect').click()
+
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.WALLET_DISCONNECTED, label: 'space-42' },
+        { spaceId: 'space-42' },
+      )
+    })
+
+    it('fires WALLET_SWITCHED exactly once per click', () => {
+      render(<Topbar />)
+      screen.getByText('trigger-switch').click()
+
+      expect(trackEvent).toHaveBeenCalledTimes(1)
+    })
+
+    it('fires WALLET_DISCONNECTED exactly once per click', () => {
+      render(<Topbar />)
+      screen.getByText('trigger-disconnect').click()
+
+      expect(trackEvent).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not fire when spaceId is null (outside Spaces)', () => {
+      mockUseCurrentSpaceId.mockReturnValue(null)
+      render(<Topbar />)
+      screen.getByText('trigger-switch').click()
+      screen.getByText('trigger-disconnect').click()
+
+      expect(trackEvent).not.toHaveBeenCalled()
+    })
   })
 
   describe('mobile', () => {

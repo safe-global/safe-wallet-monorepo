@@ -44,11 +44,11 @@ const useSpaceSubmit = (
   }
 
   const createSpace = async (name: string) => {
-    trackEvent({ ...SPACE_EVENTS.CREATE_SPACE })
     const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
     if (response.data) {
       const newSpaceId = response.data.id.toString()
+      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: newSpaceId }, { spaceId: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
 

@@ -10,6 +10,7 @@ interface AccountsWidgetProps {
   loading?: boolean
   remainingCount?: number
   onViewAll?: () => void
+  onItemClick?: (safeAddress: string) => void
   action?: ReactNode
   error?: string
   onRefresh?: () => void
@@ -22,6 +23,7 @@ const AccountsWidget = ({
   loading = false,
   remainingCount,
   onViewAll,
+  onItemClick,
   action,
   error,
   onRefresh,
@@ -51,9 +53,14 @@ const AccountsWidget = ({
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
         : accounts.map((account) =>
             account.safes.length > 1 ? (
-              <ExpandableAccountItem key={account.address} account={account} loading={loading} />
+              <ExpandableAccountItem
+                key={account.address}
+                account={account}
+                loading={loading}
+                onItemClick={onItemClick}
+              />
             ) : (
-              <AccountWidgetItem key={account.address} account={account} loading={loading} />
+              <AccountWidgetItem key={account.address} account={account} loading={loading} onItemClick={onItemClick} />
             ),
           )}
       {!loading && remainingCount !== undefined && (

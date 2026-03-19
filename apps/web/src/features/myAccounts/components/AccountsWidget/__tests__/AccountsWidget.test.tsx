@@ -3,6 +3,14 @@ import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
 import AccountsWidget from '../AccountsWidget'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockSafeItem = (chainId: string, address: string): SafeItem => ({
   chainId,
@@ -211,6 +219,33 @@ describe('AccountsWidget', () => {
     expect(screen.queryByTestId('collapsible')).not.toBeInTheDocument()
   })
 
+  it('calls onItemClick with safeAddress exactly once when a single-chain account row is clicked', async () => {
+    const onItemClick = jest.fn()
+    render(<AccountsWidget accounts={[mockAccounts[1]]} onItemClick={onItemClick} />, {
+      routerProps: { push: jest.fn() },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /Treasury/i }))
+
+    expect(onItemClick).toHaveBeenCalledTimes(1)
+    expect(onItemClick).toHaveBeenCalledWith(mockAccounts[1].address)
+  })
+
+  it('calls onItemClick with safeAddress exactly once when a sub-account row is clicked', async () => {
+    const onItemClick = jest.fn()
+    render(<AccountsWidget accounts={[mockAccounts[0]]} onItemClick={onItemClick} />, {
+      routerProps: { push: jest.fn() },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /My account/i }))
+
+    const subAccountRows = screen.getAllByTestId('sub-account-row')
+    await userEvent.click(subAccountRows[0])
+
+    expect(onItemClick).toHaveBeenCalledTimes(1)
+    expect(onItemClick).toHaveBeenCalledWith(mockAccounts[0].address)
+  })
+
   it('navigates to chain-specific safe when a sub-item is clicked', async () => {
     const mockPush = jest.fn()
     render(<AccountsWidget accounts={[mockAccounts[0]]} />, {
@@ -221,10 +256,37 @@ describe('AccountsWidget', () => {
     const trigger = screen.getByRole('button', { name: /My account/i })
     await userEvent.click(trigger)
 
-    // Click a sub-item
-    const subItems = screen.getAllByTestId('chain-logo')
-    await userEvent.click(subItems[subItems.length - 1])
+    const subAccountRows = screen.getAllByTestId('sub-account-row')
+    await userEvent.click(subAccountRows[subAccountRows.length - 1])
 
     expect(mockPush).toHaveBeenCalled()
+  })
+
+  it('fires trackEvent with spaceId and safeAddress for both GA and Mixpanel exactly once on account row click', async () => {
+    const spaceId = '123'
+    const onItemClick = (safeAddress: string) => {
+      trackEvent(
+        { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
+        {
+          spaceId,
+          [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        },
+      )
+    }
+
+    render(<AccountsWidget accounts={[mockAccounts[1]]} onItemClick={onItemClick} />, {
+      routerProps: { push: jest.fn() },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: /Treasury/i }))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED, label: spaceId },
+      {
+        spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: mockAccounts[1].address,
+      },
+    )
   })
 })

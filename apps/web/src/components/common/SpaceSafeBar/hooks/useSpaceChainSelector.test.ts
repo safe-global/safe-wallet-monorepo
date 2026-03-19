@@ -7,6 +7,24 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: jest.fn(),
+  useCurrentSpaceId: jest.fn(() => '42'),
+}))
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
+
+jest.mock('@/services/analytics/events/spaces', () => ({
+  SPACE_EVENTS: {
+    CHAIN_SWITCHED: { action: 'Chain switched', category: 'spaces' },
+  },
+}))
+
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  MixpanelEventParams: {
+    SAFE_ADDRESS: 'Safe Address',
+    CHAIN_ID: 'Chain ID',
+  },
 }))
 jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(),
@@ -30,7 +48,10 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { home: '/home' },
 }))
 
-import { useSpaceSafes } from '@/features/spaces'
+import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -75,6 +96,7 @@ function setupDefaults(
 ) {
   const allSafes = overrides.allSafes ?? [singleChainSafe]
   ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes })
+  ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress: overrides.safeAddress ?? '0xSafe1' })
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')
   ;(useChains as jest.Mock).mockReturnValue({ configs: chainConfigs })
@@ -189,5 +211,25 @@ describe('useSpaceChainSelector', () => {
       shortName: '42161',
       chainLogoUri: null,
     })
+  })
+
+  it('fires CHAIN_SWITCHED trackEvent exactly once with correct params on chain change', () => {
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('137')
+    })
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SPACE_EVENTS.CHAIN_SWITCHED, label: '42' },
+      {
+        spaceId: '42',
+        [MixpanelEventParams.SAFE_ADDRESS]: '0xSafe2',
+        [MixpanelEventParams.CHAIN_ID]: '137',
+      },
+    )
   })
 })

@@ -11,9 +11,10 @@ import type { Account } from './types'
 interface ExpandableAccountItemProps {
   account: Account
   loading?: boolean
+  onItemClick?: (safeAddress: string) => void
 }
 
-const ExpandableAccountItem = ({ account, loading = false }: ExpandableAccountItemProps): ReactElement => {
+const ExpandableAccountItem = ({ account, loading = false, onItemClick }: ExpandableAccountItemProps): ReactElement => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
@@ -42,8 +43,12 @@ const ExpandableAccountItem = ({ account, loading = false }: ExpandableAccountIt
               key={sub.chainId}
               role="button"
               tabIndex={0}
-              onClick={() => router.push(sub.href)}
-              onKeyDown={(e) => e.key === 'Enter' && router.push(sub.href)}
+              data-testid="sub-account-row"
+              onClick={() => {
+                onItemClick?.(account.address)
+                router.push(sub.href)
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && (onItemClick?.(account.address), router.push(sub.href))}
               className="flex items-center justify-between py-3 pl-8 pr-6 cursor-pointer transition-colors hover:bg-muted/50"
             >
               <ChainIndicator chainId={sub.chainId} imageSize={34} fiatValue={sub.fiatTotal} />

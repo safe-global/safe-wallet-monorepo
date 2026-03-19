@@ -15,6 +15,7 @@ import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
 import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
+import { SPACE_EVENTS } from './events/spaces'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -71,6 +72,19 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [TX_EVENTS.EXECUTE_VIA_SPENDING_LIMIT.action]: MixpanelEvent.TRANSACTION_EXECUTED,
   [OVERVIEW_EVENTS.TRUSTED_SAFES_ADDED.action]: MixpanelEvent.TRUSTED_SAFE_ADDED,
   [OVERVIEW_EVENTS.TRUSTED_SAFES_REMOVED.action]: MixpanelEvent.TRUSTED_SAFE_REMOVED,
+  [SPACE_EVENTS.CREATE_SPACE.action]: MixpanelEvent.SPACE_CREATED,
+  [SPACE_EVENTS.SPACES_ENTRY_VIEWED.action]: MixpanelEvent.SPACES_ENTRY_VIEWED,
+  [SPACE_EVENTS.SPACES_SIWE_SUCCESS.action]: MixpanelEvent.SPACES_SIWE_SUCCESS,
+  [SPACE_EVENTS.SPACES_SIWE_FAILURE.action]: MixpanelEvent.SPACES_SIWE_FAILURE,
+  [SPACE_EVENTS.SAFE_SELECTED.action]: MixpanelEvent.SAFE_SELECTED,
+  [SPACE_EVENTS.CHAIN_SWITCHED.action]: MixpanelEvent.CHAIN_SWITCHED,
+  [SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED.action]: MixpanelEvent.ACCOUNTS_WIDGET_CLICKED,
+  [SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action]: MixpanelEvent.PENDING_TX_WIDGET_CLICKED,
+  [SPACE_EVENTS.WALLET_SWITCHED.action]: MixpanelEvent.WALLET_SWITCHED,
+  [SPACE_EVENTS.WALLET_DISCONNECTED.action]: MixpanelEvent.WALLET_DISCONNECTED,
+  [SPACE_EVENTS.ADD_MEMBER.action]: MixpanelEvent.SPACE_INVITE_SENT,
+  [SPACE_EVENTS.ACCEPT_INVITE_SUBMIT.action]: MixpanelEvent.SPACE_INVITE_ACCEPTED,
+  [SPACE_EVENTS.DECLINE_INVITE_SUBMIT.action]: MixpanelEvent.SPACE_INVITE_DECLINED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)
