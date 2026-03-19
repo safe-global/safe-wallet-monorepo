@@ -13,7 +13,7 @@ function BackLink({ children, onClick, ariaLabel = 'Go back' }: BackLinkProps) {
     <div className="flex self-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
       <button
         onClick={onClick}
-        className="flex flex-1 items-center gap-1 min-h-[68px] border-0 rounded-lg bg-transparent pl-2 pr-2 m-1 cursor-pointer hover:bg-muted/30 transition-colors"
+        className="flex flex-1 items-center gap-1 min-h-[60px] border-0 rounded-lg bg-transparent pl-2 pr-2 m-1 cursor-pointer hover:bg-muted/30 transition-colors"
         aria-label={ariaLabel}
       >
         <ChevronLeft className="size-5" />
