@@ -47,6 +47,85 @@
         ]
       }
     },
+    "/v1/auth/oidc/authorize": {
+      "get": {
+        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
+        "operationId": "authAuthorizeV1",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirect to OIDC authorize endpoint"
+          }
+        },
+        "summary": "Start OIDC authorization code flow",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/callback": {
+      "get": {
+        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the configured post-login URL.",
+        "operationId": "authCallbackV1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Authorization code returned by the OIDC provider",
+            "schema": {
+              "example": "SplxlOBeZQQYbYS6WxSbIA",
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "State parameter returned by the OIDC provider",
+            "schema": {
+              "example": "af0ifjsldkj",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "required": false,
+            "in": "query",
+            "description": "Error parameter returned by the OIDC provider",
+            "schema": {
+              "example": "access_denied",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "required": false,
+            "in": "query",
+            "description": "Description of the error returned by the OIDC provider (if failed)",
+            "schema": {
+              "example": "The user has denied the request",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the configured post-login URL"
+          },
+          "400": {
+            "description": "Authorization code and state are required"
+          },
+          "401": {
+            "description": "Authentication failed or the OAuth state is invalid"
+          }
+        },
+        "summary": "Handle OIDC authorization callback",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/auth/verify": {
       "post": {
         "description": "Verifies a signed Sign-In with Ethereum (SiWE) message and nonce. On successful verification, sets an HTTP-only JWT cookie for subsequent authenticated requests.",
