@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 import { Storage } from 'redux-persist'
-import { MMKV } from 'react-native-mmkv'
+import { createMMKV } from 'react-native-mmkv'
 import { mapStorageTypeToIds, STORAGE_IDS, STORAGE_TYPES } from './constants'
 
-const safeStorage = new MMKV({
+const safeStorage = createMMKV({
   id: STORAGE_IDS.SAFE,
 })
 
@@ -17,7 +17,7 @@ export const reduxStorage: Storage = {
     return Promise.resolve(value)
   },
   removeItem: (key) => {
-    safeStorage.delete(key)
+    safeStorage.remove(key)
     return Promise.resolve()
   },
 }
@@ -59,11 +59,11 @@ export class safeMMKVStorage {
 
   static clearAllStorages() {
     Object.keys(STORAGE_IDS).forEach((id) => {
-      const storage = new MMKV({ id })
+      const storage = createMMKV({ id })
       storage.clearAll()
     })
 
-    const defaultStorage = new MMKV()
+    const defaultStorage = createMMKV()
     defaultStorage.clearAll()
   }
 }

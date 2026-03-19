@@ -1,10 +1,10 @@
-import { MMKV } from 'react-native-mmkv'
+import { createMMKV, type MMKV } from 'react-native-mmkv'
 
 let processedMessagesStorage: MMKV | null = null
 
 const getProcessedMessagesStorage = (): MMKV => {
   if (!processedMessagesStorage) {
-    processedMessagesStorage = new MMKV({ id: 'processed-messages' })
+    processedMessagesStorage = createMMKV({ id: 'processed-messages' })
   }
   return processedMessagesStorage
 }
@@ -33,7 +33,7 @@ export const checkAndMarkMessageProcessed = (messageId: string, maxStoredMessage
   const allKeys = storage.getAllKeys().filter((key) => key.startsWith('processed_'))
   if (allKeys.length > maxStoredMessages) {
     const oldKeys = allKeys.slice(0, allKeys.length - maxStoredMessages)
-    oldKeys.forEach((key) => storage.delete(key))
+    oldKeys.forEach((key) => storage.remove(key))
     console.log('[MessageDeduplication] Cleaned up', oldKeys.length, 'old processed messages')
   }
 
@@ -46,6 +46,6 @@ export const checkAndMarkMessageProcessed = (messageId: string, maxStoredMessage
 export const clearProcessedMessages = (): void => {
   const storage = getProcessedMessagesStorage()
   const allKeys = storage.getAllKeys().filter((key) => key.startsWith('processed_'))
-  allKeys.forEach((key) => storage.delete(key))
+  allKeys.forEach((key) => storage.remove(key))
   console.log('[MessageDeduplication] Cleared all processed messages:', allKeys.length, 'records')
 }
