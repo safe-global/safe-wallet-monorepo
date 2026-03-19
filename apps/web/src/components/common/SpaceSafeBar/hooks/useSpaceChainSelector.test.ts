@@ -63,6 +63,7 @@ import { isMultiChainSafeItem } from '@/hooks/safes'
 const chainConfigs = [
   { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'eth.png', shortName: 'eth' },
   { chainId: '137', chainName: 'Polygon', chainLogoUri: 'polygon.png', shortName: 'matic' },
+  { chainId: '42161', chainName: 'Arbitrum', chainLogoUri: 'arb.png', shortName: 'arb1' },
 ]
 
 const mockPush = jest.fn()
@@ -114,11 +115,11 @@ describe('useSpaceChainSelector', () => {
     setupDefaults()
   })
 
-  it('returns the chains for the current safe', () => {
+  it('returns the deployed chains for the current safe', () => {
     const { result } = renderHook(() => useSpaceChainSelector())
 
-    expect(result.current.chains).toHaveLength(1)
-    expect(result.current.chains[0]).toMatchObject({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
+    expect(result.current.deployedChains).toHaveLength(1)
+    expect(result.current.deployedChains[0]).toMatchObject({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' })
   })
 
   it('returns selectedChainId from useChainId', () => {
@@ -126,25 +127,41 @@ describe('useSpaceChainSelector', () => {
     expect(result.current.selectedChainId).toBe('1')
   })
 
-  it('returns hasMultipleChains=false for a single-chain safe', () => {
+  it('returns deployedChainIds for a single-chain safe', () => {
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.hasMultipleChains).toBe(false)
+    expect(result.current.deployedChainIds).toEqual(['1'])
   })
 
-  it('returns hasMultipleChains=true for a multi-chain safe', () => {
+  it('returns deployedChainIds for a multi-chain safe', () => {
     setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
 
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.hasMultipleChains).toBe(true)
-    expect(result.current.chains).toHaveLength(2)
+    expect(result.current.deployedChainIds).toEqual(['1', '137'])
+    expect(result.current.deployedChains).toHaveLength(2)
   })
 
-  it('returns empty chains when the current safe is not found in allSafes', () => {
+  it('returns availableChains excluding deployed chains', () => {
+    setupDefaults({ allSafes: [singleChainSafe], safeAddress: '0xSafe1' })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+    expect(result.current.availableChains).toHaveLength(2)
+    expect(result.current.availableChains.map((c) => c.chainId)).toEqual(['137', '42161'])
+  })
+
+  it('returns availableChains excluding all deployed chains for multi-chain safe', () => {
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+    expect(result.current.availableChains).toHaveLength(1)
+    expect(result.current.availableChains[0].chainId).toBe('42161')
+  })
+
+  it('returns empty deployedChains when the current safe is not found in allSafes', () => {
     setupDefaults({ allSafes: [], safeAddress: '0xSafe1' })
 
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.chains).toHaveLength(0)
-    expect(result.current.hasMultipleChains).toBe(false)
+    expect(result.current.deployedChains).toHaveLength(0)
+    expect(result.current.deployedChainIds).toEqual([])
   })
 
   it('navigates to the same safe on a different chain when handleChainChange is called', () => {
@@ -176,7 +193,7 @@ describe('useSpaceChainSelector', () => {
     setupDefaults({ allSafes: [singleChainSafe], safeAddress: '0xsafe1' })
 
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.chains).toHaveLength(1)
+    expect(result.current.deployedChains).toHaveLength(1)
   })
 
   it('falls back to null for chainLogoUri when chain config exists but chainLogoUri is missing', () => {
@@ -185,7 +202,7 @@ describe('useSpaceChainSelector', () => {
     })
 
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.chains[0]).toMatchObject({
+    expect(result.current.deployedChains[0]).toMatchObject({
       chainId: '1',
       chainName: 'Ethereum',
       shortName: 'eth',
@@ -195,22 +212,32 @@ describe('useSpaceChainSelector', () => {
 
   it('falls back to chainId for chainName/shortName when chain config is missing', () => {
     const unknownSafe: SafeItem = {
-      chainId: '42161',
-      address: '0xArb',
+      chainId: '99999',
+      address: '0xUnknown',
       isReadOnly: false,
       isPinned: false,
       lastVisited: 0,
-      name: 'Arb Safe',
+      name: 'Unknown Safe',
     }
-    setupDefaults({ allSafes: [unknownSafe], safeAddress: '0xArb', currentChainId: '42161' })
+    setupDefaults({ allSafes: [unknownSafe], safeAddress: '0xUnknown', currentChainId: '99999' })
 
     const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.chains[0]).toMatchObject({
-      chainId: '42161',
-      chainName: '42161',
-      shortName: '42161',
+    expect(result.current.deployedChains[0]).toMatchObject({
+      chainId: '99999',
+      chainName: '99999',
+      shortName: '99999',
       chainLogoUri: null,
     })
+  })
+
+  it('returns safeAddress from useSafeInfo', () => {
+    const { result } = renderHook(() => useSpaceChainSelector())
+    expect(result.current.safeAddress).toBe('0xSafe1')
+  })
+
+  it('returns safeName from the matched safe item', () => {
+    const { result } = renderHook(() => useSpaceChainSelector())
+    expect(result.current.safeName).toBe('My Safe')
   })
 
   it('fires CHAIN_SWITCHED trackEvent exactly once with correct params on chain change', () => {

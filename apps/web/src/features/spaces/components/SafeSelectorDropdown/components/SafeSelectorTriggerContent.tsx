@@ -21,8 +21,6 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     selectedItem.address,
     chainShortName,
   )
-  const isSingleChain = selectedItem.chains.length <= 1
-
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
       <Avatar size="sm">
@@ -46,7 +44,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
         balance={selectedItem.balance}
         threshold={selectedItem.threshold}
         owners={selectedItem.owners}
-        showBalanceDisplay={isSingleChain}
+        showBalanceDisplay
       />
     </div>
   )
