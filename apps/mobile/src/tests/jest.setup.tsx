@@ -163,6 +163,28 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   getString: jest.fn(),
 }))
 
+jest.mock('react-native-nitro-modules', () => ({
+  NitroModules: {
+    createHybridObject: jest.fn(),
+  },
+}))
+
+jest.mock('react-native-mmkv', () => {
+  const store = new Map<string, string | number | boolean>()
+  const mmkvMock = {
+    set: jest.fn((key: string, value: string | number | boolean) => store.set(key, value)),
+    getString: jest.fn((key: string) => store.get(key) as string | undefined),
+    getNumber: jest.fn((key: string) => store.get(key) as number | undefined),
+    getBoolean: jest.fn((key: string) => store.get(key) as boolean | undefined),
+    remove: jest.fn((key: string) => store.delete(key)),
+    clearAll: jest.fn(() => store.clear()),
+    getAllKeys: jest.fn(() => [...store.keys()]),
+  }
+  return {
+    createMMKV: jest.fn(() => ({ ...mmkvMock })),
+  }
+})
+
 jest.mock('react-native-quick-crypto', () => ({
   default: {
     randomBytes: jest.fn((size) => Buffer.alloc(size)),
