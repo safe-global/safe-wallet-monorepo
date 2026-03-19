@@ -11,7 +11,6 @@ import {
   type MultiChainSafeItem,
   type SafeItem,
 } from '@/hooks/safes'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -38,7 +37,7 @@ const formatMultichainAccount = (
   const totalFiat = safeOverviews.reduce((sum, overview) => sum + parseFloat(overview.fiatTotal || '0'), 0)
   const firstOverview = safeOverviews[0]
   const firstChain = chainMap.get(safe.safes[0]?.chainId)
-  const name = safe.name || shortenAddress(safe.address)
+  const name = safe.name || ''
 
   const subAccounts: SubAccount[] = safe.safes.map((s) => {
     const chain = chainMap.get(s.chainId)
@@ -69,7 +68,7 @@ const formatSingleSafe = (
   const chain = chainMap.get(safe.chainId)
   const overview = overviews?.find((o) => sameAddress(o.address.value, safe.address) && o.chainId === safe.chainId)
 
-  const name = safe.name || shortenAddress(safe.address)
+  const name = safe.name || ''
 
   return {
     name,

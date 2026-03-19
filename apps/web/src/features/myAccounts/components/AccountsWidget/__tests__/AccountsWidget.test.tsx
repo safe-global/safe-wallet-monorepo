@@ -12,6 +12,14 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
+const mockUseSafeDisplayName = jest.fn(
+  (_address: string, _chainId: string, preferredName?: string) => preferredName || '',
+)
+
+jest.mock('@/hooks/useSafeDisplayName', () => ({
+  useSafeDisplayName: (...args: [string, string, string?]) => mockUseSafeDisplayName(...args),
+}))
+
 const mockSafeItem = (chainId: string, address: string): SafeItem => ({
   chainId,
   address,
@@ -288,5 +296,54 @@ describe('AccountsWidget', () => {
         [MixpanelEventParams.SAFE_ADDRESS]: mockAccounts[1].address,
       },
     )
+  })
+})
+
+describe('AccountsWidget – display name fallback', () => {
+  const address = '0x1234567890abcdef1234567890abcdef12345678'
+
+  const makeAccount = (name: string): Account => ({
+    name,
+    address,
+    href: `/home?safe=eth:${address}`,
+    safes: [mockSafeItem('1', address)],
+    fiatTotal: '100',
+    owners: '1/1',
+  })
+
+  beforeEach(() => {
+    mockUseSafeDisplayName.mockClear()
+  })
+
+  it('displays cloud name when available', () => {
+    mockUseSafeDisplayName.mockReturnValue('Cloud Name')
+
+    render(<AccountsWidget accounts={[makeAccount('Cloud Name')]} />)
+
+    expect(screen.getByText('Cloud Name')).toBeInTheDocument()
+  })
+
+  it('displays local name when cloud name is empty', () => {
+    mockUseSafeDisplayName.mockReturnValue('Local Name')
+
+    render(<AccountsWidget accounts={[makeAccount('')]} />)
+
+    expect(screen.getByText('Local Name')).toBeInTheDocument()
+  })
+
+  it('displays shortened address when both cloud and local names are empty', () => {
+    mockUseSafeDisplayName.mockReturnValue('')
+
+    render(<AccountsWidget accounts={[makeAccount('')]} />)
+
+    expect(screen.getAllByText('0x1234...5678')).toHaveLength(2)
+  })
+
+  it('calls useSafeDisplayName with address, chainId, and preferred name', () => {
+    mockUseSafeDisplayName.mockReturnValue('Cloud Name')
+
+    render(<AccountsWidget accounts={[makeAccount('Cloud Name')]} />)
+
+    expect(mockUseSafeDisplayName).toHaveBeenCalledWith(address, '1', 'Cloud Name')
   })
 })

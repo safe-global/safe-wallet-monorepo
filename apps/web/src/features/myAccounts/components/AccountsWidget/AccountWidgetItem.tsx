@@ -8,6 +8,7 @@ import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 
 interface AccountWidgetItemProps {
   account: Account
@@ -16,11 +17,14 @@ interface AccountWidgetItemProps {
 }
 
 const AccountWidgetItem = ({ account, loading = false, onItemClick }: AccountWidgetItemProps): ReactElement => {
+  const chainId = account.safes[0]?.chainId ?? ''
+  const displayName = useSafeDisplayName(account.address, chainId, account.name) || shortenAddress(account.address)
+
   return (
     <WidgetItem
       href={account.href}
       onClick={onItemClick ? () => onItemClick(account.address) : undefined}
-      label={<Typography variant="paragraph-bold">{account.name}</Typography>}
+      label={<Typography variant="paragraph-bold">{displayName}</Typography>}
       info={
         <Typography variant="paragraph-mini" color="muted">
           {shortenAddress(account.address, 4)}
