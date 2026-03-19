@@ -21,7 +21,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
@@ -44,7 +44,7 @@ const ReplaySafeDialog = ({
       chainId: chain?.chainId || '',
     },
   })
-  const { handleSubmit, formState } = formMethods
+  const { handleSubmit, formState, reset } = formMethods
   const router = useRouter()
   const addressBook = useAddressBook()
 
@@ -53,6 +53,12 @@ const ReplaySafeDialog = ({
   const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (chain?.chainId) {
+      reset({ chainId: chain.chainId })
+    }
+  }, [chain?.chainId, reset])
 
   // Load some data
   const [safeCreationData, safeCreationDataError, safeCreationDataLoading] = safeCreationResult
@@ -252,12 +258,14 @@ const ReplaySafeDialog = ({
 export const CreateSafeOnNewChain = ({
   safeAddress,
   deployedChainIds,
+  defaultChainId,
   ...props
 }: Omit<
   ReplaySafeDialogProps,
   'safeCreationResult' | 'replayableChains' | 'chain' | 'isUnsupportedSafeCreationVersion'
 > & {
   deployedChainIds: string[]
+  defaultChainId?: string
 }) => {
   const { configs } = useChains()
   const deployedChains = useMemo(
@@ -276,12 +284,18 @@ export const CreateSafeOnNewChain = ({
     [allCompatibleChains, deployedChainIds],
   )
 
+  const preselectedChain = useMemo(
+    () => (defaultChainId ? replayableChains?.find((c) => c.chainId === defaultChainId) : undefined),
+    [defaultChainId, replayableChains],
+  )
+
   return (
     <ReplaySafeDialog
       safeCreationResult={safeCreationResult}
       replayableChains={replayableChains}
       safeAddress={safeAddress}
       isUnsupportedSafeCreationVersion={isUnsupportedSafeCreationVersion}
+      chain={preselectedChain}
       {...props}
     />
   )
