@@ -13,6 +13,8 @@
  */
 
 import { spawn, execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { createInterface } from 'node:readline'
 
 // ---------------------------------------------------------------------------
@@ -101,6 +103,61 @@ const WORKSPACE_NAMES = {
 const workspacePkg = WORKSPACE_NAMES[workspace] ?? `@safe-global/${workspace}`
 
 // ---------------------------------------------------------------------------
+// Missing test detection
+// ---------------------------------------------------------------------------
+
+function detectMissingTests(changedFiles, workspace) {
+  const wsRoot = workspace ? path.join('apps', workspace) : ''
+  const warnings = []
+
+  const testablePatterns = [
+    /hooks\/use.+\.tsx?$/,
+    /services\/.+\.ts$/,
+    /components\/.+\.tsx$/,
+    /store\/.+Slice\.ts$/,
+    /utils\/.+\.ts$/,
+  ]
+
+  const skipPatterns = [
+    /\.d\.ts$/,
+    /index\.ts$/,
+    /\.stories\.tsx?$/,
+    /\.test\.tsx?$/,
+    /constants\.ts$/,
+    /types\.ts$/,
+    /AUTO_GENERATED/,
+  ]
+
+  for (const file of changedFiles) {
+    if (skipPatterns.some((p) => p.test(file))) continue
+    if (!testablePatterns.some((p) => p.test(file))) continue
+
+    const dir = path.dirname(file)
+    const base = path.basename(file, path.extname(file))
+    const ext = file.endsWith('.tsx') ? '.tsx' : '.ts'
+
+    const candidates = [
+      path.join(wsRoot, dir, `${base}.test${ext}`),
+      path.join(wsRoot, dir, '__tests__', `${base}.test${ext}`),
+    ]
+
+    const testExists = candidates.some((c) => existsSync(c))
+    if (!testExists) {
+      warnings.push({ file, message: `expected ${base}.test${ext}` })
+    } else {
+      const testModified = changedFiles.some(
+        (f) => f.endsWith(`${base}.test${ext}`) && (f.includes(dir) || f.includes('__tests__')),
+      )
+      if (!testModified) {
+        warnings.push({ file, message: 'test exists but was not updated' })
+      }
+    }
+  }
+
+  return warnings
+}
+
+// ---------------------------------------------------------------------------
 // Check definitions
 // ---------------------------------------------------------------------------
 
@@ -115,7 +172,7 @@ function buildChecks() {
 
     if (changedFiles.length > 50) {
       console.log(`Note: 50+ files changed (${changedFiles.length}) — running full verify.`)
-      return buildFullChecks()
+      return { checks: buildFullChecks(), changedFiles }
     }
 
     const lintableFiles = changedFiles.filter((f) => SOURCE_EXT_RE.test(f))
@@ -153,10 +210,10 @@ function buildChecks() {
       })
     }
 
-    return checks
+    return { checks, changedFiles }
   }
 
-  return buildFullChecks()
+  return { checks: buildFullChecks(), changedFiles: null }
 }
 
 function buildFullChecks() {
@@ -184,7 +241,7 @@ function buildFullChecks() {
   ]
 }
 
-const checks = buildChecks()
+const { checks, changedFiles } = buildChecks()
 
 // ---------------------------------------------------------------------------
 // Runner
@@ -232,6 +289,9 @@ async function main() {
   const failed = results.filter((r) => r.code !== 0)
   const allPassed = failed.length === 0
 
+  // Detect missing tests when running in --changed mode
+  const testWarnings = changedFiles ? detectMissingTests(changedFiles, workspace) : []
+
   if (isCompact) {
     console.log('-- verify -----')
 
@@ -241,15 +301,33 @@ async function main() {
       console.log(r.output.trimEnd())
     }
 
+    // Print missing test warnings (one line each)
+    for (const w of testWarnings) {
+      console.log(`WARN Missing test: ${w.file}`)
+    }
+
     // Summary line
     const summary = results.map((r) => (r.code === 0 ? `PASS ${r.label}` : `FAIL ${r.label}`)).join('    ')
     console.log(`\n${summary}`)
     console.log('--------')
-  } else if (!allPassed) {
-    // In non-compact mode output was already streamed; just print summary
-    console.log('')
-    for (const r of failed) {
-      console.error(`FAIL: ${r.label} (exit ${r.code})`)
+  } else {
+    if (!allPassed) {
+      // In non-compact mode output was already streamed; just print summary
+      console.log('')
+      for (const r of failed) {
+        console.error(`FAIL: ${r.label} (exit ${r.code})`)
+      }
+    }
+
+    // Print missing test warnings block
+    if (testWarnings.length > 0) {
+      console.log('')
+      console.log('WARN Missing tests:')
+      for (const w of testWarnings) {
+        console.log(`  ${w.file} -> ${w.message}`)
+      }
+      console.log(`  ${testWarnings.length} changed file(s) have no corresponding tests.`)
+      console.log('  Run: yarn test:scaffold <file> to generate a test skeleton.')
     }
   }
 
