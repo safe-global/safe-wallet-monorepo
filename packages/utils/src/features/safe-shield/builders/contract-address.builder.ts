@@ -62,7 +62,9 @@ export class ContractAddressBuilder {
     if (!this.parent['contract'][this.address]) {
       this.parent['contract'][this.address] = DEFAULT_INFO
     }
-    this.parent['contract'][this.address][StatusGroup.CONTRACT_VERIFICATION] = [result as any]
+    this.parent['contract'][this.address][StatusGroup.CONTRACT_VERIFICATION] = [
+      result as AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>,
+    ]
     return this
   }
 

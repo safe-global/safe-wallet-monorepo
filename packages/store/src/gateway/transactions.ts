@@ -7,7 +7,6 @@ import type {
   TransactionDetails,
 } from './AUTO_GENERATED/transactions'
 import { addTagTypes } from './AUTO_GENERATED/transactions'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { getNextPageParam } from '../utils/infiniteQuery'
 
 // Define types needed for infinite query

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 export interface AddressAssetExposure {
   /**
    * description of the asset for the current diff

@@ -114,7 +114,7 @@ describe('redux-persist-transform-filter', () => {
       const store = { a: [1, 2, 3], b: 'b' }
       const result = persistFilter(
         JSON.parse(JSON.stringify(store)) as Record<string, unknown>,
-        [{ path: 'a', filterFunction: (_item: unknown) => true }],
+        [{ path: 'a', filterFunction: () => true }],
         'blacklist',
       )
 

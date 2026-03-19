@@ -1,4 +1,4 @@
-const { withAndroidManifest } = require('@expo/config-plugins')
+const { withAndroidManifest } = require('expo/config-plugins')
 
 function addNotificationIconMetadata(androidManifest) {
   const application = androidManifest.manifest.application[0]

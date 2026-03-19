@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { withPodfile, withAppDelegate, withMainApplication, withDangerousMod } = require('@expo/config-plugins')
+const { withPodfile, withAppDelegate, withMainApplication, withDangerousMod } = require('expo/config-plugins')
 const fs = require('fs')
 const path = require('path')
 // SSL Pinning Configuration will be passed from app.config.js

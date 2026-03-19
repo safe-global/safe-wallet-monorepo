@@ -74,6 +74,7 @@ describe('ReviewTokenTransfer', () => {
           setSafeTxError: mockSetSafeTxError,
           setNonce: mockSetNonce,
           setSafeMessage: jest.fn(),
+          setSafeMessageHash: jest.fn(),
           setNonceNeeded: jest.fn(),
           setSafeTxGas: jest.fn(),
           setTxOrigin: jest.fn(),

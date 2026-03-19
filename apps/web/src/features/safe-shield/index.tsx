@@ -5,7 +5,7 @@ import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
 import { useHypernativeOAuth, useIsHypernativeEligible } from '@/features/hypernative'
 
 const SafeShieldWidget = (): ReactElement => {
-  const { recipient, contract, threat, safeTx, safeAnalysis, addToTrustedList } = useSafeShield()
+  const { recipient, contract, threat, deadlock, safeTx, safeAnalysis, addToTrustedList } = useSafeShield()
   const hypernativeAuth = useHypernativeOAuth()
   const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
   const showHnInfo = !eligibilityLoading && isHypernativeEligible
@@ -22,6 +22,7 @@ const SafeShieldWidget = (): ReactElement => {
       recipient={recipient}
       contract={contract}
       threat={threat}
+      deadlock={deadlock}
       safeTx={safeTx}
       hypernativeAuth={!eligibilityLoading && isHypernativeEligible ? hypernativeAuth : undefined}
       showHypernativeInfo={showHnInfo}

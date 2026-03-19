@@ -40,7 +40,7 @@ export const BlurredIdenticonBackground = ({ address, height = 125, children }: 
               height: height,
             },
           ]}
-          tint={colorScheme || 'dark'}
+          tint={colorScheme === 'light' ? 'light' : 'dark'}
         />
 
         {children}

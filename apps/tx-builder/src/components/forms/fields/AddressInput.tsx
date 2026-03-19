@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, ChangeEvent, useEffect, useCallback, useRef } from 'react'
+import { ReactElement, useState, ChangeEvent, useEffect, useCallback, useRef } from 'react'
 import InputAdornment from '@mui/material/InputAdornment'
 import CircularProgress from '@mui/material/CircularProgress'
 
@@ -68,7 +68,7 @@ function AddressInput({
         onChangeAddress(checksumValidAddress(resolvedAddress))
         // we update the input value
         updateInputValue(resolvedAddress)
-      } catch (e) {
+      } catch {
         onChangeAddress(address)
       } finally {
         setIsLoadingENSResolution(false)
