@@ -1,3 +1,4 @@
+import { Buffer } from '@craftzdog/react-native-buffer'
 import crypto from 'react-native-quick-crypto'
 
 export type SecuredDataFile = {
