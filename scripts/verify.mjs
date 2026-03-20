@@ -48,7 +48,8 @@ function gitDiff(...diffArgs) {
       .trim()
       .split('\n')
       .filter((l) => l.length > 0)
-  } catch {
+  } catch (err) {
+    console.warn(`verify: git diff failed (${diffArgs.join(' ')}):`, err.message)
     return []
   }
 }
@@ -62,7 +63,7 @@ function getMergeBase() {
         stdio: ['ignore', 'pipe', 'ignore'],
       }).trim()
     } catch {
-      // try next
+      // target branch not found, try next
     }
   }
   return ''

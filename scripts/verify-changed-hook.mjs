@@ -1,6 +1,11 @@
 // scripts/verify-changed-hook.mjs
 import { execFileSync, spawn } from 'node:child_process'
 
+// Allow skipping via env var (e.g. SKIP_VERIFY=1 in Claude Code settings)
+if (process.env.SKIP_VERIFY) {
+  process.exit(0)
+}
+
 function getChangedSourceFiles() {
   try {
     const unstaged = execFileSync('git', ['diff', '--name-only'], { encoding: 'utf8' })
@@ -8,19 +13,20 @@ function getChangedSourceFiles() {
     return [...unstaged.trim().split('\n'), ...staged.trim().split('\n')]
       .filter(Boolean)
       .filter((f) => /\.[tj]sx?$/.test(f))
-  } catch {
+  } catch (err) {
+    console.warn('verify-changed-hook: git diff failed:', err.message)
     return []
   }
 }
 
-function detectWorkspace(files) {
+function detectWorkspaces(files) {
   const hasWeb = files.some((f) => f.startsWith('apps/web/'))
   const hasMobile = files.some((f) => f.startsWith('apps/mobile/'))
 
-  // Default to web if changes are in packages/ or other shared dirs
-  if (hasWeb || (!hasWeb && !hasMobile)) return 'web'
-  if (hasMobile) return 'mobile'
-  return 'web'
+  if (hasWeb && hasMobile) return ['web', 'mobile']
+  if (hasMobile) return ['mobile']
+  // Default to web for packages/ or other shared dirs
+  return ['web']
 }
 
 const changedFiles = getChangedSourceFiles()
@@ -29,12 +35,25 @@ if (changedFiles.length === 0) {
   process.exit(0)
 }
 
-const workspace = detectWorkspace(changedFiles)
+const workspaces = detectWorkspaces(changedFiles)
 
-const child = spawn('node', ['scripts/verify.mjs', '--changed', `--workspace=${workspace}`, '--compact'], {
-  stdio: 'inherit',
-})
+// Run verify for each affected workspace sequentially
+let exitCode = 0
 
-child.on('close', (code) => {
-  process.exit(code ?? 1)
-})
+function runNext(index) {
+  if (index >= workspaces.length) {
+    process.exit(exitCode)
+  }
+
+  const ws = workspaces[index]
+  const child = spawn('node', ['scripts/verify.mjs', '--changed', `--workspace=${ws}`, '--compact'], {
+    stdio: 'inherit',
+  })
+
+  child.on('close', (code) => {
+    if (code !== 0) exitCode = code
+    runNext(index + 1)
+  })
+}
+
+runNext(0)

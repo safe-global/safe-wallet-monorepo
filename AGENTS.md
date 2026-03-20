@@ -247,7 +247,7 @@ Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/
 
 The repo provides automated verification:
 
-1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Fix any errors before moving on.
+1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
 
 2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
 
