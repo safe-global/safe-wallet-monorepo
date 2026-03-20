@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
+import { useLazyAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -21,6 +22,7 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000
  */
 export const useEmailLoginCallback = () => {
   const dispatch = useAppDispatch()
+  const [checkSession] = useLazyAuthGetMeV1Query()
   const router = useRouter()
   const routerRef = useRef(router)
   const hasProcessed = useRef(false)
@@ -34,33 +36,38 @@ export const useEmailLoginCallback = () => {
     if (!pending) return
 
     hasProcessed.current = true
-    sessionStorage.removeItem(EMAIL_AUTH_PENDING_KEY)
 
-    const params = new URLSearchParams(window.location.search)
-    const error = params.get('error')
+    const processCallback = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search)
+        const error = params.get('error')
 
-    if (error) {
-      dispatch(
-        showNotification({
-          message: 'Something went wrong while signing in with email',
-          variant: 'error',
-          groupKey: 'email-sign-in-failed',
-        }),
-      )
+        if (error) {
+          dispatch(
+            showNotification({
+              message: 'Something went wrong while signing in with email',
+              variant: 'error',
+              groupKey: 'email-sign-in-failed',
+            }),
+          )
 
-      // Clean error param from URL using Next.js router to keep router state in sync
-      const { error: _error, ...restQuery } = routerRef.current.query
-      routerRef.current.replace({ pathname: routerRef.current.pathname, query: restQuery }, undefined, {
-        shallow: true,
-      })
-      return
+          // Clean error param from URL using Next.js router to keep router state in sync
+          const { error: _error, ...restQuery } = routerRef.current.query
+          routerRef.current.replace({ pathname: routerRef.current.pathname, query: restQuery }, undefined, {
+            shallow: true,
+          })
+          return
+        }
+
+        await checkSession().unwrap()
+        dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
+      } catch {
+        // A failed auth/me check means no valid session cookie was minted.
+      } finally {
+        sessionStorage.removeItem(EMAIL_AUTH_PENDING_KEY)
+      }
     }
 
-    // TODO: The pending flag alone doesn't prove the login completed. If a user starts
-    // the OIDC flow and navigates back without finishing, this path still runs. Ideally
-    // we'd verify the JWT cookie was minted (e.g. via a CGW /v1/auth/me endpoint) before
-    // marking the session as authenticated. Existing endpoints like /v1/users require a
-    // connected signer so they can't be used here.
-    dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
-  }, [dispatch])
+    void processCallback()
+  }, [checkSession, dispatch])
 }

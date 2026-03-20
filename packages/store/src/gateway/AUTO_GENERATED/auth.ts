@@ -6,6 +6,10 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      authGetMeV1: build.query<AuthGetMeV1ApiResponse, AuthGetMeV1ApiArg>({
+        query: () => ({ url: `/v1/auth/me` }),
+        providesTags: ['auth'],
+      }),
       authGetNonceV1: build.query<AuthGetNonceV1ApiResponse, AuthGetNonceV1ApiArg>({
         query: () => ({ url: `/v1/auth/nonce` }),
         providesTags: ['auth'],
@@ -22,6 +26,8 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type AuthGetMeV1ApiResponse = unknown
+export type AuthGetMeV1ApiArg = void
 export type AuthGetNonceV1ApiResponse = /** status 200 Unique nonce generated for authentication */ AuthNonce
 export type AuthGetNonceV1ApiArg = void
 export type AuthVerifyV1ApiResponse = unknown
@@ -38,5 +44,11 @@ export type SiweDto = {
   message: string
   signature: string
 }
-export const { useAuthGetNonceV1Query, useLazyAuthGetNonceV1Query, useAuthVerifyV1Mutation, useAuthLogoutV1Mutation } =
-  injectedRtkApi
+export const {
+  useAuthGetMeV1Query,
+  useLazyAuthGetMeV1Query,
+  useAuthGetNonceV1Query,
+  useLazyAuthGetNonceV1Query,
+  useAuthVerifyV1Mutation,
+  useAuthLogoutV1Mutation,
+} = injectedRtkApi

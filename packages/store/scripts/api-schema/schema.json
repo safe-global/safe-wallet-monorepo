@@ -24,6 +24,22 @@
         ]
       }
     },
+    "/v1/auth/me": {
+      "get": {
+        "description": "Returns 204 if a valid session cookie is present, 403 otherwise.",
+        "operationId": "authGetMeV1",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Authenticated"
+          }
+        },
+        "summary": "Check authentication status",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/auth/nonce": {
       "get": {
         "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
