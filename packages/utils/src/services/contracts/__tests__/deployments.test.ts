@@ -1,6 +1,7 @@
 import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import {
   getCanonicalOrFirstAddress,
+  getChainAgnosticAddress,
   hasCanonicalDeployment,
   hasMatchingDeployment,
   isCanonicalDeployment,
@@ -73,6 +74,48 @@ describe('deployments utils', () => {
 
     it('returns undefined when no deployment', () => {
       expect(getCanonicalOrFirstAddress(undefined, chainId)).toBeUndefined()
+    })
+  })
+
+  describe('getChainAgnosticAddress', () => {
+    const canonical = '0x1111111111111111111111111111111111111111'
+    const eip155Addr = '0x2222222222222222222222222222222222222222'
+    const unknownChainId = '999999'
+
+    it('returns per-chain address when chain is registered', () => {
+      const deployment = makeDeployment(
+        { canonical: { address: canonical, codeHash: '0xhash' } },
+        { [chainId]: [canonical] },
+      )
+      expect(getChainAgnosticAddress(deployment, chainId)).toBe(canonical)
+    })
+
+    it('falls back to canonical address for unregistered chains', () => {
+      const deployment = makeDeployment(
+        { canonical: { address: canonical, codeHash: '0xhash' } },
+        { [chainId]: [canonical] }, // only chainId=1 is registered
+      )
+      expect(getChainAgnosticAddress(deployment, unknownChainId)).toBe(canonical)
+    })
+
+    it('uses specified deployment type for fallback', () => {
+      const deployment = makeDeployment(
+        {
+          canonical: { address: canonical, codeHash: '0xhash' },
+          eip155: { address: eip155Addr, codeHash: '0xhash2' },
+        },
+        {},
+      )
+      expect(getChainAgnosticAddress(deployment, unknownChainId, 'eip155')).toBe(eip155Addr)
+    })
+
+    it('returns undefined when no deployment', () => {
+      expect(getChainAgnosticAddress(undefined, chainId)).toBeUndefined()
+    })
+
+    it('returns undefined when deployment type does not exist', () => {
+      const deployment = makeDeployment({ canonical: { address: canonical, codeHash: '0xhash' } }, {})
+      expect(getChainAgnosticAddress(deployment, unknownChainId, 'zksync')).toBeUndefined()
     })
   })
 

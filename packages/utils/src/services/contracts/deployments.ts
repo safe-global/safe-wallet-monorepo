@@ -31,6 +31,7 @@ import { ZKSYNC_ERA_CHAIN_ID } from '@safe-global/utils/config/chains'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
 
+export type DeploymentType = 'canonical' | 'eip155' | 'zksync'
 type DeploymentRecord = Record<string, { address: string; codeHash: string }>
 
 const SAFE_L2_CODE_HASHES = new Set<string>(
@@ -97,6 +98,25 @@ export const getCanonicalOrFirstAddress = (
 
   const addresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
   return addresses[0]
+}
+
+/**
+ * Returns an address for a deployment, trying per-chain lookup first, then falling back
+ * to the chain-agnostic deployment type address. Works for unregistered chains.
+ */
+export const getChainAgnosticAddress = (
+  deployment: SingletonDeploymentV2 | undefined,
+  chainId: string,
+  deploymentType: DeploymentType = 'canonical',
+): string | undefined => {
+  if (!deployment) return undefined
+
+  // Try per-chain first (works for registered chains)
+  const perChainAddress = getCanonicalOrFirstAddress(deployment, chainId)
+  if (perChainAddress) return perChainAddress
+
+  // Fall back to chain-agnostic address by deployment type
+  return deployment.deployments[deploymentType]?.address
 }
 
 /**
@@ -264,7 +284,6 @@ export const getCanonicalMultiSendAddress = (version: SafeState['version']): str
   return deployment?.deployments.canonical?.address
 }
 
-type DeploymentType = 'canonical' | 'eip155' | 'zksync'
 type DeploymentGetter = (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined
 
 const BASE_DEPLOYMENT_GETTERS: Record<string, DeploymentGetter> = {
