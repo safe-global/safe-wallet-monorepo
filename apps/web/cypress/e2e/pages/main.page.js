@@ -217,9 +217,7 @@ export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
 }
 
 export function acceptCookies(index = 0) {
-  cy.wait(1000)
-
-  cy.findAllByText('Got it!')
+  cy.findAllByText('Got it!', { timeout: 5000 })
     .should('have.length.at.least', index)
     .each(($el) => $el.click())
 
@@ -232,37 +230,33 @@ export function acceptCookies(index = 0) {
       }
       cy.wrap($button).click()
       cy.contains(acceptSelection).should('not.exist')
-      cy.wait(500)
     })
 }
 
 export function acceptCookies2() {
-  cy.wait(2000)
-  cy.get('body').then(($body) => {
+  cy.get('body', { timeout: 5000 }).then(($body) => {
     if ($body.find('button:contains(' + acceptSelection + ')').length > 0) {
       cy.contains('button', acceptSelection).click()
-      cy.wait(500)
+      cy.contains('button', acceptSelection).should('not.exist')
     }
   })
 }
 
 export function closeOutreachPopup() {
-  cy.wait(1000)
-  cy.get('body').then(($body) => {
+  cy.get('body', { timeout: 5000 }).then(($body) => {
     if ($body.find(closeOutreachPopupBtn).length > 0) {
       cy.get(closeOutreachPopupBtn).click()
-      cy.wait(500)
+      cy.get(closeOutreachPopupBtn).should('not.exist')
     }
   })
 }
 
 export function closeSecurityNotice() {
   const value = 'I understand'
-  cy.wait(2000)
-  cy.get('body').then(($body) => {
+  cy.get('body', { timeout: 5000 }).then(($body) => {
     if ($body.find('button:contains(' + value + ')').length > 0) {
       cy.contains('button', value).click()
-      cy.wait(500)
+      cy.contains('button', value).should('not.exist')
     }
   })
 }

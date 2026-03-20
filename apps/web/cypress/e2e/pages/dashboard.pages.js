@@ -97,8 +97,7 @@ export function pinAppByIndex(index) {
     .eq(index)
     .click()
     .then(() => {
-      cy.wait(1000)
-      return cy.get('[aria-label*="Unpin"]').eq(0).invoke('attr', 'aria-label')
+      return cy.get('[aria-label*="Unpin"]', { timeout: 5000 }).eq(0).invoke('attr', 'aria-label')
     })
 }
 
