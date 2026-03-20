@@ -132,7 +132,7 @@ describe('getActionableTransactions', () => {
     const tx1 = createTxItem()
     const tx2 = createTxItem()
     mockIsSignableBy.mockReturnValue(false)
-    mockIsExecutable.mockImplementation((_tx, _addr, _safe) => _tx === tx2.transaction)
+    mockIsExecutable.mockImplementation((tx) => tx === tx2.transaction)
 
     const result = getActionableTransactions([tx1, tx2], safe, '0xowner')
 

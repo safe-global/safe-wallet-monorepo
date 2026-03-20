@@ -11,10 +11,12 @@ jest.mock('@/hooks/useChains', () => ({
 
 const mockUseHasFeature = useChains.useHasFeature as jest.MockedFunction<typeof useChains.useHasFeature>
 
-const createWrapper =
-  (isBlockedCountry: boolean) =>
-  ({ children }: { children: ReactNode }) =>
+function createWrapper(isBlockedCountry: boolean) {
+  const Wrapper = ({ children }: { children: ReactNode }) =>
     createElement(GeoblockingContext.Provider, { value: isBlockedCountry }, children)
+  Wrapper.displayName = 'GeoblockingWrapper'
+  return Wrapper
+}
 
 describe('useIsEarnFeatureEnabled', () => {
   afterEach(() => jest.clearAllMocks())
