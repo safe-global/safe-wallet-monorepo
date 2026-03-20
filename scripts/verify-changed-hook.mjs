@@ -1,23 +1,37 @@
 // scripts/verify-changed-hook.mjs
 import { execFileSync, spawn } from 'node:child_process'
 
-function hasChangedSourceFiles() {
+function getChangedSourceFiles() {
   try {
     const unstaged = execFileSync('git', ['diff', '--name-only'], { encoding: 'utf8' })
     const staged = execFileSync('git', ['diff', '--name-only', '--cached'], { encoding: 'utf8' })
     return [...unstaged.trim().split('\n'), ...staged.trim().split('\n')]
       .filter(Boolean)
-      .some((f) => /\.[tj]sx?$/.test(f))
+      .filter((f) => /\.[tj]sx?$/.test(f))
   } catch {
-    return false
+    return []
   }
 }
 
-if (!hasChangedSourceFiles()) {
+function detectWorkspace(files) {
+  const hasWeb = files.some((f) => f.startsWith('apps/web/'))
+  const hasMobile = files.some((f) => f.startsWith('apps/mobile/'))
+
+  // Default to web if changes are in packages/ or other shared dirs
+  if (hasWeb || (!hasWeb && !hasMobile)) return 'web'
+  if (hasMobile) return 'mobile'
+  return 'web'
+}
+
+const changedFiles = getChangedSourceFiles()
+
+if (changedFiles.length === 0) {
   process.exit(0)
 }
 
-const child = spawn('node', ['scripts/verify.mjs', '--changed', '--workspace=web', '--compact'], {
+const workspace = detectWorkspace(changedFiles)
+
+const child = spawn('node', ['scripts/verify.mjs', '--changed', `--workspace=${workspace}`, '--compact'], {
   stdio: 'inherit',
 })
 
