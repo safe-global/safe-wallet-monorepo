@@ -37,9 +37,3 @@ export type { EmailAuthContract } from './contract'
 
 export { useEmailLogin } from './hooks/useEmailLogin'
 export { useEmailLoginCallback } from './hooks/useEmailLoginCallback'
-
-// ─────────────────────────────────────────────────────────────────
-// PUBLIC UTILITIES
-// ─────────────────────────────────────────────────────────────────
-
-export { isEmailLoginPending } from './utils'

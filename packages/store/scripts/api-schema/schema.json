@@ -32,6 +32,9 @@
         "responses": {
           "204": {
             "description": "Authenticated"
+          },
+          "403": {
+            "description": "Not authenticated"
           }
         },
         "summary": "Check authentication status",

@@ -4,13 +4,12 @@ import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { isAuthenticated, setLastUsedSpace } from '@/store/authSlice'
+import { isAuthenticated, selectIsEmailLoginPending, setLastUsedSpace } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isEmailLoginPending } from '@/features/email-auth'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const dispatch = useAppDispatch()
@@ -18,7 +17,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
-  const emailLoginPending = isEmailLoginPending()
+  const isEmailLoginPending = useAppSelector(selectIsEmailLoginPending)
 
   const isCurrentUserDeclined = currentData?.members.some(
     (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
@@ -30,7 +29,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   if (!isSpacesFeatureEnabled) return null
 
-  if (isLoading || emailLoginPending) return <LoadingState />
+  if (isLoading || isEmailLoginPending) return <LoadingState />
 
   if (!isUserSignedIn) return <SignedOutState />
 

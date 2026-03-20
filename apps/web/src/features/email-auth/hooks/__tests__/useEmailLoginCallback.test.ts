@@ -30,6 +30,7 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (expiresAt: number) => ({ type: 'auth/setAuthenticated', payload: expiresAt }),
+  setIsEmailLoginPending: (pending: boolean) => ({ type: 'auth/setIsEmailLoginPending', payload: pending }),
 }))
 
 jest.mock('@/store/notificationsSlice', () => ({
@@ -44,6 +45,11 @@ jest.mock('next/router', () => ({
   }),
 }))
 
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: (...args: unknown[]) => mockUseHasFeature(...args),
+}))
+
 describe('useEmailLoginCallback', () => {
   const originalLocation = window.location
   const initiateReturnValue = Symbol('initiate')
@@ -54,6 +60,7 @@ describe('useEmailLoginCallback', () => {
 
     jest.spyOn(Date, 'now').mockReturnValue(1000000)
 
+    mockUseHasFeature.mockReturnValue(true)
     mockInitiate.mockReturnValue(initiateReturnValue)
     mockUnwrap.mockResolvedValue(undefined)
     mockDispatch.mockImplementation((action) => {
@@ -95,6 +102,16 @@ describe('useEmailLoginCallback', () => {
     await waitFor(() => {
       expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBeNull()
     })
+  })
+
+  it('should not dispatch when EMAIL_AUTH feature is disabled', () => {
+    mockUseHasFeature.mockReturnValue(false)
+    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+
+    renderHook(() => useEmailLoginCallback())
+
+    expect(mockDispatch).not.toHaveBeenCalled()
+    expect(mockInitiate).not.toHaveBeenCalled()
   })
 
   it('should not dispatch when no pending flag exists', () => {
@@ -165,6 +182,26 @@ describe('useEmailLoginCallback', () => {
     })
   })
 
+  it('should preserve other query params when cleaning error param', async () => {
+    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        ...originalLocation,
+        search: '?spaceId=42&error=access_denied',
+        pathname: '/welcome/spaces',
+      },
+    })
+
+    renderHook(() => useEmailLoginCallback())
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/spaces', query: { spaceId: '42' } }, undefined, {
+        shallow: true,
+      })
+    })
+  })
+
   it('should not dispatch setAuthenticated when session check fails', async () => {
     sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
@@ -191,6 +228,33 @@ describe('useEmailLoginCallback', () => {
           message: 'Something went wrong while signing in with email',
         }),
       })
+    })
+  })
+
+  it('should dispatch setIsEmailLoginPending(true) then false on success', async () => {
+    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+
+    renderHook(() => useEmailLoginCallback())
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: true })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
+    })
+
+    const calls = mockDispatch.mock.calls.map((c) => c[0])
+    const pendingTrueIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === true)
+    const pendingFalseIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === false)
+    expect(pendingTrueIdx).toBeLessThan(pendingFalseIdx)
+  })
+
+  it('should dispatch setIsEmailLoginPending(false) on failure', async () => {
+    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    mockUnwrap.mockRejectedValue(new Error('Forbidden'))
+
+    renderHook(() => useEmailLoginCallback())
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
     })
   })
 
