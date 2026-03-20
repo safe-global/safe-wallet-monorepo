@@ -5,6 +5,8 @@ import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
+import { TokenType } from '@safe-global/store/gateway/types'
 
 const TotalAssetValue = ({
   fiatTotal,
@@ -22,6 +24,11 @@ const TotalAssetValue = ({
   const fontSizeValue = size === 'lg' ? '44px' : '24px'
   const { safe } = useSafeInfo()
   const { balances } = useVisibleBalances()
+  const { showUndeployedNativeValue } = useNativeTokenDisplay()
+  const shouldHideNativeTokenValue = !safe.deployed && !showUndeployedNativeValue
+  const hasOtherBalances =
+    balances.items.length > 1 ||
+    (balances.items.length === 1 && balances.items[0]?.tokenInfo.type !== TokenType.NATIVE_TOKEN)
 
   return (
     <Box>
@@ -38,6 +45,12 @@ const TotalAssetValue = ({
               </>
             ) : (
               <Skeleton variant="text" width={60} />
+            )
+          ) : shouldHideNativeTokenValue ? (
+            hasOtherBalances ? (
+              <FiatValue value={fiatTotal ?? '0'} precise />
+            ) : (
+              <FiatValue value="0" precise />
             )
           ) : (
             <TokenAmount
