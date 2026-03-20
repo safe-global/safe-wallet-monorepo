@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
 
-const EMAIL_AUTH_PENDING_KEY = 'email_auth_pending'
+export const EMAIL_AUTH_PENDING_KEY = 'email_auth_pending'
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
 /**
@@ -19,5 +19,3 @@ export const useEmailLogin = () => {
 
   return { loginWithRedirect }
 }
-
-export { EMAIL_AUTH_PENDING_KEY }

@@ -1,12 +1,18 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import { useLazyAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { EMAIL_AUTH_PENDING_KEY } from './useEmailLogin'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
+const emailSignInError = showNotification({
+  message: 'Something went wrong while signing in with email',
+  variant: 'error',
+  groupKey: 'email-sign-in-failed',
+})
 
 /**
  * Detects post-OIDC redirect and updates auth state.
@@ -22,7 +28,6 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000
  */
 export const useEmailLoginCallback = () => {
   const dispatch = useAppDispatch()
-  const [checkSession] = useLazyAuthGetMeV1Query()
   const router = useRouter()
   const routerRef = useRef(router)
   const hasProcessed = useRef(false)
@@ -43,13 +48,7 @@ export const useEmailLoginCallback = () => {
         const error = params.get('error')
 
         if (error) {
-          dispatch(
-            showNotification({
-              message: 'Something went wrong while signing in with email',
-              variant: 'error',
-              groupKey: 'email-sign-in-failed',
-            }),
-          )
+          dispatch(emailSignInError)
 
           // Clean error param from URL using Next.js router to keep router state in sync
           const { error: _error, ...restQuery } = routerRef.current.query
@@ -59,15 +58,15 @@ export const useEmailLoginCallback = () => {
           return
         }
 
-        await checkSession().unwrap()
+        await dispatch(cgwApi.endpoints.authGetMeV1.initiate()).unwrap()
         dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
       } catch {
-        // A failed auth/me check means no valid session cookie was minted.
+        dispatch(emailSignInError)
       } finally {
         sessionStorage.removeItem(EMAIL_AUTH_PENDING_KEY)
       }
     }
 
     void processCallback()
-  }, [checkSession, dispatch])
+  }, [dispatch])
 }

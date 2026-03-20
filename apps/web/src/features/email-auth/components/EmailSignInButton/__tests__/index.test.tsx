@@ -14,13 +14,24 @@ jest.mock('../../../hooks/useEmailLogin', () => ({
   useEmailLogin: () => ({ loginWithRedirect: mockLoginWithRedirect }),
 }))
 
+const mockUseHasFeature = jest.fn(() => true)
+
 jest.mock('@/hooks/useChains', () => ({
-  useHasFeature: () => true,
+  useHasFeature: () => mockUseHasFeature(),
 }))
 
 describe('EmailSignInButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseHasFeature.mockReturnValue(true)
+  })
+
+  it('should render nothing when feature flag is disabled', () => {
+    mockUseHasFeature.mockReturnValue(false)
+
+    const { container } = render(<EmailSignInButton />)
+
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('should render the sign in button', () => {
