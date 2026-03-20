@@ -100,6 +100,9 @@ const BaseButton = styled(Button, {
 export interface SafeButtonProps extends GetProps<typeof BaseButton> {
   loading?: boolean
   loadingText?: string
+  fontWeight?: '400' | '500' | '600' | '700'
+  /** Override text color (e.g. for forced light-mode onboarding) */
+  textColor?: string
 }
 
 function useTextColor(props: Record<string, unknown>): string {
@@ -131,11 +134,24 @@ function useTextColor(props: Record<string, unknown>): string {
 const TYPE_VARIANTS = ['primary', 'secondary', 'danger', 'success', 'outlined', 'text'] as const
 
 export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, SafeButtonProps>(
-  ({ loading = false, loadingText, children, disabled, icon, iconAfter, ...props }, ref) => {
+  (
+    {
+      loading = false,
+      loadingText,
+      children,
+      disabled,
+      icon,
+      iconAfter,
+      fontWeight = '700',
+      textColor: textColorOverride,
+      ...props
+    },
+    ref,
+  ) => {
     const buttonText = loading && loadingText ? loadingText : children
     const buttonIcon = loading ? <Loader size={16} thickness={1} /> : icon
     const isDisabled = loading || disabled
-    const textColor = useTextColor({ ...props, disabled: isDisabled })
+    const resolvedTextColor = textColorOverride ?? useTextColor({ ...props, disabled: isDisabled })
 
     // Strip type variants when disabled so disabled bg takes effect
     const frameProps = isDisabled
@@ -143,7 +159,7 @@ export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, 
       : props
 
     // Colorize icons
-    const iconOverrides = { color: textColor, size: 16 } as Record<string, unknown>
+    const iconOverrides = { color: resolvedTextColor, size: 16 } as Record<string, unknown>
     const coloredIcon = buttonIcon && isValidElement(buttonIcon) ? cloneElement(buttonIcon, iconOverrides) : buttonIcon
     const coloredIconAfter = iconAfter && isValidElement(iconAfter) ? cloneElement(iconAfter, iconOverrides) : iconAfter
 
@@ -152,11 +168,11 @@ export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, 
         {coloredIcon}
         <Button.Text
           fontFamily="$button"
-          fontWeight="600"
+          fontWeight={fontWeight}
           fontSize={14}
           lineHeight={20}
           letterSpacing={-0.1}
-          color={textColor}
+          color={resolvedTextColor}
         >
           {buttonText}
         </Button.Text>

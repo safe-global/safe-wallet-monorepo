@@ -72,7 +72,6 @@ export function ImportSuccess() {
                     paddingHorizontal="$2"
                     borderRadius="$3"
                     backgroundColor="$borderLight"
-                    fontWeight="500"
                     size="$5"
                     onPress={() => {
                       copy(address)
