@@ -1,5 +1,5 @@
 import crypto from 'react-native-quick-crypto'
-
+import { Buffer } from '@craftzdog/react-native-buffer'
 export type SecuredDataFile = {
   version: '1.0'
   algo: 'aes-256-gcm'
