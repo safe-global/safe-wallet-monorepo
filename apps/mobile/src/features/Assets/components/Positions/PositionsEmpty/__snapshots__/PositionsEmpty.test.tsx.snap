@@ -21,7 +21,7 @@ exports[`PositionsEmpty renders correctly 1`] = `
       testID="positions-empty"
     >
       <Text
-        accessibilityRole="header"
+        role="heading"
         style={
           {
             "color": "#121312",
@@ -33,7 +33,6 @@ exports[`PositionsEmpty renders correctly 1`] = `
             "marginLeft": 0,
             "marginRight": 0,
             "marginTop": 0,
-            "userSelect": "auto",
           }
         }
         suppressHighlighting={true}
@@ -44,7 +43,6 @@ exports[`PositionsEmpty renders correctly 1`] = `
         style={
           {
             "color": "#A1A3A7",
-            "fontFamily": "DM Sans",
             "textAlign": "center",
             "width": "80%",
           }
