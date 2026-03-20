@@ -13,6 +13,6 @@ export const useCompatibilityFallbackHandlerDeployments = () => {
 
   return useMemo(() => {
     if (!chain?.chainId || !safe.version) return undefined
-    return getCompatibilityFallbackHandlerDeployments({ network: chain?.chainId, version: safe.version })
+    return getCompatibilityFallbackHandlerDeployments({ version: safe.version })
   }, [safe.version, chain?.chainId])
 }

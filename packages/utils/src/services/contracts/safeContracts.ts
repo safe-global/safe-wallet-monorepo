@@ -35,12 +35,8 @@ export const canMigrateUnsupportedMastercopy = (
     return false
   }
 
-  // Check if migration contract is deployed on this chain
-  return Boolean(
-    getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
-      safe.chainId
-    ],
-  )
+  // Check if migration contract is deployed
+  return Boolean(getSafeMigrationDeployment({ version: SAFE_TO_L2_MIGRATION_VERSION })?.defaultAddress)
 }
 
 export const _getValidatedGetContractProps = (
@@ -58,11 +54,6 @@ export const _getValidatedGetContractProps = (
 }
 export const isMigrationToL2Possible = (safe: SafeState): boolean => {
   return (
-    safe.nonce === 0 &&
-    Boolean(
-      getSafeMigrationDeployment({ network: safe.chainId, version: SAFE_TO_L2_MIGRATION_VERSION })?.networkAddresses[
-        safe.chainId
-      ],
-    )
+    safe.nonce === 0 && Boolean(getSafeMigrationDeployment({ version: SAFE_TO_L2_MIGRATION_VERSION })?.defaultAddress)
   )
 }

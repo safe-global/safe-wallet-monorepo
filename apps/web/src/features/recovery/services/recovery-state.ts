@@ -35,12 +35,10 @@ export type RecoveryStateItem = {
 export type RecoveryState = Array<RecoveryStateItem>
 
 export function _isMaliciousRecovery({
-  chainId,
   version,
   safeAddress,
   transaction,
 }: {
-  chainId: string
   version: SafeState['version']
   safeAddress: string
   transaction: Pick<AddedEvent['args'], 'to' | 'data'>
@@ -56,14 +54,14 @@ export function _isMaliciousRecovery({
   }
 
   const multiSendDeployment =
-    getMultiSendCallOnlyDeployment({ network: chainId, version: version ?? undefined }) ??
-    getMultiSendCallOnlyDeployment({ network: chainId, version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
+    getMultiSendCallOnlyDeployment({ version: version ?? undefined }) ??
+    getMultiSendCallOnlyDeployment({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
 
   if (!multiSendDeployment) {
     return true
   }
 
-  const multiSendAddress = multiSendDeployment.networkAddresses[chainId] ?? multiSendDeployment.defaultAddress
+  const multiSendAddress = multiSendDeployment.defaultAddress
 
   // Calling official MultiSend contract with a batch of transactions to the Safe itself
   return (
@@ -159,7 +157,6 @@ const getRecoveryQueueItem = async ({
   delay,
   expiry,
   provider,
-  chainId,
   version,
   safeAddress,
 }: {
@@ -168,7 +165,6 @@ const getRecoveryQueueItem = async ({
   delay: bigint
   expiry: bigint
   provider: JsonRpcProvider
-  chainId: string
   version: SafeState['version']
   safeAddress: string
 }): Promise<RecoveryQueueItem> => {
@@ -183,7 +179,6 @@ const getRecoveryQueueItem = async ({
   ])
 
   const isMalicious = _isMaliciousRecovery({
-    chainId,
     version,
     safeAddress,
     transaction: transactionAdded.args,
@@ -202,14 +197,13 @@ export const _getRecoveryStateItem = async ({
   transactionService,
   safeAddress,
   provider,
-  chainId,
   version,
 }: {
   delayModifier: Delay
   transactionService: string
   safeAddress: string
   provider: JsonRpcProvider
-  chainId: string
+  chainId?: string
   version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
   const delayModifierAddress = await delayModifier.getAddress()
@@ -268,7 +262,6 @@ export const _getRecoveryStateItem = async ({
         delay: BigInt(delay),
         expiry: BigInt(expiry),
         provider,
-        chainId,
         version,
         safeAddress,
       })

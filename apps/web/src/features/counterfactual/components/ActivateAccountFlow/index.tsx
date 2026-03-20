@@ -101,7 +101,7 @@ const ActivateAccountFlow = () => {
 
   const { owners, threshold } = undeployedSafeSetup
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chain?.chainId })
+  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1' })
   const safeToL2SetupAddress = safeToL2SetupDeployment?.defaultAddress
   const isMultichainSafe = sameAddress(safeAccountConfig?.to, safeToL2SetupAddress)
 
