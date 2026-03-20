@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Button, Stack } from 'tamagui'
+import { Text, Button, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { WidgetDisplayWrapper } from '../WidgetDisplayWrapper'
 
@@ -11,7 +11,7 @@ interface ErrorWidgetProps {
 export function ErrorWidget({ message = 'Unable to load content', onRefresh }: ErrorWidgetProps) {
   return (
     <WidgetDisplayWrapper gap="$5" alignItems="center" paddingVertical="$4">
-      <Stack
+      <View
         backgroundColor="$backgroundPress"
         borderRadius="$2"
         width={40}
@@ -20,16 +20,16 @@ export function ErrorWidget({ message = 'Unable to load content', onRefresh }: E
         justifyContent="center"
       >
         <SafeFontIcon name="alert-circle-filled" size={24} color="$colorSecondary" />
-      </Stack>
+      </View>
 
-      <Stack gap="$1" alignItems="center">
+      <View gap="$1" alignItems="center">
         <Text color="$colorSecondary" fontSize="$4" fontWeight="600" textAlign="center">
           {message}
         </Text>
         <Text color="$colorSecondary" fontSize="$3" textAlign="center">
           Try to reload the page.
         </Text>
-      </Stack>
+      </View>
 
       {onRefresh && (
         <Button size="$3" onPress={onRefresh}>

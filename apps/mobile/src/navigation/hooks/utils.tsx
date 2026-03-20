@@ -10,7 +10,8 @@ export const getDefaultScreenOptions = (goBack: () => void) => {
     headerShadowVisible: false,
     headerLeftContainerStyle: { paddingLeft: 16 },
     headerRightContainerStyle: { paddingRight: 16 },
-    headerRight: () => <View width={48} />,
+    headerTitleAlign: 'center' as const,
+    headerRight: () => <View width={40} />,
     headerLeft: (props: NativeStackHeaderLeftProps) => {
       return <HeaderLeft props={props} goBack={goBack} />
     },

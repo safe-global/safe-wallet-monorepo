@@ -21,7 +21,7 @@ exports[`PositionsError renders correctly 1`] = `
       testID="positions-error"
     >
       <Text
-        accessibilityRole="header"
+        role="heading"
         style={
           {
             "color": "#121312",
@@ -33,7 +33,6 @@ exports[`PositionsError renders correctly 1`] = `
             "marginLeft": 0,
             "marginRight": 0,
             "marginTop": 0,
-            "userSelect": "auto",
           }
         }
         suppressHighlighting={true}
@@ -44,7 +43,6 @@ exports[`PositionsError renders correctly 1`] = `
         style={
           {
             "color": "#A1A3A7",
-            "fontFamily": "DM Sans",
             "textAlign": "center",
             "width": "80%",
           }
@@ -54,8 +52,13 @@ exports[`PositionsError renders correctly 1`] = `
         Something went wrong. Please try to load the page again.
       </Text>
       <View
-        focusVisibleStyle={{}}
-        focusable={true}
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
         onBlur={[Function]}
         onClick={[Function]}
         onFocus={[Function]}
@@ -83,9 +86,10 @@ exports[`PositionsError renders correctly 1`] = `
             "borderTopLeftRadius": 8,
             "borderTopRightRadius": 8,
             "borderTopWidth": 1,
+            "cursor": "pointer",
             "flexDirection": "row",
             "flexWrap": "nowrap",
-            "fontWeight": 700,
+            "gap": 4,
             "height": "auto",
             "justifyContent": "center",
             "marginBottom": 0,
@@ -98,6 +102,7 @@ exports[`PositionsError renders correctly 1`] = `
             "paddingTop": 14,
           }
         }
+        tabIndex={0}
       >
         <Text
           allowFontScaling={false}
@@ -120,31 +125,19 @@ exports[`PositionsError renders correctly 1`] = `
         >
           
         </Text>
-        <View
-          pointerEvents="none"
-          style={
-            {
-              "height": 0,
-              "minHeight": 0,
-              "minWidth": 3.78,
-              "width": 3.78,
-            }
-          }
-        />
         <Text
           lineBreakMode="clip"
           numberOfLines={1}
           style={
             {
               "color": "#121312",
+              "cursor": "pointer",
               "flexGrow": 0,
               "flexShrink": 1,
-              "fontFamily": "DMSans-Bold",
+              "fontFamily": "DM Sans",
               "fontSize": 14,
-              "letterSpacing": -0.1,
+              "letterSpacing": 0,
               "lineHeight": 15.400000000000002,
-              "marginBottom": -2.5,
-              "userSelect": "none",
             }
           }
           suppressHighlighting={true}

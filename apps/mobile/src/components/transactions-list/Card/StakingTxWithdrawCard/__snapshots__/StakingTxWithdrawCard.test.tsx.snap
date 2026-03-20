@@ -168,7 +168,6 @@ exports[`StakingTxWithdrawCard matches snapshot 1`] = `
                 style={
                   {
                     "color": "#A1A3A7",
-                    "fontFamily": "DM Sans",
                     "fontSize": 12,
                     "lineHeight": 20,
                   }
@@ -184,8 +183,8 @@ exports[`StakingTxWithdrawCard matches snapshot 1`] = `
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DMSans-SemiBold",
                   "fontSize": 14,
+                  "fontWeight": 600,
                   "letterSpacing": -0.01,
                   "lineHeight": 20,
                 }
@@ -208,7 +207,7 @@ exports[`StakingTxWithdrawCard matches snapshot 1`] = `
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DMSans-Bold",
+                "fontWeight": 700,
               }
             }
             suppressHighlighting={true}

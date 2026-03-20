@@ -49,13 +49,14 @@ export function SafeCard({
           <Image
             {...imageProps}
             testID="safe-card-image"
-            resizeMode="contain"
+            objectFit="contain"
             maxWidth={300}
             width={'100%'}
             borderRadius={'$4'}
             marginTop="$4"
             height={100}
-            source={image}
+            // @ts-expect-error Tamagui v2 types src as string but require() returns number - works at runtime
+            src={image}
           />
         </View>
       )}

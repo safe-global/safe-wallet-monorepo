@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Text, View, Stack } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 import { useAppSelector } from '@/src/store/hooks'
@@ -51,7 +51,7 @@ export function ShowAllAddress({ addresses }: ShowAllAddressProps) {
       </TouchableOpacity>
 
       {expanded && (
-        <Stack gap="$3" marginTop="$1">
+        <View gap="$3" marginTop="$1">
           {addresses.map((item, index) => {
             const explorerLink =
               activeChain?.blockExplorerUriTemplate && getExplorerLink(item, activeChain.blockExplorerUriTemplate)
@@ -69,7 +69,7 @@ export function ShowAllAddress({ addresses }: ShowAllAddressProps) {
               </AnalysisPaper>
             )
           })}
-        </Stack>
+        </View>
       )}
     </View>
   )

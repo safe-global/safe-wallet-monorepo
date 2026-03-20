@@ -33,7 +33,7 @@ export const FileSelectionView = ({ colorScheme, bottomInset, onFileSelect, onIm
           <YStack flex={1} justifyContent="center" alignItems="center">
             <TouchableOpacity onPress={onImagePress} activeOpacity={0.8}>
               <Image
-                source={colorScheme === 'dark' ? ImportDataSelectFilesDark : ImportDataSelectFilesLight}
+                src={colorScheme === 'dark' ? ImportDataSelectFilesDark : ImportDataSelectFilesLight}
                 alignSelf="center"
                 marginVertical="$4"
               />

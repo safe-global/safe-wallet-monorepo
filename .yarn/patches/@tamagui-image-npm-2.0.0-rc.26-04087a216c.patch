@@ -1,0 +1,225 @@
+diff --git a/dist/cjs/createImage.cjs b/dist/cjs/createImage.cjs
+index d4d0550500cc84bb13ab80f599123371f183312c..67e792fc52beb443546df0fe6b093dbbbfb8c3ed 100644
+--- a/dist/cjs/createImage.cjs
++++ b/dist/cjs/createImage.cjs
+@@ -91,13 +91,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = e => {
+         const source = e?.nativeEvent?.source || e?.source || {};
+diff --git a/dist/cjs/createImage.js b/dist/cjs/createImage.js
+index 073a8c03b5e5d0701ed87765a335407499bbe275..128eac42ba2b1956b0dc92aacf6241eed67c39eb 100644
+--- a/dist/cjs/createImage.js
++++ b/dist/cjs/createImage.js
+@@ -93,12 +93,13 @@ function createImage(options) {
+       src,
+       width: resolvedWidth,
+       height: resolvedHeight
+-    }), finalProps = {
++    }), incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+       ...rest,
+       source: finalSource,
+       style: {
+-        width: resolvedWidth,
+-        height: resolvedHeight
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
+       }
+     };
+     return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = (e) => {
+diff --git a/dist/cjs/createImage.native.js b/dist/cjs/createImage.native.js
+index 839195922d44c18092c247925a963c68ce93233c..f54af00d0e8ce02296c599e4646036e3b3cf6ec8 100644
+--- a/dist/cjs/createImage.native.js
++++ b/dist/cjs/createImage.native.js
+@@ -95,13 +95,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = function (e) {
+         var _e_nativeEvent,
+diff --git a/dist/esm/createImage.js b/dist/esm/createImage.js
+index 7401224bcd8e726dd0c79971ea00ea8bed538138..aa79f6a19ee64714e28210cbf5024c5532f968e1 100644
+--- a/dist/esm/createImage.js
++++ b/dist/esm/createImage.js
+@@ -75,12 +75,13 @@ function createImage(options) {
+       src,
+       width: resolvedWidth,
+       height: resolvedHeight
+-    }), finalProps = {
++    }), incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+       ...rest,
+       source: finalSource,
+       style: {
+-        width: resolvedWidth,
+-        height: resolvedHeight
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
+       }
+     };
+     return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = (e) => {
+diff --git a/dist/esm/createImage.mjs b/dist/esm/createImage.mjs
+index 2e3d292cda135e86bbbe97e0f8e1d4407ec0f97e..7c0d596733e9c08a1b5fe7095c1786b29720114d 100644
+--- a/dist/esm/createImage.mjs
++++ b/dist/esm/createImage.mjs
+@@ -66,13 +66,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = e => {
+         const source = e?.nativeEvent?.source || e?.source || {};
+diff --git a/dist/esm/createImage.native.js b/dist/esm/createImage.native.js
+index 9e593153bc537861b92dfae9c9d8c1d7a49957a4..1ab4b891bd72c4e45b1f80685da07531c21cd4bb 100644
+--- a/dist/esm/createImage.native.js
++++ b/dist/esm/createImage.native.js
+@@ -68,13 +68,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = function (e) {
+         var _e_nativeEvent,
+diff --git a/dist/jsx/createImage.js b/dist/jsx/createImage.js
+index 7401224bcd8e726dd0c79971ea00ea8bed538138..aa79f6a19ee64714e28210cbf5024c5532f968e1 100644
+--- a/dist/jsx/createImage.js
++++ b/dist/jsx/createImage.js
+@@ -75,12 +75,13 @@ function createImage(options) {
+       src,
+       width: resolvedWidth,
+       height: resolvedHeight
+-    }), finalProps = {
++    }), incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+       ...rest,
+       source: finalSource,
+       style: {
+-        width: resolvedWidth,
+-        height: resolvedHeight
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
+       }
+     };
+     return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = (e) => {
+diff --git a/dist/jsx/createImage.mjs b/dist/jsx/createImage.mjs
+index 2e3d292cda135e86bbbe97e0f8e1d4407ec0f97e..7c0d596733e9c08a1b5fe7095c1786b29720114d 100644
+--- a/dist/jsx/createImage.mjs
++++ b/dist/jsx/createImage.mjs
+@@ -66,13 +66,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = e => {
+         const source = e?.nativeEvent?.source || e?.source || {};
+diff --git a/dist/jsx/createImage.native.js b/dist/jsx/createImage.native.js
+index 839195922d44c18092c247925a963c68ce93233c..f54af00d0e8ce02296c599e4646036e3b3cf6ec8 100644
+--- a/dist/jsx/createImage.native.js
++++ b/dist/jsx/createImage.native.js
+@@ -95,13 +95,14 @@ function createImage(options) {
+           width: resolvedWidth,
+           height: resolvedHeight
+         }),
+-        finalProps = {
++        incomingStyle = Array.isArray(rest.style) ? Object.assign({}, ...rest.style.flat()) : rest.style, finalProps = {
+           ...rest,
+           source: finalSource,
+           style: {
+-            width: resolvedWidth,
+-            height: resolvedHeight
+-          }
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight })
++      }
+         };
+       return objectFit && (finalProps[resizeModePropName] = mapObjectFitToResizeMode(objectFit)), objectPositionPropName && objectPosition && (finalProps[objectPositionPropName] = objectPosition), onLoad && (finalProps.onLoad = function (e) {
+         var _e_nativeEvent,
+diff --git a/src/createImage.tsx b/src/createImage.tsx
+index 33b55b3cbc8947b6f73f099f7a93db125ca9cf5d..ad63cec21b6bbcd65e7af9508dbca6d83eb485ae 100644
+--- a/src/createImage.tsx
++++ b/src/createImage.tsx
+@@ -172,12 +172,17 @@ export function createImage<C extends ComponentType<any>>(
+       height: resolvedHeight,
+     })
+ 
++    const incomingStyle = Array.isArray(rest.style)
++      ? Object.assign({}, ...rest.style.flat())
++      : rest.style
++
+     const finalProps: any = {
+       ...rest,
+       source: finalSource,
+       style: {
+-        width: resolvedWidth,
+-        height: resolvedHeight,
++        ...incomingStyle,
++        ...(resolvedWidth !== undefined && { width: resolvedWidth }),
++        ...(resolvedHeight !== undefined && { height: resolvedHeight }),
+       },
+     }
+ 

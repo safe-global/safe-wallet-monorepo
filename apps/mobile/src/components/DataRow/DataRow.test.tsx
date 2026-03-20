@@ -75,7 +75,6 @@ describe('DataRow.Header', () => {
     const { getByText } = render(<DataRow.Header>Header Child</DataRow.Header>)
     const header = getByText('Header Child')
     expect(header.props.style).toMatchObject({
-      fontFamily: 'DMSans-SemiBold',
       marginBottom: 8,
       marginTop: 8,
     })

@@ -56,7 +56,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}
@@ -101,7 +100,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 style={
                   {
                     "color": "#A1A3A7",
-                    "fontFamily": "DM Sans",
                     "fontSize": 12,
                     "lineHeight": 20,
                   }
@@ -116,7 +114,6 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DM Sans",
                   }
                 }
                 suppressHighlighting={true}
@@ -188,7 +185,6 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}
@@ -202,8 +198,8 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DMSans-SemiBold",
                   "fontSize": 14,
+                  "fontWeight": 600,
                   "letterSpacing": -0.01,
                   "lineHeight": 20,
                 }
@@ -230,7 +226,6 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DM Sans",
               }
             }
             suppressHighlighting={true}
