@@ -245,9 +245,9 @@ Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/
 
 ### Fast Feedback Loop
 
-The repo provides automated verification that runs after every code change:
+The repo provides automated verification:
 
-1. **Automatic**: A Claude Code hook runs `verify:changed` after every response that modifies source files. You'll see a compact summary — fix any errors before moving on.
+1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified, so it only runs verification when source files actually changed. Fix any errors before moving on.
 
 2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
 
@@ -318,7 +318,7 @@ The repo provides automated verification that runs after every code change:
    > bundle shrinks, tests pass clean.
    ```
 
-9. **PR "Why?" section**: Every PR description must include a `## Why?` section right after the poem. Explain the motivation behind the change — what problem it solves, what user or developer pain it addresses, or what business need it serves. Focus on *why* this change is needed, not *what* it does (that's what the Summary section is for). A reviewer who reads only the "Why?" should understand whether this PR is worth reviewing at all.
+9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
 
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
