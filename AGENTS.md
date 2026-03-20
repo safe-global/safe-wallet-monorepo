@@ -318,6 +318,8 @@ The repo provides automated verification that runs after every code change:
    > bundle shrinks, tests pass clean.
    ```
 
+9. **PR "Why?" section**: Every PR description must include a `## Why?` section right after the poem. Explain the motivation behind the change — what problem it solves, what user or developer pain it addresses, or what business need it serves. Focus on *why* this change is needed, not *what* it does (that's what the Summary section is for). A reviewer who reads only the "Why?" should understand whether this PR is worth reviewing at all.
+
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
 ## Testing Guidelines
