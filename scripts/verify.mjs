@@ -319,6 +319,12 @@ async function main() {
     const summary = results.map((r) => (r.code === 0 ? `PASS ${r.label}` : `FAIL ${r.label}`)).join('    ')
     console.log(`\n${summary}`)
     console.log('--------')
+
+    // Write failures to stderr so Claude Code stop hook can display them
+    if (!allPassed) {
+      const failedLabels = failed.map((r) => `${r.label} (exit ${r.code})`).join(', ')
+      process.stderr.write(`verify failed: ${failedLabels}\n`)
+    }
   } else {
     if (!allPassed) {
       // In non-compact mode output was already streamed; just print summary

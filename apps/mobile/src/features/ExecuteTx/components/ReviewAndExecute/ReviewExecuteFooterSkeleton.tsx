@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack, View } from 'tamagui'
+import { View } from 'tamagui'
 import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 import { Container } from '@/src/components/Container'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -9,7 +9,7 @@ export function ReviewExecuteFooterSkeleton() {
 
   return (
     <SafeSkeleton.Group show={true}>
-      <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
+      <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
         <Container
           backgroundColor="transparent"
           gap={'$2'}
@@ -32,7 +32,7 @@ export function ReviewExecuteFooterSkeleton() {
 
         {/* Button skeleton */}
         <SafeSkeleton height={48} width="100%" radius={12} />
-      </Stack>
+      </View>
     </SafeSkeleton.Group>
   )
 }

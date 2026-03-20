@@ -18,7 +18,7 @@
   },
   "peerDependencies": {
     "@mui/material": "^6.5.0",
-    "tamagui": "^1.x"
+    "tamagui": "^2.x"
   },
   "peerDependenciesMeta": {
     "@mui/material": {

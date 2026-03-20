@@ -62,7 +62,7 @@ export const Settings = ({
         >
           <YStack flex={1} paddingTop={'$10'}>
             <SafeSkeleton.Group show={!owners.length}>
-              <YStack alignItems="center" space="$3" marginBottom="$6">
+              <YStack alignItems="center" gap="$3" marginBottom="$6">
                 <BadgeWrapper
                   badge={
                     <ThresholdBadge
