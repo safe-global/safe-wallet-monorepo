@@ -31,7 +31,7 @@ import { ZKSYNC_ERA_CHAIN_ID } from '@safe-global/utils/config/chains'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
 
-export type DeploymentType = 'canonical' | 'eip155' | 'zksync'
+type DeploymentType = 'canonical' | 'eip155' | 'zksync'
 type DeploymentRecord = Record<string, { address: string; codeHash: string }>
 
 const SAFE_L2_CODE_HASHES = new Set<string>(
@@ -286,7 +286,18 @@ export const getCanonicalMultiSendAddress = (version: SafeState['version']): str
 
 type DeploymentGetter = (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined
 
-const BASE_DEPLOYMENT_GETTERS: Record<string, DeploymentGetter> = {
+type AuxiliaryContractField = keyof Pick<
+  ContractNetworkConfig,
+  | 'multiSendAddress'
+  | 'multiSendCallOnlyAddress'
+  | 'safeProxyFactoryAddress'
+  | 'fallbackHandlerAddress'
+  | 'signMessageLibAddress'
+  | 'createCallAddress'
+  | 'simulateTxAccessorAddress'
+>
+
+const BASE_DEPLOYMENT_GETTERS: Record<AuxiliaryContractField, DeploymentGetter> = {
   multiSendAddress: getMultiSendDeployments,
   multiSendCallOnlyAddress: getMultiSendCallOnlyDeployments,
   safeProxyFactoryAddress: getProxyFactoryDeployments,

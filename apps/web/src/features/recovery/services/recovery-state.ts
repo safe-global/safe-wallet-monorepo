@@ -1,6 +1,7 @@
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import memoize from 'lodash/memoize'
-import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
+import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
+import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
@@ -35,10 +36,12 @@ export type RecoveryStateItem = {
 export type RecoveryState = Array<RecoveryStateItem>
 
 export function _isMaliciousRecovery({
+  chainId,
   version,
   safeAddress,
   transaction,
 }: {
+  chainId: string
   version: SafeState['version']
   safeAddress: string
   transaction: Pick<AddedEvent['args'], 'to' | 'data'>
@@ -54,14 +57,14 @@ export function _isMaliciousRecovery({
   }
 
   const multiSendDeployment =
-    getMultiSendCallOnlyDeployment({ version: version ?? undefined }) ??
-    getMultiSendCallOnlyDeployment({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
+    getMultiSendCallOnlyDeployments({ version: version ?? undefined }) ??
+    getMultiSendCallOnlyDeployments({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
 
-  if (!multiSendDeployment) {
+  const multiSendAddress = getChainAgnosticAddress(multiSendDeployment, chainId)
+
+  if (!multiSendAddress) {
     return true
   }
-
-  const multiSendAddress = multiSendDeployment.defaultAddress
 
   // Calling official MultiSend contract with a batch of transactions to the Safe itself
   return (
@@ -157,6 +160,7 @@ const getRecoveryQueueItem = async ({
   delay,
   expiry,
   provider,
+  chainId,
   version,
   safeAddress,
 }: {
@@ -165,6 +169,7 @@ const getRecoveryQueueItem = async ({
   delay: bigint
   expiry: bigint
   provider: JsonRpcProvider
+  chainId: string
   version: SafeState['version']
   safeAddress: string
 }): Promise<RecoveryQueueItem> => {
@@ -179,6 +184,7 @@ const getRecoveryQueueItem = async ({
   ])
 
   const isMalicious = _isMaliciousRecovery({
+    chainId,
     version,
     safeAddress,
     transaction: transactionAdded.args,
@@ -197,13 +203,14 @@ export const _getRecoveryStateItem = async ({
   transactionService,
   safeAddress,
   provider,
+  chainId,
   version,
 }: {
   delayModifier: Delay
   transactionService: string
   safeAddress: string
   provider: JsonRpcProvider
-  chainId?: string
+  chainId: string
   version: SafeState['version']
 }): Promise<RecoveryStateItem> => {
   const delayModifierAddress = await delayModifier.getAddress()
@@ -262,6 +269,7 @@ export const _getRecoveryStateItem = async ({
         delay: BigInt(delay),
         expiry: BigInt(expiry),
         provider,
+        chainId,
         version,
         safeAddress,
       })

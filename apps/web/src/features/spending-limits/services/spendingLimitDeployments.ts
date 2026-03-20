@@ -18,6 +18,7 @@ const ALL_VERSIONS = [ALLOWANCE_MODULE_VERSIONS['0.1.0'], ALLOWANCE_MODULE_VERSI
 
 const getModuleAddress = (deployment: ReturnType<typeof getAllowanceModuleDeployment>, chainId: string) => {
   if (!deployment) return undefined
+  // Fall back to first known address for unregistered chains (deterministic via CREATE2)
   return deployment.networkAddresses[chainId] ?? Object.values(deployment.networkAddresses)[0]
 }
 

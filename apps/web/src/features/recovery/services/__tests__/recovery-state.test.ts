@@ -55,7 +55,7 @@ describe('recovery-state', () => {
           data: '0x',
         }
 
-        expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(true)
+        expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
       })
 
       it('should return false if the transaction is calling the Safe itself', () => {
@@ -67,7 +67,7 @@ describe('recovery-state', () => {
           data: '0x',
         }
 
-        expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(false)
+        expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
       })
     })
 
@@ -104,7 +104,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(true)
+          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
         })
       })
       ;[...PRE_MULTI_SEND_CALL_ONLY_VERSIONS, ...SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS].forEach((version) => {
@@ -140,7 +140,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(true)
+          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(true)
         })
       })
 
@@ -174,7 +174,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(false)
+          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
         })
       })
 
@@ -202,7 +202,7 @@ describe('recovery-state', () => {
             data: multiSendInterface.encodeFunctionData('multiSend', [multiSendData]),
           }
 
-          expect(_isMaliciousRecovery({ version, safeAddress, transaction })).toBe(false)
+          expect(_isMaliciousRecovery({ chainId, version, safeAddress, transaction })).toBe(false)
         })
       })
     })

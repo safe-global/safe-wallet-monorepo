@@ -9,6 +9,9 @@ import { generateChecksummedAddress, createMockProvider } from '@safe-global/tes
 
 jest.mock('@/src/hooks/useSafeInfo')
 jest.mock('@/src/hooks/wallets/web3')
+jest.mock('@/src/store/hooks', () => ({
+  useAppSelector: jest.fn(() => null),
+}))
 jest.mock('./safeCoreSDK', () => ({
   initSafeSDK: jest.fn(),
   setSafeSDK: jest.fn(),
@@ -99,6 +102,8 @@ describe('useInitSafeCoreSDK', () => {
         version: mockSafe.version,
         implementationVersionState: mockSafe.implementationVersionState,
         implementation: mockSafe.implementation.value,
+        isL2Chain: undefined,
+        isZkChain: undefined,
       })
     })
 
