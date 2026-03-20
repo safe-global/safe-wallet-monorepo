@@ -9,13 +9,8 @@
   align-items: center;
 }
 
-/* Badge alignment to match PendingTxsList */
-.headerText :global .MuiBadge-root {
+.headerText > span {
   margin-left: var(--space-1);
-}
-
-.headerText :global .MuiBadge-badge {
-  position: relative;
 }
 
 .chevron {
