@@ -8,8 +8,8 @@ export const createSpaceBtn = '[data-testid="create-space-button"]'
 export const createSpaceModalBtn = '[data-testid="create-space-modal-button"]'
 export const orgSpaceInput = '[data-testid="space-name-input"]'
 export const orgName = '[data-testid="org-name"]'
-const spaceSelectorBtn = '[data-testid="space-selector-button"]'
-const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
+export const spaceSelectorBtn = '[data-testid="space-selector-button"]'
+export const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
 const spaceEditInput = 'input[name="name"]'
 const spaceSaveBtn = '[data-testid="space-save-button"]'
 const updateSuccessMsg = 'Updated space name'
@@ -26,7 +26,7 @@ const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
 const addAddressInput = '[data-testid="add-address-input"]'
 const netwrokSelector = '[data-testid="network-selector"]'
 const netwrokItem = '[data-testid="network-item"]'
-const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
+export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addMemberBtn = '[data-testid="add-member-button"]'
 const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
@@ -66,21 +66,15 @@ export function clickOnCreateSpaceModalBtn() {
 }
 
 export function typeSpaceName(name) {
-  cy.get(orgSpaceInput).find('input').clear().type(name)
+  cy.get(orgSpaceInput).clear().type(name)
 }
 
 export function clickOnSpaceSelector() {
-  cy.get(spaceSelectorBtn).click()
+  cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
 }
 
 export function spaceExists(name) {
   cy.get(spaceSelectorMenu).contains(name).should('be.visible')
-}
-
-export function createSpace(name) {
-  clickOnCreateSpaceBtn()
-  typeSpaceName(name)
-  clickOnCreateSpaceModalBtn()
 }
 
 export function getSpaceId() {
@@ -134,6 +128,22 @@ export function deleteAllSpaces() {
         }
       })
     }
+  })
+}
+
+/**
+ * Ensures the app is ready to create a space. Handles two post-login states:
+ * - If spaces exist: deletes all spaces and verifies Create space button is visible.
+ * - If no spaces: verifies Create space button is visible on the "No spaces found" page.
+ */
+export function ensureReadyToCreateSpace() {
+  cy.wait(2000)
+  cy.get('body').then(($body) => {
+    const hasSpaces = $body.find(spaceCard).length > 0
+    if (hasSpaces) {
+      deleteAllSpaces()
+    }
+    main.verifyElementsIsVisible([createSpaceBtn])
   })
 }
 
@@ -211,4 +221,52 @@ export function addMember(name, address) {
   typeMemberName(name)
   clickOnAddMemberModalBtn()
   memberIsInList(name)
+}
+
+// ===========================================
+// Onboarding selectors & labels
+// ===========================================
+
+export const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
+export const selectSafesContinueBtn = '[data-testid="select-safes-continue-button"]'
+export const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
+export const inviteMembersContinueBtn = '[data-testid="invite-members-continue-button"]'
+export const createSpaceLabel = 'Create a space'
+export const selectSafesLabel = 'Select Safes for your Space'
+export const inviteTeamMembersLabel = 'Invite team members'
+
+// Onboarding route paths
+const onboardingCreateSpacePath = '/welcome/create-space'
+const onboardingSelectSafesPath = '/welcome/select-safes'
+const onboardingInviteMembersPath = '/welcome/invite-members'
+
+// ===========================================
+// Onboarding helpers
+// ===========================================
+
+export function createSpaceViaOnboardingWithSkip(name) {
+  cy.get('body').then(($body) => {
+    if (!$body.text().includes(createSpaceLabel)) {
+      clickOnCreateSpaceBtn()
+    }
+  })
+  // Step 1: Create a space — name and submit
+  cy.url().should('include', onboardingCreateSpacePath)
+  cy.contains(createSpaceLabel).should('be.visible')
+  typeSpaceName(name)
+  clickOnCreateSpaceBtn()
+
+  // Step 2: Select Safes — wait for API to create space and navigate
+  cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath)
+  cy.url().should('include', 'spaceId=')
+  cy.get(selectSafesSkipBtn).should('be.visible').click()
+
+  // Step 3: Invite Members — wait for navigation
+  cy.url().should('include', onboardingInviteMembersPath)
+  cy.url().should('include', 'spaceId=')
+  cy.get(inviteMembersSkipBtn).should('be.visible').click()
+
+  // Wait for space dashboard to fully load
+  cy.url().should('include', constants.spaceDashboardUrl)
+  cy.url().should('include', 'spaceId=')
 }
