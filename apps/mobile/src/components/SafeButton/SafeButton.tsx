@@ -123,7 +123,7 @@ function useTextColor(props: Record<string, unknown>): string {
     return theme.color?.val
   }
   if (props.text) {
-    return theme.color?.val
+    return theme.primary?.val
   }
   if (props.success) {
     return theme.color?.val
@@ -163,19 +163,25 @@ export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, 
     const coloredIcon = buttonIcon && isValidElement(buttonIcon) ? cloneElement(buttonIcon, iconOverrides) : buttonIcon
     const coloredIconAfter = iconAfter && isValidElement(iconAfter) ? cloneElement(iconAfter, iconOverrides) : iconAfter
 
+    const isTextContent = typeof buttonText === 'string' || typeof buttonText === 'number'
+
     return (
       <BaseButton ref={ref} disabled={isDisabled} {...frameProps}>
         {coloredIcon}
-        <Button.Text
-          fontFamily="$button"
-          fontWeight={fontWeight}
-          fontSize={14}
-          lineHeight={20}
-          letterSpacing={-0.1}
-          color={resolvedTextColor}
-        >
-          {buttonText}
-        </Button.Text>
+        {isTextContent ? (
+          <Button.Text
+            fontFamily="$button"
+            fontWeight={fontWeight}
+            fontSize={14}
+            lineHeight={20}
+            letterSpacing={-0.1}
+            color={resolvedTextColor}
+          >
+            {buttonText}
+          </Button.Text>
+        ) : (
+          buttonText
+        )}
         {coloredIconAfter}
       </BaseButton>
     )
