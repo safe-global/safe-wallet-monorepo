@@ -5,7 +5,7 @@ import * as router from 'next/router'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as notifications from './notifications'
 import { act, renderHook, getAppName } from '@/tests/test-utils'
-import { TxModalContext } from '@/components/tx-flow'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import useSafeWalletProvider, { useTxFlowApi } from './useSafeWalletProvider'
 import { RpcErrorCode, SafeWalletProvider } from '.'
 import type { RootState } from '@/store'
@@ -15,6 +15,7 @@ import { faker } from '@faker-js/faker'
 import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
 import * as chainHooks from '@/hooks/useChains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { useAllSafes, useGetHref } from '@/hooks/safes'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -35,7 +36,16 @@ const createMockStore = <T,>(initialValue: T) => {
 
 const mockWcPopupStore = createMockStore<boolean>(false)
 
-const mockWcChainSwitchStore = createMockStore<any>(undefined)
+const mockWcChainSwitchStore = createMockStore<
+  | {
+      appInfo: unknown
+      chain: { chainId: string }
+      safes: unknown[]
+      onSelectSafe: (safe: unknown) => Promise<void>
+      onCancel: () => void
+    }
+  | undefined
+>(undefined)
 const mockWalletConnectInstance = {
   init: jest.fn(),
   updateSessions: jest.fn().mockResolvedValue(undefined),
@@ -170,7 +180,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -217,7 +231,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={testStore}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -259,7 +277,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -331,7 +353,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -442,7 +468,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -499,7 +529,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -545,7 +579,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -601,7 +639,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -674,7 +716,7 @@ describe('useSafeWalletProvider', () => {
                 chainName: 'Goerli',
                 zk: false,
                 beaconChainExplorerUriTemplate: {},
-              } as any,
+              } as unknown as Chain,
             ],
             loading: false,
             loaded: true,
@@ -687,7 +729,11 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
         wrapper: ({ children }) => (
           <Provider store={store}>
-            <TxModalContext.Provider value={{ setTxFlow: jest.fn() } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -745,7 +791,7 @@ describe('useSafeWalletProvider', () => {
         () =>
           ({
             send: mockSend,
-          }) as any,
+          }) as unknown as ReturnType<typeof web3ReadOnly.useWeb3ReadOnly>,
       )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))

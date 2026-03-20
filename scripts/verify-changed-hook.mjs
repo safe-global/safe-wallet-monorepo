@@ -51,7 +51,10 @@ function runNext(index) {
   })
 
   child.on('close', (code) => {
-    if (code !== 0) exitCode = code
+    if (code !== 0) {
+      process.stderr.write(`verify:changed:${ws} failed (exit ${code})\n`)
+      exitCode = code
+    }
     runNext(index + 1)
   })
 }
