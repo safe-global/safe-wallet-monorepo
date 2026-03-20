@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Stack, styled, View } from 'tamagui'
+import { styled, View } from 'tamagui'
 import { AnalysisGroup } from '../AnalysisGroup'
 import { ContractAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import { RecipientAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
@@ -86,7 +86,7 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
 
   return (
     <View>
-      <Stack
+      <View
         borderWidth={1}
         borderColor="$backgroundPaper"
         borderBottomLeftRadius="$3"
@@ -122,7 +122,7 @@ export const AnalysisDetailsContent = ({ recipient, contract, threat, safeTx }: 
             />
           </AnalysisGroupWrapper>
         )}
-      </Stack>
+      </View>
     </View>
   )
 }

@@ -1,7 +1,8 @@
-import React from 'react'
-import { styled, Button } from 'tamagui'
+import React, { isValidElement, cloneElement } from 'react'
+import { styled, Button, useTheme } from 'tamagui'
+import type { GetProps } from 'tamagui'
 import { Loader } from '@/src/components/Loader'
-// Create base styled button
+
 const BaseButton = styled(Button, {
   variants: {
     rounded: {
@@ -22,28 +23,24 @@ const BaseButton = styled(Button, {
     danger: {
       true: {
         backgroundColor: '$errorBackground',
-        color: '$error',
       },
     },
 
     success: {
       true: {
         backgroundColor: '$success',
-        color: '$color',
       },
     },
 
     primary: {
       true: {
         backgroundColor: '$primary',
-        color: '$contrast',
       },
     },
 
     secondary: {
       true: {
         backgroundColor: '$backgroundSecondary',
-        color: '$color',
       },
     },
 
@@ -52,63 +49,44 @@ const BaseButton = styled(Button, {
         backgroundColor: 'transparent',
         borderWidth: 2,
         borderColor: '$backgroundSecondary',
-        color: '$color',
       },
     },
 
     text: {
       true: {
         backgroundColor: 'transparent',
-        color: '$primary',
       },
     },
 
     disabled: {
       true: (_, allProps) => {
-        // @ts-expect-error
+        // @ts-expect-error accessing text prop from allProps
         const isText = allProps.props?.text === true
         return {
           backgroundColor: isText ? 'transparent' : '$backgroundDisabled',
-          color: '$colorLight',
         }
       },
     },
 
     size: {
       $xl: () => ({
-        fontSize: 14,
-        fontWeight: 700,
         height: 'auto',
         margin: 0,
         paddingVertical: '$3',
-        textProps: {
-          lineHeight: 24,
-        },
+        gap: 4,
       }),
       $md: () => ({
         height: 'auto',
         paddingVertical: 14,
         paddingHorizontal: 20,
         margin: 0,
-        fontWeight: 700,
-        letterSpacing: -0.1,
-        fontSize: 14,
-        scaleIcon: 0.9,
-        scaleSpace: 0.3,
-        textProps: {
-          marginBottom: -2.5,
-        },
+        gap: 4,
       }),
       $sm: () => ({
         height: 36,
         paddingVertical: '$2',
         paddingHorizontal: '$3',
-        fontWeight: 600,
-        scaleIcon: 0.8,
-        scaleSpace: 0.2,
-        textProps: {
-          marginBottom: -2.5,
-        },
+        gap: 4,
       }),
     },
   } as const,
@@ -119,22 +97,70 @@ const BaseButton = styled(Button, {
   },
 })
 
-// Extended props to support loading state
-export interface SafeButtonProps extends React.ComponentProps<typeof BaseButton> {
+export interface SafeButtonProps extends GetProps<typeof BaseButton> {
   loading?: boolean
   loadingText?: string
 }
 
-// Wrapper component that handles loading state
+function useTextColor(props: Record<string, unknown>): string {
+  const theme = useTheme()
+  if (props.disabled) {
+    return theme.colorSecondary?.val
+  }
+  if (props.danger) {
+    return theme.error?.val
+  }
+  if (props.primary) {
+    return theme.contrast?.val
+  }
+  if (props.secondary) {
+    return theme.color?.val
+  }
+  if (props.outlined) {
+    return theme.color?.val
+  }
+  if (props.text) {
+    return theme.color?.val
+  }
+  if (props.success) {
+    return theme.color?.val
+  }
+  return theme.contrast?.val
+}
+
+const TYPE_VARIANTS = ['primary', 'secondary', 'danger', 'success', 'outlined', 'text'] as const
+
 export const SafeButton = React.forwardRef<React.ElementRef<typeof BaseButton>, SafeButtonProps>(
-  ({ loading = false, loadingText, children, disabled, icon, ...props }, ref) => {
+  ({ loading = false, loadingText, children, disabled, icon, iconAfter, ...props }, ref) => {
     const buttonText = loading && loadingText ? loadingText : children
     const buttonIcon = loading ? <Loader size={16} thickness={1} /> : icon
     const isDisabled = loading || disabled
+    const textColor = useTextColor({ ...props, disabled: isDisabled })
+
+    // Strip type variants when disabled so disabled bg takes effect
+    const frameProps = isDisabled
+      ? Object.fromEntries(Object.entries(props).filter(([key]) => !(TYPE_VARIANTS as readonly string[]).includes(key)))
+      : props
+
+    // Colorize icons
+    const iconOverrides = { color: textColor, size: 16 } as Record<string, unknown>
+    const coloredIcon = buttonIcon && isValidElement(buttonIcon) ? cloneElement(buttonIcon, iconOverrides) : buttonIcon
+    const coloredIconAfter = iconAfter && isValidElement(iconAfter) ? cloneElement(iconAfter, iconOverrides) : iconAfter
 
     return (
-      <BaseButton ref={ref} disabled={isDisabled} icon={buttonIcon} {...props}>
-        {buttonText}
+      <BaseButton ref={ref} disabled={isDisabled} {...frameProps}>
+        {coloredIcon}
+        <Button.Text
+          fontFamily="$button"
+          fontWeight="600"
+          fontSize={14}
+          lineHeight={20}
+          letterSpacing={-0.1}
+          color={textColor}
+        >
+          {buttonText}
+        </Button.Text>
+        {coloredIconAfter}
       </BaseButton>
     )
   },

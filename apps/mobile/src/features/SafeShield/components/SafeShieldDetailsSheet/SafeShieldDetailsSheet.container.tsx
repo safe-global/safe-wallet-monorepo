@@ -60,7 +60,7 @@ export const SafeShieldDetailsSheetContainer = () => {
           Secured by
         </Text>
 
-        <Image source={require('@/assets/images/safe-shield-logo.png')} width={77} objectFit="contain" />
+        <Image src={require('@/assets/images/safe-shield-logo.png')} width={77} objectFit="contain" />
       </View>
     </SafeBottomSheet>
   )

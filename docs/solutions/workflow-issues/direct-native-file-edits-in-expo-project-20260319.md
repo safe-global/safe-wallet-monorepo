@@ -4,9 +4,9 @@ date: 2026-03-19
 problem_type: workflow_issue
 component: development_workflow
 symptoms:
-  - "Podfile modified directly but changes lost on next prebuild/native regeneration"
-  - "Expo plugin config.ts updated but dist/ not rebuilt, so changes not applied"
-  - "MMKV pod pinned to master in Podfile instead of through Expo config plugin"
+  - 'Podfile modified directly but changes lost on next prebuild/native regeneration'
+  - 'Expo plugin config.ts updated but dist/ not rebuilt, so changes not applied'
+  - 'MMKV pod pinned to master in Podfile instead of through Expo config plugin'
 root_cause: missing_workflow_step
 resolution_type: workflow_improvement
 severity: high
@@ -18,6 +18,7 @@ tags: [expo, podfile, native-generation, expo-plugins, build-step, ios, mobile]
 ## Problem
 
 During an upgrade of `react-native-quick-crypto` and `react-native-mmkv`, the iOS `Podfile` was modified directly to:
+
 1. Remove a `pod 'MMKV'` line
 2. Add a `post_install` block with `MMKV_IOS_EXTENSION` preprocessor macro
 3. Change the MMKV pod version pin
@@ -65,6 +66,7 @@ npx expo prebuild --clean  # Regenerates ios/ and android/ from plugins
 ```
 
 The build script from `package.json`:
+
 ```json
 "build": "rm -rf dist && tsc && cp -a ./ios-notification-service-files dist/ios-notification-service-files/"
 ```

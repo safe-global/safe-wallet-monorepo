@@ -55,7 +55,7 @@ export const DataTransferView = ({
         </YStack>
 
         {/* Phone Mockup */}
-        <Image source={colorScheme === 'dark' ? TransferOldAppDark : TransferOldAppLight} />
+        <Image src={colorScheme === 'dark' ? TransferOldAppDark : TransferOldAppLight} alignSelf="center" />
       </YStack>
 
       {/* Bottom Buttons */}

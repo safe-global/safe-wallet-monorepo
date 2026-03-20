@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack } from 'tamagui'
+import { View } from 'tamagui'
 
 interface AnalysisPaperProps {
   children: React.ReactNode
@@ -9,7 +9,7 @@ interface AnalysisPaperProps {
 
 export function AnalysisPaper({ children, spaced, fitBottom }: AnalysisPaperProps) {
   return (
-    <Stack
+    <View
       padding="$2"
       borderRadius="$4"
       borderBottomLeftRadius={fitBottom ? '$4' : '0'}
@@ -19,6 +19,6 @@ export function AnalysisPaper({ children, spaced, fitBottom }: AnalysisPaperProp
       backgroundColor="$background"
     >
       {children}
-    </Stack>
+    </View>
   )
 }
