@@ -7,11 +7,16 @@ import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { computeFiatValue } from '@/utils/fiat'
 
-const useTransferFiatValue = (transferInfo?: TransferTransactionInfo['transferInfo']): number | null => {
+// Scoped to current/live transactions where the token is in the Safe's balance.
+const useTransferFiatValue = (
+  transferInfo?: TransferTransactionInfo['transferInfo'],
+  enabled = true,
+): number | null => {
+  // Reads from Redux store cache only — no network fetch, zero cost when disabled.
   const [balances] = useTrustedTokenBalances()
 
   return useMemo(() => {
-    if (!balances || !transferInfo) return null
+    if (!enabled || !balances || !transferInfo) return null
 
     const tokenAddress = isERC20Transfer(transferInfo) ? transferInfo.tokenAddress : ZERO_ADDRESS
     const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
@@ -21,7 +26,7 @@ const useTransferFiatValue = (transferInfo?: TransferTransactionInfo['transferIn
     if (!value) return null
 
     return computeFiatValue(parseFloat(safeFormatUnits(value, token.tokenInfo.decimals)), token.fiatConversion)
-  }, [balances, transferInfo])
+  }, [enabled, balances, transferInfo])
 }
 
 export default useTransferFiatValue

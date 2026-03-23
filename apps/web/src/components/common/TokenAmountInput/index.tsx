@@ -187,7 +187,7 @@ const TokenAmountInput = ({
           visibility: fiatValue != null ? 'visible' : 'hidden',
         }}
       >
-        <FiatValue value={fiatValue} precise />
+        <FiatValue value={fiatValue ?? 0} precise />
       </Typography>
     </div>
   )

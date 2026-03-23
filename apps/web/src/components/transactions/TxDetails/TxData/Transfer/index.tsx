@@ -24,11 +24,12 @@ type TransferTxInfoProps = {
 
 const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
   const { direction } = txInfo
-  const fiatValue = useTransferFiatValue(txInfo.transferInfo)
+  const isQueued = isTxQueued(txStatus)
+  const fiatValue = useTransferFiatValue(txInfo.transferInfo, isQueued)
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
+      {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}{' '}
       <b>
         <TransferTx info={txInfo} omitSign preciseAmount />
       </b>

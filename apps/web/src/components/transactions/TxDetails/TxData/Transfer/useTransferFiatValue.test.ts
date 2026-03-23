@@ -217,4 +217,21 @@ describe('useTransferFiatValue', () => {
 
     expect(result.current).toBeNull()
   })
+
+  it('should return null when enabled is false', () => {
+    const transferInfo: TransferInfo = {
+      type: TransactionTokenType.ERC20,
+      tokenAddress: USDC_ADDRESS,
+      value: parseUnits('100', 6).toString(),
+      tokenName: 'USD Coin',
+      tokenSymbol: 'USDC',
+      decimals: 6,
+      trusted: true,
+      imitation: false,
+    }
+
+    const { result } = renderHook(() => useTransferFiatValue(transferInfo, false))
+
+    expect(result.current).toBeNull()
+  })
 })
