@@ -34,7 +34,9 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
   const isActive = activeAccount === account.address.value
   const contact = useAppSelector(selectContactByAddress(account.address.value))
   const handleChainSelect = () => {
-    if (isEdit) return
+    if (isEdit) {
+      return
+    }
     onSelect(account.address.value)
   }
 
