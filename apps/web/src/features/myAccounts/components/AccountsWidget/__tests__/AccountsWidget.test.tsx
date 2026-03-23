@@ -290,3 +290,28 @@ describe('AccountsWidget', () => {
     )
   })
 })
+
+describe('AccountsWidget – display name', () => {
+  const address = '0x1234567890abcdef1234567890abcdef12345678'
+
+  const makeAccount = (name: string): Account => ({
+    name,
+    address,
+    href: `/home?safe=eth:${address}`,
+    safes: [mockSafeItem('1', address)],
+    fiatTotal: '100',
+    owners: '1/1',
+  })
+
+  it('displays the resolved name from account.name', () => {
+    render(<AccountsWidget accounts={[makeAccount('My Safe')]} />)
+
+    expect(screen.getByText('My Safe')).toBeInTheDocument()
+  })
+
+  it('displays shortened address when name is a short address', () => {
+    render(<AccountsWidget accounts={[makeAccount('0x1234...5678')]} />)
+
+    expect(screen.getAllByText('0x1234...5678')).toHaveLength(2)
+  })
+})

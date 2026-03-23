@@ -5,7 +5,7 @@ import SpaceDashboard from './index'
 export default function SpaceDashboardPage({ spaceId }: { spaceId: string }) {
   return (
     <AuthState spaceId={spaceId}>
-      <AddressBookSourceProvider source="spaceOnly">
+      <AddressBookSourceProvider source="merged">
         <SpaceDashboard />
       </AddressBookSourceProvider>
     </AuthState>
