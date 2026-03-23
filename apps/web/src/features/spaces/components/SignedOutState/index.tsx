@@ -10,7 +10,7 @@ interface SignedOutStateProps {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
-  const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
+  const { EmailSignInButton, $isDisabled } = useLoadFeature(EmailAuthFeature)
 
   return (
     <Box className={css.content}>
@@ -21,8 +21,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
           </Typography>
 
           <Typography color="text.secondary" mb={2}>
-            To view and interact with spaces, you need to sign in with the wallet that is a member of the space, or sign
-            in with email. Sign in to continue.
+            To view and interact with spaces, you need to sign in with the wallet, that is a member of the space
+            {!$isDisabled && ', or sign in with email'}. Sign in to continue.
           </Typography>
 
           <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
