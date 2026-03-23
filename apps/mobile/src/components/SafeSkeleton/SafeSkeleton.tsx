@@ -75,12 +75,13 @@ interface SafeSkeletonProps {
   height?: number
   width?: number | DimensionValue
   radius?: number | 'round'
+  show?: boolean
   children?: React.ReactNode
 }
 
-export function SafeSkeleton({ height, width, radius = 8, children }: SafeSkeletonProps) {
+export function SafeSkeleton({ height, width, radius = 8, show: showProp, children }: SafeSkeletonProps) {
   const groupShow = useContext(SkeletonGroupContext)
-  const show = groupShow ?? !children
+  const show = showProp ?? groupShow ?? !children
   const { colorScheme } = useTheme()
   const colorMode = colorScheme === 'dark' ? 'dark' : 'light'
 
