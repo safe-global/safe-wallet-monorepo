@@ -28,6 +28,56 @@ jest.mock('@/hooks/useChains', () => ({
 const addr = (): `0x${string}` => faker.finance.ethereumAddress() as `0x${string}`
 const useTransferFiatValueSpy = jest.spyOn(useTransferFiatValueModule, 'default')
 
+const renderTransferTxInfo = ({
+  direction = TransferDirection.OUTGOING,
+  trusted = true,
+  imitation = false,
+  tokenTrusted = true,
+  tokenImitation = false,
+  tokenValue = parseUnits('1', 18).toString(),
+  txStatus = TransactionStatus.SUCCESS,
+}: {
+  direction?: TransferDirection
+  trusted?: boolean
+  imitation?: boolean
+  tokenTrusted?: boolean
+  tokenImitation?: boolean
+  tokenValue?: string
+  txStatus?: TransactionStatus
+} = {}) => {
+  const recipient = addr()
+  const sender = addr()
+  const tokenAddress = addr()
+
+  return {
+    recipient,
+    sender,
+    ...render(
+      <TransferTxInfo
+        imitation={imitation}
+        trusted={trusted}
+        txInfo={{
+          direction,
+          recipient: { value: recipient },
+          sender: { value: sender },
+          type: TransactionInfoType.TRANSFER,
+          transferInfo: {
+            tokenAddress,
+            trusted: tokenTrusted,
+            type: TransactionTokenType.ERC20,
+            decimals: 18,
+            value: tokenValue,
+            tokenName: 'Test',
+            tokenSymbol: 'TST',
+            imitation: tokenImitation,
+          },
+        }}
+        txStatus={txStatus}
+      />,
+    ),
+  }
+}
+
 describe('TransferTxInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -36,258 +86,98 @@ describe('TransferTxInfo', () => {
 
   describe('should render non-malicious', () => {
     it('outgoing tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { recipient, getByText, queryByText, queryByLabelText } = renderTransferTxInfo()
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('1', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('1 TST')).toBeInTheDocument()
-      expect(result.getByText(recipient)).toBeInTheDocument()
-      expect(result.queryByText('malicious', { exact: false })).toBeNull()
-      expect(
-        result.queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false }),
-      ).toBeNull()
+      expect(getByText('1 TST')).toBeInTheDocument()
+      expect(getByText(recipient)).toBeInTheDocument()
+      expect(queryByText('malicious', { exact: false })).toBeNull()
+      expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
     it('incoming tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { sender, getByText, queryByText, queryByLabelText } = renderTransferTxInfo({
+        direction: TransferDirection.INCOMING,
+        tokenValue: parseUnits('12.34', 18).toString(),
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted
-          txInfo={{
-            direction: TransferDirection.INCOMING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('12.34', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('12.34 TST')).toBeInTheDocument()
-      expect(result.getByText(sender)).toBeInTheDocument()
-      expect(result.queryByText('malicious', { exact: false })).toBeNull()
-      expect(result.queryByLabelText('This token isn’t verified on major token lists', { exact: false })).toBeNull()
+      expect(getByText('12.34 TST')).toBeInTheDocument()
+      expect(getByText(sender)).toBeInTheDocument()
+      expect(queryByText('malicious', { exact: false })).toBeNull()
+      expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
   })
 
   describe('should render untrusted', () => {
     it('outgoing tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { recipient, getByText, queryByText, getByLabelText } = renderTransferTxInfo({
+        trusted: false,
+        tokenTrusted: false,
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted={false}
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: false,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('1', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('1 TST')).toBeInTheDocument()
-      expect(result.getByText(recipient)).toBeInTheDocument()
-      expect(result.queryByText('malicious', { exact: false })).toBeNull()
+      expect(getByText('1 TST')).toBeInTheDocument()
+      expect(getByText(recipient)).toBeInTheDocument()
+      expect(queryByText('malicious', { exact: false })).toBeNull()
       expect(
-        result.getByLabelText('This token isn’t verified on major token lists', { exact: false }),
+        getByLabelText('This token isn\u2019t verified on major token lists', { exact: false }),
       ).toBeInTheDocument()
     })
 
     it('incoming tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { sender, getByText, queryByText, queryByLabelText } = renderTransferTxInfo({
+        direction: TransferDirection.INCOMING,
+        trusted: false,
+        tokenValue: parseUnits('12.34', 18).toString(),
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted={false}
-          txInfo={{
-            direction: TransferDirection.INCOMING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('12.34', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('12.34 TST')).toBeInTheDocument()
-      expect(result.getByText(sender)).toBeInTheDocument()
-      expect(result.queryByText('malicious', { exact: false })).toBeNull()
+      expect(getByText('12.34 TST')).toBeInTheDocument()
+      expect(getByText(sender)).toBeInTheDocument()
+      expect(queryByText('malicious', { exact: false })).toBeNull()
       expect(
-        result.queryByLabelText('This token isn’t verified on major token lists', { exact: false }),
+        queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false }),
       ).toBeInTheDocument()
     })
   })
 
   describe('should render imitations', () => {
     it('outgoing tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { recipient, getByText, queryByLabelText } = renderTransferTxInfo({
+        imitation: true,
+        tokenImitation: true,
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation
-          trusted
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('1', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: true,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('1 TST')).toBeInTheDocument()
-      expect(result.getByText(recipient)).toBeInTheDocument()
-      expect(result.getByText('malicious', { exact: false })).toBeInTheDocument()
-      expect(result.queryByLabelText('This token isn’t verified on major token lists', { exact: false })).toBeNull()
+      expect(getByText('1 TST')).toBeInTheDocument()
+      expect(getByText(recipient)).toBeInTheDocument()
+      expect(getByText('malicious', { exact: false })).toBeInTheDocument()
+      expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
     it('incoming tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { sender, getByText, queryByLabelText } = renderTransferTxInfo({
+        direction: TransferDirection.INCOMING,
+        imitation: true,
+        tokenImitation: true,
+        tokenValue: parseUnits('12.34', 18).toString(),
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation
-          trusted
-          txInfo={{
-            direction: TransferDirection.INCOMING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('12.34', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: true,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('12.34 TST')).toBeInTheDocument()
-      expect(result.getByText(sender)).toBeInTheDocument()
-      expect(result.getByText('malicious', { exact: false })).toBeInTheDocument()
-      expect(result.queryByLabelText('This token isn’t verified on major token lists', { exact: false })).toBeNull()
+      expect(getByText('12.34 TST')).toBeInTheDocument()
+      expect(getByText(sender)).toBeInTheDocument()
+      expect(getByText('malicious', { exact: false })).toBeInTheDocument()
+      expect(queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false })).toBeNull()
     })
 
     it('untrusted and imitation tx', () => {
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { sender, getByText, queryByLabelText } = renderTransferTxInfo({
+        direction: TransferDirection.INCOMING,
+        trusted: false,
+        imitation: true,
+        tokenImitation: true,
+        tokenValue: parseUnits('12.34', 18).toString(),
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation
-          trusted={false}
-          txInfo={{
-            direction: TransferDirection.INCOMING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('12.34', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: true,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByText('12.34 TST')).toBeInTheDocument()
-      expect(result.getByText(sender)).toBeInTheDocument()
-      expect(result.getByText('malicious', { exact: false })).toBeInTheDocument()
-      expect(result.queryByLabelText("This token isn't verified on major token lists", { exact: false })).toBeNull()
+      expect(getByText('12.34 TST')).toBeInTheDocument()
+      expect(getByText(sender)).toBeInTheDocument()
+      expect(getByText('malicious', { exact: false })).toBeInTheDocument()
+      expect(queryByLabelText("This token isn't verified on major token lists", { exact: false })).toBeNull()
     })
   })
 
@@ -295,104 +185,25 @@ describe('TransferTxInfo', () => {
     it('should show fiat value when useTransferFiatValue returns a value', () => {
       useTransferFiatValueSpy.mockReturnValue(1000)
 
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { getByLabelText } = renderTransferTxInfo()
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('1', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      // FiatValue renders a Tooltip span with aria-label containing formatted currency
-      expect(result.getByLabelText('$ 1,000.00')).toBeInTheDocument()
+      expect(getByLabelText('$ 1,000.00')).toBeInTheDocument()
     })
 
     it('should not show fiat value when useTransferFiatValue returns null', () => {
-      useTransferFiatValueSpy.mockReturnValue(null)
+      const { queryByLabelText } = renderTransferTxInfo()
 
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
-
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('1', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.queryByLabelText(/^\$/)).not.toBeInTheDocument()
+      expect(queryByLabelText(/^\$/)).not.toBeInTheDocument()
     })
 
     it('should show a different fiat value when hook returns a different amount', () => {
       useTransferFiatValueSpy.mockReturnValue(500)
 
-      const recipient = addr()
-      const sender = addr()
-      const tokenAddress = addr()
+      const { getByLabelText } = renderTransferTxInfo({
+        tokenValue: parseUnits('5', 18).toString(),
+      })
 
-      const result = render(
-        <TransferTxInfo
-          imitation={false}
-          trusted
-          txInfo={{
-            direction: TransferDirection.OUTGOING,
-            recipient: { value: recipient },
-            sender: { value: sender },
-            type: TransactionInfoType.TRANSFER,
-            transferInfo: {
-              tokenAddress,
-              trusted: true,
-              type: TransactionTokenType.ERC20,
-              decimals: 18,
-              value: parseUnits('5', 18).toString(),
-              tokenName: 'Test',
-              tokenSymbol: 'TST',
-              imitation: false,
-            },
-          }}
-          txStatus={TransactionStatus.SUCCESS}
-        />,
-      )
-
-      expect(result.getByLabelText('$ 500.00')).toBeInTheDocument()
+      expect(getByLabelText('$ 500.00')).toBeInTheDocument()
     })
   })
 })

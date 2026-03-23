@@ -178,11 +178,17 @@ const TokenAmountInput = ({
           </TextField>
         </div>
       </FormControl>
-      {fiatValue != null && (
-        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
-          <FiatValue value={fiatValue} precise />
-        </Typography>
-      )}
+      <Typography
+        data-testid="fiat-display"
+        variant="caption"
+        color="text.secondary"
+        className={css.fiatDisplay}
+        sx={{
+          visibility: fiatValue != null ? 'visible' : 'hidden',
+        }}
+      >
+        <FiatValue value={fiatValue} precise />
+      </Typography>
     </div>
   )
 }

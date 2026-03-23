@@ -304,7 +304,7 @@ describe('TokenAmountInput', () => {
 
       // 50 USDC * $1 fiatConversion = $50
       const fiatDisplay = screen.getByTestId('fiat-display')
-      expect(fiatDisplay).toBeInTheDocument()
+      expect(fiatDisplay).toBeVisible()
       expect(fiatDisplay.textContent).toContain('50')
     })
 
@@ -313,23 +313,23 @@ describe('TokenAmountInput', () => {
 
       // 0.5 ETH * $1000 fiatConversion = $500
       const fiatDisplay = screen.getByTestId('fiat-display')
-      expect(fiatDisplay).toBeInTheDocument()
+      expect(fiatDisplay).toBeVisible()
       expect(fiatDisplay.textContent).toContain('500')
     })
 
-    it('should not show fiat value when amount is empty', () => {
+    it('should hide fiat value when amount is empty', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="" />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
 
-    it('should not show fiat value when amount is "0"', () => {
+    it('should hide fiat value when amount is "0"', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="0" />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
 
-    it('should not show fiat value when token has no fiatConversion', () => {
+    it('should hide fiat value when token has no fiatConversion', () => {
       const balancesNoFiat: Balances['items'] = [
         {
           ...mockBalances[1],
@@ -339,10 +339,10 @@ describe('TokenAmountInput', () => {
 
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesNoFiat} />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
 
-    it('should not show fiat value when fiatConversion is "0"', () => {
+    it('should hide fiat value when fiatConversion is "0"', () => {
       const balancesZeroFiat: Balances['items'] = [
         {
           ...mockBalances[1],
@@ -352,19 +352,19 @@ describe('TokenAmountInput', () => {
 
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesZeroFiat} />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
 
-    it('should not show fiat value when selectedToken is undefined', () => {
+    it('should hide fiat value when selectedToken is undefined', () => {
       render(<FiatTestWrapper defaultTokenAddress="0x0000000000000000000000000000000000000001" defaultAmount="50" />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
 
-    it('should not show fiat value for negative amounts', () => {
+    it('should hide fiat value for negative amounts', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="-5" />)
 
-      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
   })
 })

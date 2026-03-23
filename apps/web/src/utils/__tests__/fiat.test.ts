@@ -25,6 +25,14 @@ describe('computeFiatValue', () => {
     expect(computeFiatValue(100, '0')).toBeNull()
   })
 
+  it('should return null when fiatConversion is "0.00"', () => {
+    expect(computeFiatValue(100, '0.00')).toBeNull()
+  })
+
+  it('should return null when fiatConversion is "0.0000"', () => {
+    expect(computeFiatValue(100, '0.0000')).toBeNull()
+  })
+
   it('should return null when tokenAmount is 0', () => {
     expect(computeFiatValue(0, '1')).toBeNull()
   })
