@@ -12,6 +12,8 @@ import MaliciousTxWarning from '@/components/transactions/MaliciousTxWarning'
 import { ImitationTransactionWarning } from '@/components/transactions/ImitationTransactionWarning'
 import TokenAmount from '@/components/common/TokenAmount'
 import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import FiatValue from '@/components/common/FiatValue'
+import useTransferFiatValue from './useTransferFiatValue'
 
 type TransferTxInfoProps = {
   txInfo: TransferTransactionInfo
@@ -22,6 +24,7 @@ type TransferTxInfoProps = {
 
 const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
   const { direction } = txInfo
+  const fiatValue = useTransferFiatValue(txInfo.transferInfo)
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
@@ -29,6 +32,11 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
       <b>
         <TransferTx info={txInfo} omitSign preciseAmount />
       </b>
+      {fiatValue != null && (
+        <Typography variant="body2" color="text.secondary" component="span">
+          (<FiatValue value={fiatValue} />)
+        </Typography>
+      )}
       {direction === TransferDirection.INCOMING ? ' from' : ' to'}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>

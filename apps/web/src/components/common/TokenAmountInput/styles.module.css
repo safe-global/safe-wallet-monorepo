@@ -57,3 +57,8 @@
 .select :global(.MuiSelect-icon) {
   margin-right: var(--space-2);
 }
+
+.fiatDisplay {
+  padding-left: var(--space-1);
+  padding-top: var(--space-1);
+}

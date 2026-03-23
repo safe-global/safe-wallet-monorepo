@@ -22,7 +22,9 @@ const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; nam
 
   return (
     <Stack gap={2}>
-      {token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} />}
+      {token && (
+        <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} fiatConversion={token.fiatConversion} />
+      )}
       <SendToBlock address={params.recipient} name={name} avatarSize={32} />
     </Stack>
   )
