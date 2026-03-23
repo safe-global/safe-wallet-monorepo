@@ -44,7 +44,7 @@ const InviteMembersOnboarding = (): ReactElement => {
           </Typography>
 
           <Typography variant="paragraph" align="center" color="muted" className="mx-auto w-[93%]">
-            Add people to collaborate on this space.
+            Add people to collaborate on this Space.
           </Typography>
 
           <div className="flex flex-col gap-3">
