@@ -14,7 +14,7 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 export const useEmailLogin = () => {
   const loginWithRedirect = useCallback(() => {
     sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
-    window.location.href = `${GATEWAY_URL}${AUTHORIZE_PATH}`
+    window.location.href = new URL(AUTHORIZE_PATH, GATEWAY_URL).toString()
   }, [])
 
   return { loginWithRedirect }
