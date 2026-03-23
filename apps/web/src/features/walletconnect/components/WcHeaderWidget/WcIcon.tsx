@@ -42,6 +42,7 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
             vertical: 'bottom',
             horizontal: 'right',
           }}
+          sx={showIcon ? { '& .MuiBadge-badge': { padding: 0 } } : undefined}
         >
           <SvgIcon component={WalletConnectIcon} inheritViewBox fontSize="medium" />
         </Badge>
