@@ -35,6 +35,8 @@ export interface FeatureFlags {
   earn?: boolean
   /** SPACES - collaborative spaces (default: false) */
   spaces?: boolean
+  /** EMAIL_AUTH - email-based OIDC login (default: false) */
+  emailAuth?: boolean
 }
 
 /**
