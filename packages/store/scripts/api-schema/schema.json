@@ -24,6 +24,25 @@
         ]
       }
     },
+    "/v1/auth/me": {
+      "get": {
+        "description": "Returns 204 if a valid session cookie is present, 403 otherwise.",
+        "operationId": "authGetMeV1",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Authenticated"
+          },
+          "403": {
+            "description": "Not authenticated"
+          }
+        },
+        "summary": "Check authentication status",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/auth/nonce": {
       "get": {
         "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
@@ -91,6 +110,99 @@
           }
         },
         "summary": "Logout user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/authorize": {
+      "get": {
+        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
+        "operationId": "oidcAuthAuthorizeV1",
+        "parameters": [
+          {
+            "name": "redirect_url",
+            "required": false,
+            "in": "query",
+            "description": "URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI.",
+            "schema": {
+              "example": "/settings",
+              "type": "string"
+            }
+          },
+          {
+            "name": "connection",
+            "required": false,
+            "in": "query",
+            "description": "OIDC connection name to route to a specific identity provider.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to OIDC authorize endpoint"
+          }
+        },
+        "summary": "Start OIDC authorization code flow",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/callback": {
+      "get": {
+        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the provided post-login URL or a configured default one.",
+        "operationId": "oidcAuthCallbackV1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Authorization code returned by the OIDC provider",
+            "schema": {
+              "example": "SplxlOBeZQQYbYS6WxSbIA",
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "State parameter returned by the OIDC provider",
+            "schema": {
+              "example": "af0ifjsldkj",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "required": false,
+            "in": "query",
+            "description": "Error parameter returned by the OIDC provider",
+            "schema": {
+              "example": "access_denied",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "required": false,
+            "in": "query",
+            "description": "Description of the error returned by the OIDC provider (if failed)",
+            "schema": {
+              "example": "The user has denied the request",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the post-login URL. On error, includes error query parameter."
+          }
+        },
+        "summary": "Handle OIDC authorization callback",
         "tags": [
           "auth"
         ]

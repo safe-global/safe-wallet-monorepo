@@ -1,11 +1,12 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { EmailAuthFeature } from '@/features/email-auth'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInButton from '../SignInButton'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import { Box, Button, Card, Grid2, Link, Stack, Typography } from '@mui/material'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -40,6 +41,7 @@ const AddSpaceButton = () => {
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const wallet = useWallet()
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
 
   return (
     <>
@@ -51,7 +53,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
             To view your space or create one,{' '}
-            {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
+            {!!wallet ? 'sign in with your connected wallet or email.' : 'connect your wallet or sign in with email.'}
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
@@ -59,7 +61,10 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
           </Link>
         </Box>
 
-        <SignInButton afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
+          <EmailSignInButton />
+          <SignInButton afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        </Stack>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} showButtons={false} />}
     </>
