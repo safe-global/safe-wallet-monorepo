@@ -54,11 +54,13 @@ describe('useGasPrice', () => {
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('should return the fetched gas price from the first oracle', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest.fn(() =>
+    jest.spyOn(window, 'fetch').mockImplementation(
+      jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>
@@ -69,8 +71,8 @@ describe('useGasPrice', () => {
               },
             }),
         }),
-      ),
-    })
+      ) as jest.Mock,
+    )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())
@@ -96,10 +98,8 @@ describe('useGasPrice', () => {
   })
 
   it('should speed up the gas price', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest.fn(() =>
+    jest.spyOn(window, 'fetch').mockImplementation(
+      jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>
@@ -110,8 +110,8 @@ describe('useGasPrice', () => {
               },
             }),
         }),
-      ),
-    })
+      ) as jest.Mock,
+    )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice(true))
@@ -260,36 +260,32 @@ describe('useGasPrice', () => {
   })
 
   it('should keep the previous gas price if the hook re-renders', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: {
-                  FastGasPrice: '21',
-                  suggestBaseFee: '19',
-                },
-              }),
-          }),
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: {
-                  FastGasPrice: '22',
-                  suggestBaseFee: '19',
-                },
-              }),
-          }),
-        ),
-    })
+    jest
+      .spyOn(window, 'fetch')
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: {
+                FastGasPrice: '21',
+                suggestBaseFee: '19',
+              },
+            }),
+        } as Response),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: {
+                FastGasPrice: '22',
+                suggestBaseFee: '19',
+              },
+            }),
+        } as Response),
+      )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())

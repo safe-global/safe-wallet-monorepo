@@ -53,12 +53,11 @@ export const LedgerSuccess = ({ address, name, onDone, onCopyAddress }: LedgerSu
                     paddingHorizontal="$2"
                     borderRadius="$3"
                     backgroundColor="$borderLight"
-                    fontWeight="500"
                     size="$5"
                     onPress={onCopyAddress}
                     icon={<SafeFontIcon name="copy" />}
                   >
-                    Copy
+                    <Button.Text fontWeight="500">Copy</Button.Text>
                   </Button>
                 </View>
               }

@@ -14,7 +14,7 @@ export const PositionsError = ({ onRetry }: PositionsErrorProps) => {
       <Text textAlign="center" color="$colorSecondary" width="80%">
         Something went wrong. Please try to load the page again.
       </Text>
-      <SafeButton backgroundColor="$backgroundSecondary" color="$colorPrimary" onPress={onRetry}>
+      <SafeButton secondary textColor="$colorPrimary" onPress={onRetry}>
         <SafeFontIcon size={16} name="update" color="$colorPrimary" />
         Retry
       </SafeButton>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { View, Text, Stack, YStack } from 'tamagui'
+import { View, Text, YStack } from 'tamagui'
 import { router, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
@@ -99,18 +99,18 @@ export const LedgerReviewExecuteContainer = () => {
     <ReviewAndConfirmView
       txDetails={txDetails}
       header={
-        <YStack space="$4" paddingTop="$4">
+        <YStack gap="$4" paddingTop="$4">
           <LargeHeaderTitle>Review and execute on your device</LargeHeaderTitle>
         </YStack>
       }
     >
-      <Stack
+      <View
         backgroundColor="$background"
         paddingHorizontal="$4"
         paddingVertical="$3"
         borderTopWidth={1}
         borderTopColor="$borderLight"
-        space="$3"
+        gap="$3"
         paddingBottom={bottom || '$4'}
       >
         {error && (
@@ -121,7 +121,7 @@ export const LedgerReviewExecuteContainer = () => {
         <SafeButton onPress={handleExecute} loading={isExecuting} disabled={isExecuting || !sessionId}>
           {isExecuting ? 'Execute on Ledger...' : 'Continue on Ledger'}
         </SafeButton>
-      </Stack>
+      </View>
     </ReviewAndConfirmView>
   )
 }

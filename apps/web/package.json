@@ -20,6 +20,7 @@
     "test": "cross-env TZ=CET LC_ALL=C DEBUG_PRINT_LIMIT=30000 NODE_ENV=test jest",
     "test:ci": "cross-env NODE_ENV=test yarn test --ci --silent --coverage --json --watchAll=false --testLocationInResults --outputFile=report.json",
     "test:coverage": "cross-env NODE_ENV=test yarn test --coverage --watchAll=false",
+    "test:scaffold": "node ../../scripts/test-scaffold.mjs",
     "cmp": "./scripts/cmp.sh",
     "routes": "node scripts/generate-routes.js > src/config/routes.ts && prettier -w src/config/routes.ts && cat src/config/routes.ts",
     "css-vars": "npx -y tsx ./scripts/css-vars.ts > ./src/styles/vars.css && prettier -w src/styles/vars.css",

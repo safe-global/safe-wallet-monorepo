@@ -7,7 +7,7 @@ import { LargeHeaderTitle } from '@/src/components/Title'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Platform, ScrollView } from 'react-native'
-import { Button, Text, View } from 'tamagui'
+import { Text, View } from 'tamagui'
 import { ToastViewport } from '@tamagui/toast'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import Logger from '@/src/utils/logger'
@@ -66,21 +66,16 @@ export function ImportSuccess() {
               transparent={false}
               rightNode={
                 <View flex={1} alignItems="flex-end">
-                  <Button
-                    maxWidth={120}
-                    height="$10"
-                    paddingHorizontal="$2"
-                    borderRadius="$3"
-                    backgroundColor="$borderLight"
-                    fontWeight="500"
-                    size="$5"
+                  <SafeButton
+                    secondary
+                    size="$sm"
                     onPress={() => {
                       copy(address)
                     }}
                     icon={<SafeFontIcon name="copy" />}
                   >
                     Copy
-                  </Button>
+                  </SafeButton>
                 </View>
               }
               name={name}

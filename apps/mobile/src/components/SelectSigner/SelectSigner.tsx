@@ -30,7 +30,7 @@ export function SelectSigner({ address, txId, disabled = false }: Props) {
       gap={'$2'}
       opacity={disabled ? 0.5 : 1}
     >
-      <Image testID="signature-button-image" width={16} height={16} source={Signature} />
+      <Image testID="signature-button-image" width={16} height={16} src={Signature} />
       <Text fontWeight={700}>Sign with</Text>
 
       <Identicon address={address} size={24} />

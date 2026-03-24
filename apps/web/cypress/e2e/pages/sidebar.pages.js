@@ -446,7 +446,7 @@ export function clickOnMultichainItemOptionsBtn(index) {
 }
 
 export function checkMultichainTooltipExists(index) {
-  cy.get(multichainItemSummary).eq(index).find(chainLogo).eq(0).trigger('mouseover', { force: true })
+  cy.get(multichainItemSummary).eq(index).find(chainLogo).eq(0).realHover()
   cy.get(multichainTooltip).should('exist')
 }
 

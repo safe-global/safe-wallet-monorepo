@@ -5,7 +5,7 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import React from 'react'
-import { Stack, Theme } from 'tamagui'
+import { View, Theme } from 'tamagui'
 import { WidgetAction } from './WidgetAction'
 import { WidgetDisplay } from './WidgetDisplay'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
@@ -55,11 +55,11 @@ export function SafeShieldWidget({ recipient, contract, threat, safeTx, txId }: 
 
   return (
     <Theme name="widget">
-      <Stack gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$background">
+      <View gap="$3" padding="$1" borderRadius="$2" paddingBottom="$4" backgroundColor="$background">
         <WidgetAction onPress={onPress} loading={loading} error={hasAnyError} status={overallStatus} />
 
         <WidgetDisplay recipient={recipient} contract={contract} threat={threat} loading={loading} safeTx={safeTx} />
-      </Stack>
+      </View>
     </Theme>
   )
 }

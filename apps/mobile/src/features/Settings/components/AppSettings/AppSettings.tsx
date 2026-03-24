@@ -38,7 +38,7 @@ export const AppSettings = ({ sections }: AppSettingsProps) => {
           Settings
         </LargeHeaderTitle>
         <YStack flex={1} paddingHorizontal="$3">
-          <YStack space="$4">
+          <YStack gap="$4">
             {memoizedSections.map((section, sectionIndex) => (
               <View
                 key={`section-${sectionIndex}`}

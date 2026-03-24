@@ -1,0 +1,64 @@
+name: Mobile Checks
+
+on:
+  pull_request:
+    paths:
+      - apps/mobile/**
+      - packages/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/mobile/**
+      - packages/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+      - name: Run lint
+        run: yarn workspace @safe-global/mobile lint
+
+  prettier:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+      - name: Run Prettier check
+        run: yarn workspace @safe-global/mobile prettier
+
+  type-check:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+      - name: Type check
+        run: yarn workspace @safe-global/mobile type-check

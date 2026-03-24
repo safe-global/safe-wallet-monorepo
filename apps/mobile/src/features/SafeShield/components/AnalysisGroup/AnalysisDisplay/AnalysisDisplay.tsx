@@ -5,7 +5,7 @@ import type {
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
-import { Text, View, Stack, useTheme as useTamaguiTheme } from 'tamagui'
+import { Text, View, useTheme as useTamaguiTheme } from 'tamagui'
 import { safeShieldStatusColors } from '../../../theme'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { AnalysisIssuesDisplay } from './components/AnalysisIssuesDisplay'
@@ -61,7 +61,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
           padding: 12,
         }}
       >
-        <Stack gap="$3">
+        <View gap="$3">
           {renderDescription()}
 
           {hasError && (
@@ -94,7 +94,7 @@ export function AnalysisDisplay({ result, description, severity }: AnalysisDispl
           {!hasIssues && result.addresses?.length ? (
             <ShowAllAddress addresses={result.addresses.map((a) => a.address)} />
           ) : null}
-        </Stack>
+        </View>
       </View>
     </View>
   )

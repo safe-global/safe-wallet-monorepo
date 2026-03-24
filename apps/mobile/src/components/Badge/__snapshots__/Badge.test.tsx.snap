@@ -15,10 +15,10 @@ exports[`Badge renders badge with custom size and theme 1`] = `
         {
           "alignItems": "center",
           "backgroundColor": "#3B7A54",
-          "borderBottomLeftRadius": 100000,
-          "borderBottomRightRadius": 100000,
-          "borderTopLeftRadius": 100000,
-          "borderTopRightRadius": 100000,
+          "borderBottomLeftRadius": 100000000,
+          "borderBottomRightRadius": 100000000,
+          "borderTopLeftRadius": 100000000,
+          "borderTopRightRadius": 100000000,
           "flexDirection": "column",
           "height": 32,
           "justifyContent": "center",
@@ -26,10 +26,6 @@ exports[`Badge renders badge with custom size and theme 1`] = `
           "maxWidth": 32,
           "minHeight": 32,
           "minWidth": 32,
-          "paddingBottom": 0,
-          "paddingLeft": 0,
-          "paddingRight": 0,
-          "paddingTop": 0,
           "width": 32,
         }
       }
@@ -39,7 +35,6 @@ exports[`Badge renders badge with custom size and theme 1`] = `
         style={
           {
             "color": "#121312",
-            "fontFamily": "DM Sans",
             "fontSize": 14,
           }
         }
@@ -67,10 +62,10 @@ exports[`Badge renders circular badge 1`] = `
         {
           "alignItems": "center",
           "backgroundColor": "#FFECC2",
-          "borderBottomLeftRadius": 100000,
-          "borderBottomRightRadius": 100000,
-          "borderTopLeftRadius": 100000,
-          "borderTopRightRadius": 100000,
+          "borderBottomLeftRadius": 100000000,
+          "borderBottomRightRadius": 100000000,
+          "borderTopLeftRadius": 100000000,
+          "borderTopRightRadius": 100000000,
           "flexDirection": "column",
           "height": 28,
           "justifyContent": "center",
@@ -78,10 +73,6 @@ exports[`Badge renders circular badge 1`] = `
           "maxWidth": 28,
           "minHeight": 28,
           "minWidth": 28,
-          "paddingBottom": 0,
-          "paddingLeft": 0,
-          "paddingRight": 0,
-          "paddingTop": 0,
           "width": 28,
         }
       }
@@ -91,7 +82,6 @@ exports[`Badge renders circular badge 1`] = `
         style={
           {
             "color": "#FF8C00",
-            "fontFamily": "DM Sans",
             "fontSize": 14,
           }
         }
@@ -136,7 +126,6 @@ exports[`Badge renders non-circular badge 1`] = `
         style={
           {
             "color": "#FF8C00",
-            "fontFamily": "DM Sans",
             "fontSize": 14,
           }
         }
