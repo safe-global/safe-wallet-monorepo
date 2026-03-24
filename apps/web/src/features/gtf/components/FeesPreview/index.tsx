@@ -51,14 +51,7 @@ const FeeRow = ({
   </div>
 )
 
-const feeTooltip = (text: string) => (
-  <>
-    {text}{' '}
-    <ExternalLink href={FEES_LEARN_MORE_URL} noIcon>
-      Learn more
-    </ExternalLink>
-  </>
-)
+const feeTooltip = (text: string) => text
 
 const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const { executionFee, gasFee } = props
