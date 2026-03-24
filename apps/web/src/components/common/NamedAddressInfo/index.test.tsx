@@ -87,6 +87,15 @@ describe('NamedAddressInfo', () => {
 
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
   })
+
+  it('should skip contract lookup when noContractName is true', () => {
+    const address = faker.finance.ethereumAddress()
+    render(<NamedAddressInfo address={address} noContractName />)
+
+    expect(useGetContractQueryMock.mock.calls.every(([, opts]: unknown[]) => (opts as { skip: boolean }).skip)).toBe(
+      true,
+    )
+  })
 })
 
 describe('useAddressName', () => {
@@ -260,6 +269,44 @@ describe('useAddressName', () => {
       name: 'This Safe Account',
       logoUri: undefined,
       isUnverifiedContract: false,
+    })
+  })
+
+  describe('noContractName', () => {
+    it('should skip contract lookup when noContractName is true', () => {
+      const { result } = renderHook(() => useAddressName(address, undefined, undefined, true))
+
+      expect(result.current).toEqual({
+        name: undefined,
+        logoUri: undefined,
+        isUnverifiedContract: false,
+      })
+      expect(useGetContractQueryMock.mock.calls.every(([, opts]: unknown[]) => (opts as { skip: boolean }).skip)).toBe(
+        true,
+      )
+    })
+
+    it('should still use provided name when noContractName is true', () => {
+      const { result } = renderHook(() => useAddressName(address, 'Address Book Name', undefined, true))
+
+      expect(result.current).toEqual({
+        name: 'Address Book Name',
+        logoUri: undefined,
+        isUnverifiedContract: false,
+      })
+      expect(useGetContractQueryMock.mock.calls.every(([, opts]: unknown[]) => (opts as { skip: boolean }).skip)).toBe(
+        true,
+      )
+    })
+
+    it('should still show "This Safe Account" when noContractName is true', () => {
+      const { result } = renderHook(() => useAddressName(safeAddress, undefined, undefined, true))
+
+      expect(result.current).toEqual({
+        name: 'This Safe Account',
+        logoUri: undefined,
+        isUnverifiedContract: false,
+      })
     })
   })
 })
