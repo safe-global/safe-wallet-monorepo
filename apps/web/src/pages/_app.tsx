@@ -91,6 +91,7 @@ import { AddressBookSourceProvider } from '@/components/common/AddressBookSource
 import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
+import { useEmailLoginCallback } from '@/features/email-auth'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
@@ -124,6 +125,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
+  useEmailLoginCallback()
 
   return null
 }
