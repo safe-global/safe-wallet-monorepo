@@ -13,7 +13,7 @@ export const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement =
       size="lg"
       isActive={item.isActive}
       disabled={item.disabled}
-      className={`${css.sidebarInteractive} ${css.sidebarNavItem}`}
+      className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
       render={!item.disabled ? <Link href={item.link} /> : undefined}
       data-testid="sidebar-list-item"
     >
