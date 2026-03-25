@@ -32,13 +32,27 @@ describe('useEmailLogin', () => {
     expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBe('1')
   })
 
-  it('should redirect to CGW authorize endpoint', () => {
+  it('should redirect to CGW authorize endpoint with current URL as default redirect_url', () => {
     const { result } = renderHook(() => useEmailLogin())
 
     act(() => {
       result.current.loginWithRedirect()
     })
 
-    expect(window.location.href).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
+    const redirectUrl = new URL(window.location.href)
+    expect(redirectUrl.origin + redirectUrl.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
+    expect(redirectUrl.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/spaces')
+  })
+
+  it('should use explicit redirect_url when provided', () => {
+    const customUrl = 'https://app.safe.global/home'
+    const { result } = renderHook(() => useEmailLogin())
+
+    act(() => {
+      result.current.loginWithRedirect(customUrl)
+    })
+
+    const redirectUrl = new URL(window.location.href)
+    expect(redirectUrl.searchParams.get('redirect_url')).toBe(customUrl)
   })
 })

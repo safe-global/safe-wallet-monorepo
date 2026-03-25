@@ -14,7 +14,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^about/],
     },
     '../src/gateway/AUTO_GENERATED/auth.ts': {
-      filterEndpoints: [/^auth/],
+      filterEndpoints: [/^(auth|oidcAuth)/],
     },
     '../src/gateway/AUTO_GENERATED/balances.ts': {
       filterEndpoints: [/^balances/],
