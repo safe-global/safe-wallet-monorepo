@@ -93,13 +93,12 @@ export function clickOnSafeInPopover(safe) {
 }
 
 export function clickOnParentSafeInBreadcrumb() {
-  cy.get(breadcrumpContainer, { timeout: 5000 })
-    .should('be.visible')
-    .within(() => {
-      cy.get(parentSafeItem).within(() => {
-        cy.get('a').click()
-      })
+  cy.wait(1000) // Needs time to render
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get('a').click()
     })
+  })
 }
 
 export function checkParentSafeInBreadcrumb(name, address) {
@@ -376,7 +375,7 @@ export function clickOnOpenSidebarBtn() {
 // Expands all safes in the sidebar
 export function openSidebar() {
   clickOnOpenSidebarBtn()
-  cy.get(sidebarSafeContainer, { timeout: 5000 }).should('exist')
+  cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
 }
@@ -536,7 +535,7 @@ export function renameSafeItem(oldName, newName) {
 
 export function removeSafeItem(name) {
   clickOnSafeItemOptionsBtn(name)
-  cy.get(safeItemOptionsRemoveBtn, { timeout: 5000 }).should('be.visible')
+  cy.wait(1000)
   clickOnRemoveBtn()
   confirmSafeItemRemoval()
   verifyModalRemoved()

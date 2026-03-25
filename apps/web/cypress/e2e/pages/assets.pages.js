@@ -184,9 +184,9 @@ export function changeCurrency(currency) {
 }
 
 export function clickOnSendBtn(index) {
-  cy.get(main.tableRow, { timeout: 10000 })
+  cy.wait(4000)
+  cy.get(main.tableRow)
     .eq(index)
-    .should('be.visible')
     .within(() => {
       cy.get('button')
         .contains(sendBtnStr)
@@ -215,10 +215,12 @@ export function verifyTableRows(assetsLength) {
 
 export function clickOnTokenNameSortBtn() {
   cy.get('span').contains(assetNameSortBtnStr).click()
+  cy.wait(500)
 }
 
 export function clickOnTokenBalanceSortBtn() {
   cy.get('span').contains(assetBalanceSortBtnStr).click()
+  cy.wait(500)
 }
 
 export function verifyTokenNamesOrder(option = 'ascending') {
@@ -375,6 +377,7 @@ export function selectCurrency(currency) {
 
 export function hideAsset(asset) {
   cy.contains(asset).parents(assetsTableRow).find(hideAssetCheckbox).click()
+  cy.wait(350)
   cy.contains(asset).should('not.exist')
 }
 

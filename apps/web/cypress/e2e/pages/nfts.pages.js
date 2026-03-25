@@ -73,7 +73,7 @@ export function verifySelectedNetwrokSepolia() {
 }
 
 export function clickOnInactiveNFT() {
-  cy.get(inactiveNftIcon).eq(0).scrollIntoView().click({ force: true })
+  cy.get(inactiveNftIcon).eq(0).click()
 }
 export function verifyNFTModalDoesNotExist() {
   cy.get(nftModalTitle).should('not.exist')
