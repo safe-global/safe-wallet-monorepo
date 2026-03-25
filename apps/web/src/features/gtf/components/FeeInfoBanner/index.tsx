@@ -45,7 +45,7 @@ const FeeInfoBanner = (): ReactElement | null => {
         </div>
 
         <ExternalLink href={LEARN_MORE_URL} noIcon className={css.learnMoreLink}>
-          <Typography variant="body2" fontWeight={700}>
+          <Typography variant="body2" fontWeight={700} sx={{ textDecoration: 'underline' }}>
             Learn more
           </Typography>
         </ExternalLink>
