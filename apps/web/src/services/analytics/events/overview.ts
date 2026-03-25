@@ -107,10 +107,6 @@ export const OVERVIEW_EVENTS = {
     action: 'Rename Safe from sidebar',
     category: OVERVIEW_CATEGORY,
   },
-  SAFE_TOKEN_WIDGET: {
-    action: 'Open Safe Governance App from widget',
-    category: OVERVIEW_CATEGORY,
-  },
   OPEN_MISSING_SIGNATURES: {
     action: 'Open transactions queue from missing signatures',
     category: OVERVIEW_CATEGORY,
