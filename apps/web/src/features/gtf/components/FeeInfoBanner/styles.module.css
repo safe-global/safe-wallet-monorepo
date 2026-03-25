@@ -33,12 +33,6 @@
   gap: 12px;
 }
 
-.feeInfoBullets {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .feeInfoBullet {
   display: flex;
   align-items: center;
