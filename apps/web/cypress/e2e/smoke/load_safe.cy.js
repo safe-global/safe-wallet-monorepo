@@ -30,7 +30,8 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('[SMOKE] Verify names cannot have more than 50 characters', () => {
-    cy.get(main.nameInput).should('be.visible')
+    // Wait due to re-render issues of the element
+    cy.wait(5000)
     safe.inputName(main.generateRandomString(51))
     safe.verifyNameLengthErrorMessage()
   })

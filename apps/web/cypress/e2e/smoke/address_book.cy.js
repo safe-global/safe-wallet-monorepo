@@ -19,6 +19,7 @@ describe('[SMOKE] Address book tests', () => {
 
   it('[SMOKE] Verify empty name is not allowed when editing', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1)
+    cy.wait(1000)
     cy.reload()
     addressBook.clickOnEditEntryBtn()
     addressBook.verifyEmptyOwnerNameNotAllowed()
