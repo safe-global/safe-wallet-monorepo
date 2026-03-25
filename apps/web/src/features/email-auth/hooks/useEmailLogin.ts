@@ -12,9 +12,11 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
  * automatically and would fail trying to parse the provider's HTML as JSON).
  */
 export const useEmailLogin = () => {
-  const loginWithRedirect = useCallback(() => {
+  const loginWithRedirect = useCallback((redirectUrl?: string) => {
     sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
-    window.location.href = new URL(AUTHORIZE_PATH, GATEWAY_URL).toString()
+    const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
+    url.searchParams.set('redirect_url', redirectUrl ?? window.location.href)
+    window.location.href = url.toString()
   }, [])
 
   return { loginWithRedirect }

@@ -22,6 +22,28 @@ const injectedRtkApi = api
         query: () => ({ url: `/v1/auth/logout`, method: 'POST' }),
         invalidatesTags: ['auth'],
       }),
+      oidcAuthAuthorizeV1: build.query<OidcAuthAuthorizeV1ApiResponse, OidcAuthAuthorizeV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/auth/oidc/authorize`,
+          params: {
+            redirect_url: queryArg.redirectUrl,
+            connection: queryArg.connection,
+          },
+        }),
+        providesTags: ['auth'],
+      }),
+      oidcAuthCallbackV1: build.query<OidcAuthCallbackV1ApiResponse, OidcAuthCallbackV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/auth/oidc/callback`,
+          params: {
+            code: queryArg.code,
+            state: queryArg.state,
+            error: queryArg.error,
+            error_description: queryArg.errorDescription,
+          },
+        }),
+        providesTags: ['auth'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -37,6 +59,24 @@ export type AuthVerifyV1ApiArg = {
 }
 export type AuthLogoutV1ApiResponse = unknown
 export type AuthLogoutV1ApiArg = void
+export type OidcAuthAuthorizeV1ApiResponse = unknown
+export type OidcAuthAuthorizeV1ApiArg = {
+  /** URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI. */
+  redirectUrl?: string
+  /** OIDC connection name to route to a specific identity provider. */
+  connection?: string
+}
+export type OidcAuthCallbackV1ApiResponse = unknown
+export type OidcAuthCallbackV1ApiArg = {
+  /** Authorization code returned by the OIDC provider */
+  code?: string
+  /** State parameter returned by the OIDC provider */
+  state?: string
+  /** Error parameter returned by the OIDC provider */
+  error?: string
+  /** Description of the error returned by the OIDC provider (if failed) */
+  errorDescription?: string
+}
 export type AuthNonce = {
   nonce: string
 }
@@ -51,4 +91,8 @@ export const {
   useLazyAuthGetNonceV1Query,
   useAuthVerifyV1Mutation,
   useAuthLogoutV1Mutation,
+  useOidcAuthAuthorizeV1Query,
+  useLazyOidcAuthAuthorizeV1Query,
+  useOidcAuthCallbackV1Query,
+  useLazyOidcAuthCallbackV1Query,
 } = injectedRtkApi
