@@ -1,6 +1,7 @@
 import { useMediaQuery, useTheme } from '@mui/material'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
+import { useEnsName } from '../../hooks/useAccountEnsNames'
 import css from '../AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import { SpacesFeature } from '@/features/spaces'
@@ -31,6 +32,9 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
     elementRef,
     trackingLabel,
   } = useSafeItemData(safeItem, { isSpaceSafe })
+
+  const ensName = useEnsName(safeItem.address)
+  const displayName = isSpaceSafe ? safeItem.name : name || ensName
 
   const hasQueuedItems =
     !safeItem.isReadOnly &&
@@ -69,7 +73,7 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         threshold={threshold}
         owners={owners.length}
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={isSpaceSafe ? safeItem.name : name}>
+      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={displayName}>
         {!isMobile && statusChips}
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safeItem.chainId} />

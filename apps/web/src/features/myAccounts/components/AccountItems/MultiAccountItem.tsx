@@ -2,6 +2,7 @@ import type { SafeListProps } from '../SafesList'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
+import { useEnsName } from '../../hooks/useAccountEnsNames'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -79,6 +80,7 @@ type MultiAccountItemProps = {
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
   const spaces = useLoadFeature(SpacesFeature)
+  const ensName = useEnsName(multiSafeAccountItem.address)
   const {
     address,
     name,
@@ -133,7 +135,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
               <AccountItem.Info
                 address={address}
                 chainId={sortedSafes[0]?.chainId ?? '1'}
-                name={multiSafeAccountItem.name}
+                name={multiSafeAccountItem.name || ensName}
                 showPrefix={false}
                 addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
                 data-testid="group-address"

@@ -1,6 +1,7 @@
 import { type SafeItem, type AllSafeItems, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
 import MultiAccountItem from '../AccountItems/MultiAccountItem'
 import { SafeListItem } from './SafeListItem'
+import { EnsNamesProvider } from '../../hooks/useAccountEnsNames'
 
 export type SafeListProps = {
   safes?: AllSafeItems
@@ -25,7 +26,13 @@ const SafesList = ({ safes, onLinkClick, isSpaceSafe = false }: SafeListProps) =
     return null
   }
 
-  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>)
+  return (
+    <EnsNamesProvider safes={safes}>
+      {safes.map((item) => (
+        <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>
+      ))}
+    </EnsNamesProvider>
+  )
 }
 
 export default SafesList

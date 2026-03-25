@@ -22,11 +22,16 @@ const useIsUnverifiedContract = (contract?: { contractAbi?: object | null } | nu
   return !!contract && !contract.contractAbi
 }
 
-export function useAddressName(address?: string, name?: string | null, customAvatar?: string | null) {
+export function useAddressName(
+  address?: string,
+  name?: string | null,
+  customAvatar?: string | null,
+  noContractName?: boolean,
+) {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
   const displayName = sameAddress(address, safeAddress) ? THIS_SAFE_ACCOUNT : name
-  const shouldSkipContractCheck = !!displayName || !address || !isAddress(address)
+  const shouldSkipContractCheck = noContractName || !!displayName || !address || !isAddress(address)
   const isContract = useIsContractAddress(shouldSkipContractCheck ? undefined : address)
 
   const shouldSkipContractData = shouldSkipContractCheck || !isContract
@@ -51,10 +56,22 @@ export function useAddressName(address?: string, name?: string | null, customAva
   )
 }
 
-const NamedAddressInfo = ({ address, name, customAvatar, ...props }: EthHashInfoProps) => {
-  const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar)
+type NamedAddressInfoProps = EthHashInfoProps & {
+  showName?: boolean
+  noContractName?: boolean
+}
 
-  return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} {...props} />
+const NamedAddressInfo = ({
+  address,
+  name,
+  customAvatar,
+  noContractName,
+  showName,
+  ...props
+}: NamedAddressInfoProps) => {
+  const { name: finalName, logoUri: finalAvatar } = useAddressName(address, name, customAvatar, noContractName)
+
+  return <EthHashInfo address={address} name={finalName} customAvatar={finalAvatar} showName={showName} {...props} />
 }
 
 export default memo(NamedAddressInfo)
