@@ -13,6 +13,7 @@ const SafeAppsListHeader = ({ title, amount }: SafeAppsListHeaderProps) => {
         color: 'primary.light',
         fontWeight: 'bold',
         mt: 3,
+        mb: 2,
       }}
     >
       {title} ({amount || 0})

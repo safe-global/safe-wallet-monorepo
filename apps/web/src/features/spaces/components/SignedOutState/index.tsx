@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { EmailAuthFeature } from '@/features/email-auth'
@@ -22,6 +22,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
 
           <Typography color="text.secondary" mb={2}>
             To view and interact with spaces, you need to sign in with the wallet, that is a member of the space
+            {!$isDisabled && ', or sign in with email'}. Sign in to continue. To view and interact with spaces, you need
+            to sign in with the wallet, that is a member of the space
             {!$isDisabled && ', or sign in with email'}. Sign in to continue.
           </Typography>
 

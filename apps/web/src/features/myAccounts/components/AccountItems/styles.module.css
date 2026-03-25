@@ -99,6 +99,7 @@
 
 .accountItemBalance {
   @apply flex-shrink-0 text-right self-center;
+  min-width: 80px;
 }
 
 .accountItemChainBadge {

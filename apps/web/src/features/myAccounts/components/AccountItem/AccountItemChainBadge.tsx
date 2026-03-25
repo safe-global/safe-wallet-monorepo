@@ -19,7 +19,7 @@ function AccountItemChainBadge({ chainId, safes, className, imageSize = 24 }: Ac
     return (
       <div className={cn('flex shrink-0 justify-end', className)}>
         <Tooltip>
-          <TooltipTrigger render={<span />} className="flex items-center">
+          <TooltipTrigger render={<span />} tabIndex={0} className="flex items-center">
             <NetworkLogosList networks={safes} showHasMore />
           </TooltipTrigger>
           <TooltipContent>

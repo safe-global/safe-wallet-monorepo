@@ -15,6 +15,21 @@ import { toBeHex } from 'ethers'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
+type MockQueryResult<T> = {
+  currentData: T | undefined
+  isLoading: boolean
+  error: unknown
+  refetch: jest.Mock
+}
+
+const mockQueryResult = <T>(overrides: Partial<MockQueryResult<T>> = {}): MockQueryResult<T> => ({
+  currentData: undefined,
+  isLoading: false,
+  error: undefined,
+  refetch: jest.fn(),
+  ...overrides,
+})
+
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 const CHAIN_ID = '5'
 
@@ -150,19 +165,9 @@ describe('useLoadBalances', () => {
       } as unknown as store.RootState),
     )
 
-    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-      currentData: undefined,
-      isLoading: false,
-      error: undefined,
-      refetch: jest.fn(),
-    } as any)
+    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue(mockQueryResult<Balances>())
 
-    jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-      currentData: undefined,
-      isLoading: false,
-      error: undefined,
-      refetch: jest.fn(),
-    } as any)
+    jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue(mockQueryResult<Portfolio>())
 
     jest.spyOn(useCounterfactualBalances, 'useCounterfactualBalances').mockReturnValue([undefined, undefined, false])
   })
@@ -171,12 +176,9 @@ describe('useLoadBalances', () => {
     it('should return transaction service balances when portfolio endpoint is disabled', async () => {
       const mockBalances = createMockTxServiceBalances()
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockBalances,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockBalances }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -228,12 +230,9 @@ describe('useLoadBalances', () => {
     it('should handle transaction service endpoint errors', async () => {
       const mockError = new Error('Transaction service endpoint error')
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: mockError,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ error: mockError }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -289,12 +288,9 @@ describe('useLoadBalances', () => {
     it('should return portfolio balances when portfolio endpoint is enabled', async () => {
       const mockPortfolio = createMockPortfolio()
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -326,12 +322,9 @@ describe('useLoadBalances', () => {
         safeError: undefined,
       })
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       jest
         .spyOn(useCounterfactualBalances, 'useCounterfactualBalances')
@@ -364,12 +357,9 @@ describe('useLoadBalances', () => {
         safeError: undefined,
       })
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -388,19 +378,13 @@ describe('useLoadBalances', () => {
       const mockPortfolioError = new Error('Portfolio endpoint error')
       const mockTxServiceBalances = createMockTxServiceBalances()
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: mockPortfolioError,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ error: mockPortfolioError }))
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockTxServiceBalances,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockTxServiceBalances }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -419,19 +403,13 @@ describe('useLoadBalances', () => {
       const mockPortfolioError = new Error('Portfolio endpoint error')
       const mockTxServiceError = new Error('Transaction service endpoint error')
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: mockPortfolioError,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ error: mockPortfolioError }))
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: mockTxServiceError,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ error: mockTxServiceError }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -446,12 +424,9 @@ describe('useLoadBalances', () => {
     })
 
     it('should handle loading state', async () => {
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: true,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ isLoading: true }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -486,19 +461,13 @@ describe('useLoadBalances', () => {
         } as unknown as store.RootState),
       )
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockTxServiceBalances,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockTxServiceBalances }))
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -527,12 +496,9 @@ describe('useLoadBalances', () => {
     it('should not set isAllTokensMode when "Default tokens" is selected', async () => {
       const mockPortfolio = createMockPortfolio()
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -573,19 +539,13 @@ describe('useLoadBalances', () => {
         } as unknown as store.RootState),
       )
 
-      jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockReturnValue({
-        currentData: mockTxServiceBalances,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockTxServiceBalances }))
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -630,12 +590,9 @@ describe('useLoadBalances', () => {
         positionBalances: [],
       }
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: mockPortfolio,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest
+        .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
+        .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
       const { result } = renderHook(() => useLoadBalances())
 
@@ -668,12 +625,7 @@ describe('useLoadBalances', () => {
         return false
       })
 
-      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue({
-        currentData: undefined,
-        isLoading: false,
-        error: undefined,
-        refetch: jest.fn(),
-      } as any)
+      jest.spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query').mockReturnValue(mockQueryResult<Portfolio>())
 
       const { result } = renderHook(() => useLoadBalances())
 
