@@ -11,7 +11,7 @@ import { GTFFeature } from '@/features/gtf'
 import { SlotName, withSlot } from '../slots'
 import css from './styles.module.css'
 
-const LEARN_MORE_URL = 'https://safe.global'
+const LEARN_MORE_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
 
 const FeeInfoBannerContent = (): ReactElement | null => {
   const [dismissed, setDismissed] = useLocalStorage<boolean>('gtfFeesBannerDismissed')

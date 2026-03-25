@@ -6,7 +6,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 export type FeesPreviewData = {
-  executionFee: { label: string }
   gasFee: { label: string; amount: string; currency: string }
   loading?: boolean
 }
@@ -22,7 +21,6 @@ export const useFeesPreview = (): FeesPreviewData => {
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
 
   return {
-    executionFee: { label: 'Execution fee' },
     gasFee: { label: 'Gas fee', amount: gasFeeFormatted, currency: nativeSymbol },
     loading,
   }

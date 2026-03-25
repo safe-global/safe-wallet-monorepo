@@ -12,14 +12,12 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    executionFee: { label: 'Execution fee' },
     gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
   },
 }
 
 export const Loading: Story = {
   args: {
-    executionFee: { label: 'Execution fee' },
     gasFee: { label: 'Gas fee', amount: '> 0.001', currency: 'ETH' },
     loading: true,
   },
