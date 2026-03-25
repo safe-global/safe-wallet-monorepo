@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Cypress Smoke tests
     permissions:
@@ -35,12 +35,31 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Split specs across containers
+        id: specs
+        shell: bash
+        run: |
+          mapfile -t all_specs < <(ls apps/web/cypress/e2e/smoke/*.cy.js | sort)
+          total=${#all_specs[@]}
+          container=${{ matrix.containers }}
+          num_containers=5
+          selected=()
+          for (( i=0; i<total; i++ )); do
+            if (( (i % num_containers) + 1 == container )); then
+              # Convert absolute path to relative from apps/web/
+              spec="${all_specs[$i]#apps/web/}"
+              selected+=("$spec")
+            fi
+          done
+          echo "specs=$(IFS=,; echo "${selected[*]}")" >> "$GITHUB_OUTPUT"
+
       - uses: ./.github/actions/cypress
         with:
           secrets: ${{ toJSON(secrets) }}
-          spec: cypress/e2e/smoke/*.cy.js
+          spec: ${{ steps.specs.outputs.specs }}
           group: 'Smoke tests'
           tag: 'smoke'
+          record: 'false'
 
   notify:
     if: failure() && github.event_name == 'push'
