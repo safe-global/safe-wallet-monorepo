@@ -319,8 +319,9 @@ export const isChainAgnosticVersion = (version: string | null | undefined): bool
  * Resolves all contract addresses chain-agnostically by version + deployment type.
  * Works for any chain without needing safe-deployments to register it.
  *
- * Only works for versions >= 1.4.1 (all new chains use these).
- * Returns undefined if any required address cannot be resolved.
+ * Returns undefined only if the singleton address cannot be resolved (critical).
+ * Missing auxiliary contracts are logged as warnings and omitted from the result —
+ * the SDK will still init but may fail for operations that need the missing contract.
  */
 export const resolveChainAgnosticContractAddresses = (
   version: string,
@@ -332,18 +333,30 @@ export const resolveChainAgnosticContractAddresses = (
 
   const singletonGetter: DeploymentGetter = isL2 ? getSafeL2SingletonDeployments : getSafeSingletonDeployments
 
-  const resolved: Record<string, string> = {}
-
-  // Resolve singleton
+  // Singleton is critical — cannot proceed without it
   const singletonAddress = singletonGetter({ version: cleanVersion })?.deployments[deploymentType]?.address
-  if (!singletonAddress) return undefined
-  resolved.safeSingletonAddress = singletonAddress
+  if (!singletonAddress) {
+    console.warn(`[resolveChainAgnostic] No singleton address for v${cleanVersion} (${deploymentType}, L2=${isL2})`)
+    return undefined
+  }
 
-  // Resolve all auxiliary contracts
+  const resolved: Record<string, string> = { safeSingletonAddress: singletonAddress }
+  const missingContracts: string[] = []
+
+  // Resolve auxiliary contracts — missing ones are non-fatal
   for (const [field, getter] of Object.entries(BASE_DEPLOYMENT_GETTERS)) {
     const address = getter({ version: cleanVersion })?.deployments[deploymentType]?.address
-    if (!address) return undefined
-    resolved[field] = address
+    if (address) {
+      resolved[field] = address
+    } else {
+      missingContracts.push(field)
+    }
+  }
+
+  if (missingContracts.length > 0) {
+    console.warn(
+      `[resolveChainAgnostic] Missing auxiliary contracts for v${cleanVersion} (${deploymentType}): ${missingContracts.join(', ')}`,
+    )
   }
 
   return resolved as ContractNetworkConfig

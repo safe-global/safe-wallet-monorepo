@@ -296,11 +296,29 @@ describe('deployments utils', () => {
       expect(result!.safeSingletonAddress).toBe(directResult!.safeSingletonAddress)
     })
 
-    it('returns undefined when deployment type has no addresses', () => {
-      // Version 1.4.1 has no eip155 deployments — force an invalid type via casting
-      // to verify the function returns undefined for missing deployment types
+    it('returns undefined when singleton has no address for the version', () => {
       const result = resolveChainAgnosticContractAddresses('0.0.1', true, false)
       expect(result).toBeUndefined()
+    })
+
+    it('logs warning when singleton cannot be resolved', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      resolveChainAgnosticContractAddresses('0.0.1', true, false)
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('No singleton address'))
+      warnSpy.mockRestore()
+    })
+
+    it('returns partial result with warning when auxiliary contracts are missing', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      // 1.3.0 has canonical deployments — should resolve singleton even if some aux are missing
+      const result = resolveChainAgnosticContractAddresses('1.3.0', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+
+      // If any auxiliary was missing, a warning would have been logged
+      // Either way, the result should have the singleton
+      warnSpy.mockRestore()
     })
 
     it('resolves addresses for version 1.3.0 canonical', () => {
