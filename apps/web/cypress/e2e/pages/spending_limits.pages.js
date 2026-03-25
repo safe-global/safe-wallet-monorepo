@@ -176,7 +176,7 @@ export function verifyDefaultTimeIsSet() {
 
 export function clickOnNewSpendingLimitBtn() {
   cy.get(newSpendingLimitBtn).click()
-  cy.get(modalTitle).should('have.text', newTransactionStr)
+  cy.contains(modalTitle, newTransactionStr).should('be.visible')
 }
 
 export function enterSpendingLimitAmount(amount) {
