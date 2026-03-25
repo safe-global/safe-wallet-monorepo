@@ -94,12 +94,10 @@ export function verifyExportMessage(count) {
 
 export function clickOnNameSortBtn() {
   cy.get(tableContainer).contains(nameSortBtn).click()
-  cy.wait(500)
 }
 
 export function clickOnAddrressSortBtn() {
   cy.get(tableContainer).contains(addressortBtn).click()
-  cy.wait(500)
 }
 
 export function verifyEntriesOrder(option = 'ascending') {
@@ -234,8 +232,7 @@ export function verifyBeamerIsChecked() {
 }
 
 export function verifyBeameriFrameExists() {
-  cy.wait(1000)
-  cy.get(beameriFrameContainer).should('exist')
+  cy.get(beameriFrameContainer, { timeout: 5000 }).should('exist')
 }
 
 export function verifyEmptyOwnerNameNotAllowed() {
