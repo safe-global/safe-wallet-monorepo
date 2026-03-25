@@ -1,19 +1,19 @@
-import MailOutline from '@mui/icons-material/MailOutline'
 import Button from '@mui/material/Button'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useEmailLogin, OidcConnection } from '../../hooks/useEmailLogin'
+import GoogleIcon from '@/public/images/common/google.svg'
 import css from '../styles.module.css'
 
-const EmailSignInButton = () => {
+const GoogleSignInButton = () => {
   const { loginWithRedirect } = useEmailLogin()
   const isEmailAuthEnabled = useHasFeature(FEATURES.EMAIL_AUTH)
 
   const handleClick = () => {
-    trackEvent(SPACE_EVENTS.EMAIL_SIGN_IN)
-    loginWithRedirect(OidcConnection.EMAIL)
+    trackEvent(SPACE_EVENTS.GOOGLE_SIGN_IN)
+    loginWithRedirect(OidcConnection.GOOGLE)
   }
 
   if (!isEmailAuthEnabled) return null
@@ -23,13 +23,13 @@ const EmailSignInButton = () => {
       className={css.signInButton}
       fullWidth
       disableElevation
-      startIcon={<MailOutline />}
+      startIcon={<GoogleIcon />}
       onClick={handleClick}
-      data-testid="email-login-btn"
+      data-testid="google-login-btn"
     >
-      Continue with email
+      Continue with Google
     </Button>
   )
 }
 
-export default EmailSignInButton
+export default GoogleSignInButton

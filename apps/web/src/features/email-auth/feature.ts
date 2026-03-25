@@ -10,9 +10,11 @@
  */
 import type { EmailAuthContract } from './contract'
 import EmailSignInButton from './components/EmailSignInButton'
+import GoogleSignInButton from './components/GoogleSignInButton'
 
 const feature: EmailAuthContract = {
   EmailSignInButton,
+  GoogleSignInButton,
 }
 
 export default feature satisfies EmailAuthContract

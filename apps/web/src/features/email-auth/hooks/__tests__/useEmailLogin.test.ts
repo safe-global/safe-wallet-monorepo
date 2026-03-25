@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { GATEWAY_URL } from '@/config/gateway'
-import { useEmailLogin, EMAIL_AUTH_PENDING_KEY } from '../useEmailLogin'
+import { useEmailLogin, EMAIL_AUTH_PENDING_KEY, OidcConnection } from '../useEmailLogin'
 
 describe('useEmailLogin', () => {
   const originalLocation = window.location
@@ -26,22 +26,34 @@ describe('useEmailLogin', () => {
     const { result } = renderHook(() => useEmailLogin())
 
     act(() => {
-      result.current.loginWithRedirect()
+      result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
     expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBe('1')
   })
 
-  it('should redirect to CGW authorize endpoint with current URL as default redirect_url', () => {
+  it('should redirect to CGW authorize endpoint with connection and default redirect_url', () => {
     const { result } = renderHook(() => useEmailLogin())
 
     act(() => {
-      result.current.loginWithRedirect()
+      result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
     const redirectUrl = new URL(window.location.href)
     expect(redirectUrl.origin + redirectUrl.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
     expect(redirectUrl.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/spaces')
+    expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.EMAIL)
+  })
+
+  it('should set connection=google-oauth2 for Google login', () => {
+    const { result } = renderHook(() => useEmailLogin())
+
+    act(() => {
+      result.current.loginWithRedirect(OidcConnection.GOOGLE)
+    })
+
+    const redirectUrl = new URL(window.location.href)
+    expect(redirectUrl.searchParams.get('connection')).toBe(OidcConnection.GOOGLE)
   })
 
   it('should use explicit redirect_url when provided', () => {
@@ -49,7 +61,7 @@ describe('useEmailLogin', () => {
     const { result } = renderHook(() => useEmailLogin())
 
     act(() => {
-      result.current.loginWithRedirect(customUrl)
+      result.current.loginWithRedirect(OidcConnection.EMAIL, customUrl)
     })
 
     const redirectUrl = new URL(window.location.href)

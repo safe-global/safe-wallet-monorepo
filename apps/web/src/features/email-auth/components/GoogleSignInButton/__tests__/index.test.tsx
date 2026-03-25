@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OidcConnection } from '../../../hooks/useEmailLogin'
-import EmailSignInButton from '../index'
+import GoogleSignInButton from '../index'
 
 const mockLoginWithRedirect = jest.fn()
 
@@ -25,7 +25,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => mockUseHasFeature(),
 }))
 
-describe('EmailSignInButton', () => {
+describe('GoogleSignInButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
@@ -34,31 +34,31 @@ describe('EmailSignInButton', () => {
   it('should render nothing when feature flag is disabled', () => {
     mockUseHasFeature.mockReturnValue(false)
 
-    const { container } = render(<EmailSignInButton />)
+    const { container } = render(<GoogleSignInButton />)
 
     expect(container).toBeEmptyDOMElement()
   })
 
   it('should render the sign in button', () => {
-    render(<EmailSignInButton />)
+    render(<GoogleSignInButton />)
 
-    expect(screen.getByTestId('email-login-btn')).toBeInTheDocument()
-    expect(screen.getByText('Continue with email')).toBeInTheDocument()
+    expect(screen.getByTestId('google-login-btn')).toBeInTheDocument()
+    expect(screen.getByText('Continue with Google')).toBeInTheDocument()
   })
 
   it('should track analytics event on click', () => {
-    render(<EmailSignInButton />)
+    render(<GoogleSignInButton />)
 
-    fireEvent.click(screen.getByTestId('email-login-btn'))
+    fireEvent.click(screen.getByTestId('google-login-btn'))
 
-    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.EMAIL_SIGN_IN)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.GOOGLE_SIGN_IN)
   })
 
-  it('should call loginWithRedirect with email connection on click', () => {
-    render(<EmailSignInButton />)
+  it('should call loginWithRedirect with google-oauth2 connection on click', () => {
+    render(<GoogleSignInButton />)
 
-    fireEvent.click(screen.getByTestId('email-login-btn'))
+    fireEvent.click(screen.getByTestId('google-login-btn'))
 
-    expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.EMAIL)
+    expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.GOOGLE)
   })
 })

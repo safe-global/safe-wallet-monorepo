@@ -9,7 +9,9 @@
  */
 
 import type EmailSignInButton from './components/EmailSignInButton'
+import type GoogleSignInButton from './components/GoogleSignInButton'
 
 export interface EmailAuthContract {
   EmailSignInButton: typeof EmailSignInButton
+  GoogleSignInButton: typeof GoogleSignInButton
 }

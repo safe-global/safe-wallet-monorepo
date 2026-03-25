@@ -44,3 +44,28 @@
 .orDivider::before {
   background-color: #dcdee0;
 }
+
+.walletBtnPrimary {
+  color: var(--color-text-contrast);
+  background-color: var(--color-primary-main);
+  min-height: 42px;
+}
+
+.walletBtnPrimary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.walletBtnSecondary {
+  background-color: var(--color-background-main);
+  color: var(--color-text-primary);
+  border-radius: 12px;
+  padding: 10px 28px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  min-height: 42px;
+}
+
+.walletBtnSecondary:hover {
+  background-color: var(--color-border-light);
+}
