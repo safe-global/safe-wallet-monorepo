@@ -4,11 +4,11 @@ The tx-builder is a Safe App served at `https://apps-portal.safe.global/tx-build
 
 ## Environments
 
-| Environment | URL | Trigger | Base path |
-|---|---|---|---|
-| PR Preview | `https://{branch}--tx-builder.review.5afe.dev/` | Pull request | `/` |
-| Staging | `https://tx-builder.staging.5afe.dev/` | Push to `dev` | `/` |
-| Production | `https://apps-portal.safe.global/tx-builder` | Manual (see below) | `/tx-builder/` |
+| Environment | URL                                             | Trigger            | Base path      |
+| ----------- | ----------------------------------------------- | ------------------ | -------------- |
+| PR Preview  | `https://{branch}--tx-builder.review.5afe.dev/` | Pull request       | `/`            |
+| Staging     | `https://tx-builder.staging.5afe.dev/`          | Push to `dev`      | `/`            |
+| Production  | `https://apps-portal.safe.global/tx-builder`    | Manual (see below) | `/tx-builder/` |
 
 ## PR Preview
 
@@ -39,6 +39,7 @@ Production releases are a two-step process: the developer prepares a release, th
 3. **Run the workflow**: Go to [Actions > tx-builder Deploy](https://github.com/safe-global/safe-wallet-monorepo/actions/workflows/tx-builder-deploy.yml), click "Run workflow" on the `dev` branch with `release` checked
 
 The workflow will:
+
 - Build the app with `VITE_BASE_PATH=/tx-builder/` (so assets resolve from the `/tx-builder/` subdirectory)
 - Create a `.tar.gz` archive of the build
 - Create a git tag (`tx-builder-v{VERSION}`)
