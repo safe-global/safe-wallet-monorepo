@@ -1,31 +1,25 @@
 import { useState, useCallback, type ReactElement, type MouseEvent } from 'react'
-import dynamic from 'next/dynamic'
 import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText, SvgIcon } from '@mui/material'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import CloseIcon from '@mui/icons-material/Close'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import { OpenInNewRounded } from '@mui/icons-material'
-import { useSupportChat } from '@/hooks/useSupportChat'
-import { SUPPORT_CHAT_APP_ID, SUPPORT_CHAT_ENABLED } from '@/config/constants'
+import { useLoadFeature } from '@/features/__core__'
+import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import css from './styles.module.css'
-
-const SupportChatDrawer = dynamic(
-  () =>
-    import('@safe-global/support-chat-embed').then((mod) => mod.SupportChatDrawer).catch(() => () => null),
-  { ssr: false, loading: () => null },
-)
 
 const HELP_CENTER_URL = 'https://help.safe.global'
 
 const HelpMenu = (): ReactElement | null => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [isSupportOpen, setSupportOpen] = useState(false)
+  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
   const { config, user } = useSupportChat()
   const isOfficialHost = useIsOfficialHost()
 
   const isMenuOpen = Boolean(anchorEl)
-  const showSupport = Boolean(SUPPORT_CHAT_ENABLED && isOfficialHost && SUPPORT_CHAT_APP_ID)
+  const showSupport = !$isDisabled && isOfficialHost
 
   const handleFabClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -51,7 +45,6 @@ const HelpMenu = (): ReactElement | null => {
     setSupportOpen(true)
     setAnchorEl(null)
   }, [])
-
 
   const handleSupportClose = useCallback(() => {
     setSupportOpen(false)
@@ -97,7 +90,6 @@ const HelpMenu = (): ReactElement | null => {
             <ListItemText>Contact support</ListItemText>
           </MenuItem>
         ) : null}
-
       </Menu>
 
       {showSupport ? (
