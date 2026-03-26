@@ -10,11 +10,11 @@ interface SignInOptionsProps {
 }
 
 const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsProps) => {
-  const { EmailSignInButton, GoogleSignInButton, $isDisabled } = useLoadFeature(EmailAuthFeature)
+  const { EmailSignInButton, GoogleSignInButton, $isDisabled, $isReady } = useLoadFeature(EmailAuthFeature)
 
   return (
     <Box className={css.container}>
-      {!$isDisabled && (
+      {!$isDisabled && $isReady && (
         <>
           <EmailSignInButton />
           <GoogleSignInButton />

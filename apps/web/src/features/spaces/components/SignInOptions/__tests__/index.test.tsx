@@ -26,11 +26,12 @@ jest.mock('@/features/__core__', () => ({
   createFeatureHandle: () => ({}),
 }))
 
-const mockEmailAuthFeature = (isDisabled: boolean) =>
+const mockEmailAuthFeature = (isDisabled: boolean, isReady = !isDisabled) =>
   mockUseLoadFeature.mockReturnValue({
     EmailSignInButton: isDisabled ? () => null : MockEmailSignInButton,
     GoogleSignInButton: isDisabled ? () => null : MockGoogleSignInButton,
     $isDisabled: isDisabled,
+    $isReady: isReady,
   })
 
 describe('SignInOptions', () => {
@@ -51,6 +52,17 @@ describe('SignInOptions', () => {
 
   it('should render only wallet button when email auth is disabled', () => {
     mockEmailAuthFeature(true)
+
+    render(<SignInOptions afterSignIn={mockAfterSignIn} />)
+
+    expect(screen.queryByTestId('email-login-btn')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('google-login-btn')).not.toBeInTheDocument()
+    expect(screen.queryByText('OR')).not.toBeInTheDocument()
+    expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
+  })
+
+  it('should render only wallet button while feature is loading', () => {
+    mockEmailAuthFeature(false, false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
