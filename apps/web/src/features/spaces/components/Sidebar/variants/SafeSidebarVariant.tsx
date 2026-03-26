@@ -15,6 +15,7 @@ import css from '../styles.module.css'
 import type { SafeSidebarVariantProps } from '../types'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { AppRoutes } from '@/config/routes'
+import { getDeterministicColor } from '@/features/spaces'
 import { NavItem } from './NavItem'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
@@ -27,6 +28,7 @@ export const SafeSidebarVariant = ({
   defiGroup,
 }: SafeSidebarVariantProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
+  const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
 
@@ -53,7 +55,12 @@ export const SafeSidebarVariant = ({
               >
                 <icons.ChevronLeft className={`size-4 shrink-0 ${css.backToSpaceChevron}`} />
                 <Avatar className={css.spaceSelectorAvatar}>
-                  <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+                  <AvatarFallback
+                    className={css.spaceSelectorAvatarFallback}
+                    style={spaceAvatarColor ? { backgroundColor: spaceAvatarColor } : undefined}
+                  >
+                    {initial}
+                  </AvatarFallback>
                 </Avatar>
                 <div className={css.spaceSelectorText}>
                   <span className={css.spaceSelectorName}>{spaceName}</span>

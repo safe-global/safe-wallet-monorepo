@@ -19,7 +19,7 @@ const meta = {
   component: EnhancedSidebar,
   args: {
     type: 'safe' as const,
-    spaceName: 'CompanyName',
+    spaceName: 'Company Space',
     spaceInitial: 'C',
   },
   argTypes: {
