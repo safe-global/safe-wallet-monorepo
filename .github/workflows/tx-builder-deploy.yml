@@ -176,19 +176,34 @@ jobs:
           git tag ${{ steps.version.outputs.version }}
           git push origin ${{ steps.version.outputs.version }}
 
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --list 'tx-builder-v*' --sort=-v:refname | head -1)
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log "$PREV_TAG"..HEAD --oneline -- apps/tx-builder/)
+          else
+            LOG="Initial release"
+          fi
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
-          generate_release_notes: true
           files: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
           body: |
             ## tx-builder v${{ steps.version.outputs.version_number }}
 
-            Release of tx-builder Safe App.
-
             **To deploy to production**, provide this release tag to DevOps: `${{ steps.version.outputs.version }}`
+
+            ### Changes
+            ${{ steps.changelog.outputs.log }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
