@@ -211,8 +211,6 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
             ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
           body: |
-            ## tx-builder v${{ steps.version.outputs.version_number }}
-
             ### Changes
             ${{ steps.changelog.outputs.log }}
         env:
