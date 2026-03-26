@@ -3,6 +3,8 @@ import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Storage } from '@reown/appkit-common-react-native'
+import { phantomIconBase64 } from '@/assets/wallet-icons/phantom-icon-data-uri'
+import { rabbyIconBase64 } from '@/assets/wallet-icons/rabby-icon-data-uri'
 import { mainnet, polygon, arbitrum, sepolia } from 'viem/chains'
 
 const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID ?? ''
@@ -59,6 +61,26 @@ export const appKit = createAppKit({
     '38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662', // Bitget Wallet
     '0b415a746fb9ee99cce155c2ceca0c6f6061b1dbca2d722b3ba16381d0562150', // SafePal
     '15c8b91ade1a4e58f3ce4e7a0dd7f42b47db0c8df7e0d84f63eb39bcb96c4e0f', // Bybit Wallet
+  ],
+  customWallets: [
+    {
+      id: 'rabby',
+      name: 'Rabby',
+      homepage: 'https://rabby.io',
+      mobile_link: 'rabby://',
+      image_url: rabbyIconBase64,
+      app_store: 'https://apps.apple.com/us/app/rabby-wallet-crypto-evm/id6474381673',
+      play_store: 'https://play.google.com/store/apps/details?id=com.debank.rabbymobile',
+    },
+    {
+      id: 'phantom',
+      name: 'Phantom',
+      homepage: 'https://phantom.app',
+      mobile_link: 'phantom://',
+      image_url: phantomIconBase64,
+      app_store: 'https://apps.apple.com/us/app/phantom-trade-markets/id1598432977',
+      play_store: 'https://play.google.com/store/apps/details?id=app.phantom',
+    },
   ],
   themeVariables: {
     accent: '#12FF80',
