@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { getDeterministicColor } from '@/features/spaces'
 import { SafeSidebarVariant } from '../variants/SafeSidebarVariant'
 import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
 
@@ -57,8 +58,18 @@ jest.mock('@/components/ui/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),
-  AvatarFallback: ({ children, className }: { children: ReactNode; className?: string }) => (
-    <div className={className}>{children}</div>
+  AvatarFallback: ({
+    children,
+    className,
+    style,
+  }: {
+    children: ReactNode
+    className?: string
+    style?: CSSProperties
+  }) => (
+    <div data-testid="space-avatar-fallback" className={className} style={style}>
+      {children}
+    </div>
   ),
 }))
 
@@ -132,6 +143,40 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getByText('Space')).toBeInTheDocument()
     expect(screen.getByText('M')).toBeInTheDocument()
     expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
+  })
+
+  it('applies deterministic avatar color from space name like SpaceSelectorDropdown', () => {
+    mockUseCurrentSpaceId.mockReturnValue('123')
+    const spaceName = 'My Safe Account'
+
+    render(
+      <SafeSidebarVariant
+        spaceName={spaceName}
+        spaceInitial="M"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.getByTestId('space-avatar-fallback')).toHaveStyle({
+      backgroundColor: getDeterministicColor(spaceName),
+    })
+  })
+
+  it('does not set avatar background when space name is empty', () => {
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(
+      <SafeSidebarVariant
+        spaceInitial="U"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.getByTestId('space-avatar-fallback').style.backgroundColor).toBe('')
   })
 
   it('derives initial from space name when spaceInitial not provided', () => {
