@@ -18,7 +18,7 @@ export function getRecoveryProposalTransactions({
   newThreshold: number
   newOwners: Array<AddressInfo>
 }): Array<MetaTransactionData> {
-  const safeDeployment = getSafeSingletonDeployment({ network: safe.chainId, version: safe.version ?? undefined })
+  const safeDeployment = getSafeSingletonDeployment({ version: safe.version ?? undefined })
 
   if (!safeDeployment) {
     throw new Error('Safe deployment not found')

@@ -157,17 +157,20 @@ describe('create/logic', () => {
   })
 
   describe('createNewUndeployedSafeWithoutSalt', () => {
-    it('should throw errors if no deployments are found', () => {
-      expect(() =>
-        createNewUndeployedSafeWithoutSalt(
-          '1.4.1',
-          {
-            owners: [faker.finance.ethereumAddress()],
-            threshold: 1,
-          },
-          chainBuilder().with({ chainId: 'NON_EXISTING' }).build(),
-        ),
-      ).toThrowError(new Error('No Safe deployment found'))
+    it('should resolve addresses chain-agnostically for unregistered chains', () => {
+      const result = createNewUndeployedSafeWithoutSalt(
+        '1.4.1',
+        {
+          owners: [faker.finance.ethereumAddress()],
+          threshold: 1,
+        },
+        chainBuilder().with({ chainId: 'NON_EXISTING' }).build(),
+      )
+
+      // Chain-agnostic fallback resolves canonical addresses for 1.4.1+
+      expect(result.factoryAddress).toBeDefined()
+      expect(result.masterCopy).toBeDefined()
+      expect(result.safeAccountConfig.fallbackHandler).toBeDefined()
     })
 
     it('should use l1 masterCopy and no migration on l1s without multichain feature', () => {

@@ -1,17 +1,25 @@
 import semverSatisfies from 'semver/functions/satisfies'
 import {
   getSafeSingletonDeployment,
+  getSafeSingletonDeployments,
   getSafeL2SingletonDeployment,
+  getSafeL2SingletonDeployments,
   getMultiSendCallOnlyDeployment,
   getMultiSendCallOnlyDeployments,
   getMultiSendDeployment,
   getMultiSendDeployments,
   getFallbackHandlerDeployment,
+  getCompatibilityFallbackHandlerDeployments,
   getProxyFactoryDeployment,
+  getProxyFactoryDeployments,
   getSignMessageLibDeployment,
+  getSignMessageLibDeployments,
   getCreateCallDeployment,
+  getCreateCallDeployments,
+  getSimulateTxAccessorDeployments,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
+import type { ContractNetworkConfig } from '@safe-global/protocol-kit'
 import { _SAFE_L2_DEPLOYMENTS } from '@safe-global/safe-deployments/dist/deployments'
 import type { SingletonDeploymentJSON } from '@safe-global/safe-deployments/dist/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -23,6 +31,7 @@ import { ZKSYNC_ERA_CHAIN_ID } from '@safe-global/utils/config/chains'
 
 const toNetworkAddressList = (addresses: string | string[]) => (Array.isArray(addresses) ? addresses : [addresses])
 
+type DeploymentType = 'canonical' | 'eip155' | 'zksync'
 type DeploymentRecord = Record<string, { address: string; codeHash: string }>
 
 const SAFE_L2_CODE_HASHES = new Set<string>(
@@ -89,6 +98,25 @@ export const getCanonicalOrFirstAddress = (
 
   const addresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
   return addresses[0]
+}
+
+/**
+ * Returns an address for a deployment, trying per-chain lookup first, then falling back
+ * to the chain-agnostic deployment type address. Works for unregistered chains.
+ */
+export const getChainAgnosticAddress = (
+  deployment: SingletonDeploymentV2 | undefined,
+  chainId: string,
+  deploymentType: DeploymentType = 'canonical',
+): string | undefined => {
+  if (!deployment) return undefined
+
+  // Try per-chain first (works for registered chains)
+  const perChainAddress = getCanonicalOrFirstAddress(deployment, chainId)
+  if (perChainAddress) return perChainAddress
+
+  // Fall back to chain-agnostic address by deployment type
+  return deployment.deployments[deploymentType]?.address
 }
 
 /**
@@ -254,4 +282,82 @@ export const getCanonicalMultiSendAddress = (version: SafeState['version']): str
   const safeVersion = version ?? '1.3.0'
   const deployment = getMultiSendDeployments({ version: safeVersion })
   return deployment?.deployments.canonical?.address
+}
+
+type DeploymentGetter = (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined
+
+type AuxiliaryContractField = keyof Pick<
+  ContractNetworkConfig,
+  | 'multiSendAddress'
+  | 'multiSendCallOnlyAddress'
+  | 'safeProxyFactoryAddress'
+  | 'fallbackHandlerAddress'
+  | 'signMessageLibAddress'
+  | 'createCallAddress'
+  | 'simulateTxAccessorAddress'
+>
+
+const BASE_DEPLOYMENT_GETTERS: Record<AuxiliaryContractField, DeploymentGetter> = {
+  multiSendAddress: getMultiSendDeployments,
+  multiSendCallOnlyAddress: getMultiSendCallOnlyDeployments,
+  safeProxyFactoryAddress: getProxyFactoryDeployments,
+  fallbackHandlerAddress: getCompatibilityFallbackHandlerDeployments,
+  signMessageLibAddress: getSignMessageLibDeployments,
+  createCallAddress: getCreateCallDeployments,
+  simulateTxAccessorAddress: getSimulateTxAccessorDeployments,
+}
+
+const CHAIN_AGNOSTIC_VERSIONS = '>=1.4.1'
+
+export const isChainAgnosticVersion = (version: string | null | undefined): boolean => {
+  if (!version) return false
+  const [cleanVersion] = version.split('+')
+  return semverSatisfies(cleanVersion, CHAIN_AGNOSTIC_VERSIONS)
+}
+
+/**
+ * Resolves all contract addresses chain-agnostically by version + deployment type.
+ * Works for any chain without needing safe-deployments to register it.
+ *
+ * Returns undefined only if the singleton address cannot be resolved (critical).
+ * Missing auxiliary contracts are logged as warnings and omitted from the result —
+ * the SDK will still init but may fail for operations that need the missing contract.
+ */
+export const resolveChainAgnosticContractAddresses = (
+  version: string,
+  isL2: boolean,
+  isZk: boolean,
+): ContractNetworkConfig | undefined => {
+  const [cleanVersion] = version.split('+')
+  const deploymentType: DeploymentType = isZk ? 'zksync' : 'canonical'
+
+  const singletonGetter: DeploymentGetter = isL2 ? getSafeL2SingletonDeployments : getSafeSingletonDeployments
+
+  // Singleton is critical — cannot proceed without it
+  const singletonAddress = singletonGetter({ version: cleanVersion })?.deployments[deploymentType]?.address
+  if (!singletonAddress) {
+    console.warn(`[resolveChainAgnostic] No singleton address for v${cleanVersion} (${deploymentType}, L2=${isL2})`)
+    return undefined
+  }
+
+  const resolved: Record<string, string> = { safeSingletonAddress: singletonAddress }
+  const missingContracts: string[] = []
+
+  // Resolve auxiliary contracts — missing ones are non-fatal
+  for (const [field, getter] of Object.entries(BASE_DEPLOYMENT_GETTERS)) {
+    const address = getter({ version: cleanVersion })?.deployments[deploymentType]?.address
+    if (address) {
+      resolved[field] = address
+    } else {
+      missingContracts.push(field)
+    }
+  }
+
+  if (missingContracts.length > 0) {
+    console.warn(
+      `[resolveChainAgnostic] Missing auxiliary contracts for v${cleanVersion} (${deploymentType}): ${missingContracts.join(', ')}`,
+    )
+  }
+
+  return resolved as ContractNetworkConfig
 }
