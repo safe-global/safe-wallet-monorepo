@@ -117,8 +117,8 @@ jobs:
 
       - name: Check if version already exists
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "❌ Version v${{ steps.version.outputs.version }} already exists!"
+          if git rev-parse "web-v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Version web-v${{ steps.version.outputs.version }} already exists!"
             exit 1
           fi
           echo "✅ Version is new"
@@ -196,7 +196,7 @@ jobs:
 
           # Create PR body
           PR_BODY=$(cat <<EOF
-          ## 🚀 Release v${{ steps.version.outputs.version }}
+          ## 🚀 Release web-v${{ steps.version.outputs.version }}
 
           $CHANGELOG
 
@@ -240,7 +240,7 @@ jobs:
           PR_URL=$(gh pr create \
             --base main \
             --head release \
-            --title "Release v${{ steps.version.outputs.version }}" \
+            --title "Release web-v${{ steps.version.outputs.version }}" \
             --body "$PR_BODY" \
             --label "release" \
             | tail -n 1)
@@ -265,13 +265,13 @@ jobs:
             --arg base "$BASE_BRANCH" \
             --arg pr_url "$PR_URL" \
             '{
-              text: ("🚀 *Release v" + $version + " Started*"),
+              text: ("🚀 *Release web-v" + $version + " Started*"),
               blocks: [
                 {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ("*Release v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
+                    text: ("*Release web-v" + $version + " has been initiated* ✅\n\n*Type:* " + $release_type + "\n*Base:* " + $base + "\n*PR:* " + $pr_url + "\n\n_QA team: Please review and test_ 🧪")
                   }
                 }
               ]
@@ -285,7 +285,7 @@ jobs:
         run: |
           echo "### 🎉 Release Started Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** web-v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Type:** $INPUT_RELEASE_TYPE" >> $GITHUB_STEP_SUMMARY
           echo "**Base Branch:** ${{ steps.base.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
           echo "**PR:** ${{ steps.create_pr.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY

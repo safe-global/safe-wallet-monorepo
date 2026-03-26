@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Create production release'
+        description: 'Prepare a production release'
         type: boolean
         default: true
 
@@ -124,15 +124,12 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
-  production-release:
-    name: Production Release
+  prepare-release:
+    name: Prepare Release
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.release
     permissions:
       contents: write
-      id-token: write
-    env:
-      PROD_DEPLOYMENT_HOOK_URL: ${{ secrets.PROD_DEPLOYMENT_HOOK_URL }}
 
     steps:
       - name: Checkout
@@ -149,35 +146,28 @@ jobs:
           VERSION=$(node -p 'require("./package.json").version')
           echo "version=tx-builder-v$VERSION" >> $GITHUB_OUTPUT
           echo "version_number=$VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Version: $VERSION"
+          echo "Version: $VERSION"
 
       - name: Check if tag already exists
         run: |
           if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "❌ Tag ${{ steps.version.outputs.version }} already exists!"
+            echo "Tag ${{ steps.version.outputs.version }} already exists!"
             echo "Make sure you've bumped the version in apps/tx-builder/package.json"
             exit 1
           fi
-          echo "✅ Tag is new"
+          echo "Tag is new"
 
-      - name: Build
+      - name: Build (production base path)
         run: yarn workspace @safe-global/tx-builder build
         env:
+          VITE_BASE_PATH: /tx-builder/
           VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
           VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to production S3
-        env:
-          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/releases/${{ steps.version.outputs.version }}
+      - name: Create release archive
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: aws s3 sync ./build $BUCKET --delete
+        run: tar -czf tx-builder-${{ steps.version.outputs.version_number }}.tar.gz -C build .
 
       - name: Create git tag
         run: |
@@ -186,43 +176,27 @@ jobs:
           git tag ${{ steps.version.outputs.version }}
           git push origin ${{ steps.version.outputs.version }}
 
-      - name: Create GitHub release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: tx-builder ${{ steps.version.outputs.version_number }}
+          name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
+          files: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
           body: |
             ## tx-builder v${{ steps.version.outputs.version_number }}
 
             Release of tx-builder Safe App.
+
+            **To deploy to production**, provide this release tag to DevOps: `${{ steps.version.outputs.version }}`
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Trigger production deployment
-        if: env.PROD_DEPLOYMENT_HOOK_URL != ''
-        env:
-          PROD_DEPLOYMENT_HOOK_TOKEN: ${{ secrets.PROD_DEPLOYMENT_HOOK_TOKEN }}
-          VERSION_TAG: ${{ steps.version.outputs.version }}
-        run: |
-          HTTP_STATUS=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" -X POST \
-            -F token="$PROD_DEPLOYMENT_HOOK_TOKEN" \
-            -F ref=master \
-            -F "variables[TRIGGER_RELEASE_COMMIT_TAG]=$VERSION_TAG" \
-            $PROD_DEPLOYMENT_HOOK_URL)
-          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
-            echo "❌ Production deployment trigger failed (HTTP $HTTP_STATUS)"
-            exit 1
-          fi
-
       - name: Summary
         run: |
-          echo "### 🎉 tx-builder Release Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "### tx-builder Release Ready" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifact:** tx-builder-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release has been:" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Built and uploaded to S3" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Tagged in git" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ GitHub release created" >> $GITHUB_STEP_SUMMARY
+          echo "Next step: provide this tag to DevOps for production deployment." >> $GITHUB_STEP_SUMMARY
