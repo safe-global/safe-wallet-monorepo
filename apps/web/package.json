@@ -79,6 +79,7 @@
     "@safe-global/safe-deployments": "^1.37.53",
     "@safe-global/safe-modules-deployments": "^3.0.1",
     "@safe-global/store": "workspace:^",
+    "@safe-global/support-chat-embed": "^1.0.2",
     "@safe-global/theme": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",
     "@trezor/connect-web": "9.7.2",

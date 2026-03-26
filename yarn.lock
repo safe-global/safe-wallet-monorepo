@@ -13494,6 +13494,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@safe-global/support-chat-embed@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@safe-global/support-chat-embed@npm:1.0.2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40safe-global%2Fsupport-chat-embed%2F1.0.2%2F695c7bb51a0a1a7a5710d5c0c89a846183bcc72a"
+  peerDependencies:
+    "@mui/material": ^5.0.0 || ^6.0.0
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+    viem: ^2.0.0
+  checksum: 10/b5c0099e7761361d7e3a862a22179b7166131cc1368dd62a306818ed0f58d57ec42fbc994f7a32696fe2184566a9f2d4e3c7598d8cc8da4d167f33a257bda677
+  languageName: node
+  linkType: hard
+
 "@safe-global/test@workspace:^, @safe-global/test@workspace:config/test":
   version: 0.0.0-use.local
   resolution: "@safe-global/test@workspace:config/test"
@@ -13679,6 +13691,7 @@ __metadata:
     "@safe-global/safe-deployments": "npm:^1.37.53"
     "@safe-global/safe-modules-deployments": "npm:^3.0.1"
     "@safe-global/store": "workspace:^"
+    "@safe-global/support-chat-embed": "npm:^1.0.2"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^1.0.5"

@@ -82,7 +82,7 @@ if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
 const nextConfig = {
   output: 'export', // static site export
 
-  transpilePackages: ['@safe-global/store'],
+  transpilePackages: ['@safe-global/store', '@safe-global/theme'],
   images: {
     unoptimized: true,
   },
@@ -133,11 +133,16 @@ const nextConfig = {
       ],
     })
 
+    config.resolve.modules = [path.resolve(__dirname, 'node_modules'), ...(config.resolve.modules || ['node_modules'])]
+
     config.resolve.alias = {
       ...config.resolve.alias,
       'bn.js': path.resolve('../../node_modules/bn.js/lib/bn.js'),
       'mainnet.json': path.resolve('../..node_modules/@ethereumjs/common/dist.browser/genesisStates/mainnet.json'),
       '@mui/material$': path.resolve('./src/components/common/Mui'),
+      // Force React resolution from monorepo root for portal dependencies
+      react: path.resolve(__dirname, '../../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
     }
 
     if (dev) {
