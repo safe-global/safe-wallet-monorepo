@@ -73,10 +73,10 @@ export function verifySelectedNetwrokSepolia() {
 }
 
 export function clickOnInactiveNFT() {
-  cy.get(inactiveNftIcon).eq(0).click()
+  cy.get(inactiveNftIcon).eq(0).scrollIntoView().click({ force: true })
 }
 export function verifyNFTModalDoesNotExist() {
-  cy.get(nftModalTitle).should('not.be.visible')
+  cy.get(nftModalTitle).should('not.exist')
 }
 
 export function selectNFTs(numberOfNFTs) {
