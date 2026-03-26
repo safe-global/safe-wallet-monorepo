@@ -59,6 +59,8 @@ describe('useInitSafeCoreSDK hook', () => {
       address: mockSafeInfo.safe.address.value,
       implementation: mockSafeInfo.safe.implementation.value,
       undeployedSafe: undefined,
+      isL2Chain: undefined,
+      isZkChain: undefined,
     })
 
     await waitFor(() => {
@@ -70,7 +72,7 @@ describe('useInitSafeCoreSDK hook', () => {
     const initMock = jest.spyOn(coreSDK, 'initSafeSDK')
     const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
 
-    jest.spyOn(useSafeInfo, 'default').mockReturnValueOnce({
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       ...mockSafeInfo,
       safeLoaded: false,
     })
@@ -85,7 +87,7 @@ describe('useInitSafeCoreSDK hook', () => {
     const initMock = jest.spyOn(coreSDK, 'initSafeSDK')
     const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
 
-    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValueOnce(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
 
     renderHook(() => useInitSafeCoreSDK())
 
@@ -97,7 +99,7 @@ describe('useInitSafeCoreSDK hook', () => {
     const initMock = jest.spyOn(coreSDK, 'initSafeSDK')
     const setSDKMock = jest.spyOn(coreSDK, 'setSafeSDK')
 
-    jest.spyOn(router, 'useRouter').mockReturnValueOnce({ query: {} } as unknown as router.NextRouter)
+    jest.spyOn(router, 'useRouter').mockReturnValue({ query: {} } as unknown as router.NextRouter)
 
     renderHook(() => useInitSafeCoreSDK())
 
