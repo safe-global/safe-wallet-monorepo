@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to publish (e.g. v1.81.0)'
+        description: 'Release tag to publish (e.g. web-v1.85.0)'
         required: true
         type: string
 
@@ -67,13 +67,20 @@ jobs:
             linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Resolve Docker tag
+        if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
+        id: docker_tag
+        run: |
+          RAW_TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          # Strip app prefix if present (e.g. web-v1.85.0 -> v1.85.0)
+          echo "tag=${RAW_TAG#web-}" >> $GITHUB_OUTPUT
       - name: Deploy Tag
         if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v7
         with:
           push: true
           tags: |
-            safeglobal/safe-wallet-web:${{ github.event.release.tag_name || inputs.tag }}
+            safeglobal/safe-wallet-web:${{ steps.docker_tag.outputs.tag }}
             safeglobal/safe-wallet-web:latest
           platforms: |
             linux/amd64
