@@ -13,7 +13,7 @@ import { View } from 'tamagui'
 import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
-import { selectSignerByAddress, SignerType } from '@/src/store/signersSlice'
+import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { getAddress } from 'ethers'
 
 const title = 'Add signer'
@@ -43,7 +43,7 @@ export const ImportSignersContainer = () => {
         value: getAddress(address),
         name: walletInfo?.name ?? null,
         logoUri: walletInfo?.icon ?? null,
-        type: SignerType.WALLETCONNECT,
+        type: 'walletconnect',
         walletName: walletInfo?.name,
         walletIcon: walletInfo?.icon,
       }),
