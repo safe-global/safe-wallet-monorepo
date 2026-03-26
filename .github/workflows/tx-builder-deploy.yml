@@ -129,7 +129,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.release
     permissions:
+      attestations: write
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -169,6 +171,30 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: tar -czf tx-builder-${{ steps.version.outputs.version_number }}.tar.gz -C build .
 
+      - name: Generate artifact attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
+
+      - name: Create checksum
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: sha256sum tx-builder-${{ steps.version.outputs.version_number }}.tar.gz > tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --list 'tx-builder-v*' --sort=-v:refname | head -1)
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log "$PREV_TAG"..HEAD --oneline -- apps/tx-builder/)
+          else
+            LOG="Initial release"
+          fi
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: Create git tag
         run: |
           git config user.name "github-actions[bot]"
@@ -181,14 +207,12 @@ jobs:
         with:
           name: ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
-          generate_release_notes: true
-          files: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
+          files: |
+            ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
+            ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
           body: |
-            ## tx-builder v${{ steps.version.outputs.version_number }}
-
-            Release of tx-builder Safe App.
-
-            **To deploy to production**, provide this release tag to DevOps: `${{ steps.version.outputs.version }}`
+            ### Changes
+            ${{ steps.changelog.outputs.log }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
