@@ -1,4 +1,4 @@
-import MailOutline from '@mui/icons-material/MailOutline'
+import { Mail } from 'lucide-react'
 import Button from '@mui/material/Button'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -23,7 +23,7 @@ const EmailSignInButton = () => {
       className={css.signInButton}
       fullWidth
       disableElevation
-      startIcon={<MailOutline />}
+      startIcon={<Mail size={18} />}
       onClick={handleClick}
       data-testid="email-login-btn"
     >

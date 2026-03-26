@@ -4,6 +4,7 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import { useEffect, useState } from 'react'
+import { WalletMinimal } from 'lucide-react'
 import css from './styles.module.css'
 
 export type WalletLoginButtonStyle = 'walletBtnPrimary' | 'walletBtnSecondary'
@@ -91,6 +92,7 @@ const WalletLogin = ({
       size="small"
       disableElevation
       fullWidth={fullWidth}
+      startIcon={buttonStyle === 'walletBtnSecondary' ? <WalletMinimal size={18} /> : undefined}
       data-testid="connect-wallet-btn"
     >
       {buttonText?.disconnected ?? 'Connect wallet'}
