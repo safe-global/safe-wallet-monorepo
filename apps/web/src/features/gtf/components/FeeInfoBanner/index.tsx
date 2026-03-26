@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { IconButton, SvgIcon, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined'
+import WalletOutlinedIcon from '@/public/images/common/wallet-outlined.svg'
 import TokenIcon from '@/public/images/common/token.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -31,7 +31,7 @@ const FeeInfoBanner = (): ReactElement | null => {
 
           <div className={css.feeInfoBullet}>
             <span className={css.bulletIconWrapper}>
-              <SvgIcon component={AccountBalanceWalletOutlinedIcon} className={css.bulletIcon} />
+              <SvgIcon component={WalletOutlinedIcon} inheritViewBox className={css.bulletIcon} />
             </span>
             <Typography variant="body2">No need to fund signing wallets</Typography>
           </div>

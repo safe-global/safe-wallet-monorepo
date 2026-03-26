@@ -1,14 +1,10 @@
 .feeInfoBanner {
-  background-color: #cef0fd;
+  background-color: var(--color-info-background);
   border-radius: 6px;
   padding: 16px;
   display: flex;
   gap: 16px;
   align-items: flex-start;
-}
-
-:global([data-theme='dark']) .feeInfoBanner {
-  background-color: #203339;
 }
 
 .feeInfoContent {
@@ -19,8 +15,8 @@
 }
 
 .newTag {
-  background-color: #78d2e7;
-  color: #ffffff;
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
   font-size: 11px;
   font-weight: 700;
   line-height: 16px;
@@ -29,10 +25,6 @@
   padding: 2px 8px;
   border-radius: 6px;
   align-self: flex-start;
-}
-
-:global([data-theme='dark']) .newTag {
-  background-color: #458898;
 }
 
 .feeInfoBody {
@@ -60,11 +52,10 @@
 
 .bulletIcon {
   font-size: 16px;
-  color: var(--color-text-secondary);
+  color: var(--color-primary-light);
 }
 
 .learnMoreLink {
-  text-decoration: underline;
   padding: 4px 0;
 }
 
