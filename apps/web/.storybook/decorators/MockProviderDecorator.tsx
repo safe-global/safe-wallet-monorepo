@@ -2,6 +2,7 @@ import React, { type ReactNode } from 'react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { StoryContext } from 'storybook/internal/csf'
 import { Paper } from '@mui/material'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
 type MockProviderDecoratorProps = {
   children: ReactNode
@@ -13,6 +14,8 @@ type MockProviderDecoratorProps = {
   withPaper?: boolean
   /** Paper padding */
   paperPadding?: number
+  /** Wrap with ShadcnProvider for shadcn component support */
+  shadcn?: boolean
 }
 
 /**
@@ -28,14 +31,22 @@ export const MockProviderDecorator = ({
   context,
   withPaper = false,
   paperPadding = 2,
+  shadcn = false,
 }: MockProviderDecoratorProps) => {
   const content = withPaper ? <Paper sx={{ p: paperPadding }}>{children}</Paper> : children
 
-  return (
+  const wrapped = (
     <StoreDecorator initialState={initialState} context={context}>
       {content}
     </StoreDecorator>
   )
+
+  if (shadcn) {
+    const isDark = (context?.globals as Record<string, unknown>)?.theme === 'dark'
+    return <ShadcnProvider dark={isDark}>{wrapped}</ShadcnProvider>
+  }
+
+  return wrapped
 }
 
 /**

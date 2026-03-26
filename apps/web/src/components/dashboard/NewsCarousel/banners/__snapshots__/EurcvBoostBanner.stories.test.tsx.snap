@@ -45,13 +45,13 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
           </a>
         </p>
         <button
-          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic bannerCtaText mui-style-1wse3e8-MuiButtonBase-root-MuiButton-root"
+          class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic MuiButton-root MuiButton-text MuiButton-textStatic MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorStatic bannerCtaText mui-style-1yiiekm-MuiButtonBase-root-MuiButton-root"
           tabindex="0"
           type="button"
         >
           Start earning
           <span
-            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-pctag4-MuiButton-endIcon"
+            class="MuiButton-icon MuiButton-endIcon MuiButton-iconSizeSmall mui-style-dp0v3c-MuiButton-endIcon"
           >
             <svg
               aria-hidden="true"
@@ -70,7 +70,7 @@ exports[`./EurcvBoostBanner.stories Default 1`] = `
     </div>
     <button
       aria-label="close"
-      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-1ej6am8-MuiButtonBase-root-MuiIconButton-root"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium closeButton mui-style-le4ea9-MuiButtonBase-root-MuiIconButton-root"
       tabindex="0"
       type="button"
     >

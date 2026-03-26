@@ -5,7 +5,9 @@ import { mockVisualTestApis } from '../../support/visual-mocks.js'
 const SPACE_ID = '1'
 
 function setupSpacesAuth() {
-  main.enableChainFeature(constants.chainFeatures.spaces)
+  // Note: SPACES feature flag is already present in the chains fixture (all.json).
+  // Do NOT call enableChainFeature here — it uses req.continue() which bypasses
+  // the fixture mock and hits the real staging server, causing flaky failures.
 
   main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__auth, {
     sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
@@ -32,6 +34,11 @@ describe('[VISUAL] Spaces page screenshots', { defaultCommandTimeout: 60000, ...
   beforeEach(() => {
     mockVisualTestApis()
     setupSpacesAuth()
+  })
+
+  it('[VISUAL] Screenshot spaces welcome page', () => {
+    cy.visit(constants.spacesUrl)
+    main.awaitVisualStability()
   })
 
   it('[VISUAL] Screenshot spaces dashboard page', () => {

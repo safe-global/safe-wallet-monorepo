@@ -1,6 +1,7 @@
 import { router } from 'expo-router'
 import React from 'react'
-import { Button, View } from 'tamagui'
+import { View } from 'tamagui'
+import { SafeButton } from '@/src/components/SafeButton'
 
 interface ParametersButtonProps {
   txId: string
@@ -16,21 +17,10 @@ export function ParametersButton({ txId, title = 'Transaction details' }: Parame
   }
 
   return (
-    <View height="$10" alignItems="center">
-      <Button
-        paddingHorizontal="$2"
-        height="$9"
-        borderRadius={8}
-        borderWidth={0}
-        backgroundColor="$borderLight"
-        fontWeight="700"
-        size="$4"
-        fullscreen
-        onPress={goToAdvancedDetails}
-        testID="transaction-details-button"
-      >
+    <View>
+      <SafeButton secondary size="$sm" onPress={goToAdvancedDetails} testID="transaction-details-button">
         {title}
-      </Button>
+      </SafeButton>
     </View>
   )
 }

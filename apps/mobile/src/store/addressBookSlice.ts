@@ -61,6 +61,22 @@ export const addressBookSlice = createSlice({
       state.contacts[contact.value] = contact
     },
 
+    mergeContactChainIds: (state, action: PayloadAction<{ value: string; chainIds: string[] }>) => {
+      const { value, chainIds } = action.payload
+      const existing = state.contacts[value]
+      if (!existing) {
+        return
+      }
+
+      // If currently "all networks", don't restrict
+      if (existing.chainIds.length === 0) {
+        return
+      }
+
+      const merged = [...new Set([...existing.chainIds, ...chainIds])]
+      existing.chainIds = merged
+    },
+
     addContacts: (state, action: PayloadAction<Contact[]>) => {
       action.payload.forEach((contact) => {
         state.contacts[contact.value] = contact
@@ -69,8 +85,15 @@ export const addressBookSlice = createSlice({
   },
 })
 
-export const { addContact, removeContact, selectContact, updateContact, addContacts, upsertContact } =
-  addressBookSlice.actions
+export const {
+  addContact,
+  removeContact,
+  selectContact,
+  updateContact,
+  addContacts,
+  upsertContact,
+  mergeContactChainIds,
+} = addressBookSlice.actions
 
 export const selectAddressBookState = (state: RootState) => state.addressBook
 

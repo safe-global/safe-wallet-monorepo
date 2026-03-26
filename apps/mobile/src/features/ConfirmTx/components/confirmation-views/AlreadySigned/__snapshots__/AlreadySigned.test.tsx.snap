@@ -22,8 +22,8 @@ exports[`AlreadySigned matches snapshot 1`] = `
         style={
           {
             "color": "#A1A3A7",
-            "fontFamily": "DM Sans",
             "fontSize": 14,
+            "fontWeight": 400,
             "marginBottom": 8,
             "textAlign": "center",
           }

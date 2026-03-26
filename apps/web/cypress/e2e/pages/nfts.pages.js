@@ -76,7 +76,7 @@ export function clickOnInactiveNFT() {
   cy.get(inactiveNftIcon).eq(0).click()
 }
 export function verifyNFTModalDoesNotExist() {
-  cy.get(nftModalTitle).should('not.exist')
+  cy.get(nftModalTitle).should('not.be.visible')
 }
 
 export function selectNFTs(numberOfNFTs) {

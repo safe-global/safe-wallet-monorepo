@@ -29,9 +29,4 @@ export {
 } from './hooks/useIsOnlySpendingLimitBeneficiary'
 
 // Store exports for cross-feature access
-export {
-  spendingLimitSlice,
-  selectSpendingLimits,
-  selectSpendingLimitsLoading,
-  selectSpendingLimitsLoaded,
-} from './store/spendingLimitsSlice'
+export { spendingLimitSlice, selectSpendingLimits, selectSpendingLimitsLoading } from './store/spendingLimitsSlice'

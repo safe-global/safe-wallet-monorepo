@@ -12,21 +12,47 @@ import type { MyAccountsContract } from './contract'
 
 // Direct component imports (already lazy-loaded at feature level)
 import MyAccounts from './components/MyAccounts'
-import { AccountItem } from './components/AccountItem'
+import AccountItemButton from './components/AccountItem/AccountItemButton'
+import AccountItemLink from './components/AccountItem/AccountItemLink'
+import AccountItemCheckbox from './components/AccountItem/AccountItemCheckbox'
+import AccountItemIcon from './components/AccountItem/AccountItemIcon'
+import AccountItemInfo from './components/AccountItem/AccountItemInfo'
+import AccountItemChainBadge from './components/AccountItem/AccountItemChainBadge'
+import AccountItemBalance from './components/AccountItem/AccountItemBalance'
+import AccountItemPinButton from './components/AccountItem/AccountItemPinButton'
+import AccountItemContextMenu from './components/AccountItem/AccountItemContextMenu'
+import AccountItemGroup from './components/AccountItem/AccountItemGroup'
+import AccountItemStatusChip from './components/AccountItem/AccountItemStatusChip'
+import AccountItemQueueActions from './components/AccountItem/AccountItemQueueActions'
+import AccountItemContent from './components/AccountItem/AccountItemContent'
 import SafesList from './components/SafesList'
 import AccountsNavigation from './components/AccountsNavigation'
 import SafeSelectionModal from './components/SafeSelectionModal'
 import NonPinnedWarning from './components/NonPinnedWarning'
+import AccountsWidget from './components/AccountsWidget/AccountsWidget'
 
 // Flat structure - naming determines stub behavior
 const feature: MyAccountsContract = {
   // Main component
   MyAccounts,
 
-  // Externally used components
-  AccountItem,
+  // Externally used components (individual exports to avoid compound component issues)
+  AccountItemButton,
+  AccountItemLink,
+  AccountItemCheckbox,
+  AccountItemIcon,
+  AccountItemInfo,
+  AccountItemChainBadge,
+  AccountItemBalance,
+  AccountItemPinButton,
+  AccountItemContextMenu,
+  AccountItemGroup,
+  AccountItemStatusChip,
+  AccountItemQueueActions,
+  AccountItemContent,
   SafesList,
   AccountsNavigation,
+  AccountsWidget,
 
   // Address safety components
   SafeSelectionModal,

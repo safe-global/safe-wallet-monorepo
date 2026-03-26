@@ -1,9 +1,6 @@
 import { fireEvent, waitFor, screen, render as rtlRender } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { ThemeProvider } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
 import UpdateSpaceForm from '../UpdateSpaceForm'
 
 // Import the real type
@@ -21,17 +18,12 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesUpdateV1Mutation: jest.fn(() => [mockUpdateSpace]),
 }))
 
-// Helper to render with Redux store
+// Helper to render with a specific store instance for notification assertions
 const renderWithStore = (ui: React.ReactElement) => {
   const store = makeStore(undefined, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <SafeThemeProvider mode="light">
-        {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-      </SafeThemeProvider>
-    </Provider>
-  )
-  const result = rtlRender(ui, { wrapper })
+  const result = rtlRender(ui, {
+    wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>,
+  })
   return { ...result, store }
 }
 

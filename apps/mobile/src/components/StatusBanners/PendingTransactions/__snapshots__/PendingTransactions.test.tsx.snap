@@ -97,8 +97,8 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               style={
                 {
                   "color": "#6C2D19",
-                  "fontFamily": "DMSans-Bold",
                   "fontSize": 16,
+                  "fontWeight": 700,
                   "lineHeight": 22,
                 }
               }
@@ -111,8 +111,8 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
             style={
               {
                 "color": "#6C2D19",
-                "fontFamily": "DMSans-SemiBold",
                 "fontSize": 14,
+                "fontWeight": 600,
                 "letterSpacing": -0.1,
               }
             }

@@ -23,27 +23,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      # Set up Node.js
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/yarn
         with:
-          node-version: '22.11.0' # jod
-          cache: 'yarn'
-
-      # Install dependencies
-      - name: Install dependencies
-        run: yarn install --immutable
+          after-install: 'false'
 
       # Run tests with coverage
       - name: Run Jest tests with coverage
         run: |
-          yarn workspace @safe-global/mobile test:coverage --coverageReporters=text --coverageReporters=json-summary | tee ./coverage.txt && exit ${PIPESTATUS[0]}
+          yarn workspace @safe-global/mobile test:coverage \
+            --coverageReporters=text \
+            --coverageReporters=json-summary \
+            --coverageReporters=lcov \
+            | tee ./coverage.txt && exit ${PIPESTATUS[0]}
 
       - name: Jest Coverage Comment
         uses: MishaKav/jest-coverage-comment@v1
@@ -51,3 +45,13 @@ jobs:
           coverage-summary-path: ./coverage/coverage-summary.json
           coverage-title: Coverage
           coverage-path: ./coverage.txt
+
+      - name: Upload coverage to Datadog
+        if: success() && github.event_name == 'push'
+        uses: ./.github/actions/upload-coverage
+        with:
+          api-key: ${{ secrets.DATADOG_API_KEY }}
+          site: datadoghq.eu
+          coverage-path: apps/mobile/coverage
+          base-path: apps/mobile
+          flag: workspace:mobile

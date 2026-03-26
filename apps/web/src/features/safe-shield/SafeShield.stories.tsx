@@ -9,6 +9,7 @@ import {
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
+import { RouterDecorator } from '@/stories/routerDecorator'
 
 // Seed faker for deterministic visual regression tests
 faker.seed(456)
@@ -19,11 +20,13 @@ const meta: Meta<typeof SafeShieldDisplay> = {
   decorators: [
     (Story, context) => (
       <StoreDecorator initialState={{}} context={context}>
-        <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
-          <Box sx={{ width: 320 }}>
-            <Story />
-          </Box>
-        </Paper>
+        <RouterDecorator>
+          <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
+            <Box sx={{ width: 320 }}>
+              <Story />
+            </Box>
+          </Paper>
+        </RouterDecorator>
       </StoreDecorator>
     ),
   ],
@@ -148,6 +151,7 @@ export const Loading: Story = {
     recipient: [undefined, undefined, true],
     contract: [undefined, undefined, true],
     threat: [undefined, undefined, true],
+    deadlock: [undefined, undefined, true],
   },
   parameters: {
     docs: {

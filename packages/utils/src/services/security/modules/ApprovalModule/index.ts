@@ -21,8 +21,8 @@ export type ApprovalModuleMessageRequest = {
 }
 
 export type Approval = {
-  spender: any
-  amount: any
+  spender: string
+  amount: bigint
   tokenAddress: string
   method: 'approve' | 'increaseAllowance' | 'Permit2' | 'Permit'
   transactionIndex: number

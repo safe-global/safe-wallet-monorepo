@@ -3,6 +3,8 @@ import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
+import { TokenType } from '@safe-global/store/gateway/types'
 import SafeIcon from '@/components/common/SafeIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -24,6 +26,11 @@ const SafeHeaderInfo = (): ReactElement => {
   const { ens } = useAddressResolver(safeAddress)
   const { SafeHeaderHnTooltip } = useLoadFeature(HypernativeFeature)
   const { isHypernativeGuard } = useIsHypernativeGuard()
+  const { showUndeployedNativeValue } = useNativeTokenDisplay()
+  const shouldHideNativeTokenValue = !safe.deployed && !showUndeployedNativeValue
+  const hasOtherBalances =
+    balances.items.length > 1 ||
+    (balances.items.length === 1 && balances.items[0]?.tokenInfo.type !== TokenType.NATIVE_TOKEN)
 
   return (
     <div data-testid="safe-header-info" className={css.safe}>
@@ -60,6 +67,12 @@ const SafeHeaderInfo = (): ReactElement => {
               </>
             ) : (
               <Skeleton variant="text" width={60} />
+            )
+          ) : shouldHideNativeTokenValue ? (
+            hasOtherBalances ? (
+              <FiatValue value={balances.fiatTotal} />
+            ) : (
+              <FiatValue value="0" />
             )
           ) : (
             <TokenAmount

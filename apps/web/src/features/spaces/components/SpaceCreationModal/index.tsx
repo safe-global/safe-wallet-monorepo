@@ -27,11 +27,11 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE })
       const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
 
       if (response.data) {
         const spaceId = response.data.id.toString()
+        trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: spaceId }, { spaceId })
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 

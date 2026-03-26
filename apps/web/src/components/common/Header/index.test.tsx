@@ -1,20 +1,12 @@
-import Header from '@/components/common/Header/index'
+import Header, { getLogoLink } from '@/components/common/Header/index'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
-import * as useSafeTokenEnabled from '@/hooks/useSafeTokenEnabled'
 import * as contracts from '@/features/__core__'
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { screen, fireEvent } from '@testing-library/react'
-
-jest.mock(
-  '@/components/common/SafeTokenWidget',
-  () =>
-    function SafeTokenWidget() {
-      return <div>SafeTokenWidget</div>
-    },
-)
+import { AppRoutes } from '@/config/routes'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -34,6 +26,12 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 }))
 
 const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
+
+describe('getLogoLink', () => {
+  it('always redirects to /welcome/accounts', () => {
+    expect(getLogoLink()).toEqual(AppRoutes.welcome.accounts)
+  })
+})
 
 describe('Header', () => {
   beforeEach(() => {
@@ -75,20 +73,6 @@ describe('Header', () => {
     fireEvent.click(menuButton)
 
     expect(onMenuToggle).toHaveBeenCalled()
-  })
-
-  it('renders the SafeTokenWidget when showSafeToken is true', () => {
-    jest.spyOn(useSafeTokenEnabled, 'useSafeTokenEnabled').mockReturnValue(true)
-
-    render(<Header />)
-    expect(screen.getByText('SafeTokenWidget')).toBeInTheDocument()
-  })
-
-  it('does not render the SafeTokenWidget when showSafeToken is false', () => {
-    jest.spyOn(useSafeTokenEnabled, 'useSafeTokenEnabled').mockReturnValue(false)
-
-    render(<Header />)
-    expect(screen.queryByText('SafeTokenWidget')).not.toBeInTheDocument()
   })
 
   it('displays the safe logo', () => {

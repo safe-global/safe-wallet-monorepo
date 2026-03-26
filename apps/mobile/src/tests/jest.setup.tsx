@@ -163,6 +163,28 @@ jest.mock('@react-native-clipboard/clipboard', () => ({
   getString: jest.fn(),
 }))
 
+jest.mock('react-native-nitro-modules', () => ({
+  NitroModules: {
+    createHybridObject: jest.fn(),
+  },
+}))
+
+jest.mock('react-native-mmkv', () => {
+  const store = new Map<string, string | number | boolean>()
+  const mmkvMock = {
+    set: jest.fn((key: string, value: string | number | boolean) => store.set(key, value)),
+    getString: jest.fn((key: string) => store.get(key) as string | undefined),
+    getNumber: jest.fn((key: string) => store.get(key) as number | undefined),
+    getBoolean: jest.fn((key: string) => store.get(key) as boolean | undefined),
+    remove: jest.fn((key: string) => store.delete(key)),
+    clearAll: jest.fn(() => store.clear()),
+    getAllKeys: jest.fn(() => [...store.keys()]),
+  }
+  return {
+    createMMKV: jest.fn(() => ({ ...mmkvMock })),
+  }
+})
+
 jest.mock('react-native-quick-crypto', () => ({
   default: {
     randomBytes: jest.fn((size) => Buffer.alloc(size)),
@@ -214,7 +236,6 @@ jest.mock('@/src/utils/logger', () => ({
     trace: jest.fn(),
     setLevel: jest.fn(),
     shouldLog: jest.fn(),
-    setShouldLogErrorToSentry: jest.fn(),
   },
   LogLevel: {
     TRACE: 0,
@@ -271,6 +292,11 @@ jest.mock('@react-native-firebase/crashlytics', () => {
     },
   }
 })
+
+jest.mock('@datadog/mobile-react-native', () => require('@datadog/mobile-react-native/jest'))
+jest.mock('expo-datadog', () => require('@datadog/mobile-react-native/jest'))
+
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'))
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())

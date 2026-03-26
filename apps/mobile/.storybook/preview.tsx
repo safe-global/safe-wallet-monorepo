@@ -1,4 +1,5 @@
 import type { Preview } from '@storybook/react'
+import { useColorScheme } from 'react-native'
 import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native'
 import { StorybookThemeProvider } from '@/src/theme/provider/storybookTheme'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
@@ -96,7 +97,7 @@ const preview: Preview = {
   globalTypes: {
     theme: {
       description: 'Global theme for components',
-      defaultValue: 'light',
+      defaultValue: '',
       toolbar: {
         title: 'Theme',
         icon: 'circlehollow',
@@ -111,7 +112,8 @@ const preview: Preview = {
   tags: ['autodocs'],
   decorators: [
     (Story, context) => {
-      const theme = context.globals.theme || 'light'
+      const colorScheme = useColorScheme()
+      const theme = context.globals.theme || colorScheme || 'light'
 
       return (
         <Provider store={storybookStore}>

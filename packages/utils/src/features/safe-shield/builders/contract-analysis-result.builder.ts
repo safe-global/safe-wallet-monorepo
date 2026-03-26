@@ -49,7 +49,9 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
   }
 
   build(): T extends ContractStatus.UNOFFICIAL_FALLBACK_HANDLER ? FallbackHandlerAnalysisResult : AnalysisResult<T> {
-    return { ...this.result } as any
+    return { ...this.result } as T extends ContractStatus.UNOFFICIAL_FALLBACK_HANDLER
+      ? FallbackHandlerAnalysisResult
+      : AnalysisResult<T>
   }
 
   // Preset methods for common scenarios

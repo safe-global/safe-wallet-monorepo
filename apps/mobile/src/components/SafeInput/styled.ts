@@ -1,4 +1,5 @@
 import { Input, styled, View } from 'tamagui'
+import type { ColorTokens } from 'tamagui'
 
 export const StyledInputContainer = styled(View, {
   borderWidth: 1,
@@ -22,7 +23,7 @@ export const StyledInputContainer = styled(View, {
 
 export const StyledInput = styled(Input, {
   color: '$inputTextColor',
-  placeholderTextColor: '$placeholderColor',
+  placeholderTextColor: '$placeholderColor' as ColorTokens,
   backgroundColor: '$inputBackgroundColor',
   borderWidth: 0,
 

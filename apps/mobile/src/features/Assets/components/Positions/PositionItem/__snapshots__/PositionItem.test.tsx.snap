@@ -106,6 +106,7 @@ exports[`PositionItem renders correctly 1`] = `
                 onLoadStart={[Function]}
                 onProgress={[Function]}
                 placeholder={[]}
+                sfEffect={null}
                 source={
                   [
                     {
@@ -119,6 +120,8 @@ exports[`PositionItem renders correctly 1`] = `
                     "flex": 1,
                   }
                 }
+                symbolSize={null}
+                symbolWeight={null}
                 testID="logo-image"
                 transition={null}
               />
@@ -130,8 +133,8 @@ exports[`PositionItem renders correctly 1`] = `
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DMSans-SemiBold",
                     "fontSize": 14,
+                    "fontWeight": 600,
                     "lineHeight": 20,
                   }
                 }
@@ -152,8 +155,8 @@ exports[`PositionItem renders correctly 1`] = `
                   style={
                     {
                       "color": "#A1A3A7",
-                      "fontFamily": "DM Sans",
                       "fontSize": 13,
+                      "fontWeight": 400,
                       "lineHeight": 16,
                     }
                   }
@@ -165,8 +168,8 @@ exports[`PositionItem renders correctly 1`] = `
                   style={
                     {
                       "color": "#A1A3A7",
-                      "fontFamily": "DM Sans",
                       "fontSize": 13,
+                      "fontWeight": 400,
                     }
                   }
                   suppressHighlighting={true}
@@ -177,8 +180,8 @@ exports[`PositionItem renders correctly 1`] = `
                   style={
                     {
                       "color": "#A1A3A7",
-                      "fontFamily": "DM Sans",
                       "fontSize": 13,
+                      "fontWeight": 400,
                     }
                   }
                   suppressHighlighting={true}
@@ -208,8 +211,8 @@ exports[`PositionItem renders correctly 1`] = `
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DM Sans",
                   "fontSize": 14,
+                  "fontWeight": 400,
                 }
               }
               suppressHighlighting={true}
@@ -248,8 +251,8 @@ exports[`PositionItem renders correctly 1`] = `
                     style={
                       {
                         "color": "#00B460",
-                        "fontFamily": "DM Sans",
                         "fontSize": 13,
+                        "fontWeight": 400,
                       }
                     }
                     suppressHighlighting={true}

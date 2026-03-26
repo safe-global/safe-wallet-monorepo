@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from 'react'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput } from 'react-native'
+import { Pressable, ScrollView, TextInput } from 'react-native'
 import { Text, View } from 'tamagui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useHeaderHeight } from '@/src/hooks/useHeaderHeight'
 import { AmountDisplay } from './components/AmountDisplay'
 import { TokenPill } from './components/TokenPill'
 import { RecipientHeader } from './components/RecipientHeader'
@@ -17,7 +18,6 @@ import { CustomNonceModal } from './components/CustomNonceModal'
 import { ProposerBottomSheet } from './components/ProposerBottomSheet'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
-import { useKeyboardVisible } from './hooks/useKeyboardVisible'
 import { useMaxAmount } from './hooks/useMaxAmount'
 import { useNonceSelection } from './hooks/useNonceSelection'
 import { useTokenBalance } from './hooks/useTokenBalance'
@@ -26,9 +26,7 @@ import { useEnsureActiveSigner } from './hooks/useEnsureActiveSigner'
 import { useProposerSheet } from './hooks/useProposerSheet'
 import { Address } from '@/src/types/address'
 
-const isIos = Platform.OS === 'ios'
-const keyboardBehavior = isIos ? 'padding' : undefined
-const keyboardOffset = isIos ? 100 : 0
+const keyboardBehavior = 'padding' as const
 
 function FiatToggleButton({ onToggle }: { onToggle: () => void }) {
   return (
@@ -49,7 +47,7 @@ function FiatToggleButton({ onToggle }: { onToggle: () => void }) {
 
 export function EnterAmountContainer() {
   const router = useRouter()
-  const { bottom } = useSafeAreaInsets()
+  const headerHeight = useHeaderHeight()
   const inputRef = useRef<TextInput>(null)
   const params = useLocalSearchParams<{
     recipientAddress: string
@@ -61,7 +59,6 @@ export function EnterAmountContainer() {
   const tokenAddress = params.tokenAddress ?? ''
   const activeSafe = useDefinedActiveSafe()
   const currency = useAppSelector(selectCurrency)
-  const keyboardVisible = useKeyboardVisible()
 
   const { token, decimals, maxBalance, formattedBalance, isTokenDataReady } = useTokenBalance({
     tokenAddress,
@@ -82,6 +79,7 @@ export function EnterAmountContainer() {
     currency,
     symbol: tokenSymbol,
     decimals,
+    onRawInputChange: setMax,
   })
 
   const { exceedsBalance, exceedsDecimals, isValid } = useTokenAmountValidation({
@@ -116,7 +114,7 @@ export function EnterAmountContainer() {
   })
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardBehavior} keyboardVerticalOffset={keyboardOffset}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardBehavior} keyboardVerticalOffset={headerHeight}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false} keyboardShouldPersistTaps="handled">
         <RecipientHeader
           recipientAddress={recipientAddress}
@@ -131,8 +129,6 @@ export function EnterAmountContainer() {
             <AmountDisplay
               primaryDisplay={fiatConversion.primaryDisplay}
               secondaryDisplay={fiatConversion.secondaryDisplay}
-              onToggle={fiatConversion.toggleMode}
-              canToggle={fiatConversion.hasFiatPrice}
               hasValue={rawInput.length > 0}
             />
 
@@ -185,8 +181,6 @@ export function EnterAmountContainer() {
         activeSigner={activeSigner}
         availableSigners={availableSigners}
         isSubmitting={isSubmitting}
-        keyboardVisible={keyboardVisible}
-        bottomInset={bottom}
         onReview={handleReview}
         onOpenSignerSheet={proposer.handleOpenProposerSheet}
       />
@@ -200,6 +194,7 @@ export function EnterAmountContainer() {
         onAddCustomNonce={nonce.handleAddCustomNonce}
         onEndReached={nonce.fetchMore}
         isFetchingMore={nonce.isFetchingMore}
+        onChange={nonce.handleNonceSheetChange}
       />
 
       <CustomNonceModal

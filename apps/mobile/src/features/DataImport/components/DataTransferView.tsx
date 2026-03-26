@@ -1,9 +1,9 @@
 import React from 'react'
 import { Text, YStack, Image, styled, H2, H5, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
+import { ColorScheme } from '@/src/types/theme'
 import TransferOldAppDark from '@/assets/images/transfer-old-app-dark.png'
 import TransferOldAppLight from '@/assets/images/transfer-old-app-light.png'
-import { ColorSchemeName } from 'react-native'
 import { GradientText } from '@/src/components/GradientText'
 
 const StyledText = styled(Text, {
@@ -12,7 +12,7 @@ const StyledText = styled(Text, {
 })
 
 interface DataTransferViewProps {
-  colorScheme: ColorSchemeName
+  colorScheme: ColorScheme
   bottomInset: number
   onPressTransferData: () => void
   onPressStartFresh: () => void
@@ -55,7 +55,7 @@ export const DataTransferView = ({
         </YStack>
 
         {/* Phone Mockup */}
-        <Image source={colorScheme === 'dark' ? TransferOldAppDark : TransferOldAppLight} />
+        <Image src={colorScheme === 'dark' ? TransferOldAppDark : TransferOldAppLight} alignSelf="center" />
       </YStack>
 
       {/* Bottom Buttons */}

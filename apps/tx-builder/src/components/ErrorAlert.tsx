@@ -1,4 +1,3 @@
-import React from 'react'
 import MuiAlert from '@mui/lab/Alert'
 import MuiAlertTitle from '@mui/lab/AlertTitle'
 import styled from 'styled-components'

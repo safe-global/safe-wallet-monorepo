@@ -28,6 +28,10 @@ export type ConnectedWallet = {
 
 const { getStore, setStore, useStore } = new ExternalStore<OnboardAPI>()
 
+const { setStore: setWalletReady, useStore: useIsWalletReady } = new ExternalStore<boolean>()
+
+export { useIsWalletReady }
+
 export const initOnboard = async (
   chainConfigs: Chain[],
   currentChain: Chain,
@@ -151,9 +155,9 @@ const connectLastWallet = async (onboard: OnboardAPI) => {
   if (lastWalletLabel) {
     const isUnlocked = await isWalletUnlocked(lastWalletLabel)
 
-    if (isUnlocked !== false) {
-      connectWallet(onboard, {
-        autoSelect: { label: lastWalletLabel, disableModals: isUnlocked === true },
+    if (isUnlocked === true || isUnlocked === undefined) {
+      await connectWallet(onboard, {
+        autoSelect: { label: lastWalletLabel, disableModals: isUnlocked || false },
       })
     }
   }
@@ -187,9 +191,11 @@ export const useInitOnboard = () => {
       onboard.state.actions.setWalletModules(supportedWallets)
     }
 
-    enableWallets().then(() => {
-      // Reconnect last wallet
-      connectLastWallet(onboard)
+    enableWallets().then(async () => {
+      // Reconnect last wallet and mark wallet provider as ready
+      await connectLastWallet(onboard)
+
+      setWalletReady(true)
     })
   }, [chain, onboard])
 
@@ -200,6 +206,7 @@ export const useInitOnboard = () => {
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)
+
       if (newWallet) {
         if (newWallet.label !== lastConnectedWallet) {
           lastConnectedWallet = newWallet.label

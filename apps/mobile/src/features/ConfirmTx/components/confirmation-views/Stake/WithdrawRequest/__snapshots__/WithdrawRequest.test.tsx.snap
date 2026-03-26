@@ -52,8 +52,8 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   "alignItems": "center",
                   "backgroundColor": "#F4F4F4",
                   "borderBottomColor": "#EEEFF0",
-                  "borderBottomLeftRadius": 100000,
-                  "borderBottomRightRadius": 100000,
+                  "borderBottomLeftRadius": 100000000,
+                  "borderBottomRightRadius": 100000000,
                   "borderBottomWidth": 1,
                   "borderLeftColor": "#EEEFF0",
                   "borderLeftWidth": 1,
@@ -61,8 +61,8 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   "borderRightWidth": 1,
                   "borderStyle": "solid",
                   "borderTopColor": "#EEEFF0",
-                  "borderTopLeftRadius": 100000,
-                  "borderTopRightRadius": 100000,
+                  "borderTopLeftRadius": 100000000,
+                  "borderTopRightRadius": 100000000,
                   "borderTopWidth": 1,
                   "flexDirection": "column",
                   "height": 24,
@@ -71,10 +71,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   "maxWidth": 24,
                   "minHeight": 24,
                   "minWidth": 24,
-                  "paddingBottom": 0,
-                  "paddingLeft": 0,
-                  "paddingRight": 0,
-                  "paddingTop": 0,
                   "width": 24,
                 }
               }
@@ -132,6 +128,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               onLoadStart={[Function]}
               onProgress={[Function]}
               placeholder={[]}
+              sfEffect={null}
               source={
                 [
                   {
@@ -145,6 +142,8 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                   "flex": 1,
                 }
               }
+              symbolSize={null}
+              symbolWeight={null}
               testID="logo-image"
               transition={null}
             />
@@ -170,7 +169,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DM Sans",
                 }
               }
               suppressHighlighting={true}
@@ -181,7 +179,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DMSans-Bold",
+                  "fontWeight": 700,
                 }
               }
               suppressHighlighting={true}
@@ -195,7 +193,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             style={
               {
                 "color": "#A1A3A7",
-                "fontFamily": "DM Sans",
                 "fontSize": 12,
                 "lineHeight": 16,
               }
@@ -242,7 +239,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -376,7 +372,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DM Sans",
                     "maxWidth": 150,
                   }
                 }
@@ -520,7 +515,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -612,7 +606,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               style={
                 {
                   "color": "#121312",
-                  "fontFamily": "DM Sans",
                   "fontSize": 14,
                 }
               }
@@ -639,7 +632,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -668,7 +660,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DM Sans",
                     "fontSize": 14,
                     "textDecorationLine": "underline",
                   }
@@ -682,7 +673,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 style={
                   {
                     "color": "#121312",
-                    "fontFamily": "DM Sans",
                     "fontSize": 14,
                   }
                 }
@@ -708,7 +698,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -720,7 +709,7 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             style={
               {
                 "color": "#121312",
-                "fontFamily": "DMSans-SemiBold",
+                "fontWeight": 600,
               }
             }
             suppressHighlighting={true}
@@ -747,7 +736,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -760,7 +748,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#121312",
                 "flex": 2,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
                 "textAlign": "right",
               }
@@ -787,7 +774,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               {
                 "color": "#A1A3A7",
                 "flex": 1,
-                "fontFamily": "DM Sans",
                 "fontSize": 14,
               }
             }
@@ -846,7 +832,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
                 style={
                   {
                     "color": "#00B460",
-                    "fontFamily": "DM Sans",
                     "fontSize": 12,
                   }
                 }
@@ -857,17 +842,15 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             </View>
           </View>
         </View>
-        <View
-          style={
-            {
-              "alignItems": "center",
-              "height": 40,
-            }
-          }
-        >
+        <View>
           <View
-            focusVisibleStyle={{}}
-            focusable={true}
+            accessible={true}
+            focusVisibleStyle={
+              {
+                "outlineStyle": "solid",
+                "outlineWidth": 2,
+              }
+            }
             onBlur={[Function]}
             onClick={[Function]}
             onFocus={[Function]}
@@ -881,34 +864,33 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#DCDEE0",
+                "backgroundColor": "#DDDEE0",
                 "borderBottomColor": "transparent",
                 "borderBottomLeftRadius": 8,
                 "borderBottomRightRadius": 8,
-                "borderBottomWidth": 0,
+                "borderBottomWidth": 1,
                 "borderLeftColor": "transparent",
-                "borderLeftWidth": 0,
+                "borderLeftWidth": 1,
                 "borderRightColor": "transparent",
-                "borderRightWidth": 0,
+                "borderRightWidth": 1,
                 "borderStyle": "solid",
                 "borderTopColor": "transparent",
                 "borderTopLeftRadius": 8,
                 "borderTopRightRadius": 8,
-                "borderTopWidth": 0,
-                "bottom": 0,
+                "borderTopWidth": 1,
+                "cursor": "pointer",
                 "flexDirection": "row",
                 "flexWrap": "nowrap",
-                "fontWeight": "700",
+                "gap": 4,
                 "height": 36,
                 "justifyContent": "center",
-                "left": 0,
-                "paddingLeft": 8,
-                "paddingRight": 8,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
+                "paddingBottom": 8,
+                "paddingLeft": 12,
+                "paddingRight": 12,
+                "paddingTop": 8,
               }
             }
+            tabIndex={0}
             testID="transaction-details-button"
           >
             <Text
@@ -917,13 +899,13 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
               style={
                 {
                   "color": "#121312",
+                  "cursor": "pointer",
                   "flexGrow": 0,
                   "flexShrink": 1,
                   "fontFamily": "DMSans-Bold",
                   "fontSize": 14,
-                  "letterSpacing": 0,
-                  "lineHeight": 15.400000000000002,
-                  "userSelect": "none",
+                  "letterSpacing": -0.1,
+                  "lineHeight": 20,
                 }
               }
               suppressHighlighting={true}
@@ -936,7 +918,6 @@ exports[`StakingWithdrawRequest matches snapshot 1`] = `
           style={
             {
               "color": "#A1A3A7",
-              "fontFamily": "DM Sans",
               "fontSize": 13,
             }
           }

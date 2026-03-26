@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from 'react'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { useCallback, useMemo } from 'react'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { selectPreferFiatInput, setPreferFiatInput } from '@/src/store/settingsSlice'
 
 interface UseFiatConversionArgs {
   rawInput: string
@@ -7,6 +9,7 @@ interface UseFiatConversionArgs {
   currency: string
   symbol: string
   decimals: number
+  onRawInputChange: (value: string) => void
 }
 
 interface UseFiatConversionResult {
@@ -118,7 +121,7 @@ const buildTokenDisplay = ({
   symbol,
 }: BuildTokenDisplayArgs): DisplayResult => {
   const display = rawInput || '0'
-  const fiatDisplay = hasFiatPrice ? formatCurrency((validInput * rate).toString(), currency) : ''
+  const fiatDisplay = hasFiatPrice ? formatCurrencyPrecise((validInput * rate).toString(), currency) : ''
   return {
     tokenAmount: rawInput,
     primaryDisplay: `${display} ${symbol}`,
@@ -132,8 +135,10 @@ export function useFiatConversion({
   currency,
   symbol,
   decimals,
+  onRawInputChange,
 }: UseFiatConversionArgs): UseFiatConversionResult {
-  const [isFiatMode, setIsFiatMode] = useState(true)
+  const dispatch = useAppDispatch()
+  const isFiatMode = useAppSelector(selectPreferFiatInput)
 
   const rate = fiatRate ? parseFloat(fiatRate) : 0
   const hasFiatPrice = rate > 0
@@ -151,10 +156,24 @@ export function useFiatConversion({
   }, [rawInput, isFiatMode, hasFiatPrice, rate, decimals, currency, currencySymbol, symbol])
 
   const toggleMode = useCallback(() => {
-    if (hasFiatPrice) {
-      setIsFiatMode((prev) => !prev)
+    if (!hasFiatPrice) {
+      return
     }
-  }, [hasFiatPrice])
+
+    const validInput = parseInput(rawInput)
+
+    if (isFiatMode) {
+      const tokenValue = fiatToToken(validInput, rate, decimals)
+      onRawInputChange(tokenValue)
+    } else {
+      const fiatValue = validInput * rate
+      const fixed = fiatValue.toFixed(2).replace(/\.?0+$/, '')
+      const formatted = fixed && fixed !== '0' ? fixed : ''
+      onRawInputChange(formatted)
+    }
+
+    dispatch(setPreferFiatInput(!isFiatMode))
+  }, [hasFiatPrice, rawInput, isFiatMode, rate, decimals, onRawInputChange, dispatch])
 
   return {
     ...result,

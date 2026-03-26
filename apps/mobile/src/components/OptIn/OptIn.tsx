@@ -1,5 +1,6 @@
 import React from 'react'
-import { ColorSchemeName, ImageSourcePropType, Platform, StyleSheet } from 'react-native'
+import { ImageSourcePropType, Platform, StyleSheet } from 'react-native'
+import { ColorScheme } from '@/src/types/theme'
 import { H2, Image, Text, getTokenValue, View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { WINDOW_HEIGHT } from '@/src/store/constants'
@@ -23,7 +24,7 @@ interface OptInProps {
   testID?: string
   isVisible?: boolean
   isLoading?: boolean
-  colorScheme: ColorSchemeName
+  colorScheme: ColorScheme
   infoMessage?: string
 }
 
@@ -77,7 +78,8 @@ export const OptIn: React.FC<OptInProps> = React.memo(
               </Container>
             )}
           </View>
-          {image && <Image style={styles.image} source={image} />}
+          {/* @ts-expect-error Tamagui v2 types src as string but require() returns number - works at runtime */}
+          {image && <Image style={styles.image} src={image} />}
         </View>
 
         <View testID="notifications-opt-in-cta-buttons" flexDirection="column" paddingHorizontal={'$4'} gap="$4">

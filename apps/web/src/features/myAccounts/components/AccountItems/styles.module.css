@@ -98,9 +98,8 @@
 }
 
 .accountItemBalance {
-  flex-shrink: 0;
-  text-align: right;
-  align-self: center;
+  @apply flex-shrink-0 text-right self-center;
+  min-width: 80px;
 }
 
 .accountItemChainBadge {

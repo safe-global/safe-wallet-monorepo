@@ -45,6 +45,7 @@ const groupBalance = '[data-testid="group-balance"]'
 const groupAddress = '[data-testid="group-address"]'
 const groupSafeIcon = '[data-testid="group-safe-icon"]'
 const multichainTooltip = '[data-testid="multichain-tooltip"]'
+const tooltipTrigger = '[data-slot="tooltip-trigger"]'
 const networkInput = '[id="network-input"]'
 const networkOption = 'li[role="option"]'
 const showAllNetworks = '[data-testid="show-all-networks"]'
@@ -446,7 +447,7 @@ export function clickOnMultichainItemOptionsBtn(index) {
 }
 
 export function checkMultichainTooltipExists(index) {
-  cy.get(multichainItemSummary).eq(index).find(chainLogo).eq(0).trigger('mouseover', { force: true })
+  cy.get(multichainItemSummary).eq(index).find(tooltipTrigger).eq(0).focus()
   cy.get(multichainTooltip).should('exist')
 }
 

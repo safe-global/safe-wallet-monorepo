@@ -1,4 +1,4 @@
-import { Paper, Typography } from '@mui/material'
+import { Box, Paper, Typography } from '@mui/material'
 import DefiIcon from '@/public/images/balances/defi.svg'
 
 // This component is displayed when the positions feature flag is enabled,
@@ -10,7 +10,9 @@ const PositionsUnavailable = ({ hasError = false }: { hasError?: boolean }) => {
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <DefiIcon />
+      <Box display="flex" justifyContent="center">
+        <DefiIcon />
+      </Box>
 
       <Typography data-testid="positions-unavailable-text" variant="body1" color="primary.light">
         {title}

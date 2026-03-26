@@ -15,7 +15,7 @@ export const PODFILE_MODIF_NEEDED = `
 $NotifeeExtension = true
 target 'NotifeeNotificationServiceExtension' do
   pod 'RNNotifeeCore', :path => '../../../node_modules/@notifee/react-native/RNNotifeeCore.podspec'
-  pod 'MMKV', :git => 'https://github.com/Tencent/MMKV.git', :branch => 'master'
+  pod 'MMKV', '~> 2.3.0'
   pod 'CryptoSwift', '~> 1.8.3'
   pod 'SwiftCryptoTokenFormatter', :git => 'https://github.com/compojoom/SwiftCryptoTokenFormatter', :branch => 'main'
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']

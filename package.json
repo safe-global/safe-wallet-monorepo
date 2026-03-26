@@ -11,14 +11,20 @@
   ],
   "scripts": {
     "lint": "yarn workspaces foreach --all -pt run lint",
+    "type-check": "yarn workspaces foreach --all -pt run type-check",
     "test": "yarn workspaces foreach --all -pt run test",
     "test:scripts": "yarn workspace @safe-global/web jest --config ../../scripts/jest.config.cjs",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
     "prettier": "prettier --check . --config ./.prettierrc --ignore-path ./.prettierignore",
     "prettier:fix": "prettier --write . --config ./.prettierrc --ignore-path ./.prettierignore",
+    "verify": "node scripts/verify.mjs",
+    "verify:web": "node scripts/verify.mjs --workspace=web",
+    "verify:changed": "node scripts/verify.mjs --changed",
+    "verify:changed:web": "node scripts/verify.mjs --changed --workspace=web",
     "postinstall": "husky"
   },
   "resolutions": {
+    "motion": "12.34.0",
     "@ledgerhq/context-module/ethers": "6.14.3",
     "@gnosis.pm/zodiac/ethers": "6.14.3",
     "@ledgerhq/device-signer-kit-ethereum/ethers": "6.14.3",
@@ -26,11 +32,15 @@
     "@ethersproject/signing-key/elliptic": "^6.6.1",
     "stylus": "0.64.0",
     "viem": "2.21.55",
-    "webpack": "5.97.1"
+    "webpack": "5.97.1",
+    "react-native-quick-base64": "2.2.2",
+    "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
   },
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.2.6",
     "@storybook/react": "^10.2.6",
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",

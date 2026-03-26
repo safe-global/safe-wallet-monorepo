@@ -1,6 +1,6 @@
 import React from 'react'
 import { Badge } from '@/src/components/Badge'
-import { Skeleton } from 'moti/skeleton'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 
 interface ThresholdBadgeProps {
   threshold: number
@@ -20,7 +20,7 @@ export const ThresholdBadge = ({
   testID,
 }: ThresholdBadgeProps) => {
   if (isLoading) {
-    return <Skeleton colorMode="dark" radius="round" height={size} width={size} />
+    return <SafeSkeleton radius="round" height={size} width={size} />
   }
 
   const content = `${threshold}/${ownersCount}`

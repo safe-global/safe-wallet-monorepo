@@ -1,3 +1,23 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 8eb758ed063d1905f538f72e3ee55a8c41e01d18..d1ee770a3594017357465e031c2edb4aae6a448c 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -3,7 +3,6 @@ buildscript {
+         repositories {
+             google()
+             mavenCentral()
+-            jcenter()
+         }
+ 
+         dependencies {
+@@ -52,7 +51,6 @@ repositories {
+     }
+     google()
+     mavenCentral()
+-    jcenter()
+ }
+ 
+ dependencies {
 diff --git a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java b/android/src/main/java/com/reactnativedevicecrypto/Helpers.java
 index 03fd79e8a389f33a2841ecf0e177ffc9ea01b78c..d903b5dc4b0110dab9a8c1a648d349200dd4e20f 100644
 --- a/android/src/main/java/com/reactnativedevicecrypto/Helpers.java

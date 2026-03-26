@@ -65,7 +65,7 @@ export function OnboardingCarousel({ items }: OnboardingCarouselProps) {
               onPress={onGetStartedPress}
               testID={'get-started'}
               backgroundColor={getTokenValue('$color.textContrastDark')}
-              color={getTokenValue('$color.textPrimaryDark')}
+              textColor={getTokenValue('$color.textPrimaryDark')}
             >
               Get started
             </SafeButton>

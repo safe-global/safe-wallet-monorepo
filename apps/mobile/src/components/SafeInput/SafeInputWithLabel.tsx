@@ -1,4 +1,5 @@
-import { Input, InputProps, styled, View, Text, Theme } from 'tamagui'
+import { Input, styled, View, Text, Theme } from 'tamagui'
+import type { ColorTokens, GetProps } from 'tamagui'
 import React from 'react'
 import { Platform } from 'react-native'
 
@@ -10,6 +11,7 @@ interface Props {
   left?: React.ReactNode
   right?: React.ReactNode
   testID?: string
+  editable?: boolean
 }
 
 const StyledInputContainer = styled(View, {
@@ -42,7 +44,7 @@ const StyledInputContainer = styled(View, {
 
 const StyledInput = styled(Input, {
   color: '$inputTextColor',
-  placeholderTextColor: '$placeholderColor',
+  placeholderTextColor: '$placeholderColor' as ColorTokens,
   borderWidth: 0,
   padding: 0,
 
@@ -61,8 +63,9 @@ export const SafeInputWithLabel = ({
   placeholder,
   left,
   right,
+  editable,
   ...props
-}: Props & Omit<InputProps, 'left' | 'right'>) => {
+}: Props & Omit<GetProps<typeof StyledInput>, 'left' | 'right' | 'editable'>) => {
   return (
     <Theme name={'input_with_label'}>
       <StyledInputContainer
@@ -77,7 +80,13 @@ export const SafeInputWithLabel = ({
           <View flex={1}>
             <Text color={'$colorSecondary'}>{label}</Text>
             <View flex={1} flexDirection="row" alignItems="center">
-              <StyledInput size="$5" flex={1} placeholder={placeholder} {...props} />
+              <StyledInput
+                size="$5"
+                flex={1}
+                placeholder={placeholder}
+                {...props}
+                {...(editable === false ? { readOnly: true } : {})}
+              />
             </View>
           </View>
 

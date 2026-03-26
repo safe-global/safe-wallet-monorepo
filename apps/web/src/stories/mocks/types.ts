@@ -100,6 +100,12 @@ export interface MockStoryConfig {
   pathname?: string
 
   /**
+   * Wrap with ShadcnProvider for shadcn component support
+   * @default false
+   */
+  shadcn?: boolean
+
+  /**
    * Additional query parameters for router mock
    * Will be merged with the default safe query param
    */

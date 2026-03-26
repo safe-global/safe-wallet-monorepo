@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { SafeProvider } from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -97,7 +98,7 @@ export const getGasLimitForZkSync = async (
   // 2. Add a simulate call to the predicted SafeProxy as second transaction
   const transactionDataToEstimate: string = simulateTxAccessorContract.encode('simulate', [
     safeTx.data.to,
-    // @ts-ignore
+    // @ts-ignore value type mismatch
     safeTx.data.value,
     safeTx.data.data as `0x${string}`,
     safeTx.data.operation,

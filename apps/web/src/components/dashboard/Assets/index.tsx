@@ -28,7 +28,9 @@ const MAX_ASSETS = 4
 
 const NoAssets = () => (
   <Paper elevation={0} sx={{ p: 5, textAlign: 'center' }}>
-    <NoAssetsIcon />
+    <Box display="flex" justifyContent="center">
+      <NoAssetsIcon />
+    </Box>
 
     <Typography mb={0.5} mt={3}>
       No assets yet
@@ -43,6 +45,13 @@ const AssetsSkeleton = () => (
     <Skeleton height={66} variant="rounded" />
   </WidgetCard>
 )
+
+const ASSET_BUTTON_SIZE = 28
+const ASSET_BUTTON_GAP = 8
+const VALUE_CONTAINER_GAP = 16
+
+const getAssetButtonsWidth = (buttonCount: number) =>
+  buttonCount * ASSET_BUTTON_SIZE + (buttonCount - 1) * ASSET_BUTTON_GAP
 
 const AssetRow = ({
   item,
@@ -60,6 +69,13 @@ const AssetRow = ({
   const stake = useLoadFeature(StakeFeature)
   const { SwapButton } = useLoadFeature(SwapFeature)
 
+  const assetButtonCount =
+    1 + // SendButton always
+    (showSwap ? 1 : 0) +
+    (showEarn && isEligibleEarnToken(chainId, item.tokenInfo.address) ? 1 : 0) +
+    (showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN ? 1 : 0)
+  const assetButtonsOffset = VALUE_CONTAINER_GAP + getAssetButtonsWidth(assetButtonCount)
+
   return (
     <Box className={css.container} key={item.tokenInfo.address}>
       <Stack direction="row" gap={1.5} alignItems="center">
@@ -72,7 +88,7 @@ const AssetRow = ({
         </Box>
       </Stack>
 
-      <Box className={css.valueContainer}>
+      <Box className={css.valueContainer} style={{ ['--asset-buttons-offset' as string]: `${assetButtonsOffset}px` }}>
         <Box className={css.valueContent}>
           <FiatBalance balanceItem={item} />
           <FiatChange balanceItem={item} inline />

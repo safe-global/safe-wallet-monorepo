@@ -21,3 +21,7 @@ export {
   SAFE_ADDRESSES,
 } from './fixtures'
 export type { FixtureScenario } from './fixtures'
+
+// Test server factory
+export { createTestServer } from './testServer'
+export type { TestServerOptions } from './testServer'

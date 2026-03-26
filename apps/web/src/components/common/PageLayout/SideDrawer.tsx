@@ -1,4 +1,5 @@
-import SpaceSidebar from 'src/features/spaces/components/SpaceSidebar'
+import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
+import Sidebar from '@/components/sidebar/Sidebar'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
@@ -8,7 +9,6 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRo
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 
 import classnames from 'classnames'
-import Sidebar from '@/components/sidebar/Sidebar'
 import css from './styles.module.css'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
@@ -16,9 +16,10 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
+  onSidebarOpenChange?: (open: boolean) => void
 }
 
-const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
@@ -45,8 +46,6 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
     }
   }, [onToggle, router, isSmallScreen])
 
-  const SidebarComponent = isSpaceRoute ? SpaceSidebar : Sidebar
-
   return (
     <>
       <Drawer
@@ -58,11 +57,20 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
+          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 1250 } } : {}),
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          <SidebarComponent />
+          {isSpaceRoute ? (
+            <SpacesEnhancedSidebar
+              isDrawerOpen={isOpen}
+              onDrawerClose={() => onToggle(false)}
+              onOpenChange={onSidebarOpenChange}
+            />
+          ) : (
+            <Sidebar />
+          )}
         </aside>
       </Drawer>
 

@@ -51,8 +51,15 @@ export const isAddressChange = (result: AnalysisResult): result is MasterCopyCha
   return result.type === ThreatStatus.MASTERCOPY_CHANGE
 }
 
-export const isThreatAnalysisResult = (result: any): result is ThreatAnalysisResult => {
-  if (result && 'severity' in result && 'type' in result && 'title' in result && 'description' in result) {
+export const isThreatAnalysisResult = (result: unknown): result is ThreatAnalysisResult => {
+  if (
+    typeof result === 'object' &&
+    result !== null &&
+    'severity' in result &&
+    'type' in result &&
+    'title' in result &&
+    'description' in result
+  ) {
     return true
   }
 

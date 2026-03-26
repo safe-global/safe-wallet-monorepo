@@ -2,18 +2,24 @@ import { useEffect, useState } from 'react'
 
 export const analysisVisibilityDelay = 500
 export const contractDelay = 200
+export const deadlockDelay = 300
 export const threatDelay = 400
 export const simulationDelay = 600
 
 /**
  * Calculates delay values for displaying different SafeShield analysis sections
- * in the UI, based on whether recipient and contract analysis sections are empty.
+ * in the UI, based on whether recipient, contract, and deadlock analysis sections are empty.
  *
  * @param recipientEmpty - True if recipient analysis data is empty.
  * @param contractEmpty - True if contract analysis data is empty.
+ * @param deadlockEmpty - True if deadlock analysis data is empty.
  * @returns An object containing calculated delays (ms) for each analysis section.
  */
-export const calculateAnalysisDelays = (recipientEmpty: boolean, contractEmpty: boolean) => {
+export const calculateAnalysisDelays = (
+  recipientEmpty: boolean,
+  contractEmpty: boolean,
+  deadlockEmpty: boolean = true,
+) => {
   const recipientDelay = 300
 
   let contractAnalysisDelay = contractDelay + analysisVisibilityDelay
@@ -21,25 +27,34 @@ export const calculateAnalysisDelays = (recipientEmpty: boolean, contractEmpty: 
     contractAnalysisDelay = analysisVisibilityDelay
   }
 
-  let threatAnalysisDelay = threatDelay
+  let deadlockAnalysisDelay = deadlockDelay + analysisVisibilityDelay
   if (contractEmpty || recipientEmpty) {
-    threatAnalysisDelay = contractDelay
+    deadlockAnalysisDelay = contractDelay + analysisVisibilityDelay
   }
   if (recipientEmpty) {
-    threatAnalysisDelay += analysisVisibilityDelay
+    deadlockAnalysisDelay = analysisVisibilityDelay
   }
 
+  let threatAnalysisDelay = threatDelay
   let simulationAnalysisDelay = simulationDelay
-  if (contractEmpty || recipientEmpty) {
+
+  if ((contractEmpty || recipientEmpty) && deadlockEmpty) {
+    threatAnalysisDelay = contractDelay
     simulationAnalysisDelay = threatDelay
   }
-  if (recipientEmpty) {
+  if (!deadlockEmpty) {
+    threatAnalysisDelay = deadlockDelay + analysisVisibilityDelay
+    simulationAnalysisDelay = deadlockDelay + simulationDelay
+  }
+  if (recipientEmpty && deadlockEmpty) {
+    threatAnalysisDelay += analysisVisibilityDelay
     simulationAnalysisDelay += analysisVisibilityDelay
   }
 
   return {
     recipientDelay,
     contractAnalysisDelay,
+    deadlockAnalysisDelay,
     threatAnalysisDelay,
     simulationAnalysisDelay,
   }

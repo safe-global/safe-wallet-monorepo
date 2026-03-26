@@ -8,6 +8,7 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - expo-plugins/**
 
 jobs:
   build:
@@ -21,18 +22,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      # Set up Node.js
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/yarn
         with:
-          node-version: '22.11.0' # jod
-          cache: 'yarn'
+          after-install: 'false'
 
-      # Install dependencies
-      - name: Install dependencies
-        run: yarn install --immutable
+      - name: Build expo plugins
+        run: yarn workspace @safe-global/notification-service-ios build
 
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v8

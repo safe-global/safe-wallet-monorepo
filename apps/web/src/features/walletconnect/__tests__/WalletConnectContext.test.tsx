@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useContext } from 'react'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
@@ -70,7 +70,9 @@ const ContextControlComponent = () => {
 describe('WalletConnectProvider', () => {
   const testSafeAddress = faker.finance.ethereumAddress()
 
-  const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
+  const extendedSafeInfo = extendedSafeInfoBuilder()
+    .with({ address: addressExBuilder().with({ value: testSafeAddress }).build(), chainId: '5' })
+    .build()
 
   beforeEach(() => {
     jest.resetAllMocks()
@@ -197,7 +199,9 @@ describe('WalletConnectProvider', () => {
   })
 
   describe('updateSessions', () => {
-    const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
+    const extendedSafeInfo = extendedSafeInfoBuilder()
+      .with({ address: addressExBuilder().with({ value: testSafeAddress }).build(), chainId: '5' })
+      .build()
 
     const getUpdateSafeInfoComponent = (safeInfo: ExtendedSafeInfo) => {
       // eslint-disable-next-line react/display-name
@@ -217,11 +221,11 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
-      const ChainUpdater = getUpdateSafeInfoComponent({
-        ...extendedSafeInfoBuilder().build(),
-        address: { value: testSafeAddress },
-        chainId: '1',
-      })
+      const ChainUpdater = getUpdateSafeInfoComponent(
+        extendedSafeInfoBuilder()
+          .with({ address: addressExBuilder().with({ value: testSafeAddress }).build(), chainId: '1' })
+          .build(),
+      )
 
       const { getByText } = render(
         <WalletConnectProvider>
@@ -248,11 +252,11 @@ describe('WalletConnectProvider', () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
 
-      const AddressUpdater = getUpdateSafeInfoComponent({
-        ...extendedSafeInfoBuilder().build(),
-        address: { value: newSafeAddress },
-        chainId: '5',
-      })
+      const AddressUpdater = getUpdateSafeInfoComponent(
+        extendedSafeInfoBuilder()
+          .with({ address: addressExBuilder().with({ value: newSafeAddress }).build(), chainId: '5' })
+          .build(),
+      )
 
       const { getByText } = render(
         <WalletConnectProvider>
@@ -264,7 +268,7 @@ describe('WalletConnectProvider', () => {
             safeInfo: {
               loading: false,
               loaded: true,
-              data: { ...extendedSafeInfo, address: { value: testSafeAddress }, chainId: '5' },
+              data: extendedSafeInfo,
             },
           },
         },
@@ -297,7 +301,7 @@ describe('WalletConnectProvider', () => {
             safeInfo: {
               loading: false,
               loaded: true,
-              data: { ...extendedSafeInfo, address: { value: testSafeAddress }, chainId: '5' },
+              data: extendedSafeInfo,
             },
           },
         },
@@ -811,7 +815,9 @@ describe('WalletConnectProvider', () => {
     const requestUrl = faker.internet.url()
     const requestAppName = faker.company.name()
 
-    const extendedSafeInfo = { ...extendedSafeInfoBuilder().build(), address: { value: testSafeAddress }, chainId: '5' }
+    const extendedSafeInfo = extendedSafeInfoBuilder()
+      .with({ address: addressExBuilder().with({ value: testSafeAddress }).build(), chainId: '5' })
+      .build()
 
     it('does not continue with the request if there is no matching topic', async () => {
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())

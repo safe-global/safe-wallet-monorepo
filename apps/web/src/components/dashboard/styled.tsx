@@ -1,3 +1,7 @@
+/**
+ * @usedBy features/positions/components/PositionsWidget/index.tsx (WidgetCard)
+ * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
+ */
 import type { ReactElement, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import NextLink from 'next/link'

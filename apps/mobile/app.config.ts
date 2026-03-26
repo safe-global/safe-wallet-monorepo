@@ -21,7 +21,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.8',
+  version: '1.0.10',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -32,7 +32,6 @@ const config: ExpoConfig = {
   icon: './assets/images/icon.png',
   scheme: 'myapp',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
   ios: {
     config: {
       usesNonExemptEncryption: false,
@@ -74,7 +73,6 @@ const config: ExpoConfig = {
       'android.permission.FOREGROUND_SERVICE',
       'android.permission.WAKE_LOCK',
     ],
-    edgeToEdgeEnabled: true,
     allowBackup: false,
   },
   web: {
@@ -83,6 +81,17 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    [
+      'expo-datadog',
+      {
+        errorTracking: {
+          iosDsyms: !!process.env.EAS_BUILD,
+          iosSourcemaps: !!process.env.EAS_BUILD,
+          androidSourcemaps: !!process.env.EAS_BUILD,
+          androidProguardMappingFiles: !!process.env.EAS_BUILD,
+        },
+      },
+    ],
     [
       'react-native-ble-plx',
       {
@@ -133,6 +142,7 @@ const config: ExpoConfig = {
           forceStaticLinking: ['RNFBApp'],
         },
         android: {
+          minSdkVersion: 34,
           extraMavenRepos: ['../../../../node_modules/@notifee/react-native/android/libs'],
         },
       },
@@ -148,6 +158,8 @@ const config: ExpoConfig = {
         enableBase64ShareAndroid: true,
       },
     ],
+    '@react-native-community/datetimepicker',
+    'expo-image',
     'expo-task-manager',
     'expo-web-browser',
     [
@@ -174,13 +186,7 @@ const config: ExpoConfig = {
   ],
   experiments: {
     typedRoutes: true,
-  },
-  notification: {
-    icon: './assets/images/icon.png',
-    color: '#FFFFFF',
-    androidMode: 'default',
-    androidCollapsedTitle: 'Updates from Safe Wallet',
-    iosDisplayInForeground: true,
+    reactCompiler: true,
   },
 }
 

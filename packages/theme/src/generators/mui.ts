@@ -284,7 +284,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
       MuiChip: {
         styleOverrides: {
           colorSuccess: ({ theme }) => ({ backgroundColor: theme.palette.secondary.light, height: '24px' }),
-          //@ts-ignore this is not detected even though it is declared in web app
+          //@ts-expect-error this is not detected even though it is declared in web app
           sizeTiny: {
             fontSize: '11px',
             height: 'auto',
@@ -312,7 +312,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
             '& .MuiAlert-icon': { color: theme.palette.warning.main },
             '&.MuiPaper-root': { backgroundColor: theme.palette.warning.background },
           }),
-          // @ts-ignore - custom color variant
+          // @ts-expect-error - custom color variant
           standardBackground: ({ theme }) => ({
             '& .MuiAlert-icon': { color: theme.palette.text.primary },
             '&.MuiPaper-root': { backgroundColor: theme.palette.background.main },
@@ -452,7 +452,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
               boxSizing: 'border-box',
             },
           }),
-          sizeSmall: ({ theme }) => ({
+          sizeSmall: () => ({
             width: 22,
             height: 13,
             padding: 0,

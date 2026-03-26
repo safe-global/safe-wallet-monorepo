@@ -12,11 +12,16 @@ const NO_SIDEBAR_ROUTES = [
   AppRoutes.welcome.index,
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,
+  AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.selectSafes,
+  AppRoutes.welcome.inviteMembers,
+  AppRoutes.spaces.createSpace,
   AppRoutes.imprint,
   AppRoutes.privacy,
   AppRoutes.cookie,
   AppRoutes.terms,
   AppRoutes.licenses,
+  AppRoutes.spaces.index,
 ]
 
 const TOGGLE_SIDEBAR_ROUTES = [AppRoutes.apps.open]

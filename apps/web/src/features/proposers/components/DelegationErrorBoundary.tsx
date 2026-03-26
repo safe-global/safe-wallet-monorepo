@@ -1,13 +1,5 @@
-import type { ReactElement, ReactNode } from 'react'
-import { ErrorBoundary } from '@sentry/react'
+import { Component, type ReactElement, type ReactNode } from 'react'
 import { Box, Button, Typography } from '@mui/material'
-
-type FallbackProps = {
-  error: Error
-  resetError: () => void
-  fallbackMessage?: string
-  onRetry?: () => void
-}
 
 type DelegationErrorBoundaryProps = {
   children: ReactNode
@@ -15,12 +7,50 @@ type DelegationErrorBoundaryProps = {
   onRetry?: () => void
 }
 
-function DelegationFallback({ error, resetError, fallbackMessage, onRetry }: FallbackProps): ReactElement {
-  function handleRetry(): void {
-    onRetry?.()
-    resetError()
+type DelegationErrorBoundaryState = {
+  hasError: boolean
+  error: Error | null
+}
+
+class DelegationErrorBoundary extends Component<DelegationErrorBoundaryProps, DelegationErrorBoundaryState> {
+  constructor(props: DelegationErrorBoundaryProps) {
+    super(props)
+    this.state = { hasError: false, error: null }
   }
 
+  static getDerivedStateFromError(error: Error): DelegationErrorBoundaryState {
+    return { hasError: true, error }
+  }
+
+  handleRetry = (): void => {
+    this.props.onRetry?.()
+    this.setState({ hasError: false, error: null })
+  }
+
+  render(): ReactNode {
+    if (this.state.hasError && this.state.error) {
+      return (
+        <DelegationFallback
+          error={this.state.error}
+          fallbackMessage={this.props.fallbackMessage}
+          onRetry={this.handleRetry}
+        />
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+function DelegationFallback({
+  error,
+  fallbackMessage,
+  onRetry,
+}: {
+  error: Error
+  fallbackMessage?: string
+  onRetry: () => void
+}): ReactElement {
   return (
     <Box
       sx={{
@@ -38,20 +68,10 @@ function DelegationFallback({ error, resetError, fallbackMessage, onRetry }: Fal
           {error.message}
         </Typography>
       )}
-      <Button size="small" variant="outlined" color="error" onClick={handleRetry}>
+      <Button size="small" variant="outlined" color="error" onClick={onRetry}>
         Try again
       </Button>
     </Box>
-  )
-}
-
-function DelegationErrorBoundary({ children, fallbackMessage, onRetry }: DelegationErrorBoundaryProps): ReactElement {
-  return (
-    <ErrorBoundary
-      fallback={(props) => <DelegationFallback {...props} fallbackMessage={fallbackMessage} onRetry={onRetry} />}
-    >
-      {children}
-    </ErrorBoundary>
   )
 }
 

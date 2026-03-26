@@ -28,7 +28,7 @@ const fallbackMulticall = async (provider: AbstractProvider, calls: { to: string
     try {
       const result = await provider.call(call)
       results.push({ success: true, returnData: result })
-    } catch (error) {
+    } catch {
       results.push({ success: false, returnData: '0x' })
     }
   }

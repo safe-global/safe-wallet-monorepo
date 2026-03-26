@@ -61,10 +61,10 @@ describe('formatters', () => {
     it('should return an empty string if passed a falsy value', () => {
       expect(formatters.shortenAddress('', 5)).toEqual('')
 
-      // @ts-ignore - Invalid type
+      // @ts-expect-error - testing invalid type
       expect(formatters.shortenAddress(undefined, 5)).toEqual('')
 
-      // @ts-ignore - Invalid type
+      // @ts-expect-error - testing invalid type
       expect(formatters.shortenAddress(null, 5)).toEqual('')
     })
   })

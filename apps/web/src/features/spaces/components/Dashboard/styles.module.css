@@ -29,6 +29,23 @@
   justify-content: center;
 }
 
+.widgetItem {
+  iframe {
+    display: none !important;
+  }
+}
+
+.widgetItemLabel {
+  @apply truncate;
+
+  &,
+  & > div {
+    display: inline-block;
+    vertical-align: top;
+    font-weight: 600;
+  }
+}
+
 .iconBGBlue {
   background-color: var(--color-info-background);
 }

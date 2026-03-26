@@ -218,7 +218,7 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
                                     >
                                       <button
                                         aria-label="Copy to clipboard"
-                                        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+                                        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
                                         tabindex="0"
                                         type="button"
                                       >

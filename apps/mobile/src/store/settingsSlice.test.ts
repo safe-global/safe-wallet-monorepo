@@ -4,6 +4,8 @@ import settingsReducer, {
   setHideDust,
   setTokenList,
   selectTokenList,
+  selectPreferFiatInput,
+  setPreferFiatInput,
   TOKEN_LISTS,
   SettingsState,
 } from './settingsSlice'
@@ -21,6 +23,8 @@ const createMockStore = (initialState?: Partial<SettingsState>) => {
         currency: 'usd',
         tokenList: TOKEN_LISTS.TRUSTED,
         hideDust: true,
+        preferFiatInput: true,
+        dataCollectionConsented: false,
         env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
         ...initialState,
       },
@@ -53,6 +57,27 @@ describe('settingsSlice - hideDust', () => {
     const store = createMockStore({ hideDust: undefined as unknown as boolean })
     const state = store.getState() as unknown as RootState
     expect(selectHideDust(state)).toBe(true)
+  })
+})
+
+describe('settingsSlice - preferFiatInput', () => {
+  it('should default preferFiatInput to true', () => {
+    const store = createMockStore()
+    const state = store.getState() as unknown as RootState
+    expect(selectPreferFiatInput(state)).toBe(true)
+  })
+
+  it('should set preferFiatInput to false', () => {
+    const store = createMockStore()
+    store.dispatch(setPreferFiatInput(false))
+    const state = store.getState() as unknown as RootState
+    expect(selectPreferFiatInput(state)).toBe(false)
+  })
+
+  it('should default to true when preferFiatInput is undefined (persist migration)', () => {
+    const store = createMockStore({ preferFiatInput: undefined as unknown as boolean })
+    const state = store.getState() as unknown as RootState
+    expect(selectPreferFiatInput(state)).toBe(true)
   })
 })
 

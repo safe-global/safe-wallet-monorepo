@@ -13,7 +13,6 @@ import {
   NativeStakingWithdrawTransactionInfo,
   Transaction,
   TransferTransactionInfo,
-  TransactionDetails,
   ModuleExecutionDetails,
   MultisigExecutionDetails,
 } from './AUTO_GENERATED/transactions'

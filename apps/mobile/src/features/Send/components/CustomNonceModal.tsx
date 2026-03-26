@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { TextInput, StyleSheet } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { TextInput, StyleSheet, Platform } from 'react-native'
 import { Text, useTheme } from 'tamagui'
 import { DialogModal } from './DialogModal'
 
@@ -40,10 +40,18 @@ function validateNonce(value: string, currentNonce: number): string | undefined 
 export function CustomNonceModal({ visible, defaultNonce, currentNonce, onSave, onCancel }: CustomNonceModalProps) {
   const theme = useTheme()
   const [value, setValue] = useState(defaultNonce)
+  const inputRef = useRef<TextInput>(null)
 
   useEffect(() => {
     if (visible) {
       setValue(defaultNonce)
+
+      // On Android, autoFocus inside a Modal doesn't reliably open the keyboard.
+      // Manually focusing after a short delay ensures the keyboard appears.
+      if (Platform.OS === 'android') {
+        const timer = setTimeout(() => inputRef.current?.focus(), 200)
+        return () => clearTimeout(timer)
+      }
     }
   }, [visible, defaultNonce])
 
@@ -66,11 +74,12 @@ export function CustomNonceModal({ visible, defaultNonce, currentNonce, onSave, 
   return (
     <DialogModal visible={visible} title="New nonce" onCancel={onCancel} onSave={handleSave} saveDisabled={!isValid}>
       <TextInput
+        ref={inputRef}
         style={[styles.input, { color: String(theme.color.get()) }]}
         value={value}
         onChangeText={handleChangeText}
         keyboardType="number-pad"
-        autoFocus
+        autoFocus={Platform.OS === 'ios'}
         selectTextOnFocus
         testID="custom-nonce-input"
       />

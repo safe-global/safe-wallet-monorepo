@@ -1,3 +1,5 @@
+/* @usedBy features/recovery/components/RecoveryType/index.tsx */
+
 .container {
   width: 100%;
   padding: 11px 16px;
@@ -16,12 +18,8 @@
   grid-template-columns: 1fr 170px;
 }
 
-.pendingTxHeader :global .MuiBadge-root {
+.pendingTxHeader > span {
   margin-left: var(--space-1);
-}
-
-.pendingTxHeader :global .MuiBadge-badge {
-  position: relative;
 }
 
 .innerContainer {

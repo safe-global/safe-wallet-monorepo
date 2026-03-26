@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { View, Stack, YStack } from 'tamagui'
+import { View, YStack } from 'tamagui'
 import { useLocalSearchParams, router } from 'expo-router'
 import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 import { Loader } from '@/src/components/Loader'
@@ -86,24 +86,24 @@ export const LedgerReviewSignContainer = () => {
     <ReviewAndConfirmView
       txDetails={txDetails}
       header={
-        <YStack space="$4" paddingTop="$4">
+        <YStack gap="$4" paddingTop="$4">
           <LargeHeaderTitle>Review and confirm on your device</LargeHeaderTitle>
         </YStack>
       }
     >
-      <Stack
+      <View
         backgroundColor="$background"
         paddingHorizontal="$4"
         paddingVertical="$3"
         borderTopWidth={1}
         borderTopColor="$borderLight"
-        space="$3"
+        gap="$3"
         paddingBottom={bottom || '$4'}
       >
         <SafeButton onPress={handleSign} disabled={isSigning} loading={isSigning}>
           Continue on Ledger
         </SafeButton>
-      </Stack>
+      </View>
     </ReviewAndConfirmView>
   )
 }

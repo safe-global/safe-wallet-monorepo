@@ -1,6 +1,6 @@
 import React from 'react'
 import type { MasterCopyChangeThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
-import { Text, View, Stack } from 'tamagui'
+import { Text, View } from 'tamagui'
 
 interface AddressChangesProps {
   result: MasterCopyChangeThreatAnalysisResult
@@ -23,7 +23,7 @@ export function AddressChanges({ result }: AddressChangesProps) {
   ]
 
   return (
-    <Stack gap="$2">
+    <View gap="$2">
       {items.map((item, index) => (
         <View
           key={`${item.value}-${index}`}
@@ -41,6 +41,6 @@ export function AddressChanges({ result }: AddressChangesProps) {
           </Text>
         </View>
       ))}
-    </Stack>
+    </View>
   )
 }

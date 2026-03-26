@@ -6,13 +6,18 @@ import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useOwnedSafes from '@/hooks/useOwnedSafes'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
-import type { RecipientAnalysisResults, ContractAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import type {
+  RecipientAnalysisResults,
+  ContractAnalysisResults,
+  DeadlockAnalysisResults,
+} from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
+  deadlock: AsyncResult<DeadlockAnalysisResults>
 } {
   const safeAddress = useSafeAddress()
   const chainId = useChainId()
