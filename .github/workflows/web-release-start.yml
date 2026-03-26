@@ -117,8 +117,8 @@ jobs:
 
       - name: Check if version already exists
         run: |
-          if git rev-parse "web-v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "❌ Version web-v${{ steps.version.outputs.version }} already exists!"
+          if git rev-parse "web-v${{ steps.version.outputs.version }}" >/dev/null 2>&1 || git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "❌ Version ${{ steps.version.outputs.version }} already exists (checked both web-v and legacy v prefix)!"
             exit 1
           fi
           echo "✅ Version is new"
