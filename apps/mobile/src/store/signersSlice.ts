@@ -4,15 +4,26 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import { RootState } from '@/src/store'
 import logger from '@/src/utils/logger'
 
+export enum SignerType {
+  PRIVATE_KEY = 'private-key',
+  LEDGER = 'ledger',
+  WALLETCONNECT = 'walletconnect',
+}
+
 export type Signer = AddressInfo &
   (
     | {
-        type: 'private-key'
+        type: SignerType.PRIVATE_KEY
         derivationPath?: never
       }
     | {
-        type: 'ledger'
+        type: SignerType.LEDGER
         derivationPath: string
+      }
+    | {
+        type: SignerType.WALLETCONNECT
+        walletName?: string
+        walletIcon?: string
       }
   )
 
