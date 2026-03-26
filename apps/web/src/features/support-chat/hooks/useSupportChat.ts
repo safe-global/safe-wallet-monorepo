@@ -1,5 +1,4 @@
-import { useContext, useMemo } from 'react'
-import { WalletContext } from '@/components/common/WalletProvider'
+import { useMemo } from 'react'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import {
   SUPPORT_CHAT_APP_ID,
@@ -27,7 +26,6 @@ const deriveAliasEmail = (address: string): string => {
 }
 
 export const useSupportChat = () => {
-  const { connectedWallet } = useContext(WalletContext) ?? {}
   const safeAddress = useSafeAddress()
 
   const config: SupportChatConfig = useMemo(
@@ -41,15 +39,14 @@ export const useSupportChat = () => {
   )
 
   const user: UserIdentity = useMemo(() => {
-    const aliasSource = connectedWallet?.address || safeAddress
-    const email = aliasSource ? deriveAliasEmail(aliasSource) : `guest@${SUPPORT_CHAT_ALIAS_DOMAIN}`
+    const email = safeAddress ? deriveAliasEmail(safeAddress) : `guest@${SUPPORT_CHAT_ALIAS_DOMAIN}`
 
     return {
       email,
       name: 'Safe{Wallet}',
       accountId: safeAddress,
     }
-  }, [connectedWallet, safeAddress])
+  }, [safeAddress])
 
   return { config, user }
 }

@@ -15,7 +15,7 @@ type SupportChatMessage =
   | { type: 'pylon-chat-closed' }
 
 // Constants
-const RATE_LIMIT_CONFIG = { MAX_MESSAGES: 100, WINDOW_MS: 1000 } as const
+const RATE_LIMIT_CONFIG = { MAX_MESSAGES: 10, WINDOW_MS: 1000 } as const
 const PYLON_TIMING = { RETRY_DELAY_MS: 200 } as const
 const FRAME_DIMENSIONS = {
   DEFAULT_WIDTH: 360,
@@ -38,15 +38,6 @@ function useRateLimit(maxMessages = RATE_LIMIT_CONFIG.MAX_MESSAGES, windowMs = R
   }, [maxMessages, windowMs])
 
   return { isRateLimited }
-}
-
-function isLocalhostOrigin(origin: string): boolean {
-  return (
-    origin.startsWith('http://localhost') ||
-    origin.startsWith('https://localhost') ||
-    origin.startsWith('http://127.0.0.1') ||
-    origin.startsWith('https://127.0.0.1')
-  )
 }
 
 const SENSITIVE_PATTERNS = ['APP_ID', 'PYLON', 'configuration', 'config']
@@ -180,7 +171,6 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
       const isValidOrigin =
         event.origin === chatOrigin ||
-        isLocalhostOrigin(event.origin) ||
         (chatOrigin.startsWith('http://localhost') && event.origin.startsWith('http://localhost')) ||
         (chatOrigin.startsWith('https://localhost') && event.origin.startsWith('https://localhost'))
 
