@@ -152,7 +152,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: var(--color-success-main);
   flex-shrink: 0;
   pointer-events: none;
 }
