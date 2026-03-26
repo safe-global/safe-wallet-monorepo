@@ -180,13 +180,6 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: sha256sum tx-builder-${{ steps.version.outputs.version_number }}.tar.gz > tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
 
-      - name: Create git tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
-
       - name: Generate changelog
         id: changelog
         run: |
@@ -201,6 +194,13 @@ jobs:
             echo "$LOG"
             echo "EOF"
           } >> $GITHUB_OUTPUT
+
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
