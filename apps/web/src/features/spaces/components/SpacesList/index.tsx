@@ -39,7 +39,7 @@ const AddSpaceButton = () => {
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   return (
     <Card sx={{ p: 5, textAlign: 'center' }}>
-      <Typography variant="h4" fontWeight={600} mb={1}>
+      <Typography variant="h3" fontWeight={600} mb={3}>
         Sign in
       </Typography>
 

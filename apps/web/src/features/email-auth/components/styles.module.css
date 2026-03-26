@@ -1,10 +1,10 @@
 .signInButton {
   background-color: var(--color-background-main);
   color: var(--color-text-primary);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 10px 28px;
   border: none;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
   text-transform: none;
   width: 100%;
