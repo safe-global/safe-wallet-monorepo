@@ -1,4 +1,6 @@
 export { default as BalanceChanges } from './BalanceChanges'
+export { default as FeeInfoBanner } from './FeeInfoBanner'
+export { default as FeesPreview } from './FeesPreview'
 export { default as RiskConfirmation } from './RiskConfirmation'
 export { default as TxNote } from './TxNote'
 export { default as SignerSelect } from './SignerSelect'
