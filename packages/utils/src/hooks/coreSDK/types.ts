@@ -10,4 +10,6 @@ export type SafeCoreSDKProps = {
   implementationVersionState: SafeState['implementationVersionState']
   implementation: SafeState['implementation']['value']
   undeployedSafe?: UndeployedSafe
+  isL2Chain?: boolean
+  isZkChain?: boolean
 }

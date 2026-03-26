@@ -16,20 +16,26 @@ enum ALLOWANCE_MODULE_VERSIONS {
 
 const ALL_VERSIONS = [ALLOWANCE_MODULE_VERSIONS['0.1.0'], ALLOWANCE_MODULE_VERSIONS['0.1.1']]
 
+const getModuleAddress = (deployment: ReturnType<typeof getAllowanceModuleDeployment>, chainId: string) => {
+  if (!deployment) return undefined
+  // Fall back to first known address for unregistered chains (deterministic via CREATE2)
+  return deployment.networkAddresses[chainId] ?? Object.values(deployment.networkAddresses)[0]
+}
+
 export const getDeployment = (chainId: string, modules: SafeState['modules']) => {
   if (!modules?.length) return
   for (const version of ALL_VERSIONS) {
-    const deployment = getAllowanceModuleDeployment({ network: chainId, version })
+    const deployment = getAllowanceModuleDeployment({ version })
     if (!deployment) continue
-    const deploymentAddress = deployment?.networkAddresses[chainId]
+    const deploymentAddress = getModuleAddress(deployment, chainId)
     const isMatch = modules?.some((address) => sameAddress(address.value, deploymentAddress))
     if (isMatch) return deployment
   }
 }
 
 export const getLatestSpendingLimitAddress = (chainId: string): string | undefined => {
-  const deployment = getAllowanceModuleDeployment({ network: chainId })
-  return deployment?.networkAddresses[chainId]
+  const deployment = getAllowanceModuleDeployment()
+  return getModuleAddress(deployment, chainId)
 }
 
 export const getDeployedSpendingLimitModuleAddress = (
@@ -37,5 +43,5 @@ export const getDeployedSpendingLimitModuleAddress = (
   modules: SafeState['modules'],
 ): string | undefined => {
   const deployment = getDeployment(chainId, modules)
-  return deployment?.networkAddresses[chainId]
+  return getModuleAddress(deployment, chainId)
 }

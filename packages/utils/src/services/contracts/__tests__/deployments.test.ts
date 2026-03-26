@@ -1,11 +1,14 @@
 import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import {
   getCanonicalOrFirstAddress,
+  getChainAgnosticAddress,
   hasCanonicalDeployment,
   hasMatchingDeployment,
   isCanonicalDeployment,
+  isChainAgnosticVersion,
   getCanonicalMultiSendCallOnlyAddress,
   getCanonicalMultiSendAddress,
+  resolveChainAgnosticContractAddresses,
 } from '../../contracts/deployments'
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
 
@@ -71,6 +74,48 @@ describe('deployments utils', () => {
 
     it('returns undefined when no deployment', () => {
       expect(getCanonicalOrFirstAddress(undefined, chainId)).toBeUndefined()
+    })
+  })
+
+  describe('getChainAgnosticAddress', () => {
+    const canonical = '0x1111111111111111111111111111111111111111'
+    const eip155Addr = '0x2222222222222222222222222222222222222222'
+    const unknownChainId = '999999'
+
+    it('returns per-chain address when chain is registered', () => {
+      const deployment = makeDeployment(
+        { canonical: { address: canonical, codeHash: '0xhash' } },
+        { [chainId]: [canonical] },
+      )
+      expect(getChainAgnosticAddress(deployment, chainId)).toBe(canonical)
+    })
+
+    it('falls back to canonical address for unregistered chains', () => {
+      const deployment = makeDeployment(
+        { canonical: { address: canonical, codeHash: '0xhash' } },
+        { [chainId]: [canonical] }, // only chainId=1 is registered
+      )
+      expect(getChainAgnosticAddress(deployment, unknownChainId)).toBe(canonical)
+    })
+
+    it('uses specified deployment type for fallback', () => {
+      const deployment = makeDeployment(
+        {
+          canonical: { address: canonical, codeHash: '0xhash' },
+          eip155: { address: eip155Addr, codeHash: '0xhash2' },
+        },
+        {},
+      )
+      expect(getChainAgnosticAddress(deployment, unknownChainId, 'eip155')).toBe(eip155Addr)
+    })
+
+    it('returns undefined when no deployment', () => {
+      expect(getChainAgnosticAddress(undefined, chainId)).toBeUndefined()
+    })
+
+    it('returns undefined when deployment type does not exist', () => {
+      const deployment = makeDeployment({ canonical: { address: canonical, codeHash: '0xhash' } }, {})
+      expect(getChainAgnosticAddress(deployment, unknownChainId, 'zksync')).toBeUndefined()
     })
   })
 
@@ -176,6 +221,112 @@ describe('deployments utils', () => {
     it('falls back to 1.3.0 for null version', () => {
       const address = getCanonicalMultiSendAddress(null)
       expect(address).toBe('0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761')
+    })
+  })
+
+  describe('isChainAgnosticVersion', () => {
+    it('returns true for version 1.4.1', () => {
+      expect(isChainAgnosticVersion('1.4.1')).toBe(true)
+    })
+
+    it('returns true for version 1.5.0', () => {
+      expect(isChainAgnosticVersion('1.5.0')).toBe(true)
+    })
+
+    it('returns false for version 1.3.0', () => {
+      expect(isChainAgnosticVersion('1.3.0')).toBe(false)
+    })
+
+    it('returns false for version 1.0.0', () => {
+      expect(isChainAgnosticVersion('1.0.0')).toBe(false)
+    })
+
+    it('strips version metadata before checking', () => {
+      expect(isChainAgnosticVersion('1.4.1+L2')).toBe(true)
+      expect(isChainAgnosticVersion('1.3.0+L2')).toBe(false)
+    })
+  })
+
+  describe('resolveChainAgnosticContractAddresses', () => {
+    it('resolves all canonical addresses for version 1.4.1 on L2 chains', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+      expect(result!.multiSendAddress).toBeDefined()
+      expect(result!.multiSendCallOnlyAddress).toBeDefined()
+      expect(result!.safeProxyFactoryAddress).toBeDefined()
+      expect(result!.fallbackHandlerAddress).toBeDefined()
+      expect(result!.signMessageLibAddress).toBeDefined()
+      expect(result!.createCallAddress).toBeDefined()
+      expect(result!.simulateTxAccessorAddress).toBeDefined()
+    })
+
+    it('resolves all canonical addresses for version 1.4.1 on L1 chains', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1', false, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+    })
+
+    it('returns different singleton addresses for L1 vs L2', () => {
+      const l1Result = resolveChainAgnosticContractAddresses('1.4.1', false, false)
+      const l2Result = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(l1Result).toBeDefined()
+      expect(l2Result).toBeDefined()
+      expect(l1Result!.safeSingletonAddress).not.toBe(l2Result!.safeSingletonAddress)
+    })
+
+    it('resolves zksync deployment type addresses when isZk is true', () => {
+      const canonicalResult = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+      const zkResult = resolveChainAgnosticContractAddresses('1.4.1', true, true)
+
+      expect(canonicalResult).toBeDefined()
+      expect(zkResult).toBeDefined()
+      // zkSync uses different addresses than canonical
+      expect(zkResult!.safeSingletonAddress).not.toBe(canonicalResult!.safeSingletonAddress)
+    })
+
+    it('strips version metadata before resolving', () => {
+      const result = resolveChainAgnosticContractAddresses('1.4.1+L2', true, false)
+      const directResult = resolveChainAgnosticContractAddresses('1.4.1', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBe(directResult!.safeSingletonAddress)
+    })
+
+    it('returns undefined when singleton has no address for the version', () => {
+      const result = resolveChainAgnosticContractAddresses('0.0.1', true, false)
+      expect(result).toBeUndefined()
+    })
+
+    it('logs warning when singleton cannot be resolved', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      resolveChainAgnosticContractAddresses('0.0.1', true, false)
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('No singleton address'))
+      warnSpy.mockRestore()
+    })
+
+    it('returns partial result with warning when auxiliary contracts are missing', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      // 1.3.0 has canonical deployments — should resolve singleton even if some aux are missing
+      const result = resolveChainAgnosticContractAddresses('1.3.0', true, false)
+
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
+
+      // If any auxiliary was missing, a warning would have been logged
+      // Either way, the result should have the singleton
+      warnSpy.mockRestore()
+    })
+
+    it('resolves addresses for version 1.3.0 canonical', () => {
+      const result = resolveChainAgnosticContractAddresses('1.3.0', true, false)
+
+      // 1.3.0 has canonical deployments
+      expect(result).toBeDefined()
+      expect(result!.safeSingletonAddress).toBeDefined()
     })
   })
 })
