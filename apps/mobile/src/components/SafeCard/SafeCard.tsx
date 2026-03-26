@@ -52,7 +52,6 @@ export function SafeCard({
             objectFit="contain"
             maxWidth={300}
             width={'100%'}
-            borderRadius={'$4'}
             marginTop="$4"
             height={100}
             // @ts-expect-error Tamagui v2 types src as string but require() returns number - works at runtime
