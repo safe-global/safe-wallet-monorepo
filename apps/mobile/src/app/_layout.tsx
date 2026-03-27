@@ -144,9 +144,9 @@ function RootLayout() {
   return (
     <DatadogWrapper>
       <GestureHandlerRootView>
-        <AppKitProvider instance={appKit}>
-          <KeyboardProvider>
-            <Provider store={store}>
+        <KeyboardProvider>
+          <Provider store={store}>
+            <AppKitProvider instance={appKit}>
               <DataFetchProvider>
                 <NotificationsProvider>
                   <PortalProvider shouldAddRootHost>
@@ -165,14 +165,14 @@ function RootLayout() {
                           </SafeToastProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>
+                      <AppKit />
                     </PersistGate>
                   </PortalProvider>
                 </NotificationsProvider>
               </DataFetchProvider>
-            </Provider>
-          </KeyboardProvider>
-          <AppKit />
-        </AppKitProvider>
+            </AppKitProvider>
+          </Provider>
+        </KeyboardProvider>
       </GestureHandlerRootView>
     </DatadogWrapper>
   )
