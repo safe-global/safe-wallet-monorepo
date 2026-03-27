@@ -30,7 +30,7 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (expiresAt: number) => ({ type: 'auth/setAuthenticated', payload: expiresAt }),
-  setIsEmailLoginPending: (pending: boolean) => ({ type: 'auth/setIsEmailLoginPending', payload: pending }),
+  setIsOidcLoginPending: (pending: boolean) => ({ type: 'auth/setIsOidcLoginPending', payload: pending }),
 }))
 
 jest.mock('@/store/notificationsSlice', () => ({
@@ -231,30 +231,30 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should dispatch setIsEmailLoginPending(true) then false on success', async () => {
+  it('should dispatch setIsOidcLoginPending(true) then false on success', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
     renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: true })
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: true })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: false })
     })
 
     const calls = mockDispatch.mock.calls.map((c) => c[0])
-    const pendingTrueIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === true)
-    const pendingFalseIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === false)
+    const pendingTrueIdx = calls.findIndex((c) => c?.type === 'auth/setIsOidcLoginPending' && c?.payload === true)
+    const pendingFalseIdx = calls.findIndex((c) => c?.type === 'auth/setIsOidcLoginPending' && c?.payload === false)
     expect(pendingTrueIdx).toBeLessThan(pendingFalseIdx)
   })
 
-  it('should dispatch setIsEmailLoginPending(false) on failure', async () => {
+  it('should dispatch setIsOidcLoginPending(false) on failure', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
 
     renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: false })
     })
   })
 

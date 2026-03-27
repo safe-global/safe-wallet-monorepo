@@ -39,7 +39,7 @@ describe('SignInOptions', () => {
     jest.clearAllMocks()
   })
 
-  it('should render email, Google, divider, and wallet buttons when email auth is enabled', () => {
+  it('should render email, Google, divider, and wallet buttons when OIDC auth is enabled', () => {
     mockOidcAuthFeature(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
@@ -50,7 +50,7 @@ describe('SignInOptions', () => {
     expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
   })
 
-  it('should render only wallet button when email auth is disabled', () => {
+  it('should render only wallet button when OIDC auth is disabled', () => {
     mockOidcAuthFeature(true)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)

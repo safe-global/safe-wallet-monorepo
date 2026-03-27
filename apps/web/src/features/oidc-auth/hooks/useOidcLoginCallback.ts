@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch } from '@/store'
-import { setAuthenticated, setIsEmailLoginPending } from '@/store/authSlice'
+import { setAuthenticated, setIsOidcLoginPending } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -44,7 +44,7 @@ export const useOidcLoginCallback = () => {
     if (!pending) return
 
     hasProcessed.current = true
-    dispatch(setIsEmailLoginPending(true))
+    dispatch(setIsOidcLoginPending(true))
 
     const processCallback = async () => {
       try {
@@ -70,7 +70,7 @@ export const useOidcLoginCallback = () => {
         dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
       } finally {
         sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
-        dispatch(setIsEmailLoginPending(false))
+        dispatch(setIsOidcLoginPending(false))
       }
     }
 
