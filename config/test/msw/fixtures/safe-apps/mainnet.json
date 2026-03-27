@@ -395,7 +395,7 @@
   },
   {
     "id": 24,
-    "url": "https://safe-apps.dev.5afe.dev/tx-builder",
+    "url": "https://tx-builder.staging.5afe.dev",
     "name": "Transaction Builder",
     "iconUrl": "https://safe-transaction-assets.staging.5afe.dev/safe_apps/24/icon.png",
     "description": "Compose custom contract interactions and batch them into a single transaction",
