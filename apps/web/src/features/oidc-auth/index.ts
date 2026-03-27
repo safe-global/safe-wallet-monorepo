@@ -1,35 +1,35 @@
 /**
- * Email Auth Feature - Public API (v3 Architecture)
+ * OIDC Auth Feature - Public API (v3 Architecture)
  *
- * Provides email login alongside SIWE.
- * Uses createFeatureHandle auto-derivation: 'email-auth' → FEATURES.EMAIL_AUTH
+ * Provides OIDC login alongside SIWE.
+ * Uses createFeatureHandle auto-derivation: 'oidc-auth' → FEATURES.OIDC_AUTH
  *
  * @example
  * ```typescript
  * // Component access via feature handle
- * import { EmailAuthFeature } from '@/features/email-auth'
+ * import { OidcAuthFeature } from '@/features/oidc-auth'
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
- *   const { EmailSignInButton } = useLoadFeature(EmailAuthFeature)
+ *   const { EmailSignInButton } = useLoadFeature(OidcAuthFeature)
  *   return <EmailSignInButton />
  * }
  *
  * // Hook access via direct import
- * import { useOidcLogin } from '@/features/email-auth'
+ * import { useOidcLogin } from '@/features/oidc-auth'
  * ```
  */
 import { createFeatureHandle } from '@/features/__core__'
-import type { EmailAuthContract } from './contract'
+import type { OidcAuthContract } from './contract'
 
 // ─────────────────────────────────────────────────────────────────
 // FEATURE HANDLE (lazy-loads components)
 // ─────────────────────────────────────────────────────────────────
 
-export const EmailAuthFeature = createFeatureHandle<EmailAuthContract>('email-auth')
+export const OidcAuthFeature = createFeatureHandle<OidcAuthContract>('oidc-auth')
 
 // Contract type
-export type { EmailAuthContract } from './contract'
+export type { OidcAuthContract } from './contract'
 
 // ─────────────────────────────────────────────────────────────────
 // PUBLIC HOOKS (always loaded, not lazy)

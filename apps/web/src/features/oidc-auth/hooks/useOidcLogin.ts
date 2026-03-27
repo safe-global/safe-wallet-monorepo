@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
-import { EMAIL_AUTH_PENDING_KEY, type OidcConnection } from '../constants'
+import { OIDC_AUTH_PENDING_KEY, type OidcConnection } from '../constants'
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
@@ -13,7 +13,7 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
  */
 export const useOidcLogin = () => {
   const loginWithRedirect = useCallback((connection: OidcConnection, redirectUrl?: string) => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
     url.searchParams.set('redirect_url', redirectUrl ?? window.location.href)
     url.searchParams.set('connection', connection)

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useOidcLogin } from '../useOidcLogin'
-import { EMAIL_AUTH_PENDING_KEY, OidcConnection } from '../../constants'
+import { OIDC_AUTH_PENDING_KEY, OidcConnection } from '../../constants'
 
 describe('useOidcLogin', () => {
   const originalLocation = window.location
@@ -30,7 +30,7 @@ describe('useOidcLogin', () => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
     })
 
-    expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBe('1')
+    expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBe('1')
   })
 
   it('should redirect to CGW authorize endpoint with connection and default redirect_url', () => {

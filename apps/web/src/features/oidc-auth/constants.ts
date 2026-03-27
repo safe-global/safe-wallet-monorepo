@@ -1,4 +1,4 @@
-export const EMAIL_AUTH_PENDING_KEY = 'email_auth_pending'
+export const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 
 export enum OidcConnection {
   EMAIL = 'email',

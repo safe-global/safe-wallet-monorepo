@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
-import { EmailAuthFeature } from '@/features/email-auth'
+import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
 
 interface SignedOutStateProps {
@@ -10,7 +10,7 @@ interface SignedOutStateProps {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
-  const { $isDisabled } = useLoadFeature(EmailAuthFeature)
+  const { $isDisabled } = useLoadFeature(OidcAuthFeature)
 
   return (
     <Box className={css.content}>

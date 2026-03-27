@@ -1,6 +1,6 @@
 import { Box, Divider } from '@mui/material'
 import SignInButton from '../SignInButton'
-import { EmailAuthFeature } from '@/features/email-auth'
+import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
 import css from './styles.module.css'
 
@@ -10,7 +10,7 @@ interface SignInOptionsProps {
 }
 
 const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsProps) => {
-  const { EmailSignInButton, GoogleSignInButton, $isDisabled, $isReady } = useLoadFeature(EmailAuthFeature)
+  const { EmailSignInButton, GoogleSignInButton, $isDisabled, $isReady } = useLoadFeature(OidcAuthFeature)
 
   return (
     <Box className={css.container}>

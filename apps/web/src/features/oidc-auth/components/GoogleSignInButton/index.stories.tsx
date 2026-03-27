@@ -4,11 +4,11 @@ import { createMockStory } from '@/stories/mocks'
 import GoogleSignInButton from './index'
 
 const defaultSetup = createMockStory({
-  features: { emailAuth: true },
+  features: { oidcAuth: true },
 })
 
 const meta = {
-  title: 'Features/EmailAuth/GoogleSignInButton',
+  title: 'Features/OidcAuth/GoogleSignInButton',
   component: GoogleSignInButton,
   loaders: [mswLoader],
   tags: ['autodocs'],

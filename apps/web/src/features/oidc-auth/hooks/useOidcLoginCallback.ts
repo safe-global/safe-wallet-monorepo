@@ -6,7 +6,7 @@ import { setAuthenticated, setIsEmailLoginPending } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { EMAIL_AUTH_PENDING_KEY } from '../constants'
+import { OIDC_AUTH_PENDING_KEY } from '../constants'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -31,16 +31,16 @@ const EMAIL_SIGN_IN_ERROR = {
 export const useOidcLoginCallback = () => {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const isEmailAuthEnabled = useHasFeature(FEATURES.EMAIL_AUTH)
+  const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH)
   const routerRef = useRef(router)
   const hasProcessed = useRef(false)
 
   routerRef.current = router
 
   useEffect(() => {
-    if (!isEmailAuthEnabled || hasProcessed.current) return
+    if (!isOidcAuthEnabled || hasProcessed.current) return
 
-    const pending = sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)
+    const pending = sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)
     if (!pending) return
 
     hasProcessed.current = true
@@ -69,11 +69,11 @@ export const useOidcLoginCallback = () => {
       } catch {
         dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
       } finally {
-        sessionStorage.removeItem(EMAIL_AUTH_PENDING_KEY)
+        sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
         dispatch(setIsEmailLoginPending(false))
       }
     }
 
     void processCallback()
-  }, [dispatch, isEmailAuthEnabled])
+  }, [dispatch, isOidcAuthEnabled])
 }

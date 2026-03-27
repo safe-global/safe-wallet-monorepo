@@ -18,14 +18,14 @@ interface OidcSignInButtonProps {
 
 const OidcSignInButton = ({ connection, label, icon, analyticsEvent, testId }: OidcSignInButtonProps) => {
   const { loginWithRedirect } = useOidcLogin()
-  const isEmailAuthEnabled = useHasFeature(FEATURES.EMAIL_AUTH)
+  const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH)
 
   const handleClick = () => {
     trackEvent(analyticsEvent)
     loginWithRedirect(connection)
   }
 
-  if (!isEmailAuthEnabled) return null
+  if (!isOidcAuthEnabled) return null
 
   return (
     <Button

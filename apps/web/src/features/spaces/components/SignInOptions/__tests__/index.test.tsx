@@ -26,7 +26,7 @@ jest.mock('@/features/__core__', () => ({
   createFeatureHandle: () => ({}),
 }))
 
-const mockEmailAuthFeature = (isDisabled: boolean, isReady = !isDisabled) =>
+const mockOidcAuthFeature = (isDisabled: boolean, isReady = !isDisabled) =>
   mockUseLoadFeature.mockReturnValue({
     EmailSignInButton: isDisabled ? () => null : MockEmailSignInButton,
     GoogleSignInButton: isDisabled ? () => null : MockGoogleSignInButton,
@@ -40,7 +40,7 @@ describe('SignInOptions', () => {
   })
 
   it('should render email, Google, divider, and wallet buttons when email auth is enabled', () => {
-    mockEmailAuthFeature(false)
+    mockOidcAuthFeature(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -51,7 +51,7 @@ describe('SignInOptions', () => {
   })
 
   it('should render only wallet button when email auth is disabled', () => {
-    mockEmailAuthFeature(true)
+    mockOidcAuthFeature(true)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -62,7 +62,7 @@ describe('SignInOptions', () => {
   })
 
   it('should render only wallet button while feature is loading', () => {
-    mockEmailAuthFeature(false, false)
+    mockOidcAuthFeature(false, false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -73,7 +73,7 @@ describe('SignInOptions', () => {
   })
 
   it('should show "Continue with wallet" text on the wallet button', () => {
-    mockEmailAuthFeature(false)
+    mockOidcAuthFeature(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
