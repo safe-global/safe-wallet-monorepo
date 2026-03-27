@@ -3,8 +3,6 @@ import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
 import type { Storage } from '@reown/appkit-common-react-native'
 import { createMMKV } from 'react-native-mmkv'
-import { phantomIconBase64 } from '@/assets/wallet-icons/phantom-icon-data-uri'
-import { rabbyIconBase64 } from '@/assets/wallet-icons/rabby-icon-data-uri'
 import { mainnet, polygon, arbitrum, sepolia } from 'viem/chains'
 import { safeJsonParse, safeJsonStringify } from '@walletconnect/safe-json'
 
@@ -83,7 +81,7 @@ export const appKit = createAppKit({
       name: 'Rabby',
       homepage: 'https://rabby.io',
       mobile_link: 'rabby://',
-      image_url: rabbyIconBase64,
+      image_url: 'https://app.safe.global/images/apps/rabby.png',
       app_store: 'https://apps.apple.com/us/app/rabby-wallet-crypto-evm/id6474381673',
       play_store: 'https://play.google.com/store/apps/details?id=com.debank.rabbymobile',
     },
@@ -92,7 +90,7 @@ export const appKit = createAppKit({
       name: 'Phantom',
       homepage: 'https://phantom.app',
       mobile_link: 'phantom://',
-      image_url: phantomIconBase64,
+      image_url: 'https://app.safe.global/images/apps/phantom.png',
       app_store: 'https://apps.apple.com/us/app/phantom-trade-markets/id1598432977',
       play_store: 'https://play.google.com/store/apps/details?id=app.phantom',
     },
