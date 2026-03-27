@@ -12,6 +12,7 @@ describe('Spaces dashboard tests', () => {
     cy.visit(constants.spacesUrl)
     wallet.connectSigner(owner)
     space.clickOnSignInBtn()
+    space.waitForSpacesWelcomeReady()
     space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
   })
 
