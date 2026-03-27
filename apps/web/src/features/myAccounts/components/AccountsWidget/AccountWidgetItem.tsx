@@ -16,7 +16,12 @@ interface AccountWidgetItemProps {
   onItemClick?: (safeAddress: string) => void
 }
 
-const AccountWidgetItem = ({ account, rowIndex, loading = false, onItemClick }: AccountWidgetItemProps): ReactElement => {
+const AccountWidgetItem = ({
+  account,
+  rowIndex,
+  loading = false,
+  onItemClick,
+}: AccountWidgetItemProps): ReactElement => {
   return (
     <WidgetItem
       testId={`space-dashboard-accounts-row-${rowIndex}`}

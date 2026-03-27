@@ -12,7 +12,14 @@ interface SafeWidgetProps {
   testId?: string
 }
 
-const SafeWidgetRoot = ({ title, onTitleClick, action, children, className, testId }: SafeWidgetProps): ReactElement => {
+const SafeWidgetRoot = ({
+  title,
+  onTitleClick,
+  action,
+  children,
+  className,
+  testId,
+}: SafeWidgetProps): ReactElement => {
   return (
     <div
       data-slot="safe-widget"
