@@ -16,7 +16,7 @@
  * }
  *
  * // Hook access via direct import
- * import { useEmailLogin } from '@/features/email-auth'
+ * import { useOidcLogin } from '@/features/email-auth'
  * ```
  */
 import { createFeatureHandle } from '@/features/__core__'
@@ -35,5 +35,5 @@ export type { EmailAuthContract } from './contract'
 // PUBLIC HOOKS (always loaded, not lazy)
 // ─────────────────────────────────────────────────────────────────
 
-export { useEmailLogin } from './hooks/useEmailLogin'
-export { useEmailLoginCallback } from './hooks/useEmailLoginCallback'
+export { useOidcLogin } from './hooks/useOidcLogin'
+export { useOidcLoginCallback } from './hooks/useOidcLoginCallback'

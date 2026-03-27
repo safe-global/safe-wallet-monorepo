@@ -6,7 +6,7 @@ import { setAuthenticated, setIsEmailLoginPending } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { EMAIL_AUTH_PENDING_KEY } from './useEmailLogin'
+import { EMAIL_AUTH_PENDING_KEY } from '../constants'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -28,7 +28,7 @@ const EMAIL_SIGN_IN_ERROR = {
  *
  * Should be called globally (e.g., in InitApp) so it runs on page load.
  */
-export const useEmailLoginCallback = () => {
+export const useOidcLoginCallback = () => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const isEmailAuthEnabled = useHasFeature(FEATURES.EMAIL_AUTH)

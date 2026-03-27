@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { OidcConnection } from '../../../hooks/useEmailLogin'
+import { OidcConnection } from '../../../constants'
 import EmailSignInButton from '../index'
 
 const mockLoginWithRedirect = jest.fn()
@@ -11,13 +11,9 @@ jest.mock('@/services/analytics', () => ({
   EventType: { META: 'meta' },
 }))
 
-jest.mock('../../../hooks/useEmailLogin', () => {
-  const original = jest.requireActual('../../../hooks/useEmailLogin')
-  return {
-    ...original,
-    useEmailLogin: () => ({ loginWithRedirect: mockLoginWithRedirect }),
-  }
-})
+jest.mock('../../../hooks/useOidcLogin', () => ({
+  useOidcLogin: () => ({ loginWithRedirect: mockLoginWithRedirect }),
+}))
 
 const mockUseHasFeature = jest.fn(() => true)
 

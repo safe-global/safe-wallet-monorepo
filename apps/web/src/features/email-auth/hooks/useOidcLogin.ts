@@ -1,13 +1,8 @@
 import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
+import { EMAIL_AUTH_PENDING_KEY, type OidcConnection } from '../constants'
 
-export const EMAIL_AUTH_PENDING_KEY = 'email_auth_pending'
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
-
-export enum OidcConnection {
-  EMAIL = 'email',
-  GOOGLE = 'google-oauth2',
-}
 
 /**
  * Hook for initiating the OIDC login flow via CGW.
@@ -16,7 +11,7 @@ export enum OidcConnection {
  * so we use window.location.href instead of RTK Query (fetch follows redirects
  * automatically and would fail trying to parse the provider's HTML as JSON).
  */
-export const useEmailLogin = () => {
+export const useOidcLogin = () => {
   const loginWithRedirect = useCallback((connection: OidcConnection, redirectUrl?: string) => {
     sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
     const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)

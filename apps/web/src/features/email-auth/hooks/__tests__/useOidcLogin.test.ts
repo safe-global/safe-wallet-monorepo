@@ -1,8 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import { GATEWAY_URL } from '@/config/gateway'
-import { useEmailLogin, EMAIL_AUTH_PENDING_KEY, OidcConnection } from '../useEmailLogin'
+import { useOidcLogin } from '../useOidcLogin'
+import { EMAIL_AUTH_PENDING_KEY, OidcConnection } from '../../constants'
 
-describe('useEmailLogin', () => {
+describe('useOidcLogin', () => {
   const originalLocation = window.location
 
   beforeEach(() => {
@@ -23,7 +24,7 @@ describe('useEmailLogin', () => {
   })
 
   it('should set sessionStorage flag on loginWithRedirect', () => {
-    const { result } = renderHook(() => useEmailLogin())
+    const { result } = renderHook(() => useOidcLogin())
 
     act(() => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
@@ -33,7 +34,7 @@ describe('useEmailLogin', () => {
   })
 
   it('should redirect to CGW authorize endpoint with connection and default redirect_url', () => {
-    const { result } = renderHook(() => useEmailLogin())
+    const { result } = renderHook(() => useOidcLogin())
 
     act(() => {
       result.current.loginWithRedirect(OidcConnection.EMAIL)
@@ -46,7 +47,7 @@ describe('useEmailLogin', () => {
   })
 
   it('should set connection=google-oauth2 for Google login', () => {
-    const { result } = renderHook(() => useEmailLogin())
+    const { result } = renderHook(() => useOidcLogin())
 
     act(() => {
       result.current.loginWithRedirect(OidcConnection.GOOGLE)
@@ -58,7 +59,7 @@ describe('useEmailLogin', () => {
 
   it('should use explicit redirect_url when provided', () => {
     const customUrl = 'https://app.safe.global/home'
-    const { result } = renderHook(() => useEmailLogin())
+    const { result } = renderHook(() => useOidcLogin())
 
     act(() => {
       result.current.loginWithRedirect(OidcConnection.EMAIL, customUrl)
