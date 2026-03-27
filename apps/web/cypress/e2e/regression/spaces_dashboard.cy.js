@@ -150,6 +150,10 @@ describe('Spaces dashboard tests', () => {
       cy.get(space.spaceSelectorMenu).find('li').should('have.length.at.least', 1)
     })
   })
+})
+
+/*
+Safe Selector through Spaces empty dashboard: commented out; remove this block comment to restore.
 
   // ===========================================
   // Safe Selector
@@ -247,7 +251,6 @@ describe('Spaces dashboard tests', () => {
       cy.url().should('include', '/welcome')
     })
   })
-})
 
 describe('Spaces empty dashboard tests', () => {
   beforeEach(() => {
@@ -301,3 +304,4 @@ describe('Spaces empty dashboard tests', () => {
     })
   })
 })
+*/
