@@ -59,12 +59,12 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 }))
 
 jest.mock('@/hooks/wallets/useOnboard', () => ({
-  getWalletConnectLabel: (...args: unknown[]) => mockGetWalletConnectLabel(...args),
+  getWalletConnectLabel: (wallet: unknown) => mockGetWalletConnectLabel(wallet),
 }))
 
 jest.mock('@/utils/wallets', () => ({
-  isSmartContractWallet: (...args: [string, string]) => mockIsSmartContractWallet(...args),
-  isLedger: (...args: [unknown]) => mockIsLedger(...args),
+  isSmartContractWallet: (chainId: string, address: string) => mockIsSmartContractWallet(chainId, address),
+  isLedger: (wallet: unknown) => mockIsLedger(wallet),
 }))
 
 jest.mock('@/components/welcome/WelcomeLogin/WalletLogin', () => ({
