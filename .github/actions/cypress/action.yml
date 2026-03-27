@@ -47,11 +47,11 @@ runs:
   steps:
     - uses: ./.github/actions/yarn
 
-    - name: Install Latest stable Chrome Version
-      shell: bash
-      run: |
-        curl -O 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
-        sudo apt-get install ./google-chrome-stable_current_amd64.deb
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: '134'
+      id: setup-chrome
 
     - uses: ./.github/actions/build
       with:
@@ -64,7 +64,7 @@ runs:
         spec: ${{ inputs.spec }}
         group: ${{ inputs.record == 'true' && inputs.group || '' }}
         parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
-        browser: chrome
+        browser: ${{ steps.setup-chrome.outputs.chrome-path }}
         record: ${{ inputs.record == 'true' }}
         tag: ${{ inputs.record == 'true' && inputs.tag || '' }}
         config: baseUrl=http://localhost:8080
