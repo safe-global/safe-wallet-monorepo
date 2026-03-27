@@ -8,20 +8,23 @@ import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPric
 export type FeesPreviewData = {
   gasFee: { label: string; amount: string; currency: string }
   loading?: boolean
+  error?: boolean
 }
 
 export const useFeesPreview = (): FeesPreviewData => {
   const { safeTx } = useContext(SafeTxContext)
-  const { gasLimit, gasLimitLoading } = useGasLimit(safeTx)
-  const [gasPrice, , gasPriceLoading] = useGasPrice()
+  const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
+  const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
   const chain = useCurrentChain()
 
   const loading = gasLimitLoading || gasPriceLoading || !safeTx
+  const hasError = !loading && (!!gasLimitError || !!gasPriceError || !gasLimit || !gasPrice?.maxFeePerGas)
   const gasFeeFormatted = getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain)
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
 
   return {
     gasFee: { label: 'Gas fee', amount: gasFeeFormatted, currency: nativeSymbol },
     loading,
+    error: hasError,
   }
 }

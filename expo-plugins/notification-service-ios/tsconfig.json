@@ -1,9 +1,11 @@
 {
-  "extends": "expo-module-scripts/tsconfig.plugin",
+  "extends": "../../config/tsconfig/confs/base.json",
   "compilerOptions": {
     "rootDir": "./plugin",
     "outDir": "./dist/plugin",
-    "declaration": true
+    "declaration": true,
+    "module": "CommonJS",
+    "moduleResolution": "node"
   },
   "include": ["./plugin/**/*"],
   "exclude": ["**/__tests__/*", "**/__mocks__/*"]

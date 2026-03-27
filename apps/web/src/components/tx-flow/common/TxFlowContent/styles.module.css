@@ -95,7 +95,8 @@
   flex-direction: column;
   gap: var(--space-2);
   position: sticky;
-  top: var(--space-1);
+  top: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .titleWrapper {

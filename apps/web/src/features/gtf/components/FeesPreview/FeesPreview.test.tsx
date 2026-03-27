@@ -21,4 +21,19 @@ describe('FeesPreview', () => {
     expect(screen.getByText('Gas fee')).toBeInTheDocument()
     expect(screen.queryByText('0.0002733 ETH')).not.toBeInTheDocument()
   })
+
+  it('renders "Cannot estimate" when error is true', () => {
+    render(<FeesPreview {...defaultProps} error />)
+
+    expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    expect(screen.getByText('Cannot estimate')).toBeInTheDocument()
+    expect(screen.queryByText('0.0002733 ETH')).not.toBeInTheDocument()
+  })
+
+  it('shows skeleton over error when loading is true', () => {
+    render(<FeesPreview {...defaultProps} loading error />)
+
+    expect(screen.queryByText('Cannot estimate')).not.toBeInTheDocument()
+    expect(screen.queryByText('0.0002733 ETH')).not.toBeInTheDocument()
+  })
 })

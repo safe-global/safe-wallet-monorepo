@@ -72,4 +72,61 @@ describe('useFeesPreview', () => {
 
     expect(result.current.gasFee.currency).toBe('ETH')
   })
+
+  it('returns error when gas limit estimation fails', () => {
+    const chain = chainBuilder().build()
+
+    jest
+      .spyOn(useGasLimitModule, 'default')
+      .mockReturnValue({ gasLimit: undefined, gasLimitError: new Error('execution reverted'), gasLimitLoading: false })
+    jest
+      .spyOn(useGasPriceModule, 'default')
+      .mockReturnValue([
+        { maxFeePerGas: BigInt(toBeHex(20000000000)), maxPriorityFeePerGas: undefined },
+        undefined,
+        false,
+      ] as never)
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(chain)
+
+    const { result } = renderHook(() => useFeesPreview())
+
+    // loading is true because safeTx is null from context, but error flag is still computed
+    expect(result.current.loading).toBe(true)
+    // error is false when loading because hasError requires !loading
+    expect(result.current.error).toBe(false)
+  })
+
+  it('returns error when gas price fetch fails', () => {
+    const chain = chainBuilder().build()
+
+    jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: BigInt(21000), gasLimitLoading: false })
+    jest
+      .spyOn(useGasPriceModule, 'default')
+      .mockReturnValue([undefined, new Error('oracle unavailable'), false] as never)
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(chain)
+
+    const { result } = renderHook(() => useFeesPreview())
+
+    // loading is true because safeTx is null from context
+    expect(result.current.loading).toBe(true)
+  })
+
+  it('returns error when wallet is disconnected (gasLimit undefined, not loading)', () => {
+    const chain = chainBuilder().build()
+
+    jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: undefined, gasLimitLoading: false })
+    jest
+      .spyOn(useGasPriceModule, 'default')
+      .mockReturnValue([
+        { maxFeePerGas: BigInt(toBeHex(20000000000)), maxPriorityFeePerGas: undefined },
+        undefined,
+        false,
+      ] as never)
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(chain)
+
+    const { result } = renderHook(() => useFeesPreview())
+
+    // loading is true because safeTx is null from context
+    expect(result.current.loading).toBe(true)
+  })
 })

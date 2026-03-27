@@ -61,7 +61,7 @@ export const events = {
   txCreatedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
+    eventLabel: 'https://tx-builder.staging.5afe.dev',
     eventType: 'tx_created',
     event: 'tx_created',
   },
@@ -69,7 +69,7 @@ export const events = {
   txConfirmedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://safe-apps.dev.5afe.dev/tx-builder',
+    eventLabel: 'https://tx-builder.staging.5afe.dev',
     eventType: 'tx_confirmed',
     event: 'tx_confirmed',
   },

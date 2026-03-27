@@ -9,12 +9,14 @@ const FeeRow = ({
   amount,
   currency,
   loading,
+  error,
   tooltip,
 }: {
   label: string
   amount?: string
   currency?: string
   loading?: boolean
+  error?: boolean
   tooltip?: ReactNode
 }): ReactElement => (
   <div className={css.feeRow}>
@@ -32,6 +34,10 @@ const FeeRow = ({
     </div>
     {loading ? (
       <Skeleton variant="text" sx={{ minWidth: '7em' }} />
+    ) : error ? (
+      <Typography variant="body2" letterSpacing="0.17px" color="warning.main">
+        Cannot estimate
+      </Typography>
     ) : amount ? (
       <Typography variant="body2" letterSpacing="0.17px">
         {amount} {currency}
@@ -55,6 +61,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           amount={gasFee.amount}
           currency={gasFee.currency}
           loading={props.loading}
+          error={props.error}
           tooltip="Network cost required to process this transaction. Currently paid by your signing wallet, soon from your Safe balance."
         />
       </div>

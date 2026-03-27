@@ -320,6 +320,40 @@ The repo provides automated verification:
 
 9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
 
+10. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
+
+    - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
+    - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
+    - **Both** if the PR includes UI + logic changes
+
+    Mermaid diagrams are rendered natively by GitHub. Example:
+
+    ````markdown
+    ```mermaid
+    flowchart LR
+      A[useSafeInfo hook] --> B[New validation logic]
+      B --> C{Is owner?}
+      C -->|Yes| D[Show actions]
+      C -->|No| E[Show read-only]
+    ```
+    ````
+
+    For refactors, use a before/after diagram:
+
+    ````markdown
+    ```mermaid
+    flowchart TB
+      subgraph Before
+        A1[Component A] --> B1[Inline logic]
+        A1 --> C1[Inline logic]
+      end
+      subgraph After
+        A2[Component A] --> H[useSharedHook]
+        H --> B2[Extracted service]
+      end
+    ```
+    ````
+
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
 ## Testing Guidelines
