@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
+import { Settings } from 'lucide-react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -17,6 +18,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { AppRoutes } from '@/config/routes'
 import { getDeterministicColor } from '@/features/spaces'
 import { NavItem } from './NavItem'
+import Link from 'next/link'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
@@ -31,6 +33,12 @@ export const SafeSidebarVariant = ({
   const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
+  const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const settingsHref = {
+    pathname: AppRoutes.settings.setup,
+    query: safeAddress ? { safe: safeAddress } : {},
+  }
+  const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
   const handleBackToSpace = () => {
     if (spaceId) {
@@ -96,6 +104,26 @@ export const SafeSidebarVariant = ({
           </SidebarGroupContent>
         </SidebarGroup>
       )}
+
+      {/* Settings */}
+      <SidebarGroup className={css.sidebarGroup}>
+        <SidebarGroupContent>
+          <SidebarMenu className="gap-0">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                isActive={isSettingsActive}
+                className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
+                render={<Link href={settingsHref} />}
+                data-testid="sidebar-settings-item"
+              >
+                <Settings />
+                <span>Settings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
     </SidebarContent>
   )
 }
