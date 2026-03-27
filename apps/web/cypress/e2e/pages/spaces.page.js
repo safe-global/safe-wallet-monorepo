@@ -1,7 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
-import staticSafes from '../../fixtures/safes/static.js'
-import { tableContainer } from './address_book.page.js'
+import * as navigation from './navigation.page.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const orgList = '[data-testid="org-list"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
@@ -27,6 +27,14 @@ const addAddressInput = '[data-testid="add-address-input"]'
 const netwrokSelector = '[data-testid="network-selector"]'
 const netwrokItem = '[data-testid="network-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
+/** Same pattern as `dashboard.pages.js` `pendingTxWidget` — root `data-testid` on the Space dashboard widget. */
+export const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
+/** Indexed rows: `space-dashboard-accounts-row-0`, `space-dashboard-accounts-row-1`, … */
+export const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
+export const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
+export const widgetItem = '[data-slot="widget-item"]'
+export const spaceDashboardTotalValue = '[data-testid="space-dashboard-total-value"]'
+export const spaceDashboardTotalValueLabelText = 'Total value'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addMemberBtn = '[data-testid="add-member-button"]'
 const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
@@ -86,6 +94,138 @@ export function getSpaceId() {
     return match[1]
   })
 }
+
+/** Opens the Space home dashboard for a CGW space id (query: `spaceId=`). */
+export function visitSpaceDashboard(spaceId) {
+  cy.visit(constants.spaceDashboardUrl + String(spaceId))
+}
+
+/** Intl fiat string: `$` + optional thin space + digits/commas + `.` + two fraction digits (e.g. `$874.84`, `$1,234.56`). */
+const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
+
+export function verifySpaceDashboardTotalValueFormat() {
+  main.verifyTextVisibility([spaceDashboardTotalValueLabelText])
+  cy.get(spaceDashboardTotalValue, { timeout: 30000 })
+    .should('be.visible')
+    .invoke('text')
+    .should('match', formattedSpaceTotalValuePattern)
+}
+
+const spaceDashboardWidgetSelectorByTitle = {
+  Accounts: spaceDashboardAccountsWidget,
+  Pending: pendingTxWidget,
+}
+
+/** Asserts the Accounts or Pending widget mount (cf. `dashboard.verifyPendingTxWidgetVisible`). */
+export function verifySpaceDashboardWidgetVisible(widgetTitle) {
+  const selector = spaceDashboardWidgetSelectorByTitle[widgetTitle]
+  if (!selector) {
+    throw new Error(`Unknown space dashboard widget title: ${widgetTitle}`)
+  }
+  cy.get(selector, { timeout: 30000 }).should('be.visible')
+}
+
+export function getAccountItem(index) {
+  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
+}
+
+/**
+ * Asserts how many top-level account rows the Accounts widget renders (uses `main.verifyElementsCount`).
+ * @param {number} expectedCount — Last row index is `expectedCount - 1` (`getAccountItem(n)`).
+ */
+export function verifySpaceDashboardAccountsWidgetRowCount(expectedCount) {
+  main.verifyElementsCount(`${spaceDashboardAccountsWidget} ${spaceDashboardAccountsRowSelector}`, expectedCount)
+}
+
+/** `AccountWidgetItem` — scoped under `space-dashboard-accounts-row-${n}`. */
+export const spaceDashboardAccountsRowName = '[data-testid="space-dashboard-accounts-row-name"]'
+export const spaceDashboardAccountsRowAddress = '[data-testid="space-dashboard-accounts-row-address"]'
+export const spaceDashboardAccountsRowIdenticon = '[data-testid="space-dashboard-accounts-row-identicon"]'
+export const spaceDashboardAccountsRowChainLogos = '[data-testid="space-dashboard-accounts-row-chain-logos"]'
+export const spaceDashboardAccountsRowBalance = '[data-testid="space-dashboard-accounts-row-balance"]'
+export const spaceDashboardAccountsRowThreshold = '[data-testid="space-dashboard-accounts-row-threshold"]'
+/** `ChainIndicator` network logo `<img>` (inside `space-dashboard-accounts-row-chain-logos` or tooltip). */
+export const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
+
+/**
+ * FiatValue text for the Pending tx row (whole dollars or with decimals depending on settings).
+ * @type {RegExp}
+ */
+export const pendingTxSafeBalanceRegex = /\$[\u200a\s]*875(?:\.\d{2})?/
+
+/**
+ * Asserts single-chain `AccountWidgetItem` row content via `data-testid` only (values compared with expected strings / regex).
+ * Reuses `main.shortenAddress` for the displayed address (same as `AccountWidgetItem`).
+ *
+ * @param {number} rowIndex — 0-based (`getAccountItem(rowIndex)`).
+ * @param {{ name: string, address: string, balanceRegex: RegExp, ownersThreshold?: string }} expected — pass `ownersThreshold` (e.g. `2/3`) when the row shows the owners badge; omit for multichain / expandable rows.
+ */
+export function verifySpaceDashboardAccountsRowSafeDetails(rowIndex, { name, address, balanceRegex, ownersThreshold }) {
+  const row = getAccountItem(rowIndex)
+  cy.get(row).should('be.visible').within(() => {
+    cy.get(spaceDashboardAccountsRowName).should('be.visible').and('contain.text', name)
+    cy.get(spaceDashboardAccountsRowAddress)
+      .should('be.visible')
+      .and('contain.text', main.shortenAddress(address))
+    cy.get(spaceDashboardAccountsRowIdenticon).should('be.visible')
+    cy.get(spaceDashboardAccountsRowChainLogos)
+      .find(chainIndicatorNetworkLogoImg)
+      .should('be.visible')
+    cy.get(spaceDashboardAccountsRowBalance).invoke('text').should('match', balanceRegex)
+    if (ownersThreshold !== undefined) {
+      cy.get(spaceDashboardAccountsRowThreshold).should('be.visible').and('contain.text', ownersThreshold)
+    }
+  })
+}
+
+export function getPendingTxItem(index) {
+  return `${pendingTxWidget} ${widgetItem}:eq(${index})`
+}
+
+export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
+export const sidebarItemAccounts = '[data-testid="sidebar-item-accounts"]'
+export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]'
+export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
+export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
+
+export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
+  cy.get(sidebarSelector).should('be.visible').click()
+  cy.url().should('include', pathFragment)
+}
+
+export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
+
+export function disconnectFromSpaceLevel() {
+  navigation.clickOnWalletExpandMoreIcon()
+  navigation.clickOnDisconnectBtn()
+}
+
+export const viewAllAccountsLabel = 'View all accounts'
+export const txDetailsLabel = 'Transaction details'
+export const gettingStartedLabel = 'Getting started'
+export const addSafeAccountsLabel = 'Add your Safe Accounts'
+export const addAccountBtn = '[data-testid="add-space-account-button"]'
+export const addAccountsModalLabel = 'Add Safe Accounts'
+export const importAddressBookBtn = '[aria-label="Import address book"]'
+export const importAddressBookLabel = 'Import address book'
+export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
+export const inviteMemberLabel = 'Add member'
+export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
+/** Copy on `SpaceInfoModal` when opening Learn more from the empty dashboard CTA. */
+export const exploreSpacesLabel = 'Introducing spaces'
+
+export { staticSpaces }
+
+/** Staging regression assertions for `spaces_dashboard.cy.js` — update when CGW data changes. */
+export const firstAccountAddress = '0x1694CbDE1b30eEdd9f7A2b6C7e36A180F2a3a23C7'
+/** Row index for `firstAccountAddress` when row 0 is another Safe (e.g. “Pending tx”). */
+export const unnamedAccountRowIndex = 2
+export const secondAccountName = 'Space addressbook name'
+/** Shortened display is enough for the row assertion; full address must match CGW. */
+export const secondAccountAddressPrefix = '0x0596'
+export const secondAccountAddressSuffix = '197b'
+export const pendingTxName = 'Send'
+export const pendingTxStatus = 'Needs confirmation'
 
 export function goToSpaceSettings() {
   getSpaceId().then((spaceId) => {

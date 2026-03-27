@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
+import { visualSpacesApiMockSpace } from '../../fixtures/spaces/visualSpacesApiMock.js'
 import { mockVisualTestApis } from '../../support/visual-mocks.js'
 
 const SPACE_ID = '1'
@@ -17,11 +18,9 @@ function setupSpacesAuth() {
   cy.fixture('spaces/user.json').then((mockUser) => {
     cy.intercept('GET', constants.usersEndpoint, mockUser).as('getUser')
   })
-  cy.fixture('spaces/space.json').then((mockSpace) => {
-    cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
-    cy.intercept('GET', constants.spacesGetOneEndpoint, mockSpace).as('getSpace')
-    cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [mockSpace]).as('getSpaces')
-  })
+  cy.intercept('GET', constants.spacesSafesEndpoint, { safes: {} }).as('getSpaceSafes')
+  cy.intercept('GET', constants.spacesGetOneEndpoint, visualSpacesApiMockSpace).as('getSpace')
+  cy.intercept('GET', `${constants.stagingCGWUrlv1}/spaces`, [visualSpacesApiMockSpace]).as('getSpaces')
   cy.fixture('spaces/members.json').then((mockMembers) => {
     cy.intercept('GET', constants.spacesMembersEndpoint, mockMembers).as('getSpaceMembers')
   })

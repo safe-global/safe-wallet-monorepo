@@ -15,6 +15,8 @@ interface WidgetItemProps {
   actionNode?: ReactNode
   highlighted?: boolean
   className?: string
+  /** Cypress: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
+  testId?: string
 }
 
 const WidgetItem = ({
@@ -28,6 +30,7 @@ const WidgetItem = ({
   actionNode,
   highlighted = false,
   className,
+  testId,
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
@@ -42,6 +45,7 @@ const WidgetItem = ({
   return (
     <div
       data-slot="widget-item"
+      data-testid={testId}
       role={handleClick ? 'button' : undefined}
       tabIndex={handleClick ? 0 : undefined}
       onClick={handleClick}

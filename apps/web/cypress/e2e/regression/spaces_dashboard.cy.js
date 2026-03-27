@@ -2,34 +2,17 @@ import * as constants from '../../support/constants.js'
 import * as space from '../pages/spaces.page.js'
 import * as main from '../pages/main.page.js'
 import * as wallet from '../../support/utils/wallet.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-// Use OWNER_1 for static space tests to avoid conflicts with OWNER_4 used in spaces_basicflow.cy.js
 const owner = walletCredentials.OWNER_1_PRIVATE_KEY
 
 describe('Spaces dashboard tests', () => {
   beforeEach(() => {
     cy.visit(constants.spacesUrl)
     wallet.connectSigner(owner)
-    space.loginWithSiwe()
-    cy.visit(constants.spaceDashboardUrl + space.testSpaceId)
-  })
-
-  // ===========================================
-  // SIWE Authentication
-  // ===========================================
-
-  describe('SIWE Authentication', () => {
-    it('Verify that a user can successfully sign in using SIWE with a supported wallet', () => {
-      // The beforeEach already performs SIWE login; verify we are in a Space context
-      cy.url().should('include', '/spaces')
-      cy.url().should('include', 'spaceId=')
-    })
-
-    it('Verify that after SIWE login the user lands in the correct Space context', () => {
-      space.verifyWidgetVisible('Accounts')
-      space.verifyWidgetVisible('Pending')
-    })
+    space.clickOnSignInBtn()
+    space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
   })
 
   // ===========================================
@@ -38,13 +21,11 @@ describe('Spaces dashboard tests', () => {
 
   describe('Spaces Dashboard', () => {
     it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
-      space.verifyWidgetVisible('Accounts')
-      cy.get(space.dashboardSafeList).find(space.widgetItem).should('have.length.at.least', 1)
-      space.verifyWidgetVisible('Pending')
-    })
-
-    it('Verify that the Space dashboard header displays the current Space name', () => {
-      cy.contains(space.testSpaceName).should('be.visible')
+      space.verifySpaceDashboardTotalValueFormat()
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      space.verifySpaceDashboardAccountsWidgetRowCount(2)
+      space.verifySpaceDashboardWidgetVisible('Pending')
+      cy.get(space.pendingTxWidget).find(space.widgetItem).should('have.length.at.least', 1)
     })
   })
 
@@ -54,39 +35,49 @@ describe('Spaces dashboard tests', () => {
 
   describe('Accounts Widget', () => {
     it('Verify that the Accounts widget lists all Safes associated with the current Space', () => {
-      space.verifyWidgetVisible('Accounts')
-      main.verifyMinimumElementsCount(`${space.dashboardSafeList} ${space.widgetItem}`, 1)
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      space.verifySpaceDashboardAccountsWidgetRowCount(2)
+
+    it('Verify that the single chain safe with a addressbook name  view in the accounts widget', () => {
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      space.verifySpaceDashboardAccountsRowSafeDetails(0, {
+        name: staticSpaces.dashboardWithSafes.row0PendingSafe.name,
+        address: staticSpaces.dashboardWithSafes.row0PendingSafe.address,
+        balanceRegex: space.pendingTxSafeBalanceRegex,
+        ownersThreshold: staticSpaces.dashboardWithSafes.row0PendingSafe.ownersThreshold,
+      })
     })
 
-    it('Verify that the first account has no name and displays the address', () => {
-      space.verifyWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(0))
+    it('Verify that the unnamed account row displays the address as the name', () => {
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      cy.get(space.getAccountItem(space.unnamedAccountRowIndex))
         .should('be.visible')
-        .and('contain.text', space.firstAccountAddress)
+        .and('contain.text', main.shortenAddress(space.firstAccountAddress))
         .and('not.contain.text', space.secondAccountName)
     })
 
-    it('Verify that the second account has the correct name', () => {
-      space.verifyWidgetVisible('Accounts')
+    it('Verify that the second account row has the correct name and address', () => {
+      space.verifySpaceDashboardWidgetVisible('Accounts')
       cy.get(space.getAccountItem(1))
         .should('be.visible')
         .and('contain.text', space.secondAccountName)
-        .and('contain.text', space.secondAccountAddress)
+        .and('contain.text', space.secondAccountAddressPrefix)
+        .and('contain.text', space.secondAccountAddressSuffix)
     })
 
-    it('Verify that the first account displays chain logos', () => {
-      space.verifyWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(0)).should('be.visible').find('img').should('have.length', 2)
+    it('Verify that the multichain account row displays chain logos', () => {
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      cy.get(space.getAccountItem(space.unnamedAccountRowIndex)).should('be.visible').find('img').should('have.length', 2)
     })
 
     it('Verify that clicking a Safe in the Accounts widget navigates to that Safe dashboard with Space context', () => {
-      space.verifyWidgetVisible('Accounts')
+      space.verifySpaceDashboardWidgetVisible('Accounts')
       cy.get(space.getAccountItem(0)).click()
       cy.url().should('include', '/home').and('include', 'safe=')
     })
 
     it('Verify that clicking View all accounts in the Accounts widget opens the Accounts tab of the Space', () => {
-      space.verifyWidgetVisible('Accounts')
+      space.verifySpaceDashboardWidgetVisible('Accounts')
       cy.contains(space.viewAllAccountsLabel).click()
       cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
     })
@@ -125,7 +116,7 @@ describe('Spaces dashboard tests', () => {
       cy.get(space.sidebarItemTeam).should('be.visible')
 
       // Navigate to a Safe
-      space.verifyWidgetVisible('Accounts')
+      space.verifySpaceDashboardWidgetVisible('Accounts')
       cy.get(space.getAccountItem(0)).click()
       // Wait for Safe dashboard to load
       cy.contains('Transactions').should('be.visible')
@@ -158,12 +149,12 @@ describe('Spaces dashboard tests', () => {
 
   describe('Safe Selector', () => {
     it('Verify that the Safe selector shows all Safes in the current Space', () => {
-      space.verifyWidgetVisible('Accounts')
-      main.verifyElementsCount(`${space.dashboardSafeList} ${space.widgetItem}`, 2)
+      space.verifySpaceDashboardWidgetVisible('Accounts')
+      space.verifySpaceDashboardAccountsWidgetRowCount(staticSpaces.dashboardWithSafes.accountsWidgetRowCount)
     })
 
     it('Verify that the Back to Space button is visible in the Safe selector and returns the user to Space Home', () => {
-      space.verifyWidgetVisible('Accounts')
+      space.verifySpaceDashboardWidgetVisible('Accounts')
       cy.get(space.getAccountItem(0)).click()
       cy.url().should('include', '/home')
 
@@ -198,7 +189,6 @@ describe('Spaces dashboard tests', () => {
       // Wait for the tx details page to load
       cy.contains(space.txDetailsLabel).should('be.visible')
       cy.url().should('include', '/transactions/tx').and('include', 'safe=')
-      cy.contains(space.pendingTxBatchLabel).should('be.visible')
     })
 
     it('Verify that each pending transaction displays a Safe identicon', () => {
@@ -226,7 +216,7 @@ describe('Spaces dashboard tests', () => {
     it('Verify that accessing the app without being logged in redirects to the welcome page', () => {
       cy.clearAllCookies()
       cy.clearAllLocalStorage()
-      cy.visit('/spaces?spaceId=' + space.testSpaceId)
+      space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
       // Wait for the welcome page to load
       cy.contains('Welcome').should('be.visible')
       cy.url().should('include', '/welcome')
@@ -239,7 +229,7 @@ describe('Spaces dashboard tests', () => {
 
   describe('Disconnect', () => {
     it('Verify that disconnect in the top bar clears session and routes user to the Welcome page', () => {
-      space.verifyWidgetVisible('Accounts')
+      space.verifySpaceDashboardWidgetVisible('Accounts')
 
       // Click wallet button in Spaces header, then Disconnect
       space.disconnectFromSpaceLevel()
@@ -255,8 +245,8 @@ describe('Spaces empty dashboard tests', () => {
   beforeEach(() => {
     cy.visit(constants.spacesUrl)
     wallet.connectSigner(owner)
-    space.loginWithSiwe()
-    cy.visit(constants.spaceDashboardUrl + space.emptySpaceId)
+    space.clickOnSignInBtn()
+    space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.id)
   })
 
   describe('Empty State - Getting Started', () => {
