@@ -1,31 +1,46 @@
 import '@walletconnect/react-native-compat'
 import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Storage } from '@reown/appkit-common-react-native'
+import { createMMKV } from 'react-native-mmkv'
 import { phantomIconBase64 } from '@/assets/wallet-icons/phantom-icon-data-uri'
 import { rabbyIconBase64 } from '@/assets/wallet-icons/rabby-icon-data-uri'
 import { mainnet, polygon, arbitrum, sepolia } from 'viem/chains'
+import { safeJsonParse, safeJsonStringify } from '@walletconnect/safe-json'
 
 const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID ?? ''
 
 const ethersAdapter = new EthersAdapter()
 
+const mmkv = createMMKV({ id: 'appkit' })
+
 const storage: Storage = {
-  getKeys: () => AsyncStorage.getAllKeys() as Promise<string[]>,
-  getEntries: async () => {
-    const keys = await AsyncStorage.getAllKeys()
-    const entries = await AsyncStorage.multiGet(keys as string[])
-
-    return entries.map(([key, value]) => [key, value ? JSON.parse(value) : undefined])
+  getKeys: async () => {
+    return mmkv.getAllKeys()
   },
-  getItem: async (key: string) => {
-    const value = await AsyncStorage.getItem(key)
+  getEntries: async <T = any>(): Promise<[string, T][]> => {
+    function parseEntry(key: string): [string, any] {
+      const value = mmkv.getString(key)
+      return [key, safeJsonParse(value ?? '')]
+    }
 
-    return value ? JSON.parse(value) : undefined
+    const keys = mmkv.getAllKeys()
+    return keys.map(parseEntry)
   },
-  setItem: (key: string, value: unknown) => AsyncStorage.setItem(key, JSON.stringify(value)),
-  removeItem: (key: string) => AsyncStorage.removeItem(key),
+  setItem: async <T = any>(key: string, value: T) => {
+    return mmkv.set(key, safeJsonStringify(value))
+  },
+  getItem: async <T = any>(key: string): Promise<T | undefined> => {
+    const item = mmkv.getString(key)
+    if (typeof item === 'undefined' || item === null) {
+      return undefined
+    }
+
+    return safeJsonParse(item) as T
+  },
+  removeItem: async (key: string) => {
+    await mmkv.remove(key)
+  },
 }
 
 export const appKit = createAppKit({
