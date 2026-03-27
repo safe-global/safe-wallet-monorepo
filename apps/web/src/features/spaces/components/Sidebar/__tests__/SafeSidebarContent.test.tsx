@@ -28,9 +28,11 @@ jest.mock('@/utils/chains', () => ({
   isRouteEnabled: (...args: unknown[]) => mockIsRouteEnabled(...args),
 }))
 
+const mockUseSafeInfo = jest.fn()
+
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
-  default: () => ({ safe: { deployed: true } }),
+  default: () => mockUseSafeInfo(),
 }))
 
 jest.mock('../hooks/useResolvedSidebarNav', () => ({
@@ -84,6 +86,7 @@ describe('SafeSidebarContent', () => {
     jest.clearAllMocks()
     mockIsRouteEnabled.mockReturnValue(true)
     mockUseQueuedTxsLength.mockReturnValue(2)
+    mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })
     mockUseResolvedSidebarNav.mockReturnValue({
       mainNavItems: [],
       setupGroup: { label: 'Defi', items: [] },
@@ -182,6 +185,30 @@ describe('SafeSidebarContent', () => {
       const [, defiGroup] = getCallArgs()
       expect(defiGroup.items.some((item) => item.href === href)).toBe(false)
       expect(defiGroup.items).toHaveLength(3)
+    })
+  })
+
+  describe('undeployed Safe', () => {
+    beforeEach(() => {
+      mockUseSafeInfo.mockReturnValue({ safe: { deployed: false } })
+    })
+
+    it('isItemDisabled returns true for all DeFi routes', () => {
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , options] = getCallArgs()
+      expect(options.isItemDisabled({ href: AppRoutes.swap } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.bridge } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.earn } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.stake } as SidebarItemConfig)).toBe(true)
+    })
+
+    it('isItemDisabled returns false for non-DeFi routes', () => {
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , options] = getCallArgs()
+      expect(options.isItemDisabled({ href: AppRoutes.transactions.history } as SidebarItemConfig)).toBe(false)
+      expect(options.isItemDisabled({ href: AppRoutes.home } as SidebarItemConfig)).toBe(false)
     })
   })
 
