@@ -68,6 +68,13 @@ export function clickOnSignInBtn() {
   cy.contains('Sign in with').click()
 }
 
+/** After SIWE, wait until `/welcome/spaces` shows the list or the Create space action. */
+export function waitForSpacesWelcomeReady() {
+  cy.get(`${orgList}, ${spacesListCreateSpaceBtn}`, { timeout: 60000 })
+    .filter(':visible')
+    .should('have.length.at.least', 1)
+}
+
 export function clickOnSpacesListCreateSpaceBtn() {
   cy.get(spacesListCreateSpaceBtn).should('be.enabled').click()
 }
