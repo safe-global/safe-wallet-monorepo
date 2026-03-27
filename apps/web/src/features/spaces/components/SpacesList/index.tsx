@@ -24,7 +24,7 @@ import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSi
 const AddSpaceButton = () => {
   return (
     <Button
-      data-testid="create-space-button"
+      data-testid="spaces-list-create-space-button"
       disableElevation
       variant="contained"
       size="small"

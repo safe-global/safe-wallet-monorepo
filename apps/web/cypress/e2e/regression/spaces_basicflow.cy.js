@@ -38,7 +38,7 @@ describe('Spaces basic flow tests', () => {
     space.spaceExists(newSpaceName)
     space.deleteSpace(newSpaceName)
     cy.contains(space.deleteSpaceConfirmationMsg(newSpaceName)).should('be.visible')
-    main.verifyElementsIsVisible([space.createSpaceBtn])
+    main.verifyElementsIsVisible([space.spacesListCreateSpaceBtn])
   })
 
   it('Verify an account can be added manually', () => {

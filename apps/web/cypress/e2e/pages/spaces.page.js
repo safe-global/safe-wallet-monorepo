@@ -4,7 +4,10 @@ import * as navigation from './navigation.page.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const orgList = '[data-testid="org-list"]'
-export const createSpaceBtn = '[data-testid="create-space-button"]'
+/** Spaces list / empty state — navigates to `/welcome/create-space`. */
+export const spacesListCreateSpaceBtn = '[data-testid="spaces-list-create-space-button"]'
+/** Create a Space onboarding step 1 — submits name (“Continue”). */
+export const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
 export const createSpaceModalBtn = '[data-testid="create-space-modal-button"]'
 export const orgSpaceInput = '[data-testid="space-name-input"]'
 export const orgName = '[data-testid="org-name"]'
@@ -46,8 +49,6 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
-// export const createSpaceBtn = '[data-testid="create-space-button"]'
-
 export function confirmAcceptInvite() {
   cy.get(confirmAcceptInviteBtn).click()
 }
@@ -67,8 +68,12 @@ export function clickOnSignInBtn() {
   cy.contains('Sign in with').click()
 }
 
-export function clickOnCreateSpaceBtn() {
-  cy.get(createSpaceBtn).should('be.enabled').click()
+export function clickOnSpacesListCreateSpaceBtn() {
+  cy.get(spacesListCreateSpaceBtn).should('be.enabled').click()
+}
+
+export function clickOnCreateSpaceOnboardingContinueBtn() {
+  cy.get(createSpaceOnboardingContinueBtn).should('be.enabled').click()
 }
 
 export function clickOnCreateSpaceModalBtn() {
@@ -346,7 +351,7 @@ export function ensureReadyToCreateSpace() {
     if (hasSpaces) {
       deleteAllSpaces()
     }
-    main.verifyElementsIsVisible([createSpaceBtn])
+    main.verifyElementsIsVisible([spacesListCreateSpaceBtn])
   })
 }
 
@@ -450,14 +455,14 @@ const onboardingInviteMembersPath = '/welcome/invite-members'
 export function createSpaceViaOnboardingWithSkip(name) {
   cy.get('body').then(($body) => {
     if (!$body.text().includes(createSpaceLabel)) {
-      clickOnCreateSpaceBtn()
+      clickOnSpacesListCreateSpaceBtn()
     }
   })
   // Step 1: Create a space — name and submit
   cy.url().should('include', onboardingCreateSpacePath)
   cy.contains(createSpaceLabel).should('be.visible')
   typeSpaceName(name)
-  clickOnCreateSpaceBtn()
+  clickOnCreateSpaceOnboardingContinueBtn()
 
   // Step 2: Select Safes — wait for API to create space and navigate
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath)
