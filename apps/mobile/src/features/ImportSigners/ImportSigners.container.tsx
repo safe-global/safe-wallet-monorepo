@@ -1,4 +1,4 @@
-import React, { type useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { ScrollView } from 'react-native'
 import Seed from '@/assets/images/seed.png'
 import Wallet from '@/assets/images/wallet.png'
@@ -11,9 +11,8 @@ import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View } from 'tamagui'
 import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
-import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { getAddress } from 'ethers'
 
 const items = [
@@ -51,7 +50,6 @@ export const ImportSignersContainer = () => {
   const { open } = useAppKit()
   const { address, isConnected } = useAccount()
   const { walletInfo } = useWalletInfo()
-  const existingSigner = useAppSelector((state) => (address ? selectSignerByAddress(state, address) : undefined))
   const registeredRef = useRef<string | null>(null)
 
   const { handleScroll } = useScrollableHeader({
@@ -59,7 +57,7 @@ export const ImportSignersContainer = () => {
   })
 
   useEffect(() => {
-    if (!isConnected || !address || existingSigner || registeredRef.current === address) {
+    if (!isConnected || !address || registeredRef.current === address) {
       return
     }
 
@@ -75,7 +73,7 @@ export const ImportSignersContainer = () => {
         walletIcon: walletInfo?.icon,
       }),
     )
-  }, [isConnected, address, existingSigner, walletInfo, dispatch])
+  }, [isConnected, address, walletInfo, dispatch])
 
   const handleConnectSigner = useCallback(
     (name: (typeof items)[number]['name']) => {
