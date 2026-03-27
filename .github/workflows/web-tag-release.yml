@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      version_number: ${{ steps.version.outputs.version_number }}
       changelog: ${{ steps.extract_changelog.outputs.changelog }}
 
     steps:
@@ -50,7 +51,7 @@ jobs:
         id: version
         run: |
           NEW_VERSION=$(node -p 'require("./apps/web/package.json").version')
-          echo "version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version=web-v$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_number=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create a git tag
@@ -111,7 +112,7 @@ jobs:
             ${{ needs.tag.outputs.changelog }}
 
             [🔗 IPFS release](
-            https://github.com/5afe/safe-wallet-ipfs/releases/tag/${{ needs.tag.outputs.version }})
+            https://github.com/5afe/safe-wallet-ipfs/releases/tag/v${{ needs.tag.outputs.version_number }})
         env:
           GITHUB_TOKEN: ${{ github.token }}
 

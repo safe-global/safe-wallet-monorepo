@@ -6,7 +6,9 @@ Resolves:
 
 ## How to test it
 
-## Screenshots
+## Visual summary
+
+<!-- REQUIRED for AI-authored PRs. Include a Mermaid diagram for architecture/logic changes, a screenshot for UI changes, or both. See AGENTS.md for examples. -->
 
 ## Checklist
 

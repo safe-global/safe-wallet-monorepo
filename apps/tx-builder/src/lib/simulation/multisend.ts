@@ -13,13 +13,13 @@ const MULTI_SEND_ABI = [
 ]
 
 const getMultiSendCallOnlyAddress = (chainId: string): string => {
-  const deployment = getMultiSendCallOnlyDeployment({ network: chainId })
+  const deployment = getMultiSendCallOnlyDeployment()
 
   if (!deployment) {
     throw new Error('MultiSendCallOnly deployment not found')
   }
 
-  return deployment.networkAddresses[chainId]
+  return deployment.networkAddresses[chainId] ?? deployment.defaultAddress
 }
 
 const encodeMultiSendCall = (txs: BaseTransaction[]): string => {

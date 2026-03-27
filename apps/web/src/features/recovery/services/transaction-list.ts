@@ -13,7 +13,7 @@ import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 
 function decodeOwnerManagementTransaction(safe: SafeState, transaction: BaseTransaction): SafeState {
-  const safeDeployment = getSafeSingletonDeployment({ network: safe.chainId, version: safe.version ?? undefined })
+  const safeDeployment = getSafeSingletonDeployment({ version: safe.version ?? undefined })
 
   if (!safeDeployment) {
     throw new Error('No Safe deployment found')

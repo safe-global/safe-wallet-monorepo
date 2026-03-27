@@ -1,6 +1,7 @@
 import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import memoize from 'lodash/memoize'
-import { getMultiSendCallOnlyDeployment } from '@safe-global/safe-deployments'
+import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
+import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
@@ -56,14 +57,14 @@ export function _isMaliciousRecovery({
   }
 
   const multiSendDeployment =
-    getMultiSendCallOnlyDeployment({ network: chainId, version: version ?? undefined }) ??
-    getMultiSendCallOnlyDeployment({ network: chainId, version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
+    getMultiSendCallOnlyDeployments({ version: version ?? undefined }) ??
+    getMultiSendCallOnlyDeployments({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
 
-  if (!multiSendDeployment) {
+  const multiSendAddress = getChainAgnosticAddress(multiSendDeployment, chainId)
+
+  if (!multiSendAddress) {
     return true
   }
-
-  const multiSendAddress = multiSendDeployment.networkAddresses[chainId] ?? multiSendDeployment.defaultAddress
 
   // Calling official MultiSend contract with a batch of transactions to the Safe itself
   return (
@@ -147,10 +148,14 @@ const queryAddedTransactions = async (
   const topics = await transactionAddedFilter.getTopicFilter()
   topics[1] = queryNonces
 
-  const { blockNumber } = (await _getSafeCreationReceipt({ transactionService, provider, safeAddress }))!
+  const creationReceipt = await _getSafeCreationReceipt({ transactionService, provider, safeAddress })
+
+  if (!creationReceipt) {
+    throw new Error(`Could not fetch creation receipt for Safe ${safeAddress}`)
+  }
 
   // @ts-expect-error
-  return await delayModifier.queryFilter(topics, blockNumber, 'latest')
+  return await delayModifier.queryFilter(topics, creationReceipt.blockNumber, 'latest')
 }
 
 const getRecoveryQueueItem = async ({
@@ -189,11 +194,15 @@ const getRecoveryQueueItem = async ({
     transaction: transactionAdded.args,
   })
 
+  if (!receipt) {
+    throw new Error(`Could not fetch transaction receipt for ${transactionAdded.transactionHash}`)
+  }
+
   return {
     ...transactionAdded,
     ...timestamps,
     isMalicious,
-    executor: receipt!.from,
+    executor: receipt.from,
   }
 }
 

@@ -16,7 +16,6 @@ export const createUpdateMigration = (
   const deployment = getSafeMigrationDeployment({
     version: chain.recommendedMasterCopyVersion || LATEST_SAFE_VERSION,
     released: true,
-    network: chain.chainId,
   })
 
   if (!deployment) {
@@ -36,8 +35,8 @@ export const createUpdateMigration = (
         ? 'migrateL2Singleton'
         : 'migrateSingleton'
       : chain.l2
-        ? 'migrateL2WithFallbackHandler'
-        : 'migrateWithFallbackHandler'
+      ? 'migrateL2WithFallbackHandler'
+      : 'migrateWithFallbackHandler'
   ) as 'migrateSingleton' // apease typescript
 
   const interfce = Safe_migration__factory.createInterface()
@@ -52,11 +51,10 @@ export const createUpdateMigration = (
   return tx
 }
 
-export const createMigrateToL2 = (chain: Chain) => {
+export const createMigrateToL2 = () => {
   const deployment = getSafeMigrationDeployment({
     version: SAFE_TO_L2_MIGRATION_VERSION, // This is the only version that has this contract deployed
     released: true,
-    network: chain.chainId,
   })
 
   if (!deployment) {

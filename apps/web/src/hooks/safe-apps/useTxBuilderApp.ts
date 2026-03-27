@@ -6,7 +6,7 @@ import { AppRoutes } from '@/config/routes'
 
 const TX_BUILDER_URL = IS_PRODUCTION
   ? 'https://apps-portal.safe.global/tx-builder'
-  : 'https://safe-apps.dev.5afe.dev/tx-builder'
+  : 'https://tx-builder.staging.5afe.dev'
 
 export const useTxBuilderApp = (): { link: UrlObject } => {
   const router = useRouter()

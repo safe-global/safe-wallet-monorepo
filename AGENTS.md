@@ -175,7 +175,7 @@ import { MyFeature, useMyHook } from '@/features/myfeature'
 // Prefer destructuring for cleaner component usage
 function ParentComponent() {
   const { MyComponent } = useLoadFeature(MyFeature)
-  const hookData = useMyHook()  // Direct import, always safe
+  const hookData = useMyHook() // Direct import, always safe
 
   // No null check needed - always returns an object
   // Components render null when not ready (proxy stub)
@@ -261,10 +261,12 @@ The repo provides automated verification:
 - Do NOT commit without a clean `verify:changed` pass
 
 1. **Install dependencies**: `yarn install` (from the repository root).
+
    - Uses Yarn 4 (managed via `corepack`)
    - Automatically runs `yarn after-install` for the web workspace, which generates TypeScript types from contract ABIs
 
 2. **Pre-commit hooks**: The repository uses Husky for git hooks:
+
    - **pre-commit**: Automatically runs `lint-staged` (prettier) and type-check on staged TypeScript files
    - **pre-push**: Runs linting before pushing
    - These hooks ensure code quality before commits reach the repository
@@ -300,11 +302,13 @@ The repo provides automated verification:
    ```
 
 5. **Commit messages**: use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in `CONTRIBUTING.md`.
+
    - Examples: `feat: add transaction history`, `fix: resolve wallet connection bug`, `refactor: simplify address validation`
    - **CI/CD changes**: Always use `chore:` prefix for CI, workflows, build configs (NEVER `feat:` or `fix:`)
    - **Test changes**: Always use `tests:` prefix for changes in unit or e2e tests (NEVER `feat:` or `fix:`)
 
 6. **Code style**: follow the guidelines in:
+
    - `apps/web/docs/code-style.md` for the web app.
    - `apps/mobile/docs/code-style.md` for the mobile app.
 
@@ -319,6 +323,40 @@ The repo provides automated verification:
    ```
 
 9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
+
+10. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
+
+    - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
+    - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
+    - **Both** if the PR includes UI + logic changes
+
+    Mermaid diagrams are rendered natively by GitHub. Example:
+
+    ````markdown
+    ```mermaid
+    flowchart LR
+      A[useSafeInfo hook] --> B[New validation logic]
+      B --> C{Is owner?}
+      C -->|Yes| D[Show actions]
+      C -->|No| E[Show read-only]
+    ```
+    ````
+
+    For refactors, use a before/after diagram:
+
+    ````markdown
+    ```mermaid
+    flowchart TB
+      subgraph Before
+        A1[Component A] --> B1[Inline logic]
+        A1 --> C1[Inline logic]
+      end
+      subgraph After
+        A2[Component A] --> H[useSharedHook]
+        H --> B2[Extracted service]
+      end
+    ```
+    ````
 
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
