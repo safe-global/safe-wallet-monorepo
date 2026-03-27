@@ -1,11 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import SignInButton from './index'
 
 const mockSignIn = jest.fn()
 const mockDispatch = jest.fn()
-const mockWallet = jest.fn<ReturnType<typeof import('@/hooks/wallets/useWallet').default>, []>()
+const mockWallet = jest.fn<ConnectedWallet | null, []>()
 const mockIsSmartContractWallet = jest.fn<Promise<boolean>, [string, string]>()
 const mockIsLedger = jest.fn<boolean, [unknown]>()
 const mockGetWalletConnectLabel = jest.fn<string | undefined, [unknown]>()
@@ -76,7 +77,7 @@ const defaultWallet = {
   address: '0x1234567890abcdef1234567890abcdef12345678',
   chainId: '1',
   provider: {} as unknown,
-} as ReturnType<typeof import('@/hooks/wallets/useWallet').default>
+} as ConnectedWallet
 
 describe('SignInButton tracking', () => {
   beforeEach(() => {
