@@ -18,19 +18,19 @@ const storage: Storage = {
   getKeys: async () => {
     return mmkv.getAllKeys()
   },
-  getEntries: async <T = any>(): Promise<[string, T][]> => {
-    function parseEntry(key: string): [string, any] {
+  getEntries: async <T = unknown>(): Promise<[string, T][]> => {
+    function parseEntry(key: string): [string, T] {
       const value = mmkv.getString(key)
-      return [key, safeJsonParse(value ?? '')]
+      return [key, safeJsonParse(value ?? '') as T]
     }
 
     const keys = mmkv.getAllKeys()
     return keys.map(parseEntry)
   },
-  setItem: async <T = any>(key: string, value: T) => {
+  setItem: async <T = unknown>(key: string, value: T) => {
     return mmkv.set(key, safeJsonStringify(value))
   },
-  getItem: async <T = any>(key: string): Promise<T | undefined> => {
+  getItem: async <T = unknown>(key: string): Promise<T | undefined> => {
     const item = mmkv.getString(key)
     if (typeof item === 'undefined' || item === null) {
       return undefined
