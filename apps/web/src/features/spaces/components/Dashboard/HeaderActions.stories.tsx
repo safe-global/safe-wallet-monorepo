@@ -40,7 +40,7 @@ export const ManageSafe: Story = {
   args: {
     ...Default.args,
     otherActions: (
-      <Button variant="ghost" size="sm" className="text-muted-foreground">
+      <Button variant="ghost" size="sm" className="!px-6 text-muted-foreground">
         <MoreVertical className="size-4 text-foreground" />
         Manage Safe
       </Button>
