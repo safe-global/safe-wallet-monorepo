@@ -8,6 +8,7 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: jest.fn(),
   useCurrentSpaceId: jest.fn(),
+  useIsAdmin: jest.fn(),
 }))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -30,6 +31,7 @@ jest.mock('@/store/api/gateway', () => ({
 }))
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(),
+  useAppDispatch: jest.fn(),
 }))
 jest.mock('@/store/settingsSlice', () => ({
   selectCurrency: jest.fn(),
@@ -40,6 +42,12 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 }))
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpaceSafesCreateV1Mutation: jest.fn(),
+}))
+jest.mock('@/store/notificationsSlice', () => ({
+  showNotification: jest.fn(),
 }))
 jest.mock('@/config/routes', () => ({
   AppRoutes: {
@@ -55,7 +63,7 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useSpaceSafes, useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -63,9 +71,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import { useAppSelector } from '@/store'
+import { useAppSelector, useAppDispatch } from '@/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
+import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { showNotification } from '@/store/notificationsSlice'
 
 // ── helpers ────────────────────────────────────────────────────────────
 
@@ -120,12 +130,14 @@ function setupDefaults(
     }>
     overviewsLoading?: boolean
     overviewsError?: boolean
+    isAdmin?: boolean
   } = {},
 ) {
   ;(useSpaceSafes as jest.Mock).mockReturnValue({
     allSafes: overrides.allSafes ?? [singleChainSafe],
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
+  ;(useIsAdmin as jest.Mock).mockReturnValue(overrides.isAdmin ?? false)
   ;(useSafeInfo as jest.Mock).mockReturnValue({
     safe: { threshold: 2, owners: [{ value: '0xOwner1' }, { value: '0xOwner2' }] },
     safeAddress: overrides.safeAddress ?? '0xSafe1',
@@ -141,8 +153,11 @@ function setupDefaults(
     refetch: jest.fn(),
   })
   ;(useAppSelector as jest.Mock).mockReturnValue('usd')
+  ;(useAppDispatch as jest.Mock).mockReturnValue(jest.fn())
   ;(useWallet as jest.Mock).mockReturnValue({ address: '0xWallet' })
   ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
+  ;(useSpaceSafesCreateV1Mutation as jest.Mock).mockReturnValue([jest.fn().mockResolvedValue({})])
+  ;(showNotification as jest.Mock).mockReturnValue({})
 }
 
 // ── tests ──────────────────────────────────────────────────────────────

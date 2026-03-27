@@ -39,8 +39,8 @@ const resolveThresholdAndOwners = (
   safe: { threshold: number; owners?: { value: string }[] },
   overview: SafeOverview | undefined,
 ) => ({
-  threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
-  owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
+  threshold: isCurrentSafe ? safe.threshold : overview?.threshold ?? 0,
+  owners: isCurrentSafe ? safe.owners?.length ?? 0 : overview?.owners.length ?? 0,
 })
 
 const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
@@ -135,12 +135,13 @@ export function useSpaceSafeSelectorItems() {
   const selectedItemId = `${currentChainId}:${safeAddress}`
 
   const handleItemSelect = useCallback(
-    (itemId: string) => {
+    async (itemId: string) => {
       const colonIndex = itemId.indexOf(':')
       const chainId = itemId.slice(0, colonIndex)
       const address = itemId.slice(colonIndex + 1)
       const chain = chainConfigs.find((c) => c.chainId === chainId)
       if (!chain) return
+
       trackEvent(
         { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined },
         {
@@ -149,7 +150,9 @@ export function useSpaceSafeSelectorItems() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
+
+      // Navigate to the selected safe
+      await router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
     },
     [chainConfigs, router, spaceId],
   )

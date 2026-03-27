@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import { CreateSafeOnNewChain } from './index'
 import * as spacesModule from '@/features/spaces'
 import * as spaceCreationModule from '../../hooks/useSafeCreationData'
