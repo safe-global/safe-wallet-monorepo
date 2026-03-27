@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { Typography } from '@/components/ui/typography'
 import { HeaderNavigation } from './HeaderNavigation'
 
@@ -14,6 +15,16 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
+  decorators: [
+    (Story, context) => {
+      const isDark = (context.globals?.theme as string) === 'dark'
+      return (
+        <ShadcnProvider dark={isDark}>
+          <Story />
+        </ShadcnProvider>
+      )
+    },
+  ],
   tags: ['autodocs'],
   argTypes: {
     walletAddress: {

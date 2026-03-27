@@ -30,7 +30,7 @@ export const EnhancedSidebar = ({
       </SidebarHeader>
 
       <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
-      <SidebarCommonFooter />
+      <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )
 }

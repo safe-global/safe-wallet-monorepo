@@ -4,6 +4,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { withMockProvider } from '@/storybook/preview'
 import { EnhancedSidebar } from './index'
 import { SidebarSkeleton } from './SidebarSkeleton'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const SafeSidebarLayout = ({ children }: { children: ReactNode }) => (
   <SidebarProvider defaultOpen style={{ '--sidebar-width': 'min(230px, 100%)' } as CSSProperties}>
@@ -86,6 +87,50 @@ export const TransactionsActive: Story = {
       },
     },
   },
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+const outdatedSafeState = {
+  safeInfo: {
+    loading: false,
+    loaded: true,
+    data: {
+      implementationVersionState: ImplementationVersionState.OUTDATED,
+      version: '1.1.1',
+      deployed: true,
+      address: { value: '0x1234567890123456789012345678901234567890' },
+    },
+  },
+}
+
+export const OutdatedImplementation: Story = {
+  decorators: [withMockProvider({ initialState: outdatedSafeState, shadcn: true })],
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+const undeployedSafeState = {
+  safeInfo: {
+    loading: false,
+    loaded: true,
+    data: {
+      implementationVersionState: ImplementationVersionState.UP_TO_DATE,
+      version: '1.4.1',
+      deployed: false,
+      address: { value: '0x1234567890123456789012345678901234567890' },
+    },
+  },
+}
+
+export const UndeployedSafe: Story = {
+  decorators: [withMockProvider({ initialState: undeployedSafeState, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
       <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />

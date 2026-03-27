@@ -101,6 +101,18 @@
   color: var(--color-text-secondary, #737373);
 }
 
+.outdatedDot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-error-main);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
 .transactionsBadge {
   position: absolute;
   right: 0.25rem;

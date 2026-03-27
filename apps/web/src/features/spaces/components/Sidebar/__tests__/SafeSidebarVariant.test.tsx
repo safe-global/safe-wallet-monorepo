@@ -1,16 +1,34 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/features/spaces'
 import { SafeSidebarVariant } from '../variants/SafeSidebarVariant'
 import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
+import { AppRoutes } from '@/config/routes'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const mockUseCurrentSpaceId = jest.fn()
+const mockRouterPush = jest.fn()
+const mockUseSafeInfo = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockRouterPush,
     query: {},
+    pathname: '',
   }),
+}))
+
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: () => mockUseSafeInfo(),
+}))
+
+jest.mock('@safe-global/utils/utils/chains', () => ({
+  isNonCriticalUpdate: () => false,
+}))
+
+jest.mock('@/features/spaces', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
@@ -42,13 +60,15 @@ jest.mock('@/components/ui/sidebar', () => ({
     isActive,
     tooltip,
     className,
+    onClick,
   }: {
     children: ReactNode
     isActive?: boolean
     tooltip?: string
     className?: string
+    onClick?: () => void
   }) => (
-    <button data-active={isActive} data-tooltip={tooltip} className={className}>
+    <button data-active={isActive} data-tooltip={tooltip} className={className} onClick={onClick}>
       {children}
     </button>
   ),
@@ -124,6 +144,9 @@ describe('SafeSidebarVariant', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseCurrentSpaceId.mockReturnValue(null)
+    mockUseSafeInfo.mockReturnValue({
+      safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.3.0' },
+    })
   })
 
   it('renders space selector with name and back button when spaceId exists', () => {
@@ -159,6 +182,7 @@ describe('SafeSidebarVariant', () => {
       />,
     )
 
+    // Both the component and this import resolve to the same mock, so values match
     expect(screen.getByTestId('space-avatar-fallback')).toHaveStyle({
       backgroundColor: getDeterministicColor(spaceName),
     })
@@ -255,5 +279,105 @@ describe('SafeSidebarVariant', () => {
     )
 
     expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
+  })
+
+  it('renders all main navigation items', () => {
+    const MockIcon = () => <div>Icon</div>
+    const allNavItems: ResolvedSidebarItem[] = [
+      {
+        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+        label: 'Overview',
+        href: AppRoutes.home,
+        isActive: false,
+        disabled: false,
+        link: { pathname: AppRoutes.home, query: {} },
+      },
+      {
+        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+        label: 'Assets',
+        href: AppRoutes.balances.index,
+        isActive: false,
+        disabled: false,
+        link: { pathname: AppRoutes.balances.index, query: {} },
+      },
+      {
+        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+        label: 'Transactions',
+        href: AppRoutes.transactions.history,
+        isActive: false,
+        disabled: false,
+        link: { pathname: AppRoutes.transactions.history, query: {} },
+      },
+      {
+        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+        label: 'Apps',
+        href: AppRoutes.apps.index,
+        isActive: false,
+        disabled: false,
+        link: { pathname: AppRoutes.apps.index, query: {} },
+      },
+    ]
+
+    render(
+      <SafeSidebarVariant spaceName="Test Safe" mainNavItems={allNavItems} defiGroup={{ label: 'Defi', items: [] }} />,
+    )
+
+    expect(screen.getByTestId('sidebar-item-overview')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-item-assets')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-item-apps')).toBeInTheDocument()
+  })
+
+  it('navigates to the correct Space when back button is clicked', () => {
+    mockUseCurrentSpaceId.mockReturnValue('42')
+
+    render(
+      <SafeSidebarVariant
+        spaceName="My Safe Account"
+        spaceInitial="M"
+        selectedSpace={mockSpace}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    fireEvent.click(screen.getByText('My Safe Account'))
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.index,
+      query: { spaceId: '42' },
+    })
+  })
+
+  describe('Settings', () => {
+    it('renders Settings button', () => {
+      render(<SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />)
+
+      expect(screen.getByText('Settings')).toBeInTheDocument()
+    })
+
+    it('shows outdated warning dot when Safe has a critical outdated version', () => {
+      mockUseSafeInfo.mockReturnValue({
+        safe: { implementationVersionState: ImplementationVersionState.OUTDATED, version: '1.1.1' },
+      })
+
+      const { container } = render(
+        <SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+      )
+
+      expect(container.querySelector('span[aria-hidden]')).toBeInTheDocument()
+    })
+
+    it('does not show outdated warning dot when Safe version is current', () => {
+      mockUseSafeInfo.mockReturnValue({
+        safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.4.1' },
+      })
+
+      const { container } = render(
+        <SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+      )
+
+      expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()
+    })
   })
 })
