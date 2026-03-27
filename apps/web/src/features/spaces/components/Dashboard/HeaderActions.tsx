@@ -24,7 +24,7 @@ const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherAct
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="default" className="!px-6" onClick={onSend}>
-          <ArrowUpRight className="size-4 text-[#4ade80]" />
+          <ArrowUpRight className="size-4 text-green-400" />
           Send
         </Button>
         <Button variant="outline" className="!px-6" onClick={onReceive}>
