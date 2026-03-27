@@ -129,6 +129,16 @@ export function getAccountItem(index) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
 }
 
+/** Expanded panel under a multichain `ExpandableAccountItem` (after trigger click). */
+export function getAccountExpandedPanel(rowIndex) {
+  return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
+}
+
+/** One per-chain row inside the expanded multichain panel (`ExpandableAccountItem`). */
+export function getSubAccountRow(chainId) {
+  return `${spaceDashboardAccountsWidget} [data-testid="sub-account-row-${chainId}"]`
+}
+
 /**
  * Asserts how many top-level account rows the Accounts widget renders (uses `main.verifyElementsCount`).
  * @param {number} expectedCount — Last row index is `expectedCount - 1` (`getAccountItem(n)`).
@@ -162,24 +172,71 @@ export const pendingTxSafeBalanceRegex = /\$[\u200a\s]*875(?:\.\d{2})?/
  */
 export function verifySpaceDashboardAccountsRowSafeDetails(rowIndex, { name, address, balanceRegex, ownersThreshold }) {
   const row = getAccountItem(rowIndex)
-  cy.get(row).should('be.visible').within(() => {
-    cy.get(spaceDashboardAccountsRowName).should('be.visible').and('contain.text', name)
-    cy.get(spaceDashboardAccountsRowAddress)
-      .should('be.visible')
-      .and('contain.text', main.shortenAddress(address))
-    cy.get(spaceDashboardAccountsRowIdenticon).should('be.visible')
-    cy.get(spaceDashboardAccountsRowChainLogos)
-      .find(chainIndicatorNetworkLogoImg)
-      .should('be.visible')
-    cy.get(spaceDashboardAccountsRowBalance).invoke('text').should('match', balanceRegex)
-    if (ownersThreshold !== undefined) {
-      cy.get(spaceDashboardAccountsRowThreshold).should('be.visible').and('contain.text', ownersThreshold)
-    }
-  })
+  cy.get(row)
+    .should('be.visible')
+    .within(() => {
+      cy.get(spaceDashboardAccountsRowName).should('be.visible').and('contain.text', name)
+      cy.get(spaceDashboardAccountsRowAddress).should('be.visible').and('contain.text', main.shortenAddress(address))
+      cy.get(spaceDashboardAccountsRowIdenticon).should('be.visible')
+      cy.get(spaceDashboardAccountsRowChainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
+      cy.get(spaceDashboardAccountsRowBalance).invoke('text').should('match', balanceRegex)
+      if (ownersThreshold !== undefined) {
+        cy.get(spaceDashboardAccountsRowThreshold).should('be.visible').and('contain.text', ownersThreshold)
+      }
+    })
 }
 
 export function getPendingTxItem(index) {
   return `${pendingTxWidget} ${widgetItem}:eq(${index})`
+}
+
+/** Space-context Safe bar — `SpaceChainSelector` + `ChainSelectorBlock` trigger (`ChainLogo` / `ChainIndicator`). */
+export const spaceChainSelector = '[data-testid="space-chain-selector"]'
+
+/** Space-context Safe header — `SafeSelectorTriggerContent` (after navigating to `/home?safe=…`). */
+export const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
+export const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
+export const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
+
+/**
+ * Asserts `safe` query matches the expected EIP-3770 value (e.g. `sep:0x…`).
+ * Uses `URL.searchParams` so encoded `:` (`%3A`) is handled without manual decoding.
+ * @param {string} expectedSafeParam — e.g. `sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb`
+ */
+export function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
+  cy.url({ timeout: 30000 }).should('include', '/home')
+  cy.url().should((href) => {
+    expect(new URL(href).searchParams.get('safe'), 'safe query param').to.eq(expectedSafeParam)
+  })
+}
+
+/**
+ * Asserts `SpaceChainSelector` shows the current chain logo and `SafeSelectorTriggerContent` shows the expected name and prefixed short address (same as app `formatPrefixedAddress(shortenAddress(addr), chainShortName)`).
+ * @param {{ expectedName: string, fullAddress: string, chainShortName: string }} opts
+ */
+export function verifySafeSelectorNavigationPanel({ expectedName, fullAddress, chainShortName }) {
+  const short = main.shortenAddress(fullAddress)
+  const expectedLine = `${chainShortName}:${short}`
+  cy.get(spaceChainSelector, { timeout: 30000 })
+    .should('be.visible')
+    .find(chainIndicatorNetworkLogoImg)
+    .should('be.visible')
+  cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
+  cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)
+}
+
+/**
+ * After clicking an Accounts widget row: `/home?safe=…` and Safe selector header (name + `chain:shortAddress` line).
+ * @param {{ safeFullQuery: string, expectedName: string, fullAddress: string, chainShortName: string }} opts
+ */
+export function verifyOpenedSafeDashboardFromSpaceAccountsRow({
+  safeFullQuery,
+  expectedName,
+  fullAddress,
+  chainShortName,
+}) {
+  verifySafeDashboardUrlSafeQuery(safeFullQuery)
+  verifySafeSelectorNavigationPanel({ expectedName, fullAddress, chainShortName })
 }
 
 export const sidebarItemHome = '[data-testid="sidebar-item-home"]'

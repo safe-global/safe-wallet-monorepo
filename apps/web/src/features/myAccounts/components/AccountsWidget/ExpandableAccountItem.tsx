@@ -15,7 +15,12 @@ interface ExpandableAccountItemProps {
   onItemClick?: (safeAddress: string) => void
 }
 
-const ExpandableAccountItem = ({ account, rowIndex, loading = false, onItemClick }: ExpandableAccountItemProps): ReactElement => {
+const ExpandableAccountItem = ({
+  account,
+  rowIndex,
+  loading = false,
+  onItemClick,
+}: ExpandableAccountItemProps): ReactElement => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
@@ -38,14 +43,14 @@ const ExpandableAccountItem = ({ account, rowIndex, loading = false, onItemClick
         </AccountItemContent>
       </CollapsibleTrigger>
 
-      <CollapsibleContent>
+      <CollapsibleContent data-testid={`space-dashboard-accounts-expanded-${rowIndex}`}>
         <div className="flex flex-col">
           {account.subAccounts?.map((sub) => (
             <div
               key={sub.chainId}
               role="button"
               tabIndex={0}
-              data-testid="sub-account-row"
+              data-testid={`sub-account-row-${sub.chainId}`}
               onClick={() => {
                 onItemClick?.(account.address)
                 router.push(sub.href)

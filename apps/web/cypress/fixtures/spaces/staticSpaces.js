@@ -21,9 +21,24 @@ export default {
     row0PendingSafe: {
       name: 'Pending tx',
       address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+      /** EIP-3770 short name for `safe=` query and `SafeSelectorTriggerContent` address line (`sep:0x…`). */
+      chainShortName: 'sep',
+      /** Decoded `safe` query on `/home` after opening this Safe from the Accounts widget. */
+      safeUrlParam: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
       /** Single-chain row — `AccountWidgetItem` owners badge (e.g. `2/3`). */
       ownersThreshold: '2/3',
     },
+    /** `AccountWidgetItem` row index — click opens `/home?safe=…` for one chain. */
+    singleChainAccountRowIndex: 0,
+    /**
+     * `ExpandableAccountItem` row (`safes.length > 1`) — click trigger expands; sub-rows use `sub-account-row-${chainId}`.
+     * Align `subAccounts` with CGW for this space.
+     */
+    multichainAccountRowIndex: 1,
+    multichainSubAccounts: [
+      { chainId: '11155111', safeQueryIncludes: 'sep:' },
+      { chainId: '137', safeQueryIncludes: 'matic:' },
+    ],
   },
   emptyGettingStarted: {
     id: '2362',

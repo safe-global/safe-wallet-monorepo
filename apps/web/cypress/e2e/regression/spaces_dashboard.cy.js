@@ -19,68 +19,76 @@ describe('Spaces dashboard tests', () => {
   // Spaces Dashboard
   // ===========================================
 
-  describe('Spaces Dashboard', () => {
-    it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
-      space.verifySpaceDashboardTotalValueFormat()
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.verifySpaceDashboardAccountsWidgetRowCount(2)
-      space.verifySpaceDashboardWidgetVisible('Pending')
-      cy.get(space.pendingTxWidget).find(space.widgetItem).should('have.length.at.least', 1)
-    })
+  it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
+    space.verifySpaceDashboardTotalValueFormat()
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    space.verifySpaceDashboardAccountsWidgetRowCount(2)
+    space.verifySpaceDashboardWidgetVisible('Pending')
+    cy.get(space.pendingTxWidget).find(space.widgetItem).should('have.length.at.least', 1)
   })
 
   // ===========================================
   // Accounts Widget
   // ===========================================
 
-  describe('Accounts Widget', () => {
-    it('Verify that the Accounts widget lists all Safes associated with the current Space', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.verifySpaceDashboardAccountsWidgetRowCount(2)
-
-    it('Verify that the single chain safe with a addressbook name  view in the accounts widget', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.verifySpaceDashboardAccountsRowSafeDetails(0, {
-        name: staticSpaces.dashboardWithSafes.row0PendingSafe.name,
-        address: staticSpaces.dashboardWithSafes.row0PendingSafe.address,
-        balanceRegex: space.pendingTxSafeBalanceRegex,
-        ownersThreshold: staticSpaces.dashboardWithSafes.row0PendingSafe.ownersThreshold,
-      })
+  it('Verify  the single chain safe with a addressbook name  view in the accounts widget', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    space.verifySpaceDashboardAccountsRowSafeDetails(0, {
+      name: staticSpaces.dashboardWithSafes.row0PendingSafe.name,
+      address: staticSpaces.dashboardWithSafes.row0PendingSafe.address,
+      balanceRegex: space.pendingTxSafeBalanceRegex,
+      ownersThreshold: staticSpaces.dashboardWithSafes.row0PendingSafe.ownersThreshold,
     })
+  })
 
-    it('Verify that the unnamed account row displays the address as the name', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(space.unnamedAccountRowIndex))
-        .should('be.visible')
-        .and('contain.text', main.shortenAddress(space.firstAccountAddress))
-        .and('not.contain.text', space.secondAccountName)
-    })
+  it('Verify that the unnamed account row displays the address as the name', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    cy.get(space.getAccountItem(space.unnamedAccountRowIndex))
+      .should('be.visible')
+      .and('contain.text', main.shortenAddress(space.firstAccountAddress))
+      .and('not.contain.text', space.secondAccountName)
+  })
 
-    it('Verify that the second account row has the correct name and address', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(1))
-        .should('be.visible')
-        .and('contain.text', space.secondAccountName)
-        .and('contain.text', space.secondAccountAddressPrefix)
-        .and('contain.text', space.secondAccountAddressSuffix)
-    })
+  it('Verify that the multichain account row displays chain logos', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    cy.get(space.getAccountItem(space.unnamedAccountRowIndex)).should('be.visible').find('img').should('have.length', 2)
+  })
 
-    it('Verify that the multichain account row displays chain logos', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(space.unnamedAccountRowIndex)).should('be.visible').find('img').should('have.length', 2)
+  it('Verify that a click on a single-chain account row opens that Safe dashboard with URL and header', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    cy.get(space.getAccountItem(0)).click()
+    const row = staticSpaces.dashboardWithSafes.row0PendingSafe
+    space.verifyOpenedSafeDashboardFromSpaceAccountsRow({
+      safeFullQuery: row.safeUrlParam,
+      expectedName: row.name,
+      fullAddress: row.address,
+      chainShortName: row.chainShortName,
     })
+  })
 
-    it('Verify that clicking a Safe in the Accounts widget navigates to that Safe dashboard with Space context', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      cy.get(space.getAccountItem(0)).click()
-      cy.url().should('include', '/home').and('include', 'safe=')
+  it('Verify that a click on a multichain account row expands the row with one sub-account per chain', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
+    cy.get(space.getAccountItem(rowIndex)).click()
+    cy.get(space.getAccountExpandedPanel(rowIndex)).should('be.visible')
+    staticSpaces.dashboardWithSafes.multichainSubAccounts.forEach(({ chainId }) => {
+      cy.get(space.getSubAccountRow(chainId)).should('be.visible')
     })
+  })
 
-    it('Verify that clicking View all accounts in the Accounts widget opens the Accounts tab of the Space', () => {
-      space.verifySpaceDashboardWidgetVisible('Accounts')
-      cy.contains(space.viewAllAccountsLabel).click()
-      cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
-    })
+  it('Verify that a click on an expanded sub-account row opens the Safe on the correct network', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
+    cy.get(space.getAccountItem(rowIndex)).click()
+    const sub = staticSpaces.dashboardWithSafes.multichainSubAccounts[1]
+    cy.get(space.getSubAccountRow(sub.chainId)).click()
+    cy.url().should('include', '/home').and('include', 'safe=').and('include', sub.safeQueryIncludes)
+  })
+
+  it('Verify that clicking View all accounts in the Accounts widget opens the Accounts tab of the Space', () => {
+    space.verifySpaceDashboardWidgetVisible('Accounts')
+    cy.contains(space.viewAllAccountsLabel).click()
+    cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
   })
 
   // ===========================================
