@@ -76,8 +76,8 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
         'message' in cgwError
           ? String(cgwError.message)
           : 'status' in cgwError
-          ? `Error ${cgwError.status}`
-          : 'Failed to load safe info'
+            ? `Error ${cgwError.status}`
+            : 'Failed to load safe info'
       return new Error(errorMessage)
     }
     return undeployedSafe ? undeployedError : undefined

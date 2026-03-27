@@ -39,8 +39,8 @@ const resolveThresholdAndOwners = (
   safe: { threshold: number; owners?: { value: string }[] },
   overview: SafeOverview | undefined,
 ) => ({
-  threshold: isCurrentSafe ? safe.threshold : overview?.threshold ?? 0,
-  owners: isCurrentSafe ? safe.owners?.length ?? 0 : overview?.owners.length ?? 0,
+  threshold: isCurrentSafe ? safe.threshold : (overview?.threshold ?? 0),
+  owners: isCurrentSafe ? (safe.owners?.length ?? 0) : (overview?.owners.length ?? 0),
 })
 
 const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
