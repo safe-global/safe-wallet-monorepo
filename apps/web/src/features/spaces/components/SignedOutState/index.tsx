@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { EmailAuthFeature } from '@/features/email-auth'
