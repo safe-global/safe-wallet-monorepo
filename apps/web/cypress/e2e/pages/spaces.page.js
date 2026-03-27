@@ -29,6 +29,8 @@ const netwrokItem = '[data-testid="network-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 /** Same pattern as `dashboard.pages.js` `pendingTxWidget` — root `data-testid` on the Space dashboard widget. */
 export const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
+/** `ExpandableAccountItem` sub-rows (same id per row; scope with expanded panel + `.eq(n)`, same as unit tests `getAllByTestId('sub-account-row')`). */
+export const subAccountRow = '[data-testid="sub-account-row"]'
 /** Indexed rows: `space-dashboard-accounts-row-0`, `space-dashboard-accounts-row-1`, … */
 export const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
 export const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
@@ -134,9 +136,13 @@ export function getAccountExpandedPanel(rowIndex) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
 }
 
-/** One per-chain row inside the expanded multichain panel (`ExpandableAccountItem`). */
-export function getSubAccountRow(chainId) {
-  return `${spaceDashboardAccountsWidget} [data-testid="sub-account-row-${chainId}"]`
+/** Sub-account rows: `cy.get(getAccountExpandedPanel(rowIndex)).find(subAccountRow).eq(n)` — prefer Cypress `.find()` over CSS combinator strings. */
+export function verifyExpandedPanelSubAccountRowsCount(rowIndex, expectedCount) {
+  cy.get(getAccountExpandedPanel(rowIndex)).find(subAccountRow).should('have.length', expectedCount)
+}
+
+export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {
+  cy.get(getAccountExpandedPanel(rowIndex)).find(subAccountRow).eq(subRowIndex).click()
 }
 
 /**

@@ -71,9 +71,7 @@ describe('Spaces dashboard tests', () => {
     const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
     cy.get(space.getAccountItem(rowIndex)).click()
     cy.get(space.getAccountExpandedPanel(rowIndex)).should('be.visible')
-    staticSpaces.dashboardWithSafes.multichainSubAccounts.forEach(({ chainId }) => {
-      cy.get(space.getSubAccountRow(chainId)).should('be.visible')
-    })
+    space.verifyExpandedPanelSubAccountRowsCount(rowIndex, staticSpaces.dashboardWithSafes.multichainSubAccounts.length)
   })
 
   it('Verify that a click on an expanded sub-account row opens the Safe on the correct network', () => {
@@ -81,7 +79,7 @@ describe('Spaces dashboard tests', () => {
     const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
     cy.get(space.getAccountItem(rowIndex)).click()
     const sub = staticSpaces.dashboardWithSafes.multichainSubAccounts[1]
-    cy.get(space.getSubAccountRow(sub.chainId)).click()
+    space.clickExpandedPanelSubAccountRow(rowIndex, 1)
     cy.url().should('include', '/home').and('include', 'safe=').and('include', sub.safeQueryIncludes)
   })
 

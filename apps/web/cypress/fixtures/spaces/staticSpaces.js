@@ -31,8 +31,8 @@ export default {
     /** `AccountWidgetItem` row index — click opens `/home?safe=…` for one chain. */
     singleChainAccountRowIndex: 0,
     /**
-     * `ExpandableAccountItem` row (`safes.length > 1`) — click trigger expands; sub-rows use `sub-account-row-${chainId}`.
-     * Align `subAccounts` with CGW for this space.
+     * `ExpandableAccountItem` row (`safes.length > 1`) — click trigger expands; sub-rows share `data-testid="sub-account-row"` (use index in Cypress via `.eq(n)`).
+     * Align `subAccounts` order with CGW for this space.
      */
     multichainAccountRowIndex: 1,
     multichainSubAccounts: [

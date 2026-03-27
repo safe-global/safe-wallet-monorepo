@@ -50,7 +50,7 @@ const ExpandableAccountItem = ({
               key={sub.chainId}
               role="button"
               tabIndex={0}
-              data-testid={`sub-account-row-${sub.chainId}`}
+              data-testid="sub-account-row"
               onClick={() => {
                 onItemClick?.(account.address)
                 router.push(sub.href)
