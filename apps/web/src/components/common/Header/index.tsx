@@ -11,6 +11,7 @@ import css from './styles.module.css'
 import ConnectWallet from '@/components/common/ConnectWallet'
 import NetworkSelector from '@/components/common/NetworkSelector'
 import NotificationCenter from '@/components/notification-center/NotificationCenter'
+import SafenetStakingWidget from '@/components/common/SafenetStakingWidget'
 import { AppRoutes } from '@/config/routes'
 import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
 import SafeLogoMobile from '@/public/images/logo-no-text.svg'
@@ -22,6 +23,7 @@ import { WalletConnectFeature } from '@/features/walletconnect'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 
 type HeaderProps = {
@@ -35,6 +37,7 @@ export function getLogoLink(): Url {
 
 const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const safeAddress = useSafeAddress()
+  const showSafeToken = useSafeTokenEnabled()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const router = useRouter()
@@ -81,6 +84,12 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           {isOfficialHost ? <SafeLabsLogo alt={BRAND_NAME} /> : BRAND_LOGO && <img src={BRAND_LOGO} alt={BRAND_NAME} />}
         </Link>
       </div>
+
+      {showSafeToken && (
+        <div className={classnames(css.element, css.hideMobile)}>
+          <SafenetStakingWidget />
+        </div>
+      )}
 
       <Box className={css.rightSideGroup}>
         <div data-testid="notifications-center" className={css.element}>
