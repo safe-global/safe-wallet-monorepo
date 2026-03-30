@@ -104,7 +104,10 @@ export function verifyTotalPositionsTitleVisible() {
 }
 
 export function verifyFiatValueVisible() {
-  cy.contains(/\$ [\d,]+(\.\d+)?/).should('be.visible')
+  // \u202f is a Unicode narrow no-break space. Safe's FiatValue component renders
+  // the currency symbol and amount separated by this character, not a regular ASCII
+  // space.
+  cy.contains(/\$[\s\u202f][\d,]+(\.\d+)?/).should('be.visible')
 }
 
 export function verifyPositionGroupVisible(groupName) {

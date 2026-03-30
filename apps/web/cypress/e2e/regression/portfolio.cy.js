@@ -64,6 +64,7 @@ describe('Positions AI tests', { defaultCommandTimeout: 60000, requestTimeout: 3
     portfolio.verifyTokenNameVisible(portfolio.tokenNames.aave)
     portfolio.verifyPositionTypeVisible(portfolio.positionTypes.deposited)
     portfolio.verifyFiatValueVisible()
+    portfolio.verifyPositionGroupVisible(portfolio.positionGroups.aaveV3Lending)
     portfolio.collapseProtocolAccordion(portfolio.protocols.aaveV3)
     portfolio.verifyPositionGroupNotVisible(portfolio.positionGroups.aaveV3Lending)
     portfolio.expandProtocolAccordion(portfolio.protocols.aaveV3)
@@ -71,7 +72,7 @@ describe('Positions AI tests', { defaultCommandTimeout: 60000, requestTimeout: 3
   })
 
   // TC #340
-  it('Verify that "Total positions value" displays the correct sum of all protocol fiat values', () => {
+  it('Verify that the "Total positions value" title and a fiat value are visible on the Positions tab', () => {
     portfolio.visitAndSettle(constants.positionsUrl + staticSafes.MATIC_STATIC_SAFE_33)
     portfolio.verifyTotalPositionsTitleVisible()
     portfolio.verifyFiatValueVisible()
