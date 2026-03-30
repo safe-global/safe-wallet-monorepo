@@ -23,7 +23,7 @@ describe('Spaces dashboard tests', () => {
   it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
     space.verifySpaceDashboardTotalValueFormat()
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifySpaceDashboardAccountsWidgetRowCount(2)
+    space.verifySpaceDashboardAccountsWidgetRowCount(3)
     space.verifySpaceDashboardWidgetVisible('Pending')
     cy.get(space.pendingTxWidget).find(space.widgetItem).should('have.length.at.least', 1)
   })
@@ -34,11 +34,11 @@ describe('Spaces dashboard tests', () => {
 
   it('Verify  the single chain safe with a addressbook name  view in the accounts widget', () => {
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifySpaceDashboardAccountsRowSafeDetails(0, {
-      name: staticSpaces.dashboardWithSafes.row0PendingSafe.name,
-      address: staticSpaces.dashboardWithSafes.row0PendingSafe.address,
+    space.verifySpaceDashboardAccountsRowSafeDetails(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex, {
+      name: staticSpaces.dashboardWithSafes.pendingTxAccount.name,
+      address: staticSpaces.dashboardWithSafes.pendingTxAccount.address,
       balanceRegex: space.pendingTxSafeBalanceRegex,
-      ownersThreshold: staticSpaces.dashboardWithSafes.row0PendingSafe.ownersThreshold,
+      ownersThreshold: staticSpaces.dashboardWithSafes.pendingTxAccount.ownersThreshold,
     })
   })
 
@@ -57,8 +57,8 @@ describe('Spaces dashboard tests', () => {
 
   it('Verify that a click on a single-chain account row opens that Safe dashboard with URL and header', () => {
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    cy.get(space.getAccountItem(0)).click()
-    const row = staticSpaces.dashboardWithSafes.row0PendingSafe
+    cy.get(space.getAccountItem(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex)).click()
+    const row = staticSpaces.dashboardWithSafes.pendingTxAccount
     space.verifyOpenedSafeDashboardFromSpaceAccountsRow({
       safeFullQuery: row.safeUrlParam,
       expectedName: row.name,

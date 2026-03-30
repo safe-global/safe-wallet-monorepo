@@ -293,8 +293,8 @@ export { staticSpaces }
 
 /** Staging regression assertions for `spaces_dashboard.cy.js` — update when CGW data changes. */
 export const firstAccountAddress = '0x1694CbDE1b30eEdd9f7A2b6C7e36A180F2a3a23C7'
-/** Row index for `firstAccountAddress` when row 0 is another Safe (e.g. “Pending tx”). */
-export const unnamedAccountRowIndex = 2
+/** Row index for `firstAccountAddress` (unnamed row — top of Accounts widget). */
+export const unnamedAccountRowIndex = 0
 export const secondAccountName = 'Space addressbook name'
 /** Shortened display is enough for the row assertion; full address must match CGW. */
 export const secondAccountAddressPrefix = '0x0596'
