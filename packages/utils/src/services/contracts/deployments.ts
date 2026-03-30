@@ -355,9 +355,7 @@ export const resolveChainAgnosticContractAddresses = (
 
   if (missingContracts.length > 0) {
     console.warn(
-      `[resolveChainAgnostic] Missing auxiliary contracts for v${cleanVersion} (${deploymentType}): ${missingContracts.join(
-        ', ',
-      )}`,
+      `[resolveChainAgnostic] Missing auxiliary contracts for v${cleanVersion} (${deploymentType}): ${missingContracts.join(', ')}`,
     )
   }
 
