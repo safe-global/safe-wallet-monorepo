@@ -38,7 +38,7 @@ describe('Spaces dashboard tests', () => {
     const safeData = staticSpaces.dashboardWithSafes.pendingTxAccount
 
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifySpaceDashboardAccountsRowSafeDetails(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex, {
+    space.verifyAccountRowDetails('single', staticSpaces.dashboardWithSafes.singleChainAccountRowIndex, {
       name: safeData.name,
       address: safeData.address,
       balanceRegex: space.nonZeroBalanceRegex,
@@ -50,10 +50,9 @@ describe('Spaces dashboard tests', () => {
     const account = staticSpaces.dashboardWithSafes.unnamedAccount
 
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifySpaceDashboardAccountsRowSafeDetails(staticSpaces.dashboardWithSafes.unnamedAccountRowIndex, {
+    space.verifyAccountRowDetails('multichain', staticSpaces.dashboardWithSafes.unnamedAccountRowIndex, {
       name: main.shortenAddress(account.address),
       address: account.address,
-      balanceRegex: space.zeroBalanceRegex,
       chainLogosCount: account.chainLogosCount,
     })
   })
@@ -62,10 +61,9 @@ describe('Spaces dashboard tests', () => {
     const account = staticSpaces.dashboardWithSafes.multichainAccount
 
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifySpaceDashboardAccountsRowSafeDetails(staticSpaces.dashboardWithSafes.multichainAccountRowIndex, {
+    space.verifyAccountRowDetails('multichain', staticSpaces.dashboardWithSafes.multichainAccountRowIndex, {
       name: account.name,
       address: account.address,
-      balanceRegex: space.zeroBalanceRegex,
       chainLogosCount: account.chainLogosCount,
     })
   })

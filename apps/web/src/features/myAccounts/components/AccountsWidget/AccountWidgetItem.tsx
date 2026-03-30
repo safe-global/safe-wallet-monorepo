@@ -28,22 +28,22 @@ const AccountWidgetItem = ({
       href={account.href}
       onClick={onItemClick ? () => onItemClick(account.address) : undefined}
       label={
-        <Typography data-testid="space-dashboard-accounts-row-name" variant="paragraph-bold">
+        <Typography data-testid="single-account-name" variant="paragraph-bold">
           {account.name}
         </Typography>
       }
       info={
-        <Typography data-testid="space-dashboard-accounts-row-address" variant="paragraph-mini" color="muted">
+        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
           {shortenAddress(account.address, 4)}
         </Typography>
       }
       startNode={
-        <Avatar data-testid="space-dashboard-accounts-row-identicon">
+        <Avatar data-testid="single-account-identicon">
           <Identicon address={account.address} size={40} />
         </Avatar>
       }
       featuredNode={
-        <div data-testid="space-dashboard-accounts-row-chain-logos">
+        <div data-testid="single-account-chain-logos">
           <AccountItem.ChainBadge safes={account.safes} />
         </div>
       }
@@ -51,12 +51,12 @@ const AccountWidgetItem = ({
         <div className="flex flex-col items-end gap-2">
           <AccountItem.Balance
             className="w-full"
-            data-testid="space-dashboard-accounts-row-balance"
+            data-testid="single-account-balance"
             fiatTotal={account.fiatTotal}
             isLoading={!account.fiatTotal && loading}
           />
           {!account.subAccounts && (
-            <Badge variant="secondary" data-testid="space-dashboard-accounts-row-threshold">
+            <Badge variant="secondary" data-testid="single-account-threshold">
               <UserRound className="size-3" />
               {account.owners}
             </Badge>

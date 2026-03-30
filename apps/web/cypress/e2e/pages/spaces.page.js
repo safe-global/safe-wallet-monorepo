@@ -1,9 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as navigation from './navigation.page.js'
-import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
-
-export { staticSpaces }
 
 // ===========================================
 // Selectors
@@ -34,15 +31,23 @@ const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
 const widgetItem = '[data-slot="widget-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 
-// -- Accounts widget row details --
-const spaceDashboardAccountsRowName = '[data-testid="space-dashboard-accounts-row-name"]'
-const spaceDashboardAccountsRowAddress = '[data-testid="space-dashboard-accounts-row-address"]'
-const spaceDashboardAccountsRowIdenticon = '[data-testid="space-dashboard-accounts-row-identicon"]'
-const spaceDashboardAccountsRowChainLogos = '[data-testid="space-dashboard-accounts-row-chain-logos"]'
-const spaceDashboardAccountsRowBalance = '[data-testid="space-dashboard-accounts-row-balance"]'
-const spaceDashboardAccountsRowThreshold = '[data-testid="space-dashboard-accounts-row-threshold"]'
-const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
+// -- Single-chain account row (AccountWidgetItem) --
+const singleAccountName = '[data-testid="single-account-name"]'
+const singleAccountAddress = '[data-testid="single-account-address"]'
+const singleAccountIdenticon = '[data-testid="single-account-identicon"]'
+const singleAccountChainLogos = '[data-testid="single-account-chain-logos"]'
+const singleAccountBalance = '[data-testid="single-account-balance"]'
+const singleAccountThreshold = '[data-testid="single-account-threshold"]'
+
+// -- Multichain account row (ExpandableAccountItem / AccountItemContent) --
+const multichainAccountName = '[data-testid="multichain-account-name"]'
+const multichainAccountAddress = '[data-testid="multichain-account-address"]'
+const multichainAccountIdenticon = '[data-testid="multichain-account-identicon"]'
+const multichainAccountChainLogos = '[data-testid="multichain-account-chain-logos"]'
 const subAccountRow = '[data-testid="sub-account-row"]'
+
+// -- Shared --
+const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
 
 // -- Safe-level navigation panel --
 const spaceChainSelector = '[data-testid="space-chain-selector"]'
@@ -247,26 +252,47 @@ export function verifyPendingTxWidgetItemCount(expectedCount) {
   main.verifyElementsCount(`${pendingTxWidget} ${widgetItem}`, expectedCount)
 }
 
-export function verifySpaceDashboardAccountsRowSafeDetails(
+const accountRowSelectors = {
+  single: {
+    identicon: singleAccountIdenticon,
+    name: singleAccountName,
+    address: singleAccountAddress,
+    chainLogos: singleAccountChainLogos,
+    balance: singleAccountBalance,
+    threshold: singleAccountThreshold,
+  },
+  multichain: {
+    identicon: multichainAccountIdenticon,
+    name: multichainAccountName,
+    address: multichainAccountAddress,
+    chainLogos: multichainAccountChainLogos,
+  },
+}
+
+export function verifyAccountRowDetails(
+  type,
   rowIndex,
   { name, address, balanceRegex, ownersThreshold, chainLogosCount },
 ) {
+  const sel = accountRowSelectors[type]
   const row = getAccountItem(rowIndex)
   cy.get(row)
     .should('be.visible')
     .within(() => {
-      cy.get(spaceDashboardAccountsRowName).should('be.visible').and('contain.text', name)
-      cy.get(spaceDashboardAccountsRowAddress).should('be.visible').and('contain.text', main.shortenAddress(address))
-      cy.get(spaceDashboardAccountsRowIdenticon).should('be.visible')
-      cy.get(spaceDashboardAccountsRowChainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
-      cy.get(spaceDashboardAccountsRowBalance).invoke('text').should('match', balanceRegex)
-      if (ownersThreshold !== undefined) {
-        cy.get(spaceDashboardAccountsRowThreshold).should('be.visible').and('contain.text', ownersThreshold)
+      cy.get(sel.identicon).should('be.visible')
+      cy.get(sel.name).should('be.visible').and('contain.text', name)
+      cy.get(sel.address).should('be.visible').and('contain.text', main.shortenAddress(address))
+      if (sel.chainLogos) {
+        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('be.visible')
       }
-      if (chainLogosCount !== undefined) {
-        cy.get(spaceDashboardAccountsRowChainLogos)
-          .find(chainIndicatorNetworkLogoImg)
-          .should('have.length', chainLogosCount)
+      if (balanceRegex !== undefined && sel.balance) {
+        cy.get(sel.balance).invoke('text').should('match', balanceRegex)
+      }
+      if (ownersThreshold !== undefined && sel.threshold) {
+        cy.get(sel.threshold).should('be.visible').and('contain.text', ownersThreshold)
+      }
+      if (chainLogosCount !== undefined && sel.chainLogos) {
+        cy.get(sel.chainLogos).find(chainIndicatorNetworkLogoImg).should('have.length', chainLogosCount)
       }
     })
 }
