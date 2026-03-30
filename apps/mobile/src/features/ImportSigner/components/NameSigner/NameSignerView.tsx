@@ -34,7 +34,7 @@ export function NameSignerView({
   onContinue,
   onClear,
 }: Props) {
-  const { top, bottom } = useSafeAreaInsets()
+  const { top } = useSafeAreaInsets()
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.flex1} keyboardVerticalOffset={top + CUSTOM_VERTICAL_OFFSET}>
