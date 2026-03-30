@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants'
 import * as portfolio from '../pages/portfolio.pages'
+import * as main from '../pages/main.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -10,29 +11,17 @@ describe('Positions Tests', { defaultCommandTimeout: 60000, requestTimeout: 3000
   })
 
   beforeEach(() => {
-    // Intercept the chains list endpoint to inject the POSITIONS flag.
-    cy.intercept('GET', '**/v2/chains**', (req) => {
-      req.continue((res) => {
-        if (res.body?.results && Array.isArray(res.body.results)) {
-          res.body.results = res.body.results.map((chain) => {
-            if (chain.chainId !== constants.networkKeys.polygon) return chain
-            const features = (chain.features || []).filter((f) => f !== 'PORTFOLIO_ENDPOINT')
-            if (!features.includes(constants.chainFeatures.positions)) features.push(constants.chainFeatures.positions)
-            return { ...chain, features }
-          })
-        } else if (res.body?.chainId === constants.networkKeys.polygon) {
-          const features = (res.body.features || []).filter((f) => f !== 'PORTFOLIO_ENDPOINT')
-          if (!features.includes(constants.chainFeatures.positions)) features.push(constants.chainFeatures.positions)
-          res.body = { ...res.body, features }
-        }
-      })
+    main.injectChainFeature({
+      chainId: constants.networkKeys.polygon,
+      addFlag: constants.chainFeatures.positions,
+      removeFlag: 'PORTFOLIO_ENDPOINT',
+      dataEndpoint: constants.positionsEndpoint,
+      dataAlias: 'getPositions',
     })
-
-    cy.intercept('GET', constants.positionsEndpoint).as('getPositions')
   })
 
   // TC #333
-  it('[SMOKE] Verify that the Positions widget on the dashboard displays all protocols with name and fiat value', () => {
+  it('Verify that the Positions widget on the dashboard displays all protocols with name and fiat value', () => {
     portfolio.visitAndSettle(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_33)
     portfolio.verifyWidgetIsVisible()
     portfolio.verifyProtocolInWidget(portfolio.protocols.aaveV3)
@@ -40,7 +29,7 @@ describe('Positions Tests', { defaultCommandTimeout: 60000, requestTimeout: 3000
   })
 
   // TC #334
-  it('[SMOKE] Verify that clicking "View all" on the Positions widget navigates to Assets → Positions tab', () => {
+  it('Verify that clicking "View all" on the Positions widget navigates to Assets → Positions tab', () => {
     portfolio.visitAndSettle(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_33)
     portfolio.verifyProtocolInWidget(portfolio.protocols.aaveV3)
     portfolio.clickViewAllInWidget()
