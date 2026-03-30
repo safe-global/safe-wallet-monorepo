@@ -15,7 +15,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   hypernative: false,
   earn: false,
   spaces: false,
-  emailAuth: false,
+  oidcAuth: false,
 }
 
 /**
@@ -29,7 +29,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   hypernative: 'HYPERNATIVE',
   earn: 'EARN',
   spaces: 'SPACES',
-  emailAuth: 'EMAIL_AUTH',
+  oidcAuth: 'OIDC_AUTH',
 }
 
 /**
