@@ -1,7 +1,7 @@
 import {
   authSlice,
-  setIsEmailLoginPending,
-  selectIsEmailLoginPending,
+  setIsOidcLoginPending,
+  selectIsOidcLoginPending,
   setAuthenticated,
   setUnauthenticated,
   setLastUsedSpace,
@@ -89,32 +89,32 @@ describe('authSlice', () => {
     })
   })
 
-  describe('setIsEmailLoginPending', () => {
+  describe('setIsOidcLoginPending', () => {
     it('should default to false', () => {
       const state = authSlice.reducer(undefined, { type: 'unknown' })
 
-      expect(state.isEmailLoginPending).toBe(false)
+      expect(state.isOidcLoginPending).toBe(false)
     })
 
-    it('should set isEmailLoginPending to true', () => {
-      const state = authSlice.reducer(undefined, setIsEmailLoginPending(true))
+    it('should set isOidcLoginPending to true', () => {
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
 
-      expect(state.isEmailLoginPending).toBe(true)
+      expect(state.isOidcLoginPending).toBe(true)
     })
 
-    it('should set isEmailLoginPending back to false', () => {
-      const prev = authSlice.reducer(undefined, setIsEmailLoginPending(true))
-      const state = authSlice.reducer(prev, setIsEmailLoginPending(false))
+    it('should set isOidcLoginPending back to false', () => {
+      const prev = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+      const state = authSlice.reducer(prev, setIsOidcLoginPending(false))
 
-      expect(state.isEmailLoginPending).toBe(false)
+      expect(state.isOidcLoginPending).toBe(false)
     })
   })
 
-  describe('selectIsEmailLoginPending', () => {
+  describe('selectIsOidcLoginPending', () => {
     it('should return the current pending state', () => {
-      const state = authSlice.reducer(undefined, setIsEmailLoginPending(true))
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
 
-      expect(selectIsEmailLoginPending({ auth: state } as unknown as RootState)).toBe(true)
+      expect(selectIsOidcLoginPending({ auth: state } as unknown as RootState)).toBe(true)
     })
   })
 })
