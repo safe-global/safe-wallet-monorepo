@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import { ScrollView } from 'react-native'
 import Seed from '@/assets/images/seed.png'
 import Wallet from '@/assets/images/wallet.png'
-import ConnectWalletApp from '@/assets/images/connect-wallet-app.png'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle, SectionTitle } from '@/src/components/Title'
@@ -14,6 +13,15 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { getAddress } from 'ethers'
 import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+
+const ConnectWalletAppImage = () => {
+  const { isDark } = useTheme()
+  const image = isDark
+    ? require('@/assets/images/connect-wallet-app-dark.png')
+    : require('@/assets/images/connect-wallet-app-light.png')
+  return <Image src={image} objectFit="contain" width={300} height={80} />
+}
 
 const items = [
   {
@@ -37,7 +45,7 @@ const items = [
     title: 'Connect wallet app',
     description: 'Connect an external wallet app to sign transactions.',
     icon: <SafeFontIcon name="dapp-logo" size={16} />,
-    Image: ConnectWalletApp,
+    Image: <ConnectWalletAppImage />,
     imageProps: { marginBottom: -32 },
   },
 ] as const
