@@ -22,6 +22,10 @@ const injectedRtkApi = api
         query: () => ({ url: `/v1/auth/logout`, method: 'POST' }),
         invalidatesTags: ['auth'],
       }),
+      authLogoutWithRedirectV1: build.mutation<AuthLogoutWithRedirectV1ApiResponse, AuthLogoutWithRedirectV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/auth/logout/redirect`, method: 'POST', body: queryArg.logoutDto }),
+        invalidatesTags: ['auth'],
+      }),
       oidcAuthAuthorizeV1: build.query<OidcAuthAuthorizeV1ApiResponse, OidcAuthAuthorizeV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/auth/oidc/authorize`,
@@ -48,7 +52,7 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AuthGetMeV1ApiResponse = unknown
+export type AuthGetMeV1ApiResponse = /** status 200 Authenticated user ID */ UserSession
 export type AuthGetMeV1ApiArg = void
 export type AuthGetNonceV1ApiResponse = /** status 200 Unique nonce generated for authentication */ AuthNonce
 export type AuthGetNonceV1ApiArg = void
@@ -59,6 +63,10 @@ export type AuthVerifyV1ApiArg = {
 }
 export type AuthLogoutV1ApiResponse = unknown
 export type AuthLogoutV1ApiArg = void
+export type AuthLogoutWithRedirectV1ApiResponse = unknown
+export type AuthLogoutWithRedirectV1ApiArg = {
+  logoutDto: LogoutDto
+}
 export type OidcAuthAuthorizeV1ApiResponse = unknown
 export type OidcAuthAuthorizeV1ApiArg = {
   /** URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI. */
@@ -77,12 +85,19 @@ export type OidcAuthCallbackV1ApiArg = {
   /** Description of the error returned by the OIDC provider (if failed) */
   errorDescription?: string
 }
+export type UserSession = {
+  id: string
+}
 export type AuthNonce = {
   nonce: string
 }
 export type SiweDto = {
   message: string
   signature: string
+}
+export type LogoutDto = {
+  /** Post-logout redirect URL (must be same-origin as pre-configured URL) */
+  redirect_url?: string
 }
 export const {
   useAuthGetMeV1Query,
@@ -91,6 +106,7 @@ export const {
   useLazyAuthGetNonceV1Query,
   useAuthVerifyV1Mutation,
   useAuthLogoutV1Mutation,
+  useAuthLogoutWithRedirectV1Mutation,
   useOidcAuthAuthorizeV1Query,
   useLazyOidcAuthAuthorizeV1Query,
   useOidcAuthCallbackV1Query,

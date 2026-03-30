@@ -31,7 +31,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Authenticated user ID"
+            "description": "Authenticated user ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSession"
+                }
+              }
+            }
           },
           "403": {
             "description": "Not authenticated"
@@ -110,6 +117,35 @@
           }
         },
         "summary": "Logout user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/logout/redirect": {
+      "post": {
+        "description": "Clears the authentication cookie and redirects the browser. For OIDC users, redirects through identity platform to clear their session cookie. For SiWe users, redirects directly to the app.",
+        "operationId": "authLogoutWithRedirectV1",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects to identity platform logout (OIDC) or directly to the app."
+          },
+          "400": {
+            "description": "Invalid redirect URL"
+          }
+        },
+        "summary": "Logout (with redirect)",
         "tags": [
           "auth"
         ]
@@ -5536,6 +5572,17 @@
           "name"
         ]
       },
+      "UserSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
       "AuthNonce": {
         "type": "object",
         "properties": {
@@ -5561,6 +5608,15 @@
           "message",
           "signature"
         ]
+      },
+      "LogoutDto": {
+        "type": "object",
+        "properties": {
+          "redirect_url": {
+            "type": "string",
+            "description": "Post-logout redirect URL (must be same-origin as pre-configured URL)"
+          }
+        }
       },
       "NativeToken": {
         "type": "object",

@@ -4,8 +4,9 @@ import type { Dispatch, SetStateAction } from 'react'
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
-import { Box, IconButton, Paper } from '@mui/material'
+import { Box, ButtonBase, IconButton, Paper, SvgIcon } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
+import LogoutIcon from '@mui/icons-material/Logout'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import ConnectWallet from '@/components/common/ConnectWallet'
@@ -23,6 +24,9 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
+import useLogout from '@/hooks/useLogout'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -41,6 +45,8 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const { BatchIndicator } = useLoadFeature(BatchingFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const isOfficialHost = useIsOfficialHost()
+  const authenticated = useAppSelector(isAuthenticated)
+  const { logout } = useLogout()
 
   const logoHref = getLogoLink()
 
@@ -103,6 +109,26 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           <ConnectWallet />
         </Track>
       </div>
+
+      {/* TODO temporary sign out button til Spaces are not signer-protected */}
+      {authenticated && (
+        <div className={classnames(css.element, css.signOut)}>
+          <ButtonBase
+            onClick={logout}
+            aria-label="Sign out"
+            disableRipple
+            sx={{
+              p: '10px',
+              borderRadius: '6px',
+              '&:hover': {
+                backgroundColor: 'background.light',
+              },
+            }}
+          >
+            <SvgIcon component={LogoutIcon} inheritViewBox fontSize="medium" />
+          </ButtonBase>
+        </div>
+      )}
 
       {safeAddress && (
         <div className={classnames(css.element, css.networkSelector)}>
