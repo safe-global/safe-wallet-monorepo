@@ -9,11 +9,11 @@ import { NavBarTitle, SectionTitle } from '@/src/components/Title'
 import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
-import { View } from 'tamagui'
-import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { View, Image } from 'tamagui'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { getAddress } from 'ethers'
+import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 
 const items = [
   {
@@ -47,9 +47,7 @@ const title = 'Add signer'
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
   const dispatch = useAppDispatch()
-  const { open } = useAppKit()
-  const { address, isConnected } = useAccount()
-  const { walletInfo } = useWalletInfo()
+  const { open: openWalletConnect, isConnected, address, walletInfo } = useWalletConnect()
   const registeredRef = useRef<string | null>(null)
 
   const { handleScroll } = useScrollableHeader({
@@ -85,12 +83,12 @@ export const ImportSignersContainer = () => {
               : { pathname: '/biometrics-opt-in', params: { caller: '/import-signers' } },
           ),
         hardwareSigner: () => router.push('/import-signers/hardware-devices'),
-        connectSigner: () => open({ view: 'Connect' }),
+        connectSigner: openWalletConnect,
       }
 
       actions[name]()
     },
-    [isBiometricsEnabled, open],
+    [isBiometricsEnabled, openWalletConnect],
   )
 
   return (
