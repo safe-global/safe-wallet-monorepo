@@ -4,16 +4,33 @@ import { Box, Button, CircularProgress, Typography } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import WalletIcon from '@/components/common/WalletIcon'
 import { useEffect, useState } from 'react'
+import { WalletMinimal } from 'lucide-react'
+import css from './styles.module.css'
+
+export type WalletLoginButtonStyle = 'walletBtnPrimary' | 'walletBtnSecondary'
+
+export interface WalletLoginButtonText {
+  connected?: string
+  disconnected?: string
+}
 
 interface WalletLoginProps {
   onLogin: () => void
   onContinue: () => void
-  buttonText?: string
+  buttonText?: WalletLoginButtonText
   fullWidth?: boolean
   isLoading?: boolean
+  buttonStyle?: WalletLoginButtonStyle
 }
 
-const WalletLogin = ({ onLogin, onContinue, buttonText, fullWidth, isLoading }: WalletLoginProps) => {
+const WalletLogin = ({
+  onLogin,
+  onContinue,
+  buttonText,
+  fullWidth,
+  isLoading,
+  buttonStyle = 'walletBtnPrimary',
+}: WalletLoginProps) => {
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const [hasConnectedWallet, setHasConnectedWallet] = useState(false)
@@ -38,7 +55,7 @@ const WalletLogin = ({ onLogin, onContinue, buttonText, fullWidth, isLoading }: 
         size="xlarge"
         onClick={onContinue}
         fullWidth={fullWidth}
-        style={{ color: '#fff', background: '#121312' }}
+        className={css[buttonStyle]}
         data-testid="continue-with-wallet-btn"
         disabled={isLoading}
       >
@@ -48,7 +65,7 @@ const WalletLogin = ({ onLogin, onContinue, buttonText, fullWidth, isLoading }: 
           <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
             <Box display="flex" flexDirection="column" alignItems="flex-start">
               <Typography variant="subtitle2" fontWeight={700}>
-                {buttonText || 'Continue with'} {wallet.label}
+                {buttonText?.connected ?? 'Continue with'} {wallet.label}
               </Typography>
               {wallet.address && (
                 <EthHashInfo
@@ -70,15 +87,15 @@ const WalletLogin = ({ onLogin, onContinue, buttonText, fullWidth, isLoading }: 
   return (
     <Button
       onClick={onConnectWallet}
-      style={{ color: '#fff', background: '#121312' }}
-      sx={{ minHeight: '42px' }}
+      className={css[buttonStyle]}
       variant="contained"
       size="small"
       disableElevation
       fullWidth={fullWidth}
+      startIcon={buttonStyle === 'walletBtnSecondary' ? <WalletMinimal size={18} /> : undefined}
       data-testid="connect-wallet-btn"
     >
-      Connect wallet
+      {buttonText?.disconnected ?? 'Connect wallet'}
     </Button>
   )
 }

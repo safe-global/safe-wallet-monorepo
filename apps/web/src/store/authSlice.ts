@@ -7,14 +7,14 @@ type AuthPayload = {
   sessionExpiresAt: number | null
   lastUsedSpace: string | null
   isStoreHydrated: boolean
-  isEmailLoginPending: boolean
+  isOidcLoginPending: boolean
 }
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
   lastUsedSpace: null,
   isStoreHydrated: false,
-  isEmailLoginPending: false,
+  isOidcLoginPending: false,
 }
 
 export const authSlice = createSlice({
@@ -33,13 +33,13 @@ export const authSlice = createSlice({
       state.lastUsedSpace = payload
     },
 
-    setIsEmailLoginPending: (state, { payload }: PayloadAction<boolean>) => {
-      state.isEmailLoginPending = payload
+    setIsOidcLoginPending: (state, { payload }: PayloadAction<boolean>) => {
+      state.isOidcLoginPending = payload
     },
   },
 })
 
-export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setIsEmailLoginPending } = authSlice.actions
+export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setIsOidcLoginPending } = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
@@ -53,8 +53,8 @@ export const selectIsStoreHydrated = (state: RootState): boolean => {
   return state.auth.isStoreHydrated
 }
 
-export const selectIsEmailLoginPending = (state: RootState): boolean => {
-  return state.auth.isEmailLoginPending
+export const selectIsOidcLoginPending = (state: RootState): boolean => {
+  return state.auth.isOidcLoginPending
 }
 
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {

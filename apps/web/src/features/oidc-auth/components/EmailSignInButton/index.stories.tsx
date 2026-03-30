@@ -4,11 +4,11 @@ import { createMockStory } from '@/stories/mocks'
 import EmailSignInButton from './index'
 
 const defaultSetup = createMockStory({
-  features: { emailAuth: true },
+  features: { oidcAuth: true },
 })
 
 const meta = {
-  title: 'Features/EmailAuth/EmailSignInButton',
+  title: 'Features/OidcAuth/EmailSignInButton',
   component: EmailSignInButton,
   loaders: [mswLoader],
   tags: ['autodocs'],

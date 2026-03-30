@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { useEmailLoginCallback } from '../useEmailLoginCallback'
-import { EMAIL_AUTH_PENDING_KEY } from '../useEmailLogin'
+import { useOidcLoginCallback } from '../useOidcLoginCallback'
+import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
 const mockUnwrap = jest.fn()
 const mockReplace = jest.fn()
@@ -30,7 +30,7 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (expiresAt: number) => ({ type: 'auth/setAuthenticated', payload: expiresAt }),
-  setIsEmailLoginPending: (pending: boolean) => ({ type: 'auth/setIsEmailLoginPending', payload: pending }),
+  setIsOidcLoginPending: (pending: boolean) => ({ type: 'auth/setIsOidcLoginPending', payload: pending }),
 }))
 
 jest.mock('@/store/notificationsSlice', () => ({
@@ -50,7 +50,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: (...args: unknown[]) => mockUseHasFeature(...args),
 }))
 
-describe('useEmailLoginCallback', () => {
+describe('useOidcLoginCallback', () => {
   const originalLocation = window.location
   const initiateReturnValue = Symbol('initiate')
 
@@ -82,9 +82,9 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should dispatch setAuthenticated when pending flag exists and session check succeeds', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -95,36 +95,36 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should remove sessionStorage flag after successful processing', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBeNull()
+      expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
     })
   })
 
-  it('should not dispatch when EMAIL_AUTH feature is disabled', () => {
+  it('should not dispatch when OIDC_AUTH feature is disabled', () => {
     mockUseHasFeature.mockReturnValue(false)
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     expect(mockDispatch).not.toHaveBeenCalled()
     expect(mockInitiate).not.toHaveBeenCalled()
   })
 
   it('should not dispatch when no pending flag exists', () => {
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     expect(mockDispatch).not.toHaveBeenCalled()
     expect(mockInitiate).not.toHaveBeenCalled()
   })
 
   it('should not dispatch twice on re-render', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
-    const { rerender } = renderHook(() => useEmailLoginCallback())
+    const { rerender } = renderHook(() => useOidcLoginCallback())
     rerender()
 
     await waitFor(() => {
@@ -137,7 +137,7 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should show error notification when error query param is present', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
@@ -147,7 +147,7 @@ describe('useEmailLoginCallback', () => {
       },
     })
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -163,7 +163,7 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should clean error param from URL via Next.js router', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
@@ -173,7 +173,7 @@ describe('useEmailLoginCallback', () => {
       },
     })
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/spaces', query: {} }, undefined, {
@@ -183,7 +183,7 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should preserve other query params when cleaning error param', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
@@ -193,7 +193,7 @@ describe('useEmailLoginCallback', () => {
       },
     })
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/spaces', query: { spaceId: '42' } }, undefined, {
@@ -203,10 +203,10 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should not dispatch setAuthenticated when session check fails', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockInitiate).toHaveBeenCalled()
@@ -215,10 +215,10 @@ describe('useEmailLoginCallback', () => {
   })
 
   it('should show error notification when session check fails', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith({
@@ -231,41 +231,41 @@ describe('useEmailLoginCallback', () => {
     })
   })
 
-  it('should dispatch setIsEmailLoginPending(true) then false on success', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+  it('should dispatch setIsOidcLoginPending(true) then false on success', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: true })
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: true })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: false })
     })
 
     const calls = mockDispatch.mock.calls.map((c) => c[0])
-    const pendingTrueIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === true)
-    const pendingFalseIdx = calls.findIndex((c) => c?.type === 'auth/setIsEmailLoginPending' && c?.payload === false)
+    const pendingTrueIdx = calls.findIndex((c) => c?.type === 'auth/setIsOidcLoginPending' && c?.payload === true)
+    const pendingFalseIdx = calls.findIndex((c) => c?.type === 'auth/setIsOidcLoginPending' && c?.payload === false)
     expect(pendingTrueIdx).toBeLessThan(pendingFalseIdx)
   })
 
-  it('should dispatch setIsEmailLoginPending(false) on failure', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+  it('should dispatch setIsOidcLoginPending(false) on failure', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsEmailLoginPending', payload: false })
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: false })
     })
   })
 
   it('should remove sessionStorage flag when session check fails', async () => {
-    sessionStorage.setItem(EMAIL_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     mockUnwrap.mockRejectedValue(new Error('Forbidden'))
 
-    renderHook(() => useEmailLoginCallback())
+    renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)).toBeNull()
+      expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
     })
   })
 })

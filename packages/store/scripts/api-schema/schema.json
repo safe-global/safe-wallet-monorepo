@@ -26,18 +26,18 @@
     },
     "/v1/auth/me": {
       "get": {
-        "description": "Returns 204 if a valid session cookie is present, 403 otherwise.",
+        "description": "Returns the authenticated user ID if a valid session cookie is present, 403 otherwise.",
         "operationId": "authGetMeV1",
         "parameters": [],
         "responses": {
-          "204": {
-            "description": "Authenticated"
+          "200": {
+            "description": "Authenticated user ID"
           },
           "403": {
             "description": "Not authenticated"
           }
         },
-        "summary": "Check authentication status",
+        "summary": "Get authenticated user",
         "tags": [
           "auth"
         ]

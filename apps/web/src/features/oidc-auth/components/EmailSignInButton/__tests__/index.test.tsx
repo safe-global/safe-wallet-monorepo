@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { OidcConnection } from '../../../constants'
 import EmailSignInButton from '../index'
 
 const mockLoginWithRedirect = jest.fn()
@@ -10,8 +11,8 @@ jest.mock('@/services/analytics', () => ({
   EventType: { META: 'meta' },
 }))
 
-jest.mock('../../../hooks/useEmailLogin', () => ({
-  useEmailLogin: () => ({ loginWithRedirect: mockLoginWithRedirect }),
+jest.mock('../../../hooks/useOidcLogin', () => ({
+  useOidcLogin: () => ({ loginWithRedirect: mockLoginWithRedirect }),
 }))
 
 const mockUseHasFeature = jest.fn(() => true)
@@ -38,7 +39,7 @@ describe('EmailSignInButton', () => {
     render(<EmailSignInButton />)
 
     expect(screen.getByTestId('email-login-btn')).toBeInTheDocument()
-    expect(screen.getByText('Sign in with email')).toBeInTheDocument()
+    expect(screen.getByText('Continue with email')).toBeInTheDocument()
   })
 
   it('should track analytics event on click', () => {
@@ -49,11 +50,11 @@ describe('EmailSignInButton', () => {
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.EMAIL_SIGN_IN)
   })
 
-  it('should call loginWithRedirect on click', () => {
+  it('should call loginWithRedirect with email connection on click', () => {
     render(<EmailSignInButton />)
 
     fireEvent.click(screen.getByTestId('email-login-btn'))
 
-    expect(mockLoginWithRedirect).toHaveBeenCalled()
+    expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.EMAIL)
   })
 })
