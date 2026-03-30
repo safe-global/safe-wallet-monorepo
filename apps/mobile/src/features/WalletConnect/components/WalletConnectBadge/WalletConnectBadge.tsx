@@ -20,7 +20,9 @@ class WalletConnectErrorBoundary extends Component<{ children: ReactNode }, { ha
   }
 
   render() {
-    if (this.state.hasError) return null
+    if (this.state.hasError) {
+      return null
+    }
     return this.props.children
   }
 }
