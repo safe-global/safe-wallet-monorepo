@@ -4,7 +4,7 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('Positions AI tests', { defaultCommandTimeout: 60000, requestTimeout: 30000 }, () => {
+describe('Positions Tests', { defaultCommandTimeout: 60000, requestTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
