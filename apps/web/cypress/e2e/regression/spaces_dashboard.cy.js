@@ -143,10 +143,11 @@ describe('Spaces dashboard tests', () => {
   // ===========================================
 
   describe('Space Selector', () => {
-    it('Verify that the Space selector dropdown lists all Spaces belonging to the user', () => {
+    it.only('Verify that the Space selector dropdown lists all Spaces belonging to the user', () => {
       space.clickOnSpaceSelector()
       cy.get(space.spaceSelectorMenu).should('be.visible')
-      cy.get(space.spaceSelectorMenu).find('li').should('have.length.at.least', 1)
+      cy.get(space.spaceSelectorMenu).contains(staticSpaces.dashboardWithSafes.name).should('be.visible')
+      cy.get(space.spaceSelectorMenu).contains(staticSpaces.emptyGettingStarted.name).should('be.visible')
     })
   })
 })
