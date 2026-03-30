@@ -117,14 +117,14 @@ it('Verify that clicking an account row opens the Safe dashboard', () => {
 
 ### Function Naming Convention
 
-| Prefix      | Purpose                          | Example                                |
-| ----------- | -------------------------------- | -------------------------------------- |
-| `click*`    | Click an element                 | `clickAccountItemByIndex(index)`       |
-| `open*`     | Open a dropdown/modal/panel      | `openSpaceSelector()`                  |
-| `expand*`   | Expand a collapsible section     | `expandAccountRow(index)`              |
-| `type*`     | Type into an input               | `typeSpaceName(name)`                  |
-| `visit*`    | Navigate to a URL                | `visitSpaceDashboard(id)`              |
-| `verify*`   | Assert state (visibility, URL…)  | `verifySpaceSidebarItemsVisible()`     |
+| Prefix    | Purpose                         | Example                            |
+| --------- | ------------------------------- | ---------------------------------- |
+| `click*`  | Click an element                | `clickAccountItemByIndex(index)`   |
+| `open*`   | Open a dropdown/modal/panel     | `openSpaceSelector()`              |
+| `expand*` | Expand a collapsible section    | `expandAccountRow(index)`          |
+| `type*`   | Type into an input              | `typeSpaceName(name)`              |
+| `visit*`  | Navigate to a URL               | `visitSpaceDashboard(id)`          |
+| `verify*` | Assert state (visibility, URL…) | `verifySpaceSidebarItemsVisible()` |
 
 ## Selectors
 
