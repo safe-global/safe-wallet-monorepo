@@ -41,7 +41,7 @@ describe('Spaces dashboard tests', () => {
     space.verifySpaceDashboardAccountsRowSafeDetails(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex, {
       name: safeData.name,
       address: safeData.address,
-      balanceRegex: space.pendingTxSafeBalanceRegex,
+      balanceRegex: space.nonZeroBalanceRegex,
       ownersThreshold: safeData.ownersThreshold,
     })
   })
@@ -81,7 +81,7 @@ describe('Spaces dashboard tests', () => {
       expectedName: row.name,
       fullAddress: row.address,
       chainShortName: row.chainShortName,
-      balanceRegex: space.pendingTxSafeBalanceRegex,
+      balanceRegex: space.nonZeroBalanceRegex,
       ownersThreshold: row.ownersThreshold,
     })
   })

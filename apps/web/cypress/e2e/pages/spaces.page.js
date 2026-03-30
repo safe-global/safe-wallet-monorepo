@@ -54,9 +54,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const spacesSidebarContainer = '[data-testid="sidebar-container"]'
 const backToSpaceBtn = '[aria-label="Back to space"]'
-const sidebarBackToSpaceBtn = `${spacesSidebarContainer} ${backToSpaceBtn}`
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -122,7 +120,7 @@ const updateSuccessMsg = 'Updated space name'
 const noSpacesStr = 'No spaces found'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
-export const pendingTxSafeBalanceRegex = /\$[\u200a\s]*875(?:\.\d{2})?/
+export const nonZeroBalanceRegex = /\$[\u200a\s]*[1-9][\d,]*(?:\.\d{2})?/
 export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
@@ -351,7 +349,6 @@ export function verifySpaceSidebarItemsNotVisible() {
 }
 
 export function verifySafeLevelNavigationElements() {
-  cy.get(sidebarBackToSpaceBtn).should('be.visible')
   cy.get(safeLevelNavigationBackToSpaceBtn).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
   cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')

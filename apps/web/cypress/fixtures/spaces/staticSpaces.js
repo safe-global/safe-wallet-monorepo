@@ -17,8 +17,8 @@ export default {
     name: 'Automation Test Space',
     /** Expected top-level account rows on the Space dashboard (`space-dashboard-accounts-row-*`). Align with CGW for this space. */
     accountsWidgetRowCount: 9,
-    /** Expected top-level account rows on the Safe Accounts page (`safe-list-item`). Excludes sub-accounts. */
-    safeAccountsPageCount: 3,
+    /** Expected account rows on the Safe Accounts page (`safe-list-item`), including multichain sub-accounts. */
+    safeAccountsPageCount: 9,
 
     /** Row 0 — unnamed multichain Safe (no address book name). Displays shortened address as name. */
     unnamedAccount: {
@@ -37,7 +37,7 @@ export default {
     multichainSubAccounts: [
       { chainId: '11155111', safeQueryIncludes: 'sep:' },
       { chainId: '137', safeQueryIncludes: 'matic:' },
-      //{ chainId: '8453', safeQueryIncludes: 'base:' },
+      { chainId: '8453', safeQueryIncludes: 'base:' },
       { chainId: '1', safeQueryIncludes: 'eth:' },
     ],
 
