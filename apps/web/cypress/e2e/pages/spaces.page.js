@@ -8,7 +8,7 @@ import * as navigation from './navigation.page.js'
 
 // -- Auth & welcome --
 const orgList = '[data-testid="org-list"]'
-export const spacesListCreateSpaceBtn = '[data-testid="create-space-button"]'
+export const spacesListCreateSpaceBtn = '[data-testid="spaces-list-create-space-button"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -101,7 +101,6 @@ const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
 const onboardingInviteMembersPath = '/welcome/invite-members'
-const createSpaceLabel = 'Create a Space'
 
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
@@ -498,26 +497,41 @@ export function acceptInvite(name) {
 // Onboarding flow
 // ===========================================
 
-export function createSpaceViaOnboardingWithSkip(name) {
-  cy.get('body').then(($body) => {
-    if (!$body.text().includes(createSpaceLabel)) {
-      cy.get(spacesListCreateSpaceBtn).should('be.visible').click()
-    }
-  })
-
+function navigateToCreateSpacePage() {
+  cy.get(`${spacesListCreateSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 })
+    .filter(':visible')
+    .first()
+    .then(($el) => {
+      if (!$el.is(orgSpaceInput)) {
+        cy.wrap($el).click()
+      }
+    })
   cy.url().should('include', onboardingCreateSpacePath)
-  cy.contains(createSpaceLabel).should('be.visible')
-  cy.get(orgSpaceInput).clear().type(name)
+}
+
+function submitSpaceName(name) {
+  cy.get(orgSpaceInput).should('be.visible').clear().type(name)
   cy.get(createSpaceOnboardingContinueBtn).should('be.enabled').click()
+}
 
-  cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath)
-  cy.url().should('include', 'spaceId=')
+function skipSelectSafesStep() {
+  cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
   cy.get(selectSafesSkipBtn).should('be.visible').click()
+}
 
-  cy.url().should('include', onboardingInviteMembersPath)
-  cy.url().should('include', 'spaceId=')
+function skipInviteMembersStep() {
+  cy.url().should('include', onboardingInviteMembersPath).and('include', 'spaceId=')
   cy.get(inviteMembersSkipBtn).should('be.visible').click()
+}
 
-  cy.url().should('include', constants.spaceDashboardUrl)
-  cy.url().should('include', 'spaceId=')
+function verifySpaceDashboardLoaded() {
+  cy.url().should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+}
+
+export function createSpaceViaOnboardingWithSkip(name) {
+  navigateToCreateSpacePage()
+  submitSpaceName(name)
+  skipSelectSafesStep()
+  skipInviteMembersStep()
+  verifySpaceDashboardLoaded()
 }

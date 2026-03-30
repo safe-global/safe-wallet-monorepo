@@ -26,7 +26,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
-    space.waitForSpacesWelcomeReady()
+    cy.wait(3000)
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
@@ -59,7 +59,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
-    space.waitForSpacesWelcomeReady()
+    cy.wait(3000)
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()

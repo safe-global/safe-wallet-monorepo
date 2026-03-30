@@ -79,8 +79,46 @@ Organize page object files in clear sections with this order:
     // ... use sel.name, sel.address etc.
   }
   ```
-- **Inline single-use helpers** — if a helper function is only called by one parent function, inline it rather than creating a separate function
 - **Check `main.page.js` first** for general utilities like `verifyElementsCount`, `verifyMinimumElementsCount`, `verifyValuesExist`, `verifyElementsIsVisible` — use them instead of writing custom versions
+
+### Composite Flows
+
+Multi-step flows (onboarding, account creation, member invite) should be split into small private helper functions and composed into one exported function:
+
+```js
+// Private step functions — not exported
+function navigateToCreateSpacePage() { ... }
+function submitSpaceName(name) { ... }
+function skipSelectSafesStep() { ... }
+function skipInviteMembersStep() { ... }
+function verifySpaceDashboardLoaded() { ... }
+
+// Exported composite flow — reads like a clear sequence
+export function createSpaceViaOnboardingWithSkip(name) {
+  navigateToCreateSpacePage()
+  submitSpaceName(name)
+  skipSelectSafesStep()
+  skipInviteMembersStep()
+  verifySpaceDashboardLoaded()
+}
+```
+
+Rules for composite flows:
+- Each step is a private function with a descriptive name
+- The exported function reads as a plain-language sequence
+- Step functions handle their own waits (URL checks, element visibility)
+- When a page can be reached from multiple entry points, use a resilient pattern that waits for either state:
+  ```js
+  // Wait for EITHER the list page OR the form page to appear
+  cy.get(`${listPageBtn}, ${formPageInput}`, { timeout: 30000 })
+    .filter(':visible')
+    .first()
+    .then(($el) => {
+      if (!$el.is(formPageInput)) {
+        cy.wrap($el).click()
+      }
+    })
+  ```
 
 ### Function Naming Convention
 
