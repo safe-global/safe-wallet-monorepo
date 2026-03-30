@@ -3,22 +3,19 @@ import * as main from './main.page.js'
 import * as navigation from './navigation.page.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
-export const orgList = '[data-testid="org-list"]'
+const orgList = '[data-testid="org-list"]'
 /** Spaces list / empty state — navigates to `/welcome/create-space`. */
-export const spacesListCreateSpaceBtn = '[data-testid="spaces-list-create-space-button"]'
-/** Create a Space onboarding step 1 — submits name (“Continue”). */
-export const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-export const createSpaceModalBtn = '[data-testid="create-space-modal-button"]'
-export const orgSpaceInput = '[data-testid="space-name-input"]'
-export const orgName = '[data-testid="org-name"]'
-export const spaceSelectorBtn = '[data-testid="space-selector-button"]'
-export const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
+export const CreateSpaceBtn = '[data-testid="create-space-button"]'
+/** Create a Space onboarding step 1 — submits name ("Continue"). */
+const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
+const orgSpaceInput = '[data-testid="space-name-input"]'
+const spaceSelectorBtn = '[data-testid="space-selector-button"]'
+const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
 const spaceEditInput = 'input[name="name"]'
 const spaceSaveBtn = '[data-testid="space-save-button"]'
 const updateSuccessMsg = 'Updated space name'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
-// const orgAddManuallyBtn = '[data-testid="add-manually-button"]'
 const addSpaceAccountBtn = '[data-testid="add-space-account-button"]'
 const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-button"]'
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
@@ -31,15 +28,15 @@ const netwrokSelector = '[data-testid="network-selector"]'
 const netwrokItem = '[data-testid="network-item"]'
 export const dashboardSafeList = '[data-testid="dashboard-safe-list"]'
 /** Same pattern as `dashboard.pages.js` `pendingTxWidget` — root `data-testid` on the Space dashboard widget. */
-export const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
+const spaceDashboardAccountsWidget = '[data-testid="space-dashboard-accounts-widget"]'
 /** `ExpandableAccountItem` sub-rows (same id per row; scope with expanded panel + `.eq(n)`, same as unit tests `getAllByTestId('sub-account-row')`). */
-export const subAccountRow = '[data-testid="sub-account-row"]'
+const subAccountRow = '[data-testid="sub-account-row"]'
 /** Indexed rows: `space-dashboard-accounts-row-0`, `space-dashboard-accounts-row-1`, … */
-export const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
+const spaceDashboardAccountsRowSelector = '[data-testid^="space-dashboard-accounts-row-"]'
 export const pendingTxWidget = '[data-testid="space-dashboard-pending-widget"]'
 export const widgetItem = '[data-slot="widget-item"]'
-export const spaceDashboardTotalValue = '[data-testid="space-dashboard-total-value"]'
-export const spaceDashboardTotalValueLabelText = 'Total value'
+const spaceDashboardTotalValue = '[data-testid="space-dashboard-total-value"]'
+const spaceDashboardTotalValueLabelText = 'Total value'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addMemberBtn = '[data-testid="add-member-button"]'
 const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
@@ -49,11 +46,11 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
-export function confirmAcceptInvite() {
+function confirmAcceptInvite() {
   cy.get(confirmAcceptInviteBtn).click()
 }
 
-export function typeInviteName(name) {
+function typeInviteName(name) {
   cy.get(inviteNameInput).find('input').clear().type(name)
 }
 
@@ -70,24 +67,18 @@ export function clickOnSignInBtn() {
 
 /** After SIWE, wait until `/welcome/spaces` shows the list or the Create space action. */
 export function waitForSpacesWelcomeReady() {
-  cy.get(`${orgList}, ${spacesListCreateSpaceBtn}`, { timeout: 60000 })
-    .filter(':visible')
-    .should('have.length.at.least', 1)
+  cy.get(`${orgList}, ${CreateSpaceBtn}`, { timeout: 60000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
-export function clickOnSpacesListCreateSpaceBtn() {
-  cy.get(spacesListCreateSpaceBtn).should('be.enabled').click()
+function clickOnSpacesListCreateSpaceBtn() {
+  cy.get(spacesListCreateSpaceBtn).should('be.visible').click()
 }
 
-export function clickOnCreateSpaceOnboardingContinueBtn() {
+function clickOnCreateSpaceOnboardingContinueBtn() {
   cy.get(createSpaceOnboardingContinueBtn).should('be.enabled').click()
 }
 
-export function clickOnCreateSpaceModalBtn() {
-  cy.get(createSpaceModalBtn).should('be.enabled').click()
-}
-
-export function typeSpaceName(name) {
+function typeSpaceName(name) {
   cy.get(orgSpaceInput).clear().type(name)
 }
 
@@ -99,7 +90,7 @@ export function spaceExists(name) {
   cy.get(spaceSelectorMenu).contains(name).should('be.visible')
 }
 
-export function getSpaceId() {
+function getSpaceId() {
   return cy.url().then((url) => {
     const match = url.match(/spaceId=(\d+)/)
     if (!match) {
@@ -139,12 +130,12 @@ export function verifySpaceDashboardWidgetVisible(widgetTitle) {
   cy.get(selector, { timeout: 30000 }).should('be.visible')
 }
 
-export function getAccountItem(index) {
+function getAccountItem(index) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
 }
 
 /** Expanded panel under a multichain `ExpandableAccountItem` (after trigger click). */
-export function getAccountExpandedPanel(rowIndex) {
+function getAccountExpandedPanel(rowIndex) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
 }
 
@@ -166,29 +157,32 @@ export function verifySpaceDashboardAccountsWidgetRowCount(expectedCount) {
 }
 
 /** `AccountWidgetItem` — scoped under `space-dashboard-accounts-row-${n}`. */
-export const spaceDashboardAccountsRowName = '[data-testid="space-dashboard-accounts-row-name"]'
-export const spaceDashboardAccountsRowAddress = '[data-testid="space-dashboard-accounts-row-address"]'
-export const spaceDashboardAccountsRowIdenticon = '[data-testid="space-dashboard-accounts-row-identicon"]'
-export const spaceDashboardAccountsRowChainLogos = '[data-testid="space-dashboard-accounts-row-chain-logos"]'
-export const spaceDashboardAccountsRowBalance = '[data-testid="space-dashboard-accounts-row-balance"]'
-export const spaceDashboardAccountsRowThreshold = '[data-testid="space-dashboard-accounts-row-threshold"]'
+const spaceDashboardAccountsRowName = '[data-testid="space-dashboard-accounts-row-name"]'
+const spaceDashboardAccountsRowAddress = '[data-testid="space-dashboard-accounts-row-address"]'
+const spaceDashboardAccountsRowIdenticon = '[data-testid="space-dashboard-accounts-row-identicon"]'
+const spaceDashboardAccountsRowChainLogos = '[data-testid="space-dashboard-accounts-row-chain-logos"]'
+const spaceDashboardAccountsRowBalance = '[data-testid="space-dashboard-accounts-row-balance"]'
+const spaceDashboardAccountsRowThreshold = '[data-testid="space-dashboard-accounts-row-threshold"]'
 /** `ChainIndicator` network logo `<img>` (inside `space-dashboard-accounts-row-chain-logos` or tooltip). */
-export const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
+const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo-img"]'
 
 /**
  * FiatValue text for the Pending tx row (whole dollars or with decimals depending on settings).
  * @type {RegExp}
  */
 export const pendingTxSafeBalanceRegex = /\$[\u200a\s]*875(?:\.\d{2})?/
+export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 
 /**
- * Asserts single-chain `AccountWidgetItem` row content via `data-testid` only (values compared with expected strings / regex).
- * Reuses `main.shortenAddress` for the displayed address (same as `AccountWidgetItem`).
+ * Asserts `AccountWidgetItem` row content via `data-testid` only.
  *
  * @param {number} rowIndex — 0-based (`getAccountItem(rowIndex)`).
- * @param {{ name: string, address: string, balanceRegex: RegExp, ownersThreshold?: string }} expected — pass `ownersThreshold` (e.g. `2/3`) when the row shows the owners badge; omit for multichain / expandable rows.
+ * @param {{ name: string, address: string, balanceRegex: RegExp, ownersThreshold?: string, chainLogosCount?: number }} expected
  */
-export function verifySpaceDashboardAccountsRowSafeDetails(rowIndex, { name, address, balanceRegex, ownersThreshold }) {
+export function verifySpaceDashboardAccountsRowSafeDetails(
+  rowIndex,
+  { name, address, balanceRegex, ownersThreshold, chainLogosCount },
+) {
   const row = getAccountItem(rowIndex)
   cy.get(row)
     .should('be.visible')
@@ -201,6 +195,11 @@ export function verifySpaceDashboardAccountsRowSafeDetails(rowIndex, { name, add
       if (ownersThreshold !== undefined) {
         cy.get(spaceDashboardAccountsRowThreshold).should('be.visible').and('contain.text', ownersThreshold)
       }
+      if (chainLogosCount !== undefined) {
+        cy.get(spaceDashboardAccountsRowChainLogos)
+          .find(chainIndicatorNetworkLogoImg)
+          .should('have.length', chainLogosCount)
+      }
     })
 }
 
@@ -209,19 +208,21 @@ export function getPendingTxItem(index) {
 }
 
 /** Space-context Safe bar — `SpaceChainSelector` + `ChainSelectorBlock` trigger (`ChainLogo` / `ChainIndicator`). */
-export const spaceChainSelector = '[data-testid="space-chain-selector"]'
+const spaceChainSelector = '[data-testid="space-chain-selector"]'
 
 /** Space-context Safe header — `SafeSelectorTriggerContent` (after navigating to `/home?safe=…`). */
-export const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
-export const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
-export const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
+const safeSelectorTriggerIdenticon = '[data-testid="safe-selector-trigger-identicon"]'
+const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
+const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
+const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
+const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 
 /**
  * Asserts `safe` query matches the expected EIP-3770 value (e.g. `sep:0x…`).
  * Uses `URL.searchParams` so encoded `:` (`%3A`) is handled without manual decoding.
  * @param {string} expectedSafeParam — e.g. `sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb`
  */
-export function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
+function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
   cy.url({ timeout: 30000 }).should('include', '/home')
   cy.url().should((href) => {
     expect(new URL(href).searchParams.get('safe'), 'safe query param').to.eq(expectedSafeParam)
@@ -229,32 +230,47 @@ export function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
 }
 
 /**
- * Asserts `SpaceChainSelector` shows the current chain logo and `SafeSelectorTriggerContent` shows the expected name and prefixed short address (same as app `formatPrefixedAddress(shortenAddress(addr), chainShortName)`).
- * @param {{ expectedName: string, fullAddress: string, chainShortName: string }} opts
+ * Asserts the safe-level navigation panel shows identicon, name, prefixed address, balance, threshold and chain logo.
+ * @param {{ expectedName: string, fullAddress: string, chainShortName: string, balanceRegex?: RegExp, ownersThreshold?: string }} opts
  */
-export function verifySafeSelectorNavigationPanel({ expectedName, fullAddress, chainShortName }) {
+function verifySafeSelectorNavigationPanel({
+  expectedName,
+  fullAddress,
+  chainShortName,
+  balanceRegex,
+  ownersThreshold,
+}) {
   const short = main.shortenAddress(fullAddress)
   const expectedLine = `${chainShortName}:${short}`
+  cy.get(safeSelectorTriggerIdenticon, { timeout: 30000 }).should('be.visible')
+  cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
+  cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)
+  if (balanceRegex !== undefined) {
+    cy.get(safeSelectorBalance).should('be.visible').invoke('text').should('match', balanceRegex)
+  }
+  if (ownersThreshold !== undefined) {
+    cy.get(safeSelectorThreshold).should('be.visible').and('contain.text', ownersThreshold)
+  }
   cy.get(spaceChainSelector, { timeout: 30000 })
     .should('be.visible')
     .find(chainIndicatorNetworkLogoImg)
     .should('be.visible')
-  cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
-  cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)
 }
 
 /**
- * After clicking an Accounts widget row: `/home?safe=…` and Safe selector header (name + `chain:shortAddress` line).
- * @param {{ safeFullQuery: string, expectedName: string, fullAddress: string, chainShortName: string }} opts
+ * After clicking an Accounts widget row: `/home?safe=…` and Safe selector navigation panel.
+ * @param {{ safeFullQuery: string, expectedName: string, fullAddress: string, chainShortName: string, balanceRegex?: RegExp, ownersThreshold?: string }} opts
  */
 export function verifyOpenedSafeDashboardFromSpaceAccountsRow({
   safeFullQuery,
   expectedName,
   fullAddress,
   chainShortName,
+  balanceRegex,
+  ownersThreshold,
 }) {
   verifySafeDashboardUrlSafeQuery(safeFullQuery)
-  verifySafeSelectorNavigationPanel({ expectedName, fullAddress, chainShortName })
+  verifySafeSelectorNavigationPanel({ expectedName, fullAddress, chainShortName, balanceRegex, ownersThreshold })
 }
 
 export const sidebarItemHome = '[data-testid="sidebar-item-home"]'
@@ -265,17 +281,88 @@ export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
   cy.get(sidebarSelector).should('be.visible').click()
-  cy.url().should('include', pathFragment)
+  cy.url().should('include', pathFragment).and('include', 'spaceId=')
 }
 
-export const backToSpaceBtn = '[data-testid="back-to-space-button"]'
+/** Appears twice in Space + Safe routes: sidebar (`sidebarBackToSpaceBtn`) and top bar (`safeLevelNavigationBackToSpaceBtn`). */
+export const backToSpaceBtn = '[aria-label="Back to space"]'
+/** `EnhancedSidebar` / legacy `Sidebar` root. */
+const spacesSidebarContainer = '[data-testid="sidebar-container"]'
+/** Horizontal `SpaceSafeBar`: back, safes block, chain control. */
+const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
+const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
+const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
+const sidebarBackToSpaceBtn = `${spacesSidebarContainer} ${backToSpaceBtn}`
+const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
+
+export function verifySpaceSidebarItemsVisible() {
+  cy.get(sidebarItemAccounts).should('be.visible')
+  cy.get(sidebarItemTeam).should('be.visible')
+}
+
+export function verifySpaceSidebarItemsNotVisible() {
+  cy.get(sidebarItemAccounts).should('not.exist')
+  cy.get(sidebarItemTeam).should('not.exist')
+}
+
+export function clickAccountItemByIndex(index) {
+  cy.get(getAccountItem(index)).click()
+}
+
+export function verifySafeLevelNavigationElements() {
+  cy.get(sidebarBackToSpaceBtn).should('be.visible')
+  cy.get(safeLevelNavigationBackToSpaceBtn).should('be.visible')
+  cy.get(safeLevelNavigation).find(spaceSafesNavigationBlock).should('be.visible')
+  cy.get(safeLevelNavigation).find(spaceChainNavigationButton).should('be.visible')
+}
+
+export function verifyPendingTxWidgetItemCount(expectedCount) {
+  main.verifyElementsCount(`${pendingTxWidget} ${widgetItem}`, expectedCount)
+}
+
+export function verifyAccountExpandedPanelVisible(rowIndex) {
+  cy.get(getAccountExpandedPanel(rowIndex)).should('be.visible')
+}
+
+export function verifySafeUrlIncludesParam(safeQueryIncludes) {
+  cy.url().should('include', '/home').and('include', 'safe=').and('include', safeQueryIncludes)
+}
+
+export function clickViewAllAccounts() {
+  cy.contains(viewAllAccountsLabel).click()
+}
+
+const safeAccountsPageTitle = 'Safe Accounts'
+const safeAccountsListItem = '[data-testid="safe-list-item"]'
+
+export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {
+  cy.url().should('include', '/spaces/safe-accounts').and('include', 'spaceId=')
+  cy.contains(safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
+  if (expectedAccountsCount !== undefined) {
+    main.verifyElementsCount(safeAccountsListItem, expectedAccountsCount)
+  }
+}
+
+export function verifySpaceSelectorMenuVisible() {
+  cy.get(spaceSelectorMenu).should('be.visible')
+}
+
+export function verifySpaceSelectorContainsSpaces(names) {
+  names.forEach((name) => {
+    cy.get(spaceSelectorMenu).contains(name).should('be.visible')
+  })
+}
+
+export function verifyUrlIncludesPath(path) {
+  cy.url().should('include', path)
+}
 
 export function disconnectFromSpaceLevel() {
   navigation.clickOnWalletExpandMoreIcon()
   navigation.clickOnDisconnectBtn()
 }
 
-export const viewAllAccountsLabel = 'View all accounts'
+const viewAllAccountsLabel = 'View all accounts'
 export const txDetailsLabel = 'Transaction details'
 export const gettingStartedLabel = 'Getting started'
 export const addSafeAccountsLabel = 'Add your Safe Accounts'
@@ -291,14 +378,6 @@ export const exploreSpacesLabel = 'Introducing spaces'
 
 export { staticSpaces }
 
-/** Staging regression assertions for `spaces_dashboard.cy.js` — update when CGW data changes. */
-export const firstAccountAddress = '0x1694CbDE1b30eEdd9f7A2b6C7e36A180F2a3a23C7'
-/** Row index for `firstAccountAddress` (unnamed row — top of Accounts widget). */
-export const unnamedAccountRowIndex = 0
-export const secondAccountName = 'Space addressbook name'
-/** Shortened display is enough for the row assertion; full address must match CGW. */
-export const secondAccountAddressPrefix = '0x0596'
-export const secondAccountAddressSuffix = '197b'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
 
@@ -315,7 +394,7 @@ export function goToSpaceMembers() {
   })
 }
 
-export function clickOnSaveSpaceNameBtn() {
+function clickOnSaveSpaceNameBtn() {
   cy.get(spaceSaveBtn).click()
 }
 
@@ -328,7 +407,7 @@ export function editSpace(newName) {
 export const deleteSpaceConfirmationMsg = (name) => `Deleted space ${name}`
 const noSpacesStr = 'No spaces found'
 
-export function deleteAllSpaces() {
+function deleteAllSpaces() {
   cy.wait(2000)
   cy.get('body').then(($body) => {
     if ($body.find(spaceCard).length > 0) {
@@ -368,19 +447,19 @@ export function deleteSpace(name) {
   cy.contains(noSpacesStr).should('be.visible')
 }
 
-export function clickOnAddAccountBtn() {
+function clickOnAddAccountBtn() {
   cy.get(addSpaceAccountBtn).should('be.enabled').click()
 }
 
-export function clickOnAddAccountsBtn() {
+function clickOnAddAccountsBtn() {
   cy.get(addAccountsBtn).should('be.enabled').click()
 }
 
-export function clickOnAddAccountManuallyBtn() {
+function clickOnAddAccountManuallyBtn() {
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
 }
 
-export function clickOnAddAccountManuallyModalBtn() {
+function clickOnAddAccountManuallyModalBtn() {
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
 }
 
@@ -389,12 +468,12 @@ export function selectNetwork(network) {
   cy.get(netwrokItem).contains(network).click()
 }
 
-export function setAddress(address) {
+function setAddress(address) {
   cy.get(addAddressInput).find('input').clear().type(address)
   cy.get(addAddressInput).find('input').should('have.value', address)
 }
 
-export function accountIsOndashboard(address) {
+function accountIsOndashboard(address) {
   const shortAddress = main.shortenAddress(address)
   cy.get(dashboardSafeList).contains(shortAddress).should('be.visible')
 }
@@ -410,23 +489,23 @@ export function addAccountManually(address, network) {
   accountIsOndashboard(address)
 }
 
-export function clickOnAddMemberBtn() {
+function clickOnAddMemberBtn() {
   cy.get(addMemberBtn).should('be.enabled').click()
 }
 
-export function clickOnAddMemberModalBtn() {
+function clickOnAddMemberModalBtn() {
   cy.get(addMemberModalBtn).should('be.enabled').click()
 }
 
-export function typeMemberAddress(address) {
+function typeMemberAddress(address) {
   cy.get(memberAddressInput).find('input').clear().type(address)
 }
 
-export function typeMemberName(name) {
+function typeMemberName(name) {
   cy.get(memberNameInput).find('input').clear().type(name)
 }
 
-export function memberIsInList(name) {
+function memberIsInList(name) {
   cy.contains(name).should('be.visible')
 }
 
@@ -442,13 +521,9 @@ export function addMember(name, address) {
 // Onboarding selectors & labels
 // ===========================================
 
-export const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
-export const selectSafesContinueBtn = '[data-testid="select-safes-continue-button"]'
-export const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
-export const inviteMembersContinueBtn = '[data-testid="invite-members-continue-button"]'
-export const createSpaceLabel = 'Create a space'
-export const selectSafesLabel = 'Select Safes for your Space'
-export const inviteTeamMembersLabel = 'Invite team members'
+const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
+const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
+const createSpaceLabel = 'Create a Space'
 
 // Onboarding route paths
 const onboardingCreateSpacePath = '/welcome/create-space'

@@ -20,12 +20,13 @@ describe('Spaces basic flow tests', () => {
     cy.visit(constants.spacesUrl)
   })
 
-  it.only('Verify a user can sign in, create, rename and delete an organisation', () => {
+  it('Verify a user can sign in, create, rename and delete an organisation', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const newSpaceName = 'Renamed Space'
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.waitForSpacesWelcomeReady()
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
@@ -58,6 +59,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.waitForSpacesWelcomeReady()
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()

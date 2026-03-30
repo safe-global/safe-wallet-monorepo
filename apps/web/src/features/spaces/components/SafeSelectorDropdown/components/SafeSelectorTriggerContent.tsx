@@ -23,7 +23,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   )
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
-      <Avatar size="sm">
+      <Avatar size="sm" data-testid="safe-selector-trigger-identicon">
         <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
       </Avatar>

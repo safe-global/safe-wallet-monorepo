@@ -16,10 +16,33 @@ export default {
     id: '2343',
     name: 'Automation Test Space',
     /** Expected top-level account rows on the Space dashboard (`space-dashboard-accounts-row-*`). Align with CGW for this space. */
-    accountsWidgetRowCount: 3,
+    accountsWidgetRowCount: 9,
+    /** Expected top-level account rows on the Safe Accounts page (`safe-list-item`). Excludes sub-accounts. */
+    safeAccountsPageCount: 3,
+
+    /** Row 0 — unnamed multichain Safe (no address book name). Displays shortened address as name. */
+    unnamedAccount: {
+      address: '0x1694CbDE1b30eEdd9f7A2b6C7e36A180F2a3a23C7',
+      chainLogosCount: 2,
+    },
+    unnamedAccountRowIndex: 0,
+
+    /** Row 1 — multichain Safe with address book name. Expandable with sub-account rows. */
+    multichainAccount: {
+      name: 'Space addressbook name',
+      address: '0x0596186046753e57De38905C27a25F31b9e6197b',
+      chainLogosCount: 4,
+    },
+    multichainAccountRowIndex: 1,
+    multichainSubAccounts: [
+      { chainId: '11155111', safeQueryIncludes: 'sep:' },
+      { chainId: '137', safeQueryIncludes: 'matic:' },
+      //{ chainId: '8453', safeQueryIncludes: 'base:' },
+      { chainId: '1', safeQueryIncludes: 'eth:' },
+    ],
+
     /**
      * Row 2 — single-chain “Pending tx” Safe — `verifySpaceDashboardAccountsRowSafeDetails` (name, address, Sepolia logo, balance regex).
-     * Order on dashboard: row 0 = unnamed `0x1694…`, row 1 = address book name, row 2 = this row.
      */
     pendingTxAccount: {
       name: 'Pending tx',
@@ -33,15 +56,6 @@ export default {
     },
     /** `AccountWidgetItem` row index — single-chain Pending tx row; click opens `/home?safe=…`. */
     singleChainAccountRowIndex: 2,
-    /**
-     * `ExpandableAccountItem` row (`safes.length > 1`) — first row (0x1694…) has two chains; sub-rows share `data-testid="sub-account-row"`.
-     * Align `subAccounts` order with CGW for this space.
-     */
-    multichainAccountRowIndex: 0,
-    multichainSubAccounts: [
-      { chainId: '11155111', safeQueryIncludes: 'sep:' },
-      { chainId: '137', safeQueryIncludes: 'matic:' },
-    ],
   },
   emptyGettingStarted: {
     id: '2362',
