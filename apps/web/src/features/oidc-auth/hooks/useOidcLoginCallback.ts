@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch } from '@/store'
-import { setAuthenticated, setIsEmailLoginPending } from '@/store/authSlice'
+import { setAuthenticated, setIsOidcLoginPending } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { EMAIL_AUTH_PENDING_KEY } from './useEmailLogin'
+import { OIDC_AUTH_PENDING_KEY } from '../constants'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -28,23 +28,23 @@ const EMAIL_SIGN_IN_ERROR = {
  *
  * Should be called globally (e.g., in InitApp) so it runs on page load.
  */
-export const useEmailLoginCallback = () => {
+export const useOidcLoginCallback = () => {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const isEmailAuthEnabled = useHasFeature(FEATURES.EMAIL_AUTH)
+  const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH)
   const routerRef = useRef(router)
   const hasProcessed = useRef(false)
 
   routerRef.current = router
 
   useEffect(() => {
-    if (!isEmailAuthEnabled || hasProcessed.current) return
+    if (!isOidcAuthEnabled || hasProcessed.current) return
 
-    const pending = sessionStorage.getItem(EMAIL_AUTH_PENDING_KEY)
+    const pending = sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)
     if (!pending) return
 
     hasProcessed.current = true
-    dispatch(setIsEmailLoginPending(true))
+    dispatch(setIsOidcLoginPending(true))
 
     const processCallback = async () => {
       try {
@@ -69,11 +69,11 @@ export const useEmailLoginCallback = () => {
       } catch {
         dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
       } finally {
-        sessionStorage.removeItem(EMAIL_AUTH_PENDING_KEY)
-        dispatch(setIsEmailLoginPending(false))
+        sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
+        dispatch(setIsOidcLoginPending(false))
       }
     }
 
     void processCallback()
-  }, [dispatch, isEmailAuthEnabled])
+  }, [dispatch, isOidcAuthEnabled])
 }

@@ -11,6 +11,10 @@ export const SPACE_EVENTS = {
     action: 'Sign in with email',
     category: SPACE_CATEGORY,
   },
+  GOOGLE_SIGN_IN: {
+    action: 'Sign in with Google',
+    category: SPACE_CATEGORY,
+  },
   INFO_MODAL: {
     action: 'Open info dialog',
     category: SPACE_CATEGORY,

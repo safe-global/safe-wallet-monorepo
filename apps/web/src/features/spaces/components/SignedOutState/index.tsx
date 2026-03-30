@@ -1,7 +1,7 @@
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import css from '../Dashboard/styles.module.css'
-import SignInButton from '../SignInButton'
-import { EmailAuthFeature } from '@/features/email-auth'
+import SignInOptions from '../SignInOptions'
+import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
 
 interface SignedOutStateProps {
@@ -10,7 +10,7 @@ interface SignedOutStateProps {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
-  const { EmailSignInButton, $isDisabled } = useLoadFeature(EmailAuthFeature)
+  const { $isDisabled } = useLoadFeature(OidcAuthFeature)
 
   return (
     <Box className={css.content}>
@@ -25,10 +25,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
             {!$isDisabled && ', or sign in with email'}. Sign in to continue.
           </Typography>
 
-          <Stack direction="row" justifyContent="center" spacing={2} alignItems="center">
-            <EmailSignInButton />
-            <SignInButton afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
-          </Stack>
+          <SignInOptions afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
         </Box>
       </Box>
     </Box>

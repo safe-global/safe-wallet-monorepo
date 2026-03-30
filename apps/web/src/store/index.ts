@@ -146,8 +146,8 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
     }
 
     // Mark the store as hydrated so guards wait for persisted auth state
-    // Reset isEmailLoginPending to avoid stale state from a previous session
-    nextState.auth = { ...nextState.auth, isStoreHydrated: true, isEmailLoginPending: false }
+    // Reset isOidcLoginPending to avoid stale state from a previous session
+    nextState.auth = { ...nextState.auth, isStoreHydrated: true, isOidcLoginPending: false }
 
     return nextState
   }
