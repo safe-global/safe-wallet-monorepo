@@ -141,7 +141,32 @@ When a component needs a `data-testid` for E2E tests:
 5. **Add the corresponding selector** to the page object file
 6. **Cross-reference**: after all changes, verify every new `data-testid` in source is referenced in at least one page object selector
 
-## Phase 5: Cleanup Checklist
+## Phase 5: Data Separation
+
+Keep test data and UI selectors in separate places — never mix them.
+
+### Fixture files (`cypress/fixtures/`) — test data only
+- Space IDs, names
+- Account addresses, names, chain info, row indices
+- Counts (row counts, sub-accounts)
+- Sub-account chain details (chainId, query params)
+- Any data that varies per environment or test scenario
+
+### Page object files (`e2e/pages/`) — UI selectors and labels only
+- `data-testid` selectors
+- `aria-label` selectors
+- Static UI text labels ("Getting started", "Add member", etc.)
+- Regex patterns for format validation
+- Functions (actions, verifiers)
+
+### Rules
+- **Never duplicate fixture data in page objects** — if an address or name is in a fixture, don't also define it as a `const` in the page object
+- **Never put selectors in fixtures** — selectors belong in page objects
+- **Never re-export fixtures from page objects** — tests should import fixtures directly (`import staticSpaces from '../../fixtures/spaces/staticSpaces.js'`)
+- **Never import fixtures in page objects** unless a function internally needs the data (rare — prefer passing as parameters)
+- **Regex patterns belong in page objects** not fixtures — they validate UI format, not test data
+
+## Phase 6: Cleanup Checklist
 
 After writing or refactoring tests, verify:
 
@@ -158,3 +183,6 @@ After writing or refactoring tests, verify:
 - [ ] Parameterized functions with selector lookups used instead of duplicated functions
 - [ ] No hardcoded amounts/counts in regex — format-only checks
 - [ ] Page object file is organized in clear sections (selectors, labels, helpers, actions, verifiers, flows)
+- [ ] No fixture data duplicated in page objects (addresses, names, counts)
+- [ ] No fixture re-exports from page objects — tests import fixtures directly
+- [ ] No unused imports in page objects or test files
