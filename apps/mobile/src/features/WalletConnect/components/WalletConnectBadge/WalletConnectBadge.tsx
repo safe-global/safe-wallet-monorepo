@@ -1,5 +1,5 @@
-import React from 'react'
-import { Image } from 'react-native'
+import React, { useState } from 'react'
+import { Image } from 'expo-image'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -16,8 +16,9 @@ interface WalletConnectBadgeProps {
 export function WalletConnectBadge({ address, size = 32, testID }: WalletConnectBadgeProps) {
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
   const isConnected = useWalletConnectStatus(address)
+  const [imageError, setImageError] = useState(false)
 
-  if (signer?.type !== 'walletconnect' || !signer.walletIcon) {
+  if (signer?.type !== 'walletconnect' || !signer.walletIcon || imageError) {
     return null
   }
 
@@ -38,7 +39,13 @@ export function WalletConnectBadge({ address, size = 32, testID }: WalletConnect
   return (
     <BadgeWrapper badge={statusBadge} position="top-right">
       <Badge
-        content={<Image source={{ uri: signer.walletIcon }} style={{ width: 20, height: 20, borderRadius: 150 }} />}
+        content={
+          <Image
+            source={signer.walletIcon}
+            style={{ width: 20, height: 20, borderRadius: 150 }}
+            onError={() => setImageError(true)}
+          />
+        }
         circleSize={size}
         circleProps={{ backgroundColor: isConnected ? '$backgroundSuccess' : '$backgroundError' }}
         testID={testID}
