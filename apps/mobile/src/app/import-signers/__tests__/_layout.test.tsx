@@ -25,6 +25,10 @@ jest.mock('@/src/features/ImportSigner', () => {
   }
 })
 
+jest.mock('@reown/appkit-react-native', () => ({
+  useAppKit: () => ({ disconnect: jest.fn() }),
+}))
+
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0 }),
 }))
