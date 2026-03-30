@@ -83,11 +83,9 @@ export function NameSignerView({
         </View>
       </ScrollView>
 
-      <View paddingBottom={Math.max(bottom, 16)}>
-        <SafeButton onPress={onContinue} disabled={!isValid || isLoading} testID="name-signer-continue">
-          Continue
-        </SafeButton>
-      </View>
+      <SafeButton onPress={onContinue} disabled={!isValid || isLoading} testID="name-signer-continue">
+        Continue
+      </SafeButton>
     </KeyboardAvoidingView>
   )
 }
