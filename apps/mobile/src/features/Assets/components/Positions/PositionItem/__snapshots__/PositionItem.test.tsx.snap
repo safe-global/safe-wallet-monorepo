@@ -52,9 +52,10 @@ exports[`PositionItem renders correctly 1`] = `
           style={
             {
               "alignItems": "center",
+              "flex": 1,
               "flexDirection": "row",
+              "flexShrink": 1,
               "gap": 12,
-              "maxWidth": "55%",
             }
           }
         >
@@ -127,7 +128,13 @@ exports[`PositionItem renders correctly 1`] = `
               />
             </View>
           </View>
-          <View>
+          <View
+            style={
+              {
+                "flexShrink": 1,
+              }
+            }
+          >
             <View>
               <Text
                 style={
@@ -196,7 +203,7 @@ exports[`PositionItem renders correctly 1`] = `
           style={
             {
               "alignItems": "flex-end",
-              "flexShrink": 1,
+              "flexShrink": 0,
             }
           }
         >

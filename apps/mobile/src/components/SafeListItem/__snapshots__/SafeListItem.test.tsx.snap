@@ -46,9 +46,10 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           style={
             {
               "alignItems": "center",
+              "flex": 1,
               "flexDirection": "row",
+              "flexShrink": 1,
               "gap": 12,
-              "maxWidth": "100%",
             }
           }
         >
@@ -62,7 +63,13 @@ exports[`SafeListItem should render a list item with a custom label template 1`]
           >
             Left node
           </Text>
-          <View>
+          <View
+            style={
+              {
+                "flexShrink": 1,
+              }
+            }
+          >
             <View
               style={
                 {
@@ -175,9 +182,10 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
           style={
             {
               "alignItems": "center",
+              "flex": 1,
               "flexDirection": "row",
+              "flexShrink": 1,
               "gap": 12,
-              "maxWidth": "100%",
             }
           }
         >
@@ -191,7 +199,13 @@ exports[`SafeListItem should render bottomContent with proper styling and layout
           >
             Left node
           </Text>
-          <View>
+          <View
+            style={
+              {
+                "flexShrink": 1,
+              }
+            }
+          >
             <Text
               ellipsizeMode="tail"
               numberOfLines={1}

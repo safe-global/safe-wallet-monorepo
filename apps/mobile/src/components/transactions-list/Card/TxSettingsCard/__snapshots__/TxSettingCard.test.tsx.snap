@@ -55,9 +55,10 @@ exports[`TxSettingCard should render the default markup 1`] = `
           style={
             {
               "alignItems": "center",
+              "flex": 1,
               "flexDirection": "row",
+              "flexShrink": 1,
               "gap": 12,
-              "maxWidth": "100%",
             }
           }
         >
@@ -98,7 +99,13 @@ exports[`TxSettingCard should render the default markup 1`] = `
               
             </Text>
           </View>
-          <View>
+          <View
+            style={
+              {
+                "flexShrink": 1,
+              }
+            }
+          >
             <View
               style={
                 {
