@@ -3,23 +3,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAccount, useWalletInfo } from '@reown/appkit-react-native'
-import { isAddress } from 'ethers'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { asAddress, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { formSchema } from '@/src/features/Signer/schema'
 import { type FormValues } from '@/src/features/Signer/types'
-import { type Address } from '@/src/types/address'
 import { NameSignerView } from './NameSignerView'
 import { buildDefaultName } from './buildDefaultName'
-
-function asAddress(value: string): Address {
-  if (!isAddress(value)) {
-    throw new Error(`Invalid address: ${value}`)
-  }
-
-  return value as Address
-}
 
 export function NameSignerContainer() {
   const { address: rawAddress, walletName } = useLocalSearchParams<{
