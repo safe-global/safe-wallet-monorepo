@@ -15,7 +15,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
-import logger from '@/src/utils/logger'
+import Logger from '@/src/utils/logger'
 
 const ConnectWalletAppImage = () => {
   const { isDark } = useTheme()
@@ -82,10 +82,13 @@ export const ImportSignersContainer = () => {
     connectInitiatedRef.current = false
 
     const checksumAddress = getAddress(address)
+    let cancelled = false
 
     const validateAndNavigate = async () => {
       try {
         const result = await validateAddressOwnership(checksumAddress)
+
+        if (cancelled) return
 
         if (result.isOwner) {
           router.push({
@@ -102,7 +105,9 @@ export const ImportSignersContainer = () => {
           })
         }
       } catch (error) {
-        logger.error('Error validating signer ownership:', error)
+        if (cancelled) return
+
+        Logger.error('Error validating signer ownership:', error)
         router.push({
           pathname: '/import-signers/connect-signer-error',
           params: { address: checksumAddress },
@@ -111,6 +116,10 @@ export const ImportSignersContainer = () => {
     }
 
     validateAndNavigate()
+
+    return () => {
+      cancelled = true
+    }
   }, [isConnected, address, walletInfo, validateAddressOwnership])
 
   // Reset guard when wallet disconnects so reconnection triggers navigation
