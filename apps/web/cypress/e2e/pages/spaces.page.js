@@ -8,7 +8,6 @@ import * as navigation from './navigation.page.js'
 
 // -- Auth & welcome --
 const orgList = '[data-testid="org-list"]'
-export const spacesListCreateSpaceBtn = '[data-testid="spaces-list-create-space-button"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
 
 // -- Space selector --
@@ -172,9 +171,7 @@ export function clickOnSignInBtn() {
 }
 
 export function waitForSpacesWelcomeReady() {
-  cy.get(`${orgList}, ${spacesListCreateSpaceBtn}`, { timeout: 60000 })
-    .filter(':visible')
-    .should('have.length.at.least', 1)
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 60000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
 export function visitSpaceDashboard(spaceId) {
@@ -451,7 +448,7 @@ export function ensureReadyToCreateSpace() {
     if (hasSpaces) {
       deleteAllSpaces()
     }
-    //  main.verifyElementsIsVisible([spacesListCreateSpaceBtn])
+    //  main.verifyElementsIsVisible([createSpaceBtn])
   })
 }
 

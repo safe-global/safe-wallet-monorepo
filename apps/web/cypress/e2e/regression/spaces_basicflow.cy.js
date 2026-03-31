@@ -25,6 +25,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
@@ -37,7 +38,7 @@ describe('Spaces basic flow tests', () => {
     space.spaceExists(newSpaceName)
     space.deleteSpace(newSpaceName)
     cy.contains(space.deleteSpaceConfirmationMsg(newSpaceName)).should('be.visible')
-    main.verifyElementsIsVisible([space.spacesListCreateSpaceBtn])
+    main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
   it('Verify an account can be added manually', () => {
@@ -45,6 +46,8 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
@@ -56,6 +59,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()
