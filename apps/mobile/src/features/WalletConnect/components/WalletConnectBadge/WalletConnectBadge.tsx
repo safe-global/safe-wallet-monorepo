@@ -12,6 +12,7 @@ interface WalletConnectBadgeProps {
   address: string
   size?: number
   testID?: string
+  withStatus?: boolean
 }
 
 export function WalletConnectBadge(props: WalletConnectBadgeProps) {
@@ -22,13 +23,34 @@ export function WalletConnectBadge(props: WalletConnectBadgeProps) {
   )
 }
 
-function WalletConnectBadgeInner({ address, size = 32, testID }: WalletConnectBadgeProps) {
+function WalletConnectBadgeInner({ address, size = 32, testID, withStatus = false }: WalletConnectBadgeProps) {
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
   const isConnected = useWalletConnectStatus(address)
   const [imageError, setImageError] = useState(false)
 
   if (signer?.type !== 'walletconnect' || !signer.walletIcon || imageError) {
     return null
+  }
+
+  const walletIconBadge = (
+    <Badge
+      content={
+        <Image
+          source={signer.walletIcon}
+          style={{ width: 20, height: 20, borderRadius: 150 }}
+          onError={() => setImageError(true)}
+        />
+      }
+      circleSize={size}
+      circleProps={{
+        backgroundColor: withStatus ? (isConnected ? '$backgroundSuccess' : '$backgroundError') : '$backgroundSkeleton',
+      }}
+      testID={testID}
+    />
+  )
+
+  if (!withStatus) {
+    return walletIconBadge
   }
 
   const statusBadge = isConnected ? (
@@ -47,18 +69,7 @@ function WalletConnectBadgeInner({ address, size = 32, testID }: WalletConnectBa
 
   return (
     <BadgeWrapper badge={statusBadge} position="top-right">
-      <Badge
-        content={
-          <Image
-            source={signer.walletIcon}
-            style={{ width: 20, height: 20, borderRadius: 150 }}
-            onError={() => setImageError(true)}
-          />
-        }
-        circleSize={size}
-        circleProps={{ backgroundColor: isConnected ? '$backgroundSuccess' : '$backgroundError' }}
-        testID={testID}
-      />
+      {walletIconBadge}
     </BadgeWrapper>
   )
 }

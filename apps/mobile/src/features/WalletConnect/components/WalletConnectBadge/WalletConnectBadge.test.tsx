@@ -23,18 +23,27 @@ describe('WalletConnectBadge', () => {
     jest.clearAllMocks()
   })
 
-  it('renders connected state with success badge', () => {
+  it('renders connected state with success badge when withStatus is true', () => {
     useAppSelector.mockReturnValue({ type: 'walletconnect', walletIcon: mockWalletIcon })
     useWalletConnectStatus.mockReturnValue(true)
 
-    const { getByTestId } = render(<WalletConnectBadge address={mockAddress} testID="wc-badge" />)
+    const { getByTestId } = render(<WalletConnectBadge address={mockAddress} testID="wc-badge" withStatus />)
 
     expect(getByTestId('wc-badge')).toBeTruthy()
   })
 
-  it('renders disconnected state with warning badge', () => {
+  it('renders disconnected state with warning badge when withStatus is true', () => {
     useAppSelector.mockReturnValue({ type: 'walletconnect', walletIcon: mockWalletIcon })
     useWalletConnectStatus.mockReturnValue(false)
+
+    const { getByTestId } = render(<WalletConnectBadge address={mockAddress} testID="wc-badge" withStatus />)
+
+    expect(getByTestId('wc-badge')).toBeTruthy()
+  })
+
+  it('renders without status icon when withStatus is false', () => {
+    useAppSelector.mockReturnValue({ type: 'walletconnect', walletIcon: mockWalletIcon })
+    useWalletConnectStatus.mockReturnValue(true)
 
     const { getByTestId } = render(<WalletConnectBadge address={mockAddress} testID="wc-badge" />)
 
