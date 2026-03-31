@@ -1,101 +1,194 @@
-import { renderHook, act } from '@/src/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import { useWalletConnect } from '../useWalletConnect'
+import { renderHook, act, waitFor } from '@/src/tests/test-utils'
+import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 
+const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
+
+const mockRouterPush = jest.fn()
 const mockOpen = jest.fn()
-const mockSwitchNetwork = jest.fn()
+const mockDisconnect = jest.fn()
+const mockValidateAddressOwnership = jest.fn()
 const mockUseAccount = jest.fn()
 const mockUseWalletInfo = jest.fn()
-const mockUseProvider = jest.fn()
+
+jest.mock('expo-router', () => ({
+  router: {
+    push: (...args: unknown[]) => mockRouterPush(...args),
+  },
+}))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen, switchNetwork: mockSwitchNetwork }),
+  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
   useAccount: () => mockUseAccount(),
   useWalletInfo: () => mockUseWalletInfo(),
-  useProvider: () => mockUseProvider(),
+}))
+
+jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
+  useAddressOwnershipValidation: () => ({ validateAddressOwnership: mockValidateAddressOwnership }),
 }))
 
 describe('useWalletConnect', () => {
-  const address = faker.finance.ethereumAddress() as `0x${string}`
-
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseAccount.mockReturnValue({
-      address,
-      isConnected: true,
-      chainId: 'eip155:1',
-    })
-    mockUseWalletInfo.mockReturnValue({
-      walletInfo: { name: 'MetaMask', icon: 'https://example.com/icon.png' },
-    })
-    mockUseProvider.mockReturnValue({ provider: {} })
+    mockUseAccount.mockReturnValue({ isConnected: false, address: null })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: null })
   })
 
-  it('returns account state from useAccount', () => {
-    const { result } = renderHook(() => useWalletConnect())
-
-    expect(result.current.isConnected).toBe(true)
-    expect(result.current.address).toBe(address)
-    expect(result.current.chainId).toBe('eip155:1')
-  })
-
-  it('returns walletInfo from useWalletInfo', () => {
-    const { result } = renderHook(() => useWalletConnect())
-
-    expect(result.current.walletInfo).toEqual({
-      name: 'MetaMask',
-      icon: 'https://example.com/icon.png',
-    })
-  })
-
-  it('returns provider from useProvider', () => {
-    const mockProvider = { request: jest.fn() }
-    mockUseProvider.mockReturnValue({ provider: mockProvider })
-
-    const { result } = renderHook(() => useWalletConnect())
-
-    expect(result.current.provider).toBe(mockProvider)
-  })
-
-  it('returns undefined provider when not available', () => {
-    mockUseProvider.mockReturnValue({ provider: undefined })
-
-    const { result } = renderHook(() => useWalletConnect())
-
-    expect(result.current.provider).toBeUndefined()
-  })
-
-  it('calls openAppKit with Connect view when open is called', () => {
+  it('opens the wallet modal when initiateConnection is called', () => {
     const { result } = renderHook(() => useWalletConnect())
 
     act(() => {
-      result.current.open()
+      result.current.initiateConnection()
     })
 
     expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
   })
 
-  it('calls switchNetworkAppKit with eip155 prefix', () => {
-    const { result } = renderHook(() => useWalletConnect())
+  it('navigates to name-signer when connected address is an owner', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+
+    const { result, rerender } = renderHook(() => useWalletConnect())
 
     act(() => {
-      result.current.switchNetwork('137')
+      result.current.initiateConnection()
     })
 
-    expect(mockSwitchNetwork).toHaveBeenCalledWith('eip155:137')
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockValidateAddressOwnership).toHaveBeenCalled()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/import-signers/name-signer',
+        }),
+      )
+    })
   })
 
-  it('returns disconnected state when not connected', () => {
-    mockUseAccount.mockReturnValue({
-      address: undefined,
-      isConnected: false,
-      chainId: undefined,
+  it('disconnects and navigates to error screen when connected address is not an owner', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: false })
+
+    const { result, rerender } = renderHook(() => useWalletConnect())
+
+    act(() => {
+      result.current.initiateConnection()
     })
 
-    const { result } = renderHook(() => useWalletConnect())
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
 
-    expect(result.current.isConnected).toBe(false)
-    expect(result.current.address).toBeUndefined()
-    expect(result.current.chainId).toBeUndefined()
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockValidateAddressOwnership).toHaveBeenCalled()
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/import-signers/connect-signer-error',
+        }),
+      )
+    })
+  })
+
+  it('disconnects and navigates to error screen when validation throws', async () => {
+    mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
+
+    const { result, rerender } = renderHook(() => useWalletConnect())
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/import-signers/connect-signer-error',
+        }),
+      )
+    })
+  })
+
+  it('does not navigate when wallet connects without user initiation', () => {
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    renderHook(() => useWalletConnect())
+
+    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate again for the same address after reconnect', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+
+    const { result, rerender } = renderHook(() => useWalletConnect())
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledTimes(1)
+    })
+
+    // Simulate re-render without disconnect — same address should not trigger again
+    rerender({})
+
+    expect(mockRouterPush).toHaveBeenCalledTimes(1)
+  })
+
+  it('allows navigation after disconnect and reconnect', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+
+    const { result, rerender } = renderHook(() => useWalletConnect())
+
+    // First connection
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledTimes(1)
+    })
+
+    // Disconnect
+    mockUseAccount.mockReturnValue({ isConnected: false, address: null })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: null })
+
+    rerender({})
+
+    // Reconnect with same address
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask' } })
+
+    rerender({})
+
+    await waitFor(() => {
+      expect(mockRouterPush).toHaveBeenCalledTimes(2)
+    })
   })
 })

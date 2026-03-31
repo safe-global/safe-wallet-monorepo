@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import { selectSignerHasPrivateKey, selectSignerByAddress, removeSigner } from '@/src/store/signersSlice'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 import { useIsWalletConnectSigner } from '@/src/features/WalletConnect/hooks/useIsWalletConnectSigner'
 import React, { useCallback, useState } from 'react'
 import { Alert, Linking } from 'react-native'
@@ -14,6 +13,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
+import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 
 export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
@@ -27,7 +27,7 @@ export const SignerContainer = () => {
   const isLedgerSigner = signer?.type === 'ledger'
   const isWcSigner = useIsWalletConnectSigner(address)
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
-  const { open: openWalletConnect } = useWalletConnect()
+  const { initiateConnection } = useWalletConnect()
 
   usePreventLeaveScreen(editMode)
 
@@ -137,7 +137,7 @@ export const SignerContainer = () => {
       hasPrivateKey={hasPrivateKey}
       isLedgerSigner={isLedgerSigner}
       isWcSigner={isWcSigner}
-      onReconnectWallet={isWcSigner ? openWalletConnect : undefined}
+      onReconnectWallet={isWcSigner ? initiateConnection : undefined}
       onRemoveWcSigner={isWcSigner ? onRemoveWcSigner : undefined}
       control={control}
       dirtyFields={dirtyFields}

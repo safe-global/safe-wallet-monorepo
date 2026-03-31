@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback } from 'react'
 import { ScrollView } from 'react-native'
 import Seed from '@/assets/images/seed.png'
 import Wallet from '@/assets/images/wallet.png'
@@ -9,9 +9,6 @@ import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View, Image } from 'tamagui'
-import { useAppDispatch } from '@/src/store/hooks'
-import { addSignerWithEffects } from '@/src/store/signerThunks'
-import { getAddress } from 'ethers'
 import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
@@ -54,32 +51,11 @@ const title = 'Add signer'
 
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
-  const dispatch = useAppDispatch()
-  const { open: openWalletConnect, isConnected, address, walletInfo } = useWalletConnect()
-  const registeredRef = useRef<string | null>(null)
+  const { initiateConnection } = useWalletConnect()
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
-
-  useEffect(() => {
-    if (!isConnected || !address || registeredRef.current === address) {
-      return
-    }
-
-    registeredRef.current = address
-
-    dispatch(
-      addSignerWithEffects({
-        value: getAddress(address),
-        name: walletInfo?.name ?? null,
-        logoUri: walletInfo?.icon ?? null,
-        type: 'walletconnect',
-        walletName: walletInfo?.name,
-        walletIcon: walletInfo?.icon,
-      }),
-    )
-  }, [isConnected, address, walletInfo, dispatch])
 
   const handleConnectSigner = useCallback(
     (name: (typeof items)[number]['name']) => {
@@ -91,12 +67,12 @@ export const ImportSignersContainer = () => {
               : { pathname: '/biometrics-opt-in', params: { caller: '/import-signers' } },
           ),
         hardwareSigner: () => router.push('/import-signers/hardware-devices'),
-        connectSigner: openWalletConnect,
+        connectSigner: initiateConnection,
       }
 
       actions[name]()
     },
-    [isBiometricsEnabled, openWalletConnect],
+    [isBiometricsEnabled, initiateConnection],
   )
 
   return (

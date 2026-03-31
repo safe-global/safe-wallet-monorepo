@@ -18,11 +18,10 @@ import logger from '@/src/utils/logger'
 
 interface SignersListItemProps {
   item: AddressInfo
-  index: number
   signersGroup: SignerSection[]
 }
 
-function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
+function SignersListItem({ item, signersGroup }: SignersListItemProps) {
   const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const pendingSafe = useAppSelector(selectPendingSafe)
@@ -34,7 +33,6 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
 
   const fullActions = useSignersActions(isMySigner)
   const actions = fullActions.filter(Boolean) as MenuAction[]
-  const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const copy = useCopyAndDispatchToast()
 
   const redirectToDetails = (editMode?: boolean) => {
@@ -73,16 +71,9 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   return (
-    <View position="relative">
+    <View position="relative" marginBottom="$2">
       <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
-        <View
-          backgroundColor={isDark ? '$backgroundPaper' : '$background'}
-          borderTopRightRadius={index === 0 ? '$4' : undefined}
-          borderTopLeftRadius={index === 0 ? '$4' : undefined}
-          borderBottomRightRadius={isLastItem ? '$4' : undefined}
-          borderBottomLeftRadius={isLastItem ? '$4' : undefined}
-          collapsable={false}
-        >
+        <View backgroundColor={isDark ? '$backgroundPaper' : '$background'} borderRadius="$2" collapsable={false}>
           <SignersCard
             name={contact ? (contact.name as string) : (item.name as string)}
             address={item.value as `0x${string}`}
