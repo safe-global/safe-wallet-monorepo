@@ -1,0 +1,1 @@
+export { WalletConnectBadge } from './WalletConnectBadge'

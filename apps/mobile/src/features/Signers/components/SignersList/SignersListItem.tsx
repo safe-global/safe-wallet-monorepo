@@ -3,6 +3,7 @@ import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
@@ -97,7 +98,9 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         display="flex"
         alignItems="center"
         justifyContent="center"
+        flexDirection="row"
       >
+        <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} />
         <MenuView
           onPressAction={onPressMenuAction}
           actions={actions}
