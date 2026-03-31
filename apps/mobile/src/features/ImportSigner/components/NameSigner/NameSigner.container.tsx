@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAccount, useWalletInfo } from '@reown/appkit-react-native'
+import { isAddress } from 'ethers'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { formSchema } from '@/src/features/Signer/schema'
@@ -11,15 +12,24 @@ import { type Address } from '@/src/types/address'
 import { NameSignerView } from './NameSignerView'
 import { buildDefaultName } from './buildDefaultName'
 
-function truncateAddress(address: string): string {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
+function truncateAddress(addr: string): string {
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+}
+
+function asAddress(value: string): Address {
+  if (!isAddress(value)) {
+    throw new Error(`Invalid address: ${value}`)
+  }
+
+  return value as Address
 }
 
 export function NameSignerContainer() {
-  const { address, walletName } = useLocalSearchParams<{
+  const { address: rawAddress, walletName } = useLocalSearchParams<{
     address: string
     walletName: string
   }>()
+  const address = asAddress(rawAddress)
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { isConnected } = useAccount()
@@ -77,7 +87,7 @@ export function NameSignerContainer() {
 
   return (
     <NameSignerView
-      address={address as Address}
+      address={address}
       truncatedAddress={truncateAddress(address)}
       control={control}
       errors={errors}
