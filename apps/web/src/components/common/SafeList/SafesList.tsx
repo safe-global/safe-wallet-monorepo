@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import { type AllSafeItems, isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import SafeCard from '@/features/spaces/components/SelectSafesOnboarding/components/SafeCard'
-import SimilarAddressAlert from '@/features/spaces/components/SelectSafesOnboarding/components/SimilarAddressAlert'
+import SafeCard from './components/SafeCard'
+import SimilarAddressAlert from './components/SimilarAddressAlert'
 
 export interface SafeListProps {
   trustedSafes: AllSafeItems

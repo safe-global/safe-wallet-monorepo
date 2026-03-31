@@ -2,7 +2,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 
-import useSafeCardData from '../hooks/useSafeCardData'
+import useSafeCardData from './hooks/useSafeCardData'
 import { SafeCardLayout } from './SafeCardLayout'
 
 const getSafeId = (safeItem: SafeItem) => `${safeItem.chainId}:${safeItem.address}`

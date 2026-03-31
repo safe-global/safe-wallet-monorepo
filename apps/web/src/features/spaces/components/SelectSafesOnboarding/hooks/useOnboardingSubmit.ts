@@ -12,7 +12,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
+import { getSafeId, getMultiChainSafeId } from '@/components/common/SafeList/components/SafeCard'
 
 const parseSafeKey = (key: string) => {
   const [chainId, address] = key.split(':')

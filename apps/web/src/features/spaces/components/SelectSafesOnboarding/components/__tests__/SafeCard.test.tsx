@@ -2,10 +2,10 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
-import SafeCard from '../SafeCard'
+import SafeCard from '@/components/common/SafeList/components/SafeCard'
 
 // Mock heavy child dependencies
-jest.mock('../../hooks/useSafeCardData', () => ({
+jest.mock('@/components/common/SafeList/components/hooks/useSafeCardData', () => ({
   __esModule: true,
   default: () => ({
     name: 'Test Safe',
@@ -21,12 +21,12 @@ jest.mock('@/components/common/Identicon', () => ({
   default: ({ address }: { address: string }) => <div data-testid={`identicon-${address}`} />,
 }))
 
-jest.mock('../FiatBalance', () => ({
+jest.mock('@/components/common/SafeList/components/FiatBalance', () => ({
   __esModule: true,
   default: ({ value }: { value: string | number | undefined }) => <span data-testid="fiat-balance">{value}</span>,
 }))
 
-jest.mock('../ThresholdBadge', () => ({
+jest.mock('@/components/common/SafeList/components/ThresholdBadge', () => ({
   __esModule: true,
   default: ({ threshold, owners }: { threshold: number; owners: number }) => (
     <span data-testid="threshold-badge">

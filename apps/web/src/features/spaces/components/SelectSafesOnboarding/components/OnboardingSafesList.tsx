@@ -1,6 +1,6 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import SafeCard from './SafeCard'
-import SimilarAddressAlert from './SimilarAddressAlert'
+import SafeCard from '@/components/common/SafeList/components/SafeCard'
+import SimilarAddressAlert from '@/components/common/SafeList/components/SimilarAddressAlert'
 
 interface SafeListProps {
   trustedSafes: AllSafeItems
