@@ -6,4 +6,4 @@ module.exports = {
   // No-op exports
   __esModule: true,
   default: {},
-};
+}

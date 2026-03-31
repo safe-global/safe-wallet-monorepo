@@ -1,11 +1,13 @@
 import { Box, Typography } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems, SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
-import { SafeListItem } from '../SafesList/SafeListItem'
+import { SafesList as CommonSafesList } from '@/components/common/SafeList'
+import { SafeCardItem } from '@/components/common/SafeList/components'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
   const { safe, safeAddress } = useSafeInfo()
   const addressBook = useAddressBook()
@@ -34,7 +36,14 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
       <Typography variant="h5" fontWeight={700} mb={2}>
         Current Safe Account
       </Typography>
-      <SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />
+      <CommonSafesList
+        trustedSafes={[]}
+        ownedSafes={[safeItem]}
+        similarAddresses={new Set()}
+        renderSafeCard={(safe: SafeItem | MultiChainSafeItem, isSimilar: boolean) => (
+          <SafeCardItem safe={safe} isSimilar={isSimilar} />
+        )}
+      />
     </Box>
   )
 }

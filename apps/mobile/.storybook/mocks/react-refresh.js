@@ -2,7 +2,7 @@
 // Mock react-refresh for Storybook to prevent production bundle errors
 // Provides no-op implementations of all required functions
 
-const noop = () => {};
+const noop = () => {}
 
 module.exports = {
   injectIntoGlobalHook: noop,
@@ -30,4 +30,4 @@ module.exports = {
     performReactRefresh: noop,
     register: noop,
   },
-};
+}

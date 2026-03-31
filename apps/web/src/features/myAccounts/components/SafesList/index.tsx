@@ -1,6 +1,6 @@
-import { type SafeItem, type AllSafeItems, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
-import MultiAccountItem from '../AccountItems/MultiAccountItem'
-import { SafeListItem } from './SafeListItem'
+import { type AllSafeItems, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { SafesList as CommonSafesList } from '@/components/common/SafeList'
+import { SafeCardItem } from '@/components/common/SafeList/components'
 
 export type SafeListProps = {
   safes?: AllSafeItems
@@ -8,24 +8,22 @@ export type SafeListProps = {
   isSpaceSafe?: boolean
 }
 
-const renderSafeItem = (
-  item: SafeItem | MultiChainSafeItem,
-  onLinkClick?: SafeListProps['onLinkClick'],
-  isSpaceSafe = false,
-) => {
-  return isMultiChainSafeItem(item) ? (
-    <MultiAccountItem onLinkClick={onLinkClick} multiSafeAccountItem={item} isSpaceSafe={isSpaceSafe} />
-  ) : (
-    <SafeListItem safeItem={item} onLinkClick={onLinkClick} isSpaceSafe={isSpaceSafe} />
-  )
-}
-
-const SafesList = ({ safes, onLinkClick, isSpaceSafe = false }: SafeListProps) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SafesList = ({ safes, onLinkClick, isSpaceSafe }: SafeListProps) => {
   if (!safes || safes.length === 0) {
     return null
   }
 
-  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>)
+  return (
+    <CommonSafesList
+      trustedSafes={[]}
+      ownedSafes={safes}
+      similarAddresses={new Set()}
+      renderSafeCard={(safe: SafeItem | MultiChainSafeItem, isSimilar: boolean) => (
+        <SafeCardItem safe={safe} isSimilar={isSimilar} />
+      )}
+    />
+  )
 }
 
 export default SafesList

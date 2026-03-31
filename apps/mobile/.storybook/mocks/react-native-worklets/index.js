@@ -21,8 +21,14 @@ const workletsMock = {
   createSerializable: createSerializable,
   makeShareableClone: (value) => value,
   makeShareable: (value) => value,
-  runOnUI: (fn) => (...args) => fn(...args),
-  runOnJS: (fn) => (...args) => fn(...args),
+  runOnUI:
+    (fn) =>
+    (...args) =>
+      fn(...args),
+  runOnJS:
+    (fn) =>
+    (...args) =>
+      fn(...args),
   createContext: () => ({}),
   useSharedValue: (initialValue) => ({ value: initialValue }),
   version: '0.5.0',

@@ -4,18 +4,13 @@ import { render } from '@/tests/test-utils'
 import OnboardingSafesList from '../OnboardingSafesList'
 
 // Mock child components to keep tests focused on list rendering logic
-jest.mock('@/components/common/SafeList/components/SafeCard', () => ({
-  __esModule: true,
-  default: ({ safe, isSimilar }: { safe: SafeItem | MultiChainSafeItem; isSimilar?: boolean }) => (
+jest.mock('@/components/common/SafeList/components', () => ({
+  SafeCard: ({ safe, isSimilar }: { safe: SafeItem | MultiChainSafeItem; isSimilar?: boolean }) => (
     <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar}>
       {safe.address}
     </div>
   ),
-}))
-
-jest.mock('@/components/common/SafeList/components/SimilarAddressAlert', () => ({
-  __esModule: true,
-  default: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
+  SimilarAddressAlert: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
 }))
 
 const buildSafeItem = (address: string, chainId = '1'): SafeItem =>

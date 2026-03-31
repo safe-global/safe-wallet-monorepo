@@ -1,30 +1,31 @@
 @font-face {
-    font-family: "safe-icons";
-    src: url("fonts/safe-icons.woff2") format("woff2"),
-        url("fonts/safe-icons.ttf") format("truetype"),
-        url("fonts/safe-icons.woff") format("woff");
-    font-weight: normal;
-    font-style: normal;
-    font-display: block;
+  font-family: 'safe-icons';
+  src:
+    url('fonts/safe-icons.woff2') format('woff2'),
+    url('fonts/safe-icons.ttf') format('truetype'),
+    url('fonts/safe-icons.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
 }
 @font-palette-values --palette0 {
-    font-family: "safe-icons";
-    base-palette: 0
+  font-family: 'safe-icons';
+  base-palette: 0;
 }
 .icon {
-    /* Use !important to prevent extensions from overriding this font. */
-    font-family: "safe-icons" !important;
-    font-style: normal;
-    font-weight: normal;
-    font-variant: normal;
-    text-transform: none;
-    line-height: 1;
+  /* Use !important to prevent extensions from overriding this font. */
+  font-family: 'safe-icons' !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
-    /* Better Font Rendering =========== */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .palette0 {
-    font-palette: --palette0;
-    color: currentColor;
+  font-palette: --palette0;
+  color: currentColor;
 }
