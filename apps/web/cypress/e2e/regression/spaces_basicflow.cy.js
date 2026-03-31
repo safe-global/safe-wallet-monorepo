@@ -3,7 +3,6 @@ import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as space from '../pages/spaces.page.js'
-import * as navigation from '../pages/navigation.page'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -64,8 +63,7 @@ describe('Spaces basic flow tests', () => {
 
     space.goToSpaceMembers()
     space.addMember(memberName, user_address)
-    navigation.clickOnWalletExpandMoreIcon()
-    navigation.clickOnDisconnectBtn()
+    space.disconnectFromSpaceLevel()
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
     main.verifyElementByTextExists('Pending invitations')

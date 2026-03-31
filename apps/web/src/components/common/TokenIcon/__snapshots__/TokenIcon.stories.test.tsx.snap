@@ -229,6 +229,7 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="17.333342000000002"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"

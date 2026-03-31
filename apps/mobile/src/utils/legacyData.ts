@@ -49,6 +49,7 @@ export function decodeLegacyData(file: SecuredDataFile, password: string): Seria
     const ciphertext = combined.subarray(12, combined.length - 16)
 
     const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+    // @ts-expect-error quick-crypto `Buffer` (ArrayBuffer-backed) vs @types/node `Buffer` for `setAuthTag`
     decipher.setAuthTag(tag)
 
     let decrypted: Buffer
