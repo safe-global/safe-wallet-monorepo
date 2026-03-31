@@ -1,11 +1,9 @@
-import { useCallback } from 'react'
 import { Stack, router } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 import { HeaderBackButton } from '@react-navigation/elements'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { CloseButton } from '@/src/components/CloseButton'
 
 export default function ImportSignersLayout() {
   useScreenProtection()
@@ -14,10 +12,6 @@ export default function ImportSignersLayout() {
     router.dismissAll()
     router.navigate('/signers')
   }
-
-  const handleErrorClose = useCallback(() => {
-    router.dismissAll()
-  }, [])
 
   return (
     <Stack
@@ -65,7 +59,6 @@ export default function ImportSignersLayout() {
           headerShadowVisible: false,
           headerTransparent: true,
           headerLeft: () => null,
-          headerRight: () => <CloseButton onPress={handleErrorClose} testID="connect-signer-error-close" />,
         }}
       />
       <Stack.Screen name="hardware-devices" options={{ headerShown: true, title: '' }} />

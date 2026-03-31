@@ -12,7 +12,7 @@ import Logger from '@/src/utils/logger'
  * Returns `initiateConnection` to open the WalletConnect modal.
  */
 export function useWalletConnect() {
-  const { open } = useAppKit()
+  const { open, disconnect } = useAppKit()
   const { address, isConnected } = useAccount()
   const { walletInfo } = useWalletInfo()
   const registeredRef = useRef<string | null>(null)
@@ -54,6 +54,7 @@ export function useWalletConnect() {
             },
           })
         } else {
+          disconnect()
           router.push({
             pathname: '/import-signers/connect-signer-error',
             params: { address: checksumAddress },
@@ -65,6 +66,7 @@ export function useWalletConnect() {
         }
 
         Logger.error('Error validating signer ownership:', error)
+        disconnect()
         router.push({
           pathname: '/import-signers/connect-signer-error',
           params: { address: checksumAddress },

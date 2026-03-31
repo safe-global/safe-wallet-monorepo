@@ -6,6 +6,7 @@ const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 
 const mockRouterPush = jest.fn()
 const mockOpen = jest.fn()
+const mockDisconnect = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockUseAccount = jest.fn()
 const mockUseWalletInfo = jest.fn()
@@ -17,7 +18,7 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen }),
+  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
   useAccount: () => mockUseAccount(),
   useWalletInfo: () => mockUseWalletInfo(),
 }))
@@ -59,6 +60,7 @@ describe('useWalletConnect', () => {
 
     await waitFor(() => {
       expect(mockValidateAddressOwnership).toHaveBeenCalled()
+      expect(mockDisconnect).not.toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/name-signer',
@@ -67,7 +69,7 @@ describe('useWalletConnect', () => {
     })
   })
 
-  it('navigates to error screen when connected address is not an owner', async () => {
+  it('disconnects and navigates to error screen when connected address is not an owner', async () => {
     mockValidateAddressOwnership.mockResolvedValue({ isOwner: false })
 
     const { result, rerender } = renderHook(() => useWalletConnect())
@@ -83,6 +85,7 @@ describe('useWalletConnect', () => {
 
     await waitFor(() => {
       expect(mockValidateAddressOwnership).toHaveBeenCalled()
+      expect(mockDisconnect).toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/connect-signer-error',
@@ -91,7 +94,7 @@ describe('useWalletConnect', () => {
     })
   })
 
-  it('navigates to error screen when validation throws', async () => {
+  it('disconnects and navigates to error screen when validation throws', async () => {
     mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
 
     const { result, rerender } = renderHook(() => useWalletConnect())
@@ -106,6 +109,7 @@ describe('useWalletConnect', () => {
     rerender({})
 
     await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/connect-signer-error',

@@ -14,23 +14,13 @@ function NameSigner() {
   const navigation = useNavigation()
   const { disconnect } = useAppKit()
 
-  const handleDisconnectAndGoBack = useCallback(async () => {
-    try {
-      await disconnect()
-    } catch {
-      // Always navigate even if disconnect fails
-    }
-
+  const handleDisconnectAndGoBack = useCallback(() => {
+    disconnect()
     router.back()
   }, [disconnect])
 
-  const handleDisconnectAndClose = useCallback(async () => {
-    try {
-      await disconnect()
-    } catch {
-      // Always navigate even if disconnect fails
-    }
-
+  const handleDisconnectAndClose = useCallback(() => {
+    disconnect()
     router.dismissAll()
   }, [disconnect])
 
