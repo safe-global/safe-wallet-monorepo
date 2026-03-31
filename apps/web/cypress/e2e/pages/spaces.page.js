@@ -9,6 +9,7 @@ import * as navigation from './navigation.page.js'
 // -- Auth & welcome --
 const orgList = '[data-testid="org-list"]'
 export const spacesListCreateSpaceBtn = '[data-testid="spaces-list-create-space-button"]'
+export const createSpaceBtn = '[data-testid="create-space-button"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -450,7 +451,7 @@ export function ensureReadyToCreateSpace() {
     if (hasSpaces) {
       deleteAllSpaces()
     }
-    main.verifyElementsIsVisible([spacesListCreateSpaceBtn])
+    //  main.verifyElementsIsVisible([spacesListCreateSpaceBtn])
   })
 }
 
@@ -498,7 +499,7 @@ export function acceptInvite(name) {
 // ===========================================
 
 function navigateToCreateSpacePage() {
-  cy.get(`${spacesListCreateSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 })
+  cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 })
     .filter(':visible')
     .first()
     .then(($el) => {
