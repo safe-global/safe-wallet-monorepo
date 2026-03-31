@@ -88,7 +88,9 @@ export const ImportSignersContainer = () => {
       try {
         const result = await validateAddressOwnership(checksumAddress)
 
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         if (result.isOwner) {
           router.push({
@@ -105,7 +107,9 @@ export const ImportSignersContainer = () => {
           })
         }
       } catch (error) {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         Logger.error('Error validating signer ownership:', error)
         router.push({
