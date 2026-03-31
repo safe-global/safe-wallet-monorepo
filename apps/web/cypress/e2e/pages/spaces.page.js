@@ -185,7 +185,7 @@ export function clickOnSpaceSelector() {
 }
 
 export function disconnectFromSpaceLevel() {
-  navigation.clickOnWalletExpandMoreIcon()
+  navigation.clickOnExpandWalletBtn()
   navigation.clickOnDisconnectBtn()
 }
 

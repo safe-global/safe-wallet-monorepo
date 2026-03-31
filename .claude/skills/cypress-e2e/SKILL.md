@@ -62,12 +62,36 @@ Organize page object files in clear sections with this order:
 
 ### Function Rules
 
-- **Action functions** (`click*`, `open*`, `expand*`, `type*`, `visit*`): perform one user action, no assertions about outcomes
+- **Action functions** (`click*`, `open*`, `expand*`, `type*`, `visit*`): perform one user action AND wait for the result to be ready. An action that opens a popover must wait for the popover to appear. An action that navigates must wait for the target page to load. This prevents flaky tests where the next step runs before the UI has settled:
+  ```js
+  // ✅ Good: action waits for result
+  export function clickOnExpandWalletBtn() {
+    cy.get(expandWalletBtn).should('be.visible').click()
+    cy.get(sentinelStart).next().should('exist')  // wait for popover
+  }
+
+  // ❌ Bad: action with no wait — next step may fail
+  export function clickOnExpandWalletBtn() {
+    cy.get(expandWalletBtn).click()
+  }
+  ```
 - **Verify functions** (`verify*`): assert state only, no user actions
 - Functions used only within the page object: no `export`
 - Functions used by test files: `export`
 - General functions (3+ page files): put in `main.page.js`
 - Page-specific functions: put in that page's `.pages.js`
+- **Wallet/navigation functions belong in `navigation.page.js`** — not in feature page objects. Feature page objects import and call them. When the same action has different UI across contexts (e.g. legacy vs spaces wallet button), create separate functions in `navigation.page.js` rather than duplicating selectors in feature page objects:
+  ```js
+  // navigation.page.js — both wallet expand variants
+  export function clickOnWalletExpandMoreIcon() { ... }  // legacy
+  export function clickOnExpandWalletBtn() { ... }       // spaces
+
+  // spaces.page.js — uses navigation, no local wallet selector
+  export function disconnectFromSpaceLevel() {
+    navigation.clickOnExpandWalletBtn()
+    navigation.clickOnDisconnectBtn()
+  }
+  ```
 - **Prefer one parameterized function over multiple similar functions** — use a type/variant parameter with a selector lookup table when the same verification applies to different component variants:
   ```js
   const selectors = {
