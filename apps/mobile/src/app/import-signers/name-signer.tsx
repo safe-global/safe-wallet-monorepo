@@ -1,18 +1,18 @@
 import React, { useCallback, useLayoutEffect } from 'react'
 import { useNavigation } from 'expo-router'
 import { router } from 'expo-router'
-import { useAppKit } from '@reown/appkit-react-native'
 import { getTokenValue, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { HeaderBackButton } from '@react-navigation/elements'
 import { NameSignerContainer } from '@/src/features/ImportSigner/components/NameSigner'
 import { CloseButton } from '@/src/components/CloseButton'
 import { HeaderLeft } from '@/src/navigation/hooks/utils'
+import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 
 function NameSigner() {
   const { bottom } = useSafeAreaInsets()
   const navigation = useNavigation()
-  const { disconnect } = useAppKit()
+  const { disconnect } = useWalletConnect()
 
   const handleDisconnectAndGoBack = useCallback(() => {
     disconnect()

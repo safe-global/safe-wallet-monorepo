@@ -93,5 +93,5 @@ export function useWalletConnect() {
     open({ view: 'Connect' })
   }, [open])
 
-  return { initiateConnection }
+  return { initiateConnection, disconnect }
 }
