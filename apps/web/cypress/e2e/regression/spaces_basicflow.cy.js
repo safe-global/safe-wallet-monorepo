@@ -27,7 +27,6 @@ describe('Spaces basic flow tests', () => {
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
     cy.wait(3000)
-    space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
     space.clickOnSpaceSelector(spaceName)
@@ -47,7 +46,6 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
@@ -60,7 +58,6 @@ describe('Spaces basic flow tests', () => {
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
     cy.wait(3000)
-    space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()
     space.spaceExists(spaceName)

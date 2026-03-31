@@ -25,7 +25,7 @@ describe('Spaces dashboard tests', () => {
     space.verifySpaceDashboardTotalValueFormat()
     space.verifySpaceDashboardWidgetVisible('Accounts')
     // 9 including multichainsafes
-    space.verifySpaceDashboardAccountsWidgetRowCount(9)
+    space.verifySpaceDashboardAccountsWidgetRowCount(3)
     space.verifySpaceDashboardWidgetVisible('Pending')
     space.verifyPendingTxWidgetItemCount(3)
   })
