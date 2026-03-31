@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback } from 'react'
 import { ScrollView } from 'react-native'
 import Seed from '@/assets/images/seed.png'
 import Wallet from '@/assets/images/wallet.png'
@@ -9,13 +9,8 @@ import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View, Image } from 'tamagui'
-import { useAppDispatch } from '@/src/store/hooks'
-import { getAddress } from 'ethers'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnect } from './useWalletConnect'
 import { useTheme } from '@/src/theme/hooks/useTheme'
-import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
-import Logger from '@/src/utils/logger'
 
 const ConnectWalletAppImage = () => {
   const { isDark } = useTheme()
@@ -56,82 +51,11 @@ const title = 'Add signer'
 
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
-  const dispatch = useAppDispatch()
-  const { open: openWalletConnect, isConnected, address, walletInfo } = useWalletConnect()
-  const registeredRef = useRef<string | null>(null)
-  const connectInitiatedRef = useRef(false)
-  const { validateAddressOwnership } = useAddressOwnershipValidation()
+  const { initiateConnection } = useWalletConnect()
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,
   })
-
-  // Validate ownership then navigate when the user initiates a new connection
-  useEffect(() => {
-    if (
-      !connectInitiatedRef.current ||
-      !isConnected ||
-      !address ||
-      !walletInfo ||
-      sameAddress(registeredRef.current ?? undefined, address)
-    ) {
-      return
-    }
-
-    registeredRef.current = address
-    connectInitiatedRef.current = false
-
-    const checksumAddress = getAddress(address)
-    let cancelled = false
-
-    const validateAndNavigate = async () => {
-      try {
-        const result = await validateAddressOwnership(checksumAddress)
-
-        if (cancelled) {
-          return
-        }
-
-        if (result.isOwner) {
-          router.push({
-            pathname: '/import-signers/name-signer',
-            params: {
-              address: checksumAddress,
-              walletName: walletInfo.name ?? '',
-            },
-          })
-        } else {
-          router.push({
-            pathname: '/import-signers/connect-signer-error',
-            params: { address: checksumAddress },
-          })
-        }
-      } catch (error) {
-        if (cancelled) {
-          return
-        }
-
-        Logger.error('Error validating signer ownership:', error)
-        router.push({
-          pathname: '/import-signers/connect-signer-error',
-          params: { address: checksumAddress },
-        })
-      }
-    }
-
-    validateAndNavigate()
-
-    return () => {
-      cancelled = true
-    }
-  }, [isConnected, address, walletInfo, validateAddressOwnership])
-
-  // Reset guard when wallet disconnects so reconnection triggers navigation
-  useEffect(() => {
-    if (!isConnected) {
-      registeredRef.current = null
-    }
-  }, [isConnected])
 
   const handleConnectSigner = useCallback(
     (name: (typeof items)[number]['name']) => {
@@ -143,15 +67,12 @@ export const ImportSignersContainer = () => {
               : { pathname: '/biometrics-opt-in', params: { caller: '/import-signers' } },
           ),
         hardwareSigner: () => router.push('/import-signers/hardware-devices'),
-        connectSigner: () => {
-          connectInitiatedRef.current = true
-          openWalletConnect()
-        },
+        connectSigner: initiateConnection,
       }
 
       actions[name]()
     },
-    [isBiometricsEnabled, openWalletConnect],
+    [isBiometricsEnabled, initiateConnection],
   )
 
   return (

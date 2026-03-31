@@ -1,15 +1,10 @@
 import React from 'react'
-import { faker } from '@faker-js/faker'
-import { render, screen, fireEvent, waitFor } from '@/src/tests/test-utils'
+import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { ImportSignersContainer } from '../ImportSigners.container'
 
-const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
-
 const mockRouterPush = jest.fn()
-const mockOpen = jest.fn()
-const mockValidateAddressOwnership = jest.fn()
-const mockUseAccount = jest.fn()
-const mockUseWalletInfo = jest.fn()
+const mockInitiateConnection = jest.fn()
+const mockUseBiometrics = jest.fn()
 
 jest.mock('expo-router', () => ({
   router: {
@@ -22,17 +17,11 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@/src/hooks/useBiometrics', () => ({
-  useBiometrics: () => ({ isBiometricsEnabled: true }),
+  useBiometrics: () => mockUseBiometrics(),
 }))
 
-jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen }),
-  useAccount: () => mockUseAccount(),
-  useWalletInfo: () => mockUseWalletInfo(),
-}))
-
-jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
-  useAddressOwnershipValidation: () => ({ validateAddressOwnership: mockValidateAddressOwnership }),
+jest.mock('../useWalletConnect', () => ({
+  useWalletConnect: () => ({ initiateConnection: mockInitiateConnection }),
 }))
 
 jest.mock('@/src/navigation/useScrollableHeader', () => ({
@@ -46,8 +35,7 @@ jest.mock('react-native-safe-area-context', () => ({
 describe('ImportSignersContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseAccount.mockReturnValue({ isConnected: false, address: null })
-    mockUseWalletInfo.mockReturnValue({ walletInfo: null })
+    mockUseBiometrics.mockReturnValue({ isBiometricsEnabled: true })
   })
 
   it('renders all three signer import options', () => {
@@ -58,12 +46,12 @@ describe('ImportSignersContainer', () => {
     expect(screen.getByText('Connect wallet app')).toBeTruthy()
   })
 
-  it('opens wallet modal when connect wallet app is pressed', () => {
+  it('calls initiateConnection when connect wallet app is pressed', () => {
     render(<ImportSignersContainer />)
 
     fireEvent.press(screen.getByTestId('connectSigner'))
 
-    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
+    expect(mockInitiateConnection).toHaveBeenCalled()
   })
 
   it('navigates to private key screen when seed is pressed', () => {
@@ -82,78 +70,16 @@ describe('ImportSignersContainer', () => {
     expect(mockRouterPush).toHaveBeenCalledWith('/import-signers/hardware-devices')
   })
 
-  it('navigates to name-signer when connected address is an owner', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
-
-    const { rerender } = render(<ImportSignersContainer />)
-
-    fireEvent.press(screen.getByTestId('connectSigner'))
-
-    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
-    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask', icon: '' } })
-
-    rerender(<ImportSignersContainer />)
-
-    await waitFor(() => {
-      expect(mockValidateAddressOwnership).toHaveBeenCalled()
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pathname: '/import-signers/name-signer',
-        }),
-      )
-    })
-  })
-
-  it('navigates to error screen when connected address is not an owner', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: false })
-
-    const { rerender } = render(<ImportSignersContainer />)
-
-    fireEvent.press(screen.getByTestId('connectSigner'))
-
-    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
-    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask', icon: '' } })
-
-    rerender(<ImportSignersContainer />)
-
-    await waitFor(() => {
-      expect(mockValidateAddressOwnership).toHaveBeenCalled()
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pathname: '/import-signers/connect-signer-error',
-        }),
-      )
-    })
-  })
-
-  it('navigates to error screen when validation throws', async () => {
-    mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
-
-    const { rerender } = render(<ImportSignersContainer />)
-
-    fireEvent.press(screen.getByTestId('connectSigner'))
-
-    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
-    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask', icon: '' } })
-
-    rerender(<ImportSignersContainer />)
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pathname: '/import-signers/connect-signer-error',
-        }),
-      )
-    })
-  })
-
-  it('does not navigate when wallet connects without user initiation', () => {
-    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
-    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask', icon: '' } })
+  it('navigates to biometrics opt-in when biometrics is not enabled', () => {
+    mockUseBiometrics.mockReturnValue({ isBiometricsEnabled: false })
 
     render(<ImportSignersContainer />)
 
-    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
-    expect(mockRouterPush).not.toHaveBeenCalled()
+    fireEvent.press(screen.getByTestId('seed'))
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      pathname: '/biometrics-opt-in',
+      params: { caller: '/import-signers' },
+    })
   })
 })
