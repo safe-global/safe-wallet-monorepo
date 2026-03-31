@@ -28,13 +28,13 @@ jest.mock('@/src/store/hooks', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
-const mockIsConnected = { current: true }
-const mockWalletInfo = { current: { name: 'MetaMask', icon: 'https://example.com/icon.png' } }
+const mockUseAccount = jest.fn()
+const mockUseWalletInfo = jest.fn()
 
 jest.mock('@reown/appkit-react-native', () => ({
   useAppKit: () => ({ disconnect: jest.fn() }),
-  useAccount: () => ({ isConnected: mockIsConnected.current, address: mockAddress }),
-  useWalletInfo: () => ({ walletInfo: mockWalletInfo.current }),
+  useAccount: () => mockUseAccount(),
+  useWalletInfo: () => mockUseWalletInfo(),
 }))
 
 const expectedDefaultName = `MetaMask - ${mockAddress.slice(-4)}`
@@ -42,8 +42,8 @@ const expectedDefaultName = `MetaMask - ${mockAddress.slice(-4)}`
 describe('NameSignerContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsConnected.current = true
-    mockWalletInfo.current = { name: 'MetaMask', icon: 'https://example.com/icon.png' }
+    mockUseAccount.mockReturnValue({ isConnected: true, address: mockAddress })
+    mockUseWalletInfo.mockReturnValue({ walletInfo: { name: 'MetaMask', icon: 'https://example.com/icon.png' } })
   })
 
   it('renders the naming screen with pre-filled name', () => {
