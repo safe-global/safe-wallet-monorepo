@@ -424,19 +424,17 @@ export function deleteSpace(name) {
 }
 
 function deleteAllSpaces() {
-  cy.wait(2000)
   cy.get('body').then(($body) => {
     if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard).then(($items) => {
-        for (let i = $items.length - 1; i >= 0; i--) {
-          cy.wrap($items[i]).within(() => {
-            cy.get(spaceVertMenuIcon).click({ force: true })
-          })
-          cy.get(contectMenuRemoveBtn).click({ force: true })
-          cy.get(spaceConfirmDeleteBtn).click()
-          deleteAllSpaces()
-        }
-      })
+      cy.get(spaceCard)
+        .first()
+        .within(() => {
+          cy.get(spaceVertMenuIcon).click({ force: true })
+        })
+      cy.get(contectMenuRemoveBtn).click({ force: true })
+      cy.get(spaceConfirmDeleteBtn).click()
+      cy.wait(1000)
+      deleteAllSpaces()
     }
   })
 }
