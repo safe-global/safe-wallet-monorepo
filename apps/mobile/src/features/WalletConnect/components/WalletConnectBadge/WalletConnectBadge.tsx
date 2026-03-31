@@ -1,31 +1,12 @@
-import React, { Component, useState } from 'react'
-import type { ErrorInfo, ReactNode } from 'react'
+import React, { useState } from 'react'
 import { Image } from 'expo-image'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { Badge } from '@/src/components/Badge'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { SilentErrorBoundary } from '@/src/components/ErrorBoundary'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
-
-class WalletConnectErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  state = { hasError: false }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  componentDidCatch(_error: Error, _info: ErrorInfo) {
-    // Silently swallow – badge is non-critical UI
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return null
-    }
-    return this.props.children
-  }
-}
 
 interface WalletConnectBadgeProps {
   address: string
@@ -35,9 +16,9 @@ interface WalletConnectBadgeProps {
 
 export function WalletConnectBadge(props: WalletConnectBadgeProps) {
   return (
-    <WalletConnectErrorBoundary>
+    <SilentErrorBoundary>
       <WalletConnectBadgeInner {...props} />
-    </WalletConnectErrorBoundary>
+    </SilentErrorBoundary>
   )
 }
 
