@@ -92,6 +92,7 @@ import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
+import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
@@ -126,6 +127,7 @@ const InitApp = (): null => {
   usePortfolioRefetchOnTxHistory()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
   useOidcLoginCallback()
+  useLogoutCallback()
 
   return null
 }

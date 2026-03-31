@@ -1,79 +1,81 @@
 import { renderHook, act } from '@testing-library/react'
 import useLogout from '@/hooks/useLogout'
-import { logError } from '@/services/exceptions'
+import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 
-const mockAuthLogoutWithRedirect = jest.fn().mockResolvedValue(undefined)
-
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
-  useAuthLogoutWithRedirectV1Mutation: () => [mockAuthLogoutWithRedirect],
-}))
-
-const mockDispatch = jest.fn()
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
-jest.mock('@/store/authSlice', () => ({
-  setUnauthenticated: () => ({ type: 'auth/setUnauthenticated' }),
-}))
-
-jest.mock('@/services/exceptions', () => ({
-  ...jest.requireActual('@/services/exceptions'),
-  logError: jest.fn(),
+jest.mock('@/config/gateway', () => ({
+  GATEWAY_URL: 'https://safe-client.safe.global',
 }))
 
 describe('useLogout', () => {
   const originalLocation = window.location
+  let submitSpy: jest.Mock
+  let appendChildSpy: jest.SpyInstance
+  let removeChildSpy: jest.SpyInstance
+  let capturedForm: HTMLFormElement | null = null
 
   beforeEach(() => {
     jest.clearAllMocks()
+    sessionStorage.clear()
+    capturedForm = null
+
     Object.defineProperty(window, 'location', {
       writable: true,
       value: { ...originalLocation, origin: 'http://localhost:3000' },
     })
+
+    submitSpy = jest.fn()
+    appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+      if (node instanceof HTMLFormElement) {
+        capturedForm = node
+        node.submit = submitSpy
+      }
+      return node
+    })
+    removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation((node) => node)
   })
 
   afterEach(() => {
+    appendChildSpy.mockRestore()
+    removeChildSpy.mockRestore()
     Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
   })
 
-  it('should call authLogoutWithRedirect with the correct redirect URL', async () => {
+  it('should write logging_out flag to sessionStorage before submitting', () => {
     const { result } = renderHook(() => useLogout())
 
-    await act(async () => {
-      await result.current.logout()
+    act(() => {
+      result.current.logout()
     })
 
-    expect(mockAuthLogoutWithRedirect).toHaveBeenCalledWith({
-      logoutDto: {
-        redirect_url: 'http://localhost:3000/welcome/spaces',
-      },
-    })
+    expect(sessionStorage.getItem(LOGGING_OUT_KEY)).toBe('1')
+    expect(submitSpy).toHaveBeenCalled()
   })
 
-  it('should dispatch setUnauthenticated on success', async () => {
+  it('should submit a form POST to the logout redirect endpoint', () => {
     const { result } = renderHook(() => useLogout())
 
-    await act(async () => {
-      await result.current.logout()
+    act(() => {
+      result.current.logout()
     })
 
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setUnauthenticated' })
+    expect(capturedForm).not.toBeNull()
+    expect(capturedForm!.method).toBe('post')
+    expect(capturedForm!.action).toBe('https://safe-client.safe.global/v1/auth/logout/redirect')
+
+    const input = capturedForm!.querySelector('input[name="redirect_url"]') as HTMLInputElement
+    expect(input).not.toBeNull()
+    expect(input.value).toBe('http://localhost:3000/welcome/spaces')
+
+    expect(submitSpy).toHaveBeenCalled()
   })
 
-  it('should log error when logout fails', async () => {
-    const error = new Error('Network error')
-    mockAuthLogoutWithRedirect.mockImplementationOnce(() => {
-      throw error
-    })
-
+  it('should remove the form from the DOM after submitting', () => {
     const { result } = renderHook(() => useLogout())
 
-    await act(async () => {
-      await result.current.logout()
+    act(() => {
+      result.current.logout()
     })
 
-    expect(logError).toHaveBeenCalledWith('109: Error signing out', error)
-    expect(mockDispatch).not.toHaveBeenCalled()
+    expect(removeChildSpy).toHaveBeenCalledWith(capturedForm)
   })
 })
