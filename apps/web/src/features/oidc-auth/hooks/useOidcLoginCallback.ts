@@ -1,14 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch } from '@/store'
-import { setAuthenticated, setIsOidcLoginPending } from '@/store/authSlice'
+import { setIsOidcLoginPending } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import reconcileAuth from '@/store/reconcileAuth'
 import { OIDC_AUTH_PENDING_KEY } from '../constants'
-
-const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 const EMAIL_SIGN_IN_ERROR = {
   message: 'Something went wrong while signing in with email',
@@ -47,31 +45,27 @@ export const useOidcLoginCallback = () => {
     dispatch(setIsOidcLoginPending(true))
 
     const processCallback = async () => {
-      try {
-        const params = new URLSearchParams(window.location.search)
-        const error = params.get('error')
+      const params = new URLSearchParams(window.location.search)
 
-        if (error) {
-          dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
-
-          // Read params from window.location.search instead of
-          // router.query, which may still be empty before router.isReady on first render.
-          params.delete('error')
-          const cleanQuery = Object.fromEntries(params.entries())
-          routerRef.current.replace({ pathname: routerRef.current.pathname, query: cleanQuery }, undefined, {
-            shallow: true,
-          })
-          return
-        }
-
-        await dispatch(cgwApi.endpoints.authGetMeV1.initiate()).unwrap()
-        dispatch(setAuthenticated(Date.now() + ONE_DAY_MS))
-      } catch {
+      if (params.has('error')) {
         dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
-      } finally {
-        sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
-        dispatch(setIsOidcLoginPending(false))
+
+        // Read params from window.location.search instead of
+        // router.query, which may still be empty before router.isReady on first render.
+        params.delete('error')
+        const cleanQuery = Object.fromEntries(params.entries())
+        routerRef.current.replace({ pathname: routerRef.current.pathname, query: cleanQuery }, undefined, {
+          shallow: true,
+        })
+      } else {
+        const result = await reconcileAuth(dispatch)
+        if (result === 'unauthenticated') {
+          dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
+        }
       }
+
+      sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
+      dispatch(setIsOidcLoginPending(false))
     }
 
     void processCallback()
