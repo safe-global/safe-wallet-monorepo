@@ -20,7 +20,7 @@ jest.mock('@/src/hooks/useBiometrics', () => ({
   useBiometrics: () => mockUseBiometrics(),
 }))
 
-jest.mock('../useWalletConnect', () => ({
+jest.mock('@/src/features/WalletConnect/hooks/useWalletConnect', () => ({
   useWalletConnect: () => ({ initiateConnection: mockInitiateConnection }),
 }))
 

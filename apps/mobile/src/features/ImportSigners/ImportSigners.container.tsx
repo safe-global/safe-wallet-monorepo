@@ -9,7 +9,7 @@ import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View, Image } from 'tamagui'
-import { useWalletConnect } from './useWalletConnect'
+import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 
 const ConnectWalletAppImage = () => {
