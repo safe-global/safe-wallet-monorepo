@@ -1,29 +1,12 @@
 import { useCallback } from 'react'
-import { Pressable } from 'react-native'
 import { Stack, router } from 'expo-router'
 import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
 import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 import { HeaderBackButton } from '@react-navigation/elements'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { CloseButton } from '@/src/components/CloseButton'
 import { useAppKit } from '@reown/appkit-react-native'
-
-function CloseButton({ onPress, testID }: { onPress: () => void; testID: string }) {
-  return (
-    <Pressable onPress={onPress} hitSlop={8} testID={testID}>
-      <View
-        backgroundColor="$backgroundSkeleton"
-        alignItems="center"
-        justifyContent="center"
-        borderRadius={200}
-        height={40}
-        width={40}
-      >
-        <SafeFontIcon name="close" size={24} color="$color" />
-      </View>
-    </Pressable>
-  )
-}
 
 export default function ImportSignersLayout() {
   useScreenProtection()
