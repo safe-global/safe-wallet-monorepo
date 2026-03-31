@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAccount, useWalletInfo } from '@reown/appkit-react-native'
 import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { formSchema } from '@/src/features/Signer/schema'
@@ -11,10 +12,6 @@ import { type FormValues } from '@/src/features/Signer/types'
 import { type Address } from '@/src/types/address'
 import { NameSignerView } from './NameSignerView'
 import { buildDefaultName } from './buildDefaultName'
-
-function truncateAddress(addr: string): string {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`
-}
 
 function asAddress(value: string): Address {
   if (!isAddress(value)) {
@@ -88,7 +85,7 @@ export function NameSignerContainer() {
   return (
     <NameSignerView
       address={address}
-      truncatedAddress={truncateAddress(address)}
+      truncatedAddress={shortenAddress(address)}
       control={control}
       errors={errors}
       isValid={isValid}
