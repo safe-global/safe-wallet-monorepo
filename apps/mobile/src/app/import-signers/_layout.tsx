@@ -6,11 +6,9 @@ import { HeaderBackButton } from '@react-navigation/elements'
 import { View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { CloseButton } from '@/src/components/CloseButton'
-import { useAppKit } from '@reown/appkit-react-native'
 
 export default function ImportSignersLayout() {
   useScreenProtection()
-  const { disconnect } = useAppKit()
 
   const handleLedgerSuccessClose = () => {
     router.dismissAll()
@@ -20,16 +18,6 @@ export default function ImportSignersLayout() {
   const handleErrorClose = useCallback(() => {
     router.dismissAll()
   }, [])
-
-  const handleNameSignerClose = useCallback(async () => {
-    try {
-      await disconnect()
-    } catch {
-      // Always navigate even if disconnect fails
-    }
-
-    router.dismissAll()
-  }, [disconnect])
 
   return (
     <Stack
@@ -60,14 +48,7 @@ export default function ImportSignersLayout() {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="name-signer"
-        options={{
-          headerShown: true,
-          title: '',
-          headerRight: () => <CloseButton onPress={handleNameSignerClose} testID="name-signer-close" />,
-        }}
-      />
+      <Stack.Screen name="name-signer" options={{ headerShown: true, title: '' }} />
       <Stack.Screen
         name="connect-signer-success"
         options={{
