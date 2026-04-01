@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -29,9 +29,12 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
   const pendingSafe = useAppSelector(selectPendingSafe)
   const signer = useAppSelector((state) => selectSignerByAddress(state, item.value))
 
-  // Check if the current item belongs to the 'Imported signers' section
-  const isMySigner = signersGroup.some(
-    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
+  const isMySigner = useMemo(
+    () =>
+      signersGroup.some(
+        (section) => section.id === 'imported_signers' && section.data.some((s) => s.value === item.value),
+      ),
+    [signersGroup, item.value],
   )
 
   const fullActions = useSignersActions(isMySigner)
