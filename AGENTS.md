@@ -321,7 +321,6 @@ The repo provides automated verification:
 9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
 
 10. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
-
     - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
     - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
     - **Both** if the PR includes UI + logic changes
