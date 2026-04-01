@@ -440,14 +440,13 @@ function deleteAllSpaces() {
 }
 
 export function ensureReadyToCreateSpace() {
-  cy.wait(2000)
   cy.get('body').then(($body) => {
-    const hasSpaces = $body.find(spaceCard).length > 0
-    if (hasSpaces) {
+    if ($body.find(spaceCard).length > 0) {
       deleteAllSpaces()
     }
-    //  main.verifyElementsIsVisible([createSpaceBtn])
   })
+  // Wait for either the create button or the create-space form to settle after deletion/redirect
+  cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
 // ===========================================
@@ -494,15 +493,23 @@ export function acceptInvite(name) {
 // ===========================================
 
 function navigateToCreateSpacePage() {
-  cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 })
-    .filter(':visible')
-    .first()
-    .then(($el) => {
-      if (!$el.is(orgSpaceInput)) {
-        cy.wrap($el).click()
-      }
-    })
+  // Wait for the page to settle, then check if we need to click "Create space" or are already on the form
+  cy.url({ timeout: 15000 }).then((url) => {
+    if (url.includes(onboardingCreateSpacePath)) {
+      // Already redirected to create-space form
+      cy.get(orgSpaceInput).should('be.visible')
+    } else {
+      // Still on spaces list — wait a moment for potential auto-redirect
+      cy.wait(3000)
+      cy.url().then((urlAfterWait) => {
+        if (!urlAfterWait.includes(onboardingCreateSpacePath)) {
+          cy.get(createSpaceBtn).should('be.visible').and('be.enabled').click()
+        }
+      })
+    }
+  })
   cy.url().should('include', onboardingCreateSpacePath)
+  cy.get(orgSpaceInput).should('be.visible')
 }
 
 function submitSpaceName(name) {
