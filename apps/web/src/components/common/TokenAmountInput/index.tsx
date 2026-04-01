@@ -1,8 +1,9 @@
 import NumberField from '@/components/common/NumberField'
+import FiatValue from '@/components/common/FiatValue'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button, Divider, FormControl, InputLabel, MenuItem, TextField } from '@mui/material'
+import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 import classNames from 'classnames'
 import { useCallback } from 'react'
 import { get, useFormContext } from 'react-hook-form'
@@ -29,6 +30,7 @@ type TokenAmountInputProps = {
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
   defaultTokenAddress?: string
+  onMaxClick?: () => void
 }
 
 const TokenAmountInput = ({
@@ -39,6 +41,7 @@ const TokenAmountInput = ({
   fieldArray,
   deps,
   defaultTokenAddress,
+  onMaxClick,
 }: TokenAmountInputProps) => {
   const {
     formState: { errors, defaultValues },
@@ -59,6 +62,7 @@ const TokenAmountInput = ({
   // Use defaultTokenAddress as fallback when watch() returns empty on first render
   const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
 
+  const watchedAmount = watch(amountField)
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
 
   const validateAmount = useCallback(
@@ -92,8 +96,9 @@ const TokenAmountInput = ({
       shouldValidate: true,
     })
 
+    onMaxClick?.()
     trigger(deps)
-  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps])
+  }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
   const onChangeToken = useCallback(() => {
     const amountDefaultValue = get(
@@ -106,69 +111,82 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
-  return (
-    <FormControl
-      data-testid="token-amount-section"
-      className={classNames(css.outline, { [css.error]: isAmountError })}
-      fullWidth
-    >
-      <InputLabel shrink required className={css.label}>
-        {get(errors, tokenAddressField)?.message?.toString() ||
-          get(errors, amountField)?.message?.toString() ||
-          'Amount'}
-      </InputLabel>
-      <div className={css.inputs}>
-        <NumberField
-          data-testid="token-amount-field"
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            endAdornment: maxAmount !== undefined && (
-              <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
-                Max
-              </Button>
-            ),
-          }}
-          className={css.amount}
-          required
-          placeholder="0"
-          {...register(amountField, {
-            required: true,
-            setValueAs: (value: string): string => {
-              if (typeof value !== 'string') {
-                return value
-              }
+  const fiatValue =
+    watchedAmount && selectedToken?.fiatConversion
+      ? parseFloat(watchedAmount) * parseFloat(selectedToken.fiatConversion)
+      : null
 
-              return value.replace(/,/g, '.')
-            },
-            validate: validate ?? validateAmount,
-            deps,
-          })}
-        />
-        <Divider orientation="vertical" flexItem />
-        <TextField
-          data-testid="token-selector"
-          select
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-          }}
-          className={css.select}
-          {...register(tokenAddressField, {
-            required: true,
-            onChange: onChangeToken,
-          })}
-          value={tokenAddress}
-          required
-        >
-          {balances.map((item) => (
-            <MenuItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-              <AutocompleteItem {...item} />
-            </MenuItem>
-          ))}
-        </TextField>
-      </div>
-    </FormControl>
+  return (
+    <>
+      <FormControl
+        data-testid="token-amount-section"
+        className={classNames(css.outline, { [css.error]: isAmountError })}
+        fullWidth
+      >
+        <InputLabel shrink required className={css.label}>
+          {get(errors, tokenAddressField)?.message?.toString() ||
+            get(errors, amountField)?.message?.toString() ||
+            'Amount'}
+        </InputLabel>
+        <div className={css.inputs}>
+          <NumberField
+            data-testid="token-amount-field"
+            variant="standard"
+            InputProps={{
+              disableUnderline: true,
+              endAdornment: maxAmount !== undefined && (
+                <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+                  Max
+                </Button>
+              ),
+            }}
+            className={css.amount}
+            required
+            placeholder="0"
+            {...register(amountField, {
+              required: true,
+              setValueAs: (value: string): string => {
+                if (typeof value !== 'string') {
+                  return value
+                }
+
+                return value.replace(/,/g, '.')
+              },
+              validate: validate ?? validateAmount,
+              deps,
+            })}
+          />
+          <Divider orientation="vertical" flexItem />
+          <TextField
+            data-testid="token-selector"
+            select
+            variant="standard"
+            InputProps={{
+              disableUnderline: true,
+            }}
+            className={css.select}
+            {...register(tokenAddressField, {
+              required: true,
+              onChange: onChangeToken,
+            })}
+            value={tokenAddress}
+            required
+          >
+            {balances.map((item) => (
+              <MenuItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
+                <AutocompleteItem {...item} />
+              </MenuItem>
+            ))}
+          </TextField>
+        </div>
+      </FormControl>
+
+      {fiatValue !== null && !isNaN(fiatValue) && (
+        <Typography variant="body2" color="text.secondary" mt={0.5} ml={0.5}>
+          <FiatValue value={fiatValue.toString()} />
+        </Typography>
+      )}
+    </>
   )
 }
 

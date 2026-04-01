@@ -1,7 +1,8 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { Box, Button, FormControl, Stack, SvgIcon } from '@mui/material'
+import { Alert, Box, Button, FormControl, IconButton, Stack, SvgIcon } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
 import type { MultiTokenTransferParams, TokenTransferParams } from '../types'
@@ -9,7 +10,7 @@ import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
-import { useCallback, useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { selectSpendingLimits } from '@/features/spending-limits'
 import { useAppSelector } from '@/store'
@@ -18,6 +19,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const getFieldName = (
   field: keyof TokenTransferParams,
@@ -71,6 +74,25 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
+  // GTF: resolve fee token and track MAX press for fee info banner
+  const isGtfEnabled = useHasFeature(FEATURES.GTF)
+  const [maxPressed, setMaxPressed] = useState(false)
+
+  // Mock: resolved fee token = sent token (assumes no alternative has enough balance for gas)
+  // When CGW preview endpoint is available, replace with real resolution:
+  // ETH → USDC → USDT → DAI → sent token (based on Safe balances)
+  // Note: mock always shows the banner, even when a higher-priority token could cover gas
+  const resolvedFeeToken = tokenAddress
+
+  const sentTokenIsFeeToken = sameAddress(tokenAddress, resolvedFeeToken)
+
+  // Reset banner when token changes
+  useEffect(() => {
+    setMaxPressed(false)
+  }, [tokenAddress])
+
+  const showFeeBanner = !!isGtfEnabled && !isSpendingLimitType && maxPressed && sentTokenIsFeeToken
+
   const onRemove = useCallback(() => {
     remove?.(fieldArray.index)
     trigger(MultiTokenTransferFields.recipients)
@@ -96,8 +118,24 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
               maxAmount={maxAmount}
               deps={[MultiTokenTransferFields.recipients]}
               defaultTokenAddress={tokenAddress}
+              onMaxClick={() => setMaxPressed(true)}
             />
           </FormControl>
+
+          {showFeeBanner && (
+            <Alert
+              severity="info"
+              data-testid="gtf-fee-banner"
+              action={
+                <IconButton size="small" onClick={() => setMaxPressed(false)} aria-label="Dismiss fee banner">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              }
+            >
+              Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
+              change.
+            </Alert>
+          )}
 
           {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
             <FormControl fullWidth>
