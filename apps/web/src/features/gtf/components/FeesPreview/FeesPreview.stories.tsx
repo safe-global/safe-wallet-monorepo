@@ -48,3 +48,19 @@ export const Loading: Story = {
 export const Error: Story = {
   args: { ...defaultArgs, error: true },
 }
+
+export const FallbackEOA: Story = {
+  args: {
+    canCoverFees: false,
+    executionFee: { label: 'Execution fee', amount: '0.00273', currency: 'ETH', isFree: true },
+    gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
+  },
+}
+
+export const FallbackNoGtfAmount: Story = {
+  args: {
+    canCoverFees: false,
+    executionFee: { label: 'Execution fee', isFree: true },
+    gasFee: { label: 'Gas fee', amount: '3.50', currency: 'ETH', fiatAmount: '$3.50' },
+  },
+}

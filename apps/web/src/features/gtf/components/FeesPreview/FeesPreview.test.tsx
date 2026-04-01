@@ -99,4 +99,46 @@ describe('FeesPreview', () => {
 
     expect(screen.queryByText('Cannot estimate')).not.toBeInTheDocument()
   })
+
+  describe('fallback EOA (canCoverFees: false)', () => {
+    const fallbackProps: FeesPreviewData = {
+      canCoverFees: false,
+      executionFee: { label: 'Execution fee', amount: '0.00273', currency: 'ETH', isFree: true },
+      gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
+    }
+
+    it('does not render payment source toggle', () => {
+      render(<FeesPreview {...fallbackProps} />)
+
+      expect(screen.queryByText('Pay fees from')).not.toBeInTheDocument()
+      expect(screen.queryByText('Safe wallet')).not.toBeInTheDocument()
+    })
+
+    it('renders fee rows', () => {
+      render(<FeesPreview {...fallbackProps} />)
+
+      expect(screen.getByText('FREE')).toBeInTheDocument()
+      expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    })
+
+    it('renders fallback EOA info alert', () => {
+      render(<FeesPreview {...fallbackProps} />)
+
+      expect(screen.getByTestId('fallback-eoa-banner')).toBeInTheDocument()
+    })
+
+    it('dismisses fallback EOA banner on close', () => {
+      render(<FeesPreview {...fallbackProps} />)
+
+      fireEvent.click(screen.getByLabelText('Dismiss'))
+
+      expect(screen.queryByTestId('fallback-eoa-banner')).not.toBeInTheDocument()
+    })
+
+    it('does not render total outgoing', () => {
+      render(<FeesPreview {...fallbackProps} />)
+
+      expect(screen.queryByText('Total outgoing')).not.toBeInTheDocument()
+    })
+  })
 })

@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRef, useState } from 'react'
-import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, Divider, IconButton, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -191,8 +192,9 @@ const GasTokenSelector = ({
 }
 
 const FeesPreview = (props: FeesPreviewData): ReactElement => {
-  const { executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } = props
+  const { canCoverFees, executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } = props
   const [paymentSource, setPaymentSource] = useState<PaymentSource>('safe')
+  const [fallbackDismissed, setFallbackDismissed] = useState(false)
 
   const isSafeWallet = paymentSource === 'safe'
 
@@ -211,28 +213,48 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
 
       {/* Fee card */}
       <div className={css.feeCard}>
-        {/* Payment source row */}
-        <div className={css.paymentRow}>
-          <Typography variant="body2">Pay fees from</Typography>
-          <PaymentSourceToggle value={paymentSource} onChange={setPaymentSource} />
-          <Typography variant="body2">using</Typography>
-          <GasTokenSelector
-            availableGasTokens={isSafeWallet ? availableGasTokens : availableGasTokens?.slice(0, 1)}
-            selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.symbol ?? '')}
-            onGasTokenChange={props.onGasTokenChange}
-            locked={!isSafeWallet}
-          />
-        </div>
+        {/* Payment source row — only when Safe can cover fees */}
+        {canCoverFees && (
+          <>
+            <div className={css.paymentRow}>
+              <Typography variant="body2">Pay fees from</Typography>
+              <PaymentSourceToggle value={paymentSource} onChange={setPaymentSource} />
+              <Typography variant="body2">using</Typography>
+              <GasTokenSelector
+                availableGasTokens={isSafeWallet ? availableGasTokens : availableGasTokens?.slice(0, 1)}
+                selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.symbol ?? '')}
+                onGasTokenChange={props.onGasTokenChange}
+                locked={!isSafeWallet}
+              />
+            </div>
 
-        <Divider sx={{ mx: -2 }} />
+            <Divider sx={{ mx: -2 }} />
+          </>
+        )}
 
         {/* Fee breakdown */}
         <FeeRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
         <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
-      {/* Total outgoing */}
-      {totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
+      {/* Fallback EOA banner — shown when fees were computed but Safe can't cover them */}
+      {!canCoverFees && executionFee.amount && !fallbackDismissed && (
+        <Alert
+          severity="info"
+          data-testid="fallback-eoa-banner"
+          action={
+            <IconButton size="small" onClick={() => setFallbackDismissed(true)} aria-label="Dismiss">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
+        >
+          Fees can&apos;t currently be paid from your Safe balance. For this transaction, fees will be paid by the
+          executing wallet instead.
+        </Alert>
+      )}
+
+      {/* Total outgoing — only when Safe can cover fees */}
+      {canCoverFees && totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
     </div>
   )
 }
