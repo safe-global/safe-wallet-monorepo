@@ -35,7 +35,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         <FormProvider {...formMethods}>
           <form
             onSubmit={onSubmit}
-            className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-4 sm:max-w-[520px]"
+            className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]"
           >
             <div className="flex shrink-0 flex-col gap-4">
               <Button
@@ -94,7 +94,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                   </Alert>
                 )}
 
-                <div className="flex shrink-0 flex-col gap-5 pt-2">
+                <div className="flex shrink-0 flex-col gap-5">
                   <Button
                     data-testid="select-safes-continue-button"
                     type="submit"

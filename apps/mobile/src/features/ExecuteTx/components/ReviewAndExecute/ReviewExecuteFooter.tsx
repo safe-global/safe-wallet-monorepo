@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stack, Text } from 'tamagui'
+import { View, Text } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Address } from '@/src/types/address'
@@ -48,7 +48,7 @@ export function ReviewExecuteFooter({
   const buttonText = isExecuting ? 'Executing...' : getSubmitButtonText(hasSufficientFunds)
 
   return (
-    <Stack paddingHorizontal="$4" space="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
+    <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
         backgroundColor="transparent"
         gap={'$2'}
@@ -85,6 +85,6 @@ export function ReviewExecuteFooter({
           {buttonText}
         </SafeButton>
       )}
-    </Stack>
+    </View>
   )
 }

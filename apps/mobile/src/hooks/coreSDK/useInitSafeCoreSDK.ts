@@ -4,6 +4,8 @@ import { initSafeSDK, setSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { useWeb3ReadOnly } from '@/src/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import Logger from '@/src/utils/logger'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChain } from '@/src/store/chains'
 
 /**
  * Initializes the Safe Core SDK when safe data and web3 provider are available.
@@ -31,6 +33,7 @@ import Logger from '@/src/utils/logger'
 export const useInitSafeCoreSDK = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const web3ReadOnly = useWeb3ReadOnly()
+  const chain = useAppSelector(selectActiveChain)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export const useInitSafeCoreSDK = () => {
           version: safe.version,
           implementationVersionState: safe.implementationVersionState,
           implementation: safe.implementation.value,
+          isL2Chain: chain?.l2,
+          isZkChain: chain?.zk,
         })
 
         if (signal.aborted) {
@@ -91,6 +96,8 @@ export const useInitSafeCoreSDK = () => {
 
     return cleanup
   }, [
+    chain?.l2,
+    chain?.zk,
     safe?.address?.value,
     safe?.chainId,
     safe?.implementation?.value,

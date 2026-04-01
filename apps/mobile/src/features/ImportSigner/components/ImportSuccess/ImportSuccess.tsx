@@ -3,13 +3,11 @@ import React from 'react'
 import { Badge } from '@/src/components/Badge'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { LargeHeaderTitle } from '@/src/components/Title'
-import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
+import SignersListItem from '@/src/features/Signers/components/SignersList/SignersListItem'
+import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Platform, ScrollView } from 'react-native'
-import { Button, Text, View } from 'tamagui'
-import { ToastViewport } from '@tamagui/toast'
-import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { ScrollView } from 'react-native'
+import { Text, View } from 'tamagui'
 import Logger from '@/src/utils/logger'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
@@ -20,10 +18,9 @@ export function ImportSuccess() {
     name: string
   }>()
   const router = useRouter()
-  const copy = useCopyAndDispatchToast()
   const pendingSafe = useAppSelector(selectPendingSafe)
 
-  const handleContinuePress = async () => {
+  const handleDonePress = async () => {
     try {
       router.dismissAll()
       if (pendingSafe) {
@@ -44,56 +41,42 @@ export function ImportSuccess() {
 
   return (
     <View flex={1} justifyContent="space-between" testID={'import-success'}>
+      <AbsoluteLinearGradient />
+
       <View flex={1}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$3">
-            <Badge
-              circleProps={{ backgroundColor: '$backgroundLightLight' }}
-              themeName="badge_success"
-              circleSize={64}
-              content={<SafeFontIcon size={32} color="$success" name="check-filled" />}
-            />
+          <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$4">
+            <View alignItems="center" alignSelf="stretch" gap="$5">
+              <Badge
+                circleProps={{ backgroundColor: '$backgroundSuccess' }}
+                themeName="badge_success"
+                circleSize={64}
+                content={<SafeFontIcon size={32} color="$success" name="check-filled" />}
+              />
 
-            <View margin="$10" width="100%" alignItems="center" gap="$4">
-              <LargeHeaderTitle textAlign="center">Your signer is ready!</LargeHeaderTitle>
+              <View width="100%" alignItems="center">
+                <Text fontWeight="700" fontSize={24} lineHeight={32} textAlign="center" color="$color">
+                  Your signer is ready!
+                </Text>
+                <Text textAlign="center" fontSize="$4" color="$colorSecondary" lineHeight={20}>
+                  You can now use this signer to manage your Safe.
+                </Text>
+              </View>
 
-              <Text textAlign="center" fontSize="$4">
-                You can now use it to interact with your Safe Account — sign and execute transactions seamlessly.
-              </Text>
+              <View width="100%">
+                <SignersListItem
+                  item={{ value: address, name }}
+                  signersGroup={[{ id: 'imported_signers', title: '', data: [{ value: address, name }] }]}
+                />
+              </View>
             </View>
-
-            <SignersCard
-              transparent={false}
-              rightNode={
-                <View flex={1} alignItems="flex-end">
-                  <Button
-                    maxWidth={120}
-                    height="$10"
-                    paddingHorizontal="$2"
-                    borderRadius="$3"
-                    backgroundColor="$borderLight"
-                    fontWeight="500"
-                    size="$5"
-                    onPress={() => {
-                      copy(address)
-                    }}
-                    icon={<SafeFontIcon name="copy" />}
-                  >
-                    Copy
-                  </Button>
-                </View>
-              }
-              name={name}
-              address={address}
-            />
           </View>
         </ScrollView>
-        {Platform.OS === 'ios' && <ToastViewport multipleToasts={false} left={0} right={0} />}
       </View>
 
-      <View paddingHorizontal="$3">
-        <SafeButton onPress={handleContinuePress} testID={'import-success-continue'}>
-          Continue
+      <View paddingHorizontal="$4">
+        <SafeButton onPress={handleDonePress} testID={'import-success-continue'}>
+          Done
         </SafeButton>
       </View>
     </View>

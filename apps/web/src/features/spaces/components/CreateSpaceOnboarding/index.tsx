@@ -119,11 +119,11 @@ const CreateSpaceOnboarding = (): ReactElement => {
             <div className="relative">
               <Input
                 data-testid="space-name-input"
-                placeholder="Name your space"
+                placeholder="Name your Space"
                 autoComplete="off"
                 autoFocus={!isEditMode}
                 disabled={isCheckingAccess || isSpaceLoading}
-                className="h-11 rounded-lg bg-card px-4"
+                className="h-11 rounded-sm bg-card px-4"
                 {...register('name', {
                   required: true,
                   maxLength: { value: 30, message: 'Space name must be 30 characters or less' },
@@ -155,7 +155,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
               data-testid="create-space-onboarding-continue-button"
               type="submit"
               disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-              className="h-10 w-full rounded-lg"
+              className="h-10 w-full"
               size="lg"
             >
               {isSubmitting ? <Spinner /> : 'Continue'}

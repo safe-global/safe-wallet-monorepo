@@ -71,8 +71,8 @@ describe('safeContracts', () => {
   })
 
   describe('isMigrationToL2Possible', () => {
-    it('should not be possible to migrate Safes on chains without migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeFalsy()
+    it('should be possible to migrate Safes on unregistered chains (chain-agnostic canonical fallback)', () => {
+      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeTruthy()
     })
 
     it('should not be possible to migrate Safes with nonce > 0', () => {

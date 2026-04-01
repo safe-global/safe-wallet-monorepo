@@ -9,7 +9,6 @@ export const SettingsButton = () => {
       testID={'settings-screen-header-settings-button'}
       size={'$8'}
       circular={true}
-      scaleSpace={1.5}
       backgroundColor={'$backgroundSkeleton'}
       onPress={() => {
         router.push('/app-settings')

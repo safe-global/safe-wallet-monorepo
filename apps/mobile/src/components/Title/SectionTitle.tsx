@@ -15,7 +15,7 @@ export function SectionTitle({ title, description, paddingHorizontal = '$3' }: S
         <LargeHeaderTitle marginRight={5}>{title}</LargeHeaderTitle>
       </View>
 
-      {description && <Text>{description}</Text>}
+      {description && <Text color="$colorSecondary">{description}</Text>}
     </View>
   )
 }

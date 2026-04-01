@@ -118,12 +118,12 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 sx={{ width: { lg: 320 } }}
                 className={classnames(css.widget)}
               >
-                <Box className={css.sidebarSlot}>
-                  <Slot name={SlotName.Sidebar} />
-                </Box>
-
                 <Box className={css.sticky}>
                   <SafeShieldWidget />
+
+                  <Box className={css.sidebarSlot}>
+                    <Slot name={SlotName.Sidebar} />
+                  </Box>
                 </Box>
               </Grid>
             )}

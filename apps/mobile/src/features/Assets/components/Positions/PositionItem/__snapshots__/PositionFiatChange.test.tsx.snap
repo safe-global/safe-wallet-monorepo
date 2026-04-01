@@ -34,8 +34,8 @@ exports[`PositionFiatChange renders negative change with minus sign 1`] = `
           style={
             {
               "color": "#FF5F72",
-              "fontFamily": "DM Sans",
               "fontSize": 13,
+              "fontWeight": 400,
             }
           }
           suppressHighlighting={true}
@@ -86,8 +86,8 @@ exports[`PositionFiatChange renders positive change with plus sign 1`] = `
           style={
             {
               "color": "#00B460",
-              "fontFamily": "DM Sans",
               "fontSize": 13,
+              "fontWeight": 400,
             }
           }
           suppressHighlighting={true}

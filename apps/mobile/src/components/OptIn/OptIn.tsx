@@ -78,7 +78,8 @@ export const OptIn: React.FC<OptInProps> = React.memo(
               </Container>
             )}
           </View>
-          {image && <Image style={styles.image} source={image} />}
+          {/* @ts-expect-error Tamagui v2 types src as string but require() returns number - works at runtime */}
+          {image && <Image style={styles.image} src={image} />}
         </View>
 
         <View testID="notifications-opt-in-cta-buttons" flexDirection="column" paddingHorizontal={'$4'} gap="$4">

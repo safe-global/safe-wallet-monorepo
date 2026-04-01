@@ -36,7 +36,7 @@ export const items: CarouselItem[] = [
     name: 'tracking',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.anywhere]} source={TrackAnywhere} />
+        <Image style={[styles.image, styles.anywhere]} src={TrackAnywhere} />
       </View>
     ),
     title: (
@@ -58,7 +58,7 @@ export const items: CarouselItem[] = [
     name: 'signing',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.signing]} source={Signing} />
+        <Image style={[styles.image, styles.signing]} src={Signing} />
       </View>
     ),
     title: (
@@ -78,7 +78,7 @@ export const items: CarouselItem[] = [
     name: 'update-to-date',
     image: (
       <View height={300} width={'100%'}>
-        <Image style={[styles.image, styles.signing]} source={PersonalisedUpdates} />
+        <Image style={[styles.image, styles.signing]} src={PersonalisedUpdates} />
       </View>
     ),
     title: (

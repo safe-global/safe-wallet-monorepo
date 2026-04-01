@@ -1,6 +1,6 @@
-import { styled, Stack } from 'tamagui'
+import { styled, View } from 'tamagui'
 
-export const WidgetDisplayWrapper = styled(Stack, {
+export const WidgetDisplayWrapper = styled(View, {
   paddingHorizontal: '$4',
   borderRadius: '$2',
   gap: '$3',

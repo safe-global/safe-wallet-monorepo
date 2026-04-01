@@ -14,6 +14,9 @@ import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
 import { AppRoutes } from '@/config/routes'
+import HelpMenu from '@/components/common/HelpMenu'
+import Breadcrumbs from '@/components/common/Breadcrumbs'
+import { useParentSafe } from '@/hooks/useParentSafe'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
@@ -44,6 +47,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
@@ -88,6 +92,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       >
         <div className={css.content}>
           <SafeLoadingError>
+            {!hideHeader && parentSafe && <Breadcrumbs />}
             {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
@@ -112,6 +117,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         {!isSafeLabsTermsPage && <Footer />}
       </div>
+
+      <HelpMenu />
     </>
   )
 }

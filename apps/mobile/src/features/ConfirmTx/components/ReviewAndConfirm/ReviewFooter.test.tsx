@@ -7,7 +7,9 @@ import type { Signer } from '@/src/store/signersSlice'
 
 // Test wrapper with Tamagui provider
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <TamaguiProvider config={config}>{children}</TamaguiProvider>
+  <TamaguiProvider config={config} defaultTheme="light">
+    {children}
+  </TamaguiProvider>
 )
 
 const renderWithProviders = (component: React.ReactElement) => {

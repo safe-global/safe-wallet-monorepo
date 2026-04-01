@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { KeyboardAvoidingView, StyleSheet, TouchableOpacity } from 'react-native'
-import { Button, View, YStack, ScrollView } from 'tamagui'
+import { View, YStack, ScrollView } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
 import { SectionTitle } from '@/src/components/Title'
@@ -54,18 +54,9 @@ export function ImportSigner() {
           </View>
 
           <View alignItems="center">
-            <Button
-              height="$10"
-              paddingHorizontal="$2"
-              borderRadius="$3"
-              backgroundColor="$borderLight"
-              icon={<SafeFontIcon name="paste" />}
-              fontWeight="500"
-              size="$5"
-              onPress={onInputPaste}
-            >
+            <SafeButton secondary size="$sm" icon={<SafeFontIcon name="paste" />} onPress={onInputPaste}>
               Paste
-            </Button>
+            </SafeButton>
           </View>
         </YStack>
       </ScrollView>
@@ -73,8 +64,7 @@ export function ImportSigner() {
       <SafeButton
         onPress={handleImport}
         testID={'import-signer-button'}
-        disabled={!!error}
-        opacity={!error && input && (inputType === 'private-key' || inputType === 'seed-phrase') ? 1 : 0.5}
+        disabled={!!error || !input || (inputType !== 'private-key' && inputType !== 'seed-phrase')}
       >
         Import signer
       </SafeButton>

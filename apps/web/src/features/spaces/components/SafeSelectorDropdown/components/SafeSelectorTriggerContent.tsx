@@ -15,7 +15,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
 
-  const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId, selectedItem.name)
+  const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
     resolvedName,
     selectedItem.address,

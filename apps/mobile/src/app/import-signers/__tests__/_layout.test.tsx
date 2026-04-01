@@ -25,6 +25,10 @@ jest.mock('@/src/features/ImportSigner', () => {
   }
 })
 
+jest.mock('@/src/features/WalletConnect/hooks/useWalletConnect', () => ({
+  useWalletConnect: () => ({ disconnect: jest.fn(), initiateConnection: jest.fn() }),
+}))
+
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0 }),
 }))

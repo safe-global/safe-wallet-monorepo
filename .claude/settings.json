@@ -1,1 +1,15 @@
-{}
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"$(git rev-parse --show-toplevel)\" && node scripts/verify-changed-hook.mjs'"
+          }
+        ]
+      }
+    ]
+  }
+}

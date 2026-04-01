@@ -7,16 +7,16 @@ import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeCon
 import { isPredictedSafeProps, isReplayedSafeProps } from '@/features/counterfactual/services'
 import { isLegacyVersion } from '@safe-global/utils/services/contracts/utils'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
-import { getCanonicalMultiSendContractNetworks } from '@safe-global/utils/hooks/coreSDK/contractNetworks'
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { keccak256 } from 'ethers'
 import {
   getL2MasterCopyVersionByCodeHash,
+  isChainAgnosticVersion,
   isL2MasterCopyCodeHash,
+  resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
 
-// Safe Core SDK
 export const initSafeSDK = async ({
   provider,
   chainId,
@@ -25,6 +25,8 @@ export const initSafeSDK = async ({
   implementationVersionState,
   implementation,
   undeployedSafe,
+  isL2Chain,
+  isZkChain,
 }: SafeCoreSDKProps): Promise<Safe | undefined> => {
   const providerNetwork = (await provider.getNetwork()).chainId
   if (providerNetwork !== BigInt(chainId)) {
@@ -35,17 +37,32 @@ export const initSafeSDK = async ({
   let isL1SafeSingleton = chainId === chains.eth
   let contractNetworks: ContractNetworksConfig | undefined
 
-  // If it is an official deployment we should still initiate the safeSDK
+  // For versions >= 1.4.1, resolve all addresses chain-agnostically (works on any chain)
+  if (isChainAgnosticVersion(safeVersion) && isL2Chain !== undefined) {
+    const resolved = resolveChainAgnosticContractAddresses(safeVersion, isL2Chain, isZkChain ?? false)
+
+    if (resolved) {
+      contractNetworks = { [chainId]: resolved }
+      isL1SafeSingleton = !isL2Chain
+    }
+  }
+
+  // For older versions or unrecognized master copies, use per-chain lookup
   if (!isValidMasterCopy(implementationVersionState)) {
     const masterCopy = implementation
 
     const safeL1Deployment = getSafeSingletonDeployments({ network: chainId, version: safeVersion })
     const safeL2Deployment = getSafeL2SingletonDeployments({ network: chainId, version: safeVersion })
 
-    isL1SafeSingleton = isInDeployments(masterCopy, safeL1Deployment?.networkAddresses[chainId])
+    const isL1Deployment = isInDeployments(masterCopy, safeL1Deployment?.networkAddresses[chainId])
     const isL2SafeMasterCopy = isInDeployments(masterCopy, safeL2Deployment?.networkAddresses[chainId])
 
-    if (!isL1SafeSingleton && !isL2SafeMasterCopy) {
+    if (isL1Deployment) {
+      isL1SafeSingleton = true
+    } else if (isL2SafeMasterCopy) {
+      isL1SafeSingleton = false
+    } else if (!contractNetworks) {
+      // Bytecode fallback: only if chain-agnostic resolution didn't already succeed
       try {
         const code = await provider.getCode(masterCopy)
 
@@ -69,9 +86,11 @@ export const initSafeSDK = async ({
           return
         }
 
-        // Use the custom mastercopy address with the SDK
+        // Merge custom mastercopy with chain-agnostic auxiliary addresses
+        const baseAddresses = resolveChainAgnosticContractAddresses(upgradeableVersion, true, isZkChain ?? false)
         contractNetworks = {
           [chainId]: {
+            ...baseAddresses,
             safeSingletonAddress: masterCopy,
           },
         }
@@ -83,22 +102,11 @@ export const initSafeSDK = async ({
         return
       }
     }
-
-    if (isL2SafeMasterCopy) {
-      isL1SafeSingleton = false
-    }
   }
-  // Legacy Safe contracts
+
   if (isLegacyVersion(safeVersion)) {
     isL1SafeSingleton = true
   }
-
-  contractNetworks = getCanonicalMultiSendContractNetworks({
-    implementationAddress: implementation,
-    chainId,
-    safeVersion,
-    contractNetworks,
-  })
 
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {
@@ -109,7 +117,6 @@ export const initSafeSDK = async ({
         predictedSafe: undeployedSafe.props,
       })
     }
-    // We cannot initialize a Core SDK for replayed Safes yet.
     return
   }
 

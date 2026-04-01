@@ -26,7 +26,7 @@ function AccountItemBalance({
   return (
     <div className={cn(css.accountItemBalance, className)} data-testid={testId}>
       {fiatTotal !== undefined ? (
-        <Typography variant="paragraph-small-medium" color="muted">
+        <Typography variant="paragraph-small-bold">
           <FiatValue value={fiatTotal} />
         </Typography>
       ) : isLoading ? (
