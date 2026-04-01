@@ -85,7 +85,7 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
                 {signer?.type === 'private-key' && <ImportedBadge />}
 
                 {signer?.type === 'walletconnect' && (
-                  <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} />
+                  <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} skipStatus />
                 )}
 
                 <RNView onStartShouldSetResponder={() => true}>

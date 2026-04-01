@@ -62,7 +62,7 @@ export const SignerView = ({
           <BadgeWrapper
             badge={
               isWcSigner ? (
-                <WalletConnectBadge address={signerAddress} testID="signer-wc-badge" withStatus />
+                <WalletConnectBadge address={signerAddress} testID="signer-wc-badge" />
               ) : (
                 <SignerTypeBadge address={signerAddress as Address} theme="badge_background" bordered={true} />
               )
