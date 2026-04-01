@@ -73,6 +73,33 @@ describe('useFeesPreview', () => {
     expect(result.current.gasFee.currency).toBe('ETH')
   })
 
+  it('returns enriched mock data with all fields', () => {
+    const chain = chainBuilder()
+      .with({ nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' } })
+      .build()
+
+    jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: BigInt(21000), gasLimitLoading: false })
+    jest
+      .spyOn(useGasPriceModule, 'default')
+      .mockReturnValue([
+        { maxFeePerGas: BigInt(toBeHex(20000000000)), maxPriorityFeePerGas: undefined },
+        undefined,
+        false,
+      ] as never)
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(chain)
+
+    const { result } = renderHook(() => useFeesPreview())
+
+    expect(result.current.canCoverFees).toBe(true)
+    expect(result.current.executionFee.isFree).toBe(true)
+    expect(result.current.executionFee.label).toContain('Execution fee')
+    expect(result.current.totalOutgoing).toBeDefined()
+    expect(result.current.availableGasTokens).toHaveLength(1)
+    expect(result.current.availableGasTokens?.[0].symbol).toBe('ETH')
+    expect(result.current.selectedGasToken).toBe('ETH')
+    expect(result.current.onGasTokenChange).toBeInstanceOf(Function)
+  })
+
   it('returns error when gas limit estimation fails', () => {
     const chain = chainBuilder().build()
 

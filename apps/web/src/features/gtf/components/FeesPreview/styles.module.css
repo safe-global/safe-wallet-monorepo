@@ -1,21 +1,131 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-1);
 }
 
-.feeBreakdownWide {
+.container > .totalOutgoing {
+  margin-top: var(--space-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.howFeesWork {
+  width: 126px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--color-text-primary);
+  background: linear-gradient(to right, #b0ffc9, #d7f6ff 99.5%);
+  padding: 0 6px;
+  border-radius: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 16px;
+}
+
+.howFeesWorkIcon path {
+  fill: currentColor;
+}
+
+.howFeesWork:hover {
+  opacity: 0.85;
+}
+
+.feeCard {
   border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
+}
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  width: 240px;
+  height: 32px;
+  border-radius: 32px;
+  background-color: rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.toggleTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 28px;
+  border-radius: 432px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.17px;
+  padding: 0 12px;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.toggleTabActive {
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.04);
+}
+
+.gasTokenSelector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  cursor: pointer;
+}
+
+.gasTokenSelectorLocked {
+  cursor: default;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.tokenLogo {
+  border-radius: 50%;
+}
+
+.gasTokenMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
 }
 
 .feeRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -23,4 +133,39 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+}
+
+.feeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.feeAmount {
+  display: flex;
+  align-items: center;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.totalOutgoing {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.totalOutgoingValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }

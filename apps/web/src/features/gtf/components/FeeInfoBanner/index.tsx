@@ -26,7 +26,7 @@ const FeeInfoBanner = (): ReactElement | null => {
 
         <div className={css.feeInfoBody}>
           <Typography variant="subtitle2" fontWeight={700}>
-            Soon, fees will be paid from your Safe balance.
+            Pay fees directly from your Safe wallet.
           </Typography>
 
           <div className={css.feeInfoBullet}>
