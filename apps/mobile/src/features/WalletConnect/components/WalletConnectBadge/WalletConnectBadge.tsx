@@ -29,6 +29,14 @@ export function WalletConnectBadge(props: WalletConnectBadgeProps) {
   )
 }
 
+function resolveStatus(isWcSigner: boolean, isConnected: boolean): BadgeStatus {
+  if (!isWcSigner) {
+    return 'error'
+  }
+
+  return isConnected ? 'connected' : 'disconnected'
+}
+
 const statusConfig = {
   connected: { icon: 'check-filled', color: '$success', bg: '$backgroundSuccess' },
   disconnected: { icon: 'alert-circle-filled', color: '$warning', bg: '$backgroundError' },
@@ -57,7 +65,7 @@ function WalletConnectBadgeInner({
     return null
   }
 
-  const resolvedStatus = status ?? (isWcSigner ? (isConnected ? 'connected' : 'disconnected') : 'error')
+  const resolvedStatus = status ?? resolveStatus(isWcSigner, isConnected)
   const { bg, icon: statusIcon, color } = statusConfig[resolvedStatus]
 
   const walletIconBadge = (
