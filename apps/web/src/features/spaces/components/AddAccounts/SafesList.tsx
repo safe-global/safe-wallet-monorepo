@@ -1,217 +1,37 @@
-import ChainIndicator from '@/components/common/ChainIndicator'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { ChainIcon } from '@/components/common/SafeIcon'
-import {
-  isMultiChainSafeItem,
-  type SafeItem,
-  type AllSafeItems,
-  flattenSafeItems,
-  type MultiChainSafeItem,
-} from '@/hooks/safes'
-import { useLoadFeature } from '@/features/__core__'
-import { MyAccountsFeature } from '@/features/myAccounts'
-import type { AddAccountsFormValues } from './index'
-import css from './styles.module.css'
-import { useChain } from '@/hooks/useChains'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Checkbox,
-  List,
-  ListItem,
-  Stack,
-  Typography,
-} from '@mui/material'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import { Controller, useFormContext } from 'react-hook-form'
-import { useSpaceSafes } from '@/features/spaces'
-import isEqual from 'lodash/isEqual'
+import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import SafeCard from '../SelectSafesOnboarding/components/SafeCard'
+import SimilarAddressAlert from '../SelectSafesOnboarding/components/SimilarAddressAlert'
+import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { useMemo } from 'react'
 
-const ChainItem = ({ chainId }: { chainId: string }) => {
-  const chainConfig = useChain(chainId)
-
-  if (!chainConfig) return null
-
-  return (
-    <Stack alignItems="center" direction="row" gap={1}>
-      <ChainIcon chainId={chainId} />
-      <Typography
-        component="span"
-        sx={{
-          color: 'var(--color-primary-light)',
-          fontSize: 'inherit',
-        }}
-      >
-        {chainConfig.chainName}
-      </Typography>
-    </Stack>
-  )
-}
-
-export const getSafeId = (safeItem: SafeItem) => {
+export const getSafeId = (safeItem: { chainId: string; address: string }) => {
   return `${safeItem.chainId}:${safeItem.address}`
 }
 
-function getMultiChainSafeId(mcSafe: MultiChainSafeItem) {
-  return `multichain_${mcSafe.address}`
-}
+const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>) =>
+  safes.map((safe, index) => {
+    const isSimilar = similarAddresses.has(safe.address.toLowerCase())
+    if (isMultiChainSafeItem(safe)) {
+      return <SafeCard key={`multi-${safe.address}-${index}`} safe={safe} isSimilar={isSimilar} />
+    }
+    return <SafeCard key={`${safe.chainId}:${safe.address}`} safe={safe} isSimilar={isSimilar} />
+  })
 
 const SafesList = ({ safes }: { safes: AllSafeItems }) => {
-  const { AccountItemChainBadge } = useLoadFeature(MyAccountsFeature)
-  const { watch, setValue, control } = useFormContext<AddAccountsFormValues>()
-  const { allSafes: spaceSafes } = useSpaceSafes()
-  const flatSafeItems = flattenSafeItems(spaceSafes)
-  const multiChainSpaceSafes = spaceSafes.filter(isMultiChainSafeItem)
+  // Detect similar addresses
+  const similarAddresses = useMemo<Set<string>>(() => {
+    const uniqueAddresses = [...new Set(safes.map((s) => s.address))]
+    if (uniqueAddresses.length < 2) return new Set()
+    const result = detectSimilarAddresses(uniqueAddresses)
+    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+  }, [safes])
 
   return (
-    <List
-      sx={{
-        px: 2,
-        pb: 2,
-        pt: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-        height: 400,
-        overflow: 'auto',
-      }}
-    >
-      {safes.map((safe, index) => {
-        if (isMultiChainSafeItem(safe)) {
-          const parentSafeId = getMultiChainSafeId(safe)
-          const subSafeIds = safe.safes.map(getSafeId)
-          const watchedSubSafeIds = subSafeIds.map((id) => `selectedSafes.${id}`)
+    <div className="flex w-full flex-col gap-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))] p-4">
+      {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
-          // @ts-ignore TODO: Check why this overload is not supported https://react-hook-form.com/docs/useform/watch
-          const subSafeValues = watch(watchedSubSafeIds)
-
-          const totalSubSafes = safe.safes.length
-          const checkedCount = subSafeValues.filter(Boolean).length
-          const allChecked = checkedCount === totalSubSafes && totalSubSafes > 0
-          const someChecked = checkedCount > 0 && checkedCount < totalSubSafes
-          const alreadyAdded = multiChainSpaceSafes.some((spaceSafe) => isEqual(spaceSafe.safes, safe.safes))
-
-          const handleHeaderCheckboxChange = (checked: boolean) => {
-            setValue(`selectedSafes.${parentSafeId}`, checked, { shouldValidate: true })
-
-            subSafeIds.forEach((id) => {
-              setValue(`selectedSafes.${id}`, checked, { shouldValidate: true })
-            })
-          }
-
-          return (
-            <Accordion key={index} className={css.accordion} disableGutters sx={{ flexShrink: '0' }}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                sx={{
-                  '& .MuiAccordionSummary-expandIconWrapper': { position: 'absolute', right: '16px' },
-                }}
-              >
-                <Checkbox
-                  checked={Boolean(allChecked) || alreadyAdded}
-                  indeterminate={someChecked}
-                  onChange={(e) => handleHeaderCheckboxChange(e.target.checked)}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={(e) => e.stopPropagation()}
-                  sx={{ mr: 2 }}
-                  disabled={alreadyAdded}
-                />
-                <Box className={css.safeRow} pr={4}>
-                  <EthHashInfo address={safe.address} copyAddress={false} showPrefix={false} />
-                  <Box sx={{ justifySelf: 'flex-start', pl: 2 }}>
-                    <AccountItemChainBadge safes={safe.safes} />
-                  </Box>
-                </Box>
-              </AccordionSummary>
-
-              <AccordionDetails sx={{ p: 0 }}>
-                <List disablePadding>
-                  {safe.safes.map((subSafe) => {
-                    const subSafeId = getSafeId(subSafe)
-                    const alreadyAdded = flatSafeItems.some((spaceSafe) => {
-                      return spaceSafe.chainId === subSafe.chainId && spaceSafe.address === subSafe.address
-                    })
-
-                    return (
-                      <Controller
-                        key={`${subSafeId}`}
-                        name={`selectedSafes.${subSafeId}`}
-                        control={control}
-                        render={({ field }) => {
-                          const handleItemClick = () => {
-                            field.onChange(!field.value)
-                          }
-
-                          return (
-                            <ListItem disablePadding>
-                              <ListItemButton onClick={handleItemClick} disabled={alreadyAdded}>
-                                <ListItemIcon onClick={(e) => e.stopPropagation()}>
-                                  <Checkbox
-                                    checked={Boolean(field.value) || alreadyAdded}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onFocus={(e) => e.stopPropagation()}
-                                    onChange={(e) => field.onChange(e.target.checked)}
-                                  />
-                                </ListItemIcon>
-                                <ListItemText primary={<ChainItem chainId={subSafe.chainId} />} />
-                              </ListItemButton>
-                            </ListItem>
-                          )
-                        }}
-                      />
-                    )
-                  })}
-                </List>
-              </AccordionDetails>
-            </Accordion>
-          )
-        }
-
-        const safeId = getSafeId(safe)
-        const alreadyAdded = flatSafeItems.some(
-          (spaceSafe) => spaceSafe.address === safe.address && spaceSafe.chainId === safe.chainId,
-        )
-
-        return (
-          <Controller
-            key={`${safeId}`}
-            name={`selectedSafes.${safeId}`}
-            control={control}
-            render={({ field }) => {
-              const handleItemClick = () => {
-                field.onChange(!field.value)
-              }
-
-              return (
-                <ListItem className={css.safeItem} disablePadding>
-                  <ListItemButton onClick={handleItemClick} disabled={alreadyAdded}>
-                    <ListItemIcon onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={Boolean(field.value) || alreadyAdded}
-                        onChange={(event) => field.onChange(event.target.checked)}
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box className={css.safeRow}>
-                          <EthHashInfo address={safe.address} chainId={safe.chainId} copyAddress={false} />
-                          <ChainIndicator chainId={safe.chainId} responsive onlyLogo />
-                        </Box>
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
-              )
-            }}
-          />
-        )
-      })}
-    </List>
+      {renderSafeCards(safes, similarAddresses)}
+    </div>
   )
 }
 
