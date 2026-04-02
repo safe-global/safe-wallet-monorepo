@@ -10,7 +10,25 @@ The Safe Accounts Page is a space-scoped component that displays all Safe accoun
 - ~4 levels of component nesting (Page → Main → List → Card)
 - 8 Redux selectors + 1 RTK Query endpoint per card
 - 5 custom hooks managing data transformation and memoization
-- Debounced search (300ms) to reduce query operations
+- Debounced search (300ms) with proper cleanup via `useDebounce` hook
+- Error handling for failed RTK Query calls with user-facing error UI
+
+---
+
+## Recent Updates (v1.1)
+
+**Date:** 2026-04-02
+
+**What's New:**
+
+- ✅ Error handling for `useGetSafeOverviewQuery` failures in SafeCardReadOnly
+- ✅ Loading skeleton state while fetching safe overview data
+- ✅ Type-safe RTK Query error extraction using `getRtkQueryErrorMessage()` utility
+- ✅ Proper debounce cleanup with `useDebounce` hook to prevent memory leaks
+- ✅ Protected `hasQueuedItems` from stale data during loading/error states
+- ✅ Visual feedback for non-clickable cards when data unavailable
+
+**Impact:** Improved error visibility, eliminated memory leaks, enhanced type safety
 
 ---
 
@@ -189,10 +207,23 @@ displaySafes = useMemo<AllSafeItems>(
 ### 4. Search Filtering
 
 ```typescript
-handleSearch = useCallback(debounce(setSearchQuery, 300), [])
-filteredSafes = useSafesSearch(displaySafes, searchQuery)
-safeList = searchQuery ? filteredSafes : displaySafes
+// Improved with proper debounce cleanup
+const [rawSearchQuery, setRawSearchQuery] = useState('')
+const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
+
+const filteredSafes = useSafesSearch(displaySafes, debouncedSearchQuery)
+const safeList = debouncedSearchQuery ? filteredSafes : displaySafes
+
+// In JSX:
+onChange={(e) => setRawSearchQuery(e.target.value)}
 ```
+
+**Improvements:**
+
+- Replaced `useCallback(debounce(...))` with `useDebounce` hook
+- Hook handles cleanup internally via `useEffect` return
+- Prevents memory leaks and race conditions on component unmount
+- Tracks raw and debounced values separately for better control
 
 ### 5. Similar Address Detection
 
@@ -213,8 +244,18 @@ SafeCardReadOnly
   │  ├─ useSafeItemData() // Single-chain data
   │  └─ useMultiAccountItemData() // Multi-chain aggregation
   ├─ useGetSafeOverviewQuery() // RTK Query for single safe
+  │  ├─ data: safeOverview // Safe details (queued, awaitingConfirmation)
+  │  ├─ isLoading: isLoadingOverview // Loading state → shows skeleton
+  │  └─ isError: isOverviewError // Error state → shows error icon + tooltip
+  ├─ hasQueuedItems // Protected: !isLoadingOverview && !isOverviewError && safeOverview
   └─ useLoadFeature(SpacesFeature) // Lazy-loaded context menu
 ```
+
+**Error States:**
+
+- **Loading:** Skeleton placeholder shown in pending tx area
+- **Error:** Red alert icon with "Failed to load transaction data" tooltip
+- **Success:** Badges show queued/awaiting confirmation counts, or nothing if no pending
 
 ---
 
@@ -283,16 +324,23 @@ SafeCardReadOnly
 
 ### Endpoints Called in Accounts Page
 
-| Endpoint                        | Usage                       | Called By                    | Caching           |
-| ------------------------------- | --------------------------- | ---------------------------- | ----------------- |
-| `useSpaceSafesGetV1Query`       | Fetch safes in space        | `useSpaceSafes()` hook       | Default RTK cache |
-| `useGetSafeOverviewQuery`       | Fetch safe details per card | `SafeCardReadOnly` component | Per-safe cache    |
-| `useSpaceSafesDeleteV1Mutation` | Remove safe from space      | `RemoveSafeDialog`           | Mutation          |
+| Endpoint                        | Usage                       | Called By                    | Caching           | Error Handling     |
+| ------------------------------- | --------------------------- | ---------------------------- | ----------------- | ------------------ |
+| `useSpaceSafesGetV1Query`       | Fetch safes in space        | `useSpaceSafes()` hook       | Default RTK cache | TODO: Add boundary |
+| `useGetSafeOverviewQuery`       | Fetch safe details per card | `SafeCardReadOnly` component | Per-safe cache    | ✅ Error UI shown  |
+| `useSpaceSafesCreateV1Mutation` | Add safes to space          | `AddAccounts` modal          | Mutation          | ✅ Type-safe       |
+| `useSpaceSafesDeleteV1Mutation` | Remove safe from space      | `RemoveSafeDialog`           | Mutation          | ✅ Type-safe       |
 
 **Query Skip Conditions:**
 
 - `useSpaceSafesGetV1Query`: Skipped if `!isUserSignedIn`
 - `useGetSafeOverviewQuery`: Skipped if `!singleSafe`
+
+**Error Handling:**
+
+- `useGetSafeOverviewQuery`: Shows error icon with tooltip when query fails, protects `hasQueuedItems` with `!isLoadingOverview && !isOverviewError` check
+- `useSpaceSafesCreateV1Mutation`: Uses `getRtkQueryErrorMessage()` utility for type-safe error extraction
+- `useSpaceSafesDeleteV1Mutation`: Uses `getRtkQueryErrorMessage()` utility for type-safe error extraction
 
 ---
 
@@ -510,6 +558,47 @@ const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
 ---
 
+## Recently Fixed Issues ✅
+
+### 1. **Missing Error States** ✅ FIXED
+
+**What was fixed:**
+
+- SafeCardReadOnly now handles `useGetSafeOverviewQuery` errors
+- Shows error icon (TriangleAlert) with tooltip when overview query fails
+- `hasQueuedItems` protected from showing stale data during errors
+- Error state properly guarded: `!isLoadingOverview && !isOverviewError`
+
+**Impact:** Prevents silent failures and improves error visibility
+
+---
+
+### 2. **Debounce Memory Leak Risk** ✅ FIXED
+
+**What was fixed:**
+
+- Replaced `useCallback(debounce(setSearchQuery, 300), [])` with `useDebounce` hook
+- `useDebounce` from `@safe-global/utils/hooks/useDebounce` handles cleanup internally
+- Tracks raw (`rawSearchQuery`) and debounced (`debouncedSearchQuery`) separately
+- Prevents potential state updates on unmounted component
+
+**Impact:** Eliminates race conditions on rapid space switches
+
+---
+
+### 3. **TypeScript Type Safety** ✅ FIXED
+
+**What was fixed:**
+
+- Removed `@ts-ignore` comments from AddAccounts (lines 237-238, 251-252)
+- Replaced with `getRtkQueryErrorMessage()` utility from `@/utils/rtkQuery.ts`
+- Utility properly types both `FetchBaseQueryError` and `SerializedError`
+- No more unsafe error property access
+
+**Impact:** Enforces type safety and follows codebase patterns
+
+---
+
 ## Points of Improvement
 
 ### 1. **N+1 RTK Query Problem** ⚠️
@@ -570,25 +659,7 @@ deps: [allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSaf
 
 ---
 
-### 4. **Missing Error States** ⚠️
-
-**Current:**
-
-- No error state if `useSpaceSafesGetV1Query` fails
-- No error state if `useGetSafeOverviewQuery` fails per card
-- Silent failures on RTK Query errors
-
-**Solution:**
-
-- [ ] Add error boundary around `SafeCardReadOnly`
-- [ ] Show error UI for failed card queries
-- [ ] Retry mechanism for failed fetches
-- [ ] User-facing error messages
-- **Effort:** Low | **Impact:** High (user experience)
-
----
-
-### 5. **Similar Address Algorithm Performance** ⚠️
+### 4. **Similar Address Algorithm Performance** ⚠️
 
 **Current:** `detectSimilarAddresses(uniqueAddresses)` runs O(N²)
 **Problem:**
@@ -607,7 +678,7 @@ deps: [allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSaf
 
 ---
 
-### 6. **Card Key Stability** ⚠️
+### 5. **Card Key Stability** ⚠️
 
 **Current:**
 
@@ -635,7 +706,7 @@ renderSafeCards = (safes) =>
 
 ---
 
-### 7. **Address Book Search Scope** ⚠️
+### 6. **Address Book Search Scope** ⚠️
 
 **Current:** `useSafesSearch` searches across all safe data
 **Problem:**
@@ -653,14 +724,7 @@ renderSafeCards = (safes) =>
 
 ---
 
-### 8. **TypeScript Type Safety** ✅
-
-**Current:** SafeItem types are well-defined
-**Status:** No issues identified
-
----
-
-### 9. **Lack of Virtualization** ⚠️
+### 7. **Lack of Virtualization** ⚠️
 
 **Current:** All safes rendered at once (`AccountsSafesList` maps to JSX)
 **Problem:**
@@ -678,45 +742,7 @@ renderSafeCards = (safes) =>
 
 ---
 
-### 10. **Missing Loading State** ⚠️
-
-**Current:** `useSpaceSafes` returns `isLoading`, but not shown in UI
-**Problem:**
-
-- Page shows empty state immediately if safes haven't loaded
-- User doesn't know if space is empty or still fetching
-
-**Solution:**
-
-- [ ] Show skeleton/spinner while `isLoading`
-- [ ] Distinguish between loading and empty states
-- **Effort:** Very Low | **Impact:** Medium (UX)
-
----
-
-### 11. **Debounce Memory Leak Risk** ⚠️
-
-**Current:**
-
-```typescript
-const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
-```
-
-**Problem:**
-
-- `debounce` creates closure, not cleaned up if component unmounts
-- Pending search query can update state of unmounted component
-- Race condition if rapid space switches
-
-**Solution:**
-
-- [ ] Use `useDebouncedCallback` from `use-debounce` package
-- [ ] Or manually track and cleanup in useEffect
-- **Effort:** Very Low | **Impact:** Low (rare edge case)
-
----
-
-### 12. **Memoization Granularity** ⚠️
+### 8. **Memoization Granularity** ⚠️
 
 **Current:** `displaySafes` memo prevents re-render of all downstream
 **Problem:**
@@ -735,15 +761,14 @@ const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
 ## Summary of Risks
 
-| Risk                         | Severity | Effort   | Priority |
-| ---------------------------- | -------- | -------- | -------- |
-| N+1 RTK Queries              | High     | Medium   | 1        |
-| Missing Error States         | High     | Low      | 2        |
-| Redux Memo Efficiency        | Medium   | Low      | 3        |
-| Card Key Stability           | Medium   | Very Low | 4        |
-| Missing Loading UI           | Medium   | Very Low | 5        |
-| Virtualization (1000+ items) | Medium   | Medium   | 6        |
-| Similar Address Performance  | Low      | Low      | 7        |
+| Risk                         | Severity | Effort   | Priority | Status  |
+| ---------------------------- | -------- | -------- | -------- | ------- |
+| N+1 RTK Queries              | High     | Medium   | 1        | ⏳ Open |
+| Redux Memo Efficiency        | Medium   | Low      | 2        | ⏳ Open |
+| Card Key Stability           | Medium   | Very Low | 3        | ⏳ Open |
+| Virtualization (1000+ items) | Medium   | Medium   | 4        | ⏳ Open |
+| Similar Address Performance  | Low      | Low      | 5        | ⏳ Open |
+| Address Book Search Scope    | Low      | Low      | 6        | ⏳ Open |
 
 ---
 
@@ -764,12 +789,14 @@ const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
 ## Recommendations
 
-### Short Term (v1)
+### Short Term (v1) - Completed ✅
 
-1. Add loading skeleton while fetching space safes
-2. Add error boundary around card rendering
-3. Fix card key generation (remove `index`)
-4. Add error UI for failed card queries
+1. ✅ Add error UI for failed card queries → **DONE** (SafeCardReadOnly error state)
+2. ✅ Fix debounce memory leak → **DONE** (useDebounce hook)
+3. ✅ Fix TypeScript type safety → **DONE** (getRtkQueryErrorMessage utility)
+4. Add loading skeleton while fetching space safes → **TODO**
+5. Add error boundary around card rendering → **TODO**
+6. Fix card key generation (remove `index`) → **TODO**
 
 ### Medium Term (v2)
 
