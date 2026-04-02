@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { asAddress, shortenAddress } from '@safe-global/utils/utils/formatters'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { formSchema } from '@/src/features/Signer/schema'
@@ -19,7 +19,7 @@ export function NameSignerContainer() {
   const address = asAddress(rawAddress)
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isConnected, walletInfo } = useWalletConnect()
+  const { isConnected, walletInfo } = useWalletConnectContext()
 
   const defaultName = buildDefaultName(walletName || undefined, address)
 

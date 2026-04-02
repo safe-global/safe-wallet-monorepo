@@ -20,19 +20,16 @@ import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { toBigInt } from 'ethers'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 
-const getActiveSignerRightNode = (
-  totalFee: bigint,
-  item: SignerInfo & { balance: string },
-  activeSigner?: SignerInfo,
-) => {
-  if (activeSigner?.value === item.value) {
-    return <SafeFontIcon name="check" color="$color" />
-  }
-
-  return toBigInt(item.balance) < totalFee && <Text>Insufficient balance</Text>
+const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }) => {
+  return (
+    <View flexDirection="row" alignItems="center" gap="$2">
+      {toBigInt(item.balance) < totalFee && <Text>Insufficient balance</Text>}
+      <WalletConnectBadge address={item.value} testID="signer-wc-badge" />
+    </View>
+  )
 }
 
 export const ChangeSignerSheetContainer = () => {
@@ -60,7 +57,7 @@ export const ChangeSignerSheetContainer = () => {
 
   return (
     <SafeBottomSheet
-      title="Select signer"
+      title="My signers"
       items={items}
       loading={loading || isLoadingTxDetails}
       keyExtractor={({ item }) => item.value}
@@ -78,7 +75,7 @@ export const ChangeSignerSheetContainer = () => {
             balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${
               activeChain.nativeCurrency.symbol
             }`}
-            rightNode={getActiveSignerRightNode(totalFee, item, activeSigner)}
+            rightNode={getActiveSignerRightNode(totalFee, item)}
           />
         </View>
       )}

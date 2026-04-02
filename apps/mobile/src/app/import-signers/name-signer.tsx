@@ -7,12 +7,12 @@ import { HeaderBackButton } from '@react-navigation/elements'
 import { NameSignerContainer } from '@/src/features/ImportSigner/components/NameSigner'
 import { CloseButton } from '@/src/components/CloseButton'
 import { HeaderLeft } from '@/src/navigation/hooks/utils'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 
 function NameSigner() {
   const { bottom } = useSafeAreaInsets()
   const navigation = useNavigation()
-  const { disconnect } = useWalletConnect()
+  const { disconnect } = useWalletConnectContext()
 
   const handleDisconnectAndGoBack = useCallback(() => {
     disconnect()

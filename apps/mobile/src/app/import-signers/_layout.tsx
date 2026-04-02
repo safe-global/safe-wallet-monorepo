@@ -61,6 +61,17 @@ export default function ImportSignersLayout() {
           headerLeft: () => null,
         }}
       />
+      <Stack.Screen
+        name="reconnect-error"
+        options={{
+          presentation: 'containedModal',
+          headerShown: true,
+          title: '',
+          headerShadowVisible: false,
+          headerTransparent: true,
+          headerLeft: () => null,
+        }}
+      />
       <Stack.Screen name="hardware-devices" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="ledger-connect" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="ledger-pairing" options={{ headerShown: true, title: '' }} />

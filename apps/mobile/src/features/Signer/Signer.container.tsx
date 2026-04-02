@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import { selectSignerHasPrivateKey, selectSignerByAddress, removeSigner } from '@/src/store/signersSlice'
-import { useIsWalletConnectSigner } from '@/src/features/WalletConnect/hooks/useIsWalletConnectSigner'
 import React, { useCallback, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
@@ -13,7 +12,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 
 export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
@@ -25,9 +24,9 @@ export const SignerContainer = () => {
   const hasPrivateKey = useAppSelector(selectSignerHasPrivateKey(address))
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
   const isLedgerSigner = signer?.type === 'ledger'
-  const isWcSigner = useIsWalletConnectSigner(address)
+  const { reconnect, isWalletConnectSigner } = useWalletConnectContext()
+  const isWcSigner = isWalletConnectSigner(address)
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
-  const { initiateConnection } = useWalletConnect()
 
   usePreventLeaveScreen(editMode)
 
@@ -137,7 +136,7 @@ export const SignerContainer = () => {
       hasPrivateKey={hasPrivateKey}
       isLedgerSigner={isLedgerSigner}
       isWcSigner={isWcSigner}
-      onReconnectWallet={isWcSigner ? initiateConnection : undefined}
+      onReconnectWallet={isWcSigner ? () => reconnect(address) : undefined}
       onRemoveWcSigner={isWcSigner ? onRemoveWcSigner : undefined}
       control={control}
       dirtyFields={dirtyFields}

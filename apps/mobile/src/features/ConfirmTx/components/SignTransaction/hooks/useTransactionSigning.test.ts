@@ -20,6 +20,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 }))
 jest.mock('@/src/utils/logger')
 jest.mock('@/src/services/ledger/ledger-safe-signing.service')
+jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+  useWalletConnectContext: jest.fn(() => ({ sign: jest.fn(), hasProvider: false })),
+}))
 
 const mockGetPrivateKey = getPrivateKey as jest.MockedFunction<typeof getPrivateKey>
 const mockSignTx = signTx as jest.MockedFunction<typeof signTx>
