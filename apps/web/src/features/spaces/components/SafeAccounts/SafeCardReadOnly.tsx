@@ -12,6 +12,9 @@ import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
 import { useLoadFeature } from '@/features/__core__'
 import { SpacesFeature } from '@/features/spaces'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { useChain } from '@/hooks/useChains'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -20,11 +23,13 @@ interface SafeCardReadOnlyProps {
 
 const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
   const [copied, setCopied] = useState(false)
+  const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
   const safes = isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]
   const singleSafe = safes[0]
   const spaces = useLoadFeature(SpacesFeature)
+  const chain = useChain(singleSafe?.chainId || '')
 
   // Fetch SafeOverview for pending transaction info
   const { data: safeOverview } = useGetSafeOverviewQuery(
@@ -35,16 +40,29 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
   const hasQueuedItems =
     safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
-  const handleCopyAddress = () => {
+  const handleCopyAddress = (e: React.MouseEvent) => {
+    e.stopPropagation()
     navigator.clipboard.writeText(safe.address)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleCardClick = () => {
+    if (!singleSafe || !chain?.shortName) return
+
+    router.push({
+      pathname: AppRoutes.home,
+      query: {
+        safe: `${chain.shortName}:${singleSafe.address}`,
+      },
+    })
+  }
+
   return (
     <div
       ref={elementRef as React.Ref<HTMLDivElement>}
-      className="box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors hover:bg-muted/50 sm:gap-2 sm:pl-6 sm:pr-6"
+      onClick={handleCardClick}
+      className="box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors hover:bg-muted/50 sm:gap-2 sm:pl-6 sm:pr-6 cursor-pointer"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
         <span className="inline-flex shrink-0">
@@ -94,22 +112,21 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
         </div>
       </div>
 
-      {hasQueuedItems && (
-        <div className="flex shrink-0 items-center gap-1">
-          {(safeOverview?.queued ?? 0) > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {safeOverview.queued} pending
-            </Badge>
-          )}
-          {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
-            <Badge variant="warning" className="text-xs">
-              {safeOverview.awaitingConfirmation} to confirm
-            </Badge>
-          )}
-        </div>
-      )}
-
-      <div className="ml-auto flex shrink-0 items-center justify-end pl-1 sm:pl-2">
+      <div className="ml-auto flex shrink-0 items-center justify-end gap-1 pl-1 sm:pl-2">
+        {hasQueuedItems && (
+          <div className="flex shrink-0 items-center gap-1 mr-8">
+            {(safeOverview?.queued ?? 0) > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {safeOverview.queued} pending
+              </Badge>
+            )}
+            {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
+              <Badge variant="warning" className="text-xs">
+                {safeOverview.awaitingConfirmation} to confirm
+              </Badge>
+            )}
+          </div>
+        )}
         <AccountItem.ChainBadge safes={safes} className="justify-end" />
       </div>
 
@@ -118,7 +135,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
         {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 pl-2">
+      <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
         {spaces?.SpaceSafeContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
       </div>
     </div>

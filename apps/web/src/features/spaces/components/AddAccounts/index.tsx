@@ -307,11 +307,6 @@ const AddAccounts = () => {
     }
   }, [searchQuery])
 
-  // Count selected safes in the modal (excluding multichain entries)
-  const selectedSafesCount = Object.entries(selectedSafes).filter(
-    ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
-  ).length
-
   const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
 
   return (
@@ -325,7 +320,7 @@ const AddAccounts = () => {
         title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
       >
         <Plus className="size-4" />
-        Add Accounts ({selectedSafesCount})
+        Add Accounts
       </Button>
 
       <ModalDialog open={open} fullScreen hideChainIndicator>
@@ -399,7 +394,11 @@ const AddAccounts = () => {
                         disabled={!isFormDirty || isSubmitting}
                         className="w-full"
                       >
-                        {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
+                        {isSubmitting ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          `Add Accounts (${selectedSafesLength})`
+                        )}
                       </Button>
 
                       <Button
