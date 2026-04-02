@@ -4,7 +4,7 @@ import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TriangleAlert, Copy, Check } from 'lucide-react'
+import { TriangleAlert, Copy, Check, RotateCw } from 'lucide-react'
 import { useState } from 'react'
 import { Tooltip } from '@mui/material'
 import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
@@ -37,13 +37,11 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
     data: safeOverview,
     isLoading: isLoadingOverview,
     isError: isOverviewError,
+    error: overviewError,
+    refetch: refetchOverview,
   } = useGetSafeOverviewQuery({ chainId: singleSafe?.chainId, safeAddress: singleSafe?.address }, { skip: !singleSafe })
 
-  const hasQueuedItems =
-    !isLoadingOverview &&
-    !isOverviewError &&
-    safeOverview &&
-    ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+  const hasQueuedItems = !isLoadingOverview && !isOverviewError && safeOverview && (safeOverview.queued ?? 0) > 0
 
   const isClickable = Boolean(singleSafe)
 
@@ -128,24 +126,31 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
               <Skeleton className="h-6 w-20" />
             </div>
           ) : isOverviewError ? (
-            <Tooltip title="Failed to load transaction data" placement="top">
-              <div className="flex shrink-0 items-center gap-1 mr-8">
-                <TriangleAlert className="size-4 text-destructive" />
-              </div>
+            <Tooltip
+              title={`Failed to load transaction data. ${
+                overviewError && 'status' in overviewError ? `Error: ${overviewError.status}` : 'Please try again.'
+              }`}
+              placement="top"
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  refetchOverview()
+                }}
+                className="flex shrink-0 cursor-pointer items-center gap-1 mr-8 rounded px-1.5 py-0.5 text-destructive transition-colors hover:bg-destructive/10"
+                type="button"
+              >
+                <TriangleAlert className="size-4" />
+                <RotateCw className="size-3" />
+                <span className="text-xs">Retry</span>
+              </button>
             </Tooltip>
           ) : (
             hasQueuedItems && (
               <div className="flex shrink-0 items-center gap-1 mr-8">
-                {(safeOverview?.queued ?? 0) > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {safeOverview.queued} pending
-                  </Badge>
-                )}
-                {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
-                  <Badge variant="warning" className="text-xs">
-                    {safeOverview.awaitingConfirmation} to confirm
-                  </Badge>
-                )}
+                <Badge variant="secondary" className="text-xs">
+                  {safeOverview.queued} pending
+                </Badge>
               </div>
             )
           )}

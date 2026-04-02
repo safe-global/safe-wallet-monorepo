@@ -339,8 +339,7 @@ const AddAccounts = () => {
                     </div>
 
                     <Typography variant="paragraph" align="center" color="muted">
-                      Select which Safe Accounts you want to include in your Space. This is currently limited to{' '}
-                      {SAFE_ACCOUNTS_LIMIT} Safe Accounts.
+                      You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
                     </Typography>
 
                     <InputGroup className="bg-card px-2">
@@ -357,12 +356,12 @@ const AddAccounts = () => {
                   </div>
 
                   <div
-                    className="relative min-h-0 min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
+                    className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
                     data-testid="add-accounts-safes-list-scroll-region"
                   >
                     {!hasAvailableSafes && !debouncedSearchQuery ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        There is no more Safe to add. Try to add it manually
+                        No safes on your list
                       </Typography>
                     ) : (
                       <OnboardingSafesList

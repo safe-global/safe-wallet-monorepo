@@ -1,5 +1,6 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCardReadOnly from './SafeCardReadOnly'
+import SafeCardsErrorBoundary from './SafeCardsErrorBoundary'
 import SimilarAddressAlert from '../SelectSafesOnboarding/components/SimilarAddressAlert'
 
 interface SafeListProps {
@@ -10,10 +11,12 @@ interface SafeListProps {
 const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>) =>
   safes.map((safe, index) => {
     const isSimilar = similarAddresses.has(safe.address.toLowerCase())
-    if (isMultiChainSafeItem(safe)) {
-      return <SafeCardReadOnly key={`multi-${safe.address}-${index}`} safe={safe} isSimilar={isSimilar} />
-    }
-    return <SafeCardReadOnly key={`${safe.chainId}:${safe.address}`} safe={safe} isSimilar={isSimilar} />
+    const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
+    return (
+      <SafeCardsErrorBoundary key={key}>
+        <SafeCardReadOnly safe={safe} isSimilar={isSimilar} />
+      </SafeCardsErrorBoundary>
+    )
   })
 
 const AccountsSafesList = ({ safes, similarAddresses }: SafeListProps) => {
