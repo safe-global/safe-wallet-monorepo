@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { router } from 'expo-router'
 import { getAddress } from 'ethers'
 import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
@@ -20,10 +20,7 @@ export function useImportSignerFlow() {
   const registeredRef = useRef<string | null>(null)
   const connectInitiatedRef = useRef(false)
 
-  const isConnected = useMemo(
-    () => Boolean(walletIsConnected && address && walletInfo),
-    [walletIsConnected, address, walletInfo],
-  )
+  const isConnected = Boolean(walletIsConnected && address && walletInfo)
 
   const pushConnectSignerError = useCallback(() => {
     if (!address) {
