@@ -1,7 +1,7 @@
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import type { Dispatch, SetStateAction } from 'react'
-import type { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
 import { Box, IconButton, Paper } from '@mui/material'

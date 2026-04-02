@@ -1,0 +1,1 @@
+export { SilentErrorBoundary } from './SilentErrorBoundary'

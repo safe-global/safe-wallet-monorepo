@@ -46,6 +46,23 @@ const config: ExpoConfig = {
       // https://github.com/react-native-share/react-native-share/issues/1669
       NSPhotoLibraryUsageDescription:
         'This permission is required by third party libraries, but not used in the app. If you ever get prompted for it, deny it & contact support.',
+      LSApplicationQueriesSchemes: [
+        'metamask',
+        'rabby',
+        'ledger',
+        'coinbase',
+        'okx',
+        'trust',
+        'tokenpocket',
+        'phantom',
+        'rainbow',
+        'zerion',
+        'frame',
+        'onekey',
+        'bitget',
+        'safepal',
+        'bybit',
+      ],
     },
     supportsTablet: false,
     appleTeamId: appleDevTeamId,
@@ -183,6 +200,7 @@ const config: ExpoConfig = {
         iosPermissions: ['Bluetooth'],
       },
     ],
+    './queries.js',
   ],
   experiments: {
     typedRoutes: true,
