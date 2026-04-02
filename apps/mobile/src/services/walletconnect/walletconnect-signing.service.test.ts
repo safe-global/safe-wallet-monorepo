@@ -192,6 +192,17 @@ describe('signWithWalletConnect', () => {
     await expect(signWithWalletConnect(defaultParams)).rejects.toThrow('User rejected')
   })
 
+  it('throws when typed data contains no types besides EIP712Domain', async () => {
+    mockGenerateTypedData.mockReturnValue({
+      ...mockTypedData,
+      types: { EIP712Domain: [{ name: 'verifyingContract', type: 'address' }] },
+    })
+
+    await expect(signWithWalletConnect(defaultParams)).rejects.toThrow(
+      'Typed data contains no types besides EIP712Domain',
+    )
+  })
+
   it('logs success info with signing details', async () => {
     await signWithWalletConnect(defaultParams)
 
