@@ -3,11 +3,12 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
-import { TriangleAlert } from 'lucide-react'
+import { TriangleAlert, Copy, Check } from 'lucide-react'
+import { useState } from 'react'
+import { Tooltip } from '@mui/material'
 import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
 import ThresholdBadge from '../SelectSafesOnboarding/components/ThresholdBadge'
 import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
-import SendTransactionButton from './SendTransactionButton'
 import { useLoadFeature } from '@/features/__core__'
 import { SpacesFeature } from '@/features/spaces'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
@@ -18,17 +19,27 @@ interface SafeCardReadOnlyProps {
 }
 
 const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
+  const [copied, setCopied] = useState(false)
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
   const safes = isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]
   const singleSafe = safes[0]
+  const spaces = useLoadFeature(SpacesFeature)
 
-  // Fetch SafeOverview for the single chain safe to get action buttons
+  // Fetch SafeOverview for pending transaction info
   const { data: safeOverview } = useGetSafeOverviewQuery(
     { chainId: singleSafe?.chainId, safeAddress: singleSafe?.address },
     { skip: !singleSafe },
   )
-  const spaces = useLoadFeature(SpacesFeature)
+
+  const hasQueuedItems =
+    safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(safe.address)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div
@@ -52,20 +63,51 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
               {name || shortenAddress(safe.address)}
             </span>
           </div>
-          <span className="block min-w-0 break-all text-xs text-muted-foreground">
-            {isSimilar ? (
-              <>
-                {safe.address.slice(0, 2)}
-                <b>{safe.address.slice(2, 6)}</b>
-                {safe.address.slice(6, -4)}
-                <b>{safe.address.slice(-4)}</b>
-              </>
-            ) : (
-              shortenAddress(safe.address)
-            )}
-          </span>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="block min-w-0 break-all text-xs text-muted-foreground">
+              {isSimilar ? (
+                <>
+                  {safe.address.slice(0, 2)}
+                  <b>{safe.address.slice(2, 6)}</b>
+                  {safe.address.slice(6, -4)}
+                  <b>{safe.address.slice(-4)}</b>
+                </>
+              ) : (
+                shortenAddress(safe.address)
+              )}
+            </span>
+            <Tooltip title={copied ? 'Copied!' : 'Copy address'} placement="top">
+              <button
+                onClick={handleCopyAddress}
+                className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors cursor-pointer"
+                aria-label="Copy address"
+                type="button"
+              >
+                {copied ? (
+                  <Check className="size-3.5 text-green-600" />
+                ) : (
+                  <Copy className="size-3.5 text-muted-foreground hover:text-foreground" />
+                )}
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </div>
+
+      {hasQueuedItems && (
+        <div className="flex shrink-0 items-center gap-1">
+          {(safeOverview?.queued ?? 0) > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {safeOverview.queued} pending
+            </Badge>
+          )}
+          {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
+            <Badge variant="warning" className="text-xs">
+              {safeOverview.awaitingConfirmation} to confirm
+            </Badge>
+          )}
+        </div>
+      )}
 
       <div className="ml-auto flex shrink-0 items-center justify-end pl-1 sm:pl-2">
         <AccountItem.ChainBadge safes={safes} className="justify-end" />
@@ -77,8 +119,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 pl-2">
-        {safeOverview && <SendTransactionButton safe={safeOverview} />}
-        {spaces?.SpaceSafeContextMenu && <spaces.SpaceSafeContextMenu safeItem={singleSafe} />}
+        {spaces?.SpaceSafeContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
       </div>
     </div>
   )

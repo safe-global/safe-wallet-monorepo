@@ -16,7 +16,10 @@ import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
-import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  useSpaceSafesCreateV1Mutation,
+  useSpaceSafesDeleteV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
@@ -25,7 +28,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X } from 'lucide-react'
+import { Search, Plus, X, Loader2 } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -58,6 +61,15 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   )
 }
 
+function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
+  const flatSafeItems = flattenSafeItems(spaceSafes)
+
+  return flatSafeItems.filter((spaceSafe) => {
+    const safeId = `${spaceSafe.chainId}:${spaceSafe.address}`
+    return !safes[safeId]
+  })
+}
+
 const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
 const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
@@ -83,6 +95,7 @@ const AddAccounts = () => {
   const { allSafes: spaceSafes } = useSpaceSafes()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
+  const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const spaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
 
@@ -103,16 +116,23 @@ const AddAccounts = () => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-    // Trusted safes: from addedSafes (user-pinned)
-    const trusted = allChainIds.flatMap((chainId) =>
-      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
-    )
+    // Get safes already in the space
+    const spaceSafeIds = new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`))
 
-    // Owned safes: from CGW API + undeployed
+    // Trusted safes: from addedSafes (user-pinned), excluding space safes
+    const trusted = allChainIds
+      .flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)))
+      .filter((safe) => !spaceSafeIds.has(`${safe.chainId}:${safe.address}`))
+
+    // Owned safes: from CGW API + undeployed, excluding space safes
     const owned = allChainIds.flatMap((chainId) => {
       const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
       return combined
-        .filter((address) => !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)))
+        .filter(
+          (address) =>
+            !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)) &&
+            !spaceSafeIds.has(`${chainId}:${address}`),
+        )
         .map((address) => buildItem(chainId, address))
     })
 
@@ -133,6 +153,7 @@ const AddAccounts = () => {
     allSafeNames,
     manualSafes,
     sortComparator,
+    spaceSafes,
   ])
 
   // Detect similar addresses
@@ -167,10 +188,13 @@ const AddAccounts = () => {
     },
   })
 
-  const { handleSubmit, watch, setValue, reset } = formMethods
+  const { handleSubmit, watch, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
+  const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
+  const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
+  const { isSubmitting } = formState
 
   // Reset form when modal opens
   useEffect(() => {
@@ -183,29 +207,63 @@ const AddAccounts = () => {
   }, [open, defaultSelectedSafes, reset])
 
   const onSubmit = handleSubmit(async (data) => {
-    trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
     const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
       const [chainId, address] = key.split(':')
       return { chainId, address }
     })
 
-    try {
-      const result = await addSafesToSpace({
-        spaceId: Number(spaceId),
-        createSpaceSafesDto: { safes: safesToAdd },
-      })
+    const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
+      chainId: safe.chainId,
+      address: safe.address,
+    }))
 
-      if (result.error) {
-        // @ts-ignore
-        setError(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
-        return
+    // Track event based on what action is being taken
+    if (safesToAdd.length > 0) {
+      trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
+    }
+    if (safesToRemove.length > 0) {
+      trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT })
+    }
+
+    try {
+      // Add new safes
+      if (safesToAdd.length > 0) {
+        const result = await addSafesToSpace({
+          spaceId: Number(spaceId),
+          createSpaceSafesDto: { safes: safesToAdd },
+        })
+
+        if (result.error) {
+          // @ts-ignore
+          setError(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
+          return
+        }
       }
+
+      // Remove unchecked safes
+      if (safesToRemove.length > 0) {
+        const result = await removeSafesFromSpace({
+          spaceId: Number(spaceId),
+          deleteSpaceSafesDto: { safes: safesToRemove },
+        })
+
+        if (result.error) {
+          // @ts-ignore
+          setError(result.error?.data?.message || 'Something went wrong removing one or more Safe Accounts.')
+          return
+        }
+      }
+
+      // Show success notification
+      const messages = []
+      if (safesToAdd.length > 0) messages.push(`Added ${safesToAdd.length} safe account(s)`)
+      if (safesToRemove.length > 0) messages.push(`Removed ${safesToRemove.length} safe account(s)`)
 
       dispatch(
         showNotification({
-          message: `Added safe account(s) to space`,
+          message: messages.length > 0 ? messages.join(' and ') : 'Safes updated',
           variant: 'success',
-          groupKey: 'add-safe-account-success',
+          groupKey: 'safe-account-update-success',
         }),
       )
 
@@ -249,6 +307,13 @@ const AddAccounts = () => {
     }
   }, [searchQuery])
 
+  // Count selected safes in the modal (excluding multichain entries)
+  const selectedSafesCount = Object.entries(selectedSafes).filter(
+    ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
+  ).length
+
+  const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
+
   return (
     <>
       <Button
@@ -260,7 +325,7 @@ const AddAccounts = () => {
         title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
       >
         <Plus className="size-4" />
-        Add account
+        Add Accounts ({selectedSafesCount})
       </Button>
 
       <ModalDialog open={open} fullScreen hideChainIndicator>
@@ -281,8 +346,8 @@ const AddAccounts = () => {
                     </div>
 
                     <Typography variant="paragraph" align="center" color="muted">
-                      You can add any Safe Account to your Space. This is currently limited to {SAFE_ACCOUNTS_LIMIT}
-                      Safe Accounts.
+                      Select which Safe Accounts you want to include in your Space. This is currently limited to{' '}
+                      {SAFE_ACCOUNTS_LIMIT} Safe Accounts.
                     </Typography>
 
                     <InputGroup className="bg-card px-2">
@@ -299,14 +364,20 @@ const AddAccounts = () => {
                   </div>
 
                   <div
-                    className="relative min-h-0 min-w-0 w-full max-h-80 overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
+                    className="relative min-h-0 min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
                     data-testid="add-accounts-safes-list-scroll-region"
                   >
-                    <OnboardingSafesList
-                      trustedSafes={searchQuery ? filteredTrusted : trustedSafes}
-                      ownedSafes={searchQuery ? filteredOwned : ownedSafes}
-                      similarAddresses={similarAddresses}
-                    />
+                    {!hasAvailableSafes && !searchQuery ? (
+                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                        There is no more Safe to add. Try to add it manually
+                      </Typography>
+                    ) : (
+                      <OnboardingSafesList
+                        trustedSafes={searchQuery ? filteredTrusted : trustedSafes}
+                        ownedSafes={searchQuery ? filteredOwned : ownedSafes}
+                        similarAddresses={similarAddresses}
+                      />
+                    )}
                   </div>
 
                   {error && (
@@ -322,13 +393,13 @@ const AddAccounts = () => {
 
                     <div className="flex shrink-0 flex-col gap-2">
                       <Button
-                        data-testid="add-accounts-button"
+                        data-testid="save-accounts-button"
                         type="submit"
                         size="lg"
-                        disabled={selectedSafesLength === 0}
+                        disabled={!isFormDirty || isSubmitting}
                         className="w-full"
                       >
-                        Add Accounts ({selectedSafesLength})
+                        {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
                       </Button>
 
                       <Button
@@ -336,6 +407,7 @@ const AddAccounts = () => {
                         variant="secondary"
                         size="lg"
                         onClick={handleClose}
+                        disabled={isSubmitting}
                         className="w-full hover:bg-card"
                       >
                         Cancel
