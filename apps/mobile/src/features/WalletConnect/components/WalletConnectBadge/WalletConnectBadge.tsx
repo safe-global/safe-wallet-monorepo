@@ -8,10 +8,17 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
 
+type BadgeStatus = 'connected' | 'disconnected' | 'error'
+
 interface WalletConnectBadgeProps {
   address: string
   size?: number
+  statusSize?: number
+  iconSize?: number
   testID?: string
+  status?: BadgeStatus
+  skipStatus?: boolean
+  walletIcon?: string
 }
 
 export function WalletConnectBadge(props: WalletConnectBadgeProps) {
@@ -22,43 +29,75 @@ export function WalletConnectBadge(props: WalletConnectBadgeProps) {
   )
 }
 
-function WalletConnectBadgeInner({ address, size = 32, testID }: WalletConnectBadgeProps) {
+function resolveStatus(isWcSigner: boolean, isConnected: boolean): BadgeStatus {
+  if (!isWcSigner) {
+    return 'error'
+  }
+
+  return isConnected ? 'connected' : 'disconnected'
+}
+
+const statusConfig = {
+  connected: { icon: 'check-filled', color: '$success', bg: '$backgroundSuccess' },
+  disconnected: { icon: 'alert-circle-filled', color: '$warning', bg: '$backgroundError' },
+  error: { icon: 'close-filled', color: '$error', bg: '$backgroundError' },
+} as const
+
+function WalletConnectBadgeInner({
+  address,
+  size = 32,
+  statusSize = size / 2,
+  iconSize = 0.625 * size,
+  testID,
+  status,
+  skipStatus,
+  walletIcon,
+}: WalletConnectBadgeProps) {
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
   const isConnected = useWalletConnectStatus(address)
   const [imageError, setImageError] = useState(false)
+  const isWcSigner = signer?.type === 'walletconnect'
 
-  if (signer?.type !== 'walletconnect' || !signer.walletIcon || imageError) {
+  const signerWalletIcon = isWcSigner ? signer.walletIcon : undefined
+  const walletIconUrl = walletIcon ?? signerWalletIcon
+
+  if (!walletIconUrl || imageError) {
     return null
   }
 
-  const statusBadge = isConnected ? (
+  const resolvedStatus = status ?? resolveStatus(isWcSigner, isConnected)
+  const { bg, icon: statusIcon, color } = statusConfig[resolvedStatus]
+
+  const walletIconBadge = (
     <Badge
-      content={<SafeFontIcon name="check-filled" size={16} color="$success" />}
-      circleSize={16}
-      circleProps={{ backgroundColor: '$backgroundLight' }}
+      content={
+        <Image
+          source={walletIconUrl}
+          style={{ width: iconSize, height: iconSize, borderRadius: 150 }}
+          onError={() => setImageError(true)}
+        />
+      }
+      circleSize={size}
+      circleProps={{ backgroundColor: skipStatus ? '$backgroundSkeleton' : bg }}
+      testID={testID}
     />
-  ) : (
+  )
+
+  if (skipStatus) {
+    return walletIconBadge
+  }
+
+  const statusBadge = (
     <Badge
-      content={<SafeFontIcon name="alert-circle-filled" size={16} color="$warning" />}
-      circleSize={16}
+      content={<SafeFontIcon name={statusIcon} color={color} size={statusSize} />}
+      circleSize={statusSize}
       circleProps={{ backgroundColor: '$backgroundLight' }}
     />
   )
 
   return (
     <BadgeWrapper badge={statusBadge} position="top-right">
-      <Badge
-        content={
-          <Image
-            source={signer.walletIcon}
-            style={{ width: 20, height: 20, borderRadius: 150 }}
-            onError={() => setImageError(true)}
-          />
-        }
-        circleSize={size}
-        circleProps={{ backgroundColor: isConnected ? '$backgroundSuccess' : '$backgroundError' }}
-        testID={testID}
-      />
+      {walletIconBadge}
     </BadgeWrapper>
   )
 }

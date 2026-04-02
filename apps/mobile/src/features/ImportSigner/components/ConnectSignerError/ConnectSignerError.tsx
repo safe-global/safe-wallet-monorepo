@@ -1,16 +1,16 @@
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { Text, View, useTheme } from 'tamagui'
-import { useRouter } from 'expo-router'
-import { Badge } from '@/src/components/Badge/Badge'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 import Logger from '@/src/utils/logger'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export function ConnectSignerError() {
+  const { address, walletIcon } = useLocalSearchParams<{ address: string; walletIcon: string }>()
   const router = useRouter()
   const theme = useTheme()
   const pendingSafe = useAppSelector(selectPendingSafe)
@@ -42,10 +42,14 @@ export function ConnectSignerError() {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <View flex={1} flexGrow={1} alignItems="center" justifyContent="center" paddingHorizontal="$4">
             <View alignItems="center" gap="$5">
-              <Badge
-                themeName="badge_error"
-                circleSize={64}
-                content={<SafeFontIcon size={32} color="$error" name="close-filled" />}
+              <WalletConnectBadge
+                address={address}
+                walletIcon={walletIcon}
+                size={64}
+                statusSize={24}
+                iconSize={40}
+                testID="wc-badge-error"
+                status="error"
               />
 
               <View width="100%" alignItems="center">

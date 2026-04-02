@@ -10,6 +10,14 @@ jest.mock('expo-router', () => ({
     dismissAll: mockDismissAll,
     dismissTo: mockDismissTo,
   }),
+  useLocalSearchParams: () => ({
+    address: '0xabc123',
+    walletIcon: 'https://example.com/icon.png',
+  }),
+}))
+
+jest.mock('@/src/features/WalletConnect/components/WalletConnectBadge', () => ({
+  WalletConnectBadge: () => null,
 }))
 
 const mockSelectPendingSafe = jest.fn()
