@@ -10,14 +10,12 @@ const mockOpen = jest.fn()
 const mockDisconnect = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
-let mockPathname = '/import-signers'
 
 jest.mock('expo-router', () => ({
   router: {
     push: (...args: unknown[]) => mockRouterPush(...args),
     dismiss: (...args: unknown[]) => mockRouterDismiss(...args),
   },
-  usePathname: () => mockPathname,
 }))
 
 jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
@@ -62,7 +60,6 @@ describe('useImportSignerFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     setDisconnected()
-    mockPathname = '/import-signers'
   })
 
   it('opens the wallet modal when initiateConnection is called', () => {
