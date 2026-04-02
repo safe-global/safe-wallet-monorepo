@@ -146,6 +146,36 @@ const UseFieldArrayTestWrapper = ({
   )
 }
 
+// Wrapper that allows setting an initial amount for fiat display testing
+const FiatTestWrapper = ({
+  defaultTokenAddress,
+  defaultAmount = '',
+  balances = mockBalances,
+}: {
+  defaultTokenAddress: string
+  defaultAmount?: string
+  balances?: Balances['items']
+}) => {
+  const methods = useForm({
+    defaultValues: {
+      [TokenAmountFields.tokenAddress]: defaultTokenAddress,
+      [TokenAmountFields.amount]: defaultAmount,
+    },
+  })
+
+  const selectedToken = balances.find((b) => b.tokenInfo.address === defaultTokenAddress)
+
+  return (
+    <FormProvider {...methods}>
+      <TokenAmountInput
+        balances={balances}
+        selectedToken={selectedToken}
+        maxAmount={BigInt(selectedToken?.balance || '0')}
+      />
+    </FormProvider>
+  )
+}
+
 describe('TokenAmountInput', () => {
   describe('Token preselection without fieldArray', () => {
     it('should preselect ETH (ZERO_ADDRESS) by default', () => {
@@ -265,6 +295,76 @@ describe('TokenAmountInput', () => {
       // This should fail if ZERO_ADDRESS is being selected instead of USDC
       expect(input?.value).not.toBe(ZERO_ADDRESS)
       expect(input?.value).toBe(USDC_ADDRESS)
+    })
+  })
+
+  describe('Fiat value display', () => {
+    it('should show fiat value when an amount is entered and token has fiatConversion', () => {
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" />)
+
+      // 50 USDC * $1 fiatConversion = $50
+      const fiatDisplay = screen.getByTestId('fiat-display')
+      expect(fiatDisplay).toBeVisible()
+      expect(fiatDisplay.textContent).toContain('50')
+    })
+
+    it('should show fiat value for ETH', () => {
+      render(<FiatTestWrapper defaultTokenAddress={ZERO_ADDRESS} defaultAmount="0.5" />)
+
+      // 0.5 ETH * $1000 fiatConversion = $500
+      const fiatDisplay = screen.getByTestId('fiat-display')
+      expect(fiatDisplay).toBeVisible()
+      expect(fiatDisplay.textContent).toContain('500')
+    })
+
+    it('should hide fiat value when amount is empty', () => {
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="" />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+    })
+
+    it('should hide fiat value when amount is "0"', () => {
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="0" />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+    })
+
+    it('should hide fiat value when token has no fiatConversion', () => {
+      const balancesNoFiat: Balances['items'] = [
+        {
+          ...mockBalances[1],
+          fiatConversion: '',
+        },
+      ]
+
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesNoFiat} />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+    })
+
+    it('should hide fiat value when fiatConversion is "0"', () => {
+      const balancesZeroFiat: Balances['items'] = [
+        {
+          ...mockBalances[1],
+          fiatConversion: '0',
+        },
+      ]
+
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesZeroFiat} />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+    })
+
+    it('should hide fiat value when selectedToken is undefined', () => {
+      render(<FiatTestWrapper defaultTokenAddress="0x0000000000000000000000000000000000000001" defaultAmount="50" />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+    })
+
+    it('should hide fiat value for negative amounts', () => {
+      render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="-5" />)
+
+      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
     })
   })
 })
