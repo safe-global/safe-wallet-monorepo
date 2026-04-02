@@ -23,18 +23,18 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   )
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
-      <Avatar size="sm">
+      <Avatar size="sm" data-testid="safe-selector-trigger-identicon">
         <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
       </Avatar>
-      <div className="flex flex-col items-start flex-1 min-w-0">
+      <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
         <div className="flex items-center gap-1.5">
-          <Typography variant="paragraph-small-medium" className="truncate">
+          <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
             {displayName}
           </Typography>
         </div>
         {showAddressLine && (
-          <Typography variant="paragraph-mini" color="muted">
+          <Typography data-testid="safe-selector-trigger-address" variant="paragraph-mini" color="muted">
             {addressWithPrefix}
           </Typography>
         )}

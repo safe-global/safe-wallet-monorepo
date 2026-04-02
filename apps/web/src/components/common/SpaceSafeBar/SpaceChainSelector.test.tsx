@@ -66,6 +66,7 @@ describe('SpaceChainSelector', () => {
   it('renders ChainSelectorBlock when deployed chains are present', () => {
     render(<SpaceChainSelector />)
 
+    expect(screen.getByTestId('space-chain-selector')).toBeInTheDocument()
     expect(screen.getByTestId('chain-selector-block')).toBeInTheDocument()
   })
 

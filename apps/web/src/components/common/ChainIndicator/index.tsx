@@ -60,6 +60,7 @@ const ChainIndicator = ({
 
   const logoComponent = chainConfig?.chainLogoUri ? (
     <img
+      data-testid="chain-indicator-network-logo-img"
       src={chainConfig.chainLogoUri ?? undefined}
       alt={`${chainConfig.chainName} Logo`}
       width={imageSize}

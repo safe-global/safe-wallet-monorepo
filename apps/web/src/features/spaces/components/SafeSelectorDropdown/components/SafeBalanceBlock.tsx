@@ -16,7 +16,7 @@ function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDi
       {isLoading ? (
         <Skeleton className="h-4 w-16 rounded" />
       ) : (
-        <span className="text-sm text-muted-foreground">
+        <span data-testid="safe-selector-balance" className="text-sm text-muted-foreground">
           <FiatValue value={balance} />
         </span>
       )}

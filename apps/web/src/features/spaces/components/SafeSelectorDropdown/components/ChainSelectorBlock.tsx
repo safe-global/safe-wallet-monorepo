@@ -43,6 +43,7 @@ function ChainSelectorBlock({
           <span
             role="button"
             tabIndex={0}
+            data-testid="space-chain-navigation-button"
             className="w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onKeyDown={handleChainTriggerKeyDown}
           >

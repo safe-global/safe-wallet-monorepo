@@ -169,6 +169,7 @@ const AddAccounts = () => {
       <Tooltip title={!isAdmin ? 'You need to be an Admin to add accounts' : ''} placement="top">
         <Box component="span">
           <Button
+            data-testid="add-space-account-button"
             size="sm"
             className="font-bold"
             variant={theme.palette.mode === 'light' ? 'outline' : undefined}
