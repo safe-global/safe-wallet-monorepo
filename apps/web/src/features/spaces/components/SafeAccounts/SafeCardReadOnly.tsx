@@ -3,6 +3,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { TriangleAlert, Copy, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Tooltip } from '@mui/material'
@@ -32,7 +33,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
   const chain = useChain(singleSafe?.chainId || '')
 
   // Fetch SafeOverview for pending transaction info
-  const { data: safeOverview } = useGetSafeOverviewQuery(
+  const { data: safeOverview, isLoading: isLoadingOverview } = useGetSafeOverviewQuery(
     { chainId: singleSafe?.chainId, safeAddress: singleSafe?.address },
     { skip: !singleSafe },
   )
@@ -113,19 +114,25 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
       </div>
 
       <div className="ml-auto flex shrink-0 items-center justify-end gap-1 pl-1 sm:pl-2">
-        {hasQueuedItems && (
+        {isLoadingOverview ? (
           <div className="flex shrink-0 items-center gap-1 mr-8">
-            {(safeOverview?.queued ?? 0) > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {safeOverview.queued} pending
-              </Badge>
-            )}
-            {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
-              <Badge variant="warning" className="text-xs">
-                {safeOverview.awaitingConfirmation} to confirm
-              </Badge>
-            )}
+            <Skeleton className="h-6 w-20" />
           </div>
+        ) : (
+          hasQueuedItems && (
+            <div className="flex shrink-0 items-center gap-1 mr-8">
+              {(safeOverview?.queued ?? 0) > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {safeOverview.queued} pending
+                </Badge>
+              )}
+              {(safeOverview?.awaitingConfirmation ?? 0) > 0 && (
+                <Badge variant="warning" className="text-xs">
+                  {safeOverview.awaitingConfirmation} to confirm
+                </Badge>
+              )}
+            </div>
+          )
         )}
         <AccountItem.ChainBadge safes={safes} className="justify-end" />
       </div>
