@@ -73,7 +73,7 @@ export function useImportSignerFlow() {
     }
 
     validateAndNavigate()
-  }, [walletIsConnected, address, walletInfo, validateAddressOwnership, switchNetworkIfNeeded, pushConnectSignerError])
+  }, [isConnected, address, walletInfo, validateAddressOwnership, switchNetworkIfNeeded, pushConnectSignerError])
 
   // Reset guard when wallet disconnects so reconnection triggers navigation
   useEffect(() => {
