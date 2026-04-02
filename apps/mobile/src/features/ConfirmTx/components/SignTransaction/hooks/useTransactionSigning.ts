@@ -9,6 +9,7 @@ import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gat
 import logger from '@/src/utils/logger'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { SafeVersion } from '@safe-global/types-kit'
 import useSafeInfo from '@/src/hooks/useSafeInfo'
@@ -35,6 +36,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const signer = useAppSelector((state: RootState) => selectSignerByAddress(state, signerAddress))
   const { safe } = useSafeInfo()
+  const { sign: signWithWc } = useWalletConnectContext()
 
   const [addConfirmation, { isLoading: isApiLoading, data: apiData, isError: isApiError }] =
     useTransactionsAddConfirmationV1Mutation()
@@ -45,9 +47,15 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     try {
       let signedTx: SigningResponse
 
-      // Check if this is a Ledger signer
-      if (signer?.type === 'ledger') {
-        // Handle Ledger signing
+      if (signer?.type === 'walletconnect') {
+        signedTx = await signWithWc({
+          chain: activeChain as ChainInfo,
+          activeSafe,
+          txId,
+          signerAddress,
+          safeVersion: safe.version ?? undefined,
+        })
+      } else if (signer?.type === 'ledger') {
         if (!signer.derivationPath) {
           throw new Error('Ledger signer missing derivation path')
         }
@@ -109,7 +117,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       // Re-throw error so it can be handled imperatively by the caller
       throw error
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, signer, safe.version, dispatch])
+  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, signer, safe.version, dispatch, signWithWc])
 
   const retry = useCallback(() => {
     executeSign()

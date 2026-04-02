@@ -1,41 +1,31 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@/src/tests/test-utils'
+import { render, screen, fireEvent } from '@/src/tests/test-utils'
 import { ConnectSignerError } from '../ConnectSignerError'
 
-const mockDismissAll = jest.fn()
-const mockDismissTo = jest.fn()
+const mockInitiateConnection = jest.fn()
+const mockDismiss = jest.fn()
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    dismissAll: mockDismissAll,
-    dismissTo: mockDismissTo,
-  }),
+  router: {
+    dismiss: (...args: unknown[]) => mockDismiss(...args),
+  },
   useLocalSearchParams: () => ({
     address: '0xabc123',
     walletIcon: 'https://example.com/icon.png',
   }),
 }))
 
-jest.mock('@/src/features/WalletConnect/components/WalletConnectBadge', () => ({
-  WalletConnectBadge: () => null,
+jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+  useWalletConnectContext: () => ({ initiateConnection: mockInitiateConnection }),
 }))
 
-const mockSelectPendingSafe = jest.fn()
-
-jest.mock('@/src/store/hooks', () => ({
-  ...jest.requireActual('@/src/store/hooks'),
-  useAppSelector: (selector: unknown) => {
-    if (selector === require('@/src/store/signerImportFlowSlice').selectPendingSafe) {
-      return mockSelectPendingSafe()
-    }
-    return undefined
-  },
+jest.mock('@/src/features/WalletConnect/components/WalletConnectBadge', () => ({
+  WalletConnectBadge: () => null,
 }))
 
 describe('ConnectSignerError', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockSelectPendingSafe.mockReturnValue(null)
   })
 
   it('renders error message and done button', () => {
@@ -47,30 +37,12 @@ describe('ConnectSignerError', () => {
     expect(screen.getByTestId('connect-signer-error-done')).toBeTruthy()
   })
 
-  it('navigates to signers on done press when no pending safe', async () => {
+  it('dismisses and calls initiateConnection when button is pressed', () => {
     render(<ConnectSignerError />)
 
     fireEvent.press(screen.getByTestId('connect-signer-error-done'))
 
-    await waitFor(() => {
-      expect(mockDismissAll).toHaveBeenCalledTimes(1)
-      expect(mockDismissTo).toHaveBeenCalledWith('/signers')
-    })
-  })
-
-  it('navigates to import-accounts signers when pending safe exists', async () => {
-    mockSelectPendingSafe.mockReturnValue({ address: '0x123', name: 'My Safe' })
-
-    render(<ConnectSignerError />)
-
-    fireEvent.press(screen.getByTestId('connect-signer-error-done'))
-
-    await waitFor(() => {
-      expect(mockDismissAll).toHaveBeenCalledTimes(1)
-      expect(mockDismissTo).toHaveBeenCalledWith({
-        pathname: '/(import-accounts)/signers',
-        params: { safeAddress: '0x123', safeName: 'My Safe' },
-      })
-    })
+    expect(mockDismiss).toHaveBeenCalledTimes(1)
+    expect(mockInitiateConnection).toHaveBeenCalledTimes(1)
   })
 })

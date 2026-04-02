@@ -13,7 +13,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 
 export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
@@ -27,7 +27,7 @@ export const SignerContainer = () => {
   const isLedgerSigner = signer?.type === 'ledger'
   const isWcSigner = useIsWalletConnectSigner(address)
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
-  const { initiateConnection } = useWalletConnect()
+  const { reconnect } = useWalletConnectContext()
 
   usePreventLeaveScreen(editMode)
 
@@ -137,7 +137,7 @@ export const SignerContainer = () => {
       hasPrivateKey={hasPrivateKey}
       isLedgerSigner={isLedgerSigner}
       isWcSigner={isWcSigner}
-      onReconnectWallet={isWcSigner ? initiateConnection : undefined}
+      onReconnectWallet={isWcSigner ? () => reconnect(address) : undefined}
       onRemoveWcSigner={isWcSigner ? onRemoveWcSigner : undefined}
       control={control}
       dirtyFields={dirtyFields}
