@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import { selectSignerHasPrivateKey, selectSignerByAddress, removeSigner } from '@/src/store/signersSlice'
-import { useIsWalletConnectSigner } from '@/src/features/WalletConnect/hooks/useIsWalletConnectSigner'
 import React, { useCallback, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
@@ -25,9 +24,9 @@ export const SignerContainer = () => {
   const hasPrivateKey = useAppSelector(selectSignerHasPrivateKey(address))
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
   const isLedgerSigner = signer?.type === 'ledger'
-  const isWcSigner = useIsWalletConnectSigner(address)
+  const { reconnect, isWalletConnectSigner } = useWalletConnectContext()
+  const isWcSigner = isWalletConnectSigner(address)
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
-  const { reconnect } = useWalletConnectContext()
 
   usePreventLeaveScreen(editMode)
 

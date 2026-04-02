@@ -1,7 +1,6 @@
 import React from 'react'
 import { View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useIsWalletConnectSigner } from '@/src/features/WalletConnect/hooks/useIsWalletConnectSigner'
 import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
 
@@ -11,8 +10,8 @@ interface WalletConnectGateProps {
 }
 
 export function WalletConnectGate({ signerAddress, children }: WalletConnectGateProps) {
-  const isWcSigner = useIsWalletConnectSigner(signerAddress)
-  const { switchNetworkIfNeeded, reconnect, isWrongNetwork } = useWalletConnectContext()
+  const { switchNetworkIfNeeded, reconnect, isWrongNetwork, isWalletConnectSigner } = useWalletConnectContext()
+  const isWcSigner = isWalletConnectSigner(signerAddress)
   const isSessionActive = useWalletConnectStatus(signerAddress)
 
   if (!isWcSigner) {

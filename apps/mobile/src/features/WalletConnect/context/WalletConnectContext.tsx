@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useMemo } from 'react'
+import React, { createContext, useCallback, useContext, useMemo } from 'react'
 import { AppKit, AppKitProvider, useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
 import { appKit } from '@/src/config/appKit'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectSigners } from '@/src/store/signersSlice'
 import { useImportSignerFlow } from '../hooks/useImportSignerFlow'
 import { useReconnectFlow } from '../hooks/useReconnectFlow'
 import { useSwitchNetwork } from '../hooks/useSwitchNetwork'
@@ -11,6 +13,7 @@ interface WalletConnectContextValue
     Pick<ReturnType<typeof useReconnectFlow>, 'reconnect'>,
     Pick<ReturnType<typeof useSwitchNetwork>, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
     Pick<ReturnType<typeof useWalletConnectSigning>, 'sign' | 'hasProvider'> {
+  isWalletConnectSigner: (address: string) => boolean
   address: ReturnType<typeof useAccount>['address']
   chainId: ReturnType<typeof useAccount>['chainId']
   walletInfo: ReturnType<typeof useWalletInfo>['walletInfo']
@@ -43,12 +46,19 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
   const { open, disconnect } = useAppKit()
   const { address, chainId } = useAccount()
   const { walletInfo } = useWalletInfo()
+  const signers = useAppSelector(selectSigners)
+
+  const isWalletConnectSigner = useCallback(
+    (signerAddress: string) => signers[signerAddress]?.type === 'walletconnect',
+    [signers],
+  )
 
   const value = useMemo<WalletConnectContextValue>(
     () => ({
       initiateConnection,
       isConnected,
       reconnect,
+      isWalletConnectSigner,
       switchNetwork,
       switchNetworkIfNeeded,
       isWrongNetwork,
@@ -64,6 +74,7 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
       initiateConnection,
       isConnected,
       reconnect,
+      isWalletConnectSigner,
       switchNetwork,
       switchNetworkIfNeeded,
       isWrongNetwork,
