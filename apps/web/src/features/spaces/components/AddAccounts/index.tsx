@@ -23,7 +23,8 @@ import {
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
-import debounce from 'lodash/debounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
@@ -35,7 +36,7 @@ import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Track from '@/components/common/Track'
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -85,7 +86,6 @@ const _groupAndSort = (
 const AddAccounts = () => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
   const hasResetForOpen = useRef(false)
@@ -165,10 +165,10 @@ const AddAccounts = () => {
     return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
   }, [trustedSafes, ownedSafes])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
-  const filteredTrusted = useSafesSearch(trustedSafes, searchQuery)
-  const filteredOwned = useSafesSearch(ownedSafes, searchQuery)
+  const [rawSearchQuery, setRawSearchQuery] = useState('')
+  const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
+  const filteredTrusted = useSafesSearch(trustedSafes, debouncedSearchQuery)
+  const filteredOwned = useSafesSearch(ownedSafes, debouncedSearchQuery)
 
   // Build pre-checked safes from space safes
   const defaultSelectedSafes = useMemo(() => {
@@ -234,8 +234,7 @@ const AddAccounts = () => {
         })
 
         if (result.error) {
-          // @ts-ignore
-          setError(result.error?.data?.message || 'Something went wrong adding one or more Safe Accounts.')
+          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.')
           return
         }
       }
@@ -248,8 +247,7 @@ const AddAccounts = () => {
         })
 
         if (result.error) {
-          // @ts-ignore
-          setError(result.error?.data?.message || 'Something went wrong removing one or more Safe Accounts.')
+          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe Accounts.')
           return
         }
       }
@@ -295,17 +293,17 @@ const AddAccounts = () => {
 
   const handleClose = () => {
     setError(undefined)
-    setSearchQuery('')
+    setRawSearchQuery('')
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
   }
 
   useEffect(() => {
-    if (searchQuery) {
+    if (debouncedSearchQuery) {
       trackEvent({ ...SPACE_EVENTS.SEARCH_ACCOUNTS, label: SPACE_LABELS.add_accounts_modal })
     }
-  }, [searchQuery])
+  }, [debouncedSearchQuery])
 
   const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
 
@@ -353,7 +351,7 @@ const AddAccounts = () => {
                         placeholder="Search for safes"
                         aria-label="Search Safe list"
                         autoComplete="off"
-                        onChange={(e) => handleSearch(e.target.value)}
+                        onChange={(e) => setRawSearchQuery(e.target.value)}
                       />
                     </InputGroup>
                   </div>
@@ -362,14 +360,14 @@ const AddAccounts = () => {
                     className="relative min-h-0 min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
                     data-testid="add-accounts-safes-list-scroll-region"
                   >
-                    {!hasAvailableSafes && !searchQuery ? (
+                    {!hasAvailableSafes && !debouncedSearchQuery ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         There is no more Safe to add. Try to add it manually
                       </Typography>
                     ) : (
                       <OnboardingSafesList
-                        trustedSafes={searchQuery ? filteredTrusted : trustedSafes}
-                        ownedSafes={searchQuery ? filteredOwned : ownedSafes}
+                        trustedSafes={debouncedSearchQuery ? filteredTrusted : trustedSafes}
+                        ownedSafes={debouncedSearchQuery ? filteredOwned : ownedSafes}
                         similarAddresses={similarAddresses}
                       />
                     )}
