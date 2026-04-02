@@ -11,7 +11,7 @@ export interface EthereumAddress {
   index: number
 }
 
-export type DerivationPathType = 'ledger-live' | 'legacy-ledger'
+export type DerivationPathType = 'ledger-live' | 'legacy-ledger' | 'bip44'
 
 export class LedgerEthereumService {
   private static instance: LedgerEthereumService
@@ -94,7 +94,12 @@ export class LedgerEthereumService {
 
     // Derive addresses using the appropriate derivation path
     for (let i = startIndex; i < startIndex + count; i++) {
-      const fullPath = derivationPathType === 'ledger-live' ? getAccountPath(i) : `m/44'/60'/0'/${i}`
+      const fullPath =
+        derivationPathType === 'ledger-live'
+          ? getAccountPath(i)
+          : derivationPathType === 'bip44'
+            ? `m/44'/60'/0'/0/${i}`
+            : `m/44'/60'/0'/${i}`
       const path = fullPath.substring(2) // Remove "m/" prefix for Ledger SDK
 
       try {

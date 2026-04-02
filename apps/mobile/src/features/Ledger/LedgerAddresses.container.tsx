@@ -22,6 +22,7 @@ const TITLE = 'Select address to import'
 const DERIVATION_PATH_OPTIONS = [
   { id: 'ledger-live' as const, title: 'Ledger Live' },
   { id: 'legacy-ledger' as const, title: 'Legacy Ledger' },
+  { id: 'bip44' as const, title: 'BIP44 Standard' },
 ]
 
 export const LedgerAddressesContainer = () => {
