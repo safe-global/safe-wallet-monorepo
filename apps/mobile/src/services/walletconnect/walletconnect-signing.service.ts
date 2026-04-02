@@ -1,6 +1,6 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeVersion } from '@safe-global/types-kit'
-import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
+import { generateTypedData, SigningMethod } from '@safe-global/protocol-kit'
 import { TypedDataEncoder } from 'ethers'
 import { createExistingTx } from '../tx/tx-sender/create'
 import extractTxInfo from '../tx/extractTx'
@@ -8,7 +8,6 @@ import logger from '@/src/utils/logger'
 import { SafeInfo } from '@/src/types/address'
 import { fetchTransactionDetails } from '../tx/fetchTransactionDetails'
 import type { Provider } from '@reown/appkit-common-react-native'
-import { SigningMethod } from '@safe-global/protocol-kit'
 
 export interface WalletConnectSigningParams {
   chain: ChainInfo

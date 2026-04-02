@@ -26,8 +26,9 @@ jest.mock('../tx/tx-sender/create', () => ({
   createExistingTx: (...args: unknown[]) => mockCreateExistingTx(...args),
 }))
 
-jest.mock('@safe-global/protocol-kit/dist/src/utils/eip-712', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
   generateTypedData: (...args: unknown[]) => mockGenerateTypedData(...args),
+  SigningMethod: { ETH_SIGN_TYPED_DATA_V4: 'eth_signTypedData_v4' },
 }))
 
 jest.mock('ethers', () => ({
