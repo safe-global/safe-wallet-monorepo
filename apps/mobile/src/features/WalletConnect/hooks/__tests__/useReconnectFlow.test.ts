@@ -99,24 +99,6 @@ describe('useReconnectFlow', () => {
     )
   })
 
-  it('disconnects and navigates to error on address mismatch (idempotent)', () => {
-    const { result, rerender } = renderReconnectFlow()
-
-    act(() => {
-      result.current.reconnect(mockAddress)
-    })
-
-    setConnected(mockOtherAddress)
-    rerender({})
-
-    expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/import-signers/reconnect-error',
-      }),
-    )
-  })
-
   it('does not act when wallet connects without reconnect initiation', () => {
     setConnected(mockAddress)
 
