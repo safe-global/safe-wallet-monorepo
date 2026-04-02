@@ -95,8 +95,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
         chainId: activeSafe.chainId,
         safeTxHash: signedTx.safeTransactionHash,
         addConfirmationDto: {
-          // TODO: we need to add this signature type in the auto generated types, because it was included recently in CGW
-          // @ts-ignore
           signature: signedTx.signature,
         },
       })
