@@ -8,6 +8,7 @@ const UNSUPPORTED_CHAIN_ID = '137'
 let mockIsBlockedCountry: boolean | null = false
 let mockSafeLoaded = true
 let mockChainId = MAINNET_CHAIN_ID
+let mockHasSafeTokenFeature = true
 
 jest.mock('@/components/common/GeoblockingProvider', () => ({
   GeoblockingContext: {
@@ -30,11 +31,16 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => ({ safe: { chainId: mockChainId }, safeLoaded: mockSafeLoaded }),
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: () => mockHasSafeTokenFeature,
+}))
+
 describe('useSafeTokenEnabled', () => {
   beforeEach(() => {
     mockIsBlockedCountry = false
     mockSafeLoaded = true
     mockChainId = MAINNET_CHAIN_ID
+    mockHasSafeTokenFeature = true
   })
 
   it('returns true when safe is loaded on a supported chain and not geo-blocked', () => {
