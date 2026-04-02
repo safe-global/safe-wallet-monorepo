@@ -40,7 +40,7 @@ describe('NameSignerContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseWalletConnectContext.mockReturnValue({
-      isWalletConnected: true,
+      isConnected: true,
       walletInfo: { name: 'MetaMask', icon: 'https://example.com/icon.png' },
       disconnect: jest.fn(),
       initiateConnection: jest.fn(),
