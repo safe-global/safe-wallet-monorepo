@@ -88,14 +88,32 @@ describe('WalletConnectContext', () => {
       expect(result.current.switchNetwork).toBe(mockSwitchNetwork)
       expect(result.current.switchNetworkIfNeeded).toBe(mockSwitchNetworkIfNeeded)
       expect(result.current.sign).toBe(mockSign)
-      expect(result.current.open).toBe(mockOpen)
-      expect(result.current.disconnect).toBe(mockDisconnect)
+      expect(typeof result.current.open).toBe('function')
+      expect(typeof result.current.disconnect).toBe('function')
       expect(result.current.isConnected).toBe(true)
       expect(result.current.isWrongNetwork).toBe(false)
       expect(result.current.hasProvider).toBe(true)
       expect(result.current.address).toBe(mockAddress)
       expect(result.current.chainId).toBe(1)
       expect(result.current.walletInfo).toEqual({ name: 'MetaMask' })
+    })
+  })
+
+  describe('open and disconnect wrappers', () => {
+    it('delegates open to useAppKit', () => {
+      const { result } = renderWithProvider()
+
+      result.current.open()
+
+      expect(mockOpen).toHaveBeenCalled()
+    })
+
+    it('delegates disconnect to useAppKit', () => {
+      const { result } = renderWithProvider()
+
+      result.current.disconnect()
+
+      expect(mockDisconnect).toHaveBeenCalled()
     })
   })
 

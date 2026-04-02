@@ -43,7 +43,7 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
   const { reconnect } = useReconnectFlow()
   const { switchNetwork, switchNetworkIfNeeded, isWrongNetwork } = useSwitchNetwork()
   const { sign, hasProvider } = useWalletConnectSigning()
-  const { open, disconnect } = useAppKit()
+  const appKitHook = useAppKit()
   const { address, chainId } = useAccount()
   const { walletInfo } = useWalletInfo()
   const signers = useAppSelector(selectSigners)
@@ -52,6 +52,9 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
     (signerAddress: string) => signers[signerAddress]?.type === 'walletconnect',
     [signers],
   )
+
+  const disconnect = useCallback(() => appKitHook.disconnect(), [appKitHook])
+  const open = useCallback((...args: Parameters<typeof appKitHook.open>) => appKitHook.open(...args), [appKitHook])
 
   const value = useMemo<WalletConnectContextValue>(
     () => ({
