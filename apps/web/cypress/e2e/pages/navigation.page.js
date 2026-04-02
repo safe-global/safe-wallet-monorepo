@@ -4,6 +4,7 @@ export const modalBackBtn = '[data-testid="modal-back-btn"]'
 export const newTxBtn = '[data-testid="new-tx-btn"]'
 const modalCloseIcon = '[data-testid="CloseIcon"]'
 export const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
+const expandWalletBtn = '[data-testid="expand-wallet-button"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
 
 const disconnectBtnStr = 'Disconnect'
@@ -30,6 +31,11 @@ export function clickOnNewTxBtnS() {
 
 export function clickOnWalletExpandMoreIcon() {
   cy.get(expandMoreIcon).eq(0).click({ force: true })
+  cy.get(sentinelStart).next().should('exist')
+}
+
+export function clickOnExpandWalletBtn() {
+  cy.get(expandWalletBtn).should('be.visible').click()
   cy.get(sentinelStart).next().should('exist')
 }
 

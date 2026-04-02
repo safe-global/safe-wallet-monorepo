@@ -10,17 +10,24 @@ import type { Account } from './types'
 
 interface ExpandableAccountItemProps {
   account: Account
+  rowIndex: number
   loading?: boolean
   onItemClick?: (safeAddress: string) => void
 }
 
-const ExpandableAccountItem = ({ account, loading = false, onItemClick }: ExpandableAccountItemProps): ReactElement => {
+const ExpandableAccountItem = ({
+  account,
+  rowIndex,
+  loading = false,
+  onItemClick,
+}: ExpandableAccountItemProps): ReactElement => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
+        data-testid={`space-dashboard-accounts-row-${rowIndex}`}
         className={cn(
           'flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6 cursor-pointer transition-colors hover:bg-muted/50',
           account.highlighted && 'bg-background',
@@ -36,7 +43,7 @@ const ExpandableAccountItem = ({ account, loading = false, onItemClick }: Expand
         </AccountItemContent>
       </CollapsibleTrigger>
 
-      <CollapsibleContent>
+      <CollapsibleContent data-testid={`space-dashboard-accounts-expanded-${rowIndex}`}>
         <div className="flex flex-col">
           {account.subAccounts?.map((sub) => (
             <div

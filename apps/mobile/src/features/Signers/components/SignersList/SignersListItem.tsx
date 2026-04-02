@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -12,6 +12,8 @@ import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
+import { selectSignerByAddress } from '@/src/store/signersSlice'
+import { ImportedBadge } from './ImportedBadge'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { router } from 'expo-router'
 import logger from '@/src/utils/logger'
@@ -25,10 +27,14 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
   const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const pendingSafe = useAppSelector(selectPendingSafe)
+  const signer = useAppSelector((state) => selectSignerByAddress(state, item.value))
 
-  // Check if the current item belongs to the 'Imported signers' section
-  const isMySigner = signersGroup.some(
-    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
+  const isMySigner = useMemo(
+    () =>
+      signersGroup.some(
+        (section) => section.id === 'imported_signers' && section.data.some((s) => s.value === item.value),
+      ),
+    [signersGroup, item.value],
   )
 
   const fullActions = useSignersActions(isMySigner)
@@ -77,6 +83,18 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
           <SignersCard
             name={contact ? (contact.name as string) : (item.name as string)}
             address={item.value as `0x${string}`}
+            rightNode={
+              <View flexDirection="row" alignItems="center" flexShrink={0} gap="$2">
+                {signer?.type === 'private-key' && <ImportedBadge />}
+
+                {signer?.type === 'walletconnect' && (
+                  <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} skipStatus />
+                )}
+
+                {/* Invisible spacer matching menu width so card content doesn't overlap */}
+                <View width={32} />
+              </View>
+            }
           />
         </View>
       </TouchableOpacity>
@@ -91,7 +109,6 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
         justifyContent="center"
         flexDirection="row"
       >
-        <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} />
         <MenuView
           onPressAction={onPressMenuAction}
           actions={actions}

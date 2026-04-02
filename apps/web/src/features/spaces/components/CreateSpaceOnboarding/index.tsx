@@ -152,7 +152,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             )}
 
             <Button
-              data-testid="create-space-button"
+              data-testid="create-space-onboarding-continue-button"
               type="submit"
               disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
               className="h-10 w-full"

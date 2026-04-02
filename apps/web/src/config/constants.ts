@@ -80,6 +80,12 @@ export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
 export const TREZOR_APP_URL = 'app.safe.global'
 export const TREZOR_EMAIL = 'support@safe.global'
 
+// Safe Token
+export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
+  [chains.eth]: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe',
+  [chains.sep]: '0xd16d9C09d13E9Cf77615771eADC5d51a1Ae92a26',
+}
+
 export const DEVELOPER_PORTAL_URL =
   process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
 
@@ -114,6 +120,7 @@ export enum SafeAppsTag {
   SAFE_GOVERNANCE_APP = 'safe-governance-app',
   RECOVERY_SYGNUM = 'recovery-sygnum',
   SWAP_FALLBACK = 'swap-fallback',
+  SAFENET = 'safenet',
 }
 
 // Safe Apps names

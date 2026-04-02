@@ -14,6 +14,7 @@ exports[`./ChainIndicator.stories Default 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -59,6 +60,7 @@ exports[`./ChainIndicator.stories Inline 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -93,6 +95,7 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="36"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -154,6 +157,7 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -179,6 +183,7 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -213,6 +218,7 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="16"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -278,6 +284,7 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
     >
       <img
         alt="Ethereum Logo"
+        data-testid="chain-indicator-network-logo-img"
         height="24"
         loading="lazy"
         src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"

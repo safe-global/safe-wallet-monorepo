@@ -50,7 +50,14 @@ export function SignersCard({
           {name && (
             <View flexDirection="row" alignItems="center" gap="$2">
               {typeof name === 'string' ? (
-                <Text fontSize="$4" fontWeight={600} {...titleStyle}>
+                <Text
+                  fontSize="$4"
+                  fontWeight={600}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  flexShrink={1}
+                  {...titleStyle}
+                >
                   {name}
                 </Text>
               ) : React.isValidElement(name) ? (

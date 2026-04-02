@@ -33,7 +33,7 @@ const AccountsWidget = ({
 
   if (hasError) {
     return (
-      <SafeWidget title="Accounts" action={action}>
+      <SafeWidget title="Accounts" action={action} testId="space-dashboard-accounts-widget">
         <SafeWidget.ErrorState message={error} onRefresh={onRefresh} />
       </SafeWidget>
     )
@@ -41,26 +41,33 @@ const AccountsWidget = ({
 
   if (isEmpty) {
     return (
-      <SafeWidget title="Accounts" action={action}>
+      <SafeWidget title="Accounts" action={action} testId="space-dashboard-accounts-widget">
         <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No accounts yet" />
       </SafeWidget>
     )
   }
 
   return (
-    <SafeWidget title="Accounts" action={action}>
+    <SafeWidget title="Accounts" action={action} testId="space-dashboard-accounts-widget">
       {loading
         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-        : accounts.map((account) =>
+        : accounts.map((account, rowIndex) =>
             account.safes.length > 1 ? (
               <ExpandableAccountItem
                 key={account.address}
                 account={account}
+                rowIndex={rowIndex}
                 loading={loading}
                 onItemClick={onItemClick}
               />
             ) : (
-              <AccountWidgetItem key={account.address} account={account} loading={loading} onItemClick={onItemClick} />
+              <AccountWidgetItem
+                key={account.address}
+                account={account}
+                rowIndex={rowIndex}
+                loading={loading}
+                onItemClick={onItemClick}
+              />
             ),
           )}
       {!loading && remainingCount !== undefined && (

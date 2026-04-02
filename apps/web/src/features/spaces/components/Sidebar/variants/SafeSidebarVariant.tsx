@@ -48,6 +48,7 @@ export const SafeSidebarVariant = ({
               <SidebarMenuButton
                 size="lg"
                 tooltip="Back to Space"
+                data-testid="back-to-space-button"
                 className={css.backToSpace}
                 onClick={handleBackToSpace}
               >
