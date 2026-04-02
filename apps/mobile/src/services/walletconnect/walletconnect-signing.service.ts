@@ -37,8 +37,8 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
     data: safeTx.data,
   })
 
-  const typesObj = typedData.types as unknown as Record<string, unknown>
-  const { EIP712Domain: _, ...types } = typesObj
+  // TypedDataEncoder.hash expects types without EIP712Domain
+  const { EIP712Domain: _, ...types } = typedData.types
 
   const safeTransactionHash = TypedDataEncoder.hash(
     typedData.domain as Record<string, unknown>,
