@@ -27,6 +27,9 @@ import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
+import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { useSpaceSafesCreateV1Mutation, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { isAuthenticated } from '@/store/authSlice'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -53,6 +56,12 @@ const ReplaySafeDialog = ({
   const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const spaceId = useCurrentSpaceId()
+  const isAdmin = useIsAdmin()
+  const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
+  const spaceName = useMemo(() => spaces?.find((space) => space.id === Number(spaceId))?.name, [spaces, spaceId])
 
   useEffect(() => {
     if (chain?.chainId) {
@@ -130,13 +139,59 @@ const ReplaySafeDialog = ({
         ),
       )
 
-      dispatch(
-        showNotification({
-          variant: 'success',
-          groupKey: 'replay-safe-success',
-          message: `Successfully added your account on ${selectedChain.chainName}`,
-        }),
-      )
+      // Add Safe to Space if user is admin
+      if (isAdmin && spaceId) {
+        try {
+          const result = await addSafesToSpace({
+            spaceId: Number(spaceId),
+            createSpaceSafesDto: { safes: [{ chainId: selectedChain.chainId, address: safeAddress }] },
+          })
+
+          if (!result.error) {
+            dispatch(
+              showNotification({
+                variant: 'success',
+                groupKey: 'replay-safe-success',
+                message: `Successfully added your account on ${selectedChain.chainName}`,
+              }),
+            )
+          } else {
+            // Still show success for Safe creation even if adding to Space failed
+            dispatch(
+              showNotification({
+                variant: 'success',
+                groupKey: 'replay-safe-success',
+                message: `Successfully added your account on ${selectedChain.chainName}`,
+              }),
+            )
+            dispatch(
+              showNotification({
+                variant: 'warning',
+                groupKey: 'add-safe-to-space-warning',
+                message: 'Failed to add account to Space',
+              }),
+            )
+          }
+        } catch (err) {
+          console.log('Failed to add safe to space:', err)
+          // Still show success for Safe creation
+          dispatch(
+            showNotification({
+              variant: 'success',
+              groupKey: 'replay-safe-success',
+              message: `Successfully added your account on ${selectedChain.chainName}`,
+            }),
+          )
+        }
+      } else {
+        dispatch(
+          showNotification({
+            variant: 'success',
+            groupKey: 'replay-safe-success',
+            message: `Successfully added your account on ${selectedChain.chainName}`,
+          }),
+        )
+      }
     } catch (err) {
       console.error(err)
     } finally {
@@ -182,6 +237,12 @@ const ReplaySafeDialog = ({
                 The Safe will use the initial setup of the copied Safe. Any changes to owners, threshold, modules or the
                 Safe&apos;s version will not be reflected in the copy.
               </ErrorMessage>
+
+              {isAdmin && spaceName && (
+                <ErrorMessage level="info">
+                  This Safe will also be added to the <strong>{spaceName}</strong> space.
+                </ErrorMessage>
+              )}
 
               {safeCreationDataLoading ? (
                 <Stack

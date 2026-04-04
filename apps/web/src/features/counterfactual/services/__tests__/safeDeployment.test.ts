@@ -1,4 +1,4 @@
-import { getCounterfactualBalance, getUndeployedSafeInfo } from '../safeDeployment'
+import { getCounterfactualBalance, getUndeployedSafeInfo, createPendingSafeFromUrl } from '../safeDeployment'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { chainBuilder } from '@/tests/builders/chains'
 import { faker } from '@faker-js/faker'
@@ -37,6 +37,23 @@ describe('Counterfactual utils', () => {
       expect(result.chainId).toEqual(mockChainId)
       expect(result.threshold).toEqual(undeployedSafeProps.safeAccountConfig.threshold)
       expect(result.owners[0].value).toEqual(undeployedSafeProps.safeAccountConfig.owners[0])
+    })
+  })
+
+  describe('createPendingSafeFromUrl', () => {
+    it('should return minimal safe info from URL parameters', () => {
+      const mockAddress = faker.finance.ethereumAddress()
+      const mockChainId = '1'
+      const mockChain = chainBuilder().with({ chainId: mockChainId }).build()
+
+      const result = createPendingSafeFromUrl(mockAddress, mockChainId, mockChain)
+
+      expect(result.address.value).toEqual(mockAddress)
+      expect(result.chainId).toEqual(mockChainId)
+      expect(result.deployed).toEqual(false)
+      expect(result.nonce).toEqual(-1)
+      expect(result.threshold).toEqual(0)
+      expect(result.owners).toEqual([])
     })
   })
 

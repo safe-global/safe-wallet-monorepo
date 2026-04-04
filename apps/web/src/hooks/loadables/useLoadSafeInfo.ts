@@ -12,6 +12,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCurrentChain } from '../useChains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
+import { createPendingSafeFromUrl } from '@/features/counterfactual/services/safeDeployment'
 
 const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const address = useSafeAddressFromUrl()
@@ -53,10 +54,23 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     }
   }, [cgwError])
 
+  // Fallback: create minimal Safe info from URL when all other sources fail
+  const fallbackData = useMemo(() => {
+    if (cgwDataWithDeployed || undeployedData || cache) return undefined
+    if (!address || !chainId || !chain) return undefined
+    try {
+      return createPendingSafeFromUrl(address, chainId, chain)
+    } catch {
+      return undefined
+    }
+  }, [address, chainId, chain, cgwDataWithDeployed, undeployedData, cache])
+
   // Return stored SafeInfo between polls
-  const safeData = cgwDataWithDeployed ?? undeployedData ?? cache
+  const safeData = cgwDataWithDeployed ?? undeployedData ?? fallbackData ?? cache
   // Convert RTK Query error to standard Error for AsyncResult compatibility
   const error = useMemo(() => {
+    // Don't show error if we have fallback data
+    if (fallbackData) return undefined
     if (cgwError) {
       const errorMessage =
         'message' in cgwError
@@ -67,7 +81,7 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
       return new Error(errorMessage)
     }
     return undeployedSafe ? undeployedError : undefined
-  }, [cgwError, undeployedSafe, undeployedError])
+  }, [cgwError, undeployedSafe, undeployedError, fallbackData])
 
   const loading = cgwLoading
 

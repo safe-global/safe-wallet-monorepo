@@ -381,7 +381,7 @@ const FirstSteps = () => {
 
   if (safe.deployed) return null
 
-  const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
+  const isActivating = undeployedSafe && undeployedSafe.status.status !== 'AWAITING_EXECUTION'
 
   return (
     <WidgetContainer>

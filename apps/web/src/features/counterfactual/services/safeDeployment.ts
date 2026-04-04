@@ -45,6 +45,23 @@ export const getUndeployedSafeInfo = (undeployedSafe: UndeployedSafe, address: s
   }
 }
 
+/**
+ * Create a minimal Safe info from just an address and chain.
+ * Used as fallback when Safe is accessed via URL but not deployed/indexed yet.
+ * Only contains address and chainId; other fields use defaults.
+ */
+export const createPendingSafeFromUrl = (address: string, chainId: string, chain: Chain) => {
+  const latestSafeVersion = getLatestSafeVersion(chain)
+
+  return {
+    ...defaultSafeInfo,
+    address: { value: address },
+    chainId,
+    version: latestSafeVersion,
+    deployed: false,
+  }
+}
+
 export const dispatchTxExecutionAndDeploySafe = async (
   safeTx: SafeTransaction,
   txOptions: TransactionOptions,
