@@ -51,12 +51,12 @@ export function HeaderNavigation({
       {showSearch && (
         <Button
           variant="secondary"
-          size="icon-sm"
+          size="icon-lg"
           onClick={onSearchClick}
-          className="cursor-pointer shrink-0"
+          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
           aria-label="Search"
         >
-          <Search className="size-5" />
+          <Search className="size-5 text-muted-foreground" />
         </Button>
       )}
 

@@ -12,8 +12,10 @@ import { SidebarTopBar } from './SidebarTopBar'
 
 const SkeletonRow = ({ heightClass }: { heightClass?: string } = {}): ReactElement => (
   <SidebarMenuItem>
-    <div className="flex items-center gap-2 px-3 py-2">
-      <div className={`w-48 rounded bg-sidebar-accent animate-pulse ${heightClass ?? 'h-12'}`} />
+    <div className="flex items-center gap-2 px-3 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <div
+        className={`rounded bg-sidebar-border animate-pulse w-48 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 ${heightClass ?? 'h-12'}`}
+      />
     </div>
   </SidebarMenuItem>
 )

@@ -29,7 +29,7 @@ const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
       isActive={item.isActive}
       disabled={item.disabled}
       data-testid={getSidebarItemTestId(item.label)}
-      className={`${css.sidebarInteractive} ${css.sidebarNavItem}`}
+      className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
       // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
       render={!item.disabled ? <Link href={item.link} /> : undefined}
     >
@@ -66,7 +66,7 @@ export const SpacesSidebarVariant = ({
       {/* Main Navigation */}
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0">
             {mainNavItems.map((item) => (
               <NavItem key={item.href} item={item} />
             ))}
@@ -78,7 +78,7 @@ export const SpacesSidebarVariant = ({
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupLabel>{setupGroup.label}</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0">
             {setupGroup.items.map((item) => (
               <NavItem key={item.href} item={item} />
             ))}
