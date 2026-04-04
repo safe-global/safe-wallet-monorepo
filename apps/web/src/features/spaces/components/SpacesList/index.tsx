@@ -1,7 +1,7 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
-import SignInButton from '../SignInButton'
+import SignInOptions from '../SignInOptions'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -12,7 +12,6 @@ import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { MemberStatus } from '@/features/spaces'
-import useWallet from '@/hooks/wallets/useWallet'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SpaceInfoModal from '../SpaceInfoModal'
@@ -38,31 +37,18 @@ const AddSpaceButton = () => {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
-  const wallet = useWallet()
-  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
-
   return (
-    <>
-      <Card sx={{ p: 5, textAlign: 'center' }}>
-        <Box display="flex" justifyContent="center">
-          <SpacesIcon />
-        </Box>
+    <Card sx={{ p: 5, textAlign: 'center' }}>
+      <Typography variant="h3" fontWeight={600} mb={3}>
+        Sign in
+      </Typography>
 
-        <Box mb={3}>
-          <Typography color="text.secondary" mb={1}>
-            To view your space or create one,{' '}
-            {!!wallet ? 'sign in with your connected wallet.' : 'connect your wallet.'}
-            <br />
-          </Typography>
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
-          </Link>
-        </Box>
+      <Typography color="text.secondary" mb={3}>
+        To view or create a space, sign in with your wallet.
+      </Typography>
 
-        <SignInButton afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-      </Card>
-      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} showButtons={false} />}
-    </>
+      <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+    </Card>
   )
 }
 
