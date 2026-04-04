@@ -103,7 +103,7 @@
     "idb-keyval": "^6.2.1",
     "input-otp": "^1.4.2",
     "js-cookie": "^3.0.1",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "lucide-react": "^0.563.0",
     "mixpanel-browser": "^2.66.0",
     "motion": "^12.34.0",
