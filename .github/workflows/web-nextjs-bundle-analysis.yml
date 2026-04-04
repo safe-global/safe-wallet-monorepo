@@ -83,7 +83,7 @@ jobs:
           echo EOF >> $GITHUB_OUTPUT
 
       - name: Comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: next-bundle-analysis
           message: ${{ steps.get-comment-body.outputs.body }}
