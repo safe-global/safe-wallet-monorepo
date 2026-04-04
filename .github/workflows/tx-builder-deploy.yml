@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Post building comment
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@v3
         with:
           message-id: tx-builder-preview
           message: |
@@ -79,7 +79,7 @@ jobs:
 
       - name: Post deployment link
         if: always()
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@v3
         with:
           message-id: tx-builder-preview
           message: |
