@@ -25,12 +25,13 @@ export const useLogoutCallback = () => {
 
     const process = async () => {
       const result = await reconcileAuth(dispatch)
+      const logoutNotUnauthenticated = result !== 'unauthenticated'
 
+      if (logoutNotUnauthenticated) {
+        logError(Errors._109)
+      }
       if (result === 'error') {
-        logError(Errors._109)
         dispatch(setUnauthenticated())
-      } else if (result === 'authenticated') {
-        logError(Errors._109)
       }
 
       sessionStorage.removeItem(LOGGING_OUT_KEY)
