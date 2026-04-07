@@ -79,9 +79,13 @@ jobs:
       # Extract branch name
       - name: Extract branch name
         shell: bash
-        ## Cut off "refs/heads/", only allow alphanumeric characters and convert to lower case,
-        ## e.g. "refs/heads/features/hello-1.2.0" -> "features_hello_1_2_0"
-        run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/refs\/heads\///' | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
+        ## Sanitize for DNS subdomain: replace non-alphanumeric with hyphens,
+        ## collapse runs, strip edges, lowercase, truncate to 63 chars (DNS limit).
+        ## e.g. "refs/heads/features/hello-1.2.0" -> "features-hello-1-2-0"
+        run: |
+          raw="$(echo "$GITHUB_HEAD_REF" | sed 's|refs/heads/||')"
+          safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-63 | sed 's/-$//')"
+          echo "branch=$safe" >> $GITHUB_OUTPUT
         id: extract_branch
 
       # Deploy to S3
