@@ -28,6 +28,9 @@ import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import type SpaceSettingsPage from './components/SpaceSettings/Page'
+import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
+import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
+import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -59,6 +62,11 @@ export interface SpacesContract {
   SpaceSafeAccountsPage: typeof SpaceSafeAccountsPage
   SpaceAddressBookPage: typeof SpaceAddressBookPage
   SpaceSettingsPage: typeof SpaceSettingsPage
+
+  // Onboarding page components (PascalCase) - stub renders null
+  CreateSpaceOnboarding: typeof CreateSpaceOnboarding
+  SelectSafesOnboarding: typeof SelectSafesOnboarding
+  InviteMembersOnboarding: typeof InviteMembersOnboarding
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized
