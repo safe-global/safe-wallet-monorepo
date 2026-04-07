@@ -91,9 +91,10 @@ describe('useRouterGuard', () => {
     // First guard: slow, will resolve after the second one is set up
     let resolveFirst: (value: { success: boolean }) => void
     const firstGuard = jest.fn(
-      () => new Promise<{ success: boolean }>((resolve) => {
-        resolveFirst = resolve
-      }),
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          resolveFirst = resolve
+        }),
     )
 
     // Second guard: resolves immediately with success
