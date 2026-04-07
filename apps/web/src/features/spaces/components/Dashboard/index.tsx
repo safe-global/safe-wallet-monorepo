@@ -128,7 +128,7 @@ const SpaceDashboard = () => {
                   onRefresh={refetch}
                 />
               ) : (
-                <SafeWidget title="Accounts" action={<AddActionsAction />}>
+                <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
                   <div className="animate-pulse rounded-lg bg-muted" />
                 </SafeWidget>
               )}

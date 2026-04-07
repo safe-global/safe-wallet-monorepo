@@ -14,6 +14,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
 import { AppRoutes } from '@/config/routes'
+import HelpMenu from '@/components/common/HelpMenu'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
@@ -116,6 +117,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         {!isSafeLabsTermsPage && <Footer />}
       </div>
+
+      <HelpMenu />
     </>
   )
 }

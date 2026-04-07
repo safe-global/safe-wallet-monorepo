@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu'
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
@@ -11,29 +12,33 @@ import { useTheme } from '@/src/theme/hooks/useTheme'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
+import { selectSignerByAddress } from '@/src/store/signersSlice'
+import { ImportedBadge } from './ImportedBadge'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { router } from 'expo-router'
 import logger from '@/src/utils/logger'
 
 interface SignersListItemProps {
   item: AddressInfo
-  index: number
   signersGroup: SignerSection[]
 }
 
-function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
+function SignersListItem({ item, signersGroup }: SignersListItemProps) {
   const { isDark } = useTheme()
   const contact = useAppSelector(selectContactByAddress(item.value))
   const pendingSafe = useAppSelector(selectPendingSafe)
+  const signer = useAppSelector((state) => selectSignerByAddress(state, item.value))
 
-  // Check if the current item belongs to the 'Imported signers' section
-  const isMySigner = signersGroup.some(
-    (section) => section.id === 'imported_signers' && section.data.some((signer) => signer.value === item.value),
+  const isMySigner = useMemo(
+    () =>
+      signersGroup.some(
+        (section) => section.id === 'imported_signers' && section.data.some((s) => s.value === item.value),
+      ),
+    [signersGroup, item.value],
   )
 
   const fullActions = useSignersActions(isMySigner)
   const actions = fullActions.filter(Boolean) as MenuAction[]
-  const isLastItem = signersGroup.some((section) => section.data.length === index + 1)
   const copy = useCopyAndDispatchToast()
 
   const redirectToDetails = (editMode?: boolean) => {
@@ -72,19 +77,24 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
   }
 
   return (
-    <View position="relative">
+    <View position="relative" marginBottom="$2">
       <TouchableOpacity onPress={handleItemPress} testID={`signer-${item.value}`}>
-        <View
-          backgroundColor={isDark ? '$backgroundPaper' : '$background'}
-          borderTopRightRadius={index === 0 ? '$4' : undefined}
-          borderTopLeftRadius={index === 0 ? '$4' : undefined}
-          borderBottomRightRadius={isLastItem ? '$4' : undefined}
-          borderBottomLeftRadius={isLastItem ? '$4' : undefined}
-          collapsable={false}
-        >
+        <View backgroundColor={isDark ? '$backgroundPaper' : '$background'} borderRadius="$2" collapsable={false}>
           <SignersCard
             name={contact ? (contact.name as string) : (item.name as string)}
             address={item.value as `0x${string}`}
+            rightNode={
+              <View flexDirection="row" alignItems="center" flexShrink={0} gap="$2">
+                {signer?.type === 'private-key' && <ImportedBadge />}
+
+                {signer?.type === 'walletconnect' && (
+                  <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} skipStatus />
+                )}
+
+                {/* Invisible spacer matching menu width so card content doesn't overlap */}
+                <View width={32} />
+              </View>
+            }
           />
         </View>
       </TouchableOpacity>
@@ -97,6 +107,7 @@ function SignersListItem({ item, index, signersGroup }: SignersListItemProps) {
         display="flex"
         alignItems="center"
         justifyContent="center"
+        flexDirection="row"
       >
         <MenuView
           onPressAction={onPressMenuAction}

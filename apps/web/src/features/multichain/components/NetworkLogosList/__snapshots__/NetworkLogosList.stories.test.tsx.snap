@@ -17,6 +17,7 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -30,6 +31,7 @@ exports[`./NetworkLogosList.stories FourNetworks 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
@@ -79,6 +81,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -92,6 +95,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithHasMore 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
@@ -147,6 +151,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -160,6 +165,7 @@ exports[`./NetworkLogosList.stories ManyNetworksWithoutHasMore 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
@@ -219,6 +225,7 @@ exports[`./NetworkLogosList.stories SingleNetwork 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -248,6 +255,7 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
       >
         <img
           alt="Ethereum Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
@@ -261,6 +269,7 @@ exports[`./NetworkLogosList.stories TwoNetworks 1`] = `
       >
         <img
           alt="Polygon Logo"
+          data-testid="chain-indicator-network-logo-img"
           height="24"
           loading="lazy"
           src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"

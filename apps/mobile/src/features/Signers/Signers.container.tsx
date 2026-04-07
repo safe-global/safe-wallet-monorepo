@@ -38,7 +38,7 @@ export const SignersContainer = () => {
       </View>
 
       <SafeButton onPress={onImportSigner} testID={'import-signer-button'}>
-        Import signer
+        Add signer
       </SafeButton>
     </View>
   )

@@ -14,6 +14,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
+import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
+
 type Props = {
   signerAddress: string
   onPressExplorer: () => void
@@ -24,6 +27,9 @@ type Props = {
   name: string
   hasPrivateKey: boolean
   isLedgerSigner: boolean
+  isWcSigner: boolean
+  onReconnectWallet?: () => void
+  onRemoveWcSigner?: () => void
   control: Control<FormValues>
   errors: FieldErrors<FormValues>
   dirtyFields: FieldNamesMarkedBoolean<FormValues>
@@ -42,16 +48,26 @@ export const SignerView = ({
   name,
   hasPrivateKey,
   isLedgerSigner,
+  isWcSigner,
+  onReconnectWallet,
+  onRemoveWcSigner,
 }: Props) => {
   const { bottom, top } = useSafeAreaInsets()
+  const isWcConnected = useWalletConnectStatus(signerAddress)
 
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
-        <View justifyContent={'center'} alignItems={'center'}>
+        <View justifyContent={'center'} alignItems={'center'} paddingTop={isWcSigner ? '$6' : undefined}>
           <BadgeWrapper
-            badge={<SignerTypeBadge address={signerAddress as Address} theme="badge_background" bordered={true} />}
-            position="bottom-right"
+            badge={
+              isWcSigner ? (
+                <WalletConnectBadge address={signerAddress} testID="signer-wc-badge" />
+              ) : (
+                <SignerTypeBadge address={signerAddress as Address} theme="badge_background" bordered={true} />
+              )
+            }
+            position={isWcSigner ? 'top-right' : 'bottom-right'}
           >
             <Identicon address={signerAddress as Address} size={56} />
           </BadgeWrapper>
@@ -116,13 +132,24 @@ export const SignerView = ({
         )}
       </ScrollView>
       <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top + bottom}>
-        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom ?? 60}>
+        <View paddingTop={'$2'} paddingBottom={bottom ?? 60}>
           {editMode ? (
             <SafeButton onPress={onPressEdit}>Save</SafeButton>
           ) : isLedgerSigner ? (
             <SafeButton danger={true} onPress={onDeleteLedgerConnection}>
               Delete connection
             </SafeButton>
+          ) : isWcSigner ? (
+            <YStack gap="$3">
+              {onReconnectWallet && !isWcConnected && (
+                <SafeButton onPress={onReconnectWallet} testID="reconnect-wallet-button">
+                  Reconnect wallet
+                </SafeButton>
+              )}
+              <SafeButton danger={true} onPress={onRemoveWcSigner} testID="remove-wc-signer-button">
+                Remove signer
+              </SafeButton>
+            </YStack>
           ) : null}
         </View>
       </KeyboardAvoidingView>

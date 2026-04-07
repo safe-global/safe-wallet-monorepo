@@ -25,6 +25,7 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
 
   return (
     <div
+      data-testid="space-safes-navigation-block"
       className={cn(
         // TODO: change rounded-lg (8px) to rounded-2xl (16px) after migrating to the new design system
         'group relative w-full sm:w-[430px] min-h-[calc(68px)] flex items-center shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg p-2 overflow-hidden bg-card focus:ring-0',

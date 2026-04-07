@@ -49,6 +49,22 @@ describe('formatters', () => {
     })
   })
 
+  describe('asAddress', () => {
+    it('should return the address if valid', () => {
+      expect(formatters.asAddress('0x1234567890123456789012345678901234567890')).toBe(
+        '0x1234567890123456789012345678901234567890',
+      )
+    })
+
+    it('should throw for an invalid address', () => {
+      expect(() => formatters.asAddress('not-an-address')).toThrow('Invalid address: not-an-address')
+    })
+
+    it('should throw for an empty string', () => {
+      expect(() => formatters.asAddress('')).toThrow('Invalid address: ')
+    })
+  })
+
   describe('shortenAddress', () => {
     it('should shorten an address', () => {
       expect(formatters.shortenAddress('0x1234567890123456789012345678901234567890')).toEqual('0x1234...7890')

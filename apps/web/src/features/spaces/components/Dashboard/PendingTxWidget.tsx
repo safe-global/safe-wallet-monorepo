@@ -53,7 +53,7 @@ const PendingTxWidget = ({
 
   if (hasError) {
     return (
-      <SafeWidget title="Pending">
+      <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
         <SafeWidget.ErrorState message="Unable to load content" onRefresh={onRefresh} />
       </SafeWidget>
     )
@@ -61,14 +61,14 @@ const PendingTxWidget = ({
 
   if (isEmpty) {
     return (
-      <SafeWidget title="Pending">
+      <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
         <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No pending transactions" />
       </SafeWidget>
     )
   }
 
   return (
-    <SafeWidget title="Pending">
+    <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (

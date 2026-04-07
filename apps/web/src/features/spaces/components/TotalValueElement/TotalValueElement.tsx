@@ -23,7 +23,11 @@ const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
       {loading ? (
         <Skeleton className="h-[30px] w-48" />
       ) : (
-        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+        <Typography
+          variant="h2"
+          className="font-bold leading-[1] tracking-tight"
+          data-testid="space-dashboard-total-value"
+        >
           {value}
         </Typography>
       )}
