@@ -1,9 +1,11 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import CreateSpaceOnboarding from '@/features/spaces/components/CreateSpaceOnboarding'
+import { SpacesFeature } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
 
 const CreateSpacePage: NextPage = () => {
+  const { CreateSpaceOnboarding } = useLoadFeature(SpacesFeature)
   return (
     <>
       <Head>
