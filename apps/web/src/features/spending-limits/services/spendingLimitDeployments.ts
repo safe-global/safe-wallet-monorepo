@@ -38,8 +38,8 @@ export const getLatestSpendingLimitAddress = (chainId: string): string | undefin
   // Unlike getDeployment (which uses CREATE2 fallback for already-enabled modules),
   // new enablements must match an explicitly registered chain to avoid enabling
   // a version that was never deployed there.
-  for (const version of [...ALL_VERSIONS].reverse()) {
-    const deployment = getAllowanceModuleDeployment({ version })
+  for (let i = ALL_VERSIONS.length - 1; i >= 0; i--) {
+    const deployment = getAllowanceModuleDeployment({ version: ALL_VERSIONS[i] })
     if (!deployment) continue
     if (deployment.networkAddresses[chainId]) return deployment.networkAddresses[chainId]
   }

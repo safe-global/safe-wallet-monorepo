@@ -20,6 +20,7 @@ describe('getLatestSpendingLimitAddress', () => {
     const v011 = getAllowanceModuleDeployment({ version: '0.1.1' })
     // XDC (chainId 50) has v0.1.1
     const expectedAddress = v011?.networkAddresses['50']
+    expect(expectedAddress).toBeDefined()
 
     const result = getLatestSpendingLimitAddress('50')
 
@@ -35,10 +36,10 @@ describe('getLatestSpendingLimitAddress', () => {
       (chainId) => v010?.networkAddresses[chainId] != null,
     )
 
-    if (sharedChainId) {
-      const result = getLatestSpendingLimitAddress(sharedChainId)
-      expect(result).toBe(v011?.networkAddresses[sharedChainId])
-    }
+    expect(sharedChainId).toBeDefined()
+
+    const result = getLatestSpendingLimitAddress(sharedChainId as string)
+    expect(result).toBe(v011?.networkAddresses[sharedChainId as string])
   })
 
   it('should NOT return the v0.1.1 address for mainnet (regression test for #7494)', () => {
@@ -60,6 +61,7 @@ describe('getLatestSpendingLimitAddress', () => {
   it('should return v0.1.0 address for Sepolia (chainId 11155111)', () => {
     const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
     const expectedAddress = v010?.networkAddresses['11155111']
+    expect(expectedAddress).toBeDefined()
 
     const result = getLatestSpendingLimitAddress('11155111')
 
@@ -69,6 +71,7 @@ describe('getLatestSpendingLimitAddress', () => {
   it('should return v0.1.0 address for Base (chainId 8453)', () => {
     const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
     const expectedAddress = v010?.networkAddresses['8453']
+    expect(expectedAddress).toBeDefined()
 
     const result = getLatestSpendingLimitAddress('8453')
 
