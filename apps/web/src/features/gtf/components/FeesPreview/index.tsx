@@ -1,7 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRef, useState } from 'react'
-import { Alert, Divider, IconButton, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -10,6 +9,7 @@ import css from './styles.module.css'
 const EXECUTION_FEE_TOOLTIP =
   'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
 const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on the blockchain.'
+const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
 const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
 
 type PaymentSource = 'safe' | 'signer'
@@ -89,30 +89,63 @@ const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing 
   </div>
 )
 
-const PaymentSourceToggle = ({
+const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string }[] = [
+  { value: 'safe', label: 'Safe' },
+  { value: 'signer', label: 'Signer' },
+]
+
+const PaymentSourceSelector = ({
   value,
   onChange,
 }: {
   value: PaymentSource
   onChange: (source: PaymentSource) => void
-}): ReactElement => (
-  <div className={css.toggle}>
-    <button
-      type="button"
-      className={`${css.toggleTab} ${value === 'safe' ? css.toggleTabActive : ''}`}
-      onClick={() => onChange('safe')}
-    >
-      Safe wallet
-    </button>
-    <button
-      type="button"
-      className={`${css.toggleTab} ${value === 'signer' ? css.toggleTabActive : ''}`}
-      onClick={() => onChange('signer')}
-    >
-      Signing wallet
-    </button>
-  </div>
-)
+}): ReactElement => {
+  const anchorRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+  const selected = PAYMENT_SOURCE_OPTIONS.find((o) => o.value === value) ?? PAYMENT_SOURCE_OPTIONS[0]
+
+  const handleSelect = (source: PaymentSource) => {
+    onChange(source)
+    setOpen(false)
+  }
+
+  return (
+    <>
+      <div
+        ref={anchorRef}
+        className={css.paymentSourceSelector}
+        onClick={() => setOpen(true)}
+        role="button"
+        data-testid="payment-source-selector"
+      >
+        <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
+          {selected.label}
+        </Typography>
+        <SvgIcon sx={{ fontSize: '16px', color: 'text.secondary' }}>
+          <path d="M7 10l5 5 5-5H7z" />
+        </SvgIcon>
+      </div>
+
+      <Popover
+        open={open}
+        anchorEl={anchorRef.current}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{ paper: { sx: { mt: 0.5, minWidth: 100, borderRadius: '8px' } } }}
+      >
+        {PAYMENT_SOURCE_OPTIONS.map((option) => (
+          <MenuItem key={option.value} selected={option.value === value} onClick={() => handleSelect(option.value)}>
+            <Typography variant="body2" fontWeight={700}>
+              {option.label}
+            </Typography>
+          </MenuItem>
+        ))}
+      </Popover>
+    </>
+  )
+}
 
 const GasTokenSelector = ({
   availableGasTokens,
@@ -191,10 +224,66 @@ const GasTokenSelector = ({
   )
 }
 
+const SignerFeeNotice = ({
+  availableGasTokens,
+}: {
+  availableGasTokens: FeesPreviewData['availableGasTokens']
+}): ReactElement => {
+  const nativeToken = availableGasTokens?.[0]
+
+  return (
+    <div className={css.signerFeeNotice}>
+      <div className={css.signerFeeNoticeRow}>
+        <Typography variant="body2" fontWeight={700}>
+          Fees will be paid from the signer using
+        </Typography>
+        {nativeToken?.logoUri && (
+          <img src={nativeToken.logoUri} alt={nativeToken.symbol} width={24} height={24} className={css.tokenLogo} />
+        )}
+        <Typography variant="body2" fontWeight={700}>
+          {nativeToken?.symbol}
+        </Typography>
+        <Tooltip title={SIGNER_FEE_TOOLTIP} placement="top" arrow>
+          <span className={css.tooltipIcon}>
+            <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
+          </span>
+        </Tooltip>
+      </div>
+      <Typography variant="body2" color="text.secondary">
+        Fees can&apos;t currently be paid from your Safe.
+      </Typography>
+    </div>
+  )
+}
+
+const ConfirmationFeeNotice = ({
+  availableGasTokens,
+  selectedGasToken,
+}: {
+  availableGasTokens: FeesPreviewData['availableGasTokens']
+  selectedGasToken?: string
+}): ReactElement => {
+  const token = availableGasTokens?.find((t) => t.symbol === selectedGasToken) ?? availableGasTokens?.[0]
+
+  return (
+    <div className={css.signerFeeNoticeRow}>
+      <Typography variant="body2" fontWeight={700}>
+        Fees will be paid from your Safe using
+      </Typography>
+      {token?.logoUri && (
+        <img src={token.logoUri} alt={token.symbol} width={24} height={24} className={css.tokenLogo} />
+      )}
+      <Typography variant="body2" fontWeight={700}>
+        {token?.symbol}
+      </Typography>
+    </div>
+  )
+}
+
 const FeesPreview = (props: FeesPreviewData): ReactElement => {
-  const { canCoverFees, executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } = props
+  const { canCoverFees, isConfirmation, executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } =
+    props
   const [paymentSource, setPaymentSource] = useState<PaymentSource>('safe')
-  const [fallbackDismissed, setFallbackDismissed] = useState(false)
 
   const isSafeWallet = paymentSource === 'safe'
 
@@ -213,20 +302,46 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
 
       {/* Fee card */}
       <div className={css.feeCard}>
-        {/* Payment source row — only when Safe can cover fees */}
-        {canCoverFees && (
+        {/* Confirmation notice — not the first signer, fees already locked */}
+        {isConfirmation && canCoverFees && (
+          <>
+            <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
+
+            <Divider sx={{ mx: -2 }} />
+          </>
+        )}
+
+        {/* Payment source row — first signer, Safe can cover fees */}
+        {!isConfirmation && canCoverFees && (
           <>
             <div className={css.paymentRow}>
-              <Typography variant="body2">Pay fees from</Typography>
-              <PaymentSourceToggle value={paymentSource} onChange={setPaymentSource} />
-              <Typography variant="body2">using</Typography>
-              <GasTokenSelector
-                availableGasTokens={isSafeWallet ? availableGasTokens : availableGasTokens?.slice(0, 1)}
-                selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.symbol ?? '')}
-                onGasTokenChange={props.onGasTokenChange}
-                locked={!isSafeWallet}
-              />
+              <div className={css.paymentRowGroup}>
+                <Typography variant="body2" color="text.secondary">
+                  Pay fees from:
+                </Typography>
+                <PaymentSourceSelector value={paymentSource} onChange={setPaymentSource} />
+              </div>
+              <div className={css.paymentRowGroup}>
+                <Typography variant="body2" color="text.secondary">
+                  Fees token:
+                </Typography>
+                <GasTokenSelector
+                  availableGasTokens={isSafeWallet ? availableGasTokens : availableGasTokens?.slice(0, 1)}
+                  selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.symbol ?? '')}
+                  onGasTokenChange={props.onGasTokenChange}
+                  locked={!isSafeWallet}
+                />
+              </div>
             </div>
+
+            <Divider sx={{ mx: -2 }} />
+          </>
+        )}
+
+        {/* Signer fallback notice — when Safe can't cover fees */}
+        {!canCoverFees && (
+          <>
+            <SignerFeeNotice availableGasTokens={availableGasTokens} />
 
             <Divider sx={{ mx: -2 }} />
           </>
@@ -237,24 +352,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
-      {/* Fallback EOA banner — shown when fees were computed but Safe can't cover them */}
-      {!canCoverFees && executionFee.amount && !fallbackDismissed && (
-        <Alert
-          severity="info"
-          data-testid="fallback-eoa-banner"
-          action={
-            <IconButton size="small" onClick={() => setFallbackDismissed(true)} aria-label="Dismiss">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          }
-        >
-          Fees can&apos;t currently be paid from your Safe balance. For this transaction, fees will be paid by the
-          executing wallet instead.
-        </Alert>
-      )}
-
-      {/* Total outgoing — only when Safe can cover fees */}
-      {canCoverFees && totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
+      {/* Total outgoing */}
+      {totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
     </div>
   )
 }

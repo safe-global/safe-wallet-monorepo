@@ -52,8 +52,45 @@ export const Error: Story = {
 export const FallbackEOA: Story = {
   args: {
     canCoverFees: false,
-    executionFee: { label: 'Execution fee', amount: '0.00273', currency: 'ETH', isFree: true },
-    gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
+    executionFee: { label: 'Execution fee (0.05%)', amount: '0.02733', currency: 'ETH', isFree: true },
+    gasFee: { label: 'Gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$97.30' },
+    totalOutgoing: { primary: { amount: '0.60126', currency: 'ETH' }, fiatTotal: '$1,768.95' },
+    availableGasTokens: [{ symbol: 'ETH', logoUri: '' }],
+    selectedGasToken: 'ETH',
+  },
+}
+
+export const Confirmation: Story = {
+  args: {
+    ...defaultArgs,
+    isConfirmation: true,
+  },
+}
+
+export const ConfirmationTwoCurrencies: Story = {
+  args: {
+    ...defaultArgs,
+    isConfirmation: true,
+    totalOutgoing: {
+      primary: { amount: '0.5466', currency: 'ETH' },
+      fees: { amount: '3.50', currency: 'USDC' },
+      fiatTotal: '$1,068.00',
+    },
+  },
+}
+
+export const FallbackEOATwoCurrencies: Story = {
+  args: {
+    canCoverFees: false,
+    executionFee: { label: 'Execution fee (0.05%)', amount: '0.02733', currency: 'ETH', isFree: true },
+    gasFee: { label: 'Gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$97.30' },
+    totalOutgoing: {
+      primary: { amount: '0.5466', currency: 'ETH' },
+      fees: { amount: '3.50', currency: 'USDC' },
+      fiatTotal: '$1,068.00',
+    },
+    availableGasTokens: [{ symbol: 'ETH', logoUri: '' }],
+    selectedGasToken: 'ETH',
   },
 }
 

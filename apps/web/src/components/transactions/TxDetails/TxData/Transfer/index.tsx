@@ -5,7 +5,6 @@ import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { TransferTx } from '@/components/transactions/TxInfo'
 import { isTxQueued } from '@/utils/transaction-guards'
 import { Box, Stack, Typography } from '@mui/material'
-import React from 'react'
 
 import TransferActions from '@/components/transactions/TxDetails/TxData/Transfer/TransferActions'
 import MaliciousTxWarning from '@/components/transactions/MaliciousTxWarning'
@@ -24,25 +23,29 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
   const { direction } = txInfo
 
   return (
-    <Box display="flex" flexDirection="row" alignItems="center" gap={1}>
-      {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}{' '}
-      <b>
-        <TransferTx info={txInfo} omitSign preciseAmount />
-      </b>
-      {direction === TransferDirection.INCOMING ? ' from' : ' to'}
+    <Box display="flex" flexDirection="row" alignItems="center" gap={1} sx={{ '& b': { fontWeight: 'normal' } }}>
+      <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40 }}>
+        {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}
+      </Typography>
+      <TransferTx info={txInfo} omitSign preciseAmount />
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>
   )
 }
 
 const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
-  const address = txInfo.direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const { direction } = txInfo
+  const address = direction.toUpperCase() === TransferDirection.INCOMING ? txInfo.sender : txInfo.recipient
+  const directionLabel = direction === TransferDirection.INCOMING ? 'From' : 'To'
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
       <TransferTxInfoMain txInfo={txInfo} txStatus={txStatus} trusted={trusted} imitation={imitation} />
 
-      <Box display="flex" alignItems="center" width="100%">
+      <Box display="flex" alignItems="center" gap={1} width="100%" sx={{ '& .ethHashInfo-name': { fontWeight: 700 } }}>
+        <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40, whiteSpace: 'nowrap' }}>
+          {directionLabel}
+        </Typography>
         <NamedAddressInfo
           address={address.value}
           name={address.name}
@@ -50,6 +53,8 @@ const TransferTxInfo = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfo
           shortAddress={false}
           hasExplorer
           showCopyButton
+          showPrefix={false}
+          avatarSize={32}
           trusted={trusted && !imitation}
         >
           <TransferActions address={address.value} txInfo={txInfo} trusted={trusted} />

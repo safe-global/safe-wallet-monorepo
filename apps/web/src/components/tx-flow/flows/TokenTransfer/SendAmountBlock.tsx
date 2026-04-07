@@ -10,30 +10,51 @@ const SendAmountBlock = ({
   tokenInfo,
   children,
   title = 'Send',
+  compact = false,
 }: {
   /** Amount in WEI */
   amountInWei: number | string
   tokenInfo: Balance['tokenInfo'] | TokenInfo
   children?: ReactNode
   title?: string
+  /** Inline layout without FieldsGrid wrapper */
+  compact?: boolean
 }) => {
-  return (
-    <FieldsGrid title={title}>
-      <Box display="flex" alignItems="center" gap={1}>
-        <TokenIcon logoUri={tokenInfo.logoUri ?? undefined} tokenSymbol={tokenInfo.symbol} />
+  const content = (
+    <Box display="flex" alignItems="center" gap={1}>
+      <TokenIcon
+        logoUri={tokenInfo.logoUri ?? undefined}
+        tokenSymbol={tokenInfo.symbol}
+        size={compact ? 32 : undefined}
+      />
 
+      {!compact && (
         <Typography variant="body2" fontWeight="bold">
           {tokenInfo.symbol}
         </Typography>
+      )}
 
-        {children}
+      {children}
 
-        <Typography variant="body2" data-testid="token-amount">
-          {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals ?? 0)}
-        </Typography>
-      </Box>
-    </FieldsGrid>
+      <Typography variant={compact ? 'body1' : 'body2'} data-testid="token-amount">
+        {formatVisualAmount(amountInWei, tokenInfo.decimals, tokenInfo.decimals ?? 0)}
+        {compact && ` ${tokenInfo.symbol}`}
+      </Typography>
+    </Box>
   )
+
+  if (compact) {
+    return (
+      <Box display="flex" alignItems="center" gap={3} pr={2}>
+        <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
+          {title}
+        </Typography>
+        {content}
+      </Box>
+    )
+  }
+
+  return <FieldsGrid title={title}>{content}</FieldsGrid>
 }
 
 export default SendAmountBlock

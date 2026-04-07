@@ -21,6 +21,8 @@ export type TotalOutgoing = {
 
 export type FeesPreviewData = {
   canCoverFees: boolean
+  /** When true, fees are already locked in (not the first signer) — no selectors shown */
+  isConfirmation?: boolean
   executionFee: FeeRow
   gasFee: FeeRow
   totalOutgoing?: TotalOutgoing

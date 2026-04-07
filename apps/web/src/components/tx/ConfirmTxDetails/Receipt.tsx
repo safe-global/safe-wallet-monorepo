@@ -1,7 +1,10 @@
 import type { TransactionDetails, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Fragment, useMemo, type ReactElement } from 'react'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import TokenIcon from '@/components/common/TokenIcon'
+import { useCurrentChain } from '@/hooks/useChains'
+import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -30,7 +33,10 @@ const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }
   <Box sx={{ maxHeight: '550px', flex: 1, overflowY: 'auto', px: 2, pt: 1, mt: '0 !important' }}>{children}</Box>
 )
 
+const inlineEthHashInfoSx = { '& > div': { width: 'auto' } }
+
 export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
+  const chain = useCurrentChain()
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -107,28 +113,52 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasToken" grid={grid}>
-                  <Typography variant="body2">
+                  <Typography variant="body2" sx={inlineEthHashInfoSx}>
                     <EthHashInfo
                       address={safeTxData.gasToken}
-                      avatarSize={20}
+                      showAvatar={false}
                       showPrefix={false}
                       showName={false}
                       shortAddress
                       hasExplorer
-                    />
+                    >
+                      {safeTxData.gasToken === ZERO_ADDRESS && chain?.nativeCurrency && (
+                        <Tooltip
+                          title="The GasToken address is the address of the token used to pay gas fees."
+                          placement="top"
+                          arrow
+                        >
+                          <span style={{ display: 'inline-flex' }}>
+                            <TokenIcon
+                              logoUri={chain.nativeCurrency.logoUri}
+                              tokenSymbol={chain.nativeCurrency.symbol}
+                              size={20}
+                            />
+                          </span>
+                        </Tooltip>
+                      )}
+                    </EthHashInfo>
                   </Typography>
                 </TxDetailsRow>
 
                 <TxDetailsRow label="RefundReceiver" grid={grid}>
-                  <Typography variant="body2">
+                  <Typography variant="body2" sx={inlineEthHashInfoSx}>
                     <EthHashInfo
                       address={safeTxData.refundReceiver}
-                      avatarSize={20}
+                      showAvatar={false}
                       showPrefix={false}
                       shortAddress
                       showName={false}
                       hasExplorer
-                    />
+                    >
+                      <Tooltip
+                        title="The RefundReceiver address is the one that will be reimbursed for the gas costs of executing this transaction."
+                        placement="top"
+                        arrow
+                      >
+                        <CheckIcon color="success" sx={{ fontSize: '16px', ml: 0.5 }} />
+                      </Tooltip>
+                    </EthHashInfo>
                   </Typography>
                 </TxDetailsRow>
 

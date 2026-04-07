@@ -56,42 +56,22 @@
   justify-content: space-between;
 }
 
-.toggle {
+.paymentRowGroup {
   display: flex;
   align-items: center;
-  width: 240px;
+  gap: 8px;
+}
+
+.paymentSourceSelector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   height: 32px;
-  border-radius: 32px;
-  background-color: rgba(0, 0, 0, 0.04);
-  position: relative;
-}
-
-.toggleTab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 120px;
-  height: 28px;
-  border-radius: 432px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--color-text-secondary);
-  letter-spacing: 0.17px;
-  padding: 0 12px;
-  transition:
-    background-color 0.15s,
-    color 0.15s;
-}
-
-.toggleTabActive {
+  padding: 2px 6px 2px 15px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
   background-color: var(--color-background-paper);
-  color: var(--color-text-primary);
-  font-weight: 700;
-  letter-spacing: 0.1px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
 }
 
 .gasTokenSelector {
@@ -153,6 +133,19 @@
 .strikethrough {
   text-decoration: line-through;
   color: var(--color-text-secondary);
+}
+
+.signerFeeNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signerFeeNoticeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .totalOutgoing {
