@@ -101,10 +101,11 @@ const SolidityForm = ({
     watch,
     getValues,
     reset,
-    formState: { isSubmitSuccessful, dirtyFields },
+    unregister,
+    formState: { dirtyFields },
   } = useForm<SolidityFormValuesTypes>({
     defaultValues: initialValues,
-    mode: 'onTouched', // This option allows you to configure the validation strategy before the user submits the form
+    mode: 'onTouched',
   })
 
   const toAddress = watch(TO_ADDRESS_FIELD_NAME)
@@ -118,6 +119,20 @@ const SolidityForm = ({
   const isPayableMethod = !!contract && contractMethod?.payable
 
   const isValueInputVisible = showHexEncodedData || !showContractFields || isPayableMethod
+
+  const resetForm = () => {
+    // Unregister contract field values so they get freshly registered with
+    // their defaultValues on the next render. Without this, shouldUnregister=false
+    // keeps stale undefined values after reset, preventing the same method
+    // from being submitted twice.
+    unregister(CONTRACT_VALUES_FIELD_NAME)
+    reset({ ...initialValues, [TO_ADDRESS_FIELD_NAME]: toAddress })
+  }
+
+  const handleFormSubmit = (values: SolidityFormValuesTypes) => {
+    onSubmit(values)
+    resetForm()
+  }
 
   useEffect(() => {
     const contractFieldsValues = getValues(CONTRACT_VALUES_FIELD_NAME)
@@ -145,15 +160,9 @@ const SolidityForm = ({
     }
   }, [dirtyFields, reset, showHexEncodedData, customTransactionData, toAddress, nativeValue, initialValues])
 
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset({ ...initialValues, [TO_ADDRESS_FIELD_NAME]: toAddress })
-    }
-  }, [isSubmitSuccessful, reset, toAddress, initialValues])
-
   return (
     <>
-      <form id={id} data-testid={id} onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form id={id} data-testid={id} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
         {/* To Address field */}
         <Field
           id="to-address-input"
