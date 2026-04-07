@@ -90,6 +90,19 @@ describe('NavItem', () => {
     expect(screen.getByText('You need to activate your Safe first.')).toBeInTheDocument()
   })
 
+  it('uses per-label test id when isSpacesVariant', () => {
+    render(<NavItem item={baseItem} isSpacesVariant />)
+
+    expect(screen.getByTestId('sidebar-item-home')).toBeInTheDocument()
+  })
+
+  it('does not show Safe activation tooltip when disabled and isSpacesVariant', () => {
+    const disabledItem = { ...baseItem, disabled: true }
+    render(<NavItem item={disabledItem} isSpacesVariant />)
+
+    expect(screen.queryByText('You need to activate your Safe first.')).not.toBeInTheDocument()
+  })
+
   it('sets data-active attribute when isActive is true', () => {
     const activeItem = { ...baseItem, isActive: true }
     render(<NavItem item={activeItem} />)
