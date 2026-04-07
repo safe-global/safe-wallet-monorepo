@@ -2,34 +2,21 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useOidcLoginCallback } from '../useOidcLoginCallback'
 import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
-const mockUnwrap = jest.fn()
 const mockReplace = jest.fn()
-const mockInitiate = jest.fn()
+const mockReconcileAuth = jest.fn()
 
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
-  cgwApi: {
-    endpoints: {
-      authGetMeV1: {
-        initiate: (...args: unknown[]) => mockInitiate(...args),
-      },
-    },
-  },
+jest.mock('@/store/reconcileAuth', () => ({
+  __esModule: true,
+  default: (...args: unknown[]) => mockReconcileAuth(...args),
 }))
 
-const mockDispatch = jest.fn((action) => {
-  // When dispatching the initiate thunk, return the unwrap handle
-  if (action === mockInitiate.mock.results[mockInitiate.mock.results.length - 1]?.value) {
-    return { unwrap: mockUnwrap }
-  }
-  return action
-})
+const mockDispatch = jest.fn((action) => action)
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
 jest.mock('@/store/authSlice', () => ({
-  setAuthenticated: (expiresAt: number) => ({ type: 'auth/setAuthenticated', payload: expiresAt }),
   setIsOidcLoginPending: (pending: boolean) => ({ type: 'auth/setIsOidcLoginPending', payload: pending }),
 }))
 
@@ -52,23 +39,13 @@ jest.mock('@/hooks/useChains', () => ({
 
 describe('useOidcLoginCallback', () => {
   const originalLocation = window.location
-  const initiateReturnValue = Symbol('initiate')
 
   beforeEach(() => {
     jest.clearAllMocks()
     sessionStorage.clear()
 
-    jest.spyOn(Date, 'now').mockReturnValue(1000000)
-
     mockUseHasFeature.mockReturnValue(true)
-    mockInitiate.mockReturnValue(initiateReturnValue)
-    mockUnwrap.mockResolvedValue(undefined)
-    mockDispatch.mockImplementation((action) => {
-      if (action === initiateReturnValue) {
-        return { unwrap: mockUnwrap }
-      }
-      return action
-    })
+    mockReconcileAuth.mockResolvedValue('authenticated')
 
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -81,16 +58,13 @@ describe('useOidcLoginCallback', () => {
     Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
   })
 
-  it('should dispatch setAuthenticated when pending flag exists and session check succeeds', async () => {
+  it('should call reconcileAuth when pending flag exists', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
     renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'auth/setAuthenticated',
-        payload: 1000000 + 24 * 60 * 60 * 1000,
-      })
+      expect(mockReconcileAuth).toHaveBeenCalledWith(mockDispatch)
     })
   })
 
@@ -104,36 +78,32 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should not dispatch when OIDC_AUTH feature is disabled', () => {
+  it('should not process when OIDC_AUTH feature is disabled', () => {
     mockUseHasFeature.mockReturnValue(false)
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
     renderHook(() => useOidcLoginCallback())
 
     expect(mockDispatch).not.toHaveBeenCalled()
-    expect(mockInitiate).not.toHaveBeenCalled()
+    expect(mockReconcileAuth).not.toHaveBeenCalled()
   })
 
-  it('should not dispatch when no pending flag exists', () => {
+  it('should not process when no pending flag exists', () => {
     renderHook(() => useOidcLoginCallback())
 
     expect(mockDispatch).not.toHaveBeenCalled()
-    expect(mockInitiate).not.toHaveBeenCalled()
+    expect(mockReconcileAuth).not.toHaveBeenCalled()
   })
 
-  it('should not dispatch twice on re-render', async () => {
+  it('should not process twice on re-render', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
     const { rerender } = renderHook(() => useOidcLoginCallback())
     rerender()
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'auth/setAuthenticated',
-        payload: expect.any(Number),
-      })
+      expect(mockReconcileAuth).toHaveBeenCalledTimes(1)
     })
-    expect(mockInitiate).toHaveBeenCalledTimes(1)
   })
 
   it('should show error notification when error query param is present', async () => {
@@ -158,8 +128,7 @@ describe('useOidcLoginCallback', () => {
         }),
       })
     })
-    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'auth/setAuthenticated' }))
-    expect(mockInitiate).not.toHaveBeenCalled()
+    expect(mockReconcileAuth).not.toHaveBeenCalled()
   })
 
   it('should clean error param from URL via Next.js router', async () => {
@@ -202,21 +171,9 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should not dispatch setAuthenticated when session check fails', async () => {
+  it('should show error notification when reconcileAuth returns unauthenticated', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    mockUnwrap.mockRejectedValue(new Error('Forbidden'))
-
-    renderHook(() => useOidcLoginCallback())
-
-    await waitFor(() => {
-      expect(mockInitiate).toHaveBeenCalled()
-    })
-    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'auth/setAuthenticated' }))
-  })
-
-  it('should show error notification when session check fails', async () => {
-    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    mockUnwrap.mockRejectedValue(new Error('Forbidden'))
+    mockReconcileAuth.mockResolvedValue('unauthenticated')
 
     renderHook(() => useOidcLoginCallback())
 
@@ -231,7 +188,19 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should dispatch setIsOidcLoginPending(true) then false on success', async () => {
+  it('should not show error notification when reconcileAuth succeeds', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+    mockReconcileAuth.mockResolvedValue('authenticated')
+
+    renderHook(() => useOidcLoginCallback())
+
+    await waitFor(() => {
+      expect(mockReconcileAuth).toHaveBeenCalled()
+    })
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/showNotification' }))
+  })
+
+  it('should dispatch setIsOidcLoginPending(true) then false', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
 
     renderHook(() => useOidcLoginCallback())
@@ -249,7 +218,7 @@ describe('useOidcLoginCallback', () => {
 
   it('should dispatch setIsOidcLoginPending(false) on failure', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    mockUnwrap.mockRejectedValue(new Error('Forbidden'))
+    mockReconcileAuth.mockResolvedValue('unauthenticated')
 
     renderHook(() => useOidcLoginCallback())
 
@@ -258,14 +227,28 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should remove sessionStorage flag when session check fails', async () => {
+  it('should remove sessionStorage flag when reconcileAuth returns unauthenticated', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    mockUnwrap.mockRejectedValue(new Error('Forbidden'))
+    mockReconcileAuth.mockResolvedValue('unauthenticated')
 
     renderHook(() => useOidcLoginCallback())
 
     await waitFor(() => {
       expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
     })
+  })
+
+  it('should not show error notification on transient errors', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+    mockReconcileAuth.mockResolvedValue('error')
+
+    renderHook(() => useOidcLoginCallback())
+
+    await waitFor(() => {
+      expect(mockReconcileAuth).toHaveBeenCalled()
+      expect(sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)).toBeNull()
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'auth/setIsOidcLoginPending', payload: false })
+    })
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/showNotification' }))
   })
 })
