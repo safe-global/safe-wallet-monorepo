@@ -80,11 +80,12 @@ jobs:
       - name: Extract branch name
         shell: bash
         ## Sanitize for DNS subdomain: replace non-alphanumeric with hyphens,
-        ## collapse runs, strip edges, lowercase, truncate to 63 chars (DNS limit).
-        ## e.g. "refs/heads/features/hello-1.2.0" -> "features-hello-1-2-0"
+        ## collapse runs, strip edges, lowercase.
+        ## Truncate to 50 chars so the full label (branch--walletweb) stays under
+        ## the 63-char DNS limit.
         run: |
           raw="$(echo "$GITHUB_HEAD_REF" | sed 's|refs/heads/||')"
-          safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-63 | sed 's/-$//')"
+          safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-50 | sed 's/-$//')"
           echo "branch=$safe" >> $GITHUB_OUTPUT
         id: extract_branch
 
