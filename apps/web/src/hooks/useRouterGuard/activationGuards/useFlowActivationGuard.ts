@@ -117,7 +117,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces])
+  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isSpaceRoute, fetchSpaces])
 
   return {
     activationGuard,

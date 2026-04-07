@@ -1,6 +1,6 @@
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 
 export type ActivationGuard = () => Promise<{ success: boolean; redirectTo?: string }>
@@ -24,26 +24,37 @@ interface useRouterGuardProps {
 
 export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
   const router = useRouter()
+  const routerRef = useRef(router)
+  routerRef.current = router
+
   const { activationGuard } = useGuard()
   const isCheckingAccess = useIsCheckingAccess()
 
   useEffect(() => {
+    let cancelled = false
+
     const checkAccess = async () => {
       setIsCheckingAccess(true)
 
       const { success, redirectTo } = await activationGuard()
+
+      if (cancelled) return
 
       if (success) {
         setIsCheckingAccess(false)
       } else {
         // we do not want to set isCheckingAccess to false here because we want
         // the checking access to be reseted only after the redirect is done
-        router.replace(redirectTo ?? AppRoutes.welcome.index)
+        routerRef.current.replace(redirectTo ?? AppRoutes.welcome.index)
       }
     }
 
     checkAccess()
-  }, [activationGuard, router])
+
+    return () => {
+      cancelled = true
+    }
+  }, [activationGuard])
 
   return { isCheckingAccess }
 }
