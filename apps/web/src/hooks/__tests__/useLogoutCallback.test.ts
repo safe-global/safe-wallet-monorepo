@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useLogoutCallback, LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
+import { setUnauthenticated } from '@/store/authSlice'
 import { logError } from '@/services/exceptions'
 
 jest.mock('@/services/exceptions', () => ({
@@ -62,11 +63,12 @@ describe('useLogoutCallback', () => {
 
     await waitFor(() => {
       expect(logError).toHaveBeenCalledWith('109: Error signing out')
+      expect(mockDispatch).not.toHaveBeenCalledWith(setUnauthenticated())
       expect(sessionStorage.getItem(LOGGING_OUT_KEY)).toBeNull()
     })
   })
 
-  it('should log error 109 on transient errors', async () => {
+  it('should log error 109 and clear auth state on transient errors', async () => {
     sessionStorage.setItem(LOGGING_OUT_KEY, '1')
     mockReconcileAuth.mockResolvedValue('error')
 
@@ -74,6 +76,7 @@ describe('useLogoutCallback', () => {
 
     await waitFor(() => {
       expect(logError).toHaveBeenCalledWith('109: Error signing out')
+      expect(mockDispatch).toHaveBeenCalledWith(setUnauthenticated())
       expect(sessionStorage.getItem(LOGGING_OUT_KEY)).toBeNull()
     })
   })

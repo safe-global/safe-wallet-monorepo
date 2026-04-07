@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useAppDispatch } from '@/store'
+import { setUnauthenticated } from '@/store/authSlice'
 import reconcileAuth from '@/store/reconcileAuth'
 import { logError, Errors } from '@/services/exceptions'
 
@@ -25,7 +26,10 @@ export const useLogoutCallback = () => {
     const process = async () => {
       const result = await reconcileAuth(dispatch)
 
-      if (result === 'error' || result === 'authenticated') {
+      if (result === 'error') {
+        logError(Errors._109)
+        dispatch(setUnauthenticated())
+      } else if (result === 'authenticated') {
         logError(Errors._109)
       }
 
