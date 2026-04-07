@@ -78,22 +78,14 @@ jobs:
 
       # Extract branch name
       - name: Extract branch name
-        shell: bash
-        ## Sanitize for DNS subdomain: replace non-alphanumeric with hyphens,
-        ## collapse runs, strip edges, lowercase.
-        ## Truncate to 50 chars so the full label (branch--walletweb) stays under
-        ## the 63-char DNS limit.
-        run: |
-          raw="$(echo "$GITHUB_HEAD_REF" | sed 's|refs/heads/||')"
-          safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-50 | sed 's/-$//')"
-          echo "branch=$safe" >> $GITHUB_OUTPUT
         id: extract_branch
+        uses: ./.github/actions/branch-slug
 
       # Deploy to S3
       - name: Deploy PR branch
         if: github.event.number
         env:
-          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.branch }}
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}
         working-directory: apps/web
         run: bash  ./scripts/github/s3_upload.sh
 
@@ -108,10 +100,10 @@ jobs:
             ✅  Deploy successful!
 
             **Website:**
-            https://${{ steps.extract_branch.outputs.branch }}--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
+            https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/home?safe=eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
 
             **Storybook:**
-            https://${{ steps.extract_branch.outputs.branch }}--walletweb.review.5afe.dev/storybook/
+            https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/storybook/
           message-failure: |
             ## Branch preview
             ❌  Deploy failed!
