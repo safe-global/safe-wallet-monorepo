@@ -66,7 +66,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex items-center px-6 py-4 bg-secondary dark:bg-background ${
+        className={`flex flex-wrap items-center px-6 py-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'justify-between pl-2' : 'justify-between'
         }`}
       >
@@ -82,7 +82,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         ) : null}
 
         {/* Left content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
           {isSpaceRoute ? (
             // TODO: Global search
             <div />
@@ -92,7 +92,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         </div>
 
         {/* Right content: navigation buttons */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 max-md:ml-auto">
           <HeaderNavigation
             walletAddress={wallet?.address ?? ''}
             messages={unreadCount}

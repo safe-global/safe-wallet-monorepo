@@ -8,6 +8,14 @@
 @media (max-width: 899.95px) {
   .topbar {
     left: 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .mainSpace {
+    && {
+      @apply pt-0;
+    }
   }
 }
 
