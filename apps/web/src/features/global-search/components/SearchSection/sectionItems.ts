@@ -1,5 +1,5 @@
-import { Accounts } from './sections/Accounts'
-import { NavigateTo } from './sections/NavigateTo'
+import { AccountsSection } from './sections/Accounts'
+import { NavigateToSection } from './sections/NavigateTo'
 
 interface SectionItem {
   label: string
@@ -13,13 +13,13 @@ export const sectionItems: SectionItem[] = [
     activate: () => {
       console.log('Navigate to')
     },
-    renderItem: NavigateTo,
+    renderItem: NavigateToSection,
   },
   {
     label: 'Accounts',
     activate: () => {
       console.log('Accounts')
     },
-    renderItem: Accounts,
+    renderItem: AccountsSection,
   },
 ]

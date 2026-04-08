@@ -30,7 +30,7 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
-  const { GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
+  const { GlobalSearchModal } = useLoadFeature(GlobalSearchFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
@@ -74,6 +74,12 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
           onWalletClick={handleWalletClick}
         />
       </header>
+
+      {!isMobile && (
+        <div className="relative flex justify-start p-6 pb-0 -mb-6">
+          <GlobalSearchModal />
+        </div>
+      )}
 
       <NotificationsPopover ref={notificationsRef} />
 

@@ -15,6 +15,7 @@ import type { GlobalSearchContract } from './contract'
 
 // Component imports
 import GlobalSearchInput from './components/GlobalSearchInput'
+import GlobalSearchModal from './components/GlobalSearchModal'
 
 // Flat structure - naming conventions determine stub behavior:
 // - PascalCase -> component (stub renders null)
@@ -23,6 +24,7 @@ import GlobalSearchInput from './components/GlobalSearchInput'
 const feature: GlobalSearchContract = {
   // Components
   GlobalSearchInput,
+  GlobalSearchModal,
 }
 
 export default feature

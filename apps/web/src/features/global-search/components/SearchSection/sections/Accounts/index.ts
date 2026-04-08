@@ -1,3 +1,1 @@
-import Accounts from './Accounts'
-
-export { Accounts }
+export { default as AccountsSection } from './AccountsSection'

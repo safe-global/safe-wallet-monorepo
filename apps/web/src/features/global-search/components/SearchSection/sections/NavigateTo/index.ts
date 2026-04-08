@@ -1,3 +1,1 @@
-import NavigateTo from './NavigateTo'
-
-export { NavigateTo }
+export { default as NavigateToSection } from './NavigateToSection'

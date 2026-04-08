@@ -11,6 +11,7 @@
 
 // Component imports
 import type GlobalSearchInput from './components/GlobalSearchInput'
+import type GlobalSearchModal from './components/GlobalSearchModal'
 
 /**
  * GlobalSearch Feature Implementation - flat structure (NO hooks)
@@ -20,4 +21,5 @@ import type GlobalSearchInput from './components/GlobalSearchInput'
 export interface GlobalSearchContract {
   // Components (PascalCase) - stub renders null
   GlobalSearchInput: typeof GlobalSearchInput
+  GlobalSearchModal: typeof GlobalSearchModal
 }
