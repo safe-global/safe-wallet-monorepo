@@ -173,11 +173,11 @@ export const SpaceSelectorDropdown = ({
         <DropdownMenuSeparator className="my-1" />
 
         <DropdownMenuItem onClick={handleCreateSpace} className="gap-3 min-h-9 px-2 py-2">
-          <Plus className="size-5 flex-shrink-0" style={{ color: 'var(--sidebar-muted, #737373)' }} />
+          <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>Add new space</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleViewSpaces} className="gap-3 min-h-9 px-2 py-2">
-          <LayoutGrid className="size-5 flex-shrink-0" style={{ color: 'var(--sidebar-muted, #737373)' }} />
+          <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>View all</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

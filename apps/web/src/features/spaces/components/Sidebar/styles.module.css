@@ -232,6 +232,10 @@
   background-color: var(--secondary) !important;
 }
 
+.dropdownIcon {
+  color: var(--sidebar-muted, #737373);
+}
+
 .groupLabel {
   color: var(--sidebar-muted, #737373);
   font-size: 12px;

@@ -9,6 +9,7 @@ import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import type { SpaceItem } from './types'
+import { getQuerySpaceId } from './utils'
 import { useSidebarHydrated } from './hooks/useSidebarHydrated'
 import { SidebarSkeleton } from './SidebarSkeleton'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -61,10 +62,7 @@ const HydratedSidebar = (): ReactElement => {
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
 
-  const rawQuerySpaceId = router.query.spaceId
-  const explicitSpaceId = typeof rawQuerySpaceId === 'string' && rawQuerySpaceId.length > 0 ? rawQuerySpaceId : null
-
-  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : explicitSpaceId
+  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
 
   const selectedSpace =
     spaceIdForSidebarSelection != null

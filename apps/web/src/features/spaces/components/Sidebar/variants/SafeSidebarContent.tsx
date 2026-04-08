@@ -11,6 +11,7 @@ import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SpaceSelectorProps, SidebarItemConfig } from '../types'
+import { getQuerySpaceId } from '../utils'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -28,7 +29,7 @@ export const SafeSidebarContent = ({
   const { safe } = useSafeInfo()
 
   const getLink = (item: SidebarItemConfig) => {
-    const spaceId = typeof router.query.spaceId === 'string' ? router.query.spaceId : null
+    const spaceId = getQuerySpaceId(router.query)
     const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
     const query: { spaceId?: string | null; safe?: string } = {
       ...(safeAddress && { safe: safeAddress }),
