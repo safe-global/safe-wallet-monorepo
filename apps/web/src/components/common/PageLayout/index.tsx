@@ -21,6 +21,7 @@ import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { GlobalSearchFeature } from '@/features/global-search'
+import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -52,6 +53,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
   const { GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   useRouterGuard({ useGuard: useFlowActivationGuard })
+  useKeyboardObserver()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
