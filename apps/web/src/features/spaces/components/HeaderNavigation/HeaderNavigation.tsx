@@ -94,7 +94,7 @@ export function HeaderNavigation({
       {walletConnectSlot}
 
       {showBatch && (
-        <div className="relative">
+        <div className="relative" data-track="batching: Batch sidebar open">
           <Button
             variant="secondary"
             size="icon-lg"
