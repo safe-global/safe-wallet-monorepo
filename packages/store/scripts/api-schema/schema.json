@@ -1969,9 +1969,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to create spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Create space",
@@ -2002,9 +1999,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to view spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Get user spaces",
@@ -2015,7 +2009,7 @@
     },
     "/v1/spaces/create-with-user": {
       "post": {
-        "description": "Creates a new space and automatically creates a user account if one does not exist for the authenticated wallet.",
+        "description": "Creates a new space for the authenticated user. Activates the user if their status is PENDING.",
         "operationId": "spacesCreateWithUserV1",
         "parameters": [],
         "requestBody": {
@@ -2031,7 +2025,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space and user created successfully",
+            "description": "Space created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2087,7 +2081,7 @@
             "description": "Forbidden resource - user is not a member of this space"
           },
           "404": {
-            "description": "Space not found or user not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space by ID",
@@ -2139,7 +2133,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space",
@@ -2173,7 +2167,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete space",
@@ -2512,13 +2506,13 @@
             "description": "Membership deleted"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Not authenticated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer or space not found"
+            "description": "Space not found"
           },
           "409": {
             "description": "Cannot remove last admin"
@@ -2619,10 +2613,10 @@
             "description": "Alias updated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer, space or member not found"
+            "description": "Space or member not found"
           }
         },
         "summary": "Update member alias",
