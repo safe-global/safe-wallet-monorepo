@@ -30,6 +30,45 @@ jest.mock('@/features/wallet', () => ({
   }),
 }))
 
+jest.mock('@/features/walletconnect', () => ({
+  WalletConnectFeature: { name: 'walletconnect' },
+}))
+
+jest.mock('@/features/batching', () => ({
+  useDraftBatch: () => [],
+}))
+
+jest.mock('@/hooks/useSafeAddress', () => ({
+  __esModule: true,
+  default: () => '',
+}))
+
+jest.mock('@/hooks/useIsSafeOwner', () => ({
+  __esModule: true,
+  default: () => false,
+}))
+
+jest.mock('@/hooks/useProposers', () => ({
+  useIsWalletProposer: () => false,
+}))
+
+const mockIsSpaceRoute = jest.fn(() => true)
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: () => mockIsSpaceRoute(),
+}))
+
+jest.mock('@/components/common/SpaceSafeBar', () => {
+  const MockSpaceSafeBar = () => <div data-testid="space-safe-bar" />
+  MockSpaceSafeBar.displayName = 'SpaceSafeBar'
+  return { __esModule: true, default: MockSpaceSafeBar }
+})
+
+jest.mock('./SearchInput', () => {
+  const MockSearchInput = () => <div data-testid="search-input" />
+  MockSearchInput.displayName = 'SearchInput'
+  return { __esModule: true, default: MockSearchInput }
+})
+
 jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage', () => ({
   useShowNotificationsRenewalMessage: jest.fn(),
 }))
@@ -76,8 +115,10 @@ describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(true)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
+      WalletConnectWidget: () => null,
     })
   })
 
@@ -111,6 +152,22 @@ describe('Topbar', () => {
     expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
   })
 
+  describe('route-based left content', () => {
+    it('renders SearchInput on space routes', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      render(<Topbar />)
+      expect(screen.getByTestId('search-input')).toBeInTheDocument()
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+    })
+
+    it('renders SpaceSafeBar on non-space routes', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      render(<Topbar />)
+      expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+      expect(screen.queryByTestId('search-input')).not.toBeInTheDocument()
+    })
+  })
+
   describe('wallet tracking', () => {
     beforeEach(() => {
       mockUseCurrentSpaceId.mockReturnValue('space-42')
@@ -127,6 +184,7 @@ describe('Topbar', () => {
             <button onClick={onWalletDisconnect}>trigger-disconnect</button>
           </>
         ),
+        WalletConnectWidget: () => null,
       })
     })
 

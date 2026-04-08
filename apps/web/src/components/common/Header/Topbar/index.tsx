@@ -6,20 +6,30 @@ import { Button } from '@/components/ui/button'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useDraftBatch } from '@/features/batching'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import SpaceSafeBar from '@/components/common/SpaceSafeBar'
+import SearchInput from './SearchInput'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
+  /** When provided, toggles the batch sidebar (Safe routes only) */
+  onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
+const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isMobile = useIsMobile()
   const {
     wallet,
@@ -29,9 +39,17 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
+  const isSpaceRoute = useIsSpaceRoute()
+  const safeAddress = useSafeAddress()
+  const isProposer = useIsWalletProposer()
+  const isSafeOwner = useIsSafeOwner()
+  const draftBatch = useDraftBatch()
+
+  const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
     if (!spaceId) return
@@ -42,13 +60,16 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     if (!spaceId) return
     trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
   }
+
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isMobile)
 
   return (
     <>
       <header
-        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between pl-2' : 'justify-end'}`}
+        className={`flex items-center px-6 py-4 bg-secondary dark:bg-background ${
+          showMenuButton ? 'justify-between pl-2' : 'justify-between'
+        }`}
       >
         {showMenuButton ? (
           <Button
@@ -60,12 +81,24 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
             <Menu className="size-5" />
           </Button>
         ) : null}
-        <HeaderNavigation
-          walletAddress={wallet?.address ?? ''}
-          messages={unreadCount}
-          onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
-          onWalletClick={handleWalletClick}
-        />
+
+        {/* Left content: search for Space routes, SpaceSafeBar for Safe routes */}
+        <div className="flex-1 min-w-0">{isSpaceRoute ? <SearchInput /> : <SpaceSafeBar />}</div>
+
+        {/* Right content: navigation buttons */}
+        <div className="flex items-center gap-1 shrink-0">
+          <HeaderNavigation
+            walletAddress={wallet?.address ?? ''}
+            messages={unreadCount}
+            showSearch={!isSpaceRoute}
+            onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
+            onWalletClick={handleWalletClick}
+            walletConnectSlot={<WalletConnectWidget />}
+            showBatch={!isSpaceRoute && showBatchButton}
+            batchCount={draftBatch.length}
+            onBatchClick={() => onBatchToggle?.((open) => !open)}
+          />
+        </div>
       </header>
 
       <NotificationsPopover ref={notificationsRef} />

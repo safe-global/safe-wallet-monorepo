@@ -1,5 +1,5 @@
-import type { MouseEvent } from 'react'
-import { Search, Bell, Wallet } from 'lucide-react'
+import type { MouseEvent, ReactNode } from 'react'
+import { Search, Bell, Wallet, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 
@@ -29,6 +29,14 @@ export interface HeaderNavigationProps {
    * Callback when wallet button is clicked
    */
   onWalletClick?: (event: MouseEvent<HTMLButtonElement>) => void
+  /** Slot for WalletConnect widget (renders its own button + popup) */
+  walletConnectSlot?: ReactNode
+  /** Whether to show the Batch button */
+  showBatch?: boolean
+  /** Batch button callback */
+  onBatchClick?: () => void
+  /** Number of items in the draft batch (shown as badge) */
+  batchCount?: number
 }
 
 /**
@@ -42,6 +50,10 @@ export function HeaderNavigation({
   onSearchClick,
   onNotificationsClick,
   onWalletClick,
+  walletConnectSlot,
+  showBatch = false,
+  onBatchClick,
+  batchCount = 0,
 }: HeaderNavigationProps) {
   const truncatedAddress =
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
@@ -78,6 +90,29 @@ export function HeaderNavigation({
           />
         )}
       </div>
+
+      {walletConnectSlot}
+
+      {showBatch && (
+        <div className="relative">
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            onClick={onBatchClick}
+            className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+            aria-label="Batch transactions"
+          >
+            <Layers className="size-5 text-muted-foreground" />
+          </Button>
+
+          {batchCount > 0 && (
+            <span
+              className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-secondary bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+              aria-label={`${batchCount} batched transactions`}
+            />
+          )}
+        </div>
+      )}
 
       <Button
         variant="secondary"
