@@ -11,6 +11,7 @@ import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@/config/chains'
 import type { RootState } from '@/store'
+import type { SpaceItem } from './types'
 
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
@@ -20,6 +21,8 @@ const SAFE_SIDEBAR_ROUTER_QUERY = {
   chain: defaultChainShortName,
   safe: '0x1234567890123456789012345678901234567890',
 }
+
+const STORY_SELECTED_SPACE: SpaceItem = { id: 1, name: 'Company Space' }
 
 const storyChain = (() => {
   const base = createChainData()
@@ -113,7 +116,12 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+      />
     </SafeSidebarLayout>
   ),
 }
@@ -131,7 +139,12 @@ export const WithTransactions: Story = {
   decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...mockTxQueueState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+      />
     </SafeSidebarLayout>
   ),
 }
@@ -149,7 +162,12 @@ export const TransactionsActive: Story = {
   },
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+      />
     </SafeSidebarLayout>
   ),
 }
@@ -171,7 +189,12 @@ export const OutdatedSafeVersion: Story = {
   decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...outdatedSafeState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+      />
     </SafeSidebarLayout>
   ),
 }
@@ -193,7 +216,12 @@ export const UndeployedSafe: Story = {
   decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...undeployedSafeState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+      />
     </SafeSidebarLayout>
   ),
 }
