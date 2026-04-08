@@ -63,11 +63,9 @@ export function initializeCaptchaHeaders() {
       const data = await response.clone().json()
       if (data?.message === 'Invalid CAPTCHA token') {
         sharedTokenRef.current = null
-        console.log('Invalid CAPTCHA token, refreshing token')
         resetCaptchaPromise()
         widgetRefreshCallbackRef.current?.()
       }
-      console.log('Response status:', response.status)
     } catch {
       // Ignore non-JSON or unreadable responses
     }
