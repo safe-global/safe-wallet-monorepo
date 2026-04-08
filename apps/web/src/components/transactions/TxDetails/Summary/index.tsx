@@ -13,6 +13,8 @@ import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -21,6 +23,15 @@ interface Props {
   txDetails?: TransactionDetails
   showMultisend?: boolean
   showDecodedData?: boolean
+}
+
+const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
+  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
+  const feesData = useHistoryFeesBreakdown(txDetails)
+
+  if (!feesData) return null
+
+  return <HistoryFeesAccordion data={feesData} />
 }
 
 const Summary = ({
@@ -84,6 +95,12 @@ const Summary = ({
             {dateString(executedAt)}
           </Typography>
         </TxDataRow>
+      )}
+
+      {txDetails && (
+        <Box mt={2}>
+          <HistoryFees txDetails={txDetails} />
+        </Box>
       )}
 
       {showDetails && (

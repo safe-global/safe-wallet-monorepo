@@ -1,0 +1,64 @@
+.feesAccordion {
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px 6px 0 0;
+  margin-bottom: -1px;
+}
+
+.feesAccordion:last-child {
+  border-radius: 6px;
+  margin-bottom: 0;
+}
+
+.summaryContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.summaryLeft {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.summaryRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+}
+
+.breakdownContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.feeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feeLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.feeAmount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
