@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useResolvedSidebarNav } from '../hooks/useResolvedSidebarNav'
-import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
+import { useResolvedSidebarNav } from '../useResolvedSidebarNav'
+import type { SidebarItemConfig, SidebarGroupConfig } from '../../types'
 
 jest.mock('next/router', () => ({
   useRouter: () => ({

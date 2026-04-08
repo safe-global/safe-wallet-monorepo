@@ -6,6 +6,10 @@ import { trackEvent } from '@/services/analytics'
 import { getDeterministicColor } from '@/features/spaces'
 import { SpaceSelectorDropdown } from '../variants/SpaceSelectorDropdown'
 
+jest.mock('../hooks/useAddSafeToSpace', () => ({
+  useAddSafeToSpace: () => ({ addToSpace: jest.fn().mockResolvedValue(true), loadingSpaceId: null }),
+}))
+
 const mockPush = jest.fn()
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -135,13 +139,13 @@ describe('SpaceSelectorDropdown', () => {
   it('adds an accessible label to the trigger', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space' }} spaces={[]} />)
 
-    expect(screen.getByRole('button', { name: 'Selected space Company Space. Open space selector' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Open workspace selector' })).toBeVisible()
   })
 
   it('sets aria-expanded on the trigger based on dropdown state', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space' }} spaces={[]} />)
 
-    const trigger = screen.getByRole('button', { name: 'Selected space Company Space. Open space selector' })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
 
     fireEvent.click(trigger)
@@ -156,7 +160,7 @@ describe('SpaceSelectorDropdown', () => {
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
-    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
 
     const spaceItemButtons = screen
@@ -172,7 +176,7 @@ describe('SpaceSelectorDropdown', () => {
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
-    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
 
     const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
@@ -184,7 +188,7 @@ describe('SpaceSelectorDropdown', () => {
   it('tracks CREATE_SPACE_MODAL event and navigates when "Add new space" is clicked', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
 
-    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('Add new space'))
 
@@ -195,7 +199,7 @@ describe('SpaceSelectorDropdown', () => {
   it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View all" is clicked', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
 
-    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('View all'))
 
@@ -221,7 +225,7 @@ describe('SpaceSelectorDropdown', () => {
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
-    const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
 
     const alphaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Alpha')

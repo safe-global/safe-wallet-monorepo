@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
+import { useSidebarHydrated } from '../useSidebarHydrated'
 
 describe('useSidebarHydrated', () => {
   it('returns true after mount', () => {
