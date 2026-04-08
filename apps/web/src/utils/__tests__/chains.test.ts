@@ -144,6 +144,14 @@ describe('chains', () => {
           ),
         ).toEqual('1.4.1')
       })
+
+      it('should trust recommendedMasterCopyVersion for chains not in safe-deployments', () => {
+        expect(
+          getLatestSafeVersion(
+            chainBuilder().with({ chainId: '25363', recommendedMasterCopyVersion: '1.4.1' }).build(),
+          ),
+        ).toEqual('1.4.1')
+      })
     })
   })
 })
