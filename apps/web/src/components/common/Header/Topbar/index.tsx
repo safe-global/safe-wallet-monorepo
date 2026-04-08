@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
+import { GlobalSearchFeature } from '@/features/global-search'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
@@ -29,6 +30,7 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
+  const { GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
@@ -48,18 +50,23 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between pl-2' : 'justify-end'}`}
+        className={`flex items-center justify-between w-full gap-4 p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${
+          showMenuButton ? 'pl-2' : ''
+        }`}
       >
-        {showMenuButton ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onMenuToggle?.((open) => !open)}
-            aria-label="Open sidebar menu"
-          >
-            <Menu className="size-5" />
-          </Button>
-        ) : null}
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {showMenuButton ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onMenuToggle?.((open) => !open)}
+              aria-label="Open sidebar menu"
+            >
+              <Menu className="size-5" />
+            </Button>
+          ) : null}
+        </div>
+
         <HeaderNavigation
           walletAddress={wallet?.address ?? ''}
           messages={unreadCount}

@@ -78,6 +78,7 @@ describe('Topbar', () => {
     mockUseIsMobile.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
+      GlobalSearchInput: () => null,
     })
   })
 
@@ -127,6 +128,7 @@ describe('Topbar', () => {
             <button onClick={onWalletDisconnect}>trigger-disconnect</button>
           </>
         ),
+        GlobalSearchInput: () => null,
       })
     })
 

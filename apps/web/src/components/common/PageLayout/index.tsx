@@ -20,6 +20,7 @@ import { useParentSafe } from '@/hooks/useParentSafe'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import { GlobalSearchFeature } from '@/features/global-search'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -49,7 +50,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
-
+  const { GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   useRouterGuard({ useGuard: useFlowActivationGuard })
 
   // Hide sidebar when transaction flow is open
@@ -91,6 +92,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         })}
       >
         <div className={css.content}>
+          {!hideHeader && isSpaceRoute && <GlobalSearchInput className="max-w-sm mb-8 mt-[-2rem] ml-[1.4rem]" />}
+
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
             {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
