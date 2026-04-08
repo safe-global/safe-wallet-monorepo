@@ -1,13 +1,80 @@
-.icon {
-  height: 16px;
-  width: 16px;
+.auditRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  column-gap: var(--space-2);
+  padding: 0;
 }
 
-.dot {
-  height: 10px;
-  width: 10px;
+.timelineCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+.timelineIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  flex-shrink: 0;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  background-color: var(--color-border-light);
+  min-height: 8px;
+}
+
+.infoCol {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 4px 0 var(--space-2);
+}
+
+.actorRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+  min-width: 0;
+  margin-top: 2px;
+}
+
+.actorCopy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.actorText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.actorCopy:hover .actorText {
+  color: var(--color-primary-main);
+}
+
+.timestamp {
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 5px;
+}
+
+/* Shared legacy styles consumed by RecoverySigners and MsgSigners */
 .signers {
   padding: 0;
 }
@@ -19,10 +86,6 @@
   left: 15px;
   top: 20px;
   height: calc(100% - 40px);
-}
-
-.signers :global .MuiListItem-root:first-of-type {
-  padding-top: 0;
 }
 
 .signers :global .MuiListItem-root {
@@ -38,10 +101,9 @@
   background-color: var(--color-background-paper);
 }
 
-.confirmationsTotal {
-  color: var(--color-border-main);
-  display: inline;
-  font-weight: normal;
+.icon {
+  height: 16px;
+  width: 16px;
 }
 
 .listFooter {

@@ -40,7 +40,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxNotesFeature } from '@/features/tx-notes'
 import { useLoadFeature } from '@/features/__core__'
-import { TxShareBlock, TxExplorerLink } from '../TxShareLink'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
@@ -187,11 +186,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* Signers */}
       {(!isUnsigned || proposer) && (
         <div className={css.txSigners}>
-          <TxShareBlock
-            txId={txDetails.txId}
-            hasSigners={isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)}
-          />
-
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
@@ -200,8 +194,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
-
-          {txDetails.txHash && <TxExplorerLink txHash={txDetails.txHash} />}
 
           {isQueue && (
             <Box className={css.buttons}>
