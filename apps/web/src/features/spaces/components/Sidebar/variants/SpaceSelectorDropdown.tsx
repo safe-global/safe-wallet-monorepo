@@ -1,5 +1,5 @@
 import { useId, useState, type ReactElement } from 'react'
-import { Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Plus, LayoutGrid } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -100,6 +100,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         className={css.spaceSelectorDropdownContent}
         data-testid="space-selector-menu"
       >
+        <div className={cn(css.groupLabel, 'mb-1')}>Spaces</div>
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>
@@ -120,8 +121,12 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         <DropdownMenuSeparator />
 
         {spaces.map((space) => (
-          <DropdownMenuItem key={space.id} onClick={() => handleSelectSpace(space.id)}>
-            <Avatar className={cn('size-6 shrink-0', css.spaceSelectorItemAvatar)}>
+          <DropdownMenuItem
+            key={space.id}
+            onClick={() => handleSelectSpace(space.id)}
+            className={cn('gap-3 min-h-9 px-2 py-2', selectedSpace?.id === space.id && css.navItemActive)}
+          >
+            <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
               <AvatarFallback
                 className={css.spaceSelectorItemAvatarFallback}
                 style={{ backgroundColor: getDeterministicColor(space.name) }}
@@ -129,15 +134,21 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
                 {space.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <span>{space.name}</span>
+            <span className="flex-1">{space.name}</span>
             {selectedSpace?.id === space.id && <Check className="ml-auto size-4" />}
           </DropdownMenuItem>
         ))}
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1" />
 
-        <DropdownMenuItem onClick={handleCreateSpace}>Create space</DropdownMenuItem>
-        <DropdownMenuItem onClick={handleViewSpaces}>View spaces</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCreateSpace} className="gap-3 min-h-9 px-2 py-2">
+          <Plus className="size-5 flex-shrink-0" style={{ color: 'var(--sidebar-muted, #737373)' }} />
+          <span>Add new space</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleViewSpaces} className="gap-3 min-h-9 px-2 py-2">
+          <LayoutGrid className="size-5 flex-shrink-0" style={{ color: 'var(--sidebar-muted, #737373)' }} />
+          <span>View all</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
