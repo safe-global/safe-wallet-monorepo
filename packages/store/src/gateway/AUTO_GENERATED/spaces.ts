@@ -158,8 +158,7 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse =
-  /** status 200 Space and user created successfully */ CreateSpaceResponse
+export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
   /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
