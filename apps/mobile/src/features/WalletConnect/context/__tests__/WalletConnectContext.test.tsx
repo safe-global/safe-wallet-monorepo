@@ -4,7 +4,11 @@ import { renderHook, createTestStore } from '@/src/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { Provider } from 'react-redux'
-import { useWalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
+import {
+  useWalletConnectContext,
+  useOptionalWalletConnectContext,
+  WalletConnectProvider,
+} from '../WalletConnectContext'
 
 const mockAddress = getAddress(faker.finance.ethereumAddress())
 
@@ -45,16 +49,14 @@ jest.mock('../../hooks/useWalletConnectSigning', () => ({
 }))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  AppKitProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   AppKit: () => null,
+  AppKitProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
   useAccount: () => ({ address: mockAddress, chainId: 1 }),
   useWalletInfo: () => ({ walletInfo: { name: 'MetaMask' } }),
 }))
 
-jest.mock('@/src/config/appKit', () => ({
-  appKit: {},
-}))
+const mockInstance = {} as NonNullable<React.ComponentProps<typeof WalletConnectProvider>['instance']>
 
 const renderWithProvider = (storeOverrides?: Parameters<typeof createTestStore>[0]) => {
   const store = createTestStore(storeOverrides)
@@ -62,7 +64,7 @@ const renderWithProvider = (storeOverrides?: Parameters<typeof createTestStore>[
   return nativeRenderHook(() => useWalletConnectContext(), {
     wrapper: ({ children }: { children: React.ReactNode }) => (
       <Provider store={store}>
-        <WalletConnectProvider>{children}</WalletConnectProvider>
+        <WalletConnectProvider instance={mockInstance}>{children}</WalletConnectProvider>
       </Provider>
     ),
   })
@@ -96,6 +98,21 @@ describe('WalletConnectContext', () => {
       expect(result.current.address).toBe(mockAddress)
       expect(result.current.chainId).toBe(1)
       expect(result.current.walletInfo).toEqual({ name: 'MetaMask' })
+    })
+  })
+
+  describe('useOptionalWalletConnectContext', () => {
+    it('returns null when no instance is provided', () => {
+      const store = createTestStore()
+      const { result } = nativeRenderHook(() => useOptionalWalletConnectContext(), {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <Provider store={store}>
+            <WalletConnectProvider instance={null}>{children}</WalletConnectProvider>
+          </Provider>
+        ),
+      })
+
+      expect(result.current).toBeNull()
     })
   })
 
