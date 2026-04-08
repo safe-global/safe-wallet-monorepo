@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GlobalSearchModal } from '../index'
 
+jest.mock('@/features/spaces', () => ({
+  useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
+}))
+
 describe('GlobalSearchModal', () => {
   it('renders the search input', () => {
     render(<GlobalSearchModal />)
@@ -16,15 +20,12 @@ describe('GlobalSearchModal', () => {
     expect(screen.getByText('Send')).toBeInTheDocument()
     expect(screen.getByText('Swap')).toBeInTheDocument()
     expect(screen.getByText('Transaction builder')).toBeInTheDocument()
-    expect(screen.getAllByText('Accounts')).toHaveLength(2)
   })
 
-  it('renders the accounts section with mock accounts', () => {
+  it('renders the accounts section label', () => {
     render(<GlobalSearchModal />)
 
-    expect(screen.getByText('Payroll')).toBeInTheDocument()
-    expect(screen.getByText('Treasury')).toBeInTheDocument()
-    expect(screen.getByText('My account')).toBeInTheDocument()
+    expect(screen.getAllByText('Accounts')).toHaveLength(2)
   })
 
   it('allows typing in the search input', async () => {

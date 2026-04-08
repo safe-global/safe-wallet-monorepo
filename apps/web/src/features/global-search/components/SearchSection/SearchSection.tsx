@@ -5,7 +5,7 @@ const SearchSection = () => {
   return (
     <>
       {sectionItems.map((item) => (
-        <div className="flex flex-col">
+        <div key={item.label} className="flex flex-col">
           <p className="px-4 py-2 text-xs text-muted-foreground">{item.label}</p>
           {item.renderItem()}
         </div>

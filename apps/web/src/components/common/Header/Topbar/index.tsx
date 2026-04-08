@@ -75,11 +75,7 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
         />
       </header>
 
-      {!isMobile && (
-        <div className="relative flex justify-start p-6 pb-0 -mb-6">
-          <GlobalSearchModal />
-        </div>
-      )}
+      {!isMobile && <GlobalSearchModal />}
 
       <NotificationsPopover ref={notificationsRef} />
 
