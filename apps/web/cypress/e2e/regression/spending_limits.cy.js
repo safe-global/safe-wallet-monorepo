@@ -181,7 +181,7 @@ describe('Spending limits tests', () => {
     spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_0)
   })
 
-  it.only('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
+  it('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
     spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
     main.setupSafeSettingsWithAllTokens().then(() => {
       spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
