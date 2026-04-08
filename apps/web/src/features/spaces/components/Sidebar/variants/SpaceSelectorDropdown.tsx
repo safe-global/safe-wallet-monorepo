@@ -1,5 +1,5 @@
 import { useId, useState, type ReactElement } from 'react'
-import { Check, ChevronDown, ChevronUp, Plus, CircleFadingPlus, LayoutGrid } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Plus, CircleFadingPlus, LayoutGrid, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -20,20 +20,28 @@ import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
 import { truncateSpaceName } from '../utils'
+import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
   triggerVariant?: 'default' | 'addToWorkspace'
+  onSpaceAdded?: (space: SpaceItem) => void
 }
 
 export const SpaceSelectorDropdown = ({
   selectedSpace,
   spaces = [],
   triggerVariant = 'default',
+  onSpaceAdded,
 }: SpaceSelectorDropdownProps): ReactElement => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const [loadingSpaceId, setLoadingSpaceId] = useState<number | null>(null)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
@@ -41,11 +49,42 @@ export const SpaceSelectorDropdown = ({
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
 
-  const handleSelectSpace = (spaceId: number) => {
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, spaceId: spaceId.toString() },
-    })
+  const { safe } = useSafeInfo()
+  const chain = useCurrentChain()
+  const dispatch = useAppDispatch()
+  const [addSafeToSpace] = useSpaceSafesCreateV1Mutation()
+
+  const handleSelectSpace = async (spaceId: number) => {
+    if (triggerVariant === 'addToWorkspace') {
+      if (!chain?.chainId || !safe.address.value) return
+      setLoadingSpaceId(spaceId)
+      try {
+        const result = await addSafeToSpace({
+          spaceId,
+          createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
+        })
+        if (result.error) {
+          dispatch(
+            showNotification({
+              message: 'Failed to add Safe to workspace.',
+              variant: 'error',
+              groupKey: 'add-safe-to-workspace-error',
+            }),
+          )
+          return
+        }
+        const space = spaces.find((s) => s.id === spaceId)
+        if (space) onSpaceAdded?.(space)
+        setIsOpen(false)
+      } finally {
+        setLoadingSpaceId(null)
+      }
+    } else {
+      router.push({
+        pathname: router.pathname,
+        query: { ...router.query, spaceId: spaceId.toString() },
+      })
+    }
   }
 
   const handleCreateSpace = () => {
@@ -139,7 +178,8 @@ export const SpaceSelectorDropdown = ({
         {spaces.map((space) => (
           <DropdownMenuItem
             key={space.id}
-            onClick={() => handleSelectSpace(space.id)}
+            onClick={() => void handleSelectSpace(space.id)}
+            disabled={loadingSpaceId !== null}
             className={cn('gap-3 min-h-9 px-2 py-2', selectedSpace?.id === space.id && css.navItemActive)}
           >
             <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
@@ -151,7 +191,11 @@ export const SpaceSelectorDropdown = ({
               </AvatarFallback>
             </Avatar>
             <span className="flex-1">{space.name}</span>
-            {selectedSpace?.id === space.id && <Check className="ml-auto size-4" />}
+            {loadingSpaceId === space.id ? (
+              <Loader2 className="ml-auto size-4 animate-spin" />
+            ) : selectedSpace?.id === space.id ? (
+              <Check className="ml-auto size-4" />
+            ) : null}
           </DropdownMenuItem>
         ))}
 

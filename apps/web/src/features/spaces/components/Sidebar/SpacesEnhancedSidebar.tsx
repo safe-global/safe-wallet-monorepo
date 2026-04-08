@@ -1,4 +1,5 @@
-import { useEffect, type CSSProperties, type ReactElement } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from './index'
 import { useAppSelector } from '@/store'
@@ -7,6 +8,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
+import type { SpaceItem } from './types'
 import { useSidebarHydrated } from './hooks/useSidebarHydrated'
 import { SidebarSkeleton } from './SidebarSkeleton'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -50,17 +52,29 @@ export const SpacesEnhancedSidebar = ({
 }
 
 const HydratedSidebar = (): ReactElement => {
+  const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const spaceId = useCurrentSpaceId()
+  const resolvedSpaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
+  const [addedToSpace, setAddedToSpace] = useState<SpaceItem | undefined>()
 
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
 
-  const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
+  const rawQuerySpaceId = router.query.spaceId
+  const explicitSpaceId = typeof rawQuerySpaceId === 'string' && rawQuerySpaceId.length > 0 ? rawQuerySpaceId : null
+
+  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : explicitSpaceId
+
+  const selectedSpace =
+    spaceIdForSidebarSelection != null
+      ? spaces?.find((space) => space.id === Number(spaceIdForSidebarSelection))
+      : undefined
+
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces ?? [])
 
-  const spaceName = selectedSpace?.name ?? ''
+  const effectiveSelectedSpace = selectedSpace ?? addedToSpace
+  const spaceName = effectiveSelectedSpace?.name ?? ''
   const spaceInitial = spaceName.charAt(0).toUpperCase()
 
   const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
@@ -70,8 +84,9 @@ const HydratedSidebar = (): ReactElement => {
       type={sidebarType}
       spaceName={spaceName}
       spaceInitial={spaceInitial}
-      selectedSpace={selectedSpace}
+      selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}
+      onSpaceAdded={setAddedToSpace}
     />
   )
 }

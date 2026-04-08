@@ -35,6 +35,7 @@ export interface SpaceSelectorProps {
   spaceInitial?: string
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
+  onSpaceAdded?: (space: SpaceItem) => void
 }
 
 export interface SafeWorkspaceHeaderBackToSpace {
@@ -48,6 +49,7 @@ export interface SafeWorkspaceHeaderAddToWorkspace {
   variant: 'addToWorkspace'
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
+  onSpaceAdded?: (space: SpaceItem) => void
 }
 
 export type SafeWorkspaceHeaderProps = SafeWorkspaceHeaderBackToSpace | SafeWorkspaceHeaderAddToWorkspace

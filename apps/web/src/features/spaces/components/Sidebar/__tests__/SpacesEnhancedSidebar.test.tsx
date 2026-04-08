@@ -5,6 +5,7 @@ import { SpacesEnhancedSidebar } from '../SpacesEnhancedSidebar'
 const mockUseSidebarHydrated = jest.fn()
 const mockUseAppSelector = jest.fn()
 const mockUseCurrentSpaceId = jest.fn()
+const mockUseRouter = jest.fn()
 const mockUseIsSpaceRoute = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
@@ -26,6 +27,10 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+jest.mock('next/router', () => ({
+  useRouter: () => mockUseRouter(),
 }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
@@ -61,6 +66,7 @@ describe('SpacesEnhancedSidebar', () => {
     mockUseSidebar.mockReturnValue({ open: true })
     mockUseAppSelector.mockReturnValue(true)
     mockUseCurrentSpaceId.mockReturnValue('1')
+    mockUseRouter.mockReturnValue({ query: { spaceId: '1' } })
     mockUseIsSpaceRoute.mockReturnValue(true)
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [{ id: 1, name: 'Core Space' }] })
@@ -88,6 +94,7 @@ describe('SpacesEnhancedSidebar', () => {
   it('renders safe variant after hydration when not on a space route', () => {
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseIsSpaceRoute.mockReturnValue(false)
+    mockUseRouter.mockReturnValue({ query: { spaceId: '1' } })
 
     render(<SpacesEnhancedSidebar />)
 
@@ -101,6 +108,7 @@ describe('SidebarStateReporter', () => {
     mockUseSidebarHydrated.mockReturnValue(false)
     mockUseAppSelector.mockReturnValue(false)
     mockUseCurrentSpaceId.mockReturnValue(undefined)
+    mockUseRouter.mockReturnValue({ query: {} })
     mockUseIsSpaceRoute.mockReturnValue(false)
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({})
     mockUseSpacesGetV1Query.mockReturnValue({})

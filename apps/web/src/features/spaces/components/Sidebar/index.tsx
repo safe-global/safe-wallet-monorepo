@@ -17,6 +17,7 @@ export const EnhancedSidebar = ({
   spaceInitial,
   selectedSpace,
   spaces,
+  onSpaceAdded,
 }: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
@@ -29,7 +30,13 @@ export const EnhancedSidebar = ({
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
+      <Variant
+        spaceName={spaceName}
+        spaceInitial={spaceInitial}
+        selectedSpace={selectedSpace}
+        spaces={spaces}
+        onSpaceAdded={onSpaceAdded}
+      />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )

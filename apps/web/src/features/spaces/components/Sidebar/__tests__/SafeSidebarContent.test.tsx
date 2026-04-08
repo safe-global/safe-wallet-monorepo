@@ -39,13 +39,6 @@ jest.mock('../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
-const mockUseCurrentSpaceId = jest.fn()
-
-jest.mock('@/features/spaces', () => ({
-  ...jest.requireActual('@/features/spaces'),
-  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
-}))
-
 jest.mock('../config', () => {
   const { AppRoutes } = require('@/config/routes')
   const Icon = () => null
@@ -91,7 +84,6 @@ const renderWithGeoblocking = (isBlockedCountry: boolean | null) =>
 describe('SafeSidebarContent', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseCurrentSpaceId.mockReturnValue('123')
     mockIsRouteEnabled.mockReturnValue(true)
     mockUseQueuedTxsLength.mockReturnValue(2)
     mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })

@@ -1,6 +1,4 @@
 import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
-import Sidebar from '@/components/sidebar/Sidebar'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'
@@ -23,7 +21,6 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
-  const isSpaceRoute = useIsSpaceRoute()
 
   const showSidebarToggle = isSafeAppRoute && !isSmallScreen
   // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
@@ -57,20 +54,16 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
-          ...(isSpaceRoute ? { '& .MuiPaper-root': { zIndex: 1250 } } : {}),
+          '& .MuiPaper-root': { zIndex: 1250 },
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          {isSpaceRoute ? (
-            <SpacesEnhancedSidebar
-              isDrawerOpen={isOpen}
-              onDrawerClose={() => onToggle(false)}
-              onOpenChange={onSidebarOpenChange}
-            />
-          ) : (
-            <Sidebar />
-          )}
+          <SpacesEnhancedSidebar
+            isDrawerOpen={isOpen}
+            onDrawerClose={() => onToggle(false)}
+            onOpenChange={onSidebarOpenChange}
+          />
         </aside>
       </Drawer>
 
