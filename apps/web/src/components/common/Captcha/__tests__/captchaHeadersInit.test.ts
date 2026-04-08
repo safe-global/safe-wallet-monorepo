@@ -124,13 +124,13 @@ describe('captchaHeadersInit', () => {
       ({
         status,
         clone: () => ({ json: () => Promise.resolve(body) }),
-      } as unknown as Response)
+      }) as unknown as Response
 
     const makeUnreadableResponse = (status: number) =>
       ({
         status,
         clone: () => ({ json: () => Promise.reject(new Error('not json')) }),
-      } as unknown as Response)
+      }) as unknown as Response
 
     it('clears token, resets promise, and calls widget refresh on captcha 401', async () => {
       const mockRefresh = jest.fn()
