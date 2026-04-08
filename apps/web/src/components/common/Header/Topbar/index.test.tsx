@@ -63,12 +63,6 @@ jest.mock('@/components/common/SpaceSafeBar', () => {
   return { __esModule: true, default: MockSpaceSafeBar }
 })
 
-jest.mock('./SearchInput', () => {
-  const MockSearchInput = () => <div data-testid="search-input" />
-  MockSearchInput.displayName = 'SearchInput'
-  return { __esModule: true, default: MockSearchInput }
-})
-
 jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage', () => ({
   useShowNotificationsRenewalMessage: jest.fn(),
 }))
@@ -153,10 +147,9 @@ describe('Topbar', () => {
   })
 
   describe('route-based left content', () => {
-    it('renders SearchInput on space routes', () => {
+    it('does not render SpaceSafeBar on space routes', () => {
       mockIsSpaceRoute.mockReturnValue(true)
       render(<Topbar />)
-      expect(screen.getByTestId('search-input')).toBeInTheDocument()
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
     })
 
@@ -164,7 +157,6 @@ describe('Topbar', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       render(<Topbar />)
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
-      expect(screen.queryByTestId('search-input')).not.toBeInTheDocument()
     })
   })
 

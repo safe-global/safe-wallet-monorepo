@@ -60,6 +60,7 @@ export function HeaderNavigation({
 
   return (
     <div className={cn('flex items-center gap-1.5 rounded-sm bg-background dark:bg-secondary p-[3px]')}>
+      {/* TODO: Global search button */}
       {showSearch && (
         <Button
           variant="secondary"

@@ -20,7 +20,6 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
-import SearchInput from './SearchInput'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -82,8 +81,15 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           </Button>
         ) : null}
 
-        {/* Left content: search for Space routes, SpaceSafeBar for Safe routes */}
-        <div className="flex-1 min-w-0">{isSpaceRoute ? <SearchInput /> : <SpaceSafeBar />}</div>
+        {/* Left content */}
+        <div className="flex-1 min-w-0">
+          {isSpaceRoute ? (
+            // TODO: Global search
+            <div />
+          ) : (
+            <SpaceSafeBar />
+          )}
+        </div>
 
         {/* Right content: navigation buttons */}
         <div className="flex items-center gap-1 shrink-0">
