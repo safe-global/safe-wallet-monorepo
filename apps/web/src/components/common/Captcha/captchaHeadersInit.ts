@@ -59,12 +59,14 @@ export function initializeCaptchaHeaders() {
 
   setHandleResponseHook(async (response: Response) => {
     if (response.status !== 401) return
+    // No widget registered means captcha is disabled — don't reset the promise or we'll deadlock
+    if (!widgetRefreshCallbackRef.current) return
     try {
       const data = await response.clone().json()
       if (data?.message === 'Invalid CAPTCHA token') {
         sharedTokenRef.current = null
         resetCaptchaPromise()
-        widgetRefreshCallbackRef.current?.()
+        widgetRefreshCallbackRef.current()
       }
     } catch {
       // Ignore non-JSON or unreadable responses
