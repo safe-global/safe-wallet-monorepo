@@ -27,7 +27,10 @@ function SpaceChainSelector() {
   if (!deployedChains.length) return null
 
   return (
-    <div className="self-stretch sm:order-last flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg bg-card">
+    <div
+      className="self-stretch sm:order-last flex items-stretch shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] rounded-lg bg-card"
+      data-testid="space-chain-selector"
+    >
       <ChainSelectorBlock
         deployedChains={deployedChains}
         availableChains={availableChains}

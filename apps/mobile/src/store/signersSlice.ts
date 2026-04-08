@@ -14,6 +14,11 @@ export type Signer = AddressInfo &
         type: 'ledger'
         derivationPath: string
       }
+    | {
+        type: 'walletconnect'
+        walletName?: string
+        walletIcon?: string
+      }
   )
 
 const initialState: Record<string, Signer> = {}

@@ -60,6 +60,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           <SidebarMenuButton
             size="lg"
             className={css.spaceSelector}
+            data-testid="space-selector-button"
             aria-label={triggerAriaLabel}
             aria-expanded={isOpen}
             aria-haspopup="menu"
@@ -92,7 +93,13 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent id={menuId} side="bottom" align="start" className={css.spaceSelectorDropdownContent}>
+      <DropdownMenuContent
+        id={menuId}
+        side="bottom"
+        align="start"
+        className={css.spaceSelectorDropdownContent}
+        data-testid="space-selector-menu"
+      >
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>

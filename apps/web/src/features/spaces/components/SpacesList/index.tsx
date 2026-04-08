@@ -138,7 +138,7 @@ const SpacesList = () => {
           ))}
 
         {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
-          <Grid2 container spacing={2} flexWrap="wrap">
+          <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
             {activeSpaces.length > 0 ? (
               activeSpaces.map((space) => (
                 <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
