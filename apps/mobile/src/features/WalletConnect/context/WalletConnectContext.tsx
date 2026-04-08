@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AppKit, AppKitProvider, useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
@@ -42,11 +42,10 @@ export function useOptionalWalletConnectContext(): WalletConnectContextValue | n
 }
 
 /**
- * Inner component that mounts all WalletConnect hooks and provides their
- * combined API via context. Must be rendered inside AppKitProvider since
- * hooks like useAppKit() depend on it.
+ * Mounts all WalletConnect hooks once and pushes the combined API into
+ * the given callback. Must be rendered inside AppKitProvider.
  */
-function WalletConnectContextInner({ children }: { children: React.ReactNode }) {
+function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: WalletConnectContextValue) => void }) {
   const { initiateConnection, isConnected } = useImportSignerFlow()
   const { reconnect } = useReconnectFlow()
   const { switchNetwork, switchNetworkIfNeeded, isWrongNetwork } = useSwitchNetwork()
@@ -62,8 +61,15 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
     [signers],
   )
 
-  const disconnect = useCallback(() => appKitHook.disconnect(), [appKitHook])
-  const open = useCallback((...args: Parameters<typeof appKitHook.open>) => appKitHook.open(...args), [appKitHook])
+  // Stabilize via ref so these callbacks never change identity.
+  // appKitHook is a valtio snapshot — new reference every render —
+  // which would otherwise cause an infinite setState loop in the
+  // bridge/provider cycle.
+  const appKitRef = useRef(appKitHook)
+  appKitRef.current = appKitHook
+
+  const disconnect = useCallback(() => appKitRef.current.disconnect(), [])
+  const open = useCallback((...args: Parameters<typeof appKitHook.open>) => appKitRef.current.open(...args), [])
 
   const value = useMemo<WalletConnectContextValue>(
     () => ({
@@ -100,7 +106,14 @@ function WalletConnectContextInner({ children }: { children: React.ReactNode }) 
     ],
   )
 
-  return <WalletConnectContext.Provider value={value}>{children}</WalletConnectContext.Provider>
+  const onContextReadyRef = useRef(onContextReady)
+  onContextReadyRef.current = onContextReady
+
+  useEffect(() => {
+    onContextReadyRef.current(value)
+  }, [value])
+
+  return null
 }
 
 interface WalletConnectProviderProps {
@@ -111,19 +124,22 @@ interface WalletConnectProviderProps {
 /**
  * Provides WalletConnect context to the app.
  *
- * When an AppKit instance is available, children are wrapped inside
- * AppKitProvider so that hooks like useAppKit() and the <AppKit /> modal
- * (rendered separately in the navigation tree) have access to context.
+ * Children always occupy the same tree position so React never remounts
+ * them when AppKit initializes (which would cause a visible flash).
+ * The AppKit bridge and modal are rendered as siblings above children.
  */
 export function WalletConnectProvider({ children, instance }: WalletConnectProviderProps) {
-  if (instance) {
-    return (
-      <AppKitProvider instance={instance}>
-        <WalletConnectContextInner>{children}</WalletConnectContextInner>
-        <AppKit />
-      </AppKitProvider>
-    )
-  }
+  const [contextValue, setContextValue] = useState<WalletConnectContextValue | null>(null)
 
-  return <WalletConnectContext.Provider value={null}>{children}</WalletConnectContext.Provider>
+  return (
+    <WalletConnectContext.Provider value={contextValue}>
+      {instance && (
+        <AppKitProvider instance={instance}>
+          <WalletConnectContextBridge onContextReady={setContextValue} />
+          <AppKit />
+        </AppKitProvider>
+      )}
+      {children}
+    </WalletConnectContext.Provider>
+  )
 }
