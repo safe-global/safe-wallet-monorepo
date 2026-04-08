@@ -181,23 +181,23 @@ describe('SpaceSelectorDropdown', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '2' } })
   })
 
-  it('tracks CREATE_SPACE_MODAL event and navigates when "Create space" is clicked', () => {
+  it('tracks CREATE_SPACE_MODAL event and navigates when "Add new space" is clicked', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('Create space'))
+    fireEvent.click(screen.getByText('Add new space'))
 
     expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
   })
 
-  it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View spaces" is clicked', () => {
+  it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View all" is clicked', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha' }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: /Selected space Alpha/ })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('View spaces'))
+    fireEvent.click(screen.getByText('View all'))
 
     expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)

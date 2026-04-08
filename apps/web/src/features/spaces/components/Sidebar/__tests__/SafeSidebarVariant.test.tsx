@@ -2,11 +2,15 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/features/spaces'
 import { SafeSidebarVariant } from '../variants/SafeSidebarVariant'
-import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
+import type {
+  SafeWorkspaceHeaderBackToSpace,
+  SafeWorkspaceHeaderAddToWorkspace,
+  ResolvedSidebarItem,
+  ResolvedSidebarGroup,
+} from '../types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
-const mockUseCurrentSpaceId = jest.fn()
 const mockRouterPush = jest.fn()
 const mockUseSafeInfo = jest.fn()
 
@@ -29,10 +33,6 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 
 jest.mock('@/features/spaces', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
-}))
-
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
-  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
 jest.mock('../variants/NavItem', () => ({
@@ -61,14 +61,22 @@ jest.mock('@/components/ui/sidebar', () => ({
     tooltip,
     className,
     onClick,
+    'data-testid': dataTestId,
   }: {
     children: ReactNode
     isActive?: boolean
     tooltip?: string
     className?: string
     onClick?: () => void
+    'data-testid'?: string
   }) => (
-    <button data-active={isActive} data-tooltip={tooltip} className={className} onClick={onClick}>
+    <button
+      data-active={isActive}
+      data-tooltip={tooltip}
+      data-testid={dataTestId}
+      className={className}
+      onClick={onClick}
+    >
       {children}
     </button>
   ),
@@ -99,12 +107,33 @@ jest.mock('../config', () => ({
   },
 }))
 
-describe('SafeSidebarVariant', () => {
-  const mockSpace: SpaceItem = {
-    id: 1,
-    name: 'Test Safe',
-  }
+jest.mock('../variants/SpaceSelectorDropdown', () => ({
+  SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
+    triggerVariant === 'addToWorkspace' ? (
+      <button type="button" data-testid="add-safe-to-workspace-button">
+        Add Safe to workspace
+      </button>
+    ) : (
+      <div data-testid="space-selector-default">Space selector</div>
+    ),
+}))
 
+const createBackHeader = (overrides: Partial<SafeWorkspaceHeaderBackToSpace> = {}): SafeWorkspaceHeaderBackToSpace => ({
+  variant: 'backToSpace',
+  spaceName: 'Test Safe',
+  spaceId: '123',
+  ...overrides,
+})
+
+const createAddHeader = (
+  overrides: Partial<SafeWorkspaceHeaderAddToWorkspace> = {},
+): SafeWorkspaceHeaderAddToWorkspace => ({
+  variant: 'addToWorkspace',
+  spaces: [],
+  ...overrides,
+})
+
+describe('SafeSidebarVariant', () => {
   const MockIcon = () => <div>Icon</div>
 
   const mockMainNavItems: ResolvedSidebarItem[] = [
@@ -143,20 +172,19 @@ describe('SafeSidebarVariant', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseCurrentSpaceId.mockReturnValue(null)
     mockUseSafeInfo.mockReturnValue({
       safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.3.0' },
     })
   })
 
   it('renders space selector with name and back button when spaceId exists', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
-
     render(
       <SafeSidebarVariant
-        spaceName="My Safe Account"
-        spaceInitial="M"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({
+          spaceName: 'My Safe Account',
+          spaceInitial: 'M',
+          spaceId: '123',
+        })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -169,14 +197,11 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('applies deterministic avatar color from space name like SpaceSelectorDropdown', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
     const spaceName = 'My Safe Account'
 
     render(
       <SafeSidebarVariant
-        spaceName={spaceName}
-        spaceInitial="M"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName, spaceInitial: 'M', spaceId: '123' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -189,12 +214,9 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('does not set avatar background when space name is empty', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
-
     render(
       <SafeSidebarVariant
-        spaceInitial="U"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName: '', spaceInitial: 'U', spaceId: '123' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -204,12 +226,9 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('derives initial from space name when spaceInitial not provided', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
-
     render(
       <SafeSidebarVariant
-        spaceName="MySpace"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName: 'MySpace', spaceId: '123' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -219,13 +238,9 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('uses provided spaceInitial when available', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
-
     render(
       <SafeSidebarVariant
-        spaceName="MySpace"
-        spaceInitial="X"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName: 'MySpace', spaceInitial: 'X', spaceId: '123' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -237,9 +252,7 @@ describe('SafeSidebarVariant', () => {
   it('renders all navigation sections', () => {
     render(
       <SafeSidebarVariant
-        spaceName="Test Safe"
-        spaceInitial="T"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName: 'Test Safe', spaceInitial: 'T' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -253,12 +266,9 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('handles undefined space name', () => {
-    mockUseCurrentSpaceId.mockReturnValue('123')
-
     render(
       <SafeSidebarVariant
-        spaceInitial="U"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({ spaceName: '', spaceInitial: 'U', spaceId: '123' })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
@@ -267,18 +277,18 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getByText('U')).toBeInTheDocument()
   })
 
-  it('does not render back to space button when no spaceId', () => {
+  it('renders Add Safe to workspace when Safe is not in a Space', () => {
     render(
       <SafeSidebarVariant
-        spaceName="My Safe Account"
-        spaceInitial="M"
-        selectedSpace={mockSpace}
+        workspaceHeader={createAddHeader()}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
     )
 
     expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
+    expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    expect(screen.getByText('Add Safe to workspace')).toBeInTheDocument()
   })
 
   it('renders all main navigation items', () => {
@@ -319,7 +329,11 @@ describe('SafeSidebarVariant', () => {
     ]
 
     render(
-      <SafeSidebarVariant spaceName="Test Safe" mainNavItems={allNavItems} defiGroup={{ label: 'Defi', items: [] }} />,
+      <SafeSidebarVariant
+        workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+        mainNavItems={allNavItems}
+        defiGroup={{ label: 'Defi', items: [] }}
+      />,
     )
 
     expect(screen.getByTestId('sidebar-item-overview')).toBeInTheDocument()
@@ -329,19 +343,19 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('navigates to the correct Space when back button is clicked', () => {
-    mockUseCurrentSpaceId.mockReturnValue('42')
-
     render(
       <SafeSidebarVariant
-        spaceName="My Safe Account"
-        spaceInitial="M"
-        selectedSpace={mockSpace}
+        workspaceHeader={createBackHeader({
+          spaceName: 'My Safe Account',
+          spaceInitial: 'M',
+          spaceId: '42',
+        })}
         mainNavItems={mockMainNavItems}
         defiGroup={mockDefiGroup}
       />,
     )
 
-    fireEvent.click(screen.getByText('My Safe Account'))
+    fireEvent.click(screen.getByTestId('back-to-space-button'))
 
     expect(mockRouterPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.index,
@@ -351,7 +365,13 @@ describe('SafeSidebarVariant', () => {
 
   describe('Settings', () => {
     it('renders Settings button', () => {
-      render(<SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />)
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
 
       expect(screen.getByText('Settings')).toBeInTheDocument()
     })
@@ -362,7 +382,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(container.querySelector('span[aria-hidden]')).toBeInTheDocument()
@@ -374,7 +398,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant spaceName="Test Safe" mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()

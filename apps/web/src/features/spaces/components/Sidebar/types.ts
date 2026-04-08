@@ -37,7 +37,23 @@ export interface SpaceSelectorProps {
   spaces?: SpaceItem[]
 }
 
-export interface SafeSidebarVariantProps extends SpaceSelectorProps {
+export interface SafeWorkspaceHeaderBackToSpace {
+  variant: 'backToSpace'
+  spaceName: string
+  spaceInitial?: string
+  spaceId: string
+}
+
+export interface SafeWorkspaceHeaderAddToWorkspace {
+  variant: 'addToWorkspace'
+  selectedSpace?: SpaceItem
+  spaces?: SpaceItem[]
+}
+
+export type SafeWorkspaceHeaderProps = SafeWorkspaceHeaderBackToSpace | SafeWorkspaceHeaderAddToWorkspace
+
+export interface SafeSidebarVariantProps {
+  workspaceHeader: SafeWorkspaceHeaderProps
   mainNavItems: ResolvedSidebarItem[]
   defiGroup: ResolvedSidebarGroup
 }

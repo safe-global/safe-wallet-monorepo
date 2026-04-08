@@ -14,10 +14,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { icons } from '../config'
 import css from '../styles.module.css'
 import type { SafeSidebarVariantProps } from '../types'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { AppRoutes } from '@/config/routes'
 import { getDeterministicColor } from '@/features/spaces'
 import { NavItem } from './NavItem'
+import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -27,14 +27,10 @@ const getSpaceInitial = (name: string | undefined, initial: string | undefined):
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
 
 export const SafeSidebarVariant = ({
-  spaceName = '',
-  spaceInitial,
+  workspaceHeader,
   mainNavItems,
   defiGroup,
 }: SafeSidebarVariantProps): ReactElement => {
-  const initial = getSpaceInitial(spaceName, spaceInitial)
-  const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
-  const spaceId = useCurrentSpaceId()
   const router = useRouter()
   const { safe } = useSafeInfo()
   const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
@@ -47,45 +43,62 @@ export const SafeSidebarVariant = ({
   const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
   const handleBackToSpace = () => {
-    if (spaceId) {
-      router.push({
-        pathname: AppRoutes.spaces.index,
-        query: { spaceId },
-      })
+    if (workspaceHeader.variant !== 'backToSpace') {
+      return
     }
+    router.push({
+      pathname: AppRoutes.spaces.index,
+      query: { spaceId: workspaceHeader.spaceId },
+    })
+  }
+
+  const renderWorkspaceHeader = () => {
+    if (workspaceHeader.variant === 'backToSpace') {
+      const { spaceName, spaceInitial } = workspaceHeader
+      const initial = getSpaceInitial(spaceName, spaceInitial)
+      const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
+
+      return (
+        <SidebarMenuButton
+          size="lg"
+          tooltip="Back to Space"
+          data-testid="back-to-space-button"
+          className={css.backToSpace}
+          onClick={handleBackToSpace}
+        >
+          <icons.ChevronLeft className={`size-4 shrink-0 ${css.backToSpaceChevron}`} />
+          <Avatar className={css.spaceSelectorAvatar}>
+            <AvatarFallback
+              className={css.spaceSelectorAvatarFallback}
+              style={spaceAvatarColor ? { backgroundColor: spaceAvatarColor } : undefined}
+            >
+              {initial}
+            </AvatarFallback>
+          </Avatar>
+          <div className={css.spaceSelectorText}>
+            <span className={css.spaceSelectorName}>{spaceName}</span>
+            <span className={css.spaceSelectorSubtitle}>Space</span>
+          </div>
+        </SidebarMenuButton>
+      )
+    }
+
+    return (
+      <SpaceSelectorDropdown
+        triggerVariant="addToWorkspace"
+        selectedSpace={workspaceHeader.selectedSpace}
+        spaces={workspaceHeader.spaces}
+      />
+    )
   }
 
   return (
     <SidebarContent className={css.sidebarContent}>
-      {spaceId && (
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                size="lg"
-                tooltip="Back to Space"
-                data-testid="back-to-space-button"
-                className={css.backToSpace}
-                onClick={handleBackToSpace}
-              >
-                <icons.ChevronLeft className={`size-4 shrink-0 ${css.backToSpaceChevron}`} />
-                <Avatar className={css.spaceSelectorAvatar}>
-                  <AvatarFallback
-                    className={css.spaceSelectorAvatarFallback}
-                    style={spaceAvatarColor ? { backgroundColor: spaceAvatarColor } : undefined}
-                  >
-                    {initial}
-                  </AvatarFallback>
-                </Avatar>
-                <div className={css.spaceSelectorText}>
-                  <span className={css.spaceSelectorName}>{spaceName}</span>
-                  <span className={css.spaceSelectorSubtitle}>Space</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-      )}
+      <SidebarGroup className={css.sidebarGroup}>
+        <SidebarMenu>
+          <SidebarMenuItem>{renderWorkspaceHeader()}</SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
 
       {/* Main Navigation */}
       <SidebarGroup className={css.sidebarGroup}>

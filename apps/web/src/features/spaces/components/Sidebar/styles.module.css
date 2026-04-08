@@ -51,6 +51,43 @@
   cursor: pointer;
 }
 
+/* “Add Safe to workspace” (opens space selector) */
+.addSafeToWorkspaceTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  border-radius: 9999px;
+  border: 2px dashed var(--sidebar-border, #e5e5e5);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.addSafeToWorkspaceRing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--color-success-background, #dcfce7);
+}
+
+.addSafeToWorkspacePlusIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-success-main, #16a34a);
+}
+
+.addSafeToWorkspaceLabel {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary, #171717);
+  text-align: left;
+}
+
 .spaceSelectorAvatar {
   width: 32px;
   height: 32px;
@@ -144,6 +181,32 @@
 
 :global(.group[data-collapsible='icon']) .backToSpaceChevron {
   display: none;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px;
+  gap: 0;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceLabel {
+  display: none !important;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceIconCircle {
+  width: 32px;
+  height: 32px;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceDashedRing {
+  width: 24px;
+  height: 24px;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspacePlusIcon {
+  width: 12px;
+  height: 12px;
 }
 
 :global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {

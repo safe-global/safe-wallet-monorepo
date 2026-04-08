@@ -1,5 +1,5 @@
 import { useId, useState, type ReactElement } from 'react'
-import { Check, ChevronDown, ChevronUp, Plus, LayoutGrid } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Plus, CircleFadingPlus, LayoutGrid } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -24,9 +24,14 @@ import { truncateSpaceName } from '../utils'
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
+  triggerVariant?: 'default' | 'addToWorkspace'
 }
 
-export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelectorDropdownProps): ReactElement => {
+export const SpaceSelectorDropdown = ({
+  selectedSpace,
+  spaces = [],
+  triggerVariant = 'default',
+}: SpaceSelectorDropdownProps): ReactElement => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
@@ -34,7 +39,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
-  const triggerAriaLabel = spaceName ? `Selected space ${spaceName}. Open space selector` : 'Open space selector'
+  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
 
   const handleSelectSpace = (spaceId: number) => {
     router.push({
@@ -59,8 +64,8 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
         render={
           <SidebarMenuButton
             size="lg"
-            className={css.spaceSelector}
-            data-testid="space-selector-button"
+            className={triggerVariant === 'addToWorkspace' ? css.addSafeToWorkspaceTrigger : css.spaceSelector}
+            data-testid={triggerVariant === 'addToWorkspace' ? 'add-safe-to-workspace-button' : 'space-selector-button'}
             aria-label={triggerAriaLabel}
             aria-expanded={isOpen}
             aria-haspopup="menu"
@@ -68,29 +73,40 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           />
         }
       >
-        <Avatar className={css.spaceSelectorAvatar}>
-          <AvatarFallback
-            className={css.spaceSelectorAvatarFallback}
-            style={selectedSpaceColor ? { backgroundColor: selectedSpaceColor } : undefined}
-          >
-            {initial}
-          </AvatarFallback>
-        </Avatar>
-        <div className={css.spaceSelectorText}>
-          {spaceName ? (
-            <Tooltip>
-              <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
-              <TooltipContent side="top">{spaceName}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <span className={css.spaceSelectorName} />
-          )}
-          <span className={css.spaceSelectorSubtitle}>Space</span>
-        </div>
-        <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1" aria-hidden>
-          <ChevronUp className="size-4" />
-          <ChevronDown className="size-4" />
-        </div>
+        {triggerVariant === 'addToWorkspace' ? (
+          <>
+            <span className={css.addSafeToWorkspaceRing}>
+              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
+            </span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+          </>
+        ) : (
+          <>
+            <Avatar className={css.spaceSelectorAvatar}>
+              <AvatarFallback
+                className={css.spaceSelectorAvatarFallback}
+                style={selectedSpaceColor ? { backgroundColor: selectedSpaceColor } : undefined}
+              >
+                {initial}
+              </AvatarFallback>
+            </Avatar>
+            <div className={css.spaceSelectorText}>
+              {spaceName ? (
+                <Tooltip>
+                  <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
+                  <TooltipContent side="top">{spaceName}</TooltipContent>
+                </Tooltip>
+              ) : (
+                <span className={css.spaceSelectorName} />
+              )}
+              <span className={css.spaceSelectorSubtitle}>Space</span>
+            </div>
+            <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1" aria-hidden>
+              <ChevronUp className="size-4" />
+              <ChevronDown className="size-4" />
+            </div>
+          </>
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
@@ -118,7 +134,7 @@ export const SpaceSelectorDropdown = ({ selectedSpace, spaces = [] }: SpaceSelec
           </div>
         )}
 
-        <DropdownMenuSeparator />
+        {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
 
         {spaces.map((space) => (
           <DropdownMenuItem

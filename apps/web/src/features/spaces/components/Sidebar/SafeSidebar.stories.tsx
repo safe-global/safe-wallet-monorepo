@@ -15,7 +15,6 @@ import type { RootState } from '@/store'
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
 
-/** Unprefixed address + `chain` query so useUrlChainId matches DEFAULT_CHAIN_ID (eth: would force mainnet only). */
 const SAFE_SIDEBAR_ROUTER_QUERY = {
   spaceId: '1',
   chain: defaultChainShortName,
@@ -28,7 +27,6 @@ const storyChain = (() => {
   return base.chainId === id ? base : { ...base, chainId: id, shortName: defaultChainShortName }
 })()
 
-// Seed getChainsConfigV2 so useCurrentChain() + isRouteEnabled() work for Stories without generated chains.json.
 const safeSidebarStoryState = {
   [cgwClient.reducerPath]: {
     queries: {
@@ -59,6 +57,20 @@ const safeSidebarStoryState = {
     },
   },
 } as unknown as Partial<RootState>
+
+const notInSpaceStoryState = {
+  ...safeSidebarStoryState,
+  auth: {
+    sessionExpiresAt: null,
+    lastUsedSpace: null,
+    isStoreHydrated: true,
+  },
+} as unknown as Partial<RootState>
+
+const NOT_IN_SPACE_DEMO_SPACES = [
+  { id: 101, name: 'Design workspace' },
+  { id: 102, name: 'Treasury' },
+] as const
 
 const SafeSidebarLayout = ({ children }: { children: ReactNode }) => (
   <SidebarProvider defaultOpen style={{ '--sidebar-width': 'min(230px, 100%)' } as CSSProperties}>
@@ -190,6 +202,37 @@ export const Skeleton: Story = {
   render: () => (
     <SafeSidebarLayout>
       <SidebarSkeleton />
+    </SafeSidebarLayout>
+  ),
+}
+
+export const NotPartOfSpace: Story = {
+  args: {
+    spaceName: '',
+    spaceInitial: '',
+  },
+  decorators: [withMockProvider({ initialState: notInSpaceStoryState, shadcn: true })],
+  parameters: {
+    nextjs: {
+      appDirectory: false,
+      router: {
+        pathname: '/home',
+        query: {
+          chain: defaultChainShortName,
+          safe: '0x1234567890123456789012345678901234567890',
+          spaceId: '',
+        },
+      },
+    },
+  },
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar
+        type={args.type}
+        spaceName={args.spaceName}
+        spaceInitial={args.spaceInitial}
+        spaces={[...NOT_IN_SPACE_DEMO_SPACES]}
+      />
     </SafeSidebarLayout>
   ),
 }
