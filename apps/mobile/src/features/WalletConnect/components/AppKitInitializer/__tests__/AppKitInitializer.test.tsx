@@ -5,7 +5,7 @@ import { Provider } from 'react-redux'
 import { createTestStore } from '@/src/tests/test-utils'
 import { AppKitInitializer } from '../AppKitInitializer'
 import { cgwChainsToReownNetworks } from '@/src/features/WalletConnect/utils/chains'
-import { createAppKitInstance, FALLBACK_NETWORKS } from '@/src/features/WalletConnect/appKit'
+import { createAppKitInstance } from '@/src/features/WalletConnect/appKit'
 import { selectAllChains, selectActiveChain } from '@/src/store/chains'
 
 jest.mock('@/src/features/WalletConnect/utils/chains', () => ({
@@ -14,7 +14,6 @@ jest.mock('@/src/features/WalletConnect/utils/chains', () => ({
 
 jest.mock('@/src/features/WalletConnect/appKit', () => ({
   createAppKitInstance: jest.fn().mockReturnValue({}),
-  FALLBACK_NETWORKS: [{ id: 1, name: 'Ethereum' }],
 }))
 
 jest.mock('@/src/store/chains', () => ({
@@ -66,17 +65,17 @@ describe('AppKitInitializer', () => {
     mockCreateAppKitInstance.mockReturnValue({ mock: 'appkit' })
   })
 
-  it('creates instance with fallback networks when no active chain', () => {
-    mockSelectActiveChain.mockReturnValue(null)
+  it('defers initialization when no chains are available', () => {
     mockCgwChainsToReownNetworks.mockReturnValue([])
 
     const { getByTestId } = renderAppKitInitializer()
 
     expect(getByTestId('child')).toBeTruthy()
-    expect(mockCreateAppKitInstance).toHaveBeenCalledWith(FALLBACK_NETWORKS, FALLBACK_NETWORKS[0])
+    expect(mockCreateAppKitInstance).not.toHaveBeenCalled()
+    expect(getByTestId('instance').props.children).toBe('null')
   })
 
-  it('renders children within WalletConnectProvider when active chain is present', () => {
+  it('renders children within WalletConnectProvider when chains are present', () => {
     mockSelectActiveChain.mockReturnValue({ chainId: '1' })
     mockCgwChainsToReownNetworks.mockReturnValue([ethereumNetwork])
 
@@ -106,15 +105,6 @@ describe('AppKitInitializer', () => {
     expect(mockCreateAppKitInstance).toHaveBeenCalledWith([ethereumNetwork, polygonNetwork], ethereumNetwork)
   })
 
-  it('uses FALLBACK_NETWORKS when no chains are available', () => {
-    mockSelectActiveChain.mockReturnValue({ chainId: '1' })
-    mockCgwChainsToReownNetworks.mockReturnValue([])
-
-    renderAppKitInitializer()
-
-    expect(mockCreateAppKitInstance).toHaveBeenCalledWith(FALLBACK_NETWORKS, undefined)
-  })
-
   it('sets defaultNetwork to active chain when available', () => {
     mockSelectActiveChain.mockReturnValue({ chainId: '137' })
     mockCgwChainsToReownNetworks.mockReturnValue([ethereumNetwork, polygonNetwork])
@@ -131,6 +121,15 @@ describe('AppKitInitializer', () => {
     renderAppKitInitializer()
 
     expect(mockCreateAppKitInstance).toHaveBeenCalledWith([ethereumNetwork], undefined)
+  })
+
+  it('falls back to first network as default when no active chain', () => {
+    mockSelectActiveChain.mockReturnValue(null)
+    mockCgwChainsToReownNetworks.mockReturnValue([ethereumNetwork, polygonNetwork])
+
+    renderAppKitInitializer()
+
+    expect(mockCreateAppKitInstance).toHaveBeenCalledWith([ethereumNetwork, polygonNetwork], ethereumNetwork)
   })
 
   it('passes the AppKit instance to WalletConnectProvider', () => {

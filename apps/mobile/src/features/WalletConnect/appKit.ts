@@ -3,7 +3,6 @@ import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
 import type { Network, Storage } from '@reown/appkit-common-react-native'
 import { createMMKV } from 'react-native-mmkv'
-import { mainnet } from 'viem/chains'
 import { safeJsonParse, safeJsonStringify } from '@walletconnect/safe-json'
 
 const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID ?? ''
@@ -40,9 +39,6 @@ const storage: Storage = {
     await mmkv.remove(key)
   },
 }
-
-/** Mainnet fallback for first launch when no persisted chains are available */
-export const FALLBACK_NETWORKS: [Network, ...Network[]] = [mainnet]
 
 export type AppKitInstance = ReturnType<typeof createAppKit>
 
