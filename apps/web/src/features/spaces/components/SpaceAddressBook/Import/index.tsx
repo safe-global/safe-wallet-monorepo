@@ -3,12 +3,12 @@ import { Button } from '@mui/material'
 import { useState } from 'react'
 import ImportAddressBookDialog from './ImportAddressBookDialog'
 
-const ImportAddressBook = () => {
+const ImportAddressBook = ({ disabled }: { disabled?: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      <Button variant="text" size="small" startIcon={<ImportIcon />} onClick={() => setOpen(true)}>
+      <Button variant="text" size="small" startIcon={<ImportIcon />} onClick={() => setOpen(true)} disabled={disabled}>
         Import
       </Button>
       {open && <ImportAddressBookDialog handleClose={() => setOpen(false)} />}
