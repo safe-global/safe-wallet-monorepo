@@ -73,7 +73,7 @@ export function HeaderNavigation({
         </Button>
       )}
 
-      <div className="relative">
+      <div className="relative" data-testid="notifications-center">
         <Button
           variant="secondary"
           size="icon-lg"
@@ -121,7 +121,7 @@ export function HeaderNavigation({
         onClick={onWalletClick}
         className="cursor-pointer gap-1.5 shrink-0 rounded-sm dark:bg-card"
         aria-label={`Wallet ${truncatedAddress}`}
-        data-testid="expand-wallet-button"
+        data-testid="open-account-center"
       >
         <Wallet className="size-5 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
