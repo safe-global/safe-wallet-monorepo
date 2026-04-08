@@ -9,7 +9,7 @@ const GlobalSearchModal = () => {
   const [query, setQuery] = useState('')
 
   return (
-    <Dialog open>
+    <Dialog>
       <DialogContent showCloseButton={false} className="h-[480px] p-0">
         <Card className="h-full py-4 gap-2 shadow-none border-0">
           <div className="px-4 shrink-0">

@@ -1,5 +1,6 @@
 import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
+import { TrustedSafesSection } from './sections/TrustedSafes'
 
 interface SectionItem {
   label: string
@@ -21,5 +22,12 @@ export const sectionItems: SectionItem[] = [
       console.log('Accounts')
     },
     renderItem: AccountsSection,
+  },
+  {
+    label: 'Trusted safes',
+    activate: () => {
+      console.log('Trusted safes')
+    },
+    renderItem: TrustedSafesSection,
   },
 ]
