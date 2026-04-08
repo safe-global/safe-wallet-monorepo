@@ -4,6 +4,7 @@ import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
+import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 
 function SpaceSafeBar() {
   const isQualifiedSafe = useIsQualifiedSafe()
@@ -27,6 +28,7 @@ function SpaceSafeBar() {
         isError={isError}
         onRetry={refetch}
       />
+      <SpaceNestedSafesButton />
     </div>
   )
 }

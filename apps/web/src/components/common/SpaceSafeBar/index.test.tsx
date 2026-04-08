@@ -46,6 +46,12 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   return { __esModule: true, default: MockSafeSelectorDropdown }
 })
 
+jest.mock('./SpaceNestedSafesButton', () => {
+  const MockSpaceNestedSafesButton = () => <div data-testid="space-nested-safes-button" />
+  MockSpaceNestedSafesButton.displayName = 'SpaceNestedSafesButton'
+  return { __esModule: true, default: MockSpaceNestedSafesButton }
+})
+
 jest.mock('./SpaceBackLink', () => {
   const MockSpaceBackLink = (props: Record<string, unknown>) => (
     <div
