@@ -18,9 +18,12 @@ const headCells = [
 
 type SpaceAddressBookTableProps = {
   entries: SpaceAddressBookItemDto[]
+  hasWallet: boolean
 }
 
-function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
+const PAGE_SIZE = 25
+
+function SpaceAddressBookTable({ entries, hasWallet }: SpaceAddressBookTableProps) {
   const chains = useChains()
 
   const rows = entries.map((entry) => ({

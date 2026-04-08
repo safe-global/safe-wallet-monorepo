@@ -21,7 +21,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = () => {
+const AddContact = ({ disabled }: { disabled?: boolean }) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)

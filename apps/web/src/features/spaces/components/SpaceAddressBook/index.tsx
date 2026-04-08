@@ -14,6 +14,9 @@ const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
+   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const hasWallet = (user?.wallets?.length ?? 0) > 0
   const addressBookItems = useGetSpaceAddressBook()
 
   const filteredAddressBook = useAddressBookSearch(addressBookItems, searchQuery)
@@ -38,9 +41,9 @@ const SpaceAddressBook = () => {
 
         {isAdmin && (
           <Stack direction="row" gap={1}>
-            <ImportAddressBook />
+            <ImportAddressBook disabled={!hasWallet} />
             <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-              <AddContact />
+              <AddContact disabled={!hasWallet} />
             </Track>
           </Stack>
         )}
@@ -55,7 +58,7 @@ const SpaceAddressBook = () => {
       {addressBookItems.length === 0 ? (
         <EmptyAddressBook />
       ) : (
-        filteredAddressBook.length > 0 && <SpaceAddressBookTable entries={filteredAddressBook} />
+        filteredAddressBook.length > 0 && <SpaceAddressBookTable entries={filteredAddressBook} hasWallet={hasWallet}/>
       )}
     </>
   )
