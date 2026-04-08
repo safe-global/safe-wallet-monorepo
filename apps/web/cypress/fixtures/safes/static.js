@@ -145,4 +145,11 @@ export default {
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
   /** Positions static safe - Used in: portfolio.cy.js */
   MATIC_STATIC_SAFE_33: 'matic:0xc1f4652866ddB3811adcd3418c13eF640e88E1f6',
+
+  // Allowance Module address verification safes (same Safe on two networks)
+  // New safes were added to be sure they don't have the AllowanceModule enabled by default
+  /** Spending limits AllowanceModule address verification (Sepolia) - Used in: spending_limits.cy.js */
+  SEP_STATIC_SAFE_47: 'sep:0xeB50238Aa80834dFE960A7baC61ee3541FB4c68E',
+  /** Spending limits AllowanceModule address verification (Polygon) - Used in: spending_limits.cy.js */
+  MATIC_STATIC_SAFE_34: 'matic:0xeB50238Aa80834dFE960A7baC61ee3541FB4c68E',
 }

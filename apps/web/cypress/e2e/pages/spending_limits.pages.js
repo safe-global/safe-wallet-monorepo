@@ -174,6 +174,11 @@ export function verifyDefaultTimeIsSet() {
   cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
+export function visitSpendingLimitsPage(safe) {
+  cy.visit(constants.setupUrl + safe)
+  cy.get(spendingLimitsSection).should('be.visible')
+}
+
 export function clickOnNewSpendingLimitBtn() {
   cy.get(newSpendingLimitBtn).click()
   cy.contains(modalTitle, newTransactionStr).should('be.visible')
@@ -234,4 +239,9 @@ export function verifyDecodedTxSummary(names) {
       cy.contains(item)
     })
   })
+}
+
+export function verifyEnableModuleAddress(moduleAddress) {
+  cy.get(actionItem).first().click()
+  cy.contains(moduleAddress).should('be.visible')
 }
