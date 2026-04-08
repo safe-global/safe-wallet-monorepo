@@ -31,18 +31,20 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
         content: (
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={entry.address} size={32} />
-            <Stack direction="column" spacing={0.5}>
-              <EthHashInfo
-                showAvatar={false}
-                address={entry.address}
-                name={entry.name}
-                shortAddress={false}
-                showPrefix={false}
-                addressBookNameSource={ContactSource.space}
-                hasExplorer
-                showCopyButton
-              />
-            </Stack>
+            <Box sx={{ '& .ethHashInfo-name': { fontWeight: 700 } }}>
+              <Stack direction="column" spacing={0.5}>
+                <EthHashInfo
+                  showAvatar={false}
+                  address={entry.address}
+                  name={entry.name}
+                  shortAddress={false}
+                  showPrefix={false}
+                  addressBookNameSource={ContactSource.space}
+                  hasExplorer
+                  showCopyButton
+                />
+              </Stack>
+            </Box>
           </Stack>
         ),
       },

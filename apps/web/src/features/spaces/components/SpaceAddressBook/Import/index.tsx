@@ -1,5 +1,5 @@
 import ImportIcon from '@/public/images/common/import.svg'
-import { Button } from '@mui/material'
+import { Button, SvgIcon } from '@mui/material'
 import { useState } from 'react'
 import ImportAddressBookDialog from './ImportAddressBookDialog'
 
@@ -8,7 +8,12 @@ const ImportAddressBook = () => {
 
   return (
     <>
-      <Button variant="text" size="small" startIcon={<ImportIcon />} onClick={() => setOpen(true)}>
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<SvgIcon component={ImportIcon} inheritViewBox fontSize="small" color="primary" />}
+        onClick={() => setOpen(true)}
+      >
         Import
       </Button>
       {open && <ImportAddressBookDialog handleClose={() => setOpen(false)} />}

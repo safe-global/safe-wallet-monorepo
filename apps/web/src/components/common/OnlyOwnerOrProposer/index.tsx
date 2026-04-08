@@ -1,22 +1,24 @@
 import { useMemo, type ReactElement } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useIsWalletProposer } from '@/hooks/useProposers'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import { Tooltip, type TooltipProps } from '@mui/material'
 
-type CheckWalletProps = {
+type OnlyOwnerOrProposerProps = {
   children: (ok: boolean) => ReactElement
   placement?: TooltipProps['placement']
 }
 
 enum Message {
   WalletNotConnected = 'Please connect your wallet',
-  NotSafeOwner = 'Your connected wallet is not a signer of this Safe Account',
+  NotSafeOwnerOrProposer = 'Your connected wallet is not a signer or proposer of this Safe Account',
 }
 
-const OnlyOwner = ({ children, placement = 'bottom' }: CheckWalletProps): ReactElement => {
+const OnlyOwnerOrProposer = ({ children, placement = 'bottom' }: OnlyOwnerOrProposerProps): ReactElement => {
   const wallet = useWallet()
   const isSafeOwner = useIsSafeOwner()
+  const isProposer = useIsWalletProposer()
   const connectWallet = useConnectWallet()
 
   const message = useMemo(() => {
@@ -24,10 +26,10 @@ const OnlyOwner = ({ children, placement = 'bottom' }: CheckWalletProps): ReactE
       return Message.WalletNotConnected
     }
 
-    if (!isSafeOwner) {
-      return Message.NotSafeOwner
+    if (!isSafeOwner && !isProposer) {
+      return Message.NotSafeOwnerOrProposer
     }
-  }, [isSafeOwner, wallet])
+  }, [isSafeOwner, isProposer, wallet])
 
   if (!message) return children(true)
 
@@ -38,4 +40,4 @@ const OnlyOwner = ({ children, placement = 'bottom' }: CheckWalletProps): ReactE
   )
 }
 
-export default OnlyOwner
+export default OnlyOwnerOrProposer
