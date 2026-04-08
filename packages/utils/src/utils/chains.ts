@@ -117,23 +117,23 @@ export const getBlockExplorerLink = (
     return getExplorerLink(address, chain.blockExplorerUriTemplate)
   }
 }
-/** This version is used if a network does not have the LATEST_SAFE_VERSION deployed yet */
-const FALLBACK_SAFE_VERSION = '1.3.0' as const
 export const getLatestSafeVersion = (
   chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
 ): SafeVersion => {
-  const latestSafeVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
+  const recommendedVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
 
-  // Without version filter it will always return the LATEST_SAFE_VERSION constant to avoid automatically updating to the newest version if the deployments change
-  const latestDeploymentVersion = (getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version ??
-    FALLBACK_SAFE_VERSION) as SafeVersion
+  // For chains registered in safe-deployments, cap at the latest deployed version
+  // to avoid using a version that isn't actually deployed on-chain yet.
+  const deployedVersion = getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version
 
-  // The version needs to be smaller or equal to the
-  if (semverSatisfies(latestDeploymentVersion, `<=${latestSafeVersion}`)) {
-    return latestDeploymentVersion
-  } else {
-    return latestSafeVersion as SafeVersion
+  if (deployedVersion) {
+    return (
+      semverSatisfies(deployedVersion, `<=${recommendedVersion}`) ? deployedVersion : recommendedVersion
+    ) as SafeVersion
   }
+
+  // For chains not in safe-deployments, trust the CGW's recommended version directly
+  return recommendedVersion as SafeVersion
 }
 
 export const isNonCriticalUpdate = (version?: string | null) => {
