@@ -79,6 +79,7 @@ describe('Topbar', () => {
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
+      GlobalSearchInput: () => null,
     })
   })
 
@@ -129,6 +130,7 @@ describe('Topbar', () => {
           </>
         ),
         GlobalSearchModal: () => null,
+        GlobalSearchInput: () => null,
       })
     })
 

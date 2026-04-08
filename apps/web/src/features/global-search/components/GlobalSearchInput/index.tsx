@@ -1,14 +1,19 @@
 import { Search } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { useAppDispatch } from '@/store'
+import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
 
 interface GlobalSearchInputProps {
   className?: string
 }
 
 const GlobalSearchInput = ({ className }: GlobalSearchInputProps) => {
+  const dispatch = useAppDispatch()
+
   return (
     <button
       type="button"
+      onClick={() => dispatch(openGlobalSearch())}
       className={cn(
         'flex w-full items-center gap-2 rounded-md bg-card border border-input px-3 py-2 text-sm text-muted-foreground transition-colors',
         'hover:bg-accent hover:text-accent-foreground',
