@@ -34,6 +34,7 @@ const slimitReplacementWarning = '[data-testid="limit-replacement-warning"]'
 const addressItem = '[data-testid="address-item"]'
 const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
+const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
 const actionSectionItem = () => {
@@ -51,6 +52,7 @@ const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
+  enableModule: 'enableModule',
   resetAllowance: 'resetAllowance',
   setAllowance: 'setAllowance',
 }
@@ -243,5 +245,5 @@ export function verifyDecodedTxSummary(names) {
 
 export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
-  cy.contains(moduleAddress).should('be.visible')
+  cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }
