@@ -24,13 +24,13 @@ export function AppKitInitializer({ children }: { children: React.ReactNode }) {
     const reownNetworks = cgwChainsToReownNetworks(chains)
 
     if (reownNetworks.length > 0) {
-      const networks = reownNetworks as [(typeof reownNetworks)[0], ...typeof reownNetworks]
+      const [firstNetwork, ...restNetworks] = reownNetworks
       const defaultNetwork = activeChain
         ? reownNetworks.find((n) => n.id === parseInt(activeChain.chainId, 10))
-        : networks[0]
+        : firstNetwork
 
-      Logger.info(`AppKit initialized with ${networks.length} networks. Default: ${defaultNetwork?.id}.`)
-      instanceRef.current = createAppKitInstance(networks, defaultNetwork)
+      Logger.info(`AppKit initialized with ${reownNetworks.length} networks. Default: ${defaultNetwork?.id}.`)
+      instanceRef.current = createAppKitInstance([firstNetwork, ...restNetworks], defaultNetwork)
     }
   }
 
