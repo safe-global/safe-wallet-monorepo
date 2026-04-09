@@ -121,7 +121,7 @@ export function HeaderNavigation({
         onClick={onWalletClick}
         className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
         aria-label={`Wallet ${truncatedAddress}`}
-        data-testid="connect-wallet-btn"
+        data-testid={walletAddress ? 'open-account-center' : 'connect-wallet-btn'}
       >
         <Wallet className="size-5 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
