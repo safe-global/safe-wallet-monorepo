@@ -20,6 +20,8 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
+import SafenetStakingButton from './SafenetStakingButton'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -47,6 +49,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const draftBatch = useDraftBatch()
+  const showSafeToken = useSafeTokenEnabled()
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
@@ -93,8 +96,19 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Right content: navigation buttons */}
         <div className="flex items-center gap-1 shrink-0 max-md:ml-auto">
+          {showSafeToken && (
+            <div className="hidden sm:block">
+              <SafenetStakingButton />
+            </div>
+          )}
+
           <HeaderNavigation
             walletAddress={wallet?.address ?? ''}
+            walletEns={wallet?.ens}
+            isConnected={Boolean(wallet)}
+            walletIcon={wallet?.icon}
+            walletLabel={wallet?.label}
+            walletOpen={walletOpen}
             messages={unreadCount}
             showSearch={!isSpaceRoute}
             onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}

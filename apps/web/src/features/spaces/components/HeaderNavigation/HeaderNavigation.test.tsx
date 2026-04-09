@@ -5,6 +5,7 @@ import { HeaderNavigation } from './HeaderNavigation'
 describe('HeaderNavigation', () => {
   const defaultProps = {
     walletAddress: '0x1234567890abcdef1234567890abcdef12345678',
+    isConnected: true,
   }
 
   it('renders notifications and wallet buttons by default', () => {
@@ -18,6 +19,20 @@ describe('HeaderNavigation', () => {
     render(<HeaderNavigation {...defaultProps} />)
 
     expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  it('shows ENS name instead of address when provided', () => {
+    render(<HeaderNavigation {...defaultProps} walletEns="vitalik.eth" />)
+
+    expect(screen.getByText('vitalik.eth')).toBeInTheDocument()
+    expect(screen.queryByText('0x1234...5678')).not.toBeInTheDocument()
+  })
+
+  it('shows "Connect" text when wallet is not connected', () => {
+    render(<HeaderNavigation walletAddress="" isConnected={false} />)
+
+    expect(screen.getByText('Connect')).toBeInTheDocument()
+    expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
   })
 
   it('shows search button when showSearch is true', () => {
@@ -56,10 +71,19 @@ describe('HeaderNavigation', () => {
     expect(screen.queryByLabelText('Batch transactions')).not.toBeInTheDocument()
   })
 
-  it('shows batch count badge when batchCount > 0', () => {
+  it('shows batch count number when batchCount > 0', () => {
     render(<HeaderNavigation {...defaultProps} showBatch batchCount={3} />)
 
-    expect(screen.getByLabelText('3 batched transactions')).toBeInTheDocument()
+    const badge = screen.getByLabelText('3 batched transactions')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveTextContent('3')
+  })
+
+  it('caps batch count display at 99+', () => {
+    render(<HeaderNavigation {...defaultProps} showBatch batchCount={150} />)
+
+    const badge = screen.getByLabelText('150 batched transactions')
+    expect(badge).toHaveTextContent('99+')
   })
 
   it('hides batch count badge when batchCount is 0', () => {
@@ -68,10 +92,19 @@ describe('HeaderNavigation', () => {
     expect(screen.queryByLabelText(/batched transactions/)).not.toBeInTheDocument()
   })
 
-  it('shows unread notification badge when messages > 0', () => {
+  it('shows unread notification count when messages > 0', () => {
     render(<HeaderNavigation {...defaultProps} messages={5} />)
 
-    expect(screen.getByLabelText('5 unread messages')).toBeInTheDocument()
+    const badge = screen.getByLabelText('5 unread messages')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveTextContent('5')
+  })
+
+  it('caps notification count display at 99+', () => {
+    render(<HeaderNavigation {...defaultProps} messages={120} />)
+
+    const badge = screen.getByLabelText('120 unread messages')
+    expect(badge).toHaveTextContent('99+')
   })
 
   it('calls onBatchClick when batch button is clicked', async () => {

@@ -1,5 +1,8 @@
 import type { MouseEvent, ReactNode } from 'react'
-import { Search, Bell, Wallet, Layers } from 'lucide-react'
+import { useMemo } from 'react'
+import { Search, Bell, Wallet, Layers, ChevronUp, ChevronDown } from 'lucide-react'
+import { blo } from 'blo'
+import { isAddress } from 'ethers'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
@@ -7,12 +10,31 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analy
 
 export interface HeaderNavigationProps {
   /**
-   * Safe address to display (will be truncated)
+   * Wallet address to display (will be truncated)
    */
   walletAddress: string
   /**
-   * Number of unread messages:
-   * the parent can pass useAppSelector(selectNotifications).filter(n => !n.isRead).length into messages from Redux
+   * ENS name to display instead of truncated address
+   */
+  walletEns?: string
+  /**
+   * Whether a wallet is connected
+   */
+  isConnected?: boolean
+  /**
+   * Wallet provider icon (SVG string or data URI from onboard)
+   */
+  walletIcon?: string
+  /**
+   * Wallet provider label (e.g. "MetaMask", "WalletConnect")
+   */
+  walletLabel?: string
+  /**
+   * Whether the wallet popover is open (controls chevron direction)
+   */
+  walletOpen?: boolean
+  /**
+   * Number of unread messages
    */
   messages?: number
   /**
@@ -47,6 +69,11 @@ export interface HeaderNavigationProps {
  */
 export function HeaderNavigation({
   walletAddress,
+  walletEns,
+  isConnected = false,
+  walletIcon,
+  walletLabel,
+  walletOpen = false,
   messages = 0,
   showSearch = false,
   onSearchClick,
@@ -59,6 +86,24 @@ export function HeaderNavigation({
 }: HeaderNavigationProps) {
   const truncatedAddress =
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
+
+  const walletDisplayName = walletEns || truncatedAddress
+
+  const identiconUrl = useMemo(() => {
+    try {
+      if (walletAddress && isAddress(walletAddress)) {
+        return blo(walletAddress as `0x${string}`)
+      }
+    } catch {
+      // ignore
+    }
+    return null
+  }, [walletAddress])
+
+  const providerIconSrc = useMemo(() => {
+    if (!walletIcon) return null
+    return walletIcon.startsWith('data:') ? walletIcon : `data:image/svg+xml;utf8,${encodeURIComponent(walletIcon)}`
+  }, [walletIcon])
 
   return (
     <div className={cn('flex items-center gap-1')}>
@@ -88,9 +133,11 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+            className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
             aria-label={`${messages} unread messages`}
-          />
+          >
+            {messages > 99 ? '99+' : messages}
+          </span>
         )}
       </div>
 
@@ -111,9 +158,11 @@ export function HeaderNavigation({
 
             {batchCount > 0 && (
               <span
-                className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+                className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
                 aria-label={`${batchCount} batched transactions`}
-              />
+              >
+                {batchCount > 99 ? '99+' : batchCount}
+              </span>
             )}
           </div>
         </Track>
@@ -125,11 +174,32 @@ export function HeaderNavigation({
           size="lg"
           onClick={onWalletClick}
           className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-          aria-label={`Wallet ${truncatedAddress}`}
-          data-testid={walletAddress ? 'open-account-center' : 'connect-wallet-btn'}
+          aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
+          data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
         >
-          <Wallet className="size-5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
+          {isConnected && identiconUrl ? (
+            <div className="relative shrink-0">
+              <img src={identiconUrl} alt="Wallet identicon" className="size-6 rounded-full" />
+              {providerIconSrc && (
+                <img
+                  src={providerIconSrc}
+                  alt={`${walletLabel ?? 'Wallet'} logo`}
+                  className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-card bg-background p-px"
+                />
+              )}
+            </div>
+          ) : (
+            <Wallet className="size-5 text-muted-foreground" />
+          )}
+          <span className="text-xs text-muted-foreground font-normal">
+            {isConnected ? walletDisplayName : 'Connect'}
+          </span>
+          {isConnected &&
+            (walletOpen ? (
+              <ChevronUp className="size-3.5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="size-3.5 text-muted-foreground" />
+            ))}
         </Button>
       </Track>
     </div>
