@@ -60,7 +60,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
             <Track
               {...NESTED_SAFE_EVENTS.OPEN_LIST}
               label={NESTED_SAFE_LABELS.space_safe_bar}
-              mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Nested Safes' }}
+              mixpanelParams={{ [MixpanelEventParams.SAFE_SELECTOR_DROPDOWN]: 'Nested Safes' }}
             >
               <div className="relative flex items-center">
                 <GitMerge className="size-5" />
