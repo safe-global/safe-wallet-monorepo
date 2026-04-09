@@ -4,7 +4,6 @@ import { Alert, Box, Divider, IconButton, Stack, SvgIcon, Tooltip, Typography } 
 import AddIcon from '@mui/icons-material/Add'
 import DoneIcon from '@mui/icons-material/Done'
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined'
-import TagOutlinedIcon from '@mui/icons-material/TagOutlined'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 
@@ -150,32 +149,13 @@ type TxSignersProps = {
   proposer?: string
 }
 
-const CopyHashButton = ({ txHash }: { txHash?: string | null }) => {
-  const [copied, handleCopy] = useCopyToClipboard(txHash)
-
-  return (
-    <Tooltip
-      title={copied ? 'Copied' : txHash ? 'Copy the transaction hash' : 'Available after execution'}
-      placement="top"
-    >
-      <span>
-        <IconButton size="small" sx={{ color: 'inherit' }} disabled={!txHash} onClick={handleCopy}>
-          <TagOutlinedIcon fontSize="small" />
-        </IconButton>
-      </span>
-    </Tooltip>
-  )
-}
-
 const AuditLogHeader = ({
   children,
   txId,
-  txHash,
   explorerLink,
 }: {
   children?: ReactElement
   txId: string
-  txHash?: string | null
   explorerLink?: { title: string; href: string }
 }) => (
   <>
@@ -192,7 +172,6 @@ const AuditLogHeader = ({
             </IconButton>
           </Tooltip>
         </TxShareLinkWrapper>
-        <CopyHashButton txHash={txHash} />
         {explorerLink ? (
           <ExplorerButton {...explorerLink} isCompact />
         ) : (
@@ -240,7 +219,7 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
 
     return (
       <Box mb={2} data-testid="transaction-actions-list">
-        <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />
+        <AuditLogHeader txId={txId} explorerLink={explorerLink} />
         <AuditRow
           label="Executed"
           actionType="executed"
@@ -261,7 +240,7 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
 
     return (
       <Box mb={2} data-testid="transaction-actions-list">
-        <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />
+        <AuditLogHeader txId={txId} explorerLink={explorerLink} />
 
         <AuditRow
           label="Created"
@@ -307,7 +286,7 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
 
   return (
     <Box mb={2} data-testid="transaction-actions-list">
-      <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink}>
+      <AuditLogHeader txId={txId} explorerLink={explorerLink}>
         <TxConfirmations submittedConfirmations={confirmations.length} requiredConfirmations={confirmationsRequired} />
       </AuditLogHeader>
 

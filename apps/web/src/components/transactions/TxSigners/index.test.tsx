@@ -333,7 +333,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText(/Alice/)).toBeInTheDocument()
   })
 
   describe('Module-executed transactions', () => {
@@ -369,7 +369,7 @@ describe('TxSigners (Audit Log)', () => {
       expect(screen.getByText('Audit log')).toBeInTheDocument()
       expect(screen.getByText('Created')).toBeInTheDocument()
       expect(screen.getByText('Executed')).toBeInTheDocument()
-      expect(screen.getByText('Allowance Module')).toBeInTheDocument()
+      expect(screen.getByText(/Allowance Module/)).toBeInTheDocument()
 
       await waitFor(() => {
         expect(mockGetTransaction).toHaveBeenCalledWith(txDetails.txHash)
