@@ -107,7 +107,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -185,7 +185,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -263,7 +263,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -489,7 +489,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -567,7 +567,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -645,7 +645,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis failed. Review before processing.
                                   </p>
@@ -795,7 +795,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -873,7 +873,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -1023,7 +1023,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1101,7 +1101,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -1251,7 +1251,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1329,7 +1329,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}
                                   </p>
@@ -1666,7 +1666,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -1964,7 +1964,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -2042,7 +2042,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2120,7 +2120,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}
                                   </p>
@@ -2457,7 +2457,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -2535,7 +2535,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2613,7 +2613,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change as it may overwrite account ownership.
                                   </p>
@@ -2791,7 +2791,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -2869,7 +2869,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -2947,7 +2947,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.
                                   </p>
@@ -3114,7 +3114,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -3192,7 +3192,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -3270,7 +3270,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change Safe modules.
                                   </p>
@@ -3420,7 +3420,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     1 Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.
                                   </p>
@@ -3522,7 +3522,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     1 address has few transactions.
                                   </p>
@@ -3624,7 +3624,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You are interacting with 2 addresses for the first time.
                                   </p>
@@ -3765,7 +3765,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     2 addresses are in your address book or a Safe you own.
                                   </p>
@@ -3967,7 +3967,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
@@ -4150,7 +4150,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
@@ -4323,7 +4323,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     All these contracts are verified.
                                   </p>
@@ -4484,7 +4484,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with all these contracts before.
                                   </p>
@@ -4706,7 +4706,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     The transaction {reason_phrase} {classification_phrase}. Cancel this transaction.
                                   </p>
@@ -4873,7 +4873,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This Safe account cannot be created on the destination chain. You will not be able to claim ownership of the same address. Funds sent may be inaccessible.
                                   </p>
@@ -4890,7 +4890,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address has few transactions.
                                   </p>
@@ -4907,7 +4907,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You are interacting with this address for the first time.
                                   </p>
@@ -4924,7 +4924,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5002,7 +5002,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
@@ -5043,7 +5043,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
@@ -5072,7 +5072,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is not verified.
                                   </p>
@@ -5089,7 +5089,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with this contract 43 times.
                                   </p>
@@ -5167,7 +5167,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change Safe modules.
                                   </p>
@@ -5317,7 +5317,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5395,7 +5395,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -5473,7 +5473,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify this change before proceeding as it will change the Safe's ownership
                                   </p>
@@ -5623,7 +5623,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -5701,7 +5701,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
@@ -5742,7 +5742,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
@@ -5771,7 +5771,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is verified as "Lido staking v2".
                                   </p>
@@ -5788,7 +5788,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     You have interacted with this contract 43 times.
                                   </p>
@@ -5866,7 +5866,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis failed. Review before processing.
                                   </p>
@@ -6067,7 +6067,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -6145,7 +6145,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Contract verification is currently unavailable.
                                   </p>
@@ -6223,7 +6223,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -6373,7 +6373,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Contract verification is currently unavailable.
                                   </p>
@@ -6390,7 +6390,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Verify the 
                                     <a
@@ -6492,7 +6492,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     Threat analysis found no issues
                                   </p>
@@ -6642,7 +6642,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This address is in your address book. 
                                   </p>
@@ -6720,7 +6720,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                                   class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
                                 >
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
                                   >
                                     This contract is not verified.
                                   </p>

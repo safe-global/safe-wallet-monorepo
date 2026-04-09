@@ -10,6 +10,7 @@ import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getChainConfig } from '@/utils/chains'
 import { makeStore, setStoreInstance } from '@/store'
+import * as safeDeployments from '@safe-global/safe-deployments'
 
 describe('chains', () => {
   beforeAll(() => {
@@ -142,6 +143,24 @@ describe('chains', () => {
           getLatestSafeVersion(
             chainBuilder().with({ chainId: '11155111', recommendedMasterCopyVersion: null }).build(),
           ),
+        ).toEqual('1.4.1')
+      })
+
+      it('should trust recommendedMasterCopyVersion when chain is not in safe-deployments', () => {
+        jest.spyOn(safeDeployments, 'getSafeSingletonDeployment').mockReturnValue(undefined)
+
+        expect(
+          getLatestSafeVersion(
+            chainBuilder().with({ chainId: '99999', recommendedMasterCopyVersion: '1.4.1' }).build(),
+          ),
+        ).toEqual('1.4.1')
+      })
+
+      it('should fall back to LATEST_SAFE_VERSION when chain is not in safe-deployments and recommendedMasterCopyVersion is null', () => {
+        jest.spyOn(safeDeployments, 'getSafeSingletonDeployment').mockReturnValue(undefined)
+
+        expect(
+          getLatestSafeVersion(chainBuilder().with({ chainId: '99999', recommendedMasterCopyVersion: null }).build()),
         ).toEqual('1.4.1')
       })
     })

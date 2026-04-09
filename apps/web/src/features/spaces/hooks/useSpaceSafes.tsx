@@ -12,7 +12,13 @@ import useWallet from '@/hooks/wallets/useWallet'
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData, isLoading } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn })
+  const {
+    currentData,
+    isLoading,
+    isError: isSpaceSafesError,
+    error: spaceSafesError,
+    refetch: refetchSpaceSafes,
+  } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn })
   const spaceContacts = useGetSpaceAddressBook()
 
   // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account
@@ -30,5 +36,5 @@ export const useSpaceSafes = () => {
     [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
   )
 
-  return { allSafes, isLoading }
+  return { allSafes, isLoading, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes }
 }
