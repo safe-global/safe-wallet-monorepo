@@ -22,6 +22,6 @@ describe('SidebarSkeleton', () => {
 
     expect(screen.getByTestId('sidebar')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-top-bar')).toBeInTheDocument()
-    expect(screen.getAllByTestId('skeleton-row')).toHaveLength(8)
+    expect(screen.getAllByTestId('skeleton-row')).toHaveLength(9)
   })
 })

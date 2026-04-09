@@ -45,6 +45,27 @@ export const useCurrentMembership = (spaceId?: number) => {
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
+export const useCurrentMemberProfile = (spaceId?: number) => {
+  const currentSpaceId = useCurrentSpaceId()
+  const actualSpaceId = spaceId ?? currentSpaceId
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: membersData, isLoading: isMembersLoading } = useMembersGetUsersV1Query(
+    { spaceId: Number(actualSpaceId) },
+    { skip: !isUserSignedIn },
+  )
+  const { currentData: user, isLoading: isUserLoading } = useUsersGetWithWalletsV1Query(undefined, {
+    skip: !isUserSignedIn,
+  })
+  const members = membersData?.members || []
+  const membership = members.find((member) => member.user.id === user?.id)
+
+  return {
+    membership,
+    walletAddress: user?.wallets?.[0]?.address,
+    isLoading: isMembersLoading || isUserLoading,
+  }
+}
+
 export const useIsActiveMember = (spaceId?: number) => {
   const currentMembership = useCurrentMembership(spaceId)
   return !!currentMembership && currentMembership.status === MemberStatus.ACTIVE
