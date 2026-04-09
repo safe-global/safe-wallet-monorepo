@@ -11,10 +11,6 @@
   stroke-width: 1.5;
 }
 
-.sidebarHeader {
-  padding: 24px 12px 12px;
-}
-
 .spaceSelector {
   display: flex;
   align-items: center;
@@ -214,6 +210,10 @@
 
 :global(.group[data-collapsible='icon']) .transactionsBadgeDot {
   display: block;
+}
+
+.sidebarGroup {
+  padding-block: 0;
 }
 
 .navItemActive {

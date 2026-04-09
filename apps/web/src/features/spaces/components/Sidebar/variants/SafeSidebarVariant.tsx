@@ -59,7 +59,7 @@ export const SafeSidebarVariant = ({
       </SidebarGroup>
 
       {/* New Transaction */}
-      <SidebarGroup className={`${css.sidebarGroup} py-0`}>
+      <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
           <NewTransactionButton />
         </SidebarGroupContent>
