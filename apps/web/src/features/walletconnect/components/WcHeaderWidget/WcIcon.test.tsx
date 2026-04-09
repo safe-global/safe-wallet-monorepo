@@ -5,7 +5,7 @@ import WcIcon from './WcIcon'
 jest.mock('@/components/common/Track', () => {
   return {
     __esModule: true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     default: (props: any) => <>{props.children}</>,
   }
 })
@@ -13,7 +13,7 @@ jest.mock('@/components/common/Track', () => {
 jest.mock('@/components/safe-apps/SafeAppIconCard', () => {
   return {
     __esModule: true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     default: (props: any) => <img alt={props.alt} />,
   }
 })
