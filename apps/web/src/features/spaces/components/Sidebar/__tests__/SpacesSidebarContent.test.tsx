@@ -69,11 +69,12 @@ describe('SpacesSidebarContent', () => {
   const mockSpace: SpaceItem = {
     id: 1,
     name: 'Test Space',
+    safeCount: 0,
   }
 
   const mockSpaces: SpaceItem[] = [
-    { id: 1, name: 'Space 1' },
-    { id: 2, name: 'Space 2' },
+    { id: 1, name: 'Space 1', safeCount: 0 },
+    { id: 2, name: 'Space 2', safeCount: 0 },
   ]
 
   const mockResolvedNavItems = {

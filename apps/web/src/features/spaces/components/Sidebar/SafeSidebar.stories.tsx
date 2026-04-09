@@ -22,7 +22,7 @@ const SAFE_SIDEBAR_ROUTER_QUERY = {
   safe: '0x1234567890123456789012345678901234567890',
 }
 
-const STORY_SELECTED_SPACE: SpaceItem = { id: 1, name: 'Company Space' }
+const STORY_SELECTED_SPACE: SpaceItem = { id: 1, name: 'Company Space', safeCount: 0 }
 
 const storyChain = (() => {
   const base = createChainData()
@@ -70,10 +70,10 @@ const notInSpaceStoryState = {
   },
 } as unknown as Partial<RootState>
 
-const NOT_IN_SPACE_DEMO_SPACES = [
-  { id: 101, name: 'Design workspace' },
-  { id: 102, name: 'Treasury' },
-] as const
+const NOT_IN_SPACE_DEMO_SPACES: SpaceItem[] = [
+  { id: 101, name: 'Design workspace', safeCount: 0 },
+  { id: 102, name: 'Treasury', safeCount: 0 },
+]
 
 const SafeSidebarLayout = ({ children }: { children: ReactNode }) => (
   <SidebarProvider defaultOpen style={{ '--sidebar-width': 'min(230px, 100%)' } as CSSProperties}>

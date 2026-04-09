@@ -37,7 +37,7 @@ describe('useAddSafeToSpace', () => {
 
   it('calls the mutation with correct args and returns true on success', async () => {
     const onSpaceAdded = jest.fn()
-    const spaces = [{ id: 5, name: 'Alpha' }]
+    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
 
     let success: boolean | undefined
@@ -59,13 +59,13 @@ describe('useAddSafeToSpace', () => {
         },
       }),
     )
-    expect(onSpaceAdded).toHaveBeenCalledWith({ id: 5, name: 'Alpha' })
+    expect(onSpaceAdded).toHaveBeenCalledWith({ id: 5, name: 'Alpha', safeCount: 0 })
     expect(success).toBe(true)
   })
 
   it('dispatches error notification and returns false when API returns an error', async () => {
     mockAddSafeToSpace.mockResolvedValue({ error: new Error('API error') })
-    const spaces = [{ id: 5, name: 'Alpha' }]
+    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces }))
 
     let success: boolean | undefined
