@@ -1,49 +1,61 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { router } from 'expo-router'
-import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
+import { useOnAppKitConnect } from './useOnAppKitConnect'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
  * On address mismatch, navigates to ReconnectError which owns subsequent retries.
+ *
+ * Uses CONNECT_SUCCESS event subscription instead of useEffect to respond
+ * directly to connection events. The pendingAddressRef guard ensures only
+ * user-initiated reconnections (via reconnect()) trigger the flow —
+ * auto-reconnects and connections from useImportSignerFlow are ignored.
  */
 export function useReconnectFlow() {
   const { open, disconnect } = useAppKit()
-  const { address, isConnected: walletIsConnected } = useAccount()
-  const { walletInfo } = useWalletInfo()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
   const pendingAddressRef = useRef<string | null>(null)
 
-  useEffect(() => {
-    if (!pendingAddressRef.current || !walletIsConnected || !address || !walletInfo) {
-      return
-    }
+  useOnAppKitConnect(
+    (eventData) => {
+      if (!pendingAddressRef.current) {
+        return
+      }
 
-    const reconnectAddress = getAddress(pendingAddressRef.current)
-    pendingAddressRef.current = null
+      const reconnectAddress = getAddress(pendingAddressRef.current)
+      pendingAddressRef.current = null
 
-    if (!sameAddress(reconnectAddress, address)) {
-      disconnect()
+      const connectedAddress = eventData.address
 
-      router.push({
-        pathname: '/import-signers/reconnect-error',
-        params: { address: reconnectAddress },
-      })
+      if (!connectedAddress || !sameAddress(reconnectAddress, connectedAddress)) {
+        disconnect()
 
-      return
-    }
+        router.push({
+          pathname: '/import-signers/reconnect-error',
+          params: { address: reconnectAddress },
+        })
 
-    switchNetworkIfNeeded()
-  }, [walletIsConnected, address, walletInfo, disconnect, switchNetworkIfNeeded])
+        return
+      }
+
+      switchNetworkIfNeeded()
+    },
+    () => {
+      pendingAddressRef.current = null
+    },
+  )
 
   const reconnect = useCallback(
-    (signerAddress: string) => {
+    async (signerAddress: string) => {
+      await disconnect()
       pendingAddressRef.current = signerAddress
       open({ view: 'Connect' })
     },
-    [open],
+    [disconnect, open],
   )
 
   return { reconnect }
