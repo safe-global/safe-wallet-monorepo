@@ -147,7 +147,7 @@ export const SpaceSelectorDropdown = ({
         {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
 
         {spaces.map((space) => {
-          const isAtLimit = triggerVariant === 'addToWorkspace' && (space.safeCount ?? 0) >= SAFE_ACCOUNTS_LIMIT
+          const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
 
           const isDisabled = loadingSpaceId !== null || isAtLimit
 
