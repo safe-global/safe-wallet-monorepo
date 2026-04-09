@@ -79,7 +79,6 @@ const HydratedSidebar = (): ReactElement => {
 
   const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
   const spaceName = effectiveSelectedSpace?.name ?? ''
-  const spaceInitial = spaceName.charAt(0).toUpperCase()
 
   const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
 
@@ -87,7 +86,6 @@ const HydratedSidebar = (): ReactElement => {
     <EnhancedSidebar
       type={sidebarType}
       spaceName={spaceName}
-      spaceInitial={spaceInitial}
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}
       onSpaceAdded={setAddedToSpace}
