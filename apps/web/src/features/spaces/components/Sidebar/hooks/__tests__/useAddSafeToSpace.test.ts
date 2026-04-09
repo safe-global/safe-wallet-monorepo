@@ -49,6 +49,16 @@ describe('useAddSafeToSpace', () => {
       spaceId: 5,
       createSpaceSafesDto: { safes: [{ chainId: '1', address: '0xSafe' }] },
     })
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'notifications/add',
+        payload: {
+          message: 'Successfully added Safe to workspoace.',
+          variant: 'success',
+          groupKey: 'add-safe-to-workspace-success',
+        },
+      }),
+    )
     expect(onSpaceAdded).toHaveBeenCalledWith({ id: 5, name: 'Alpha' })
     expect(success).toBe(true)
   })
