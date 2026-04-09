@@ -59,14 +59,14 @@ export function HeaderNavigation({
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
 
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-sm bg-background dark:bg-secondary p-[3px]')}>
+    <div className={cn('flex items-center gap-1')}>
       {/* TODO: Global search button */}
       {showSearch && (
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon-lg"
           onClick={onSearchClick}
-          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
           aria-label="Search"
         >
           <Search className="size-5 text-muted-foreground" />
@@ -75,10 +75,10 @@ export function HeaderNavigation({
 
       <div className="relative" data-testid="notifications-center">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon-lg"
           onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
           aria-label="Notifications"
         >
           <Bell className="size-5 text-muted-foreground" />
@@ -86,7 +86,7 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-secondary bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+            className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
             aria-label={`${messages} unread messages`}
           />
         )}
@@ -97,10 +97,10 @@ export function HeaderNavigation({
       {showBatch && (
         <div className="relative" data-track="batching: Batch sidebar open">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="icon-lg"
             onClick={onBatchClick}
-            className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+            className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
             aria-label="Batch transactions"
           >
             <Layers className="size-5 text-muted-foreground" />
@@ -108,7 +108,7 @@ export function HeaderNavigation({
 
           {batchCount > 0 && (
             <span
-              className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-secondary bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+              className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
               aria-label={`${batchCount} batched transactions`}
             />
           )}
@@ -116,12 +116,12 @@ export function HeaderNavigation({
       )}
 
       <Button
-        variant="secondary"
+        variant="ghost"
         size="lg"
         onClick={onWalletClick}
-        className="cursor-pointer gap-1.5 shrink-0 rounded-sm dark:bg-card"
+        className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
         aria-label={`Wallet ${truncatedAddress}`}
-        data-testid="open-account-center"
+        data-testid="connect-wallet-btn"
       >
         <Wallet className="size-5 text-muted-foreground" />
         <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
