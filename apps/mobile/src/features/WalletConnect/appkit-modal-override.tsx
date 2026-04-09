@@ -146,7 +146,6 @@ export function Modal({ visible, onBackdropPress, onRequestClose, testID, childr
     }
 
     return (
-      // @ts-expect-error - FullWindowOverlay is not fully typed
       <FullWindowOverlay>
         <View style={{ flex: 1 }} testID={testID} pointerEvents="box-none">
           {modalContent}
