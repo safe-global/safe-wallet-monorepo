@@ -20,8 +20,14 @@ import {
 } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
 
-// Public re-exports — same module instances as the rest of AppKit
-import { useTheme, BorderRadius } from '@reown/appkit-ui-react-native'
+// Deep imports to avoid circular resolution — Metro redirects the barrel's
+// ./components/wui-modal back to this file, so importing from the barrel
+// would read uninitialized exports. These resolve to the same module
+// instances (same ThemeContext) since Metro deduplicates by file path.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { useTheme } = require('@reown/appkit-ui-react-native/lib/module/hooks/useTheme')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { BorderRadius } = require('@reown/appkit-ui-react-native/lib/module/utils/ThemeUtil')
 
 export type ModalProps = Pick<RNModalProps, 'visible' | 'onDismiss' | 'testID' | 'onRequestClose'> & {
   children: React.ReactNode
