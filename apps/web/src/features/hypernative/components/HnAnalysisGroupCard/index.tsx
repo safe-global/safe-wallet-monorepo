@@ -3,14 +3,14 @@ import { Stack, Typography } from '@mui/material'
 import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
 import HypernativeLogo from '../HypernativeLogo'
 
-type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer' | 'requestId'>
+type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'>
 
 /**
  * Hypernative-branded variant of AnalysisGroupCard.
  * Renders the "by Hypernative" footer inside the collapse content.
- * Omits requestId to hide the "Report false result" link (Blockaid-only).
+ * Strips requestId to hide the "Report false result" link (Blockaid-only).
  */
-export const HnAnalysisGroupCard = (props: HnAnalysisGroupCardProps): ReactElement | null => {
+export const HnAnalysisGroupCard = ({ requestId: _, ...props }: HnAnalysisGroupCardProps): ReactElement | null => {
   const footer = (
     <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
       <Typography variant="caption" color="text.secondary">

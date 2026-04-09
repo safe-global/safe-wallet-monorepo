@@ -7,7 +7,7 @@ jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({
   AnalysisGroupCard: jest.fn(() => <div data-testid="analysis-group-card">AnalysisGroupCard</div>),
 }))
 
-jest.mock('../../HypernativeLogo', () => ({
+jest.mock('../HypernativeLogo', () => ({
   __esModule: true,
   default: () => <div data-testid="hn-logo">HypernativeLogo</div>,
 }))
@@ -19,8 +19,8 @@ describe('HnAnalysisGroupCard', () => {
     jest.clearAllMocks()
   })
 
-  it('should not pass requestId to AnalysisGroupCard', () => {
-    render(<HnAnalysisGroupCard data={{}} />)
+  it('should strip requestId before passing props to AnalysisGroupCard', () => {
+    render(<HnAnalysisGroupCard data={{}} requestId="test-request-id" />)
 
     expect(mockAnalysisGroupCard).toHaveBeenCalledTimes(1)
     const receivedProps = mockAnalysisGroupCard.mock.calls[0][0] as AnalysisGroupCardProps
