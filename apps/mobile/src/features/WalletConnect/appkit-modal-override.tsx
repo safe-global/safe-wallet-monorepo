@@ -20,11 +20,8 @@ import {
 } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
 
-// Re-use the original theme hook from the UI library
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { useTheme } = require('@reown/appkit-ui-react-native/lib/module/hooks/useTheme')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { BorderRadius } = require('@reown/appkit-ui-react-native/lib/module/utils/ThemeUtil')
+// Public re-exports — same module instances as the rest of AppKit
+import { useTheme, BorderRadius } from '@reown/appkit-ui-react-native'
 
 export type ModalProps = Pick<RNModalProps, 'visible' | 'onDismiss' | 'testID' | 'onRequestClose'> & {
   children: React.ReactNode
