@@ -28,6 +28,7 @@ export interface ResolvedSidebarGroup {
 export interface SpaceItem {
   id: number
   name: string
+  safeCount?: number
 }
 
 export interface SpaceSelectorProps {

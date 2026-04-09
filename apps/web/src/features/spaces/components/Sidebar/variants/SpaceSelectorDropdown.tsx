@@ -16,7 +16,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
-import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
+import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH } from '../constants'
 import css from '../styles.module.css'
 import type { SpaceItem } from '../types'
 import { truncateSpaceName } from '../utils'
@@ -146,29 +146,46 @@ export const SpaceSelectorDropdown = ({
 
         {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
 
-        {spaces.map((space) => (
-          <DropdownMenuItem
-            key={space.id}
-            onClick={() => void handleSelectSpace(space.id)}
-            disabled={loadingSpaceId !== null}
-            className={cn('gap-3 min-h-9 px-2 py-2', selectedSpace?.id === space.id && css.navItemActive)}
-          >
-            <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
-              <AvatarFallback
-                className={css.spaceSelectorItemAvatarFallback}
-                style={{ backgroundColor: getDeterministicColor(space.name) }}
-              >
-                {space.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <span className="flex-1">{space.name}</span>
-            {loadingSpaceId === space.id ? (
-              <Loader2 className="ml-auto size-4 animate-spin" />
-            ) : selectedSpace?.id === space.id ? (
-              <Check className="ml-auto size-4" />
-            ) : null}
-          </DropdownMenuItem>
-        ))}
+        {spaces.map((space) => {
+          const isAtLimit = triggerVariant === 'addToWorkspace' && (space.safeCount ?? 0) >= SAFE_ACCOUNTS_LIMIT
+
+          const isDisabled = loadingSpaceId !== null || isAtLimit
+
+          const menuItem = (
+            <DropdownMenuItem
+              key={space.id}
+              onClick={() => void handleSelectSpace(space.id)}
+              disabled={isDisabled}
+              className={cn('gap-3 min-h-9 px-2 py-2', selectedSpace?.id === space.id && css.navItemActive)}
+            >
+              <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
+                <AvatarFallback
+                  className={css.spaceSelectorItemAvatarFallback}
+                  style={{ backgroundColor: getDeterministicColor(space.name) }}
+                >
+                  {space.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="flex-1">{space.name}</span>
+              {loadingSpaceId === space.id ? (
+                <Loader2 className="ml-auto size-4 animate-spin" />
+              ) : selectedSpace?.id === space.id ? (
+                <Check className="ml-auto size-4" />
+              ) : null}
+            </DropdownMenuItem>
+          )
+
+          if (!isAtLimit) return menuItem
+
+          return (
+            <Tooltip key={space.id}>
+              <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
+              <TooltipContent side="right">
+                {`You've reached the limit of Safes for this workspace (max. ${SAFE_ACCOUNTS_LIMIT} Safes per workspace)`}
+              </TooltipContent>
+            </Tooltip>
+          )
+        })}
 
         <DropdownMenuSeparator className="my-1" />
 

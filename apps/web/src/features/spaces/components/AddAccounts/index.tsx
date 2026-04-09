@@ -40,6 +40,7 @@ import Track from '@/components/common/Track'
 import { showNotification } from '@/store/notificationsSlice'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -58,9 +59,6 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
       }),
   )
 }
-
-const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
-const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
 const AddAccounts = () => {
   const isAdmin = useIsAdmin()
