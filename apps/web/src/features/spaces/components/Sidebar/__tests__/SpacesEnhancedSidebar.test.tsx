@@ -11,6 +11,7 @@ const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
 const mockGetNonDeclinedSpaces = jest.fn()
 const mockUseSidebar = jest.fn()
+const mockUseIsQualifiedSafe = jest.fn()
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
@@ -27,6 +28,11 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: () => mockUseIsQualifiedSafe(),
 }))
 
 jest.mock('next/router', () => ({
@@ -71,6 +77,7 @@ describe('SpacesEnhancedSidebar', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [{ id: 1, name: 'Core Space' }] })
     mockGetNonDeclinedSpaces.mockReturnValue([{ id: 1, name: 'Core Space' }])
+    mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
   it('renders skeleton while hydration is pending', () => {
@@ -100,6 +107,17 @@ describe('SpacesEnhancedSidebar', () => {
 
     expect(screen.getByTestId('enhanced-sidebar')).toHaveTextContent('safe:Core Space')
   })
+
+  it('renders back to space when qualified safe has no spaceId in query', () => {
+    mockUseSidebarHydrated.mockReturnValue(true)
+    mockUseIsSpaceRoute.mockReturnValue(false)
+    mockUseRouter.mockReturnValue({ query: {} })
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    render(<SpacesEnhancedSidebar />)
+
+    expect(screen.getByTestId('enhanced-sidebar')).toHaveTextContent('safe:Core Space')
+  })
 })
 
 describe('SidebarStateReporter', () => {
@@ -113,6 +131,7 @@ describe('SidebarStateReporter', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({})
     mockUseSpacesGetV1Query.mockReturnValue({})
     mockGetNonDeclinedSpaces.mockReturnValue([])
+    mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
   it('calls onOpenChange with true when sidebar is open', () => {

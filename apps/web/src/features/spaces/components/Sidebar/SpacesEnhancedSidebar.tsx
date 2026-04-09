@@ -13,6 +13,7 @@ import { getQuerySpaceId } from './utils'
 import { useSidebarHydrated } from './hooks/useSidebarHydrated'
 import { SidebarSkeleton } from './SidebarSkeleton'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 interface SpacesEnhancedSidebarProps {
   /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
@@ -58,6 +59,7 @@ const HydratedSidebar = (): ReactElement => {
   const resolvedSpaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
   const [addedToSpace, setAddedToSpace] = useState<SpaceItem | undefined>()
+  const isQualifiedSafe = useIsQualifiedSafe()
 
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
@@ -71,7 +73,11 @@ const HydratedSidebar = (): ReactElement => {
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces ?? [])
 
-  const effectiveSelectedSpace = selectedSpace ?? addedToSpace
+  const qualifiedSpaceId = isQualifiedSafe ? resolvedSpaceId : null
+  const qualifiedSpace =
+    qualifiedSpaceId != null ? spaces?.find((space) => space.id === Number(qualifiedSpaceId)) : undefined
+
+  const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
   const spaceName = effectiveSelectedSpace?.name ?? ''
   const spaceInitial = spaceName.charAt(0).toUpperCase()
 
