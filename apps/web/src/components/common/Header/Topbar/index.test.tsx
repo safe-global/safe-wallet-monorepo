@@ -69,7 +69,12 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  OVERVIEW_EVENTS: { NOTIFICATION_CENTER: 'notification_center' },
+  OVERVIEW_EVENTS: {
+    NOTIFICATION_CENTER: 'notification_center',
+    OPEN_ONBOARD: { action: 'Open wallet modal', category: 'overview' },
+  },
+  OVERVIEW_LABELS: { top_bar: 'top_bar' },
+  BATCH_EVENTS: { BATCH_SIDEBAR_OPEN: { action: 'Batch sidebar open', category: 'batching' } },
 }))
 
 jest.mock('@/services/analytics/events/spaces', () => ({
