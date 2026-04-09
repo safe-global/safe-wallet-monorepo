@@ -122,6 +122,36 @@ describe('SpaceNestedSafesButton', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
+  it('displays raw count while loading', () => {
+    mockUseNestedSafesVisibility.mockReturnValue({
+      visibleSafes: [],
+      allSafesWithStatus: [],
+      hasCompletedCuration: false,
+      isLoading: true,
+      startFiltering: mockStartFiltering,
+      hasStarted: true,
+    })
+
+    render(<SpaceNestedSafesButton />)
+    expect(screen.getByText('2')).toBeInTheDocument()
+  })
+
+  it('renders without badge when ownedSafes data is not yet available', () => {
+    mockUseOwnersQuery.mockReturnValue({ currentData: undefined })
+    mockUseNestedSafesVisibility.mockReturnValue({
+      visibleSafes: [],
+      allSafesWithStatus: [],
+      hasCompletedCuration: false,
+      isLoading: false,
+      startFiltering: mockStartFiltering,
+      hasStarted: true,
+    })
+
+    render(<SpaceNestedSafesButton />)
+    expect(screen.getByTestId('space-nested-safes-button')).toBeInTheDocument()
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
+  })
+
   it('does not display badge when count is zero', () => {
     mockUseOwnersQuery.mockReturnValue({ currentData: { '1': [] } })
     mockUseNestedSafesVisibility.mockReturnValue({

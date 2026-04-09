@@ -181,6 +181,13 @@ describe('SpaceSafeBar', () => {
     expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
   })
 
+  it('renders SpaceNestedSafesButton when useIsQualifiedSafe returns true', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('space-nested-safes-button')).toBeInTheDocument()
+  })
+
   it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({

@@ -45,7 +45,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
 
   return (
     <>
-      <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className="flex self-stretch items-stretch sm:order-1 rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
         <Tooltip>
           <TooltipTrigger
             render={

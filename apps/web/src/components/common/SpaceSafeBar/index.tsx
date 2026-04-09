@@ -21,6 +21,7 @@ function SpaceSafeBar() {
     >
       {space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
       <SpaceChainSelector />
+      <SpaceNestedSafesButton />
       <SafeSelectorDropdown
         items={items}
         selectedItemId={selectedItemId}
@@ -28,7 +29,6 @@ function SpaceSafeBar() {
         isError={isError}
         onRetry={refetch}
       />
-      <SpaceNestedSafesButton />
     </div>
   )
 }
