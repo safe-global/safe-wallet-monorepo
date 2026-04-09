@@ -14,6 +14,7 @@ import css from '../styles.module.css'
 import type { SafeSidebarVariantProps } from '../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from './NavItem'
+import { NewTransactionButton } from '../NewTransactionButton'
 import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 import { BackToSpaceButton } from './../BackToSpaceButton'
 import Link from 'next/link'
@@ -55,6 +56,13 @@ export const SafeSidebarVariant = ({
         <SidebarMenu>
           <SidebarMenuItem>{workspaceHeaderEl}</SidebarMenuItem>
         </SidebarMenu>
+      </SidebarGroup>
+
+      {/* New Transaction */}
+      <SidebarGroup className={`${css.sidebarGroup} py-0`}>
+        <SidebarGroupContent>
+          <NewTransactionButton />
+        </SidebarGroupContent>
       </SidebarGroup>
 
       {/* Main Navigation */}
