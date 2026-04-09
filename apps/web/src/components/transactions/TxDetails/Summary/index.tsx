@@ -21,6 +21,7 @@ interface Props {
   txDetails?: TransactionDetails
   showMultisend?: boolean
   showDecodedData?: boolean
+  hideAuditLogFields?: boolean
 }
 
 const Summary = ({
@@ -30,6 +31,7 @@ const Summary = ({
   txDetails,
   showMultisend = true,
   showDecodedData = true,
+  hideAuditLogFields = false,
 }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
@@ -64,13 +66,13 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
-      {txHash && (
+      {!hideAuditLogFields && txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      {submittedAt && (
+      {!hideAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
           <Typography variant="body2" component="div">
             {dateString(submittedAt)}
@@ -78,7 +80,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {executedAt && (
+      {!hideAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
           <Typography variant="body2" component="div">
             {dateString(executedAt)}

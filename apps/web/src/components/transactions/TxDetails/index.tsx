@@ -11,6 +11,7 @@ import useProposers from '@/hooks/useProposers'
 import {
   isAwaitingExecution,
   isOrderTxInfo,
+  isModuleDetailedExecutionInfo,
   isModuleExecutionInfo,
   isMultiSendTxInfo,
   isMultisigDetailedExecutionInfo,
@@ -107,6 +108,12 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
   const { safe } = useSafeInfo()
 
+  const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+  const showAuditLog =
+    (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && (!isUnsigned || !!proposer)) ||
+    isModuleExecution ||
+    !!txDetails.executedAt
+
   return (
     <>
       {/* /Details */}
@@ -144,7 +151,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         </div>
 
         {/* Module information*/}
-        {moduleAddress && (
+        {moduleAddress && !showAuditLog && (
           <div className={css.txModule}>
             <InfoDetails title="Executed via module:">
               <NamedAddressInfo
@@ -168,6 +175,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               txInfo={txDetails.txInfo}
               showMultisend={false}
               showDecodedData={!isDecodedDataVisible}
+              hideAuditLogFields={showAuditLog}
             />
           </ObservabilityErrorBoundary>
         </div>

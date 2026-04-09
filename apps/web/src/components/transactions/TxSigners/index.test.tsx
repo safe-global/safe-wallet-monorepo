@@ -5,6 +5,7 @@ import {
   transactionDetailsBuilder,
   multisigExecutionDetailsBuilder,
   multisigConfirmationBuilder,
+  moduleExecutionDetailsBuilder,
 } from '@/tests/builders/transactionDetails'
 import { safeTxSummaryBuilder, executionInfoBuilder } from '@/tests/builders/safeTx'
 import { addressExBuilder } from '@/tests/builders/safe'
@@ -23,6 +24,11 @@ jest.mock('@/hooks/useIsPending', () => jest.fn(() => false))
 jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirmations'))
 jest.mock('@/hooks/useAddressBook', () => jest.fn(() => ({})))
 
+const mockGetTransaction = jest.fn()
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
+}))
+
 // Avoid rendering nested share link wrapper logic
 jest.mock('@/components/transactions/TxShareLink/TxShareLink', () => ({
   __esModule: true,
@@ -40,13 +46,14 @@ const buildConfirmations = (count: number, required: number) => {
 describe('TxSigners (Audit Log)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockGetTransaction.mockReset()
     mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
     mockWallet({ address: ownerAddress })
     mockCurrentChain()
   })
 
-  it('returns null for non-multisig execution info', () => {
-    const txDetails = transactionDetailsBuilder().with({ detailedExecutionInfo: undefined }).build()
+  it('returns null for transactions without execution info or executedAt', () => {
+    const txDetails = transactionDetailsBuilder().with({ detailedExecutionInfo: undefined, executedAt: null }).build()
     const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
     const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
@@ -95,7 +102,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    expect(screen.getByText('Confirmations 2/3')).toBeInTheDocument()
+    expect(screen.getByText('2/3')).toBeInTheDocument()
   })
 
   it('shows "Created" label for owner-initiated transactions', () => {
@@ -265,8 +272,6 @@ describe('TxSigners (Audit Log)', () => {
           value: '0',
           isCancellation: true,
           methodName: null,
-          actionCount: null,
-          humanDescription: null,
         },
         detailedExecutionInfo: multisigExecutionDetailsBuilder()
           .with({ confirmations, confirmationsRequired: 2 })
@@ -288,7 +293,6 @@ describe('TxSigners (Audit Log)', () => {
     Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
 
     const { confirmations } = buildConfirmations(1, 2)
-    const signerAddress = confirmations[0].signer.value
     const txDetails = transactionDetailsBuilder()
       .with({
         detailedExecutionInfo: multisigExecutionDetailsBuilder()
@@ -330,5 +334,104 @@ describe('TxSigners (Audit Log)', () => {
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
     expect(screen.getByText('Alice')).toBeInTheDocument()
+  })
+
+  describe('Module-executed transactions', () => {
+    const buildModuleTxDetails = (moduleOverrides = {}, txOverrides = {}) =>
+      transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: moduleExecutionDetailsBuilder()
+            .with({
+              address: {
+                value: checksumAddress(faker.finance.ethereumAddress()),
+                name: 'AllowanceModule',
+                logoUri: null,
+              },
+              ...moduleOverrides,
+            })
+            .build(),
+          txStatus: TransactionStatus.SUCCESS,
+          executedAt: Date.now(),
+          txHash: faker.string.hexadecimal({ length: 64 }),
+          ...txOverrides,
+        })
+        .build()
+
+    it('renders Created and Executed rows with initiator from on-chain lookup', async () => {
+      const initiatorAddr = checksumAddress(faker.finance.ethereumAddress())
+      mockGetTransaction.mockResolvedValue({ from: initiatorAddr })
+
+      const txDetails = buildModuleTxDetails()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(screen.getByText('Audit log')).toBeInTheDocument()
+      expect(screen.getByText('Created')).toBeInTheDocument()
+      expect(screen.getByText('Executed')).toBeInTheDocument()
+      expect(screen.getByText('Allowance Module')).toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(mockGetTransaction).toHaveBeenCalledWith(txDetails.txHash)
+      })
+    })
+
+    it('shows dash for Created row when RPC lookup has not resolved', () => {
+      mockGetTransaction.mockReturnValue(new Promise(() => {})) // never resolves
+
+      const txDetails = buildModuleTxDetails()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(screen.getByText('Created')).toBeInTheDocument()
+      expect(screen.getByText('—')).toBeInTheDocument()
+    })
+
+    it('does not show confirmation chip for module transactions', () => {
+      mockGetTransaction.mockResolvedValue({ from: checksumAddress(faker.finance.ethereumAddress()) })
+
+      const txDetails = buildModuleTxDetails()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(screen.queryByText(/\d\/\d/)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Incoming/simple executed transactions', () => {
+    it('renders audit log with Executed row for incoming transactions', () => {
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: undefined,
+          txStatus: TransactionStatus.SUCCESS,
+          executedAt: Date.now(),
+          txHash: faker.string.hexadecimal({ length: 64 }),
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(screen.getByText('Audit log')).toBeInTheDocument()
+      expect(screen.getByText('Executed')).toBeInTheDocument()
+      expect(screen.getByTestId('transaction-actions-list')).toBeInTheDocument()
+    })
+
+    it('returns null for transactions without executedAt', () => {
+      const txDetails = transactionDetailsBuilder()
+        .with({
+          detailedExecutionInfo: undefined,
+          executedAt: null,
+          txHash: null,
+        })
+        .build()
+      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+
+      expect(container.firstChild).toBeNull()
+    })
   })
 })

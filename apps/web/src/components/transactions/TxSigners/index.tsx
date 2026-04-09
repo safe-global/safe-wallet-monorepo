@@ -4,14 +4,20 @@ import { Alert, Box, Divider, IconButton, Stack, SvgIcon, Tooltip, Typography } 
 import AddIcon from '@mui/icons-material/Add'
 import DoneIcon from '@mui/icons-material/Done'
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined'
+import TagOutlinedIcon from '@mui/icons-material/TagOutlined'
+import CopyIcon from '@mui/icons-material/ContentCopy'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
-import { isCancellationTxInfo, isExecutable, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import {
+  isCancellationTxInfo,
+  isExecutable,
+  isModuleDetailedExecutionInfo,
+  isMultisigDetailedExecutionInfo,
+} from '@/utils/transaction-guards'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import CopyIcon from '@/public/images/common/copy.svg'
-import LinkIcon from '@/public/images/common/link.svg'
+import ExplorerFallbackIcon from '@/public/images/common/link.svg'
 
 import css from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -22,6 +28,8 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { CopyDeeplinkLabels } from '@/services/analytics'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
 import ExplorerButton from '@/components/common/ExplorerButton'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 type ActionType = 'created' | 'signed' | 'executed'
 
@@ -61,21 +69,27 @@ type AuditRowProps = {
 
 const COPIED_TOOLTIP_MS = 750
 
-const AuditRow = ({ label, actionType, address, name, timestamp, isLast }: AuditRowProps): ReactElement => {
-  const displayText = address ? name || shortenAddress(address) : undefined
+const useCopyToClipboard = (text?: string | null): [boolean, () => void] => {
   const [copied, setCopied] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => () => clearTimeout(timerRef.current), [])
 
   const handleCopy = useCallback(() => {
-    if (!address) return
-    navigator.clipboard.writeText(address).then(() => {
+    if (!text) return
+    navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => setCopied(false), COPIED_TOOLTIP_MS)
     })
-  }, [address])
+  }, [text])
+
+  return [copied, handleCopy]
+}
+
+const AuditRow = ({ label, actionType, address, name, timestamp, isLast }: AuditRowProps): ReactElement => {
+  const displayText = address ? name || shortenAddress(address) : undefined
+  const [copied, handleCopy] = useCopyToClipboard(address)
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -109,7 +123,7 @@ const AuditRow = ({ label, actionType, address, name, timestamp, isLast }: Audit
             <Tooltip title={copied ? 'Copied' : 'Click to copy address'} placement="top">
               <Box className={css.actorCopy} onClick={handleCopy} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
                 <Typography variant="caption" color="text.secondary" component="span" className={css.actorText}>
-                  {displayText}
+                  By {displayText}
                 </Typography>
               </Box>
             </Tooltip>
@@ -136,6 +150,66 @@ type TxSignersProps = {
   proposer?: string
 }
 
+const CopyHashButton = ({ txHash }: { txHash?: string | null }) => {
+  const [copied, handleCopy] = useCopyToClipboard(txHash)
+
+  return (
+    <Tooltip
+      title={copied ? 'Copied' : txHash ? 'Copy the transaction hash' : 'Available after execution'}
+      placement="top"
+    >
+      <span>
+        <IconButton size="small" sx={{ color: 'inherit' }} disabled={!txHash} onClick={handleCopy}>
+          <TagOutlinedIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+  )
+}
+
+const AuditLogHeader = ({
+  children,
+  txId,
+  txHash,
+  explorerLink,
+}: {
+  children?: ReactElement
+  txId: string
+  txHash?: string | null
+  explorerLink?: { title: string; href: string }
+}) => (
+  <>
+    <Stack direction="row" alignItems="center" gap={1} mb={1}>
+      <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Audit log
+      </Typography>
+      {children}
+      <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
+          <Tooltip title="Copy transaction link" placement="top">
+            <IconButton size="small" sx={{ color: 'inherit' }}>
+              <CopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </TxShareLinkWrapper>
+        <CopyHashButton txHash={txHash} />
+        {explorerLink ? (
+          <ExplorerButton {...explorerLink} isCompact />
+        ) : (
+          <Tooltip title="Available after execution" placement="top">
+            <span>
+              <IconButton size="small" disabled>
+                <SvgIcon component={ExplorerFallbackIcon} inheritViewBox fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
+      </Box>
+    </Stack>
+    <Divider sx={{ mb: 1.5 }} />
+  </>
+)
+
 const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSignersProps): ReactElement | null => {
   const { detailedExecutionInfo, txInfo, txId } = txDetails
   const isPending = useIsPending(txId)
@@ -145,14 +219,74 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
 
-  if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    return null
-  }
+  const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
+  const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
 
-  const { confirmations, confirmationsRequired, executor, submittedAt } = detailedExecutionInfo
+  // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
+  const readOnlyProvider = useWeb3ReadOnly()
+  const [onChainFrom] = useAsync(async () => {
+    if (isMultisig || !txDetails.txHash || !readOnlyProvider) return undefined
+    const tx = await readOnlyProvider.getTransaction(txDetails.txHash)
+    return tx?.from
+  }, [isMultisig, txDetails.txHash, readOnlyProvider])
+
+  const explorerLink = chain && txDetails.txHash ? getBlockExplorerLink(chain, txDetails.txHash) : undefined
 
   const resolveName = (address: string | undefined, apiFallback?: string | null): string | undefined =>
     address ? addressBook[address] || apiFallback || undefined : undefined
+
+  if (!isMultisig && !isModule) {
+    if (!txDetails.executedAt) return null
+
+    return (
+      <Box mb={2} data-testid="transaction-actions-list">
+        <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />
+        <AuditRow
+          label="Executed"
+          actionType="executed"
+          address={onChainFrom}
+          name={resolveName(onChainFrom)}
+          timestamp={txDetails.executedAt}
+          isLast
+        />
+      </Box>
+    )
+  }
+
+  // Module-executed transaction: Created (initiator EOA) + Executed (module)
+  if (isModule && detailedExecutionInfo) {
+    const moduleAddress = detailedExecutionInfo.address.value
+    // "AllowanceModule" → "Allowance Module"
+    const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
+
+    return (
+      <Box mb={2} data-testid="transaction-actions-list">
+        <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />
+
+        <AuditRow
+          label="Created"
+          actionType="created"
+          address={onChainFrom}
+          name={resolveName(onChainFrom)}
+          timestamp={txDetails.executedAt}
+        />
+
+        <AuditRow
+          label="Executed"
+          actionType="executed"
+          address={moduleAddress}
+          name={resolveName(moduleAddress, moduleName)}
+          timestamp={txDetails.executedAt}
+          isLast
+        />
+      </Box>
+    )
+  }
+
+  // Multisig transaction: full audit log with confirmations
+  // At this point isMultisig is true and both !isMultisig and isModule branches have returned
+  const multisigInfo = detailedExecutionInfo!
+  const { confirmations, confirmationsRequired, executor, submittedAt } = multisigInfo
 
   const canExecute = wallet?.address ? isExecutable(txSummary, wallet.address, safe) : false
   const confirmationsNeeded = confirmationsRequired - confirmations.length
@@ -163,64 +297,29 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
   const creationLabel = isTxFromProposer ? 'Proposed' : 'Created'
   const signingLabel = (idx: number) => `Signed (${idx + 1}/${confirmationsRequired})`
 
-  // Use txStatus as fallback for terminal states (FAILED, CANCELLED, AWAITING_EXECUTION, etc.)
   const executionStatus = executor
     ? 'Executed'
     : isPending
       ? txStatus
       : shortenAuditStatus(isTxFromProposer && !isConfirmed ? 'Awaiting review' : txStatus)
 
-  // Only show execution row once threshold reached, tx is terminal, or executor is known
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
-
-  const explorerLink = chain && txDetails.txHash ? getBlockExplorerLink(chain, txDetails.txHash) : undefined
 
   return (
     <Box mb={2} data-testid="transaction-actions-list">
-      {/* Header */}
-      <Stack direction="row" alignItems="center" gap={1} mb={1}>
-        <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Audit log
-        </Typography>
+      <AuditLogHeader txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink}>
         <TxConfirmations submittedConfirmations={confirmations.length} requiredConfirmations={confirmationsRequired} />
-        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <TxShareLinkWrapper id={txDetails.txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
-            <Tooltip title="Copy transaction link" placement="top">
-              <IconButton size="small" sx={{ color: 'inherit' }}>
-                <SvgIcon component={CopyIcon} inheritViewBox fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </TxShareLinkWrapper>
-          {explorerLink ? (
-            <ExplorerButton {...explorerLink} isCompact />
-          ) : (
-            <Tooltip title="Available after execution" placement="top">
-              <span>
-                <IconButton size="small" disabled>
-                  <SvgIcon component={LinkIcon} inheritViewBox fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          )}
-        </Box>
-      </Stack>
+      </AuditLogHeader>
 
-      <Divider sx={{ mb: 1.5 }} />
-
-      {/* Creation event — label reflects whether owner or delegate submitted */}
       <AuditRow
         label={creationLabel}
         actionType="created"
         address={proposer}
-        name={resolveName(
-          proposer,
-          detailedExecutionInfo.proposer?.name || detailedExecutionInfo.proposedByDelegate?.name,
-        )}
+        name={resolveName(proposer, multisigInfo.proposer?.name || multisigInfo.proposedByDelegate?.name)}
         timestamp={submittedAt}
         isLast={confirmations.length === 0 && !showExecutionRow}
       />
 
-      {/* Individual confirmations */}
       {confirmations.map(({ signer, submittedAt: signedAt }, idx) => (
         <AuditRow
           key={signer.value}
@@ -233,7 +332,6 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         />
       ))}
 
-      {/* Execution — only shown once threshold reached or tx is in a terminal/executable state */}
       {showExecutionRow && (
         <AuditRow
           label={executionStatus}
@@ -245,7 +343,6 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         />
       )}
 
-      {/* Footer hint when below threshold */}
       {!isConfirmed && !executor && (
         <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
           {isCancellation
@@ -254,7 +351,6 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         </Alert>
       )}
 
-      {/* Proposer review hint — only shown while still below threshold */}
       {isTxFromProposer && !executor && !isConfirmed && (
         <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
           {isCancellation
