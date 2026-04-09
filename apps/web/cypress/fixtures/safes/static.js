@@ -149,7 +149,7 @@ export default {
   // Allowance Module address verification safes (same Safe on two networks)
   // New safes were added to be sure they don't have the AllowanceModule enabled by default
   /** Spending limits AllowanceModule address verification (Sepolia) - Used in: spending_limits.cy.js */
-  SEP_STATIC_SAFE_47: 'sep:0xeB50238Aa80834dFE960A7baC61ee3541FB4c68E',
+  SEP_STATIC_SAFE_47: 'sep:0xED6ee29286c4791B55129eA2570d2e3097B067De',
   /** Spending limits AllowanceModule address verification (Polygon) - Used in: spending_limits.cy.js */
-  MATIC_STATIC_SAFE_34: 'matic:0xeB50238Aa80834dFE960A7baC61ee3541FB4c68E',
+  MATIC_STATIC_SAFE_34: 'matic:0xED6ee29286c4791B55129eA2570d2e3097B067De',
 }
