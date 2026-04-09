@@ -2,6 +2,8 @@ import type { MouseEvent, ReactNode } from 'react'
 import { Search, Bell, Wallet, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
+import Track from '@/components/common/Track'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
 
 export interface HeaderNavigationProps {
   /**
@@ -95,37 +97,41 @@ export function HeaderNavigation({
       {walletConnectSlot}
 
       {showBatch && (
-        <div className="relative" data-track="batching: Batch sidebar open">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            onClick={onBatchClick}
-            className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-            aria-label="Batch transactions"
-          >
-            <Layers className="size-5 text-muted-foreground" />
-          </Button>
+        <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
+          <div className="relative" data-track="batching: Batch sidebar open">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={onBatchClick}
+              className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+              aria-label="Batch transactions"
+            >
+              <Layers className="size-5 text-muted-foreground" />
+            </Button>
 
-          {batchCount > 0 && (
-            <span
-              className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
-              aria-label={`${batchCount} batched transactions`}
-            />
-          )}
-        </div>
+            {batchCount > 0 && (
+              <span
+                className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-card bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+                aria-label={`${batchCount} batched transactions`}
+              />
+            )}
+          </div>
+        </Track>
       )}
 
-      <Button
-        variant="ghost"
-        size="lg"
-        onClick={onWalletClick}
-        className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-        aria-label={`Wallet ${truncatedAddress}`}
-        data-testid={walletAddress ? 'open-account-center' : 'connect-wallet-btn'}
-      >
-        <Wallet className="size-5 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
-      </Button>
+      <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
+        <Button
+          variant="ghost"
+          size="lg"
+          onClick={onWalletClick}
+          className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+          aria-label={`Wallet ${truncatedAddress}`}
+          data-testid={walletAddress ? 'open-account-center' : 'connect-wallet-btn'}
+        >
+          <Wallet className="size-5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
+        </Button>
+      </Track>
     </div>
   )
 }
