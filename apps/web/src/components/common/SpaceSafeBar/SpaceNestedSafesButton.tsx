@@ -84,6 +84,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
         visibleSafes={visibleSafes}
         hasCompletedCuration={hasCompletedCuration}
         isLoading={isLoading}
+        centered
       />
     </>
   )
