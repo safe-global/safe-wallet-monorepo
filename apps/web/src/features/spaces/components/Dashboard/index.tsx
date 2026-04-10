@@ -1,8 +1,4 @@
 import { useEffect } from 'react'
-import MembersCard from './MembersCard'
-import SpacesCTACard from './SpacesCTACard'
-import AddressBookCard from './ImportAddressBookCard'
-import { Grid2, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { flattenSafeItems } from '@/hooks/safes'
 import {
@@ -14,7 +10,6 @@ import {
   useSpacePendingTransactions,
   SpacesFeature,
 } from '@/features/spaces'
-import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -32,6 +27,14 @@ const AddActionsAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
       <AddAccounts />
+    </Track>
+  )
+}
+
+const EmptyStateAddAction = () => {
+  return (
+    <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+      <AddAccounts buttonVariant="default" buttonLabel="Add account" />
     </Track>
   )
 }
@@ -106,71 +109,46 @@ const SpaceDashboard = () => {
     <>
       {isInvited && <PreviewInvite />}
 
-      {safeItems.length > 0 ? (
-        <>
-          <Grid container>
-            <Grid size={12}>
-              <AggregatedBalance safeItems={safeItems} />
-            </Grid>
+      <>
+        <Grid container>
+          <Grid size={12}>
+            <AggregatedBalance safeItems={safeItems} accountsLoading={isOverviewLoading} />
           </Grid>
+        </Grid>
 
-          <Grid container spacing={3}>
-            <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
-              {$isReady ? (
-                <AccountsWidget
-                  accounts={accounts}
-                  loading={isOverviewLoading}
-                  remainingCount={remainingCount > 0 ? remainingCount : undefined}
-                  onViewAll={handleViewAll}
-                  onItemClick={handleItemClick}
-                  action={<AddActionsAction />}
-                  error={error}
-                  onRefresh={refetch}
-                />
-              ) : (
-                <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
-                  <div className="animate-pulse rounded-lg bg-muted" />
-                </SafeWidget>
-              )}
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <PendingTxWidget
-                transactions={pendingTxs}
-                loading={isPendingTxLoading}
-                error={pendingTxError ? String(pendingTxError) : undefined}
-                remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
-                onViewAll={handleViewAllPendingTxs}
-                onRefresh={refetchPendingTxs}
-                onItemClick={handlePendingTxItemClick}
+        <Grid container spacing={3}>
+          <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
+            {$isReady ? (
+              <AccountsWidget
+                accounts={accounts}
+                loading={isOverviewLoading}
+                remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                onViewAll={handleViewAll}
+                onItemClick={handleItemClick}
+                action={accounts.length > 0 ? <AddActionsAction /> : undefined}
+                emptyStateAction={<EmptyStateAddAction />}
+                error={error}
+                onRefresh={refetch}
               />
-            </Grid>
+            ) : (
+              <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
+                <div className="animate-pulse rounded-lg bg-muted" />
+              </SafeWidget>
+            )}
           </Grid>
-        </>
-      ) : (
-        <>
-          <Typography variant="h1" fontWeight={700} mb={4}>
-            Getting started
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid size={12}>
-              <AddAccountsCard />
-            </Grid>
-
-            <Grid2 size={{ xs: 12, md: 4 }}>
-              <AddressBookCard />
-            </Grid2>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <MembersCard />
-            </Grid>
-
-            <Grid2 size={{ xs: 12, md: 4 }}>
-              <SpacesCTACard />
-            </Grid2>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <PendingTxWidget
+              transactions={pendingTxs}
+              loading={isPendingTxLoading}
+              error={pendingTxError ? String(pendingTxError) : undefined}
+              remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
+              onViewAll={handleViewAllPendingTxs}
+              onRefresh={refetchPendingTxs}
+              onItemClick={handlePendingTxItemClick}
+            />
           </Grid>
-        </>
-      )}
+        </Grid>
+      </>
     </>
   )
 }

@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Users } from 'lucide-react'
+import { WalletCards } from 'lucide-react'
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'
@@ -12,6 +12,7 @@ interface AccountsWidgetProps {
   onViewAll?: () => void
   onItemClick?: (safeAddress: string) => void
   action?: ReactNode
+  emptyStateAction?: ReactNode
   error?: string
   onRefresh?: () => void
 }
@@ -25,6 +26,7 @@ const AccountsWidget = ({
   onViewAll,
   onItemClick,
   action,
+  emptyStateAction,
   error,
   onRefresh,
 }: AccountsWidgetProps): ReactElement => {
@@ -42,7 +44,13 @@ const AccountsWidget = ({
   if (isEmpty) {
     return (
       <SafeWidget title="Accounts" action={action} testId="space-dashboard-accounts-widget">
-        <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No accounts yet" />
+        <SafeWidget.EmptyState
+          className="max-w-[229px] mx-auto"
+          icon={<WalletCards className="size-6 text-green-500" />}
+          text="No accounts yet"
+          subtitle="Add your Safe accounts to view balances and manage transactions."
+          action={emptyStateAction}
+        />
       </SafeWidget>
     )
   }

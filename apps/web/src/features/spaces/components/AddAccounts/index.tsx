@@ -83,7 +83,12 @@ const _groupAndSort = (
   return [...multi, ...single].sort(sortComparator)
 }
 
-const AddAccounts = () => {
+interface AddAccountsProps {
+  buttonVariant?: 'outline' | 'default'
+  buttonLabel?: string
+}
+
+const AddAccounts = ({ buttonVariant = 'outline', buttonLabel = 'Add Accounts' }: AddAccountsProps = {}) => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
   const [error, setError] = useState<string>()
@@ -310,15 +315,19 @@ const AddAccounts = () => {
   return (
     <>
       <Button
-        size="sm"
-        className="font-bold"
-        variant="outline"
+        size="lg"
+        className="font-bold px-4 py-0"
+        variant={buttonVariant}
         disabled={!isAdmin}
         onClick={() => setOpen(true)}
         title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
       >
-        <Plus className="size-4" />
-        Add Accounts
+        <Plus
+          className={cn('size-4 mr-1', {
+            'text-green-500': buttonVariant === 'default',
+          })}
+        />
+        {buttonLabel}
       </Button>
 
       <ModalDialog open={open} fullScreen hideChainIndicator>

@@ -34,4 +34,13 @@ describe('WidgetEmptyState', () => {
     expect(screen.getByText('No items found')).toBeInTheDocument()
     expect(screen.queryByText('Please try again.')).not.toBeInTheDocument()
   })
+
+  it('applies custom icon container className', () => {
+    const { container } = render(
+      <WidgetEmptyState icon={<span data-testid="icon" />} text="Empty" iconContainerClassName="bg-accent" />,
+    )
+
+    const iconContainer = container.querySelector('[data-testid="icon"]')?.parentElement
+    expect(iconContainer?.className).toContain('bg-accent')
+  })
 })
