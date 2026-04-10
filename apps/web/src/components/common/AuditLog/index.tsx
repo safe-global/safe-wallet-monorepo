@@ -16,7 +16,7 @@ export const ACTION_ICONS: Record<ActionType, typeof AddIcon> = {
   confirmed: DoneIcon,
 }
 
-const auditDateFormatter = new Intl.DateTimeFormat('en-US', {
+const auditDateFormatter = new Intl.DateTimeFormat(undefined, {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
@@ -37,11 +37,14 @@ export const useCopyToClipboard = (text?: string | null): [boolean, () => void] 
 
   const handleCopy = useCallback(() => {
     if (!text) return
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      clearTimeout(timerRef.current)
-      timerRef.current = setTimeout(() => setCopied(false), COPIED_TOOLTIP_MS)
-    })
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true)
+        clearTimeout(timerRef.current)
+        timerRef.current = setTimeout(() => setCopied(false), COPIED_TOOLTIP_MS)
+      })
+      .catch(() => {})
   }, [text])
 
   return [copied, handleCopy]
