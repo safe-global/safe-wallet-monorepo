@@ -322,7 +322,7 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         />
       )}
 
-      {!isConfirmed && !executor && (
+      {confirmationsNeeded > 0 && !executor && (
         <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
           {isCancellation
             ? 'Cancellation can be executed once the required approvals are collected.'
@@ -330,7 +330,7 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         </Alert>
       )}
 
-      {isTxFromProposer && !executor && !isConfirmed && (
+      {isTxFromProposer && !executor && (
         <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
           {isCancellation
             ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'

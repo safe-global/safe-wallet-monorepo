@@ -240,6 +240,63 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
   })
 
+  it('shows proposer banner even after threshold is reached but not executed', () => {
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor: null })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={true}
+        proposer={checksumAddress(faker.finance.ethereumAddress())}
+      />,
+    )
+
+    expect(
+      screen.getByText('This transaction was created by a proposer. Please review and either confirm or reject it.'),
+    ).toBeInTheDocument()
+    // Threshold alert should still be hidden since threshold is met
+    expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
+  })
+
+  it('shows alerts for the last signer who can execute', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    // Wallet is the last signer needed — canExecute would be true
+    mockWallet({ address: ownerAddress })
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor: null })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(
+      <TxSigners
+        txDetails={txDetails}
+        txSummary={txSummary}
+        isTxFromProposer={true}
+        proposer={checksumAddress(faker.finance.ethereumAddress())}
+      />,
+    )
+
+    expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
+    expect(
+      screen.getByText('This transaction was created by a proposer. Please review and either confirm or reject it.'),
+    ).toBeInTheDocument()
+  })
+
   it('shows disabled explorer button with tooltip for queued transactions', () => {
     const { confirmations } = buildConfirmations(1, 2)
     const txDetails = transactionDetailsBuilder()
