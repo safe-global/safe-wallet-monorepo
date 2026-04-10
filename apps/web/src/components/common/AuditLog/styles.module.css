@@ -18,15 +18,14 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--color-border-light);
-  background-color: var(--color-background-paper);
+  background-color: var(--color-background-main);
   flex-shrink: 0;
 }
 
 .timelineLine {
   width: 2px;
   flex: 1;
-  background-color: var(--color-border-light);
+  background-color: var(--color-background-main);
   min-height: 8px;
 }
 
@@ -35,7 +34,7 @@
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  padding: 4px 0 var(--space-2);
+  padding: 0 0 var(--space-2);
 }
 
 .actorRow {
@@ -71,5 +70,5 @@
   white-space: nowrap;
   text-align: right;
   flex-shrink: 0;
-  padding-top: 5px;
+  padding-top: 0;
 }

@@ -77,7 +77,7 @@ const AuditLogHeader = ({
         )}
       </Box>
     </Stack>
-    <Divider sx={{ mb: 1.5 }} />
+    <Divider sx={{ mb: 2 }} />
   </>
 )
 

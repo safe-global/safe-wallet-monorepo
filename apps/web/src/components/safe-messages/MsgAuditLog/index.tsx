@@ -42,7 +42,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
           </CopyTooltip>
         </Box>
       </Stack>
-      <Divider sx={{ mb: 1.5 }} />
+      <Divider sx={{ mb: 2 }} />
 
       <AuditRow
         label="Created"
