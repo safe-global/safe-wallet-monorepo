@@ -13,7 +13,7 @@ import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type SpendingLimitsProps = {
   txData?: TransactionData | null

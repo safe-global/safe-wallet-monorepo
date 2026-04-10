@@ -3,8 +3,8 @@ import useTransferFiatValue from './useTransferFiatValue'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import { TokenType, TransactionTokenType } from '@safe-global/store/gateway/types'
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { parseUnits } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type TransferInfo = TransferTransactionInfo['transferInfo']
 

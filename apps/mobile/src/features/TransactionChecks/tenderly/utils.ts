@@ -1,6 +1,5 @@
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
+import { EthSafeTransaction, encodeMultiSendData } from '@safe-global/protocol-kit'
 
 import {
   getReadOnlyCurrentGnosisSafeContract,

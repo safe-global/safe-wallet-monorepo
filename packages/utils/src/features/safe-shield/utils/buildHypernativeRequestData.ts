@@ -1,5 +1,5 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 import type { HypernativeAssessmentRequestDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 
 type BuildHypernativeRequestDataParams = {
