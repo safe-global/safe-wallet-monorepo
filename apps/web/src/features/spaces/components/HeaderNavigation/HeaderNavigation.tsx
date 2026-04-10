@@ -195,7 +195,7 @@ export function HeaderNavigation({
             <Wallet className="size-5 text-muted-foreground" />
           )}
           <span className="text-xs text-muted-foreground font-normal">
-            {isConnected ? walletDisplayName : 'Connect'}
+            {isConnected ? walletDisplayName : 'Connect Wallet'}
           </span>
           {isConnected &&
             (walletOpen ? (

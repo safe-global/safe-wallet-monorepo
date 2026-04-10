@@ -28,10 +28,10 @@ describe('HeaderNavigation', () => {
     expect(screen.queryByText('0x1234...5678')).not.toBeInTheDocument()
   })
 
-  it('shows "Connect" text when wallet is not connected', () => {
+  it('shows "Connect Wallet" text when wallet is not connected', () => {
     render(<HeaderNavigation walletAddress="" isConnected={false} />)
 
-    expect(screen.getByText('Connect')).toBeInTheDocument()
+    expect(screen.getByText('Connect Wallet')).toBeInTheDocument()
     expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
   })
 
