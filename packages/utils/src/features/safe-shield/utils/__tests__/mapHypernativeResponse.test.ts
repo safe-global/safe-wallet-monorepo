@@ -6,6 +6,7 @@ import type {
   HypernativeAssessmentResponseDto,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import type { HypernativeBalanceChange } from '../../types/hypernative.type'
+import type { ThreatAnalysisResponseDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { ZeroAddress } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
@@ -1329,6 +1330,96 @@ describe('mapHypernativeResponse', () => {
       expect(result[StatusGroup.THREAT]?.[0].description).toBe(
         'Custom risk title. The full threat report is available in your Hypernative account.',
       )
+    })
+  })
+
+  describe('threatAnalysis field', () => {
+    it('should use threatAnalysis when present and pass through transformThreatAnalysisResponse', () => {
+      const threatAnalysis: ThreatAnalysisResponseDto = {
+        THREAT: [
+          {
+            severity: 'CRITICAL',
+            type: 'MALICIOUS',
+            title: 'Malicious transaction',
+            description: 'This transaction is malicious',
+          },
+        ],
+        BALANCE_CHANGE: [
+          {
+            asset: { type: 'NATIVE', symbol: 'ETH' },
+            in: [{ value: '1000000000000000000' }],
+            out: [],
+          },
+        ],
+        request_id: 'test-request-id',
+      }
+
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...createNoThreatResponse(),
+        assessmentData: {
+          ...createNoThreatResponse().assessmentData,
+          threatAnalysis,
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]).toHaveLength(1)
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('Malicious transaction')
+      expect(result.BALANCE_CHANGE).toHaveLength(1)
+      expect(result.request_id).toBe('test-request-id')
+    })
+
+    it('should preserve CUSTOM_CHECKS from findings when threatAnalysis is present', () => {
+      const threatAnalysis: ThreatAnalysisResponseDto = {
+        THREAT: [
+          {
+            severity: 'OK',
+            type: 'NO_THREAT',
+            title: 'No threats detected',
+            description: 'No issues found',
+          },
+        ],
+      }
+
+      const noThreatResponse = createNoThreatResponse()
+      const response: HypernativeAssessmentResponseDto['data'] = {
+        ...noThreatResponse,
+        assessmentData: {
+          ...noThreatResponse.assessmentData,
+          threatAnalysis,
+          findings: {
+            ...noThreatResponse.assessmentData.findings,
+            CUSTOM_CHECKS: {
+              status: 'Risks found',
+              severity: 'warn',
+              risks: [
+                {
+                  title: 'Custom check warning',
+                  details: 'Custom check details',
+                  severity: 'warn',
+                  safeCheckId: faker.string.alphanumeric(10),
+                },
+              ],
+            },
+          },
+        },
+      }
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.CUSTOM_CHECKS]).toHaveLength(1)
+      expect(result[StatusGroup.CUSTOM_CHECKS]?.[0].severity).toBe(Severity.WARN)
+    })
+
+    it('should fall back to existing mapping when threatAnalysis is absent', () => {
+      const response = createNoThreatResponse()
+
+      const result = mapHypernativeResponse(response, mockSafeAddress)
+
+      expect(result[StatusGroup.THREAT]).toHaveLength(1)
+      expect(result[StatusGroup.THREAT]?.[0].type).toBe(ThreatStatus.NO_THREAT)
+      expect(result[StatusGroup.THREAT]?.[0].title).toBe('No threats detected')
     })
   })
 })

@@ -1,4 +1,5 @@
 import { ThreatStatus, Severity, ContractStatus } from '.'
+import type { ThreatAnalysisResponseDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 
 export const HypernativeRiskSeverityMap = {
   accept: Severity.OK,
@@ -66,6 +67,7 @@ export interface HypernativeAssessmentData {
   interpretation: string
   findings: HypernativeFindingsGroup
   balanceChanges?: HypernativeBalanceChanges
+  threatAnalysis?: ThreatAnalysisResponseDto
 }
 
 export interface HypernativeFindingsGroup {
