@@ -22,6 +22,7 @@ import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
+import SetupWidget from '../SetupWidget'
 
 const AddActionsAction = () => {
   return (
@@ -45,7 +46,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { allSafes: safes } = useSpaceSafes()
+  const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
@@ -137,15 +138,19 @@ const SpaceDashboard = () => {
             )}
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <PendingTxWidget
-              transactions={pendingTxs}
-              loading={isPendingTxLoading}
-              error={pendingTxError ? String(pendingTxError) : undefined}
-              remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
-              onViewAll={handleViewAllPendingTxs}
-              onRefresh={refetchPendingTxs}
-              onItemClick={handlePendingTxItemClick}
-            />
+            {safeItems.length === 0 && !isSafesLoading ? (
+              <SetupWidget />
+            ) : (
+              <PendingTxWidget
+                transactions={pendingTxs}
+                loading={isPendingTxLoading}
+                error={pendingTxError ? String(pendingTxError) : undefined}
+                remainingCount={remainingPendingTxCount > 0 ? remainingPendingTxCount : undefined}
+                onViewAll={handleViewAllPendingTxs}
+                onRefresh={refetchPendingTxs}
+                onItemClick={handlePendingTxItemClick}
+              />
+            )}
           </Grid>
         </Grid>
       </>
