@@ -4,11 +4,8 @@ import Link from 'next/link'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
+import { DialogClose, DialogTitle } from '@/components/ui/dialog'
 import { AppRoutes } from '@/config/routes'
-
-interface AddToSpacePopupModalProps {
-  onClose: () => void
-}
 
 const BENEFITS = [
   'Keep all related Safes in one shared workspace',
@@ -16,18 +13,16 @@ const BENEFITS = [
   'Streamline coordination across initiators, approvers, and executors',
 ]
 
-export const AddToSpacePopupModal = ({ onClose }: AddToSpacePopupModalProps): ReactElement => {
+export const AddToSpacePopupModal = (): ReactElement => {
   return (
-    <div className="flex flex-col w-full rounded-3xl overflow-hidden shadow-lg bg-background">
+    <div className="flex flex-col w-full">
       <div className="flex items-center justify-between px-5 py-5">
-        <Typography variant="h4">Add to Space</Typography>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <DialogTitle>
+          <Typography variant="h4">Add to Space</Typography>
+        </DialogTitle>
+        <DialogClose aria-label="Close" className="text-muted-foreground hover:text-foreground transition-colors">
           <X className="size-4" />
-        </button>
+        </DialogClose>
       </div>
 
       <div className="flex flex-col gap-6 px-6 pb-6 pt-2.5">

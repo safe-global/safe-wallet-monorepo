@@ -12,9 +12,7 @@ const meta = {
       appDirectory: false,
     },
   },
-  args: {
-    onClose: () => undefined,
-  },
+  args: {},
 } satisfies Meta<typeof AddToSpacePopupModal>
 
 export default meta

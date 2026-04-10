@@ -1,7 +1,7 @@
-import { useState, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { CircleFadingPlus } from 'lucide-react'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import css from '../styles.module.css'
 import type { SafeWorkspaceHeaderProps } from '../types'
 import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
@@ -13,8 +13,6 @@ export interface SafeSidebarWorkspaceHeaderProps {
 }
 
 export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorkspaceHeaderProps): ReactElement => {
-  const [isCreateSpaceModalOpen, setIsCreateSpaceModalOpen] = useState(false)
-
   switch (workspaceHeader.variant) {
     case 'backToSpace':
       return <BackToSpaceButton {...workspaceHeader} />
@@ -33,15 +31,14 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
       }
 
       return (
-        <Popover open={isCreateSpaceModalOpen} onOpenChange={setIsCreateSpaceModalOpen}>
-          <PopoverTrigger
+        <Dialog>
+          <DialogTrigger
             render={
               <SidebarMenuButton
                 size="lg"
                 className={css.addSafeToWorkspaceTrigger}
                 data-testid="add-safe-to-workspace-button"
                 aria-label="Add Safe to workspace"
-                aria-expanded={isCreateSpaceModalOpen}
                 aria-haspopup="dialog"
               />
             }
@@ -50,16 +47,11 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
             </span>
             <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
-          </PopoverTrigger>
-          <PopoverContent
-            side="top"
-            align="start"
-            sideOffset={8}
-            className="w-[423px] p-0 shadow-none ring-0 bg-transparent"
-          >
-            <AddToSpacePopupModal onClose={() => setIsCreateSpaceModalOpen(false)} />
-          </PopoverContent>
-        </Popover>
+          </DialogTrigger>
+          <DialogContent className="w-[423px] max-w-[423px] p-0">
+            <AddToSpacePopupModal />
+          </DialogContent>
+        </Dialog>
       )
     }
 

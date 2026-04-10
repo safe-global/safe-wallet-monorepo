@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/features/spaces'
 import { SafeSidebarWorkspaceHeader } from '../variants/SafeSidebarWorkspaceHeader'
@@ -7,37 +7,19 @@ import { AppRoutes } from '@/config/routes'
 
 const spaceSelectorDropdownMock = jest.fn()
 
-jest.mock('@/components/ui/popover', () => ({
-  Popover: ({
-    children,
-    open,
-    onOpenChange,
-  }: {
-    children: ReactNode
-    open?: boolean
-    onOpenChange?: (v: boolean) => void
-  }) => (
-    <div data-testid="popover-root" data-open={String(open)} onClick={() => onOpenChange?.(!open)}>
-      {children}
-    </div>
-  ),
-  PopoverTrigger: ({ children, render: renderProp }: { children: ReactNode; render?: ReactNode }) => (
-    <div data-testid="popover-trigger">
+jest.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ children }: { children: ReactNode }) => <div data-testid="dialog-root">{children}</div>,
+  DialogTrigger: ({ children, render: renderProp }: { children: ReactNode; render?: ReactNode }) => (
+    <div data-testid="dialog-trigger">
       {renderProp}
       {children}
     </div>
   ),
-  PopoverContent: ({ children }: { children: ReactNode }) => <div data-testid="popover-content">{children}</div>,
+  DialogContent: ({ children }: { children: ReactNode }) => <div data-testid="dialog-content">{children}</div>,
 }))
 
 jest.mock('../AddToSpacePopupModal', () => ({
-  AddToSpacePopupModal: ({ onClose }: { onClose: () => void }) => (
-    <div data-testid="add-to-space-popup-modal">
-      <button type="button" onClick={onClose} data-testid="modal-close-btn">
-        Close
-      </button>
-    </div>
-  ),
+  AddToSpacePopupModal: () => <div data-testid="add-to-space-popup-modal" />,
 }))
 
 const mockRouterPush = jest.fn()
@@ -62,7 +44,6 @@ jest.mock('@/components/ui/sidebar', () => ({
     className,
     onClick,
     'data-testid': dataTestId,
-    'aria-expanded': ariaExpanded,
     'aria-label': ariaLabel,
     'aria-haspopup': ariaHaspopup,
   }: {
@@ -72,7 +53,6 @@ jest.mock('@/components/ui/sidebar', () => ({
     className?: string
     onClick?: () => void
     'data-testid'?: string
-    'aria-expanded'?: boolean
     'aria-label'?: string
     'aria-haspopup'?: string
   }) => (
@@ -80,7 +60,6 @@ jest.mock('@/components/ui/sidebar', () => ({
       data-active={isActive}
       data-tooltip={tooltip}
       data-testid={dataTestId}
-      data-aria-expanded={ariaExpanded}
       data-aria-label={ariaLabel}
       data-aria-haspopup={ariaHaspopup}
       className={className}
@@ -235,7 +214,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
         />,
       )
 
-      fireEvent.click(screen.getByTestId('back-to-space-button'))
+      screen.getByTestId('back-to-space-button').click()
 
       expect(mockRouterPush).toHaveBeenCalledWith({
         pathname: AppRoutes.spaces.index,
@@ -243,27 +222,27 @@ describe('SafeSidebarWorkspaceHeader', () => {
       })
     })
 
-    it('does not render add-to-workspace or popover UI', () => {
+    it('does not render add-to-workspace or dialog UI', () => {
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createBackHeader({ spaceName: 'Test', spaceId: '1' })} />)
 
-      expect(screen.queryByTestId('popover-root')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('dialog-root')).not.toBeInTheDocument()
       expect(spaceSelectorDropdownMock).not.toHaveBeenCalled()
     })
   })
 
   describe('variant addToWorkspace', () => {
-    it('renders Popover with modal when there are no spaces (empty array)', () => {
+    it('renders Dialog with modal when there are no spaces (empty array)', () => {
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces: [] })} />)
 
-      expect(screen.getByTestId('popover-root')).toBeInTheDocument()
+      expect(screen.getByTestId('dialog-root')).toBeInTheDocument()
       expect(screen.getByTestId('add-to-space-popup-modal')).toBeInTheDocument()
       expect(spaceSelectorDropdownMock).not.toHaveBeenCalled()
     })
 
-    it('renders Popover with modal when spaces is undefined (treated as no spaces)', () => {
+    it('renders Dialog with modal when spaces is undefined (treated as no spaces)', () => {
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces: undefined })} />)
 
-      expect(screen.getByTestId('popover-root')).toBeInTheDocument()
+      expect(screen.getByTestId('dialog-root')).toBeInTheDocument()
       expect(screen.getByTestId('add-to-space-popup-modal')).toBeInTheDocument()
       expect(spaceSelectorDropdownMock).not.toHaveBeenCalled()
     })
@@ -283,7 +262,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       )
 
       expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-      expect(screen.queryByTestId('popover-root')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('dialog-root')).not.toBeInTheDocument()
       expect(spaceSelectorDropdownMock).toHaveBeenCalledWith(
         expect.objectContaining({
           triggerVariant: 'addToWorkspace',
@@ -294,7 +273,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       )
     })
 
-    it('prefers SpaceSelectorDropdown over Popover when multiple spaces exist', () => {
+    it('prefers SpaceSelectorDropdown over Dialog when multiple spaces exist', () => {
       const spaces = [
         { id: 1, name: 'A', safeCount: 1 },
         { id: 2, name: 'B', safeCount: 0 },
@@ -302,39 +281,17 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
 
-      expect(screen.queryByTestId('popover-root')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('dialog-root')).not.toBeInTheDocument()
       expect(spaceSelectorDropdownMock).toHaveBeenCalled()
     })
 
-    it('renders Add Safe to workspace trigger and popup inside Popover when not in a Space', () => {
+    it('renders Add Safe to workspace trigger and popup inside Dialog when not in a Space', () => {
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader()} />)
 
       expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
-      expect(screen.getByTestId('popover-root')).toBeInTheDocument()
+      expect(screen.getByTestId('dialog-root')).toBeInTheDocument()
       expect(screen.getByText('Add Safe to workspace')).toBeInTheDocument()
       expect(screen.getByTestId('add-to-space-popup-modal')).toBeInTheDocument()
-    })
-
-    it('sets aria-expanded on trigger from popover open state', () => {
-      render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces: [] })} />)
-
-      const trigger = screen.getByTestId('add-safe-to-workspace-button')
-      expect(trigger).toHaveAttribute('data-aria-expanded', 'false')
-
-      fireEvent.click(screen.getByTestId('popover-root'))
-
-      expect(trigger).toHaveAttribute('data-aria-expanded', 'true')
-    })
-
-    it('closes popover when modal onClose is invoked', () => {
-      render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces: [] })} />)
-
-      fireEvent.click(screen.getByTestId('popover-root'))
-      expect(screen.getByTestId('popover-root')).toHaveAttribute('data-open', 'true')
-
-      fireEvent.click(screen.getByTestId('modal-close-btn'))
-
-      expect(screen.getByTestId('popover-root')).toHaveAttribute('data-open', 'false')
     })
   })
 })
