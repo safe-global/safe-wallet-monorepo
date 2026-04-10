@@ -6,7 +6,7 @@ import css from '../styles.module.css'
 import type { SafeWorkspaceHeaderProps } from '../types'
 import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 import { BackToSpaceButton } from '../BackToSpaceButton'
-import { AddToSpacePopupModal } from '../AddToSpacePopupModal'
+import { AddToSpacePopupModal } from '../../AddToSpacePopupModal/AddToSpacePopupModal'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps

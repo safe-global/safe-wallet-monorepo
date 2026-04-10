@@ -53,7 +53,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: {
-          message: 'Successfully added Safe to workspoace.',
+          message: 'Successfully added Safe to workspace.',
           variant: 'success',
           groupKey: 'add-safe-to-workspace-success',
         },
