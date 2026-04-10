@@ -75,7 +75,7 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
         />
       </header>
 
-      {!isMobile && <GlobalSearchModal />}
+      <GlobalSearchModal />
 
       <NotificationsPopover ref={notificationsRef} />
 

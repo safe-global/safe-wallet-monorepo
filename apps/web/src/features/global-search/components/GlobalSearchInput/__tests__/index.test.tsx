@@ -1,7 +1,9 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import GlobalSearchInput from '../index'
-import * as globalSearchSlice from '@/features/global-search/store/globalSearchSlice'
+import { makeStore } from '@/store'
+import { Provider } from 'react-redux'
+import { render as rtlRender } from '@testing-library/react'
 
 describe('GlobalSearchInput', () => {
   it('renders the search button with placeholder text', () => {
@@ -19,13 +21,20 @@ describe('GlobalSearchInput', () => {
     expect(button).toHaveClass('max-w-md')
   })
 
-  it('dispatches openGlobalSearch on click', async () => {
-    const spy = jest.spyOn(globalSearchSlice, 'openGlobalSearch')
+  it('sets globalSearch.open to true on click', async () => {
+    const store = makeStore(undefined, { skipBroadcast: true })
     const user = userEvent.setup()
 
-    render(<GlobalSearchInput />)
+    rtlRender(
+      <Provider store={store}>
+        <GlobalSearchInput />
+      </Provider>,
+    )
+
+    expect(store.getState().globalSearch.open).toBe(false)
+
     await user.click(screen.getByRole('button', { name: 'Search for anything' }))
 
-    expect(spy).toHaveBeenCalled()
+    expect(store.getState().globalSearch.open).toBe(true)
   })
 })

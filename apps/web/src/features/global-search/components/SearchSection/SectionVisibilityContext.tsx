@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 
 interface SectionVisibilityContextValue {
   reportVisibility: (id: string, visible: boolean) => void
@@ -19,7 +19,7 @@ export const SectionVisibilityProvider = ({ children }: { children: ReactNode })
     setVisibleSections((prev) => (prev[id] === visible ? prev : { ...prev, [id]: visible }))
   }, [])
 
-  const hasVisibleSections = Object.values(visibleSections).some(Boolean)
+  const hasVisibleSections = useMemo(() => Object.values(visibleSections).some(Boolean), [visibleSections])
 
   return (
     <SectionVisibilityContext.Provider value={{ reportVisibility, hasVisibleSections }}>

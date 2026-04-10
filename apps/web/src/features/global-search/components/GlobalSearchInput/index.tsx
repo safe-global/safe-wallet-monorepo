@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useAppDispatch } from '@/store'
-import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
+import { openGlobalSearch } from '@/features/global-search/store'
 
 interface GlobalSearchInputProps {
   className?: string

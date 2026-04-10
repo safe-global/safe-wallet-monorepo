@@ -1,26 +1,18 @@
-import { useCallback } from 'react'
-import { isMultiChainSafeItem, useOwnedSafesGrouped, flattenSafeItems, type AllSafeItems } from '@/hooks/safes'
+import { useMemo } from 'react'
+import { isMultiChainSafeItem, useOwnedSafesGrouped, flattenSafeItems } from '@/hooks/safes'
 import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
-import { useAppSelector } from '@/store'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import useMatchSafe from '@/features/global-search/hooks/useMatchSafe'
 import SectionWrapper from '../../SectionWrapper'
 
 const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
   const { allMultiChainSafes, allSingleSafes } = useOwnedSafesGrouped()
-  const allSafes = flattenSafeItems([...(allMultiChainSafes ?? []), ...(allSingleSafes ?? [])])
-  const addressBooks = useAppSelector(selectAllAddressBooks)
-
-  const matchSafe = useCallback(
-    (safe: AllSafeItems[number], q: string): boolean => {
-      const address = safe.address.toLowerCase()
-      const safeName =
-        safe.name ?? addressBooks[isMultiChainSafeItem(safe) ? safe.safes[0].chainId : safe.chainId]?.[safe.address]
-      return address.includes(q) || (safeName?.toLowerCase().includes(q) ?? false)
-    },
-    [addressBooks],
+  const allSafes = useMemo(
+    () => flattenSafeItems([...(allMultiChainSafes ?? []), ...(allSingleSafes ?? [])]),
+    [allMultiChainSafes, allSingleSafes],
   )
+  const matchSafe = useMatchSafe()
 
   const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
 

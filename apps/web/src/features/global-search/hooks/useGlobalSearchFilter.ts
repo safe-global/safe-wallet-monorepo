@@ -26,12 +26,11 @@ const useGlobalSearchFilter = <T>(items: T[], query: string, filterBy: keyof T |
     return items.filter((item) => matchFn(item, trimmed))
   }, [items, query, filterBy])
 
-  reportVisibility(idRef.current, filteredItems.length > 0)
-
   useEffect(() => {
     const currentId = idRef.current
+    reportVisibility(currentId, filteredItems.length > 0)
     return () => reportVisibility(currentId, false)
-  }, [reportVisibility])
+  }, [reportVisibility, filteredItems.length])
 
   return filteredItems
 }

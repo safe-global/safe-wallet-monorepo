@@ -1,27 +1,15 @@
-import { useCallback } from 'react'
-import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces'
 import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
-import { useAppSelector } from '@/store'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import useMatchSafe from '@/features/global-search/hooks/useMatchSafe'
 import SectionWrapper from '../../SectionWrapper'
 
 const AccountsSection = ({ query, label }: SectionItemProps) => {
   const { allSafes, isLoading } = useSpaceSafes()
-  const addressBooks = useAppSelector(selectAllAddressBooks)
-
-  const matchSafe = useCallback(
-    (safe: AllSafeItems[number], q: string): boolean => {
-      const address = safe.address.toLowerCase()
-      const safeName =
-        safe.name ?? addressBooks[isMultiChainSafeItem(safe) ? safe.safes[0].chainId : safe.chainId]?.[safe.address]
-      return address.includes(q) || (safeName?.toLowerCase().includes(q) ?? false)
-    },
-    [addressBooks],
-  )
+  const matchSafe = useMatchSafe()
 
   const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
 

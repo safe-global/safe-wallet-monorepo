@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { closeGlobalSearch, selectGlobalSearchOpen } from '@/features/global-search/store/globalSearchSlice'
+import { closeGlobalSearch, selectGlobalSearchOpen } from '@/features/global-search/store'
 import GlobalSearch from './GlobalSearch'
 import SearchSection from '../SearchSection/SearchSection'
 

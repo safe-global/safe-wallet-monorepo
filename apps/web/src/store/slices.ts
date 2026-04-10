@@ -37,4 +37,4 @@ export {
   closeGlobalSearch,
   toggleGlobalSearch,
   selectGlobalSearchOpen,
-} from '@/features/global-search/store/globalSearchSlice'
+} from '@/features/global-search/store'

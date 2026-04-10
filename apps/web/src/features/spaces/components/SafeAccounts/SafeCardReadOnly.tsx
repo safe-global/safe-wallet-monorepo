@@ -51,7 +51,10 @@ const SafeCardReadOnly = ({
     isError: isOverviewError,
     error: overviewError,
     refetch: refetchOverview,
-  } = useGetSafeOverviewQuery({ chainId: singleSafe?.chainId, safeAddress: singleSafe?.address }, { skip: !singleSafe })
+  } = useGetSafeOverviewQuery(
+    { chainId: singleSafe?.chainId, safeAddress: singleSafe?.address },
+    { skip: !singleSafe || !showPending },
+  )
 
   const hasQueuedItems = !isLoadingOverview && !isOverviewError && safeOverview && (safeOverview.queued ?? 0) > 0
 

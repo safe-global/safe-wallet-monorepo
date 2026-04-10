@@ -63,11 +63,12 @@ Organize page object files in clear sections with this order:
 ### Function Rules
 
 - **Action functions** (`click*`, `open*`, `expand*`, `type*`, `visit*`): perform one user action AND wait for the result to be ready. An action that opens a popover must wait for the popover to appear. An action that navigates must wait for the target page to load. This prevents flaky tests where the next step runs before the UI has settled:
+
   ```js
   // ✅ Good: action waits for result
   export function clickOnExpandWalletBtn() {
     cy.get(expandWalletBtn).should('be.visible').click()
-    cy.get(sentinelStart).next().should('exist')  // wait for popover
+    cy.get(sentinelStart).next().should('exist') // wait for popover
   }
 
   // ❌ Bad: action with no wait — next step may fail
@@ -75,12 +76,14 @@ Organize page object files in clear sections with this order:
     cy.get(expandWalletBtn).click()
   }
   ```
+
 - **Verify functions** (`verify*`): assert state only, no user actions
 - Functions used only within the page object: no `export`
 - Functions used by test files: `export`
 - General functions (3+ page files): put in `main.page.js`
 - Page-specific functions: put in that page's `.pages.js`
 - **Wallet/navigation functions belong in `navigation.page.js`** — not in feature page objects. Feature page objects import and call them. When the same action has different UI across contexts (e.g. legacy vs spaces wallet button), create separate functions in `navigation.page.js` rather than duplicating selectors in feature page objects:
+
   ```js
   // navigation.page.js — both wallet expand variants
   export function clickOnWalletExpandMoreIcon() { ... }  // legacy
@@ -92,6 +95,7 @@ Organize page object files in clear sections with this order:
     navigation.clickOnDisconnectBtn()
   }
   ```
+
 - **Prefer one parameterized function over multiple similar functions** — use a type/variant parameter with a selector lookup table when the same verification applies to different component variants:
   ```js
   const selectors = {
@@ -128,6 +132,7 @@ export function createSpaceViaOnboardingWithSkip(name) {
 ```
 
 Rules for composite flows:
+
 - Each step is a private function with a descriptive name
 - The exported function reads as a plain-language sequence
 - Step functions handle their own waits (URL checks, element visibility)
@@ -146,14 +151,14 @@ Rules for composite flows:
 
 ### Function Naming Convention
 
-| Prefix      | Purpose                          | Example                                |
-| ----------- | -------------------------------- | -------------------------------------- |
-| `click*`    | Click an element                 | `clickAccountItemByIndex(index)`       |
-| `open*`     | Open a dropdown/modal/panel      | `openSpaceSelector()`                  |
-| `expand*`   | Expand a collapsible section     | `expandAccountRow(index)`              |
-| `type*`     | Type into an input               | `typeSpaceName(name)`                  |
-| `visit*`    | Navigate to a URL                | `visitSpaceDashboard(id)`              |
-| `verify*`   | Assert state (visibility, URL)   | `verifySpaceSidebarItemsVisible()`     |
+| Prefix    | Purpose                        | Example                            |
+| --------- | ------------------------------ | ---------------------------------- |
+| `click*`  | Click an element               | `clickAccountItemByIndex(index)`   |
+| `open*`   | Open a dropdown/modal/panel    | `openSpaceSelector()`              |
+| `expand*` | Expand a collapsible section   | `expandAccountRow(index)`          |
+| `type*`   | Type into an input             | `typeSpaceName(name)`              |
+| `visit*`  | Navigate to a URL              | `visitSpaceDashboard(id)`          |
+| `verify*` | Assert state (visibility, URL) | `verifySpaceSidebarItemsVisible()` |
 
 ## Phase 3: Write Tests
 
@@ -208,6 +213,7 @@ When a component needs a `data-testid` for E2E tests:
 Keep test data and UI selectors in separate places — never mix them.
 
 ### Fixture files (`cypress/fixtures/`) — test data only
+
 - Space IDs, names
 - Account addresses, names, chain info, row indices
 - Counts (row counts, sub-accounts)
@@ -215,6 +221,7 @@ Keep test data and UI selectors in separate places — never mix them.
 - Any data that varies per environment or test scenario
 
 ### Page object files (`e2e/pages/`) — UI selectors and labels only
+
 - `data-testid` selectors
 - `aria-label` selectors
 - Static UI text labels ("Getting started", "Add member", etc.)
@@ -222,6 +229,7 @@ Keep test data and UI selectors in separate places — never mix them.
 - Functions (actions, verifiers)
 
 ### Rules
+
 - **Never duplicate fixture data in page objects** — if an address or name is in a fixture, don't also define it as a `const` in the page object
 - **Never put selectors in fixtures** — selectors belong in page objects
 - **Never re-export fixtures from page objects** — tests should import fixtures directly (`import staticSpaces from '../../fixtures/spaces/staticSpaces.js'`)
