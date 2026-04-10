@@ -98,6 +98,7 @@ export enum MixpanelEventParams {
   FAILURE_REASON = 'Failure Reason',
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
+  SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
 }
 
 export enum SafeAppLaunchLocation {
