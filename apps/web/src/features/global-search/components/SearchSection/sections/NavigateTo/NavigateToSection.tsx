@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
+import SectionWrapper from '../../SectionWrapper'
 
 interface NavigationItem {
   icon: ReactNode
@@ -16,27 +17,29 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
   { icon: <WalletCards className="size-5" />, label: 'Accounts' },
 ]
 
-const NavigateToSection = ({ query }: SectionItemProps) => {
+const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const filteredItems = useGlobalSearchFilter(NAVIGATION_ITEMS, query, 'label')
 
   if (filteredItems.length === 0) return null
 
   return (
-    <div className="flex flex-col">
-      {filteredItems.map((item) => (
-        <button
-          key={item.label}
-          type="button"
-          className={cn(
-            'flex items-center gap-3 px-4 py-2 font-bold text-sm text-foreground',
-            'hover:bg-accent rounded-lg mx-2 transition-colors',
-          )}
-        >
-          <span className="text-muted-foreground">{item.icon}</span>
-          {item.label}
-        </button>
-      ))}
-    </div>
+    <SectionWrapper label={label}>
+      <div className="flex flex-col">
+        {filteredItems.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            className={cn(
+              'flex items-center cursor-pointer gap-3 px-4 py-2 font-bold text-sm text-foreground',
+              'hover:bg-accent rounded-lg mx-2 transition-colors',
+            )}
+          >
+            <span className="text-muted-foreground">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </SectionWrapper>
   )
 }
 

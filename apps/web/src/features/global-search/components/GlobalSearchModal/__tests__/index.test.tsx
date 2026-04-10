@@ -5,6 +5,7 @@ import type { RootState } from '@/store'
 
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
+  useCurrentSpaceId: () => null,
 }))
 
 jest.mock('@/hooks/safes', () => ({

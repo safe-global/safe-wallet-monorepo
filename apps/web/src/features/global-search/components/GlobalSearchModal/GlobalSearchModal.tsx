@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { closeGlobalSearch, selectGlobalSearchOpen } from '@/features/global-search/store/globalSearchSlice'
@@ -21,16 +20,14 @@ const GlobalSearchModal = () => {
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent showCloseButton={false} className="h-[480px] p-0">
-        <Card className="h-full py-4 gap-2 shadow-none border-0">
+      <DialogContent showCloseButton={false} className="max-h-[480px] p-0">
+        <Card className="flex flex-col max-h-[480px] py-4 gap-2 shadow-none border-0">
           <div className="px-4 shrink-0">
             <GlobalSearch value={query} onChange={setQuery} />
           </div>
-          <ScrollArea className="min-h-0 flex-1">
-            <div className="flex flex-col gap-0.5">
-              <SearchSection query={query} />
-            </div>
-          </ScrollArea>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <SearchSection query={query} />
+          </div>
         </Card>
       </DialogContent>
     </Dialog>
