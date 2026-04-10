@@ -1,7 +1,4 @@
-import type { Event } from '@reown/appkit-common-react-native'
-import { useStableAppKitEvent } from './useStableAppKitEvent'
-
-export type ConnectSuccessEvent = Extract<Event, { event: 'CONNECT_SUCCESS' }>
+import { AppKitEvent, useStableAppKitEvent } from './useStableAppKitEvent'
 
 /**
  * Subscribes to the AppKit CONNECT_SUCCESS event (with typed payload)
@@ -11,10 +8,8 @@ export type ConnectSuccessEvent = Extract<Event, { event: 'CONNECT_SUCCESS' }>
  * @param onFailure  Called when the connection fails or is rejected by the user.
  *                   Use this to reset ref guards so they don't leak.
  */
-export function useOnAppKitConnect(onSuccess: (event: ConnectSuccessEvent) => void, onFailure: () => void) {
-  useStableAppKitEvent('CONNECT_SUCCESS', (state) => {
-    onSuccess(state.data as ConnectSuccessEvent)
-  })
+export function useOnAppKitConnect(onSuccess: (event: AppKitEvent<'CONNECT_SUCCESS'>) => void, onFailure: () => void) {
+  useStableAppKitEvent('CONNECT_SUCCESS', (state) => onSuccess(state.data))
 
   useStableAppKitEvent('CONNECT_ERROR', onFailure)
   useStableAppKitEvent('USER_REJECTED', onFailure)
