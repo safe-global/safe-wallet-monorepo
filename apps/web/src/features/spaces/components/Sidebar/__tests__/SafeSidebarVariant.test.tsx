@@ -1,6 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { getDeterministicColor } from '@/features/spaces'
 import { SafeSidebarVariant } from '../variants/SafeSidebarVariant'
 import type {
   SafeWorkspaceHeaderBackToSpace,
@@ -11,13 +10,12 @@ import type {
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
-const mockRouterPush = jest.fn()
 const mockUseSafeInfo = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    push: mockRouterPush,
+    push: jest.fn(),
     query: {},
     pathname: '',
   }),
@@ -191,78 +189,6 @@ describe('SafeSidebarVariant', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(false)
   })
 
-  it('renders space selector with name and back button when spaceId exists', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({
-          spaceName: 'My Safe Account',
-          spaceInitial: 'M',
-          spaceId: '123',
-        })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByText('My Safe Account')).toBeInTheDocument()
-    expect(screen.getByText('Space')).toBeInTheDocument()
-    expect(screen.getByText('M')).toBeInTheDocument()
-    expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
-  })
-
-  it('applies deterministic avatar color from space name like SpaceSelectorDropdown', () => {
-    const spaceName = 'My Safe Account'
-
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName, spaceInitial: 'M', spaceId: '123' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    // Both the component and this import resolve to the same mock, so values match
-    expect(screen.getByTestId('space-avatar-fallback')).toHaveStyle({
-      backgroundColor: getDeterministicColor(spaceName),
-    })
-  })
-
-  it('does not set avatar background when space name is empty', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName: '', spaceInitial: 'U', spaceId: '123' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByTestId('space-avatar-fallback').style.backgroundColor).toBe('')
-  })
-
-  it('derives initial from space name when spaceInitial not provided', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName: 'MySpace', spaceId: '123' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByText('M')).toBeInTheDocument()
-  })
-
-  it('uses provided spaceInitial when available', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName: 'MySpace', spaceInitial: 'X', spaceId: '123' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByText('X')).toBeInTheDocument()
-  })
-
   it('renders all navigation sections', () => {
     render(
       <SafeSidebarVariant
@@ -279,33 +205,7 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getAllByText('Swap').length).toBeGreaterThan(0)
   })
 
-  it('handles undefined space name', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName: '', spaceInitial: 'U', spaceId: '123' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByText('U')).toBeInTheDocument()
-  })
-
-  it('renders Add Safe to workspace when Safe is not in a Space and is deployed', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createAddHeader()}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
-    expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-    expect(screen.getByText('Add Safe to workspace')).toBeInTheDocument()
-  })
-
-  it('hides Add Safe to workspace button for counterfactual (undeployed) Safes', () => {
+  it('hides workspace header group for counterfactual addToWorkspace (undeployed) Safes', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(true)
 
     render(
@@ -318,6 +218,21 @@ describe('SafeSidebarVariant', () => {
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
     expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+  })
+
+  it('still renders backToSpace workspace header when Safe is counterfactual', () => {
+    mockUseIsCounterfactualSafe.mockReturnValue(true)
+
+    render(
+      <SafeSidebarVariant
+        workspaceHeader={createBackHeader({ spaceName: 'My Space', spaceId: '9' })}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    expect(screen.getByText('My Space')).toBeInTheDocument()
   })
 
   it('renders all main navigation items', () => {
@@ -369,27 +284,6 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getByTestId('sidebar-item-assets')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-item-apps')).toBeInTheDocument()
-  })
-
-  it('navigates to the correct Space when back button is clicked', () => {
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({
-          spaceName: 'My Safe Account',
-          spaceInitial: 'M',
-          spaceId: '42',
-        })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    fireEvent.click(screen.getByTestId('back-to-space-button'))
-
-    expect(mockRouterPush).toHaveBeenCalledWith({
-      pathname: AppRoutes.spaces.index,
-      query: { spaceId: '42' },
-    })
   })
 
   describe('Settings', () => {

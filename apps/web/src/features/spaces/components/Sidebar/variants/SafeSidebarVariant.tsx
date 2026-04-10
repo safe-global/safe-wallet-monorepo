@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Settings } from 'lucide-react'
 import {
@@ -15,8 +15,7 @@ import type { SafeSidebarVariantProps } from '../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from './NavItem'
 import { NewTransactionButton } from '../NewTransactionButton'
-import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
-import { BackToSpaceButton } from './../BackToSpaceButton'
+import { SafeSidebarWorkspaceHeader } from './SafeSidebarWorkspaceHeader'
 import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -40,24 +39,16 @@ export const SafeSidebarVariant = ({
   }
   const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
-  const workspaceHeaderEl =
-    workspaceHeader.variant === 'backToSpace' ? (
-      <BackToSpaceButton {...workspaceHeader} />
-    ) : isCounterfactualSafe ? null : (
-      <SpaceSelectorDropdown
-        triggerVariant="addToWorkspace"
-        selectedSpace={workspaceHeader.selectedSpace}
-        spaces={workspaceHeader.spaces}
-        onSpaceAdded={workspaceHeader.onSpaceAdded}
-      />
-    )
+  const shouldRenderWorkspaceHeaderGroup = workspaceHeader.variant === 'backToSpace' || !isCounterfactualSafe
 
   return (
     <SidebarContent className={css.sidebarContent}>
-      {workspaceHeaderEl && (
+      {shouldRenderWorkspaceHeaderGroup && (
         <SidebarGroup className={css.sidebarGroup}>
           <SidebarMenu>
-            <SidebarMenuItem>{workspaceHeaderEl}</SidebarMenuItem>
+            <SidebarMenuItem>
+              <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       )}
