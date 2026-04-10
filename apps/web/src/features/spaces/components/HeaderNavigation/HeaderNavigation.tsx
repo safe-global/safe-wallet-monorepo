@@ -1,16 +1,41 @@
-import type { MouseEvent } from 'react'
-import { Search, Bell, Wallet } from 'lucide-react'
+import type { MouseEvent, ReactNode } from 'react'
+import { useMemo } from 'react'
+import { Search, Bell, Wallet, Layers, ChevronUp, ChevronDown } from 'lucide-react'
+import { blo } from 'blo'
+import { isAddress } from 'ethers'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
+import Track from '@/components/common/Track'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
+import BatchTooltip from '@/features/batching/components/BatchTooltip'
 
 export interface HeaderNavigationProps {
   /**
-   * Safe address to display (will be truncated)
+   * Wallet address to display (will be truncated)
    */
   walletAddress: string
   /**
-   * Number of unread messages:
-   * the parent can pass useAppSelector(selectNotifications).filter(n => !n.isRead).length into messages from Redux
+   * ENS name to display instead of truncated address
+   */
+  walletEns?: string
+  /**
+   * Whether a wallet is connected
+   */
+  isConnected?: boolean
+  /**
+   * Wallet provider icon (SVG string or data URI from onboard)
+   */
+  walletIcon?: string
+  /**
+   * Wallet provider label (e.g. "MetaMask", "WalletConnect")
+   */
+  walletLabel?: string
+  /**
+   * Whether the wallet popover is open (controls chevron direction)
+   */
+  walletOpen?: boolean
+  /**
+   * Number of unread messages
    */
   messages?: number
   /**
@@ -29,6 +54,14 @@ export interface HeaderNavigationProps {
    * Callback when wallet button is clicked
    */
   onWalletClick?: (event: MouseEvent<HTMLButtonElement>) => void
+  /** Slot for WalletConnect widget (renders its own button + popup) */
+  walletConnectSlot?: ReactNode
+  /** Whether to show the Batch button */
+  showBatch?: boolean
+  /** Batch button callback */
+  onBatchClick?: () => void
+  /** Number of items in the draft batch (shown as badge) */
+  batchCount?: number
 }
 
 /**
@@ -37,35 +70,63 @@ export interface HeaderNavigationProps {
  */
 export function HeaderNavigation({
   walletAddress,
+  walletEns,
+  isConnected = false,
+  walletIcon,
+  walletLabel,
+  walletOpen = false,
   messages = 0,
   showSearch = false,
   onSearchClick,
   onNotificationsClick,
   onWalletClick,
+  walletConnectSlot,
+  showBatch = false,
+  onBatchClick,
+  batchCount = 0,
 }: HeaderNavigationProps) {
   const truncatedAddress =
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
 
+  const walletDisplayName = walletEns || truncatedAddress
+
+  const identiconUrl = useMemo(() => {
+    try {
+      if (walletAddress && isAddress(walletAddress)) {
+        return blo(walletAddress as `0x${string}`)
+      }
+    } catch {
+      // ignore
+    }
+    return null
+  }, [walletAddress])
+
+  const providerIconSrc = useMemo(() => {
+    if (!walletIcon) return null
+    return walletIcon.startsWith('data:') ? walletIcon : `data:image/svg+xml;utf8,${encodeURIComponent(walletIcon)}`
+  }, [walletIcon])
+
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-sm bg-background dark:bg-secondary p-[3px]')}>
+    <div className={cn('flex items-center gap-1')}>
+      {/* TODO: Global search button */}
       {showSearch && (
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon-lg"
           onClick={onSearchClick}
-          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
           aria-label="Search"
         >
           <Search className="size-5 text-muted-foreground" />
         </Button>
       )}
 
-      <div className="relative">
+      <div className="relative" data-testid="notifications-center">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon-lg"
           onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0 rounded-sm dark:bg-card"
+          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
           aria-label="Notifications"
         >
           <Bell className="size-5 text-muted-foreground" />
@@ -73,23 +134,77 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute z-10 flex items-center justify-center rounded-full border-[3px] border-secondary bg-[var(--color-success-main)] w-[10px] h-[10px] top-[9px] right-[10px]"
+            className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
             aria-label={`${messages} unread messages`}
-          />
+          >
+            {messages > 99 ? '99+' : messages}
+          </span>
         )}
       </div>
 
-      <Button
-        variant="secondary"
-        size="lg"
-        onClick={onWalletClick}
-        className="cursor-pointer gap-1.5 shrink-0 rounded-sm dark:bg-card"
-        aria-label={`Wallet ${truncatedAddress}`}
-        data-testid="expand-wallet-button"
-      >
-        <Wallet className="size-5 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground font-normal">{truncatedAddress}</span>
-      </Button>
+      {walletConnectSlot}
+
+      {showBatch && (
+        <BatchTooltip>
+          <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
+            <div className="relative" data-track="batching: Batch sidebar open">
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                onClick={onBatchClick}
+                className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+                aria-label="Batch transactions"
+              >
+                <Layers className="size-5 text-muted-foreground" />
+              </Button>
+
+              {batchCount > 0 && (
+                <span
+                  className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
+                  aria-label={`${batchCount} batched transactions`}
+                >
+                  {batchCount > 99 ? '99+' : batchCount}
+                </span>
+              )}
+            </div>
+          </Track>
+        </BatchTooltip>
+      )}
+
+      <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
+        <Button
+          variant="ghost"
+          size="lg"
+          onClick={onWalletClick}
+          className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+          aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
+          data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
+        >
+          {isConnected && identiconUrl ? (
+            <div className="relative shrink-0">
+              <img src={identiconUrl} alt="Wallet identicon" className="size-6 rounded-full" />
+              {providerIconSrc && (
+                <img
+                  src={providerIconSrc}
+                  alt={`${walletLabel ?? 'Wallet'} logo`}
+                  className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-card bg-background p-px"
+                />
+              )}
+            </div>
+          ) : (
+            <Wallet className="size-5 text-muted-foreground" />
+          )}
+          <span className="text-xs text-muted-foreground font-normal">
+            {isConnected ? walletDisplayName : 'Connect Wallet'}
+          </span>
+          {isConnected &&
+            (walletOpen ? (
+              <ChevronUp className="size-3.5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="size-3.5 text-muted-foreground" />
+            ))}
+        </Button>
+      </Track>
     </div>
   )
 }
