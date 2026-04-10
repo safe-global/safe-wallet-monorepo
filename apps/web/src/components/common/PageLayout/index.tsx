@@ -18,7 +18,6 @@ import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
-import { GlobalSearchFeature } from '@/features/global-search'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 
 const ONBOARDING_ROUTES = [
@@ -49,7 +48,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
-  const { GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
+
   useRouterGuard({ useGuard: useFlowActivationGuard })
   useKeyboardObserver()
 
@@ -63,7 +62,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   return (
     <>
       {!hideHeader && (
-        <div className={css.topbar}>
+        <div
+          className={classnames(css.topbar, {
+            [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+          })}
+        >
           <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </div>
       )}
@@ -86,8 +89,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         })}
       >
         <div className={css.content}>
-          {!hideHeader && isSpaceRoute && <GlobalSearchInput className="max-w-sm mb-8 mt-[-2rem] ml-[1.4rem]" />}
-
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
             {isOnboardingRoute ? (

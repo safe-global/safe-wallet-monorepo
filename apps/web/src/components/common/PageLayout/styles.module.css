@@ -3,6 +3,11 @@
 .topbar {
   @apply absolute top-0 right-0 z-[1];
   left: 230px;
+  transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+}
+
+.topbarCollapsed {
+  left: 4rem;
 }
 
 @media (max-width: 899.95px) {
