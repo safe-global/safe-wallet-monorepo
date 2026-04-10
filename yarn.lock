@@ -3858,13 +3858,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cowprotocol/iframe-transport@npm:^2.0.12":
-  version: 2.0.12
-  resolution: "@cowprotocol/iframe-transport@npm:2.0.12"
+"@cowprotocol/iframe-transport@npm:^2.0.13":
+  version: 2.0.13
+  resolution: "@cowprotocol/iframe-transport@npm:2.0.13"
   dependencies:
     "@cowprotocol/types": "npm:^4.1.2"
     eventemitter3: "npm:^4.0.0"
-  checksum: 10/f4aa09e4d4f67352ea09ca312e013d01ba5c3b2f291cf3449f0be32c7530d868210f99a323dfd2933c14e7577c454dd2745cae115cfd2a65083cc146696d3fdd
+  checksum: 10/51f189d371a3206c280328c5a6da73a8f11083503b4e06224647eaa659cc983dbb48e0993ea59759df8083056f79c6dc392d64d6527bd3bc3b92b85382f7beff
   languageName: node
   linkType: hard
 
@@ -4085,27 +4085,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-lib@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "@cowprotocol/widget-lib@npm:2.2.4"
+"@cowprotocol/widget-lib@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@cowprotocol/widget-lib@npm:2.2.5"
   dependencies:
     "@cowprotocol/cow-sdk": "npm:8.0.5"
     "@cowprotocol/events": "npm:^4.1.2"
-    "@cowprotocol/iframe-transport": "npm:^2.0.12"
-  checksum: 10/280419730ad6818973c4c8994f16b22a7a9c71a1e3acbd1c611db36203f56157c7ad729bcb480657be5ce32243022abced019e0c8d75cc60c771da0da025c318
+    "@cowprotocol/iframe-transport": "npm:^2.0.13"
+  checksum: 10/9343cf70a57b899cf555c635356721769d1e5a6fe47107e3d5d767f86fc06df93c249a002a506b08d4a3a86706679eb90386e16259e42a1bdff204ad53043dc0
   languageName: node
   linkType: hard
 
-"@cowprotocol/widget-react@npm:1.3.4":
-  version: 1.3.4
-  resolution: "@cowprotocol/widget-react@npm:1.3.4"
+"@cowprotocol/widget-react@npm:1.3.5":
+  version: 1.3.5
+  resolution: "@cowprotocol/widget-react@npm:1.3.5"
   dependencies:
     "@cowprotocol/events": "npm:^4.1.2"
     "@cowprotocol/types": "npm:^4.1.2"
-    "@cowprotocol/widget-lib": "npm:^2.2.4"
+    "@cowprotocol/widget-lib": "npm:^2.2.5"
   peerDependencies:
     react: 19.1.2
-  checksum: 10/f6440a914f01cec606e145a965ac0e620a92e1243e7532f45d5a8ce5fe3ec28482e6b00fe00d622b47ba51e6c40b3116fe3d45f58cc24a916b1334a23f4119c2
+  checksum: 10/cb086614e5fb470ec9b404a4b6758af57b51ecfbc8aa2cd66231f0366949db3037e9e9a332c14a8790c783d552a6383cf1b59d968c8821d09f04994fa9ced262
   languageName: node
   linkType: hard
 
@@ -13494,7 +13494,7 @@ __metadata:
     "@base-ui/react": "npm:^1.1.0"
     "@chromatic-com/storybook": "npm:^4.1.2"
     "@cowprotocol/app-data": "npm:^3.1.0"
-    "@cowprotocol/widget-react": "npm:1.3.4"
+    "@cowprotocol/widget-react": "npm:1.3.5"
     "@datadog/browser-rum": "npm:^6.24.1"
     "@ducanh2912/next-pwa": "npm:^10.2.9"
     "@emotion/cache": "npm:^11.14.0"
