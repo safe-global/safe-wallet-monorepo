@@ -86,12 +86,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Left content */}
         <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
-          {isSpaceRoute ? (
-            // TODO: Global search
-            <div />
-          ) : (
-            <SpaceSafeBar />
-          )}
+          <SpaceSafeBar />
         </div>
 
         {/* Right content: navigation buttons */}
