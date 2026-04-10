@@ -21,6 +21,7 @@ import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
+import { useIsCounterfactualSafe } from '@/features/counterfactual'
 
 export const SafeSidebarVariant = ({
   workspaceHeader,
@@ -29,6 +30,7 @@ export const SafeSidebarVariant = ({
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
+  const isCounterfactualSafe = useIsCounterfactualSafe()
   const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
   const isOutdated =
     safe.implementationVersionState === ImplementationVersionState.OUTDATED && !isNonCriticalUpdate(safe.version)
@@ -41,7 +43,7 @@ export const SafeSidebarVariant = ({
   const workspaceHeaderEl =
     workspaceHeader.variant === 'backToSpace' ? (
       <BackToSpaceButton {...workspaceHeader} />
-    ) : (
+    ) : isCounterfactualSafe ? null : (
       <SpaceSelectorDropdown
         triggerVariant="addToWorkspace"
         selectedSpace={workspaceHeader.selectedSpace}
@@ -52,11 +54,13 @@ export const SafeSidebarVariant = ({
 
   return (
     <SidebarContent className={css.sidebarContent}>
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarMenu>
-          <SidebarMenuItem>{workspaceHeaderEl}</SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
+      {workspaceHeaderEl && (
+        <SidebarGroup className={css.sidebarGroup}>
+          <SidebarMenu>
+            <SidebarMenuItem>{workspaceHeaderEl}</SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
 
       {/* New Transaction */}
       <SidebarGroup className={css.sidebarGroup}>

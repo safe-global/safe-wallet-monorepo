@@ -13,6 +13,7 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const mockRouterPush = jest.fn()
 const mockUseSafeInfo = jest.fn()
+const mockUseIsCounterfactualSafe = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -25,6 +26,18 @@ jest.mock('next/router', () => ({
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: () => mockUseSafeInfo(),
+}))
+
+jest.mock('@/features/counterfactual', () => ({
+  useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
+}))
+
+jest.mock('../NewTransactionButton', () => ({
+  NewTransactionButton: () => (
+    <button type="button" data-testid="new-tx-btn">
+      New transaction
+    </button>
+  ),
 }))
 
 jest.mock('@safe-global/utils/utils/chains', () => ({
@@ -175,6 +188,7 @@ describe('SafeSidebarVariant', () => {
     mockUseSafeInfo.mockReturnValue({
       safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.3.0' },
     })
+    mockUseIsCounterfactualSafe.mockReturnValue(false)
   })
 
   it('renders space selector with name and back button when spaceId exists', () => {
@@ -277,7 +291,7 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getByText('U')).toBeInTheDocument()
   })
 
-  it('renders Add Safe to workspace when Safe is not in a Space', () => {
+  it('renders Add Safe to workspace when Safe is not in a Space and is deployed', () => {
     render(
       <SafeSidebarVariant
         workspaceHeader={createAddHeader()}
@@ -289,6 +303,21 @@ describe('SafeSidebarVariant', () => {
     expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
     expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
     expect(screen.getByText('Add Safe to workspace')).toBeInTheDocument()
+  })
+
+  it('hides Add Safe to workspace button for counterfactual (undeployed) Safes', () => {
+    mockUseIsCounterfactualSafe.mockReturnValue(true)
+
+    render(
+      <SafeSidebarVariant
+        workspaceHeader={createAddHeader()}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
+    expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
   })
 
   it('renders all main navigation items', () => {
