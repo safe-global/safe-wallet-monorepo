@@ -4,6 +4,7 @@ import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
+import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 
 function SpaceSafeBar() {
   const isQualifiedSafe = useIsQualifiedSafe()
@@ -13,13 +14,10 @@ function SpaceSafeBar() {
   if (!isQualifiedSafe) return null
 
   return (
-    <div
-      data-testid="safe-level-navigation"
-      className="flex flex-wrap items-center gap-2 px-4 sm:px-6 pt-4 pb-0"
-      style={{ backgroundColor: 'var(--color-background-main)' }}
-    >
+    <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
       {space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
       <SpaceChainSelector />
+      <SpaceNestedSafesButton />
       <SafeSelectorDropdown
         items={items}
         selectedItemId={selectedItemId}

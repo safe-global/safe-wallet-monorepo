@@ -4,6 +4,14 @@ import type { ReactElement, ReactNode } from 'react'
 import type { ResolvedSidebarItem } from '../types'
 import { NavItem } from '../variants/NavItem'
 
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
+}))
+
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
@@ -27,7 +35,7 @@ jest.mock('@/components/ui/sidebar', () => ({
     if (renderProp && !disabled) {
       // Next.js Link href can be a string or { pathname, query } object
       const rawHref = renderProp.props.href
-      const href = typeof rawHref === 'string' ? rawHref : (rawHref?.pathname ?? '')
+      const href = typeof rawHref === 'string' ? rawHref : rawHref?.pathname ?? ''
       return (
         <a href={href} data-testid={testId} className={className} data-active={isActive}>
           {children}
@@ -71,8 +79,28 @@ describe('NavItem', () => {
     const disabledItem = { ...baseItem, disabled: true }
     render(<NavItem item={disabledItem} />)
 
-    const button = screen.getByRole('button')
+    const button = screen.getByTestId('sidebar-list-item')
     expect(button).toBeDisabled()
+  })
+
+  it('shows tooltip when disabled', () => {
+    const disabledItem = { ...baseItem, disabled: true }
+    render(<NavItem item={disabledItem} />)
+
+    expect(screen.getByText('You need to activate your Safe first.')).toBeInTheDocument()
+  })
+
+  it('uses per-label test id when isSpacesVariant', () => {
+    render(<NavItem item={baseItem} isSpacesVariant />)
+
+    expect(screen.getByTestId('sidebar-item-home')).toBeInTheDocument()
+  })
+
+  it('does not show Safe activation tooltip when disabled and isSpacesVariant', () => {
+    const disabledItem = { ...baseItem, disabled: true }
+    render(<NavItem item={disabledItem} isSpacesVariant />)
+
+    expect(screen.queryByText('You need to activate your Safe first.')).not.toBeInTheDocument()
   })
 
   it('sets data-active attribute when isActive is true', () => {

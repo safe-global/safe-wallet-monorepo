@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
+import { Settings } from 'lucide-react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -15,7 +16,12 @@ import css from '../styles.module.css'
 import type { SafeSidebarVariantProps } from '../types'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { AppRoutes } from '@/config/routes'
+import { getDeterministicColor } from '@/features/spaces'
 import { NavItem } from './NavItem'
+import Link from 'next/link'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
+import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
@@ -27,8 +33,18 @@ export const SafeSidebarVariant = ({
   defiGroup,
 }: SafeSidebarVariantProps): ReactElement => {
   const initial = getSpaceInitial(spaceName, spaceInitial)
+  const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const spaceId = useCurrentSpaceId()
   const router = useRouter()
+  const { safe } = useSafeInfo()
+  const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const isOutdated =
+    safe.implementationVersionState === ImplementationVersionState.OUTDATED && !isNonCriticalUpdate(safe.version)
+  const settingsHref = {
+    pathname: AppRoutes.settings.setup,
+    query: safeAddress ? { safe: safeAddress } : {},
+  }
+  const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
   const handleBackToSpace = () => {
     if (spaceId) {
@@ -52,14 +68,19 @@ export const SafeSidebarVariant = ({
                 className={css.backToSpace}
                 onClick={handleBackToSpace}
               >
+                <icons.ChevronLeft className={`size-4 shrink-0 ${css.backToSpaceChevron}`} />
                 <Avatar className={css.spaceSelectorAvatar}>
-                  <AvatarFallback className={css.spaceSelectorAvatarFallback}>{initial}</AvatarFallback>
+                  <AvatarFallback
+                    className={css.spaceSelectorAvatarFallback}
+                    style={spaceAvatarColor ? { backgroundColor: spaceAvatarColor } : undefined}
+                  >
+                    {initial}
+                  </AvatarFallback>
                 </Avatar>
                 <div className={css.spaceSelectorText}>
                   <span className={css.spaceSelectorName}>{spaceName}</span>
                   <span className={css.spaceSelectorSubtitle}>Space</span>
                 </div>
-                <icons.ChevronLeft className={`ml-auto size-4 shrink-0 ${css.backToSpaceChevron}`} />
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -69,7 +90,7 @@ export const SafeSidebarVariant = ({
       {/* Main Navigation */}
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0">
             {mainNavItems.map((item) => (
               <NavItem key={item.href} item={item} />
             ))}
@@ -82,7 +103,7 @@ export const SafeSidebarVariant = ({
         <SidebarGroup className={css.sidebarGroup}>
           <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0">
               {defiGroup.items.map((item) => (
                 <NavItem key={item.href} item={item} />
               ))}
@@ -90,6 +111,27 @@ export const SafeSidebarVariant = ({
           </SidebarGroupContent>
         </SidebarGroup>
       )}
+
+      {/* Settings */}
+      <SidebarGroup className={css.sidebarGroup}>
+        <SidebarGroupContent>
+          <SidebarMenu className="gap-0">
+            <SidebarMenuItem className="relative">
+              <SidebarMenuButton
+                size="lg"
+                isActive={isSettingsActive}
+                className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
+                render={<Link href={settingsHref} />}
+                data-testid="sidebar-settings-item"
+              >
+                <Settings />
+                <span>Settings</span>
+              </SidebarMenuButton>
+              {isOutdated && <span className={css.outdatedDot} aria-hidden />}
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
     </SidebarContent>
   )
 }

@@ -14,8 +14,10 @@ jest.mock('next/router', () => ({
   }),
 }))
 
+const mockUseQueuedTxsLength = jest.fn()
+
 jest.mock('@/hooks/useTxQueue', () => ({
-  useQueuedTxsLength: () => 2,
+  useQueuedTxsLength: () => mockUseQueuedTxsLength(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -26,9 +28,11 @@ jest.mock('@/utils/chains', () => ({
   isRouteEnabled: (...args: unknown[]) => mockIsRouteEnabled(...args),
 }))
 
+const mockUseSafeInfo = jest.fn()
+
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
-  default: () => ({ safe: { deployed: true } }),
+  default: () => mockUseSafeInfo(),
 }))
 
 jest.mock('../hooks/useResolvedSidebarNav', () => ({
@@ -62,6 +66,7 @@ type CallArgs = [
   SidebarItemConfig[],
   SidebarGroupConfig,
   {
+    getLink: (item: SidebarItemConfig) => { pathname: string; query: Record<string, string | null | undefined> }
     isItemActive: (item: SidebarItemConfig, pathname: string) => boolean
     isItemDisabled: (item: SidebarItemConfig) => boolean
   },
@@ -80,6 +85,8 @@ describe('SafeSidebarContent', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsRouteEnabled.mockReturnValue(true)
+    mockUseQueuedTxsLength.mockReturnValue(2)
+    mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })
     mockUseResolvedSidebarNav.mockReturnValue({
       mainNavItems: [],
       setupGroup: { label: 'Defi', items: [] },
@@ -163,6 +170,78 @@ describe('SafeSidebarContent', () => {
       const [, defiGroup] = getCallArgs()
       expect(defiGroup.items.some((item) => item.href === AppRoutes.earn)).toBe(false)
       expect(defiGroup.items).toHaveLength(3)
+    })
+  })
+
+  describe('chain filtering', () => {
+    it.each([
+      ['Swap', AppRoutes.swap],
+      ['Bridge', AppRoutes.bridge],
+      ['Stake', AppRoutes.stake],
+    ])('hides %s when the chain does not support it', (_label, href) => {
+      mockIsRouteEnabled.mockImplementation((route: string) => route !== href)
+      renderWithGeoblocking(false)
+
+      const [, defiGroup] = getCallArgs()
+      expect(defiGroup.items.some((item) => item.href === href)).toBe(false)
+      expect(defiGroup.items).toHaveLength(3)
+    })
+  })
+
+  describe('undeployed Safe', () => {
+    beforeEach(() => {
+      mockUseSafeInfo.mockReturnValue({ safe: { deployed: false } })
+    })
+
+    it('isItemDisabled returns true for all DeFi routes', () => {
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , options] = getCallArgs()
+      expect(options.isItemDisabled({ href: AppRoutes.swap } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.bridge } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.earn } as SidebarItemConfig)).toBe(true)
+      expect(options.isItemDisabled({ href: AppRoutes.stake } as SidebarItemConfig)).toBe(true)
+    })
+
+    it('isItemDisabled returns false for non-DeFi routes', () => {
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , options] = getCallArgs()
+      expect(options.isItemDisabled({ href: AppRoutes.transactions.history } as SidebarItemConfig)).toBe(false)
+      expect(options.isItemDisabled({ href: AppRoutes.home } as SidebarItemConfig)).toBe(false)
+    })
+  })
+
+  describe('getLink', () => {
+    it('redirects Transactions to queue route when queue is non-empty', () => {
+      mockUseQueuedTxsLength.mockReturnValue(3)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , { getLink }] = getCallArgs()
+      const result = getLink({ href: AppRoutes.transactions.history } as SidebarItemConfig)
+      expect(result.pathname).toBe(AppRoutes.transactions.queue)
+    })
+
+    it('keeps Transactions on history route when queue is empty', () => {
+      mockUseQueuedTxsLength.mockReturnValue(0)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , { getLink }] = getCallArgs()
+      const result = getLink({ href: AppRoutes.transactions.history } as SidebarItemConfig)
+      expect(result.pathname).toBe(AppRoutes.transactions.history)
+    })
+
+    it('passes href through unchanged for non-Transactions items', () => {
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , { getLink }] = getCallArgs()
+      expect(getLink({ href: AppRoutes.home } as SidebarItemConfig).pathname).toBe(AppRoutes.home)
+      expect(getLink({ href: AppRoutes.balances.index } as SidebarItemConfig).pathname).toBe(AppRoutes.balances.index)
+      expect(getLink({ href: AppRoutes.apps.index } as SidebarItemConfig).pathname).toBe(AppRoutes.apps.index)
+      expect(getLink({ href: AppRoutes.swap } as SidebarItemConfig).pathname).toBe(AppRoutes.swap)
+      expect(getLink({ href: AppRoutes.bridge } as SidebarItemConfig).pathname).toBe(AppRoutes.bridge)
+      expect(getLink({ href: AppRoutes.earn } as SidebarItemConfig).pathname).toBe(AppRoutes.earn)
+      expect(getLink({ href: AppRoutes.stake } as SidebarItemConfig).pathname).toBe(AppRoutes.stake)
     })
   })
 })

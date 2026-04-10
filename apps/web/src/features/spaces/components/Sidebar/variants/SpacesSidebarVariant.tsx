@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import Link from 'next/link'
 import {
   SidebarContent,
   SidebarGroup,
@@ -7,45 +6,16 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import css from '../styles.module.css'
 import type { SpaceSelectorProps, ResolvedSidebarItem, ResolvedSidebarGroup } from '../types'
-import { getSidebarItemTestId } from '../utils'
+import { NavItem } from './NavItem'
 import { SpaceSelectorDropdown } from './SpaceSelectorDropdown'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarItem[]
   setupGroup: ResolvedSidebarGroup
 }
-
-const getBadgeAriaLabel = (label: string, count: number): string =>
-  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
-
-const NavItem = ({ item }: { item: ResolvedSidebarItem }): ReactElement => (
-  <SidebarMenuItem key={item.href} className="relative">
-    <SidebarMenuButton
-      size="lg"
-      isActive={item.isActive}
-      disabled={item.disabled}
-      data-testid={getSidebarItemTestId(item.label)}
-      className={`${css.sidebarInteractive} ${css.sidebarNavItem}`}
-      // No tooltip: when set, TooltipTrigger is used and does not forward disabled to the DOM.
-      render={!item.disabled ? <Link href={item.link} /> : undefined}
-    >
-      <item.icon />
-      <span>{item.label}</span>
-    </SidebarMenuButton>
-    {item.badge !== undefined && item.badge > 0 && (
-      <>
-        <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
-          {item.badge}
-        </span>
-        <span className={css.transactionsBadgeDot} aria-hidden />
-      </>
-    )}
-  </SidebarMenuItem>
-)
 
 export const SpacesSidebarVariant = ({
   selectedSpace,
@@ -66,9 +36,9 @@ export const SpacesSidebarVariant = ({
       {/* Main Navigation */}
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0">
             {mainNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
+              <NavItem key={item.href} item={item} isSpacesVariant />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
@@ -78,9 +48,9 @@ export const SpacesSidebarVariant = ({
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupLabel>{setupGroup.label}</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu>
+          <SidebarMenu className="gap-0">
             {setupGroup.items.map((item) => (
-              <NavItem key={item.href} item={item} />
+              <NavItem key={item.href} item={item} isSpacesVariant />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>

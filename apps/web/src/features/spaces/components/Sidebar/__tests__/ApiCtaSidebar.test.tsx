@@ -4,6 +4,7 @@ import { ApiCtaSidebar } from '../ApiCtaSidebar'
 
 const mockSetIsCollapsed = jest.fn()
 let mockIsCollapsed = false
+let mockSidebarState: 'expanded' | 'collapsed' = 'expanded'
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [mockIsCollapsed, mockSetIsCollapsed]))
 
@@ -18,16 +19,25 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     onClick,
+    render,
     'data-testid': testId,
   }: {
     children: ReactNode
     onClick?: () => void
+    render?: React.ReactElement<{ href?: string; target?: string; rel?: string }>
     'data-testid'?: string
   }) => (
     <button data-testid={testId} onClick={onClick}>
-      {children}
+      {render ? (
+        <a href={render.props.href} target={render.props.target} rel={render.props.rel}>
+          {children}
+        </a>
+      ) : (
+        children
+      )}
     </button>
   ),
+  useSidebar: () => ({ state: mockSidebarState, isMobile: false }),
 }))
 
 jest.mock('@/components/ui/button', () => ({
@@ -53,6 +63,7 @@ describe('ApiCtaSidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsCollapsed = false
+    mockSidebarState = 'expanded'
   })
 
   describe('expanded state (default)', () => {
@@ -146,6 +157,29 @@ describe('ApiCtaSidebar', () => {
       fireEvent.click(screen.getByTestId('api-cta-collapsed'))
 
       expect(mockSetIsCollapsed).toHaveBeenCalledWith(false)
+    })
+  })
+
+  describe('icon-collapsed sidebar state', () => {
+    beforeEach(() => {
+      mockSidebarState = 'collapsed'
+      mockIsCollapsed = false
+    })
+
+    it('renders the collapsed menu button even when CTA is expanded', () => {
+      render(<ApiCtaSidebar />)
+
+      expect(screen.getByTestId('api-cta-collapsed')).toBeInTheDocument()
+      expect(screen.queryByTestId('api-cta-sidebar')).not.toBeInTheDocument()
+    })
+
+    it('links to the API docs when collapsed', () => {
+      render(<ApiCtaSidebar />)
+
+      const link = screen.getByRole('link', { name: /API/i })
+      expect(link).toHaveAttribute('href', 'https://developer.safe.global/login')
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 })

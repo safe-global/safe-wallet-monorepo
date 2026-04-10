@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { withMockProvider } from '@/storybook/preview'
 import { EnhancedSidebar } from './index'
 import { SidebarSkeleton } from './SidebarSkeleton'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const SafeSidebarLayout = ({ children }: { children: ReactNode }) => (
-  <SidebarProvider defaultOpen>
+  <SidebarProvider defaultOpen style={{ '--sidebar-width': 'min(230px, 100%)' } as CSSProperties}>
     <div className="flex min-h-screen w-full">
       {children}
       <SidebarInset />
@@ -19,7 +20,7 @@ const meta = {
   component: EnhancedSidebar,
   args: {
     type: 'safe' as const,
-    spaceName: 'CompanyName',
+    spaceName: 'Company Space',
     spaceInitial: 'C',
   },
   argTypes: {
@@ -47,6 +48,89 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+const mockTxQueueState = {
+  txQueue: {
+    loading: false,
+    data: {
+      results: [{ type: 'TRANSACTION' }, { type: 'TRANSACTION' }, { type: 'TRANSACTION' }],
+    },
+  },
+}
+
+export const WithTransactions: Story = {
+  decorators: [withMockProvider({ initialState: mockTxQueueState })],
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+export const TransactionsActive: Story = {
+  decorators: [withMockProvider({ initialState: mockTxQueueState })],
+  parameters: {
+    nextjs: {
+      appDirectory: false,
+      router: {
+        pathname: '/transactions/queue',
+        query: {
+          spaceId: '1',
+          safe: 'eth:0x1234567890123456789012345678901234567890',
+        },
+      },
+    },
+  },
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+const outdatedSafeState = {
+  safeInfo: {
+    loading: false,
+    loaded: true,
+    data: {
+      implementationVersionState: ImplementationVersionState.OUTDATED,
+      version: '1.1.1',
+      deployed: true,
+      address: { value: '0x1234567890123456789012345678901234567890' },
+    },
+  },
+}
+
+export const OutdatedImplementation: Story = {
+  decorators: [withMockProvider({ initialState: outdatedSafeState, shadcn: true })],
+  render: (args) => (
+    <SafeSidebarLayout>
+      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+    </SafeSidebarLayout>
+  ),
+}
+
+const undeployedSafeState = {
+  safeInfo: {
+    loading: false,
+    loaded: true,
+    data: {
+      implementationVersionState: ImplementationVersionState.UP_TO_DATE,
+      version: '1.4.1',
+      deployed: false,
+      address: { value: '0x1234567890123456789012345678901234567890' },
+    },
+  },
+}
+
+export const UndeployedSafe: Story = {
+  decorators: [withMockProvider({ initialState: undeployedSafeState, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
       <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />

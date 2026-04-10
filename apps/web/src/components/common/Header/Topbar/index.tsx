@@ -7,20 +7,31 @@ import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { GlobalSearchFeature } from '@/features/global-search'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useDraftBatch } from '@/features/batching'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import SpaceSafeBar from '@/components/common/SpaceSafeBar'
+import SafenetStakingButton from './SafenetStakingButton'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
+  /** When provided, toggles the batch sidebar (Safe routes only) */
+  onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
+const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isMobile = useIsMobile()
   const {
     wallet,
@@ -31,9 +42,18 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
   const { GlobalSearchModal } = useLoadFeature(GlobalSearchFeature)
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
+  const isSpaceRoute = useIsSpaceRoute()
+  const safeAddress = useSafeAddress()
+  const isProposer = useIsWalletProposer()
+  const isSafeOwner = useIsSafeOwner()
+  const draftBatch = useDraftBatch()
+  const showSafeToken = useSafeTokenEnabled()
+
+  const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
     if (!spaceId) return
@@ -44,35 +64,63 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     if (!spaceId) return
     trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
   }
+
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isMobile)
 
   return (
     <>
       <header
-        className={`flex items-center justify-between w-full gap-4 p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${
-          showMenuButton ? 'pl-2' : ''
+        className={`flex flex-wrap items-center px-6 py-4 bg-secondary dark:bg-background ${
+          showMenuButton ? 'justify-between pl-2' : 'justify-between'
         }`}
       >
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          {showMenuButton ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onMenuToggle?.((open) => !open)}
-              aria-label="Open sidebar menu"
-            >
-              <Menu className="size-5" />
-            </Button>
-          ) : null}
+        {showMenuButton ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onMenuToggle?.((open) => !open)}
+            aria-label="Open sidebar menu"
+          >
+            <Menu className="size-5" />
+          </Button>
+        ) : null}
+
+        {/* Left content */}
+        <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
+          {isSpaceRoute ? (
+            // TODO: Global search
+            <div />
+          ) : (
+            <SpaceSafeBar />
+          )}
         </div>
 
-        <HeaderNavigation
-          walletAddress={wallet?.address ?? ''}
-          messages={unreadCount}
-          onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
-          onWalletClick={handleWalletClick}
-        />
+        {/* Right content: navigation buttons */}
+        <div className="flex items-center gap-1 shrink-0 max-md:ml-auto">
+          {showSafeToken && (
+            <div className="hidden sm:block">
+              <SafenetStakingButton />
+            </div>
+          )}
+
+          <HeaderNavigation
+            walletAddress={wallet?.address ?? ''}
+            walletEns={wallet?.ens}
+            isConnected={Boolean(wallet)}
+            walletIcon={wallet?.icon}
+            walletLabel={wallet?.label}
+            walletOpen={walletOpen}
+            messages={unreadCount}
+            showSearch={!isSpaceRoute}
+            onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
+            onWalletClick={handleWalletClick}
+            walletConnectSlot={<WalletConnectWidget />}
+            showBatch={!isSpaceRoute && showBatchButton}
+            batchCount={draftBatch.length}
+            onBatchClick={() => onBatchToggle?.((open) => !open)}
+          />
+        </div>
       </header>
 
       <GlobalSearchModal />

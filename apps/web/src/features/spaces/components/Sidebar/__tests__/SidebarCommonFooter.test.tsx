@@ -89,6 +89,10 @@ jest.mock('../config', () => ({
   },
 }))
 
+jest.mock('../ApiCtaSidebar', () => ({
+  ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
+}))
+
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()

@@ -2,35 +2,34 @@
 
 .topbar {
   @apply absolute top-0 right-0 z-[1];
+  left: 230px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 899.95px) {
   .topbar {
-    @apply left-0;
+    left: 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .mainSpace {
+    && {
+      @apply pt-0;
+    }
   }
 }
 
 .mainSpace {
   /* we need it in order to have higher importance than the .main class */
   && {
-    @apply pt-14;
+    @apply pt-20;
   }
-}
-
-.header {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  z-index: 1201;
-  background: var(--color-background-paper);
-  padding-top: env(safe-area-inset-top);
 }
 
 .main {
   background-color: var(--color-background-main);
   padding-left: 230px;
-  padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+  padding-top: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

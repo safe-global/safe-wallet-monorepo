@@ -29,7 +29,7 @@ jobs:
       - uses: ./.github/actions/yarn
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@v4.1.26
+        uses: CatChen/eslint-suggestion-action@v4.1.27
         with:
           request-changes: true
           fail-check: true
@@ -85,7 +85,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@v3.0.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook
