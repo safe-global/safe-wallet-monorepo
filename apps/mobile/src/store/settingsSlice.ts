@@ -18,6 +18,7 @@ export interface SettingsState {
   hideDust: boolean
   preferFiatInput: boolean
   dataCollectionConsented: boolean
+  screenProtectionDisabled: boolean
   env: EnvState
 }
 
@@ -29,6 +30,7 @@ const initialState: SettingsState = {
   hideDust: true,
   preferFiatInput: true,
   dataCollectionConsented: false,
+  screenProtectionDisabled: false,
   env: {
     rpc: {},
     tenderly: {
@@ -62,6 +64,9 @@ const settingsSlice = createSlice({
     },
     setDataCollectionConsented: (state, { payload }: PayloadAction<boolean>) => {
       state.dataCollectionConsented = payload
+    },
+    setScreenProtectionDisabled: (state, { payload }: PayloadAction<boolean>) => {
+      state.screenProtectionDisabled = payload
     },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
@@ -106,6 +111,11 @@ export const selectRpc = createSelector(selectSettingsState, (settings) => {
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
+export const selectScreenProtectionDisabled = createSelector(
+  selectSettingsState,
+  (settings) => settings.screenProtectionDisabled ?? false,
+)
+
 export const {
   updateSettings,
   resetSettings,
@@ -114,5 +124,6 @@ export const {
   setHideDust,
   setPreferFiatInput,
   setDataCollectionConsented,
+  setScreenProtectionDisabled,
 } = settingsSlice.actions
 export default settingsSlice.reducer

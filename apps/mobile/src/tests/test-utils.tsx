@@ -27,6 +27,7 @@ const defaultSettings: SettingsState = {
   hideDust: true,
   preferFiatInput: true,
   dataCollectionConsented: false,
+  screenProtectionDisabled: false,
   env: {
     rpc: {},
     tenderly: {
