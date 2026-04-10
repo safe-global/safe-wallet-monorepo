@@ -1,6 +1,8 @@
 import { ArrowUpRight, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '@/utils/cn'
+import type { SectionItemProps } from '../../sectionItems'
+import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
 
 interface NavigationItem {
   icon: ReactNode
@@ -14,10 +16,14 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
   { icon: <WalletCards className="size-5" />, label: 'Accounts' },
 ]
 
-const NavigateToSection = () => {
+const NavigateToSection = ({ query }: SectionItemProps) => {
+  const filteredItems = useGlobalSearchFilter(NAVIGATION_ITEMS, query, 'label')
+
+  if (filteredItems.length === 0) return null
+
   return (
     <div className="flex flex-col">
-      {NAVIGATION_ITEMS.map((item) => (
+      {filteredItems.map((item) => (
         <button
           key={item.label}
           type="button"

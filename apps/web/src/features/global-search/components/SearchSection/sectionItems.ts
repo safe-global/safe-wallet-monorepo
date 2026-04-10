@@ -2,10 +2,14 @@ import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
 import { TrustedSafesSection } from './sections/TrustedSafes'
 
+export interface SectionItemProps {
+  query: string
+}
+
 interface SectionItem {
   label: string
   activate: () => void
-  renderItem: () => React.ReactNode
+  renderItem: (props: SectionItemProps) => React.ReactNode
 }
 
 export const sectionItems: SectionItem[] = [

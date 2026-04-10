@@ -28,7 +28,7 @@ const GlobalSearchModal = () => {
           </div>
           <ScrollArea className="min-h-0 flex-1">
             <div className="flex flex-col gap-0.5">
-              <SearchSection />
+              <SearchSection query={query} />
             </div>
           </ScrollArea>
         </Card>
