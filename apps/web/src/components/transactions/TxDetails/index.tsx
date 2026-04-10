@@ -175,7 +175,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               txInfo={txDetails.txInfo}
               showMultisend={false}
               showDecodedData={!isDecodedDataVisible}
-              hideAuditLogFields={showAuditLog}
+              showAuditLogFields={!showAuditLog}
             />
           </ObservabilityErrorBoundary>
         </div>
