@@ -34,7 +34,7 @@ export const SidebarProfileView = ({
               render={
                 <SidebarMenuButton
                   size="lg"
-                  className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
+                  className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem, css.profileTrigger)}
                   data-testid="sidebar-profile-trigger"
                   aria-label="Profile menu"
                 />

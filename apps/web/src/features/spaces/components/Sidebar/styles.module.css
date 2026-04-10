@@ -313,6 +313,13 @@
   opacity: 0.7;
 }
 
-:global(.group[data-collapsible='icon']) .profileName {
-  display: none !important;
+:global(.group[data-collapsible='icon']) {
+  .profileName {
+    display: none !important;
+  }
+
+  .profileTrigger {
+    height: 3rem !important;
+    width: 3rem !important;
+  }
 }
