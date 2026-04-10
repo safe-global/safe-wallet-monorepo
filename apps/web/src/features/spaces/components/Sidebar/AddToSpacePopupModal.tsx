@@ -25,12 +25,12 @@ export const AddToSpacePopupModal = (): ReactElement => {
         </DialogClose>
       </div>
 
-      <div className="flex flex-col gap-6 px-6 pb-6 pt-2.5">
+      <div className="flex flex-col gap-4 sm:gap-6 px-6 pb-6 pt-2.5">
         <Typography variant="paragraph" color="muted">
           Bring related Safes into a shared workspace and collaborate with your team — all in one place.
         </Typography>
 
-        <div className="relative h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
+        <div className="relative h-[140px] sm:h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
           <Image
             src="/images/spaces/empty_dashboard.png"
             alt="Add to Space illustration"
@@ -39,7 +39,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
           />
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-5 sm:gap-8">
           {BENEFITS.map((text) => (
             <div key={text} className="flex gap-4 items-start">
               <div className="flex items-center justify-center size-6 rounded-full bg-sidebar-accent shrink-0">
