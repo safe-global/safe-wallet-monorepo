@@ -32,7 +32,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
 
         <div className="relative h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
           <Image
-            src="/images/spaces/create_space_info.png"
+            src="/images/spaces/empty_dashboard.png"
             alt="Add to Space illustration"
             fill
             className="object-contain"
@@ -42,8 +42,8 @@ export const AddToSpacePopupModal = (): ReactElement => {
         <div className="flex flex-col gap-8">
           {BENEFITS.map((text) => (
             <div key={text} className="flex gap-4 items-start">
-              <div className="flex items-center justify-center size-6 rounded-full bg-accent shrink-0">
-                <Check className="size-4 text-primary" />
+              <div className="flex items-center justify-center size-6 rounded-full bg-sidebar-accent shrink-0">
+                <Check className="size-4 primary" />
               </div>
               <Typography variant="paragraph-small" color="muted" className="leading-5">
                 {text}
