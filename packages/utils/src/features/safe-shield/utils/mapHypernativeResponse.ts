@@ -15,6 +15,7 @@ import {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type AnalysisResult } from '../types'
 import { sortBySeverity } from './analysisUtils'
+import { transformThreatAnalysisResponse } from './transformThreatAnalysisResponse'
 import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { ZeroAddress } from 'ethers'
 
@@ -33,14 +34,21 @@ export function mapHypernativeResponse(
     return createErrorResult(response.error)
   }
 
-  const assessment = response.assessmentData
-  const balanceChanges = assessment.balanceChanges
-    ? mapBalanceChanges(safeAddress, assessment.balanceChanges)
-    : undefined
+  const { threatAnalysis, findings, balanceChanges: hnBalanceChanges } = response.assessmentData
+
+  if (threatAnalysis) {
+    const threatResult = transformThreatAnalysisResponse(threatAnalysis)
+    return {
+      ...threatResult,
+      [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(findings.CUSTOM_CHECKS),
+    } as ThreatAnalysisResults
+  }
+
+  const balanceChanges = hnBalanceChanges ? mapBalanceChanges(safeAddress, hnBalanceChanges) : undefined
 
   return {
-    [StatusGroup.THREAT]: mapThreatFindings(assessment.findings.THREAT_ANALYSIS),
-    [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(assessment.findings.CUSTOM_CHECKS),
+    [StatusGroup.THREAT]: mapThreatFindings(findings.THREAT_ANALYSIS),
+    [StatusGroup.CUSTOM_CHECKS]: mapCustomChecksFindings(findings.CUSTOM_CHECKS),
     ...(balanceChanges && balanceChanges.length ? { BALANCE_CHANGE: balanceChanges } : {}),
   } as ThreatAnalysisResults
 }

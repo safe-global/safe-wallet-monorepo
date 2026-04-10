@@ -21,6 +21,11 @@ jest.mock('@/src/components/SelectSigner', () => ({
   SelectSigner: () => null,
 }))
 
+// Mock WalletConnectGate to avoid @reown/appkit-react-native ESM issues
+jest.mock('@/src/features/WalletConnect/components/WalletConnectGate', () => ({
+  WalletConnectGate: ({ children }: { children: React.ReactNode }) => children,
+}))
+
 describe('ReviewFooter', () => {
   const mockSigner: Signer = {
     value: '0x456' as `0x${string}`,

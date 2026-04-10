@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Post building comment
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@v3
         with:
           message-id: tx-builder-preview
           message: |
@@ -62,8 +62,7 @@ jobs:
 
       - name: Extract branch name
         id: extract_branch
-        shell: bash
-        run: echo "branch=$(echo $GITHUB_HEAD_REF | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')" >> $GITHUB_OUTPUT
+        uses: ./.github/actions/branch-slug
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -73,13 +72,13 @@ jobs:
 
       - name: Deploy to S3
         env:
-          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/tx-builder/${{ steps.extract_branch.outputs.branch }}
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/tx-builder/${{ steps.extract_branch.outputs.slug }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: aws s3 sync ./build $BUCKET --delete
 
       - name: Post deployment link
         if: always()
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@v3
         with:
           message-id: tx-builder-preview
           message: |
@@ -87,7 +86,7 @@ jobs:
             ✅ Deploy successful!
 
             **Preview URL:**
-            https://${{ steps.extract_branch.outputs.branch }}--tx-builder.review.5afe.dev/
+            https://${{ steps.extract_branch.outputs.slug }}--tx-builder.review.5afe.dev/
           message-failure: |
             ## tx-builder Preview
             ❌ Deploy failed!
