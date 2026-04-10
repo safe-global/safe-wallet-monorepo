@@ -28,6 +28,7 @@ import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
@@ -43,6 +44,7 @@ const SwapWidget = ({ sell }: Params) => {
   const { palette } = useTheme()
   const darkMode = useDarkMode()
   const chainId = useChainId()
+  const cowChainId = useMemo(() => parseCowSupportedChainId(chainId), [chainId])
   const dispatch = useAppDispatch()
   const swapParams = useAppSelector(selectSwapParams)
   const { safeAddress, safeLoading } = useSafeInfo()
@@ -70,7 +72,7 @@ const SwapWidget = ({ sell }: Params) => {
     appCode: 'Safe Wallet Swaps', // Name of your app (max 50 characters)
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
-    chainId,
+    chainId: cowChainId,
     baseUrl: cowSwapBaseUrl,
     standaloneMode: false,
     disableToastMessages: true,
@@ -226,7 +228,7 @@ const SwapWidget = ({ sell }: Params) => {
   useEffect(() => {
     setParams((params) => ({
       ...params,
-      chainId,
+      chainId: cowChainId,
       theme: {
         baseTheme: darkMode ? 'dark' : 'light',
         primary: palette.primary.main,
@@ -240,7 +242,7 @@ const SwapWidget = ({ sell }: Params) => {
         alert: palette.warning.main,
       },
     }))
-  }, [palette, darkMode, chainId])
+  }, [palette, darkMode, cowChainId])
 
   useEffect(() => {
     if (!sell) return
