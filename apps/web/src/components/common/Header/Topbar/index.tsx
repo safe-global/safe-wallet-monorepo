@@ -85,9 +85,11 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         ) : null}
 
         {/* Left content */}
-        <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
-          <SpaceSafeBar />
-        </div>
+        {!isSpaceRoute && (
+          <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
+            <SpaceSafeBar />
+          </div>
+        )}
 
         {/* Right content: navigation buttons */}
         <div className="flex items-center gap-1 shrink-0 max-md:ml-auto">
