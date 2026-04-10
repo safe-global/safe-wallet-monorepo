@@ -21,6 +21,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
+import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 
 export const SafeSidebarVariant = ({
   workspaceHeader,
@@ -30,16 +31,21 @@ export const SafeSidebarVariant = ({
   const router = useRouter()
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const isHydrated = useSidebarHydrated()
+
+  const safeAddress = isHydrated && typeof router.query.safe === 'string' ? router.query.safe : undefined
   const isOutdated =
-    safe.implementationVersionState === ImplementationVersionState.OUTDATED && !isNonCriticalUpdate(safe.version)
+    isHydrated &&
+    safe.implementationVersionState === ImplementationVersionState.OUTDATED &&
+    !isNonCriticalUpdate(safe.version)
   const settingsHref = {
     pathname: AppRoutes.settings.setup,
     query: safeAddress ? { safe: safeAddress } : {},
   }
   const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
-  const shouldRenderWorkspaceHeaderGroup = workspaceHeader.variant === 'backToSpace' || !isCounterfactualSafe
+  const shouldRenderWorkspaceHeaderGroup =
+    workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)
 
   return (
     <SidebarContent className={css.sidebarContent}>
