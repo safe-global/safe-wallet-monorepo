@@ -35,7 +35,7 @@ jest.mock('@/components/ui/sidebar', () => ({
     if (renderProp && !disabled) {
       // Next.js Link href can be a string or { pathname, query } object
       const rawHref = renderProp.props.href
-      const href = typeof rawHref === 'string' ? rawHref : rawHref?.pathname ?? ''
+      const href = typeof rawHref === 'string' ? rawHref : (rawHref?.pathname ?? '')
       return (
         <a href={href} data-testid={testId} className={className} data-active={isActive}>
           {children}
