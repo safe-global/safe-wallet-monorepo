@@ -57,6 +57,7 @@ export const NESTED_SAFE_EVENTS = {
 export enum NESTED_SAFE_LABELS {
   header = 'header',
   sidebar = 'sidebar',
+  space_safe_bar = 'space_safe_bar',
   list = 'list',
   success_screen = 'success_screen',
   first_time = 'first_time',
