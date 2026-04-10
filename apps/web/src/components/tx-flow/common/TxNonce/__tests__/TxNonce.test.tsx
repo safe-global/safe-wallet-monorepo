@@ -161,6 +161,16 @@ describe('TxNonce', () => {
       renderTxNonce({ nonce: 5, recommendedNonce: 5, safeTx }, undefined, { isRejection: false })
       expect(screen.getByRole('combobox')).toBeInTheDocument()
     })
+
+    it('locks nonce when confirming an existing rejection tx (isRejection from ConfirmTxFlow)', () => {
+      const safeTx = {
+        data: { nonce: 5, to: '0x123', value: '0', data: '0x', operation: 0 },
+        signatures: new Map(),
+      } as any
+      renderTxNonce({ nonce: 5, recommendedNonce: 5, safeTx }, undefined, { isRejection: true })
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
   })
 
   describe('canEdit prop', () => {
