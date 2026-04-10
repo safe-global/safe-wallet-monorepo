@@ -26,7 +26,7 @@ export const SidebarProfileView = ({
 }: SidebarProfileViewProps): ReactElement => (
   <>
     <Separator />
-    <SidebarFooter data-testid="sidebar-profile-section">
+    <SidebarFooter data-testid="sidebar-profile-section" className="py-1">
       <SidebarMenu>
         <SidebarMenuItem>
           <Popover>
@@ -48,8 +48,8 @@ export const SidebarProfileView = ({
 
             <PopoverContent
               side="top"
-              align="start"
-              sideOffset={4}
+              align="center"
+              sideOffset={12}
               className={css.profilePopover}
               data-testid="sidebar-profile-popover"
             >
