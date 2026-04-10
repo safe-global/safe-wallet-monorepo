@@ -34,6 +34,18 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_tag_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'github-actions[bot]'
+          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Verify PR commits are in main
         if: github.event.pull_request.merged != true
@@ -56,7 +68,7 @@ jobs:
 
       - name: Create a git tag
         if: steps.version.outputs.version
-        run: git tag ${{ steps.version.outputs.version }} && git push --tags
+        run: git tag -s ${{ steps.version.outputs.version }} -m "${{ steps.version.outputs.version }}" && git push --tags
 
       - name: Trigger Docker Hub release
         if: steps.version.outputs.version
