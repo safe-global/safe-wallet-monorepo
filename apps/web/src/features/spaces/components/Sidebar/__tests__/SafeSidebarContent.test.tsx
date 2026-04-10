@@ -56,8 +56,13 @@ jest.mock('../config', () => {
   }
 })
 
+const mockSafeSidebarVariant = jest.fn()
+
 jest.mock('../variants/SafeSidebarVariant', () => ({
-  SafeSidebarVariant: () => <div>Safe sidebar</div>,
+  SafeSidebarVariant: (props: unknown) => {
+    mockSafeSidebarVariant(props)
+    return <div>Safe sidebar</div>
+  },
 }))
 
 const defaultProps = { spaceName: 'Space', spaceInitial: 'S', spaces: [] }
@@ -209,6 +214,26 @@ describe('SafeSidebarContent', () => {
       const [, , options] = getCallArgs()
       expect(options.isItemDisabled({ href: AppRoutes.transactions.history } as SidebarItemConfig)).toBe(false)
       expect(options.isItemDisabled({ href: AppRoutes.home } as SidebarItemConfig)).toBe(false)
+    })
+  })
+
+  describe('onSpaceAdded propagation', () => {
+    it('passes onSpaceAdded into the addToWorkspace workspaceHeader when no space is selected', () => {
+      const onSpaceAdded = jest.fn()
+      render(
+        <GeoblockingContext.Provider value={false}>
+          <SafeSidebarContent spaces={[{ id: 1, name: 'My Space', safeCount: 0 }]} onSpaceAdded={onSpaceAdded} />
+        </GeoblockingContext.Provider>,
+      )
+
+      expect(mockSafeSidebarVariant).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workspaceHeader: expect.objectContaining({
+            variant: 'addToWorkspace',
+            onSpaceAdded,
+          }),
+        }),
+      )
     })
   })
 

@@ -77,6 +77,26 @@ describe('useAddSafeToSpace', () => {
     expect(success).toBe(false)
   })
 
+  it('dispatches an error notification with the correct message content when API fails', async () => {
+    mockAddSafeToSpace.mockResolvedValue({ error: new Error('API error') })
+    const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+    await act(async () => {
+      await result.current.addToSpace(5)
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'notifications/add',
+        payload: expect.objectContaining({
+          message: 'Failed to add Safe to workspace.',
+          variant: 'error',
+          groupKey: 'add-safe-to-workspace-error',
+        }),
+      }),
+    )
+  })
+
   it('returns false without calling the mutation when chain is missing', async () => {
     mockUseCurrentChain.mockReturnValue(null)
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
