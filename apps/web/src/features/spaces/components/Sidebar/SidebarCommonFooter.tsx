@@ -5,6 +5,7 @@ import { icons } from './config'
 import css from './styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import { Switch } from '@/components/ui/switch'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
@@ -56,6 +57,9 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
             render={<a href={`${HELP_CENTER_URL}/en/`} target="_blank" rel="noopener noreferrer" />}
             data-testid="list-item-need-help"
+            onClick={() =>
+              trackEvent({ ...OVERVIEW_EVENTS.HELP_CENTER }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' })
+            }
           >
             <icons.CircleHelp />
             <span>Help</span>

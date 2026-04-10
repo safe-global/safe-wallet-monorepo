@@ -1,9 +1,16 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
 const mockUseDarkMode = jest.fn()
+const mockTrackEvent = jest.fn()
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+  OVERVIEW_EVENTS: { HELP_CENTER: { action: 'Open Help Center' } },
+  MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
+}))
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockUseAppDispatch(),
@@ -25,11 +32,13 @@ jest.mock('@/components/ui/sidebar', () => ({
     render: renderProp,
     className,
     'data-testid': testId,
+    onClick,
   }: {
     children: ReactNode
     render?: ReactElement<{ href: string; target?: string; rel?: string }>
     className?: string
     'data-testid'?: string
+    onClick?: () => void
   }) =>
     renderProp ? (
       <a
@@ -38,11 +47,12 @@ jest.mock('@/components/ui/sidebar', () => ({
         href={renderProp.props.href}
         target={renderProp.props.target}
         rel={renderProp.props.rel}
+        onClick={onClick}
       >
         {children}
       </a>
     ) : (
-      <button data-testid={testId} className={className}>
+      <button data-testid={testId} className={className} onClick={onClick}>
         {children}
       </button>
     ),
@@ -99,6 +109,16 @@ describe('SidebarCommonFooter', () => {
     isProductionMock = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
+  })
+
+  it('fires HELP_CENTER tracking event when clicking the Help button', () => {
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('list-item-need-help'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'Open Help Center' }),
+      expect.objectContaining({ sidebarElement: 'Help Center' }),
+    )
   })
 
   it('renders footer and help entry', () => {
