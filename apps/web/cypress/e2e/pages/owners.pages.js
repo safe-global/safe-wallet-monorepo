@@ -172,8 +172,7 @@ export function verifyTooltiptext(text) {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click({ force: true })
-  cy.get(sentinelStart).next().should('be.visible')
+  cy.get('[data-testid="open-account-center"]').click()
 }
 
 export function clickOnDisconnectBtn() {

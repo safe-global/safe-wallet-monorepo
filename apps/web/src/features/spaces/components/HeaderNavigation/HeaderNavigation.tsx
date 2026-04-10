@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
+import BatchTooltip from '@/features/batching/components/BatchTooltip'
 
 export interface HeaderNavigationProps {
   /**
@@ -144,28 +145,30 @@ export function HeaderNavigation({
       {walletConnectSlot}
 
       {showBatch && (
-        <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
-          <div className="relative" data-track="batching: Batch sidebar open">
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              onClick={onBatchClick}
-              className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-              aria-label="Batch transactions"
-            >
-              <Layers className="size-5 text-muted-foreground" />
-            </Button>
-
-            {batchCount > 0 && (
-              <span
-                className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
-                aria-label={`${batchCount} batched transactions`}
+        <BatchTooltip>
+          <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
+            <div className="relative" data-track="batching: Batch sidebar open">
+              <Button
+                variant="ghost"
+                size="icon-lg"
+                onClick={onBatchClick}
+                className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+                aria-label="Batch transactions"
               >
-                {batchCount > 99 ? '99+' : batchCount}
-              </span>
-            )}
-          </div>
-        </Track>
+                <Layers className="size-5 text-muted-foreground" />
+              </Button>
+
+              {batchCount > 0 && (
+                <span
+                  className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
+                  aria-label={`${batchCount} batched transactions`}
+                >
+                  {batchCount > 99 ? '99+' : batchCount}
+                </span>
+              )}
+            </div>
+          </Track>
+        </BatchTooltip>
       )}
 
       <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>

@@ -36,7 +36,8 @@ export function addToBatch(EOA, currentNonce, amount) {
   selectComboButtonOption('addToBatch')
 
   addToBatchButton()
-  cy.contains(transactionAddedToBatchStr).click().should('not.be.visible')
+  cy.contains(transactionAddedToBatchStr).click({ force: true })
+  cy.contains(transactionAddedToBatchStr).should('not.exist')
 }
 
 function fillTransactionData(EOA, amount) {
@@ -69,6 +70,10 @@ function addToBatchButton() {
 export function openBatchtransactionsModal() {
   cy.get(batchTxTopBar).should('be.visible').click()
   cy.contains(batchedTransactionsStr).should('be.visible')
+}
+
+export function closeBatchtransactionsModal() {
+  cy.get('aside').find('[aria-label="close"]').click()
 }
 
 export function openNewTransactionModal() {

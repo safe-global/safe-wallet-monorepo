@@ -5,6 +5,11 @@ import SuccessIcon from '@/public/images/common/success.svg'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { CustomTooltip } from '@/components/common/CustomTooltip'
 
+/**
+ * @deprecated Used only by the legacy MUI BatchIndicator.
+ * Remove this entire directory once the Header migration to TopBar is complete.
+ * New code should use `@/features/batching/components/BatchTooltip` instead.
+ */
 const BatchTooltip = ({ children }: { children: ReactElement }) => {
   const [showTooltip, setShowTooltip] = useState<boolean>(false)
 
