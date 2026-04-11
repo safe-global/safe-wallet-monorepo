@@ -12,6 +12,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
+import { useTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlChainId } from '@/hooks/useChainId'
 import type { ScanContext } from '@/features/security/data/scanners/types'
@@ -29,6 +30,12 @@ const useSafePageScanContext = (): ScanContext | null => {
   const isMultichain = useIsMultichainSafe() ?? false
   const latestVersion = getLatestSafeVersion(chain)
   const { currentData: safeOverview } = useGetSafeOverviewQuery(
+    { chainId: safe.chainId, safeAddress: safe.address.value },
+    { skip: !safeLoaded },
+  )
+
+  // Fetch creation transaction for factory/deployment validation
+  const { currentData: creationTx } = useTransactionsGetCreationTransactionV1Query(
     { chainId: safe.chainId, safeAddress: safe.address.value },
     { skip: !safeLoaded },
   )
@@ -108,6 +115,14 @@ const useSafePageScanContext = (): ScanContext | null => {
       isMultichain,
       multichainSignersConsistent,
       multichainDeviatingChains,
+      creationInfo: creationTx
+        ? {
+            factoryAddress: creationTx.factoryAddress ?? null,
+            creator: creationTx.creator,
+            masterCopy: creationTx.masterCopy ?? null,
+            transactionHash: creationTx.transactionHash,
+          }
+        : null,
     }
   }, [
     safe,
@@ -125,6 +140,7 @@ const useSafePageScanContext = (): ScanContext | null => {
     multichainSafeItems,
     undeployedSafes,
     allChains,
+    creationTx,
   ])
 }
 

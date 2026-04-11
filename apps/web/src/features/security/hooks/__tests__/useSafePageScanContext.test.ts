@@ -40,6 +40,9 @@ jest.mock('@/store/api/gateway', () => ({
   useGetSafeOverviewQuery: jest.fn(),
   useGetMultipleSafeOverviewsQuery: jest.fn(),
 }))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
+  useTransactionsGetCreationTransactionV1Query: jest.fn(),
+}))
 jest.mock('@/store', () => ({ useAppSelector: jest.fn() }))
 jest.mock('@/store/slices', () => ({ selectCurrency: jest.fn(), selectUndeployedSafes: jest.fn() }))
 jest.mock('@/features/multichain/hooks/useIsMultichainSafe', () => ({ useIsMultichainSafe: jest.fn() }))
@@ -65,6 +68,7 @@ import { useAllSafesGrouped } from '@/hooks/safes'
 import { useGetSafeOverviewQuery, useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
+import { useTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 function setupDefaults(overrides: Partial<typeof mockSafeInfo> = {}) {
   const info = { ...mockSafeInfo, ...overrides }
@@ -81,6 +85,7 @@ function setupDefaults(overrides: Partial<typeof mockSafeInfo> = {}) {
   ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({ currentData: undefined })
   ;(useAppSelector as jest.Mock).mockReturnValue({})
   ;(useIsMultichainSafe as jest.Mock).mockReturnValue(false)
+  ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
 }
 
 // ── tests ──────────────────────────────────────────────────────────────

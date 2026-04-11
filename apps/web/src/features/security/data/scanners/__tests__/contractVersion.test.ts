@@ -101,4 +101,35 @@ describe('contractVersionScanner', () => {
     )
     expect(result.status).toBe('clear')
   })
+
+  it('returns partial when original deployment used unrecognized implementation', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        creationInfo: {
+          factoryAddress: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+          creator: '0x1234',
+          masterCopy: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+          transactionHash: '0xabc',
+        },
+      }),
+    )
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+    expect(result.score).toBe(60)
+  })
+
+  it('returns clear when creation master copy is a known deployment', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        chainId: '1',
+        creationInfo: {
+          factoryAddress: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+          creator: '0x1234',
+          masterCopy: '0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552',
+          transactionHash: '0xabc',
+        },
+      }),
+    )
+    expect(result.status).toBe('clear')
+  })
 })

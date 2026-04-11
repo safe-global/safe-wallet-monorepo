@@ -30,5 +30,6 @@ export const createMockContext = (overrides: Partial<ScanContext> = {}): ScanCon
   isMultichain: false,
   multichainSignersConsistent: true,
   multichainDeviatingChains: [],
+  creationInfo: null,
   ...overrides,
 })

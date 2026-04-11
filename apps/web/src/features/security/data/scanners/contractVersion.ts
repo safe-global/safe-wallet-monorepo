@@ -86,6 +86,24 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
+    // Check if original deployment used a recognized implementation
+    const { creationInfo } = ctx
+    if (creationInfo?.masterCopy && !isKnownImplementation(creationInfo.masterCopy, chainId)) {
+      return {
+        status: 'partial',
+        severity: 'Medium',
+        score: 60,
+        evidence: [
+          { label: 'Current version', value: versionLabel },
+          { label: 'Original implementation', value: `${creationInfo.masterCopy.slice(0, 10)}...` },
+          { label: 'Status', value: 'Deployed with unrecognized implementation' },
+        ],
+        remediation:
+          'This Safe was originally deployed with an unrecognized implementation contract. The current version is up to date, but the deployment origin could not be verified.',
+        lastChecked: now,
+      }
+    }
+
     return {
       status: 'clear',
       severity: 'Low',

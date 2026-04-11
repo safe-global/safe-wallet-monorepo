@@ -166,6 +166,11 @@ const entryToRow = (entry: AuditLogEntry, getTxDetailLink?: TxLinkFn) => {
               {meta.label}
             </Typography>
             {description && <Box sx={{ mt: 0.5 }}>{description}</Box>}
+            {transaction.note && (
+              <Typography variant="caption" color="text.secondary" display="block" mt={0.5} fontStyle="italic">
+                {transaction.note}
+              </Typography>
+            )}
           </Box>
         ),
       },
