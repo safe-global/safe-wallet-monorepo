@@ -7,7 +7,7 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/store/slices'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
-import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
+import type { ScanResult } from '@/features/security/data/scanners/types'
 import { scanKey } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'

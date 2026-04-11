@@ -1,16 +1,11 @@
 import type { SecurityScanner } from './types'
 import { accountSetupScanner } from './accountSetup'
-import { signerActivityScanner } from './signerActivity'
-import { signerIntegrityScanner } from './signerIntegrity'
 import { multichainSetupScanner } from './multichainSetup'
 import { contractVersionScanner } from './contractVersion'
 import { modulesScanner } from './modules'
 import { guardScanner } from './guard'
 import { pendingTxScanner } from './pendingTx'
-import { tokenApprovalsScanner } from './tokenApprovals'
 import { recoveryScanner } from './recovery'
-import { addressBookScanner } from './addressBook'
-import { trustedSafeScanner } from './trustedSafe'
 import { transactionScanningScanner } from './transactionScanning'
 
 export const SCANNERS: SecurityScanner[] = [
