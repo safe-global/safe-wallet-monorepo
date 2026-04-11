@@ -106,7 +106,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       balanceUsd: Number(safeOverview?.fiatTotal) || 0,
       // TODO: wire real data when these scanners are activated
       addressBookEntryCount: 0,
-      queuedTxCount: 0,
+      queuedTxCount: safeOverview?.queued ?? 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
       chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
       isTrustedSafe: false,

@@ -58,13 +58,13 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
     fixRoute: AppRoutes.settings.security,
     ctaLabel: 'Learn more',
   },
-  // pending_tx: {
-  //   id: 'pending_tx',
-  //   title: 'Pending transactions',
-  //   shortDescription: 'Unexecuted transactions that may need review or cleanup.',
-  //   fixRoute: AppRoutes.transactions.queue,
-  //   ctaLabel: 'Review queue',
-  // },
+  pending_tx: {
+    id: 'pending_tx',
+    title: 'Pending transactions',
+    shortDescription: 'Unexecuted transactions that may need review or cleanup.',
+    fixRoute: AppRoutes.transactions.queue,
+    ctaLabel: 'Review queue',
+  },
   // token_approvals: {
   //   id: 'token_approvals',
   //   title: 'Token approvals',
