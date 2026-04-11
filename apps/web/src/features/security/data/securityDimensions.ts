@@ -30,19 +30,19 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
   //   fixRoute: AppRoutes.settings.setup,
   //   ctaLabel: 'Review signers',
   // },
-  multichain_setup: {
-    id: 'multichain_setup',
-    title: 'Multichain setup',
-    shortDescription: 'Whether signers are consistent across all networks this Safe is deployed on.',
-    fixRoute: AppRoutes.settings.setup,
-    ctaLabel: 'Review signers',
-  },
   contract_version: {
     id: 'contract_version',
     title: 'Contract version',
     shortDescription: 'Whether the Safe is running the latest and most secure version.',
     fixRoute: AppRoutes.settings.modules,
     ctaLabel: 'Update',
+  },
+  multichain_setup: {
+    id: 'multichain_setup',
+    title: 'Multichain setup',
+    shortDescription: 'Whether signers are consistent across all networks this Safe is deployed on.',
+    fixRoute: AppRoutes.settings.setup,
+    ctaLabel: 'Review signers',
   },
   // modules: {
   //   id: 'modules',

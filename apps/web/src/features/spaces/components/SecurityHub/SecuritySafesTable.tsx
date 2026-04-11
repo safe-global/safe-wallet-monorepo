@@ -2,6 +2,7 @@ import { type ReactElement, useState, useCallback, Fragment } from 'react'
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   Paper,
   Stack,
@@ -14,46 +15,51 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded'
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
-import { getGradeColor } from '@/features/spaces/data/securityScoring'
-import type { ScanResult } from '@/features/spaces/data/scanners/types'
-import {
-  scanKey,
-  formatTimestamp,
-  computeSummary,
-  severityRank,
-  type GradeSummary,
-} from '@/features/spaces/data/scanners/utils'
+import { getStrengthLevel, getStrengthColor } from '@/features/security/data/securityScoring'
+import type { ScanResult } from '@/features/security/data/scanners/types'
+import { scanKey, computeSummary, severityRank, type GradeSummary } from '@/features/security/data/scanners/utils'
 import Identicon from '@/components/common/Identicon'
+import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const DASH = '—'
 
-const GradeCell = ({ summary }: { summary: GradeSummary | null }) =>
-  summary ? (
+const StrengthCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
+  if (isScanning) {
+    return <CircularProgress size={16} thickness={5} />
+  }
+  if (!summary) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        {DASH}
+      </Typography>
+    )
+  }
+  const clearRatio = summary.healthy / (summary.atRisk + summary.needsAttention + summary.healthy)
+  const level = getStrengthLevel(clearRatio)
+  const color = getStrengthColor(level)
+
+  return (
     <Stack direction="row" alignItems="center" spacing={1}>
       <Box
         sx={{
           width: 10,
           height: 10,
           borderRadius: '50%',
-          backgroundColor: getGradeColor(summary.grade),
+          backgroundColor: color,
           flexShrink: 0,
         }}
       />
       <Typography variant="body2" fontWeight={600}>
-        {summary.grade}
+        {level}
       </Typography>
     </Stack>
-  ) : (
-    <Typography variant="body2" color="text.secondary">
-      {DASH}
-    </Typography>
   )
+}
 
 const CountCell = ({ count }: { count: number | undefined }) => (
   <Typography variant="body2" fontWeight={count && count > 0 ? 700 : 400} color="text.primary">
@@ -65,16 +71,16 @@ type SecuritySafesTableProps = {
   safes: SpaceSafeEntry[]
   onViewReport: (address: string, chainId: string) => void
   selectedSafe: SelectedSafe | null
-  scanTimestamps: Record<string, number>
   scanResults: Record<string, Record<string, ScanResult>>
+  scanningKeys?: Set<string>
 }
 
 const SecuritySafesTable = ({
   safes,
   onViewReport,
   selectedSafe,
-  scanTimestamps,
   scanResults,
+  scanningKeys,
 }: SecuritySafesTableProps): ReactElement => {
   const [expandedAddresses, setExpandedAddresses] = useState<Set<string>>(new Set())
 
@@ -118,13 +124,9 @@ const SecuritySafesTable = ({
     }
   }
 
-  const getAggregateLastScanned = (safe: SpaceSafeEntry): number | undefined => {
-    let latest: number | undefined
-    for (const chain of safe.chainEntries) {
-      const ts = scanTimestamps[scanKey(safe.address, chain.chainId)]
-      if (ts && (!latest || ts > latest)) latest = ts
-    }
-    return latest
+  const isAnyChainScanning = (safe: SpaceSafeEntry): boolean => {
+    if (!scanningKeys) return false
+    return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
   }
 
   return (
@@ -137,8 +139,7 @@ const SecuritySafesTable = ({
             <TableCell>At risk</TableCell>
             <TableCell>Needs attention</TableCell>
             <TableCell>Healthy</TableCell>
-            <TableCell>Risk</TableCell>
-            <TableCell>Last scanned</TableCell>
+            <TableCell>Setup strength</TableCell>
             <TableCell align="right" />
           </TableRow>
         </TableHead>
@@ -151,6 +152,7 @@ const SecuritySafesTable = ({
               const key = scanKey(safe.address, safe.chainId)
               const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
               const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
+              const isScanning = scanningKeys?.has(key)
 
               return (
                 <TableRow key={key} selected={isSelected}>
@@ -168,7 +170,7 @@ const SecuritySafesTable = ({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <NetworkLogosList networks={[{ chainId: safe.chainId }]} />
+                    <ChainIndicator chainId={safe.chainId} responsive />
                   </TableCell>
                   <TableCell>
                     <CountCell count={summary?.atRisk} />
@@ -180,28 +182,22 @@ const SecuritySafesTable = ({
                     <CountCell count={summary?.healthy} />
                   </TableCell>
                   <TableCell>
-                    <GradeCell summary={summary} />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatTimestamp(scanTimestamps[key])}
-                    </Typography>
+                    <StrengthCell summary={summary} isScanning={isScanning} />
                   </TableCell>
                   <TableCell align="right">
                     {safe.chainEntries[0]?.isDeployed !== false ? (
                       <Button
-                        variant="text"
+                        variant={isSelected ? 'contained' : 'text'}
                         size="small"
-                        endIcon={
-                          isSelected ? (
-                            <KeyboardArrowUpRoundedIcon />
-                          ) : (
-                            <ArrowForwardIcon sx={{ fontSize: '16px !important' }} />
-                          )
-                        }
+                        startIcon={<VisibilityRoundedIcon />}
                         onClick={() => onViewReport(safe.address, safe.chainId)}
+                        sx={
+                          isSelected
+                            ? { backgroundColor: 'text.primary', '&:hover': { backgroundColor: 'text.primary' } }
+                            : {}
+                        }
                       >
-                        {isSelected ? 'Close' : 'Checks'}
+                        {isSelected ? 'Close' : 'View report'}
                       </Button>
                     ) : (
                       <Tooltip title="Safe not yet deployed on this network">
@@ -218,7 +214,7 @@ const SecuritySafesTable = ({
             }
 
             const aggregateSummary = getAggregateSummary(safe)
-            const aggregateLastScanned = getAggregateLastScanned(safe)
+            const aggregateScanning = isAnyChainScanning(safe)
 
             return (
               <Fragment key={safe.address}>
@@ -245,7 +241,7 @@ const SecuritySafesTable = ({
                           toggleExpand(safe.address)
                         }}
                       >
-                        <ExpandMoreIcon
+                        <ExpandMoreRoundedIcon
                           sx={{
                             fontSize: 18,
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -256,7 +252,14 @@ const SecuritySafesTable = ({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <NetworkLogosList networks={safe.chainEntries.map((c) => ({ chainId: c.chainId }))} showHasMore />
+                    <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: '6px' }}>
+                      <NetworkLogosList networks={safe.chainEntries.slice(0, 3).map((c) => ({ chainId: c.chainId }))} />
+                      {safe.chainEntries.length > 3 && (
+                        <Typography variant="caption" color="text.secondary">
+                          +{safe.chainEntries.length - 3}
+                        </Typography>
+                      )}
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <CountCell count={aggregateSummary?.atRisk} />
@@ -268,12 +271,7 @@ const SecuritySafesTable = ({
                     <CountCell count={aggregateSummary?.healthy} />
                   </TableCell>
                   <TableCell>
-                    <GradeCell summary={aggregateSummary} />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatTimestamp(aggregateLastScanned)}
-                    </Typography>
+                    <StrengthCell summary={aggregateSummary} isScanning={aggregateScanning} />
                   </TableCell>
                   <TableCell align="right" />
                 </TableRow>
@@ -282,6 +280,7 @@ const SecuritySafesTable = ({
                   const key = scanKey(safe.address, chain.chainId)
                   const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
                   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
+                  const isScanning = scanningKeys?.has(key)
 
                   return (
                     <TableRow
@@ -298,7 +297,7 @@ const SecuritySafesTable = ({
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <NetworkLogosList networks={[{ chainId: chain.chainId }]} />
+                        <ChainIndicator chainId={chain.chainId} responsive />
                       </TableCell>
                       <TableCell>
                         <CountCell count={summary?.atRisk} />
@@ -310,28 +309,22 @@ const SecuritySafesTable = ({
                         <CountCell count={summary?.healthy} />
                       </TableCell>
                       <TableCell>
-                        <GradeCell summary={summary} />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatTimestamp(scanTimestamps[key])}
-                        </Typography>
+                        <StrengthCell summary={summary} isScanning={isScanning} />
                       </TableCell>
                       <TableCell align="right">
                         {chain.isDeployed ? (
                           <Button
-                            variant="text"
+                            variant={isSelected ? 'contained' : 'text'}
                             size="small"
-                            endIcon={
-                              isSelected ? (
-                                <KeyboardArrowUpRoundedIcon />
-                              ) : (
-                                <ArrowForwardIcon sx={{ fontSize: '16px !important' }} />
-                              )
-                            }
+                            startIcon={<VisibilityRoundedIcon />}
                             onClick={() => onViewReport(safe.address, chain.chainId)}
+                            sx={
+                              isSelected
+                                ? { backgroundColor: 'text.primary', '&:hover': { backgroundColor: 'text.primary' } }
+                                : {}
+                            }
                           >
-                            {isSelected ? 'Close' : 'Checks'}
+                            {isSelected ? 'Close' : 'View report'}
                           </Button>
                         ) : (
                           <Tooltip title="Safe not yet deployed on this network">

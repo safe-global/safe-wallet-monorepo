@@ -32,3 +32,22 @@ const GRADE_BG_COLORS: Record<SecurityGrade, string> = {
 export const getGradeColor = (grade: SecurityGrade): string => GRADE_COLORS[grade]
 
 export const getGradeBgColor = (grade: SecurityGrade): string => GRADE_BG_COLORS[grade]
+
+// Strength-based framing (positive: higher = better)
+export type StrengthLevel = 'Strong' | 'Moderate' | 'Weak' | 'Critical'
+
+export const getStrengthLevel = (clearRatio: number): StrengthLevel => {
+  if (clearRatio >= 0.83) return 'Strong'
+  if (clearRatio >= 0.5) return 'Moderate'
+  if (clearRatio >= 0.17) return 'Weak'
+  return 'Critical'
+}
+
+const STRENGTH_COLORS: Record<StrengthLevel, string> = {
+  Strong: 'success.main',
+  Moderate: 'warning.main',
+  Weak: 'error.main',
+  Critical: 'error.main',
+}
+
+export const getStrengthColor = (level: StrengthLevel): string => STRENGTH_COLORS[level]

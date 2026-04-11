@@ -1,4 +1,5 @@
 import type { ScanResult } from './types'
+import type { SecurityGrade } from '../securityTypes'
 import { getGrade } from '../securityScoring'
 
 export const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
@@ -17,7 +18,7 @@ export type GradeSummary = {
   atRisk: number
   needsAttention: number
   healthy: number
-  grade: ReturnType<typeof getGrade>
+  grade: SecurityGrade
 }
 
 export const computeSummary = (results: Record<string, ScanResult>): GradeSummary | null => {
