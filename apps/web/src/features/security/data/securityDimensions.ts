@@ -30,8 +30,8 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
   // },
   // signer_integrity: {
   //   id: 'signer_integrity',
-  //   title: 'Signer integrity',
-  //   shortDescription: 'Whether any signers are flagged as compromised or sanctioned.',
+  //   title: 'Signer screening',
+  //   shortDescription: 'Whether any signers have exposure to sanctioned or flagged sources.',
   //   fixRoute: AppRoutes.settings.setup,
   //   ctaLabel: 'Review signers',
   //   category: 'account',

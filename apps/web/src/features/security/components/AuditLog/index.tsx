@@ -1,5 +1,5 @@
 import { type ReactElement, type ReactNode, useMemo } from 'react'
-import { Box, Button, Skeleton, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Skeleton, Stack, Typography } from '@mui/material'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import Link from 'next/link'
 import type {
@@ -162,9 +162,21 @@ const entryToRow = (entry: AuditLogEntry, getTxDetailLink?: TxLinkFn) => {
         mobileLabel: 'Event',
         content: (
           <Box>
-            <Typography variant="body2" fontWeight={600}>
-              {meta.label}
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="body2" fontWeight={600}>
+                {meta.label}
+              </Typography>
+              {entry.warnings.map((w) => (
+                <Chip
+                  key={w.label}
+                  label={w.label}
+                  size="small"
+                  color={w.severity === 'error' ? 'error' : 'warning'}
+                  variant="outlined"
+                  sx={{ height: 20, fontSize: '0.7rem' }}
+                />
+              ))}
+            </Stack>
             {description && <Box sx={{ mt: 0.5 }}>{description}</Box>}
             {transaction.note && (
               <Typography variant="caption" color="text.secondary" display="block" mt={0.5} fontStyle="italic">

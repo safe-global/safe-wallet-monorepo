@@ -5,12 +5,15 @@ export const signerIntegrityScanner: SecurityScanner = {
   scan: async () => {
     const now = new Date().toISOString()
 
+    // TODO: Requires server-side proxy (CGW endpoint) for Blockaid Risk Exposure API.
+    // Browser CORS blocks direct calls to api.blockaid.io.
+    // See: https://docs.blockaid.io — POST /v0/address/risk-exposure
     return {
       status: 'partial' as const,
       severity: 'Medium' as const,
       score: 50,
-      evidence: ['Automated sanctions and compromise screening not yet available'],
-      remediation: 'Manually verify that no signers appear on sanctions lists or have been compromised.',
+      evidence: [{ label: 'Status', value: 'Automated screening not yet available' }],
+      remediation: 'Manually verify that all signers are trustworthy and have not been compromised.',
       lastChecked: now,
     }
   },
