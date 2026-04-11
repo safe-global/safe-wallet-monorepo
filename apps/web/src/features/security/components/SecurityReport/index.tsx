@@ -3,10 +3,11 @@ import { Box, Fade, Skeleton, Stack } from '@mui/material'
 import useSecurityScan from '@/features/security/hooks/useSecurityScan'
 import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
 import SecurityStrengthBar from '@/features/security/components/SecurityStrengthBar'
-import DimensionGrid from './DimensionGrid'
+import DimensionGrid, { type CtaOverride } from './DimensionGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
+  ctaOverrides?: Record<string, CtaOverride>
   onScanComplete?: (
     safeAddress: string,
     chainId: string,
@@ -15,7 +16,7 @@ type SecurityReportProps = {
   ) => void
 }
 
-const SecurityReport = ({ scanContext, onScanComplete }: SecurityReportProps): ReactElement => {
+const SecurityReport = ({ scanContext, ctaOverrides, onScanComplete }: SecurityReportProps): ReactElement => {
   const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
@@ -50,7 +51,7 @@ const SecurityReport = ({ scanContext, onScanComplete }: SecurityReportProps): R
           lastScannedAt={lastScannedAt}
           onRescan={rescan}
         />
-        <DimensionGrid results={results} loading={loading} />
+        <DimensionGrid results={results} loading={loading} ctaOverrides={ctaOverrides} />
       </Box>
     </Fade>
   )

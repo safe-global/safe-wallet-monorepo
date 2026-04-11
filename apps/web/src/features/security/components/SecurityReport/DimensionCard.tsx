@@ -18,9 +18,11 @@ type DimensionCardProps = {
   def: DimensionDef
   result?: ScanResult
   isScanning: boolean
+  onCtaClick?: () => void
+  clearCtaLabel?: string
 }
 
-const DimensionCard = ({ def, result, isScanning }: DimensionCardProps): ReactElement => {
+const DimensionCard = ({ def, result, isScanning, onCtaClick, clearCtaLabel }: DimensionCardProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
 
@@ -92,20 +94,63 @@ const DimensionCard = ({ def, result, isScanning }: DimensionCardProps): ReactEl
               —
             </Typography>
           )}
-          {needsFix && (
-            <Button
-              component={Link}
-              href={def.fixRoute}
-              target="_blank"
-              variant="text"
-              size="small"
-              endIcon={<ArrowForwardRoundedIcon />}
-              onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              sx={{ px: 1 }}
-            >
-              {result?.ctaLabelOverride ?? def.ctaLabel}
-            </Button>
-          )}
+          {needsFix &&
+            (onCtaClick ? (
+              <Button
+                variant="text"
+                size="small"
+                endIcon={<ArrowForwardRoundedIcon />}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation()
+                  onCtaClick()
+                }}
+                sx={{ px: 1 }}
+              >
+                {result?.ctaLabelOverride ?? def.ctaLabel}
+              </Button>
+            ) : (
+              <Button
+                component={Link}
+                href={def.fixRoute}
+                target="_blank"
+                variant="text"
+                size="small"
+                endIcon={<ArrowForwardRoundedIcon />}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                sx={{ px: 1 }}
+              >
+                {result?.ctaLabelOverride ?? def.ctaLabel}
+              </Button>
+            ))}
+          {!needsFix &&
+            clearCtaLabel &&
+            (onCtaClick ? (
+              <Button
+                variant="text"
+                size="small"
+                endIcon={<ArrowForwardRoundedIcon />}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation()
+                  onCtaClick()
+                }}
+                sx={{ px: 1 }}
+              >
+                {clearCtaLabel}
+              </Button>
+            ) : (
+              <Button
+                component={Link}
+                href={def.fixRoute}
+                target="_blank"
+                variant="text"
+                size="small"
+                endIcon={<ArrowForwardRoundedIcon />}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                sx={{ px: 1 }}
+              >
+                {clearCtaLabel}
+              </Button>
+            ))}
         </Stack>
       </Box>
 
