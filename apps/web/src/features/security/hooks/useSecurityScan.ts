@@ -10,7 +10,6 @@ export type ScanState = {
   lastScannedAt: number | null
   progress: number
   rescan: () => void
-  rescanOne: (id: string) => void
 }
 
 const useSecurityScan = (ctx: ScanContext | null): ScanState => {
@@ -83,24 +82,6 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
   const total = SCANNERS.length
   const progress = total > 0 ? Math.round(((total - loadingCount) / total) * 100) : 0
 
-  const rescanOne = useCallback(
-    (id: string) => {
-      const currentCtx = ctxRef.current
-      if (!currentCtx) return
-      const scanner = SCANNERS.find((s) => s.id === id)
-      if (!scanner) return
-
-      setErrors((prev) => {
-        const next = { ...prev }
-        delete next[id]
-        return next
-      })
-
-      executeScan(id, () => scanner.scan(currentCtx))
-    },
-    [executeScan],
-  )
-
   return {
     results,
     loading,
@@ -109,7 +90,6 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
     lastScannedAt,
     progress,
     rescan: runScan,
-    rescanOne,
   }
 }
 

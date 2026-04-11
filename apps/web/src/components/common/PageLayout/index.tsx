@@ -93,7 +93,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
-            {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
+            {!hideHeader && !isSpaceRoute && (pathname === AppRoutes.home || pathname === AppRoutes.security) && (
+              <SpaceSafeBar />
+            )}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div

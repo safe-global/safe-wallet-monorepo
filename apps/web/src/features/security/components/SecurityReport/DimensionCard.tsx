@@ -1,26 +1,12 @@
 import { type ReactElement, useState, useCallback } from 'react'
-import {
-  Box,
-  Button,
-  Chip,
-  Collapse,
-  Divider,
-  IconButton,
-  Paper,
-  Skeleton,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Button, Chip, Collapse, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import RefreshIcon from '@mui/icons-material/Refresh'
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import Link from 'next/link'
-import type { DimensionDef } from '@/features/spaces/data/securityDimensions'
-import type { ScanResult } from '@/features/spaces/data/scanners/types'
-import type { DimensionStatus } from '@/features/spaces/data/securityTypes'
-import { getGradeColor, getGradeBgColor } from '@/features/spaces/data/securityScoring'
-import { formatTimestamp } from '@/features/spaces/data/scanners/utils'
+import type { DimensionDef } from '@/features/security/data/securityDimensions'
+import type { ScanResult } from '@/features/security/data/scanners/types'
+import type { DimensionStatus } from '@/features/security/data/securityTypes'
+import { getGradeColor, getGradeBgColor } from '@/features/security/data/securityScoring'
 
 const STATUS_LABELS = {
   clear: 'Healthy',
@@ -32,10 +18,9 @@ type DimensionCardProps = {
   def: DimensionDef
   result?: ScanResult
   isScanning: boolean
-  onRescan?: (id: string) => void
 }
 
-const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps): ReactElement => {
+const DimensionCard = ({ def, result, isScanning }: DimensionCardProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
 
@@ -71,9 +56,10 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
             {def.title}
           </Typography>
           <KeyboardArrowDownRoundedIcon
+            aria-label={expanded ? 'Collapse details' : 'Expand details'}
             sx={{
               color: 'text.primary',
-              fontSize: 20,
+              fontSize: 24,
               flexShrink: 0,
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s',
@@ -81,7 +67,7 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
           />
         </Stack>
 
-        <Typography variant="caption" color="text.secondary" lineHeight={1.5}>
+        <Typography variant="body2" color="primary.light" lineHeight={1.5}>
           {def.shortDescription}
         </Typography>
 
@@ -97,9 +83,8 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
               sx={{
                 backgroundColor: getGradeBgColor(result.severity),
                 color,
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                height: 24,
+                fontWeight: 700,
+                letterSpacing: '0.5px',
               }}
             />
           ) : (
@@ -114,7 +99,7 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
               target="_blank"
               variant="text"
               size="small"
-              endIcon={<ArrowForwardIcon />}
+              endIcon={<ArrowForwardRoundedIcon />}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
               sx={{ px: 1 }}
             >
@@ -136,11 +121,11 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
             <Stack spacing={0.5}>
               {result?.evidence.map((item, i) =>
                 typeof item === 'string' ? (
-                  <Typography key={i} variant="body2">
+                  <Typography key={`${i}-${item}`} variant="body2">
                     {item}
                   </Typography>
                 ) : (
-                  <Stack key={i} direction="row" spacing={1}>
+                  <Stack key={`${item.label}-${item.value}`} direction="row" spacing={1}>
                     <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120, flexShrink: 0 }}>
                       {item.label}
                     </Typography>
@@ -161,38 +146,6 @@ const DimensionCard = ({ def, result, isScanning, onRescan }: DimensionCardProps
               <Typography variant="body2">{result.remediation}</Typography>
             </Box>
           )}
-
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-            {result?.lastChecked && (
-              <Typography variant="caption" color="text.secondary">
-                Checked {formatTimestamp(new Date(result.lastChecked).getTime())}
-              </Typography>
-            )}
-            {onRescan && (
-              <Tooltip title="Re-check">
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onRescan(def.id)
-                  }}
-                  disabled={isScanning}
-                  sx={{ ml: 'auto' }}
-                >
-                  <RefreshIcon
-                    fontSize="small"
-                    sx={{
-                      animation: isScanning ? 'spin 1s linear infinite' : 'none',
-                      '@keyframes spin': {
-                        '0%': { transform: 'rotate(0deg)' },
-                        '100%': { transform: 'rotate(360deg)' },
-                      },
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Stack>
         </Box>
       </Collapse>
     </Paper>
