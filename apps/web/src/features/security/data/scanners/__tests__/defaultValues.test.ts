@@ -6,6 +6,7 @@ import { multichainSetupScanner } from '../multichainSetup'
 import { contractVersionScanner } from '../contractVersion'
 import { modulesScanner } from '../modules'
 import { transactionScanningScanner } from '../transactionScanning'
+import { fallbackHandlerScanner } from '../fallbackHandler'
 import { createMockContext } from '../test-helpers'
 
 /**
@@ -78,6 +79,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['contractVersion', contractVersionScanner],
       ['modules', modulesScanner],
       ['transactionScanning', transactionScanningScanner],
+      ['fallbackHandler', fallbackHandlerScanner],
     ])('%s scanner includes lastChecked', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(result.lastChecked).toBeDefined()
@@ -95,6 +97,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['contractVersion', contractVersionScanner],
       ['modules', modulesScanner],
       ['transactionScanning', transactionScanningScanner],
+      ['fallbackHandler', fallbackHandlerScanner],
     ])('%s scanner returns valid status and severity', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(['clear', 'issue', 'partial']).toContain(result.status)

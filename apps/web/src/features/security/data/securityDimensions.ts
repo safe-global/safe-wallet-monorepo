@@ -92,6 +92,14 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
     ctaLabel: 'Learn more',
     category: 'account',
   },
+  fallback_handler: {
+    id: 'fallback_handler',
+    title: 'Fallback handler',
+    shortDescription: 'Whether the fallback handler is a recognized official Safe deployment.',
+    fixRoute: AppRoutes.settings.modules,
+    ctaLabel: 'Review handler',
+    category: 'account',
+  },
   recovery: {
     id: 'recovery',
     title: 'Recovery setup',

@@ -7,6 +7,7 @@ import { guardScanner } from './guard'
 import { pendingTxScanner } from './pendingTx'
 import { recoveryScanner } from './recovery'
 import { transactionScanningScanner } from './transactionScanning'
+import { fallbackHandlerScanner } from './fallbackHandler'
 
 export const SCANNERS: SecurityScanner[] = [
   accountSetupScanner,
@@ -20,6 +21,7 @@ export const SCANNERS: SecurityScanner[] = [
   // tokenApprovalsScanner,
   recoveryScanner,
   transactionScanningScanner,
+  fallbackHandlerScanner,
   // addressBookScanner,
   // trustedSafeScanner,
 ]
