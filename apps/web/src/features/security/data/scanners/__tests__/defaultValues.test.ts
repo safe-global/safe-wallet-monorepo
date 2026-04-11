@@ -4,6 +4,7 @@ import { pendingTxScanner } from '../pendingTx'
 import { recoveryScanner } from '../recovery'
 import { multichainSetupScanner } from '../multichainSetup'
 import { contractVersionScanner } from '../contractVersion'
+import { modulesScanner } from '../modules'
 import { createMockContext } from '../test-helpers'
 
 /**
@@ -74,6 +75,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['recovery', recoveryScanner],
       ['multichainSetup', multichainSetupScanner],
       ['contractVersion', contractVersionScanner],
+      ['modules', modulesScanner],
     ])('%s scanner includes lastChecked', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(result.lastChecked).toBeDefined()
@@ -89,6 +91,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['recovery', recoveryScanner],
       ['multichainSetup', multichainSetupScanner],
       ['contractVersion', contractVersionScanner],
+      ['modules', modulesScanner],
     ])('%s scanner returns valid status and severity', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(['clear', 'issue', 'partial']).toContain(result.status)

@@ -44,13 +44,13 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
     fixRoute: AppRoutes.settings.setup,
     ctaLabel: 'Review signers',
   },
-  // modules: {
-  //   id: 'modules',
-  //   title: 'Modules & extensions',
-  //   shortDescription: 'Installed modules and whether they introduce additional risk.',
-  //   fixRoute: AppRoutes.settings.modules,
-  //   ctaLabel: 'Review modules',
-  // },
+  modules: {
+    id: 'modules',
+    title: 'Modules & extensions',
+    shortDescription: 'Installed modules and whether they introduce additional risk.',
+    fixRoute: AppRoutes.settings.modules,
+    ctaLabel: 'Review modules',
+  },
   guard: {
     id: 'guard',
     title: 'Transaction guard',
