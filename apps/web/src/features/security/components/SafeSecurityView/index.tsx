@@ -1,7 +1,8 @@
-import { type ReactElement, useCallback, useContext, useState } from 'react'
+import { type ReactElement, type SyntheticEvent, useCallback, useContext, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import useSafePageScanContext from '@/features/security/hooks/useSafePageScanContext'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsActiveMember } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
@@ -10,17 +11,21 @@ import { TxModalContext } from '@/components/tx-flow'
 import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
 import { AppRoutes } from '@/config/routes'
 import SecurityReport from '@/features/security/components/SecurityReport'
+import AuditLog from '@/features/security/components/AuditLog'
+import SecurityTabs from '@/features/security/components/SecurityTabs'
 import type { CardOverride } from '@/features/security/components/SecurityReport/DimensionGrid'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 
 const SafeSecurityView = (): ReactElement => {
   const scanContext = useSafePageScanContext()
+  const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
   const isSpaceMember = useIsActiveMember()
   const canView = isSafeOwner || isSpaceMember
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const [signupOpen, setSignupOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
   const { HypernativeLogo, HnSignupFlow } = useLoadFeature(HypernativeFeature)
 
   const querySafe = router.query.safe
@@ -40,6 +45,10 @@ const SafeSecurityView = (): ReactElement => {
   }, [router.push, safeQueryParam])
 
   const closeSignup = useCallback(() => setSignupOpen(false), [])
+
+  const handleTabChange = useCallback((_: SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
+  }, [])
 
   const buildCardOverrides = useCallback(
     (results: Record<string, ScanResult>): Record<string, CardOverride> => {
@@ -83,14 +92,18 @@ const SafeSecurityView = (): ReactElement => {
     )
   }
 
-  // Key on URL query param — changes immediately on selection, forcing a full
-  // SecurityReport remount with clean state. The staleness guards in
-  // useSafePageScanContext ensure no scan fires until data matches the URL.
   const safeKey = safeQueryParam ?? 'loading'
 
   return (
     <Box>
-      <SecurityReport key={safeKey} scanContext={scanContext} buildCardOverrides={buildCardOverrides} />
+      <SecurityTabs value={activeTab} onChange={handleTabChange} />
+
+      {activeTab === 0 && (
+        <SecurityReport key={safeKey} scanContext={scanContext} buildCardOverrides={buildCardOverrides} />
+      )}
+
+      {activeTab === 1 && <AuditLog chainId={safe.chainId} safeAddress={safe.address.value} />}
+
       <HnSignupFlow open={signupOpen} onClose={closeSignup} />
     </Box>
   )

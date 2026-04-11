@@ -3,11 +3,13 @@ import { Box, Fade, Skeleton, Stack } from '@mui/material'
 import useSecurityScan from '@/features/security/hooks/useSecurityScan'
 import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
 import SecurityStrengthBar from '@/features/security/components/SecurityStrengthBar'
+import type { DimensionDef } from '@/features/security/data/securityDimensions'
 import DimensionGrid, { type CardOverride } from './DimensionGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
   buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
+  dimensionFilter?: (def: DimensionDef) => boolean
   onScanComplete?: (
     safeAddress: string,
     chainId: string,
@@ -16,7 +18,12 @@ type SecurityReportProps = {
   ) => void
 }
 
-const SecurityReport = ({ scanContext, buildCardOverrides, onScanComplete }: SecurityReportProps): ReactElement => {
+const SecurityReport = ({
+  scanContext,
+  buildCardOverrides,
+  dimensionFilter,
+  onScanComplete,
+}: SecurityReportProps): ReactElement => {
   const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
@@ -53,7 +60,12 @@ const SecurityReport = ({ scanContext, buildCardOverrides, onScanComplete }: Sec
           lastScannedAt={lastScannedAt}
           onRescan={rescan}
         />
-        <DimensionGrid results={results} loading={loading} cardOverrides={cardOverrides} />
+        <DimensionGrid
+          results={results}
+          loading={loading}
+          cardOverrides={cardOverrides}
+          dimensionFilter={dimensionFilter}
+        />
       </Box>
     </Fade>
   )

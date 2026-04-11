@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { type ReactElement, type SyntheticEvent, useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Box, Button, Collapse, Stack, Typography } from '@mui/material'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
@@ -13,6 +13,9 @@ import { SCANNERS } from '@/features/security/data/scanners/registry'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReport from '@/features/security/components/SecurityReport'
+import AuditLog from '@/features/security/components/AuditLog'
+import SecurityTabs from '@/features/security/components/SecurityTabs'
+import type { DimensionDef } from '@/features/security/data/securityDimensions'
 import SearchInput from '../SearchInput'
 
 export type ChainEntry = {
@@ -156,6 +159,7 @@ const SecurityHub = (): ReactElement => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
+  const [reportTab, setReportTab] = useState(0)
   const [scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
@@ -198,6 +202,7 @@ const SecurityHub = (): ReactElement => {
       if (prev && prev.address === address && prev.chainId === chainId) return null
       return { address, chainId }
     })
+    setReportTab(0)
   }, [])
 
   const handleScanComplete = useCallback(
@@ -267,7 +272,20 @@ const SecurityHub = (): ReactElement => {
       <Collapse in={!!selectedSafe} timeout={{ enter: 400, exit: 200 }} unmountOnExit>
         <Box mt={5}>
           {selectedSafe && (
-            <SecurityReport key={selectedKey!} scanContext={scanContext} onScanComplete={handleScanComplete} />
+            <>
+              <SecurityTabs value={reportTab} onChange={(_: SyntheticEvent, v: number) => setReportTab(v)} />
+
+              {reportTab === 0 && (
+                <SecurityReport
+                  key={selectedKey!}
+                  scanContext={scanContext}
+                  onScanComplete={handleScanComplete}
+                  dimensionFilter={(def: DimensionDef) => def.category === 'account'}
+                />
+              )}
+
+              {reportTab === 1 && <AuditLog chainId={selectedSafe.chainId} safeAddress={selectedSafe.address} />}
+            </>
           )}
         </Box>
       </Collapse>
