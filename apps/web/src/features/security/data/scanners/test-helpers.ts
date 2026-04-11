@@ -25,6 +25,7 @@ export const createMockContext = (overrides: Partial<ScanContext> = {}): ScanCon
   balanceUsd: 0,
   chainSupportsRecovery: true,
   chainSupportsHypernative: false,
+  chainSupportsTransactionScanning: true,
   isTrustedSafe: false,
   isMultichain: false,
   multichainSignersConsistent: true,

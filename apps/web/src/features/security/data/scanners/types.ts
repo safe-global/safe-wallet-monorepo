@@ -21,6 +21,7 @@ export type ScanContext = {
   balanceUsd: number
   chainSupportsRecovery: boolean
   chainSupportsHypernative: boolean
+  chainSupportsTransactionScanning: boolean
   isTrustedSafe: boolean
   isMultichain: boolean
   multichainSignersConsistent: boolean

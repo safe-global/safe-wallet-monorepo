@@ -11,6 +11,7 @@ import { tokenApprovalsScanner } from './tokenApprovals'
 import { recoveryScanner } from './recovery'
 import { addressBookScanner } from './addressBook'
 import { trustedSafeScanner } from './trustedSafe'
+import { transactionScanningScanner } from './transactionScanning'
 
 export const SCANNERS: SecurityScanner[] = [
   accountSetupScanner,
@@ -23,6 +24,7 @@ export const SCANNERS: SecurityScanner[] = [
   pendingTxScanner,
   // tokenApprovalsScanner,
   recoveryScanner,
+  transactionScanningScanner,
   // addressBookScanner,
   // trustedSafeScanner,
 ]
