@@ -75,6 +75,12 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
   useEffect(() => {
     if (ctxKey) {
       runScan()
+    } else {
+      // Context went null (Safe switching) — clear stale results and reject in-flight scans
+      scanIdRef.current++
+      setResults({})
+      setErrors({})
+      setLastScannedAt(null)
     }
   }, [ctxKey, runScan])
 

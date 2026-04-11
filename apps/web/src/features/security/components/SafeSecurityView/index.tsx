@@ -2,7 +2,6 @@ import { type ReactElement, useCallback, useContext, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import useSafePageScanContext from '@/features/security/hooks/useSafePageScanContext'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsActiveMember } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
@@ -15,7 +14,6 @@ import type { CardOverride } from '@/features/security/components/SecurityReport
 import type { ScanResult } from '@/features/security/data/scanners/types'
 
 const SafeSecurityView = (): ReactElement => {
-  const { safe, safeAddress } = useSafeInfo()
   const scanContext = useSafePageScanContext()
   const isSafeOwner = useIsSafeOwner()
   const isSpaceMember = useIsActiveMember()
@@ -85,9 +83,10 @@ const SafeSecurityView = (): ReactElement => {
     )
   }
 
-  // Use router query as key source — it updates immediately on navigation,
-  // avoiding double-remount from async useSafeInfo transitions
-  const safeKey = safeQueryParam ?? `${safe.chainId}:${safeAddress}`
+  // Key on URL query param — changes immediately on selection, forcing a full
+  // SecurityReport remount with clean state. The staleness guards in
+  // useSafePageScanContext ensure no scan fires until data matches the URL.
+  const safeKey = safeQueryParam ?? 'loading'
 
   return (
     <Box>
