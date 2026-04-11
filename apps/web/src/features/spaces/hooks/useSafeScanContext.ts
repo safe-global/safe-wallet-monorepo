@@ -109,6 +109,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       queuedTxCount: safeOverview?.queued ?? 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
       chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
+      chainSupportsTransactionScanning: chain ? hasFeature(chain, FEATURES.RISK_MITIGATION) : false,
       isTrustedSafe: false,
       isMultichain,
       multichainSignersConsistent,

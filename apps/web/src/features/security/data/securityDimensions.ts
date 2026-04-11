@@ -72,6 +72,13 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
   //   fixRoute: AppRoutes.balances.index,
   //   ctaLabel: 'Review approvals',
   // },
+  transaction_scanning: {
+    id: 'transaction_scanning',
+    title: 'Transaction scanning',
+    shortDescription: 'Whether transactions are scanned for malicious activity before execution.',
+    fixRoute: AppRoutes.settings.security,
+    ctaLabel: 'Learn more',
+  },
   recovery: {
     id: 'recovery',
     title: 'Recovery setup',
