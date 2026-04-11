@@ -73,10 +73,32 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('clear')
   })
 
-  it('returns clear for up-to-date version', async () => {
+  it('returns clear for up-to-date version with known implementation', async () => {
     const result = await contractVersionScanner.scan(createMockContext())
     expect(result.status).toBe('clear')
     expect(result.severity).toBe('Low')
     expect(result.score).toBe(100)
+  })
+
+  it('returns issue for up-to-date version with unrecognized implementation address', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationAddress: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('returns clear for known L2 singleton address', async () => {
+    // Safe L2 v1.3.0 on mainnet
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        chainId: '1',
+        implementationAddress: '0x3E5c63644E683549055b9Be8653de26E0B4CD36E',
+      }),
+    )
+    expect(result.status).toBe('clear')
   })
 })
