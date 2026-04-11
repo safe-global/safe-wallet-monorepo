@@ -1,12 +1,10 @@
 import { getProxyFactoryDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
-
-const KNOWN_VERSIONS: SafeVersion[] = ['1.0.0', '1.1.1', '1.2.0', '1.3.0', '1.4.1']
+import { KNOWN_SAFE_VERSIONS } from './constants'
 
 const isKnownFactory = (address: string, chainId: string): boolean =>
-  hasMatchingDeployment(getProxyFactoryDeployments, address, chainId, KNOWN_VERSIONS)
+  hasMatchingDeployment(getProxyFactoryDeployments, address, chainId, KNOWN_SAFE_VERSIONS)
 
 export const factoryValidationScanner: SecurityScanner = {
   id: 'factory_validation',
@@ -16,11 +14,11 @@ export const factoryValidationScanner: SecurityScanner = {
 
     if (!creationInfo) {
       return {
-        status: 'clear',
+        status: 'partial',
         severity: 'Low',
-        score: 90,
+        score: 70,
         evidence: [{ label: 'Status', value: 'Creation data not available' }],
-        remediation: '',
+        remediation: 'Deployment origin could not be verified because creation data is not yet available.',
         lastChecked: now,
       }
     }

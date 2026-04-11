@@ -12,18 +12,13 @@ import { factoryValidationScanner } from './factoryValidation'
 
 export const SCANNERS: SecurityScanner[] = [
   accountSetupScanner,
-  // signerActivityScanner,
-  // signerIntegrityScanner,
   multichainSetupScanner,
   contractVersionScanner,
   modulesScanner,
   guardScanner,
   pendingTxScanner,
-  // tokenApprovalsScanner,
   recoveryScanner,
   transactionScanningScanner,
   fallbackHandlerScanner,
   factoryValidationScanner,
-  // addressBookScanner,
-  // trustedSafeScanner,
 ]

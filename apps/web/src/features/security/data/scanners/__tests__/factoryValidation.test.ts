@@ -2,10 +2,10 @@ import { factoryValidationScanner } from '../factoryValidation'
 import { createMockContext } from '../test-helpers'
 
 describe('factoryValidationScanner', () => {
-  it('returns clear when no creation data is available', async () => {
+  it('returns partial when no creation data is available', async () => {
     const result = await factoryValidationScanner.scan(createMockContext({ creationInfo: null }))
-    expect(result.status).toBe('clear')
-    expect(result.score).toBe(90)
+    expect(result.status).toBe('partial')
+    expect(result.score).toBe(70)
   })
 
   it('returns partial when factory address is not recorded', async () => {
