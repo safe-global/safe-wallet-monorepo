@@ -36,12 +36,6 @@ const ChangeSignerSetupWarning = dynamic(() =>
   })),
 )
 
-const InconsistentSignerSetupWarning = dynamic(() =>
-  import('./components/SignerSetupWarning/InconsistentSignerSetupWarning').then((mod) => ({
-    default: mod.InconsistentSignerSetupWarning,
-  })),
-)
-
 const ChainIndicatorList = dynamic(() =>
   import('./components/SignerSetupWarning/InconsistentSignerSetupWarning').then((mod) => ({
     default: mod.ChainIndicatorList,
@@ -54,20 +48,12 @@ const UnsupportedMastercopyWarning = dynamic(() =>
   })),
 )
 
-const OutdatedMastercopyWarning = dynamic(() =>
-  import('./components/OutdatedMastercopyWarning/OutdatedMastercopyWarning').then((mod) => ({
-    default: mod.OutdatedMastercopyWarning,
-  })),
-)
-
 export {
   CreateSafeOnNewChain,
   CreateSafeOnSpecificChain,
   NetworkLogosList,
   SafeCreationNetworkInput,
   ChangeSignerSetupWarning,
-  InconsistentSignerSetupWarning,
   ChainIndicatorList,
   UnsupportedMastercopyWarning,
-  OutdatedMastercopyWarning,
 }

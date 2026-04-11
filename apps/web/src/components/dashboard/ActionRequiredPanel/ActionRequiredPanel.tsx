@@ -24,8 +24,8 @@ export interface ActionRequiredPanelProps {
  * ```tsx
  * <ActionRequiredPanel>
  *   <RecoveryHeader />
- *   <InconsistentSignerSetupWarning />
- *   <UnsupportedMastercopyWarning />
+ *   <NonPinnedWarning />
+ *   <SecurityIssuesWarning />
  * </ActionRequiredPanel>
  * ```
  */

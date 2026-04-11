@@ -14,6 +14,11 @@ import { type NavItem, navItems } from './config'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import { useQueuedTxsLength } from '@/hooks/useTxQueue'
+import useSecurityIssueCount from '@/features/security/hooks/useSecurityIssueCount'
+import { getStrengthColor } from '@/features/security/data/securityScoring'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsActiveMember } from '@/features/spaces'
+import { Box } from '@mui/material'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
@@ -46,6 +51,10 @@ const Navigation = (): ReactElement | null => {
   const { safe } = useSafeInfo()
   const currentSubdirectory = getSubdirectory(router.pathname)
   const queueSize = useQueuedTxsLength()
+  const { strengthLevel } = useSecurityIssueCount()
+  const isSafeOwner = useIsSafeOwner()
+  const isSpaceMember = useIsActiveMember()
+  const canViewSecurity = isSafeOwner || isSpaceMember
   const isBlockedCountry = useContext(GeoblockingContext)
 
   const visibleNavItems = useMemo(() => {
@@ -54,9 +63,13 @@ const Navigation = (): ReactElement | null => {
         return false
       }
 
+      if (item.href === AppRoutes.security && !canViewSecurity) {
+        return false
+      }
+
       return isRouteEnabled(item.href, chain)
     })
-  }, [chain, isBlockedCountry])
+  }, [chain, isBlockedCountry, canViewSecurity])
 
   const enabledNavItems = useMemo(() => {
     return safe.deployed
@@ -116,6 +129,22 @@ const Navigation = (): ReactElement | null => {
 
         if (item.href === AppRoutes.transactions.history) {
           ItemTag = queueSize ? <SidebarListItemCounter count={queueSize} /> : null
+        }
+
+        if (item.href === AppRoutes.security && strengthLevel && strengthLevel !== 'Strong') {
+          ItemTag = (
+            <Box
+              component="span"
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: getStrengthColor(strengthLevel),
+                display: 'inline-block',
+                ml: 0.5,
+              }}
+            />
+          )
         }
 
         const shouldPlaceDivider = item.href === AppRoutes.apps.index || item.href === AppRoutes.stake
