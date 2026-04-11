@@ -51,13 +51,13 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
   //   fixRoute: AppRoutes.settings.modules,
   //   ctaLabel: 'Review modules',
   // },
-  // guard: {
-  //   id: 'guard',
-  //   title: 'Guard / Co-signer',
-  //   shortDescription: 'Whether a transaction guard or co-signer is enabled for additional protection.',
-  //   fixRoute: AppRoutes.settings.modules,
-  //   ctaLabel: 'Review modules',
-  // },
+  guard: {
+    id: 'guard',
+    title: 'Transaction guard',
+    shortDescription: 'Whether a transaction guard is enabled for pre-execution validation.',
+    fixRoute: AppRoutes.settings.security,
+    ctaLabel: 'Learn more',
+  },
   // pending_tx: {
   //   id: 'pending_tx',
   //   title: 'Pending transactions',

@@ -19,7 +19,7 @@ export const SCANNERS: SecurityScanner[] = [
   multichainSetupScanner,
   contractVersionScanner,
   // modulesScanner,
-  // guardScanner,
+  guardScanner,
   // pendingTxScanner,
   // tokenApprovalsScanner,
   recoveryScanner,

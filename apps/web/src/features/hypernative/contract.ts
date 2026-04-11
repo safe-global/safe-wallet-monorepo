@@ -26,6 +26,7 @@ import type { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
 import type { HnAnalysisGroupCard } from './components/HnAnalysisGroupCard'
 import type { HnCustomChecksCard } from './components/HnCustomChecksCard'
 import type { HnInfoCard } from './components/HnInfoCard'
+import type HnSignupFlow from './components/HnSignupFlow/HnSignupFlow'
 import type { isHypernativeGuard } from './services/hypernativeGuardCheck'
 import type { HnQueueAssessment } from './components/HnQueueAssessment'
 
@@ -51,6 +52,7 @@ export interface HypernativeContract {
   HnAnalysisGroupCard: typeof HnAnalysisGroupCard
   HnCustomChecksCard: typeof HnCustomChecksCard
   HnInfoCard: typeof HnInfoCard
+  HnSignupFlow: typeof HnSignupFlow
 
   // Services (camelCase → undefined when not ready)
   isHypernativeGuard: typeof isHypernativeGuard

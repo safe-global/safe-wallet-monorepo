@@ -3,10 +3,12 @@ import { Box, Button, Chip, Collapse, Divider, Paper, Skeleton, Stack, Typograph
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import type { DimensionDef } from '@/features/security/data/securityDimensions'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import type { DimensionStatus } from '@/features/security/data/securityTypes'
 import { getGradeColor, getGradeBgColor } from '@/features/security/data/securityScoring'
+import type { CardOverride } from './DimensionGrid'
 
 const STATUS_LABELS = {
   clear: 'Healthy',
@@ -18,16 +20,20 @@ type DimensionCardProps = {
   def: DimensionDef
   result?: ScanResult
   isScanning: boolean
-  onCtaClick?: () => void
-  clearCtaLabel?: string
+  override?: CardOverride
 }
 
-const DimensionCard = ({ def, result, isScanning, onCtaClick, clearCtaLabel }: DimensionCardProps): ReactElement => {
+const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
+  const router = useRouter()
 
   const color = result ? getGradeColor(result.severity) : 'text.secondary'
   const needsFix = result ? result.status !== 'clear' : false
+  const fixHref = { pathname: def.fixRoute, query: { safe: router.query.safe } }
+  const ctaLabel = needsFix
+    ? (override?.ctaLabel ?? result?.ctaLabelOverride ?? def.ctaLabel)
+    : (override?.clearCtaLabel ?? null)
 
   return (
     <Paper
@@ -54,23 +60,25 @@ const DimensionCard = ({ def, result, isScanning, onCtaClick, clearCtaLabel }: D
     >
       <Box sx={{ p: 2.5, minHeight: 170, display: 'flex', flexDirection: 'column' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="body1" fontWeight={700}>
-            {def.title}
+          <Typography variant="body1" fontWeight={700} noWrap>
+            {override?.title ?? def.title}
           </Typography>
-          <KeyboardArrowDownRoundedIcon
-            aria-label={expanded ? 'Collapse details' : 'Expand details'}
-            sx={{
-              color: 'text.primary',
-              fontSize: 24,
-              flexShrink: 0,
-              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
-          />
+          <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
+            {override?.logo}
+            <KeyboardArrowDownRoundedIcon
+              aria-label={expanded ? 'Collapse details' : 'Expand details'}
+              sx={{
+                color: 'text.primary',
+                fontSize: 24,
+                transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s',
+              }}
+            />
+          </Stack>
         </Stack>
 
         <Typography variant="body2" color="primary.light" lineHeight={1.5}>
-          {def.shortDescription}
+          {override?.description ?? def.shortDescription}
         </Typography>
 
         <Box flex={1} minHeight={16} />
@@ -94,61 +102,31 @@ const DimensionCard = ({ def, result, isScanning, onCtaClick, clearCtaLabel }: D
               —
             </Typography>
           )}
-          {needsFix &&
-            (onCtaClick ? (
+          {ctaLabel &&
+            (override?.onCtaClick ? (
               <Button
                 variant="text"
                 size="small"
                 endIcon={<ArrowForwardRoundedIcon />}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation()
-                  onCtaClick()
+                  override.onCtaClick!()
                 }}
                 sx={{ px: 1 }}
               >
-                {result?.ctaLabelOverride ?? def.ctaLabel}
+                {ctaLabel}
               </Button>
             ) : (
               <Button
                 component={Link}
-                href={def.fixRoute}
-                target="_blank"
+                href={fixHref}
                 variant="text"
                 size="small"
                 endIcon={<ArrowForwardRoundedIcon />}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 sx={{ px: 1 }}
               >
-                {result?.ctaLabelOverride ?? def.ctaLabel}
-              </Button>
-            ))}
-          {!needsFix &&
-            clearCtaLabel &&
-            (onCtaClick ? (
-              <Button
-                variant="text"
-                size="small"
-                endIcon={<ArrowForwardRoundedIcon />}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation()
-                  onCtaClick()
-                }}
-                sx={{ px: 1 }}
-              >
-                {clearCtaLabel}
-              </Button>
-            ) : (
-              <Button
-                component={Link}
-                href={def.fixRoute}
-                target="_blank"
-                variant="text"
-                size="small"
-                endIcon={<ArrowForwardRoundedIcon />}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                sx={{ px: 1 }}
-              >
-                {clearCtaLabel}
+                {ctaLabel}
               </Button>
             ))}
         </Stack>

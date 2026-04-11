@@ -1,13 +1,13 @@
-import { type ReactElement, useEffect, useRef } from 'react'
+import { type ReactElement, useEffect, useMemo, useRef } from 'react'
 import { Box, Fade, Skeleton, Stack } from '@mui/material'
 import useSecurityScan from '@/features/security/hooks/useSecurityScan'
 import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
 import SecurityStrengthBar from '@/features/security/components/SecurityStrengthBar'
-import DimensionGrid, { type CtaOverride } from './DimensionGrid'
+import DimensionGrid, { type CardOverride } from './DimensionGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
-  ctaOverrides?: Record<string, CtaOverride>
+  buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
   onScanComplete?: (
     safeAddress: string,
     chainId: string,
@@ -16,10 +16,12 @@ type SecurityReportProps = {
   ) => void
 }
 
-const SecurityReport = ({ scanContext, ctaOverrides, onScanComplete }: SecurityReportProps): ReactElement => {
+const SecurityReport = ({ scanContext, buildCardOverrides, onScanComplete }: SecurityReportProps): ReactElement => {
   const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
+
+  const cardOverrides = useMemo(() => buildCardOverrides?.(results) ?? {}, [buildCardOverrides, results])
 
   useEffect(() => {
     if (isComplete && lastScannedAt && onScanComplete && scanContextRef.current) {
@@ -51,7 +53,7 @@ const SecurityReport = ({ scanContext, ctaOverrides, onScanComplete }: SecurityR
           lastScannedAt={lastScannedAt}
           onRescan={rescan}
         />
-        <DimensionGrid results={results} loading={loading} ctaOverrides={ctaOverrides} />
+        <DimensionGrid results={results} loading={loading} cardOverrides={cardOverrides} />
       </Box>
     </Fade>
   )
