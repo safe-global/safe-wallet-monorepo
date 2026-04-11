@@ -92,6 +92,14 @@ export const DIMENSION_DEFS: Record<string, DimensionDef> = {
     ctaLabel: 'Learn more',
     category: 'account',
   },
+  factory_validation: {
+    id: 'factory_validation',
+    title: 'Deployment origin',
+    shortDescription: 'Whether this Safe was deployed via an official Safe proxy factory.',
+    fixRoute: AppRoutes.settings.setup,
+    ctaLabel: 'View details',
+    category: 'account',
+  },
   fallback_handler: {
     id: 'fallback_handler',
     title: 'Fallback handler',

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { type SafeItem } from '@/hooks/safes'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { useTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { useChain } from '@/hooks/useChains'
 import useChains from '@/hooks/useChains'
@@ -28,6 +29,12 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
 
   // Fetch master copies for deployer resolution
   const { currentData: masterCopies } = useChainsGetMasterCopiesV1Query({ chainId }, { skip: !selected || !isDeployed })
+
+  // Fetch creation transaction for factory/deployment validation
+  const { currentData: creationTx } = useTransactionsGetCreationTransactionV1Query(
+    { chainId, safeAddress: address },
+    { skip: !selected || !isDeployed },
+  )
 
   // For multichain: fetch overviews for all chains to compare signer setup
   const currency = useAppSelector(selectCurrency)
@@ -114,6 +121,14 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       isMultichain,
       multichainSignersConsistent,
       multichainDeviatingChains,
+      creationInfo: creationTx
+        ? {
+            factoryAddress: creationTx.factoryAddress ?? null,
+            creator: creationTx.creator,
+            masterCopy: creationTx.masterCopy ?? null,
+            transactionHash: creationTx.transactionHash,
+          }
+        : null,
     }
   }, [
     selected,
@@ -128,6 +143,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     multichainSafeItems,
     undeployedSafes,
     allChains,
+    creationTx,
   ])
 }
 

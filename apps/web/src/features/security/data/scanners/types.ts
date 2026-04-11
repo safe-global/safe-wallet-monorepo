@@ -26,6 +26,12 @@ export type ScanContext = {
   isMultichain: boolean
   multichainSignersConsistent: boolean
   multichainDeviatingChains: string[]
+  creationInfo: {
+    factoryAddress: string | null
+    creator: string
+    masterCopy: string | null
+    transactionHash: string
+  } | null
 }
 
 export type EvidenceItem = { label: string; value: string } | string

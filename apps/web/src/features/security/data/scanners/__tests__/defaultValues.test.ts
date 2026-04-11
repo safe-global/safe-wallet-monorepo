@@ -7,6 +7,7 @@ import { contractVersionScanner } from '../contractVersion'
 import { modulesScanner } from '../modules'
 import { transactionScanningScanner } from '../transactionScanning'
 import { fallbackHandlerScanner } from '../fallbackHandler'
+import { factoryValidationScanner } from '../factoryValidation'
 import { createMockContext } from '../test-helpers'
 
 /**
@@ -80,6 +81,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['modules', modulesScanner],
       ['transactionScanning', transactionScanningScanner],
       ['fallbackHandler', fallbackHandlerScanner],
+      ['factoryValidation', factoryValidationScanner],
     ])('%s scanner includes lastChecked', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(result.lastChecked).toBeDefined()
@@ -98,6 +100,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['modules', modulesScanner],
       ['transactionScanning', transactionScanningScanner],
       ['fallbackHandler', fallbackHandlerScanner],
+      ['factoryValidation', factoryValidationScanner],
     ])('%s scanner returns valid status and severity', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(['clear', 'issue', 'partial']).toContain(result.status)

@@ -8,6 +8,7 @@ import { pendingTxScanner } from './pendingTx'
 import { recoveryScanner } from './recovery'
 import { transactionScanningScanner } from './transactionScanning'
 import { fallbackHandlerScanner } from './fallbackHandler'
+import { factoryValidationScanner } from './factoryValidation'
 
 export const SCANNERS: SecurityScanner[] = [
   accountSetupScanner,
@@ -22,6 +23,7 @@ export const SCANNERS: SecurityScanner[] = [
   recoveryScanner,
   transactionScanningScanner,
   fallbackHandlerScanner,
+  factoryValidationScanner,
   // addressBookScanner,
   // trustedSafeScanner,
 ]
