@@ -2,30 +2,70 @@ import { useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useMasterCopies } from '@/hooks/useMasterCopies'
 import { useCurrentChain } from '@/hooks/useChains'
+import useChains from '@/hooks/useChains'
+import { type SafeItem, useAllSafesGrouped } from '@/hooks/safes'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useAppSelector } from '@/store'
+import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
 import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
+import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import type { ScanContext } from '@/features/security/data/scanners/types'
 
 /**
  * Builds a ScanContext for the current Safe page.
- * Uses useSafeInfo() which has all data already available in the Safe context.
- * Much simpler than the Spaces version (useSafeScanContext) which uses RTK Query.
+ * Uses useSafeInfo() for Safe data + multichain consistency check via SafeOverview API.
  */
 const useSafePageScanContext = (): ScanContext | null => {
-  const { safe, safeLoaded } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const [masterCopies] = useMasterCopies()
   const chain = useCurrentChain()
   const isMultichain = useIsMultichainSafe() ?? false
   const latestVersion = getLatestSafeVersion(chain)
 
+  // Multichain consistency check — same approach as Spaces useSafeScanContext
+  const { allMultiChainSafes } = useAllSafesGrouped()
+  const currency = useAppSelector(selectCurrency)
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
+  const { configs: allChains } = useChains()
+
+  const multichainSafeItems: SafeItem[] = useMemo(() => {
+    if (!isMultichain || !safeAddress) return []
+    const group = allMultiChainSafes?.find((m) => sameAddress(m.address, safeAddress))
+    if (!group) return []
+    return group.safes.filter((s) => !undeployedSafes[s.chainId]?.[s.address])
+  }, [isMultichain, safeAddress, allMultiChainSafes, undeployedSafes])
+
+  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
+    { safes: multichainSafeItems, currency },
+    { skip: !isMultichain || multichainSafeItems.length === 0 },
+  )
+
   return useMemo(() => {
     if (!safeLoaded || !safe) return null
 
-    // Resolve deployer — same logic as Spaces version
+    // Resolve deployer
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safe.implementation.value))
     const isCircles = matchingMc?.version?.toLowerCase().includes('circles') ?? false
     const deployer: 'Gnosis' | 'Circles' | null = matchingMc ? (isCircles ? 'Circles' : 'Gnosis') : null
+
+    // Compute multichain signer consistency
+    let multichainSignersConsistent = true
+    let multichainDeviatingChains: string[] = []
+    if (isMultichain && safeOverviews && safeOverviews.length > 0) {
+      const safeSetups = getSafeSetups(multichainSafeItems, safeOverviews, undeployedSafes)
+      const sharedSetup = getSharedSetup(safeSetups)
+      multichainSignersConsistent = sharedSetup !== undefined
+
+      if (!multichainSignersConsistent) {
+        const deviating = getDeviatingSetups(safeSetups, safe.chainId)
+        multichainDeviatingChains = deviating.map((setup) => {
+          const chainConfig = allChains.find((c) => c.chainId === setup.chainId)
+          return chainConfig?.chainName ?? `Chain ${setup.chainId}`
+        })
+      }
+    }
 
     return {
       owners: safe.owners,
@@ -48,10 +88,21 @@ const useSafePageScanContext = (): ScanContext | null => {
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
       isTrustedSafe: false,
       isMultichain,
-      multichainSignersConsistent: true,
-      multichainDeviatingChains: [],
+      multichainSignersConsistent,
+      multichainDeviatingChains,
     }
-  }, [safe, safeLoaded, masterCopies, latestVersion, chain, isMultichain])
+  }, [
+    safe,
+    safeLoaded,
+    masterCopies,
+    latestVersion,
+    chain,
+    isMultichain,
+    safeOverviews,
+    multichainSafeItems,
+    undeployedSafes,
+    allChains,
+  ])
 }
 
 export default useSafePageScanContext
