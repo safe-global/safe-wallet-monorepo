@@ -12,6 +12,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import { useGetSafeOverviewQuery } from '@/store/api/gateway'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useUrlChainId } from '@/hooks/useChainId'
 import type { ScanContext } from '@/features/security/data/scanners/types'
 
 /**
@@ -19,12 +21,14 @@ import type { ScanContext } from '@/features/security/data/scanners/types'
  * Uses useSafeInfo() for Safe data + multichain consistency check via SafeOverview API.
  */
 const useSafePageScanContext = (): ScanContext | null => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded, safeLoading } = useSafeInfo()
+  const urlAddress = useSafeAddressFromUrl()
+  const urlChainId = useUrlChainId()
   const [masterCopies] = useMasterCopies()
   const chain = useCurrentChain()
   const isMultichain = useIsMultichainSafe() ?? false
   const latestVersion = getLatestSafeVersion(chain)
-  const { data: safeOverview } = useGetSafeOverviewQuery(
+  const { currentData: safeOverview } = useGetSafeOverviewQuery(
     { chainId: safe.chainId, safeAddress: safe.address.value },
     { skip: !safeLoaded },
   )
@@ -42,13 +46,19 @@ const useSafePageScanContext = (): ScanContext | null => {
     return group.safes.filter((s) => !undeployedSafes[s.chainId]?.[s.address])
   }, [isMultichain, safeAddress, allMultiChainSafes, undeployedSafes])
 
-  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
+  const { currentData: safeOverviews } = useGetMultipleSafeOverviewsQuery(
     { safes: multichainSafeItems, currency },
     { skip: !isMultichain || multichainSafeItems.length === 0 },
   )
 
   return useMemo(() => {
-    if (!safeLoaded || !safe) return null
+    if (!safeLoaded || !safe || safeLoading) return null
+    if (urlAddress && !sameAddress(safeAddress, urlAddress)) return null
+    if (urlChainId && safe.chainId !== urlChainId) return null
+    // Wait for overview data so balanceUsd and queuedTxCount are accurate on first scan
+    if (!safeOverview) return null
+    // Wait for multichain overview data before building context
+    if (isMultichain && multichainSafeItems.length > 0 && !safeOverviews) return null
 
     // Resolve deployer
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safe.implementation.value))
@@ -100,7 +110,11 @@ const useSafePageScanContext = (): ScanContext | null => {
     }
   }, [
     safe,
+    safeAddress,
     safeLoaded,
+    safeLoading,
+    urlAddress,
+    urlChainId,
     masterCopies,
     latestVersion,
     chain,
