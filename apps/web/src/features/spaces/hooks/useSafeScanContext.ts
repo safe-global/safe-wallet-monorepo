@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { type SafeItem } from '@/hooks/safes'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { useChain } from '@/hooks/useChains'
 import useChains from '@/hooks/useChains'
 import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
@@ -53,6 +53,12 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     { skip: !isMultichain || multichainSafeItems.length === 0 },
   )
 
+  // Fetch overview for balance data (fiatTotal) on the selected chain
+  const { data: safeOverview } = useGetSafeOverviewQuery(
+    { chainId, safeAddress: address },
+    { skip: !selected || !isDeployed },
+  )
+
   const chain = useChain(chainId)
   const latestVersion = getLatestSafeVersion(chain)
   const { configs: allChains } = useChains()
@@ -97,10 +103,12 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       chainId: selected.chainId,
       safeAddress: selected.address,
       nonce: safeInfo.nonce,
+      balanceUsd: Number(safeOverview?.fiatTotal) || 0,
       // TODO: wire real data when these scanners are activated
       addressBookEntryCount: 0,
       queuedTxCount: 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
+      chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
       isTrustedSafe: false,
       isMultichain,
       multichainSignersConsistent,
@@ -114,6 +122,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     masterCopies,
     latestVersion,
     isMultichain,
+    safeOverview,
     safeOverviews,
     multichainSafeItems,
     undeployedSafes,

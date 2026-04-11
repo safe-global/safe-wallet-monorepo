@@ -11,6 +11,7 @@ import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
+import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import type { ScanContext } from '@/features/security/data/scanners/types'
 
 /**
@@ -23,6 +24,10 @@ const useSafePageScanContext = (): ScanContext | null => {
   const chain = useCurrentChain()
   const isMultichain = useIsMultichainSafe() ?? false
   const latestVersion = getLatestSafeVersion(chain)
+  const { data: safeOverview } = useGetSafeOverviewQuery(
+    { chainId: safe.chainId, safeAddress: safe.address.value },
+    { skip: !safeLoaded },
+  )
 
   // Multichain consistency check — same approach as Spaces useSafeScanContext
   const { allMultiChainSafes } = useAllSafesGrouped()
@@ -82,10 +87,12 @@ const useSafePageScanContext = (): ScanContext | null => {
       chainId: safe.chainId,
       safeAddress: safe.address.value,
       nonce: safe.nonce,
+      balanceUsd: Number(safeOverview?.fiatTotal) || 0,
       // TODO: wire real data when these scanners are activated
       addressBookEntryCount: 0,
       queuedTxCount: 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
+      chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
       isTrustedSafe: false,
       isMultichain,
       multichainSignersConsistent,
@@ -98,6 +105,7 @@ const useSafePageScanContext = (): ScanContext | null => {
     latestVersion,
     chain,
     isMultichain,
+    safeOverview,
     safeOverviews,
     multichainSafeItems,
     undeployedSafes,

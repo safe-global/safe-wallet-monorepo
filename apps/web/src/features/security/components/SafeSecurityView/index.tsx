@@ -1,15 +1,18 @@
-import { type ReactElement, useCallback, useContext, useMemo } from 'react'
+import { type ReactElement, useCallback, useContext, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import useSafePageScanContext from '@/features/security/hooks/useSafePageScanContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsActiveMember } from '@/features/spaces'
+import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature } from '@/features/hypernative'
 import { TxModalContext } from '@/components/tx-flow'
 import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
 import { AppRoutes } from '@/config/routes'
 import SecurityReport from '@/features/security/components/SecurityReport'
-import type { CtaOverride } from '@/features/security/components/SecurityReport/DimensionGrid'
+import type { CardOverride } from '@/features/security/components/SecurityReport/DimensionGrid'
+import type { ScanResult } from '@/features/security/data/scanners/types'
 
 const SafeSecurityView = (): ReactElement => {
   const { safe, safeAddress } = useSafeInfo()
@@ -19,6 +22,13 @@ const SafeSecurityView = (): ReactElement => {
   const canView = isSafeOwner || isSpaceMember
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
+  const [signupOpen, setSignupOpen] = useState(false)
+  const { HypernativeLogo, HnSignupFlow } = useLoadFeature(HypernativeFeature)
+
+  const querySafe = router.query.safe
+  const safeQueryParam = typeof querySafe === 'string' ? querySafe : undefined
+
+  const hasModules = (scanContext?.modules ?? []).length > 0
 
   const openRecoverySetup = useCallback(() => {
     setTxFlow(<UpsertRecoveryFlow />)
@@ -27,21 +37,40 @@ const SafeSecurityView = (): ReactElement => {
   const openRecoveryManage = useCallback(() => {
     router.push({
       pathname: AppRoutes.settings.security,
-      query: { safe: router.query.safe },
+      query: { safe: safeQueryParam },
     })
-  }, [router])
+  }, [router.push, safeQueryParam])
 
-  const ctaOverrides = useMemo((): Record<string, CtaOverride> | undefined => {
-    if (!isSafeOwner) return undefined
+  const closeSignup = useCallback(() => setSignupOpen(false), [])
 
-    const hasModules = (scanContext?.modules ?? []).length > 0
-    return {
-      recovery: {
-        onCtaClick: hasModules ? openRecoveryManage : openRecoverySetup,
-        clearCtaLabel: 'Manage recovery',
-      },
-    }
-  }, [isSafeOwner, scanContext?.modules, openRecoverySetup, openRecoveryManage])
+  const buildCardOverrides = useCallback(
+    (results: Record<string, ScanResult>): Record<string, CardOverride> => {
+      const overrides: Record<string, CardOverride> = {}
+
+      if (isSafeOwner) {
+        overrides.recovery = {
+          onCtaClick: hasModules ? openRecoveryManage : openRecoverySetup,
+          clearCtaLabel: 'Manage recovery',
+        }
+      }
+
+      const guardResult = results.guard
+      if (guardResult?.partner === 'hypernative') {
+        overrides.guard = {
+          ...overrides.guard,
+          title: 'Hypernative Guardian',
+          description: 'Enterprise-grade transaction guard that monitors and blocks risky transactions.',
+          logo: <HypernativeLogo sx={{ fontSize: 80, height: 20 }} />,
+          ctaLabel: guardResult.status === 'partial' ? 'Get Guardian' : undefined,
+          onCtaClick: guardResult.status === 'partial' ? () => setSignupOpen(true) : undefined,
+          clearCtaLabel: 'Manage Guardian',
+        }
+      }
+
+      return overrides
+    },
+    [isSafeOwner, hasModules, openRecoverySetup, openRecoveryManage, HypernativeLogo],
+  )
 
   if (!canView) {
     return (
@@ -56,9 +85,14 @@ const SafeSecurityView = (): ReactElement => {
     )
   }
 
+  // Use router query as key source — it updates immediately on navigation,
+  // avoiding double-remount from async useSafeInfo transitions
+  const safeKey = safeQueryParam ?? `${safe.chainId}:${safeAddress}`
+
   return (
     <Box>
-      <SecurityReport key={`${safe.chainId}:${safeAddress}`} scanContext={scanContext} ctaOverrides={ctaOverrides} />
+      <SecurityReport key={safeKey} scanContext={scanContext} buildCardOverrides={buildCardOverrides} />
+      <HnSignupFlow open={signupOpen} onClose={closeSignup} />
     </Box>
   )
 }

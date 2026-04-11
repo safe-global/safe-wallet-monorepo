@@ -18,7 +18,9 @@ export type ScanContext = {
   nonce: number
   addressBookEntryCount: number
   queuedTxCount: number
+  balanceUsd: number
   chainSupportsRecovery: boolean
+  chainSupportsHypernative: boolean
   isTrustedSafe: boolean
   isMultichain: boolean
   multichainSignersConsistent: boolean
@@ -35,6 +37,7 @@ export type ScanResult = {
   remediation: string
   lastChecked: string
   ctaLabelOverride?: string
+  partner?: 'hypernative'
 }
 
 export type SecurityScanner = {
