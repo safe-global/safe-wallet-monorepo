@@ -1,0 +1,34 @@
+import type { DimensionResult, SecurityGrade } from './securityTypes'
+
+export const calculateClearRatio = (dimensions: DimensionResult[]): number => {
+  if (dimensions.length === 0) return 0
+  const clearCount = dimensions.filter((d) => d.status === 'clear').length
+  return clearCount / dimensions.length
+}
+
+export const calculateScore = (clearRatio: number): number => Math.round(clearRatio * 100)
+
+export const getGrade = (clearRatio: number): SecurityGrade => {
+  if (clearRatio >= 0.83) return 'Low'
+  if (clearRatio >= 0.5) return 'Medium'
+  if (clearRatio >= 0.17) return 'High'
+  return 'Critical'
+}
+
+const GRADE_COLORS: Record<SecurityGrade, string> = {
+  Low: 'success.main',
+  Medium: 'warning.main',
+  High: 'error.main',
+  Critical: 'error.main',
+}
+
+const GRADE_BG_COLORS: Record<SecurityGrade, string> = {
+  Low: 'success.background',
+  Medium: 'warning.background',
+  High: 'error.background',
+  Critical: 'error.background',
+}
+
+export const getGradeColor = (grade: SecurityGrade): string => GRADE_COLORS[grade]
+
+export const getGradeBgColor = (grade: SecurityGrade): string => GRADE_BG_COLORS[grade]
