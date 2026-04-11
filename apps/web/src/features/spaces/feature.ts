@@ -32,6 +32,7 @@ import SpaceMembersPage from './components/Members/Page'
 import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import SpaceSettingsPage from './components/SpaceSettings/Page'
+import SecurityHubPage from './components/SecurityHub/Page'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -62,6 +63,7 @@ const feature: SpacesContract = {
   SpaceSafeAccountsPage,
   SpaceAddressBookPage,
   SpaceSettingsPage,
+  SecurityHubPage,
 
   // Services
   isUnauthorized,

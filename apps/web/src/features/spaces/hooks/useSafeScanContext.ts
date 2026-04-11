@@ -1,0 +1,124 @@
+import { useMemo } from 'react'
+import { type SafeItem } from '@/hooks/safes'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useChain } from '@/hooks/useChains'
+import useChains from '@/hooks/useChains'
+import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useAppSelector } from '@/store'
+import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
+import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
+import type { ScanContext } from '@/features/spaces/data/scanners/types'
+import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+
+const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry | undefined): ScanContext | null => {
+  const chainId = selected?.chainId ?? ''
+  const address = selected?.address ?? ''
+  const isMultichain = (entry?.chainEntries.length ?? 0) > 1
+  const selectedChainEntry = entry?.chainEntries.find((c) => c.chainId === chainId)
+  const isDeployed = selectedChainEntry?.isDeployed ?? false
+
+  // Fetch SafeState for the selected chain — skip if not deployed
+  const { currentData: safeInfo, isLoading: isSafeLoading } = useSafesGetSafeV1Query(
+    { chainId, safeAddress: address },
+    { skip: !selected || !isDeployed },
+  )
+
+  // Fetch master copies for deployer resolution
+  const { currentData: masterCopies } = useChainsGetMasterCopiesV1Query({ chainId }, { skip: !selected || !isDeployed })
+
+  // For multichain: fetch overviews for all chains to compare signer setup
+  const currency = useAppSelector(selectCurrency)
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
+  const multichainSafeItems: SafeItem[] = useMemo(
+    () =>
+      isMultichain && entry
+        ? entry.chainEntries
+            .filter((c) => c.isDeployed)
+            .map((c) => ({
+              chainId: c.chainId,
+              address: entry.address,
+              isReadOnly: false,
+              isPinned: false,
+              lastVisited: 0,
+              name: undefined,
+            }))
+        : [],
+    [isMultichain, entry],
+  )
+  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
+    { safes: multichainSafeItems, currency },
+    { skip: !isMultichain || multichainSafeItems.length === 0 },
+  )
+
+  const chain = useChain(chainId)
+  const latestVersion = getLatestSafeVersion(chain)
+  const { configs: allChains } = useChains()
+
+  return useMemo(() => {
+    if (!selected || !entry || !safeInfo || isSafeLoading) return null
+
+    // Resolve deployer using the same logic as useMasterCopies + OutdatedMastercopyWarning
+    const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))
+    const isCircles = matchingMc?.version?.toLowerCase().includes('circles') ?? false
+    const deployer: 'Gnosis' | 'Circles' | null = matchingMc ? (isCircles ? 'Circles' : 'Gnosis') : null
+
+    // Compute multichain signer consistency using the same utils as InconsistentSignerSetupWarning
+    let multichainSignersConsistent = true
+    let multichainDeviatingChains: string[] = []
+    if (isMultichain && safeOverviews && safeOverviews.length > 0) {
+      const safeSetups = getSafeSetups(multichainSafeItems, safeOverviews, undeployedSafes)
+      const sharedSetup = getSharedSetup(safeSetups)
+      multichainSignersConsistent = sharedSetup !== undefined
+
+      if (!multichainSignersConsistent) {
+        const deviating = getDeviatingSetups(safeSetups, selected.chainId)
+        multichainDeviatingChains = deviating.map((setup) => {
+          const chainConfig = allChains.find((c) => c.chainId === setup.chainId)
+          return chainConfig?.chainName ?? `Chain ${setup.chainId}`
+        })
+      }
+    }
+
+    return {
+      owners: safeInfo.owners,
+      threshold: safeInfo.threshold,
+      modules: safeInfo.modules ?? null,
+      guard: safeInfo.guard ?? null,
+      fallbackHandler: safeInfo.fallbackHandler ?? null,
+      implementationVersionState: safeInfo.implementationVersionState,
+      implementationAddress: safeInfo.implementation.value,
+      version: safeInfo.version ?? null,
+      latestVersion,
+      isNonCriticalUpdate: !!isNonCriticalUpdate(safeInfo.version),
+      masterCopyDeployer: deployer,
+      chainId: selected.chainId,
+      safeAddress: selected.address,
+      nonce: safeInfo.nonce,
+      // TODO: wire real data when these scanners are activated
+      addressBookEntryCount: 0,
+      queuedTxCount: 0,
+      chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
+      isTrustedSafe: false,
+      isMultichain,
+      multichainSignersConsistent,
+      multichainDeviatingChains,
+    }
+  }, [
+    selected,
+    entry,
+    safeInfo,
+    isSafeLoading,
+    masterCopies,
+    latestVersion,
+    isMultichain,
+    safeOverviews,
+    multichainSafeItems,
+    undeployedSafes,
+    allChains,
+  ])
+}
+
+export default useSafeScanContext
