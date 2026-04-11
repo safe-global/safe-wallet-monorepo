@@ -101,7 +101,7 @@ function setupDefaults(
   ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress: overrides.safeAddress ?? '0xSafe1' })
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')
   ;(useChains as jest.Mock).mockReturnValue({ configs: chainConfigs })
-  ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
+  ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, pathname: '/home' })
   ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
     (item: SafeItem | MultiChainSafeItem) => 'safes' in item,
   )
