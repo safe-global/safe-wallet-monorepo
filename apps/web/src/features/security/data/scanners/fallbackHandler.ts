@@ -4,10 +4,11 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
 import { ZERO_ADDRESS } from './constants'
 
-const KNOWN_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
+// Only 1.3.0+ has the CompatibilityFallbackHandler; older versions used different handler contracts
+const HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
 
 const isKnownFallbackHandler = (address: string, chainId: string): boolean =>
-  hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, KNOWN_VERSIONS)
+  hasMatchingDeployment(getCompatibilityFallbackHandlerDeployments, address, chainId, HANDLER_VERSIONS)
 
 export const fallbackHandlerScanner: SecurityScanner = {
   id: 'fallback_handler',

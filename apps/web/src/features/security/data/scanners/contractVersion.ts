@@ -1,15 +1,13 @@
 import { isValidMasterCopy, isMigrationToL2Possible } from '@safe-global/utils/services/contracts/safeContracts'
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import type { SafeVersion } from '@safe-global/types-kit'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SecurityScanner } from './types'
-
-const KNOWN_VERSIONS: SafeVersion[] = ['1.0.0', '1.1.1', '1.2.0', '1.3.0', '1.4.1']
+import { KNOWN_SAFE_VERSIONS } from './constants'
 
 const isKnownImplementation = (address: string, chainId: string): boolean =>
-  hasMatchingDeployment(getSafeSingletonDeployments, address, chainId, KNOWN_VERSIONS) ||
-  hasMatchingDeployment(getSafeL2SingletonDeployments, address, chainId, KNOWN_VERSIONS)
+  hasMatchingDeployment(getSafeSingletonDeployments, address, chainId, KNOWN_SAFE_VERSIONS) ||
+  hasMatchingDeployment(getSafeL2SingletonDeployments, address, chainId, KNOWN_SAFE_VERSIONS)
 
 export const contractVersionScanner: SecurityScanner = {
   id: 'contract_version',
@@ -23,7 +21,7 @@ export const contractVersionScanner: SecurityScanner = {
       masterCopyDeployer,
       nonce,
       chainId,
-      safeAddress,
+      creationInfo,
     } = ctx
     const now = new Date().toISOString()
     const versionLabel = version ?? 'Unknown'
@@ -87,7 +85,6 @@ export const contractVersionScanner: SecurityScanner = {
     }
 
     // Check if original deployment used a recognized implementation
-    const { creationInfo } = ctx
     if (creationInfo?.masterCopy && !isKnownImplementation(creationInfo.masterCopy, chainId)) {
       return {
         status: 'partial',
