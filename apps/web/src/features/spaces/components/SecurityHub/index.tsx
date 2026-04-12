@@ -160,7 +160,7 @@ const SecurityHub = (): ReactElement => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [reportTab, setReportTab] = useState(0)
-  const [scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
+  const [_scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
