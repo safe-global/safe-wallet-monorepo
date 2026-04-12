@@ -8,6 +8,7 @@ import DimensionGrid, { type CardOverride } from './DimensionGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
+  initialResults?: Record<string, ScanResult>
   buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
   dimensionFilter?: (def: DimensionDef) => boolean
   onScanComplete?: (
@@ -20,11 +21,12 @@ type SecurityReportProps = {
 
 const SecurityReport = ({
   scanContext,
+  initialResults,
   buildCardOverrides,
   dimensionFilter,
   onScanComplete,
 }: SecurityReportProps): ReactElement => {
-  const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
+  const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext, initialResults)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
 

@@ -12,14 +12,17 @@ export type ScanState = {
   rescan: () => void
 }
 
-const useSecurityScan = (ctx: ScanContext | null): ScanState => {
-  const [results, setResults] = useState<Record<string, ScanResult>>({})
+const useSecurityScan = (ctx: ScanContext | null, initialResults?: Record<string, ScanResult>): ScanState => {
+  const [results, setResults] = useState<Record<string, ScanResult>>(initialResults ?? {})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [lastScannedAt, setLastScannedAt] = useState<number | null>(null)
+  const [lastScannedAt, setLastScannedAt] = useState<number | null>(
+    initialResults && Object.keys(initialResults).length > 0 ? Date.now() : null,
+  )
   const scanIdRef = useRef(0)
   const ctxRef = useRef(ctx)
   ctxRef.current = ctx
+  const hasInitialResults = useRef(!!initialResults && Object.keys(initialResults).length > 0)
 
   const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
 
@@ -74,6 +77,11 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
 
   useEffect(() => {
     if (ctxKey) {
+      if (hasInitialResults.current) {
+        // Skip auto-scan — we already have results from the caller
+        hasInitialResults.current = false
+        return
+      }
       runScan()
     } else {
       // Context went null (Safe switching) — clear stale results and reject in-flight scans

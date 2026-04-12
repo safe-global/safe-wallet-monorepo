@@ -1,4 +1,4 @@
-import { type ReactElement, useState, useCallback, Fragment } from 'react'
+import { type ReactElement, useState, useCallback, useMemo, Fragment } from 'react'
 import {
   Box,
   Button,
@@ -15,6 +15,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import Link from 'next/link'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
@@ -25,6 +26,9 @@ import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
+import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { AppRoutes } from '@/config/routes'
 
 const DASH = '—'
 
@@ -87,6 +91,26 @@ const SecuritySafesTable = ({
   scanResults,
   scanningKeys,
 }: SecuritySafesTableProps): ReactElement => {
+  const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
+  const chainShortNames = useMemo(() => {
+    if (!chainsData) return {}
+    const map: Record<string, string> = {}
+    for (const id of chainsData.ids) {
+      const chain = chainsData.entities[id]
+      if (chain) map[chain.chainId] = chain.shortName
+    }
+    return map
+  }, [chainsData])
+
+  const getSafeSecurityHref = useCallback(
+    (address: string, chainId: string) => {
+      const shortName = chainShortNames[chainId]
+      if (!shortName) return undefined
+      return { pathname: AppRoutes.security, query: { safe: `${shortName}:${address}` } }
+    },
+    [chainShortNames],
+  )
+
   const [expandedAddresses, setExpandedAddresses] = useState<Set<string>>(new Set())
 
   const toggleExpand = useCallback((address: string) => {
@@ -157,6 +181,8 @@ const SecuritySafesTable = ({
               const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
               const isScanning = scanningKeys?.has(key)
 
+              const safeHref = getSafeSecurityHref(safe.address, safe.chainId)
+
               return (
                 <TableRow key={key} selected={isSelected}>
                   <TableCell>
@@ -166,7 +192,16 @@ const SecuritySafesTable = ({
                         variant="body2"
                         fontWeight={600}
                         noWrap
-                        sx={{ width: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        component={safeHref ? Link : 'span'}
+                        {...(safeHref ? { href: safeHref } : {})}
+                        sx={{
+                          width: 100,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          '&:hover': safeHref ? { textDecoration: 'underline' } : {},
+                        }}
                       >
                         {safe.name || shortenAddress(safe.address)}
                       </Typography>
@@ -221,7 +256,7 @@ const SecuritySafesTable = ({
                   onClick={() => toggleExpand(safe.address)}
                 >
                   <TableCell>
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
                       <Identicon address={safe.address} size={32} />
                       <Typography
                         variant="body2"
@@ -272,6 +307,7 @@ const SecuritySafesTable = ({
                   const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
                   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
                   const isScanning = scanningKeys?.has(key)
+                  const childHref = getSafeSecurityHref(safe.address, chain.chainId)
 
                   return (
                     <TableRow
@@ -283,8 +319,19 @@ const SecuritySafesTable = ({
                       }}
                     >
                       <TableCell>
-                        <Typography variant="body2" color="text.secondary" sx={{ pl: 5.5 }}>
-                          {shortenAddress(safe.address)}
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          component={childHref ? Link : 'span'}
+                          {...(childHref ? { href: childHref } : {})}
+                          sx={{
+                            pl: 5.5,
+                            textDecoration: 'none',
+                            color: 'text.secondary',
+                            '&:hover': childHref ? { textDecoration: 'underline' } : {},
+                          }}
+                        >
+                          {safe.name || shortenAddress(safe.address)}
                         </Typography>
                       </TableCell>
                       <TableCell>
