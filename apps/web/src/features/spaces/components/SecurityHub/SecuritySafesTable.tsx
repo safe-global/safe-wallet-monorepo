@@ -18,6 +18,7 @@ import {
 import Link from 'next/link'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
 import { getStrengthLevel, getStrengthColor } from '@/features/security/data/securityScoring'
 import type { ScanResult } from '@/features/security/data/scanners/types'
@@ -153,6 +154,19 @@ const SecuritySafesTable = ({
     }
   }
 
+  const hasMultichainWarning = (safe: SpaceSafeEntry): boolean => {
+    for (const chain of safe.chainEntries) {
+      const key = scanKey(safe.address, chain.chainId)
+      const results = scanResults[key]
+      if (!results) continue
+      const multichainResult = results['multichain_setup']
+      if (multichainResult && multichainResult.status !== 'clear' && multichainResult.status !== 'not_applicable') {
+        return true
+      }
+    }
+    return false
+  }
+
   const isAnyChainScanning = (safe: SpaceSafeEntry): boolean => {
     if (!scanningKeys) return false
     return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
@@ -247,6 +261,7 @@ const SecuritySafesTable = ({
 
             const aggregateSummary = getAggregateSummary(safe)
             const aggregateScanning = isAnyChainScanning(safe)
+            const showMultichainWarning = hasMultichainWarning(safe)
 
             return (
               <Fragment key={safe.address}>
@@ -281,6 +296,11 @@ const SecuritySafesTable = ({
                           }}
                         />
                       </IconButton>
+                      {showMultichainWarning && (
+                        <Tooltip title="Signer setup differs across networks">
+                          <WarningAmberRoundedIcon sx={{ fontSize: 18, color: 'warning.main' }} />
+                        </Tooltip>
+                      )}
                     </Stack>
                   </TableCell>
                   <TableCell>

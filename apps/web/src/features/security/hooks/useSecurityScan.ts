@@ -12,6 +12,14 @@ const scanResultsCache = new Map<string, { results: Record<string, ScanResult>; 
 
 export const getScanResultsCache = () => scanResultsCache
 
+const SCANNER_TIMEOUT_MS = 15_000
+
+const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> =>
+  Promise.race([
+    promise,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Scanner timed out')), ms)),
+  ])
+
 export type ScanState = {
   results: Record<string, ScanResult>
   loading: Record<string, boolean>
@@ -81,7 +89,7 @@ const useSecurityScan = (ctx: ScanContext | null, initialResults?: Record<string
     SCANNERS.forEach((scanner) => {
       executeScan(
         scanner.id,
-        () => scanner.scan(currentCtx),
+        () => withTimeout(scanner.scan(currentCtx), SCANNER_TIMEOUT_MS),
         currentScanId,
         () => {
           completedCount++
