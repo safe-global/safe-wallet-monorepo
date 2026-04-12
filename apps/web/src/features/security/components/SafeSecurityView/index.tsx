@@ -4,7 +4,8 @@ import { useRouter } from 'next/router'
 import useSafePageScanContext from '@/features/security/hooks/useSafePageScanContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useIsActiveMember } from '@/features/spaces'
+import { useIsActiveMember, useSpaceSafes } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useLoadFeature } from '@/features/__core__'
 import { HypernativeFeature } from '@/features/hypernative'
 import { TxModalContext } from '@/components/tx-flow'
@@ -20,8 +21,10 @@ const SafeSecurityView = (): ReactElement => {
   const scanContext = useSafePageScanContext()
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
+  const { allSafes } = useSpaceSafes()
   const isSpaceMember = useIsActiveMember()
-  const canView = isSafeOwner || isSpaceMember
+  const isSafeInSpace = isSpaceMember && allSafes.some((s) => sameAddress(s.address, safe.address.value))
+  const canView = isSafeOwner || isSafeInSpace
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const [signupOpen, setSignupOpen] = useState(false)
