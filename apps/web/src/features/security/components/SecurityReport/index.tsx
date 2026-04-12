@@ -3,14 +3,14 @@ import { Box, Fade, Skeleton, Stack } from '@mui/material'
 import useSecurityScan from '@/features/security/hooks/useSecurityScan'
 import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
 import SecurityStrengthBar from '@/features/security/components/SecurityStrengthBar'
-import type { DimensionDef } from '@/features/security/data/securityDimensions'
-import DimensionGrid, { type CardOverride } from './DimensionGrid'
+import type { CheckDef } from '@/features/security/data/securityChecks'
+import CheckGrid, { type CardOverride } from './CheckGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
   initialResults?: Record<string, ScanResult>
   buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
-  dimensionFilter?: (def: DimensionDef) => boolean
+  checkFilter?: (def: CheckDef) => boolean
   onScanComplete?: (
     safeAddress: string,
     chainId: string,
@@ -23,7 +23,7 @@ const SecurityReport = ({
   scanContext,
   initialResults,
   buildCardOverrides,
-  dimensionFilter,
+  checkFilter,
   onScanComplete,
 }: SecurityReportProps): ReactElement => {
   const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext, initialResults)
@@ -62,12 +62,12 @@ const SecurityReport = ({
           lastScannedAt={lastScannedAt}
           onRescan={rescan}
         />
-        <DimensionGrid
+        <CheckGrid
           results={results}
           loading={loading}
           errors={errors}
           cardOverrides={cardOverrides}
-          dimensionFilter={dimensionFilter}
+          checkFilter={checkFilter}
         />
       </Box>
     </Fade>

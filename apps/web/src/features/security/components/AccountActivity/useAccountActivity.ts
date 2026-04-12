@@ -3,16 +3,16 @@ import { useLazyTransactionsGetTransactionsHistoryV1Query } from '@safe-global/s
 import type { Transaction, TransactionItem, DateLabel } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isSettingsChangeTxInfo } from '@/utils/transaction-guards'
 
-export type AuditLogWarning = {
+export type AccountActivityWarning = {
   label: string
   severity: 'info' | 'warning' | 'error'
 }
 
-export type AuditLogEntry = {
+export type AccountActivityEntry = {
   id: string
   transaction: Transaction
   timestamp: number
-  warnings: AuditLogWarning[]
+  warnings: AccountActivityWarning[]
 }
 
 const MAX_PAGES = 10
@@ -32,8 +32,8 @@ const extractCursor = (nextUrl?: string | null): string | undefined => {
 
 const HIGH_RISK_CHANGES = new Set(['CHANGE_MASTER_COPY', 'SET_GUARD', 'DELETE_GUARD', 'SET_FALLBACK_HANDLER'])
 
-const deriveWarnings = (tx: Transaction): AuditLogWarning[] => {
-  const warnings: AuditLogWarning[] = []
+const deriveWarnings = (tx: Transaction): AccountActivityWarning[] => {
+  const warnings: AccountActivityWarning[] = []
 
   if (tx.txStatus === 'FAILED') {
     warnings.push({ label: 'Execution failed', severity: 'error' })
@@ -53,7 +53,7 @@ const deriveWarnings = (tx: Transaction): AuditLogWarning[] => {
   return warnings
 }
 
-const extractSettingsChanges = (results: (TransactionItem | DateLabel)[]): AuditLogEntry[] =>
+const extractSettingsChanges = (results: (TransactionItem | DateLabel)[]): AccountActivityEntry[] =>
   results
     .filter(isTransactionItem)
     .filter((item) => isSettingsChangeTxInfo(item.transaction.txInfo))
@@ -64,9 +64,9 @@ const extractSettingsChanges = (results: (TransactionItem | DateLabel)[]): Audit
       warnings: deriveWarnings(item.transaction),
     }))
 
-const useAuditLog = (chainId: string, safeAddress: string) => {
+const useAccountActivity = (chainId: string, safeAddress: string) => {
   const [trigger] = useLazyTransactionsGetTransactionsHistoryV1Query()
-  const [entries, setEntries] = useState<AuditLogEntry[]>([])
+  const [entries, setEntries] = useState<AccountActivityEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(false)
@@ -83,7 +83,7 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
       setHasMore(false)
 
       try {
-        const collected: AuditLogEntry[] = []
+        const collected: AccountActivityEntry[] = []
         let cursor: string | undefined
         let pages = 0
         let moreAvailable = false
@@ -131,4 +131,4 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
   return { entries, isLoading, error, hasMore }
 }
 
-export default useAuditLog
+export default useAccountActivity

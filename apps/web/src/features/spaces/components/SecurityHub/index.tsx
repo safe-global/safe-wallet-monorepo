@@ -13,9 +13,9 @@ import { SCANNERS } from '@/features/security/data/scanners/registry'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReport from '@/features/security/components/SecurityReport'
-import AuditLog from '@/features/security/components/AuditLog'
+import AccountActivity from '@/features/security/components/AccountActivity'
 import SecurityTabs from '@/features/security/components/SecurityTabs'
-import type { DimensionDef } from '@/features/security/data/securityDimensions'
+import type { CheckDef } from '@/features/security/data/securityChecks'
 import SearchInput from '../SearchInput'
 
 export type ChainEntry = {
@@ -294,11 +294,11 @@ const SecurityHub = (): ReactElement => {
                   scanContext={scanContext}
                   initialResults={selectedKey ? allScanResults[selectedKey] : undefined}
                   onScanComplete={handleScanComplete}
-                  dimensionFilter={(def: DimensionDef) => def.category === 'account'}
+                  checkFilter={(def: CheckDef) => def.category === 'account'}
                 />
               )}
 
-              {reportTab === 1 && <AuditLog chainId={selectedSafe.chainId} safeAddress={selectedSafe.address} />}
+              {reportTab === 1 && <AccountActivity chainId={selectedSafe.chainId} safeAddress={selectedSafe.address} />}
             </>
           )}
         </Box>

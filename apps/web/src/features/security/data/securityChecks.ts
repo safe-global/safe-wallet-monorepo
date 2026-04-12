@@ -1,17 +1,17 @@
 import { AppRoutes } from '@/config/routes'
 
-export type DimensionCategory = 'account' | 'user'
+export type CheckCategory = 'account' | 'user'
 
-export type DimensionDef = {
+export type CheckDef = {
   id: string
   title: string
   shortDescription: string
   fixRoute: string
   ctaLabel: string
-  category: DimensionCategory
+  category: CheckCategory
 }
 
-export const DIMENSION_DEFS: Record<string, DimensionDef> = {
+export const CHECK_DEFS: Record<string, CheckDef> = {
   account_setup: {
     id: 'account_setup',
     title: 'Account setup',

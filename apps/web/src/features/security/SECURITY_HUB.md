@@ -135,14 +135,14 @@ SafeSecurityView
 ├── Tab: Security Overview
 │   ├── SecurityReport
 │   │   ├── SecurityStrengthBar (overall score + strength level)
-│   │   └── DimensionGrid (grouped by category)
-│   │       └── DimensionCard × N (per check)
+│   │   └── CheckGrid (grouped by category)
+│   │       └── CheckCard × N (per check)
 │   └── CardOverrides (Hypernative branding, Recovery CTAs)
 └── Tab: Account Activity
-    └── AuditLog (EnhancedTable with sorting + pagination)
+    └── AccountActivity (EnhancedTable with sorting + pagination)
 ```
 
-### Dimension categories
+### Check categories
 
 | Category | Visible to                        | Checks                               |
 | -------- | --------------------------------- | ------------------------------------ |

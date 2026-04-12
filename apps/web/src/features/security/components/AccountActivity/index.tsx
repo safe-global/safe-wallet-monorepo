@@ -12,7 +12,7 @@ import { getTxLink } from '@/utils/tx-link'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { getSettingsMeta } from './utils'
-import useAuditLog, { type AuditLogEntry } from './useAuditLog'
+import useAccountActivity, { type AccountActivityEntry } from './useAccountActivity'
 
 const STATUS_LABELS: Record<string, string> = {
   SUCCESS: 'Executed',
@@ -113,7 +113,7 @@ const renderSettingsDescription = (txInfo: SettingsChangeTransaction): ReactNode
 
 type TxLinkFn = ReturnType<typeof getTxLink> extends infer R ? (txId: string) => R : never
 
-const entryToRow = (entry: AuditLogEntry, getTxDetailLink?: TxLinkFn) => {
+const entryToRow = (entry: AccountActivityEntry, getTxDetailLink?: TxLinkFn) => {
   const { transaction } = entry
   if (!isSettingsChangeTxInfo(transaction.txInfo)) return null
 
@@ -232,13 +232,13 @@ const entryToRow = (entry: AuditLogEntry, getTxDetailLink?: TxLinkFn) => {
   }
 }
 
-type AuditLogProps = {
+type AccountActivityProps = {
   chainId: string
   safeAddress: string
 }
 
-const AuditLog = ({ chainId, safeAddress }: AuditLogProps): ReactElement => {
-  const { entries, isLoading, error, hasMore } = useAuditLog(chainId, safeAddress)
+const AccountActivity = ({ chainId, safeAddress }: AccountActivityProps): ReactElement => {
+  const { entries, isLoading, error, hasMore } = useAccountActivity(chainId, safeAddress)
   const chain = useCurrentChain()
 
   const getTxDetailLink = useMemo(() => {
@@ -297,4 +297,4 @@ const AuditLog = ({ chainId, safeAddress }: AuditLogProps): ReactElement => {
   )
 }
 
-export default AuditLog
+export default AccountActivity

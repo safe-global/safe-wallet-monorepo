@@ -4,13 +4,13 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import type { DimensionDef } from '@/features/security/data/securityDimensions'
+import type { CheckDef } from '@/features/security/data/securityChecks'
 import type { ScanResult } from '@/features/security/data/scanners/types'
-import type { DimensionStatus } from '@/features/security/data/securityTypes'
+import type { CheckStatus } from '@/features/security/data/securityTypes'
 import { getGradeColor, getGradeBgColor } from '@/features/security/data/securityScoring'
-import type { CardOverride } from './DimensionGrid'
+import type { CardOverride } from './CheckGrid'
 
-const STATUS_LABELS: Record<DimensionStatus, string> = {
+const STATUS_LABELS: Record<CheckStatus, string> = {
   clear: 'Healthy',
   issue: 'At risk',
   partial: 'Needs attention',
@@ -18,15 +18,15 @@ const STATUS_LABELS: Record<DimensionStatus, string> = {
   inconclusive: 'Unverified',
 }
 
-type DimensionCardProps = {
-  def: DimensionDef
+type CheckCardProps = {
+  def: CheckDef
   result?: ScanResult
   isScanning: boolean
   error?: string
   override?: CardOverride
 }
 
-const DimensionCard = ({ def, result, isScanning, error, override }: DimensionCardProps): ReactElement => {
+const CheckCard = ({ def, result, isScanning, error, override }: CheckCardProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
   const router = useRouter()
@@ -212,4 +212,4 @@ const DimensionCard = ({ def, result, isScanning, error, override }: DimensionCa
   )
 }
 
-export default DimensionCard
+export default CheckCard

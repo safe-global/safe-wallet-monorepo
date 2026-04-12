@@ -12,9 +12,9 @@ import { TxModalContext } from '@/components/tx-flow'
 import UpsertRecoveryFlow from '@/components/tx-flow/flows/UpsertRecovery'
 import { AppRoutes } from '@/config/routes'
 import SecurityReport from '@/features/security/components/SecurityReport'
-import AuditLog from '@/features/security/components/AuditLog'
+import AccountActivity from '@/features/security/components/AccountActivity'
 import SecurityTabs from '@/features/security/components/SecurityTabs'
-import type { CardOverride } from '@/features/security/components/SecurityReport/DimensionGrid'
+import type { CardOverride } from '@/features/security/components/SecurityReport/CheckGrid'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 
 const SafeSecurityView = (): ReactElement => {
@@ -105,7 +105,7 @@ const SafeSecurityView = (): ReactElement => {
         <SecurityReport key={safeKey} scanContext={scanContext} buildCardOverrides={buildCardOverrides} />
       )}
 
-      {activeTab === 1 && <AuditLog chainId={safe.chainId} safeAddress={safe.address.value} />}
+      {activeTab === 1 && <AccountActivity chainId={safe.chainId} safeAddress={safe.address.value} />}
 
       <HnSignupFlow open={signupOpen} onClose={closeSignup} />
     </Box>
