@@ -55,6 +55,7 @@ Checks that can trigger the Critical floor:
 
 - Account setup: 1 signer, or threshold = 1
 - Contract version: unsupported master copy
+- Signer screening: blocklisted or malicious signer
 
 ### Risk grades (per check)
 
@@ -183,3 +184,4 @@ Checks that return `not_applicable` or `inconclusive` share the same visual trea
 | Known deployments (singletons, factories, handlers)      | `@safe-global/safe-deployments`              | `hasMatchingDeployment()`                          |
 | Known Zodiac modules                                     | `@gnosis.pm/zodiac`                          | `ContractVersions`                                 |
 | Transaction history (audit log)                          | CGW `/safes/{address}/transactions/history`  | `useLazyTransactionsGetTransactionsHistoryV1Query` |
+| Signer risk exposure (signer screening)                  | Blockaid `POST /v0/address/risk-exposure`    | `fetchRiskExposure()` in `signerIntegrity` scanner |
