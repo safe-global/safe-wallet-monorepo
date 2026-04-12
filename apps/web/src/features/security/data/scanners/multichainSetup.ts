@@ -22,9 +22,9 @@ export const multichainSetupScanner: SecurityScanner = {
         multichainDeviatingChains.length > 0 ? multichainDeviatingChains.join(', ') : 'Multiple networks'
 
       return {
-        status: 'issue',
-        severity: 'Critical',
-        score: 10,
+        status: 'partial',
+        severity: 'Medium',
+        score: 30,
         evidence: [
           { label: 'Result', value: 'Signer setup differs across networks' },
           { label: 'Affected', value: chainList },

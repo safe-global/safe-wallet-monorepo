@@ -27,9 +27,9 @@ describe('multichainSetupScanner', () => {
         multichainDeviatingChains: ['Polygon', 'Arbitrum'],
       }),
     )
-    expect(result.status).toBe('issue')
-    expect(result.severity).toBe('Critical')
-    expect(result.score).toBe(10)
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+    expect(result.score).toBe(30)
   })
 
   it('includes affected chain names in evidence', async () => {

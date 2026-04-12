@@ -55,7 +55,7 @@ const useSecurityIssueCount = (): { issueCount: number; strengthLevel: StrengthL
   }, [ctxKey, runScan])
 
   const entries = Object.values(results)
-  const applicable = entries.filter((r) => r.status !== 'not_applicable')
+  const applicable = entries.filter((r) => r.status !== 'not_applicable' && r.status !== 'inconclusive')
   const issueCount = applicable.filter((r) => r.status !== 'clear').length
   const applicableCount = applicable.length
   const clearRatio = applicableCount > 0 ? (applicableCount - issueCount) / applicableCount : 0

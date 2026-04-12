@@ -9,8 +9,8 @@ export const signerIntegrityScanner: SecurityScanner = {
     // Browser CORS blocks direct calls to api.blockaid.io.
     // See: https://docs.blockaid.io — POST /v0/address/risk-exposure
     return {
-      status: 'partial' as const,
-      severity: 'Medium' as const,
+      status: 'inconclusive' as const,
+      severity: 'Low' as const,
       score: 50,
       evidence: [{ label: 'Status', value: 'Automated screening not yet available' }],
       remediation: 'Manually verify that all signers are trustworthy and have not been compromised.',

@@ -50,6 +50,31 @@ describe('fallbackHandlerScanner', () => {
     expect(result.evidence).toEqual(expect.arrayContaining([expect.objectContaining({ value: 'Suspicious Handler' })]))
   })
 
+  it('returns clear for CoW TWAP handler on supported chain', async () => {
+    const result = await fallbackHandlerScanner.scan(
+      createMockContext({
+        chainId: '1',
+        fallbackHandler: { value: '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5', name: 'TWAP Handler' },
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+    expect(result.evidence).toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'CoW Protocol TWAP handler' })]),
+    )
+  })
+
+  it('returns issue for CoW TWAP handler on unsupported chain', async () => {
+    const result = await fallbackHandlerScanner.scan(
+      createMockContext({
+        chainId: '999999',
+        fallbackHandler: { value: '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5' },
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+  })
+
   it('includes lastChecked timestamp', async () => {
     const result = await fallbackHandlerScanner.scan(createMockContext())
     expect(result.lastChecked).toBeDefined()

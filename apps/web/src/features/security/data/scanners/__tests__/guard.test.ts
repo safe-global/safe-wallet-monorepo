@@ -24,7 +24,7 @@ describe('guardScanner', () => {
     })
   })
 
-  describe('Tier 2: trusted Hypernative guard', () => {
+  describe('Tier 2: trusted guards', () => {
     it('returns clear with partner tag for Hypernative guard', async () => {
       const ctx = createMockContext({
         guard: { value: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'Hypernative Guardian' },
@@ -43,6 +43,25 @@ describe('guardScanner', () => {
       const result = await guardScanner.scan(ctx)
       expect(result.status).toBe('clear')
       expect(result.partner).toBe('hypernative')
+    })
+
+    it('returns clear for Zodiac ScopeGuard by name (no partner tag)', async () => {
+      const ctx = createMockContext({
+        guard: { value: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'Scope Guard' },
+      })
+      const result = await guardScanner.scan(ctx)
+      expect(result.status).toBe('clear')
+      expect(result.severity).toBe('Low')
+      expect(result.partner).toBeUndefined()
+    })
+
+    it('returns clear for Zodiac MetaGuard by name', async () => {
+      const ctx = createMockContext({
+        guard: { value: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'Meta Guard v1' },
+      })
+      const result = await guardScanner.scan(ctx)
+      expect(result.status).toBe('clear')
+      expect(result.partner).toBeUndefined()
     })
   })
 
