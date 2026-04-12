@@ -16,6 +16,7 @@ export type CardOverride = {
 type DimensionGridProps = {
   results: Record<string, ScanResult>
   loading: Record<string, boolean>
+  errors?: Record<string, string>
   cardOverrides?: Record<string, CardOverride>
   dimensionFilter?: (def: DimensionDef) => boolean
 }
@@ -27,7 +28,13 @@ const CATEGORY_LABELS: Record<DimensionCategory, string> = {
 
 const CATEGORY_ORDER: DimensionCategory[] = ['account', 'user']
 
-const DimensionGrid = ({ results, loading, cardOverrides, dimensionFilter }: DimensionGridProps): ReactElement => {
+const DimensionGrid = ({
+  results,
+  loading,
+  errors,
+  cardOverrides,
+  dimensionFilter,
+}: DimensionGridProps): ReactElement => {
   const grouped = useMemo(() => {
     const defs = Object.values(DIMENSION_DEFS).filter((def) => !dimensionFilter || dimensionFilter(def))
 
@@ -60,6 +67,7 @@ const DimensionGrid = ({ results, loading, cardOverrides, dimensionFilter }: Dim
                   def={def}
                   result={results[def.id]}
                   isScanning={loading[def.id] ?? false}
+                  error={errors?.[def.id]}
                   override={cardOverrides?.[def.id]}
                 />
               </Grid>

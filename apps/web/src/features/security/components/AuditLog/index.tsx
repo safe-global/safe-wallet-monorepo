@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, useMemo } from 'react'
 import { Box, Button, Chip, Skeleton, Stack, Typography } from '@mui/material'
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
 import Link from 'next/link'
 import type {
   SettingsChangeTransaction,
@@ -222,8 +222,8 @@ const entryToRow = (entry: AuditLogEntry, getTxDetailLink?: TxLinkFn) => {
         sticky: true,
         content: txDetailLink ? (
           <Link href={txDetailLink.href} passHref legacyBehavior>
-            <Button component="a" variant="outlined" size="small" startIcon={<VisibilityOutlinedIcon />}>
-              Transaction
+            <Button component="a" variant="text" size="small" startIcon={<VisibilityRoundedIcon />}>
+              View transaction
             </Button>
           </Link>
         ) : null,
@@ -238,7 +238,7 @@ type AuditLogProps = {
 }
 
 const AuditLog = ({ chainId, safeAddress }: AuditLogProps): ReactElement => {
-  const { entries, isLoading, error } = useAuditLog(chainId, safeAddress)
+  const { entries, isLoading, error, hasMore } = useAuditLog(chainId, safeAddress)
   const chain = useCurrentChain()
 
   const getTxDetailLink = useMemo(() => {
@@ -285,7 +285,16 @@ const AuditLog = ({ chainId, safeAddress }: AuditLogProps): ReactElement => {
     )
   }
 
-  return <EnhancedTable rows={rows} headCells={HEAD_CELLS} mobileVariant />
+  return (
+    <>
+      <EnhancedTable rows={rows} headCells={HEAD_CELLS} mobileVariant />
+      {hasMore && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
+          Showing the most recent {entries.length} changes. Older entries are not displayed.
+        </Typography>
+      )}
+    </>
+  )
 }
 
 export default AuditLog

@@ -26,7 +26,7 @@ const SecurityReport = ({
   dimensionFilter,
   onScanComplete,
 }: SecurityReportProps): ReactElement => {
-  const { results, loading, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext, initialResults)
+  const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext, initialResults)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
 
@@ -65,6 +65,7 @@ const SecurityReport = ({
         <DimensionGrid
           results={results}
           loading={loading}
+          errors={errors}
           cardOverrides={cardOverrides}
           dimensionFilter={dimensionFilter}
         />
