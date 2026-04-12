@@ -241,7 +241,7 @@ const SecurityHub = (): ReactElement => {
         direction="row"
         justifyContent="space-between"
         alignItems="flex-start"
-        flexDirection={{ xs: 'column-reverse', md: 'row' }}
+        flexDirection={{ xs: 'column', md: 'row' }}
         flexWrap="nowrap"
         gap={2}
         mb={3}
