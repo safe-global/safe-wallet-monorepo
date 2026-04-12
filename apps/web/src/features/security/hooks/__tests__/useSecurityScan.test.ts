@@ -61,7 +61,7 @@ describe('useSecurityScan', () => {
   it('clears results when context goes null', async () => {
     const ctx = createMockContext()
     const { result, rerender } = renderHook(({ c }: { c: ScanContext | null }) => useSecurityScan(c), {
-      initialProps: { c: ctx },
+      initialProps: { c: ctx } as { c: ScanContext | null },
     })
 
     await waitFor(() => {
@@ -108,7 +108,7 @@ describe('useSecurityScan', () => {
 
     const ctx1 = createMockContext({ chainId: '1', safeAddress: '0xSafe1' })
     const { result, rerender } = renderHook(({ c }: { c: ScanContext | null }) => useSecurityScan(c), {
-      initialProps: { c: ctx1 },
+      initialProps: { c: ctx1 } as { c: ScanContext | null },
     })
 
     // Switch context before slow scanner resolves

@@ -1,4 +1,4 @@
-import type { ScanContext } from '../types'
+import type { ScanContext } from './types'
 
 /** Creates a default ScanContext with sensible defaults. Override any field. */
 export const createMockContext = (overrides: Partial<ScanContext> = {}): ScanContext => ({
