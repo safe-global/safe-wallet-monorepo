@@ -17,7 +17,8 @@ import { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import useSecurityIssueCount from '@/features/security/hooks/useSecurityIssueCount'
 import { getStrengthColor } from '@/features/security/data/securityScoring'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useIsActiveMember } from '@/features/spaces'
+import { useIsActiveMember, useSpaceSafes } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Box } from '@mui/material'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
@@ -54,7 +55,9 @@ const Navigation = (): ReactElement | null => {
   const { strengthLevel } = useSecurityIssueCount()
   const isSafeOwner = useIsSafeOwner()
   const isSpaceMember = useIsActiveMember()
-  const canViewSecurity = isSafeOwner || isSpaceMember
+  const { allSafes: spaceSafes } = useSpaceSafes()
+  const isSafeInSpace = isSpaceMember && spaceSafes.some((s) => sameAddress(s.address, safe.address.value))
+  const canViewSecurity = isSafeOwner || isSafeInSpace
   const isBlockedCountry = useContext(GeoblockingContext)
 
   const visibleNavItems = useMemo(() => {
