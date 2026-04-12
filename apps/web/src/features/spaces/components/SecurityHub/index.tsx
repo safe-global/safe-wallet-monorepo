@@ -79,6 +79,7 @@ const useAutoScan = (
   const [scanningKeys, setScanningKeys] = useState<Set<string>>(new Set())
   const [isRunning, setIsRunning] = useState(false)
   const completedRef = useRef<Set<string>>(new Set())
+  const scanningRef = useRef<string | null>(null)
 
   const currentTarget = isRunning && currentIndex < queue.length ? queue[currentIndex] : null
   const currentEntry = currentTarget ? safes.find((s) => s.address === currentTarget.address) : undefined
@@ -91,10 +92,13 @@ const useAutoScan = (
 
     const key = scanKey(currentTarget.address, currentTarget.chainId)
     if (completedRef.current.has(key)) {
-      // Already scanned, advance
       setCurrentIndex((i) => i + 1)
       return
     }
+
+    // Guard: don't re-launch scanners if already scanning this key
+    if (scanningRef.current === key) return
+    scanningRef.current = key
 
     setScanningKeys((prev) => new Set(prev).add(key))
 
@@ -115,6 +119,7 @@ const useAutoScan = (
           completed++
           if (completed === total) {
             completedRef.current.add(key)
+            scanningRef.current = null
             onComplete(currentTarget.address, currentTarget.chainId, Date.now(), results)
             setScanningKeys((prev) => {
               const next = new Set(prev)
@@ -146,6 +151,7 @@ const useAutoScan = (
 
   const startScan = useCallback(() => {
     completedRef.current = new Set()
+    scanningRef.current = null
     setCurrentIndex(0)
     setJustCompleted(false)
     setIsRunning(true)
@@ -202,7 +208,6 @@ const SecurityHub = (): ReactElement => {
       if (prev && prev.address === address && prev.chainId === chainId) return null
       return { address, chainId }
     })
-    setReportTab(0)
   }, [])
 
   const handleScanComplete = useCallback(
