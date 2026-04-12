@@ -121,17 +121,18 @@ const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps
                 {ctaLabel}
               </Button>
             ) : (
-              <Button
-                component={Link}
-                href={fixHref}
-                variant="text"
-                size="small"
-                endIcon={<ArrowForwardRoundedIcon />}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                sx={{ px: 1 }}
-              >
-                {ctaLabel}
-              </Button>
+              <Link href={fixHref} passHref legacyBehavior>
+                <Button
+                  component="a"
+                  variant="text"
+                  size="small"
+                  endIcon={<ArrowForwardRoundedIcon />}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  sx={{ px: 1 }}
+                >
+                  {ctaLabel}
+                </Button>
+              </Link>
             ))}
         </Stack>
       </Box>
