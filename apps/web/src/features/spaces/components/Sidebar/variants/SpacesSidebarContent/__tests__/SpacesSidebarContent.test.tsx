@@ -41,8 +41,8 @@ jest.mock('../../../config', () => ({
         href: '/spaces/members',
       },
       {
-        icon: () => <div>Security</div>,
-        label: 'Security',
+        icon: () => <div>Security hub</div>,
+        label: 'Security hub',
         href: '/spaces/security',
         activeMemberOnly: true,
       },

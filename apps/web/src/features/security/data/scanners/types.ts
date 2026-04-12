@@ -1,4 +1,4 @@
-import type { DimensionStatus, SecurityGrade } from '../securityTypes'
+import type { CheckStatus, SecurityGrade } from '../securityTypes'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 export type ScanContext = {
@@ -37,7 +37,7 @@ export type ScanContext = {
 export type EvidenceItem = { label: string; value: string } | string
 
 export type ScanResult = {
-  status: DimensionStatus
+  status: CheckStatus
   severity: SecurityGrade
   score: number
   evidence: EvidenceItem[]

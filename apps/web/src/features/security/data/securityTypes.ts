@@ -1,11 +1,11 @@
 export type SecurityGrade = 'Low' | 'Medium' | 'High' | 'Critical'
 
-export type DimensionStatus = 'clear' | 'issue' | 'partial' | 'not_applicable' | 'inconclusive'
+export type CheckStatus = 'clear' | 'issue' | 'partial' | 'not_applicable' | 'inconclusive'
 
-export type DimensionResult = {
+export type CheckResult = {
   id: string
   title: string
-  status: DimensionStatus
+  status: CheckStatus
   severity: SecurityGrade
   score: number
   shortDescription: string
@@ -39,7 +39,7 @@ export type SafeSecurityDetail = SafeSecuritySummary & {
     lastActive?: string
     custody?: 'Hardware' | 'Hot' | 'Unknown'
   }[]
-  dimensions: DimensionResult[]
+  dimensions: CheckResult[]
 }
 
 export type WorkspaceSecuritySummary = {

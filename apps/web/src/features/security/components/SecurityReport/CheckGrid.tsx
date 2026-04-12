@@ -1,8 +1,8 @@
 import { type ReactElement, type ReactNode, useMemo } from 'react'
 import { Grid2 as Grid, Typography } from '@mui/material'
 import type { ScanResult } from '@/features/security/data/scanners/types'
-import { DIMENSION_DEFS, type DimensionCategory, type DimensionDef } from '@/features/security/data/securityDimensions'
-import DimensionCard from './DimensionCard'
+import { CHECK_DEFS, type CheckCategory, type CheckDef } from '@/features/security/data/securityChecks'
+import CheckCard from './CheckCard'
 
 export type CardOverride = {
   onCtaClick?: () => void
@@ -13,32 +13,26 @@ export type CardOverride = {
   logo?: ReactNode
 }
 
-type DimensionGridProps = {
+type CheckGridProps = {
   results: Record<string, ScanResult>
   loading: Record<string, boolean>
   errors?: Record<string, string>
   cardOverrides?: Record<string, CardOverride>
-  dimensionFilter?: (def: DimensionDef) => boolean
+  checkFilter?: (def: CheckDef) => boolean
 }
 
-const CATEGORY_LABELS: Record<DimensionCategory, string> = {
+const CATEGORY_LABELS: Record<CheckCategory, string> = {
   account: 'Account checks',
   user: 'Personal checks',
 }
 
-const CATEGORY_ORDER: DimensionCategory[] = ['account', 'user']
+const CATEGORY_ORDER: CheckCategory[] = ['account', 'user']
 
-const DimensionGrid = ({
-  results,
-  loading,
-  errors,
-  cardOverrides,
-  dimensionFilter,
-}: DimensionGridProps): ReactElement => {
+const CheckGrid = ({ results, loading, errors, cardOverrides, checkFilter }: CheckGridProps): ReactElement => {
   const grouped = useMemo(() => {
-    const defs = Object.values(DIMENSION_DEFS).filter((def) => !dimensionFilter || dimensionFilter(def))
+    const defs = Object.values(CHECK_DEFS).filter((def) => !checkFilter || checkFilter(def))
 
-    const groups: Partial<Record<DimensionCategory, typeof defs>> = {}
+    const groups: Partial<Record<CheckCategory, typeof defs>> = {}
     for (const def of defs) {
       const cat = def.category
       ;(groups[cat] ??= []).push(def)
@@ -49,7 +43,7 @@ const DimensionGrid = ({
       label: CATEGORY_LABELS[cat],
       defs: groups[cat]!,
     }))
-  }, [dimensionFilter])
+  }, [checkFilter])
 
   return (
     <>
@@ -63,7 +57,7 @@ const DimensionGrid = ({
           <Grid container spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
             {defs.map((def) => (
               <Grid key={def.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <DimensionCard
+                <CheckCard
                   def={def}
                   result={results[def.id]}
                   isScanning={loading[def.id] ?? false}
@@ -79,4 +73,4 @@ const DimensionGrid = ({
   )
 }
 
-export default DimensionGrid
+export default CheckGrid

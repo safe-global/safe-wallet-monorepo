@@ -93,7 +93,7 @@ describe('SpacesSidebarVariant', () => {
       },
       {
         icon: Shield,
-        label: 'Security',
+        label: 'Security hub',
         href: '/security',
         badge: 0,
         isActive: false,
@@ -130,7 +130,7 @@ describe('SpacesSidebarVariant', () => {
     expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
     expect(screen.getByText('Setup')).toBeInTheDocument()
     expect(screen.getByText('Team')).toBeInTheDocument()
-    expect(screen.getByText('Security')).toBeInTheDocument()
+    expect(screen.getByText('Security hub')).toBeInTheDocument()
   })
 
   it('renders badge for items with non-zero badge count', () => {
@@ -157,6 +157,6 @@ describe('SpacesSidebarVariant', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /Security/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Security hub/i })).toBeDisabled()
   })
 })
