@@ -55,10 +55,12 @@ const useSecurityIssueCount = (): { issueCount: number; strengthLevel: StrengthL
   }, [ctxKey, runScan])
 
   const entries = Object.values(results)
-  const issueCount = entries.filter((r) => r.status !== 'clear').length
-  const total = entries.length
-  const clearRatio = total > 0 ? (total - issueCount) / total : 0
-  const strengthLevel = total > 0 ? getStrengthLevel(clearRatio) : null
+  const applicable = entries.filter((r) => r.status !== 'not_applicable')
+  const issueCount = applicable.filter((r) => r.status !== 'clear').length
+  const applicableCount = applicable.length
+  const clearRatio = applicableCount > 0 ? (applicableCount - issueCount) / applicableCount : 0
+  const hasCriticalIssue = applicable.some((r) => r.severity === 'Critical')
+  const strengthLevel = applicableCount > 0 ? getStrengthLevel(clearRatio, hasCriticalIssue) : null
 
   return { issueCount, strengthLevel, isScanning }
 }

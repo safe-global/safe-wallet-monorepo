@@ -8,7 +8,7 @@ export const multichainSetupScanner: SecurityScanner = {
 
     if (!isMultichain) {
       return {
-        status: 'clear',
+        status: 'not_applicable',
         severity: 'Low',
         score: 100,
         evidence: [{ label: 'Result', value: 'Deployed on a single network' }],

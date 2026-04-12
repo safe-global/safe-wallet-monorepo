@@ -10,11 +10,12 @@ import type { DimensionStatus } from '@/features/security/data/securityTypes'
 import { getGradeColor, getGradeBgColor } from '@/features/security/data/securityScoring'
 import type { CardOverride } from './DimensionGrid'
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<DimensionStatus, string> = {
   clear: 'Healthy',
   issue: 'At risk',
   partial: 'Needs attention',
-} satisfies Record<DimensionStatus, string>
+  not_applicable: 'N/A',
+}
 
 type DimensionCardProps = {
   def: DimensionDef
@@ -28,8 +29,9 @@ const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
   const router = useRouter()
 
-  const color = result ? getGradeColor(result.severity) : 'text.secondary'
-  const needsFix = result ? result.status !== 'clear' : false
+  const isNA = result?.status === 'not_applicable'
+  const color = result && !isNA ? getGradeColor(result.severity) : 'text.secondary'
+  const needsFix = result ? result.status !== 'clear' && !isNA : false
   const fixHref = { pathname: def.fixRoute, query: { safe: router.query.safe } }
   const ctaLabel = needsFix
     ? (override?.ctaLabel ?? result?.ctaLabelOverride ?? def.ctaLabel)
@@ -42,6 +44,7 @@ const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps
         borderRadius: '12px',
         cursor: 'pointer',
         overflow: 'hidden',
+        opacity: isNA ? 0.6 : 1,
         transition: 'box-shadow 0.2s, border-color 0.2s',
         border: 1,
         borderColor: expanded ? 'border.light' : 'transparent',
@@ -91,7 +94,7 @@ const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps
               label={STATUS_LABELS[result.status]}
               size="small"
               sx={{
-                backgroundColor: getGradeBgColor(result.severity),
+                backgroundColor: isNA ? 'border.light' : getGradeBgColor(result.severity),
                 color,
                 fontWeight: 700,
                 letterSpacing: '0.5px',

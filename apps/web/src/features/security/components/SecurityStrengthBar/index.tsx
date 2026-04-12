@@ -18,14 +18,17 @@ const SecurityStrengthBar = ({
   lastScannedAt,
   onRescan,
 }: SecurityStrengthBarProps): ReactElement => {
-  const { clearCount, total, clearRatio, level, color } = useMemo(() => {
+  const { clearCount, applicableCount, total, clearRatio, level, color } = useMemo(() => {
     const entries = Object.values(results)
     const total = entries.length
-    const clearCount = entries.filter((r) => r.status === 'clear').length
-    const clearRatio = total > 0 ? clearCount / total : 0
-    const level = getStrengthLevel(clearRatio)
+    const applicable = entries.filter((r) => r.status !== 'not_applicable')
+    const applicableCount = applicable.length
+    const clearCount = applicable.filter((r) => r.status === 'clear').length
+    const clearRatio = applicableCount > 0 ? clearCount / applicableCount : 0
+    const hasCriticalIssue = applicable.some((r) => r.severity === 'Critical')
+    const level = getStrengthLevel(clearRatio, hasCriticalIssue)
     const color = getStrengthColor(level)
-    return { clearCount, total, clearRatio, level, color }
+    return { clearCount, applicableCount, total, clearRatio, level, color }
   }, [results])
 
   if (!isComplete && total === 0) {
@@ -91,7 +94,7 @@ const SecurityStrengthBar = ({
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" mt={1.5}>
         <Typography variant="caption" color="text.secondary">
-          {clearCount}/{total} checks passing
+          {clearCount}/{applicableCount} checks passing
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {lastScannedAt ? `Last scan: ${formatTimestamp(lastScannedAt)}` : ''}

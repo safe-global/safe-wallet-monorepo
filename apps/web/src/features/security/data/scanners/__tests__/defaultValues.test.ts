@@ -103,7 +103,7 @@ describe('scanner accuracy with real vs default data', () => {
       ['factoryValidation', factoryValidationScanner],
     ])('%s scanner returns valid status and severity', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
-      expect(['clear', 'issue', 'partial']).toContain(result.status)
+      expect(['clear', 'issue', 'partial', 'not_applicable']).toContain(result.status)
       expect(['Low', 'Medium', 'High', 'Critical']).toContain(result.severity)
       expect(result.score).toBeGreaterThanOrEqual(0)
       expect(result.score).toBeLessThanOrEqual(100)
