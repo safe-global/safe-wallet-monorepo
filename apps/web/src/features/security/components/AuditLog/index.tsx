@@ -18,7 +18,7 @@ const STATUS_LABELS: Record<string, string> = {
   SUCCESS: 'Executed',
   FAILED: 'Failed',
   CANCELLED: 'Cancelled',
-  AWAITING_CONFIRMATIONS: 'Pending',
+  AWAITING_CONFIRMATIONS: 'Awaiting signatures',
   AWAITING_EXECUTION: 'Ready',
 }
 

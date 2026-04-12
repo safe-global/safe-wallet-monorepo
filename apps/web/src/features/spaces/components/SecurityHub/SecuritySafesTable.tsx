@@ -209,8 +209,9 @@ const SecuritySafesTable = ({
                         noWrap
                         component={safeHref ? Link : 'span'}
                         {...(safeHref ? { href: safeHref } : {})}
+                        title={safe.name || safe.address}
                         sx={{
-                          width: 100,
+                          maxWidth: 160,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           textDecoration: 'none',
@@ -279,7 +280,8 @@ const SecuritySafesTable = ({
                         variant="body2"
                         fontWeight={600}
                         noWrap
-                        sx={{ width: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        title={safe.name || safe.address}
+                        sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}
                       >
                         {safe.name || shortenAddress(safe.address)}
                       </Typography>

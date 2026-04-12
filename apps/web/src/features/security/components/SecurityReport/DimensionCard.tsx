@@ -1,5 +1,5 @@
 import { type ReactElement, useState, useCallback } from 'react'
-import { Box, Button, Chip, Collapse, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, Collapse, Divider, Paper, Skeleton, Stack, Tooltip, Typography } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import Link from 'next/link'
@@ -92,16 +92,36 @@ const DimensionCard = ({ def, result, isScanning, error, override }: DimensionCa
           {isScanning && !result ? (
             <Skeleton width={80} height={24} />
           ) : result ? (
-            <Chip
-              label={STATUS_LABELS[result.status]}
-              size="small"
-              sx={{
-                backgroundColor: isExcluded ? 'border.light' : getGradeBgColor(result.severity),
-                color,
-                fontWeight: 700,
-                letterSpacing: '0.5px',
-              }}
-            />
+            isExcluded ? (
+              <Tooltip
+                title={
+                  result.evidence.map((e) => (typeof e === 'string' ? e : e.value)).find((v) => v) ??
+                  'This check does not apply to this Safe'
+                }
+              >
+                <Chip
+                  label={STATUS_LABELS[result.status]}
+                  size="small"
+                  sx={{
+                    backgroundColor: 'border.light',
+                    color,
+                    fontWeight: 700,
+                    letterSpacing: '0.5px',
+                  }}
+                />
+              </Tooltip>
+            ) : (
+              <Chip
+                label={STATUS_LABELS[result.status]}
+                size="small"
+                sx={{
+                  backgroundColor: getGradeBgColor(result.severity),
+                  color,
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                }}
+              />
+            )
           ) : error ? (
             <Chip
               label="Error"
