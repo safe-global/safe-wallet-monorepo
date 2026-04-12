@@ -22,10 +22,11 @@ type DimensionCardProps = {
   def: DimensionDef
   result?: ScanResult
   isScanning: boolean
+  error?: string
   override?: CardOverride
 }
 
-const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps): ReactElement => {
+const DimensionCard = ({ def, result, isScanning, error, override }: DimensionCardProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
   const toggle = useCallback(() => setExpanded((prev) => !prev), [])
   const router = useRouter()
@@ -97,6 +98,17 @@ const DimensionCard = ({ def, result, isScanning, override }: DimensionCardProps
               sx={{
                 backgroundColor: isExcluded ? 'border.light' : getGradeBgColor(result.severity),
                 color,
+                fontWeight: 700,
+                letterSpacing: '0.5px',
+              }}
+            />
+          ) : error ? (
+            <Chip
+              label="Error"
+              size="small"
+              sx={{
+                backgroundColor: 'error.background',
+                color: 'error.main',
                 fontWeight: 700,
                 letterSpacing: '0.5px',
               }}

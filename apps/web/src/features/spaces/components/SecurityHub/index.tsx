@@ -166,6 +166,7 @@ const SecurityHub = (): ReactElement => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [reportTab, setReportTab] = useState(0)
+  const reportRef = useRef<HTMLDivElement>(null)
   const [_scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
@@ -223,6 +224,13 @@ const SecurityHub = (): ReactElement => {
   const scanContext = useSafeScanContext(selectedSafe, selectedEntry)
   const selectedKey = selectedSafe ? scanKey(selectedSafe.address, selectedSafe.chainId) : null
 
+  // Scroll to report when a Safe is selected
+  useEffect(() => {
+    if (selectedSafe && reportRef.current) {
+      setTimeout(() => reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 450)
+    }
+  }, [selectedSafe])
+
   return (
     <Box data-testid="security-hub">
       <Typography variant="h1" mb={3}>
@@ -275,7 +283,7 @@ const SecurityHub = (): ReactElement => {
       )}
 
       <Collapse in={!!selectedSafe} timeout={{ enter: 400, exit: 200 }} unmountOnExit>
-        <Box mt={5}>
+        <Box mt={5} ref={reportRef}>
           {selectedSafe && (
             <>
               <SecurityTabs value={reportTab} onChange={(_: SyntheticEvent, v: number) => setReportTab(v)} />

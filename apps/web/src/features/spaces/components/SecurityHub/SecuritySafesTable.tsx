@@ -18,6 +18,7 @@ import {
 import Link from 'next/link'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
 import { getStrengthLevel, getStrengthColor } from '@/features/security/data/securityScoring'
@@ -235,13 +236,14 @@ const SecuritySafesTable = ({
                       <Button
                         variant={isSelected ? 'contained' : 'text'}
                         size="small"
-                        startIcon={<VisibilityRoundedIcon />}
+                        startIcon={isSelected ? <CloseRoundedIcon /> : <VisibilityRoundedIcon />}
                         onClick={() => onViewReport(safe.address, safe.chainId)}
-                        sx={
-                          isSelected
+                        sx={{
+                          minWidth: 130,
+                          ...(isSelected
                             ? { backgroundColor: 'text.primary', '&:hover': { backgroundColor: 'text.primary' } }
-                            : {}
-                        }
+                            : {}),
+                        }}
                       >
                         {isSelected ? 'Close' : 'View report'}
                       </Button>

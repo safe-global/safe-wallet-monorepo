@@ -87,7 +87,7 @@ const SecurityStrengthBar = ({
           backgroundColor: 'border.light',
           '& .MuiLinearProgress-bar': {
             borderRadius: 5,
-            background: 'linear-gradient(90deg, #12FF80, #00BFE5)',
+            backgroundColor: color,
           },
         }}
       />

@@ -69,6 +69,7 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
   const [entries, setEntries] = useState<AuditLogEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(false)
 
   useEffect(() => {
     if (!chainId || !safeAddress) return
@@ -79,11 +80,13 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
       setIsLoading(true)
       setEntries([])
       setError(null)
+      setHasMore(false)
 
       try {
         const collected: AuditLogEntry[] = []
         let cursor: string | undefined
         let pages = 0
+        let moreAvailable = false
 
         while (pages < MAX_PAGES) {
           const result = await trigger({ chainId, safeAddress, cursor })
@@ -93,12 +96,20 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
           pages++
 
           const next = extractCursor(result.data.next)
-          if (!next || collected.length >= TARGET_ENTRIES) break
+          if (!next) break
+          if (collected.length >= TARGET_ENTRIES) {
+            moreAvailable = true
+            break
+          }
           cursor = next
         }
 
+        // Hit page limit but more data exists
+        if (pages >= MAX_PAGES) moreAvailable = true
+
         if (!cancelled) {
           setEntries(collected)
+          setHasMore(moreAvailable)
         }
       } catch {
         if (!cancelled) {
@@ -117,7 +128,7 @@ const useAuditLog = (chainId: string, safeAddress: string) => {
     }
   }, [chainId, safeAddress, trigger])
 
-  return { entries, isLoading, error }
+  return { entries, isLoading, error, hasMore }
 }
 
 export default useAuditLog
