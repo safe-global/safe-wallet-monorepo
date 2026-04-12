@@ -2,6 +2,16 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import type { ScanContext, ScanResult } from '../data/scanners/types'
 import { SCANNERS } from '../data/scanners/registry'
 
+/**
+ * Module-level cache so multiple hook instances sharing the same ctxKey
+ * (e.g., sidebar + main security page) reuse results instead of running
+ * duplicate scans. Keyed by `chainId:safeAddress`. TTL: 60 seconds.
+ */
+const CACHE_TTL_MS = 60_000
+const scanResultsCache = new Map<string, { results: Record<string, ScanResult>; timestamp: number }>()
+
+export const getScanResultsCache = () => scanResultsCache
+
 export type ScanState = {
   results: Record<string, ScanResult>
   loading: Record<string, boolean>
@@ -13,18 +23,26 @@ export type ScanState = {
 }
 
 const useSecurityScan = (ctx: ScanContext | null, initialResults?: Record<string, ScanResult>): ScanState => {
-  const [results, setResults] = useState<Record<string, ScanResult>>(initialResults ?? {})
+  const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
+
+  // Resolve initial state: explicit initialResults > cache > empty
+  const resolvedInitial = (() => {
+    if (initialResults && Object.keys(initialResults).length > 0) return initialResults
+    if (ctxKey) {
+      const cached = scanResultsCache.get(ctxKey)
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.results
+    }
+    return null
+  })()
+
+  const [results, setResults] = useState<Record<string, ScanResult>>(resolvedInitial ?? {})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [lastScannedAt, setLastScannedAt] = useState<number | null>(
-    initialResults && Object.keys(initialResults).length > 0 ? Date.now() : null,
-  )
+  const [lastScannedAt, setLastScannedAt] = useState<number | null>(resolvedInitial ? Date.now() : null)
   const scanIdRef = useRef(0)
   const ctxRef = useRef(ctx)
   ctxRef.current = ctx
-  const hasInitialResults = useRef(!!initialResults && Object.keys(initialResults).length > 0)
-
-  const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
+  const hasInitialResults = useRef(!!resolvedInitial)
 
   const executeScan = useCallback(
     (scannerId: string, scanFn: () => Promise<ScanResult>, guardId?: number, onAllComplete?: () => void) => {
@@ -68,7 +86,17 @@ const useSecurityScan = (ctx: ScanContext | null, initialResults?: Record<string
         () => {
           completedCount++
           if (completedCount === total) {
-            setLastScannedAt(Date.now())
+            const now = Date.now()
+            setLastScannedAt(now)
+            // Write to module-level cache so other hook instances (sidebar) reuse results
+            const key = ctxRef.current ? `${ctxRef.current.chainId}:${ctxRef.current.safeAddress}` : null
+            if (key) {
+              // Read final results from state updater to avoid closure staleness
+              setResults((final) => {
+                scanResultsCache.set(key, { results: final, timestamp: now })
+                return final
+              })
+            }
           }
         },
       )

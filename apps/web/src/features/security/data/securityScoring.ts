@@ -1,12 +1,4 @@
-import type { DimensionResult, SecurityGrade } from './securityTypes'
-
-export const calculateClearRatio = (dimensions: DimensionResult[]): number => {
-  if (dimensions.length === 0) return 0
-  const clearCount = dimensions.filter((d) => d.status === 'clear').length
-  return clearCount / dimensions.length
-}
-
-export const calculateScore = (clearRatio: number): number => Math.round(clearRatio * 100)
+import type { SecurityGrade } from './securityTypes'
 
 export const getGrade = (clearRatio: number): SecurityGrade => {
   if (clearRatio >= 0.83) return 'Low'
