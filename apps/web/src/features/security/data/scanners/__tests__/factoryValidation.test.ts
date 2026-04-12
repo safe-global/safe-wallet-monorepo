@@ -34,7 +34,7 @@ describe('factoryValidationScanner', () => {
     expect(result.score).toBe(100)
   })
 
-  it('returns issue for an unrecognized factory address', async () => {
+  it('returns partial for an unrecognized factory address', async () => {
     const result = await factoryValidationScanner.scan(
       createMockContext({
         chainId: '1',
@@ -46,9 +46,9 @@ describe('factoryValidationScanner', () => {
         },
       }),
     )
-    expect(result.status).toBe('issue')
-    expect(result.severity).toBe('High')
-    expect(result.score).toBe(20)
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+    expect(result.score).toBe(60)
   })
 
   it('includes lastChecked timestamp', async () => {

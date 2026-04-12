@@ -50,9 +50,9 @@ export const factoryValidationScanner: SecurityScanner = {
     }
 
     return {
-      status: 'issue',
-      severity: 'High',
-      score: 20,
+      status: 'partial',
+      severity: 'Medium',
+      score: 60,
       evidence: [
         { label: 'Factory', value: `${creationInfo.factoryAddress.slice(0, 10)}...` },
         { label: 'Status', value: 'Unrecognized factory' },
