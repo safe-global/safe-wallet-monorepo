@@ -1,10 +1,7 @@
 import { type ReactElement, type SyntheticEvent } from 'react'
-import { Tab, Tabs, Typography } from '@mui/material'
+import { Tab, Tabs } from '@mui/material'
 
 const TABS = ['Security overview', 'Account activity'] as const
-
-const tabSx = { textTransform: 'none', opacity: 1, px: 3 } as const
-const firstTabSx = { ...tabSx, '&:first-of-type': { pl: 0 } } as const
 
 type SecurityTabsProps = {
   value: number
@@ -16,12 +13,17 @@ const SecurityTabs = ({ value, onChange }: SecurityTabsProps): ReactElement => (
     {TABS.map((label, idx) => (
       <Tab
         key={label}
-        label={
-          <Typography variant="body2" fontWeight={700} color={value === idx ? 'primary' : 'primary.light'}>
-            {label}
-          </Typography>
-        }
-        sx={idx === 0 ? firstTabSx : tabSx}
+        label={label}
+        sx={{
+          textTransform: 'none',
+          opacity: 1,
+          px: 3,
+          fontSize: 'body2.fontSize',
+          fontWeight: 700,
+          color: 'primary.light',
+          '&.Mui-selected': { color: 'primary.main' },
+          '&:first-of-type': { pl: 0 },
+        }}
       />
     ))}
   </Tabs>

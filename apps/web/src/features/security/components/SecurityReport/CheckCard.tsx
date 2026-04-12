@@ -142,6 +142,7 @@ const CheckCard = ({ def, result, isScanning, error, override }: CheckCardProps)
             (override?.onCtaClick ? (
               <Button
                 variant="text"
+                color="primary"
                 size="small"
                 endIcon={<ArrowForwardRoundedIcon />}
                 onClick={(e: React.MouseEvent) => {
@@ -157,6 +158,7 @@ const CheckCard = ({ def, result, isScanning, error, override }: CheckCardProps)
                 <Button
                   component="a"
                   variant="text"
+                  color="primary"
                   size="small"
                   endIcon={<ArrowForwardRoundedIcon />}
                   onClick={(e: React.MouseEvent) => e.stopPropagation()}
