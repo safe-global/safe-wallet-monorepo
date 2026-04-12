@@ -26,16 +26,17 @@ Checks that don't apply to this Safe (e.g., multichain check on a single-chain S
 
 ### Check statuses
 
-Each check returns one of four statuses:
+Each check returns one of five statuses:
 
-| Status             | UI label        | Meaning                            | Counts toward score? |
-| ------------------ | --------------- | ---------------------------------- | -------------------- |
-| **Clear**          | Healthy         | No issues detected                 | Yes (positive)       |
-| **Partial**        | Needs attention | Something worth reviewing          | Yes (negative)       |
-| **Issue**          | At risk         | A problem that should be addressed | Yes (negative)       |
-| **Not applicable** | N/A             | Check doesn't apply to this Safe   | No (excluded)        |
+| Status             | UI label        | Meaning                                                   | Counts toward score? |
+| ------------------ | --------------- | --------------------------------------------------------- | -------------------- |
+| **Clear**          | Healthy         | No issues detected                                        | Yes (positive)       |
+| **Partial**        | Needs attention | Something worth reviewing                                 | Yes (negative)       |
+| **Issue**          | At risk         | A problem that should be addressed                        | Yes (negative)       |
+| **Not applicable** | N/A             | Check doesn't apply to this Safe                          | No (excluded)        |
+| **Inconclusive**   | Unverified      | Check cannot be completed (blocked feature, missing data) | No (excluded)        |
 
-Only "clear" counts positively. "Partial" and "issue" both reduce the score equally. "Not applicable" is excluded entirely.
+Only "clear" counts positively. "Partial" and "issue" both reduce the score equally. "Not applicable" and "inconclusive" are both excluded entirely — they affect neither the numerator nor the denominator.
 
 ### Strength levels
 
@@ -54,7 +55,6 @@ Checks that can trigger the Critical floor:
 
 - Account setup: 1 signer, or threshold = 1
 - Contract version: unsupported master copy
-- Multichain setup: inconsistent signers across chains
 
 ### Risk grades (per check)
 
@@ -148,11 +148,13 @@ SafeSecurityView
 | Account  | Everyone (owners + Space members) | All 12 active checks                 |
 | User     | Safe page only (not Spaces admin) | Address book, Trusted Safe (planned) |
 
-### N/A check rendering
+### Excluded check rendering
 
-Checks that return `not_applicable` are rendered with:
+Checks that return `not_applicable` or `inconclusive` share the same visual treatment:
 
-- Greyed "N/A" chip (neutral `border.light` background instead of severity color)
+- Greyed chip (neutral `border.light` background instead of severity color)
+  - `not_applicable` → "N/A" label
+  - `inconclusive` → "Unverified" label
 - 60% opacity on the entire card
 - No CTA button (nothing to act on)
 - Excluded from the strength bar count ("X/Y checks passing" only shows applicable checks)

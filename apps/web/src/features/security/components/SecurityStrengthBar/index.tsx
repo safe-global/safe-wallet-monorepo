@@ -21,7 +21,7 @@ const SecurityStrengthBar = ({
   const { clearCount, applicableCount, total, clearRatio, level, color } = useMemo(() => {
     const entries = Object.values(results)
     const total = entries.length
-    const applicable = entries.filter((r) => r.status !== 'not_applicable')
+    const applicable = entries.filter((r) => r.status !== 'not_applicable' && r.status !== 'inconclusive')
     const applicableCount = applicable.length
     const clearCount = applicable.filter((r) => r.status === 'clear').length
     const clearRatio = applicableCount > 0 ? clearCount / applicableCount : 0
