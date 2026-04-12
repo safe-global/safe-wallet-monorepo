@@ -1,45 +1,6 @@
-import {
-  calculateClearRatio,
-  calculateScore,
-  getGrade,
-  getGradeColor,
-  getStrengthLevel,
-  getStrengthColor,
-} from '../securityScoring'
-import type { DimensionResult } from '../securityTypes'
-
-const makeDimension = (status: 'clear' | 'issue' | 'partial'): DimensionResult => ({ status }) as DimensionResult
+import { getGrade, getGradeColor, getStrengthLevel, getStrengthColor } from '../securityScoring'
 
 describe('securityScoring', () => {
-  describe('calculateClearRatio', () => {
-    it('returns 0 for empty array', () => {
-      expect(calculateClearRatio([])).toBe(0)
-    })
-
-    it('returns 1 for all clear', () => {
-      const dims = [makeDimension('clear'), makeDimension('clear'), makeDimension('clear')]
-      expect(calculateClearRatio(dims)).toBe(1)
-    })
-
-    it('returns 0 for no clear', () => {
-      const dims = [makeDimension('issue'), makeDimension('partial')]
-      expect(calculateClearRatio(dims)).toBe(0)
-    })
-
-    it('returns correct ratio for mixed results', () => {
-      const dims = [makeDimension('clear'), makeDimension('issue'), makeDimension('clear'), makeDimension('partial')]
-      expect(calculateClearRatio(dims)).toBe(0.5)
-    })
-  })
-
-  describe('calculateScore', () => {
-    it('converts ratio to percentage', () => {
-      expect(calculateScore(0.75)).toBe(75)
-      expect(calculateScore(1)).toBe(100)
-      expect(calculateScore(0)).toBe(0)
-    })
-  })
-
   describe('getGrade', () => {
     it('returns Low for >= 0.83', () => {
       expect(getGrade(0.83)).toBe('Low')
