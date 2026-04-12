@@ -88,6 +88,20 @@ describe('securityScoring', () => {
     it('returns Critical for < 0.17', () => {
       expect(getStrengthLevel(0)).toBe('Critical')
     })
+
+    it('caps at Weak when hasCriticalIssue is true and ratio is Strong', () => {
+      expect(getStrengthLevel(1, true)).toBe('Weak')
+      expect(getStrengthLevel(0.9, true)).toBe('Weak')
+    })
+
+    it('caps at Weak when hasCriticalIssue is true and ratio is Moderate', () => {
+      expect(getStrengthLevel(0.6, true)).toBe('Weak')
+    })
+
+    it('does not change Weak or Critical when hasCriticalIssue is true', () => {
+      expect(getStrengthLevel(0.2, true)).toBe('Weak')
+      expect(getStrengthLevel(0, true)).toBe('Critical')
+    })
   })
 
   describe('getStrengthColor', () => {

@@ -18,12 +18,11 @@ export const transactionScanningScanner: SecurityScanner = {
     }
 
     return {
-      status: 'partial',
+      status: 'not_applicable',
       severity: 'Low',
       score: 70,
       evidence: [{ label: 'Status', value: 'Transaction scanning not available on this network' }],
-      remediation:
-        'Transaction scanning is not yet supported on this network. Exercise extra caution when reviewing transactions.',
+      remediation: '',
       lastChecked: now,
     }
   },

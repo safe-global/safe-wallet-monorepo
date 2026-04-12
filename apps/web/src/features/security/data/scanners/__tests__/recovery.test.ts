@@ -3,9 +3,9 @@ import { ZERO_ADDRESS } from '../constants'
 import { createMockContext } from '../test-helpers'
 
 describe('recoveryScanner', () => {
-  it('returns clear when chain does not support recovery', async () => {
+  it('returns not_applicable when chain does not support recovery', async () => {
     const result = await recoveryScanner.scan(createMockContext({ chainSupportsRecovery: false }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 

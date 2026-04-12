@@ -37,7 +37,7 @@ export const recoveryScanner: SecurityScanner = {
 
     if (!chainSupportsRecovery) {
       return {
-        status: 'clear',
+        status: 'not_applicable',
         severity: 'Low',
         score: 100,
         evidence: [{ label: 'Status', value: 'Not available on this network' }],

@@ -36,11 +36,14 @@ export const getGradeBgColor = (grade: SecurityGrade): string => GRADE_BG_COLORS
 // Strength-based framing (positive: higher = better)
 export type StrengthLevel = 'Strong' | 'Moderate' | 'Weak' | 'Critical'
 
-export const getStrengthLevel = (clearRatio: number): StrengthLevel => {
-  if (clearRatio >= 0.83) return 'Strong'
-  if (clearRatio >= 0.5) return 'Moderate'
-  if (clearRatio >= 0.17) return 'Weak'
-  return 'Critical'
+export const getStrengthLevel = (clearRatio: number, hasCriticalIssue = false): StrengthLevel => {
+  const base: StrengthLevel =
+    clearRatio >= 0.83 ? 'Strong' : clearRatio >= 0.5 ? 'Moderate' : clearRatio >= 0.17 ? 'Weak' : 'Critical'
+
+  // A Critical severity finding caps strength at Weak regardless of clear ratio
+  if (hasCriticalIssue && (base === 'Strong' || base === 'Moderate')) return 'Weak'
+
+  return base
 }
 
 const STRENGTH_COLORS: Record<StrengthLevel, string> = {

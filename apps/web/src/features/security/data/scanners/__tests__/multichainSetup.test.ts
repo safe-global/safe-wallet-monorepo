@@ -2,9 +2,9 @@ import { multichainSetupScanner } from '../multichainSetup'
 import { createMockContext } from '../test-helpers'
 
 describe('multichainSetupScanner', () => {
-  it('returns clear for single-chain Safe', async () => {
+  it('returns not_applicable for single-chain Safe', async () => {
     const result = await multichainSetupScanner.scan(createMockContext({ isMultichain: false }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 

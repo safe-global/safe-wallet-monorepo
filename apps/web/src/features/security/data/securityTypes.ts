@@ -1,6 +1,6 @@
 export type SecurityGrade = 'Low' | 'Medium' | 'High' | 'Critical'
 
-export type DimensionStatus = 'clear' | 'issue' | 'partial'
+export type DimensionStatus = 'clear' | 'issue' | 'partial' | 'not_applicable'
 
 export type DimensionResult = {
   id: string
