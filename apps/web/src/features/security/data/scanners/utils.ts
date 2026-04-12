@@ -15,24 +15,22 @@ export const formatTimestamp = (ts?: number): string => {
 }
 
 export type GradeSummary = {
-  atRisk: number
-  needsAttention: number
-  healthy: number
+  passing: number
+  applicableCount: number
   grade: SecurityGrade
+  hasCriticalIssue: boolean
 }
 
 export const computeSummary = (results: Record<string, ScanResult>): GradeSummary | null => {
   const entries = Object.values(results)
-  if (entries.length === 0) return null
-  let atRisk = 0
-  let needsAttention = 0
-  let healthy = 0
-  for (const r of entries) {
-    if (r.status === 'issue') atRisk++
-    else if (r.status === 'partial') needsAttention++
-    else healthy++
-  }
-  return { atRisk, needsAttention, healthy, grade: getGrade(healthy / entries.length) }
+  const applicable = entries.filter((r) => r.status !== 'not_applicable' && r.status !== 'inconclusive')
+  if (applicable.length === 0) return null
+
+  const passing = applicable.filter((r) => r.status === 'clear').length
+  const hasCriticalIssue = applicable.some((r) => r.severity === 'Critical')
+  const clearRatio = passing / applicable.length
+
+  return { passing, applicableCount: applicable.length, grade: getGrade(clearRatio), hasCriticalIssue }
 }
 
 export const severityRank = (severity: string): number => {

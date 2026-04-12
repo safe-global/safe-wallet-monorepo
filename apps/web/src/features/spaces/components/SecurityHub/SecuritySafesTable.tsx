@@ -39,8 +39,8 @@ const StrengthCell = ({ summary, isScanning }: { summary: GradeSummary | null; i
       </Typography>
     )
   }
-  const clearRatio = summary.healthy / (summary.atRisk + summary.needsAttention + summary.healthy)
-  const level = getStrengthLevel(clearRatio)
+  const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
+  const level = getStrengthLevel(clearRatio, summary.hasCriticalIssue)
   const color = getStrengthColor(level)
 
   return (
@@ -61,11 +61,16 @@ const StrengthCell = ({ summary, isScanning }: { summary: GradeSummary | null; i
   )
 }
 
-const CountCell = ({ count }: { count: number | undefined }) => (
-  <Typography variant="body2" fontWeight={count && count > 0 ? 700 : 400} color="text.primary">
-    {count ?? DASH}
-  </Typography>
-)
+const ChecksCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
+  if (isScanning) {
+    return <CircularProgress size={16} thickness={5} />
+  }
+  return (
+    <Typography variant="body2" color="text.primary">
+      {summary ? `${summary.passing}/${summary.applicableCount}` : DASH}
+    </Typography>
+  )
+}
 
 type SecuritySafesTableProps = {
   safes: SpaceSafeEntry[]
@@ -94,10 +99,10 @@ const SecuritySafesTable = ({
   }, [])
 
   const getAggregateSummary = (safe: SpaceSafeEntry): GradeSummary | null => {
-    let totalAtRisk = 0
-    let totalNeedsAttention = 0
-    let totalHealthy = 0
+    let totalPassing = 0
+    let totalApplicable = 0
     let worstGradeRank = 4
+    let hasCriticalIssue = false
     let hasAny = false
 
     for (const chain of safe.chainEntries) {
@@ -107,9 +112,9 @@ const SecuritySafesTable = ({
       const summary = computeSummary(results)
       if (!summary) continue
       hasAny = true
-      totalAtRisk += summary.atRisk
-      totalNeedsAttention += summary.needsAttention
-      totalHealthy += summary.healthy
+      totalPassing += summary.passing
+      totalApplicable += summary.applicableCount
+      if (summary.hasCriticalIssue) hasCriticalIssue = true
       const rank = severityRank(summary.grade)
       if (rank < worstGradeRank) worstGradeRank = rank
     }
@@ -117,10 +122,10 @@ const SecuritySafesTable = ({
     if (!hasAny) return null
     const gradeMap = ['Critical', 'High', 'Medium', 'Low'] as const
     return {
-      atRisk: totalAtRisk,
-      needsAttention: totalNeedsAttention,
-      healthy: totalHealthy,
+      passing: totalPassing,
+      applicableCount: totalApplicable,
       grade: gradeMap[worstGradeRank] ?? 'Low',
+      hasCriticalIssue,
     }
   }
 
@@ -136,9 +141,7 @@ const SecuritySafesTable = ({
           <TableRow>
             <TableCell>Account</TableCell>
             <TableCell>Network</TableCell>
-            <TableCell>At risk</TableCell>
-            <TableCell>Needs attention</TableCell>
-            <TableCell>Healthy</TableCell>
+            <TableCell>Checks passing</TableCell>
             <TableCell>Setup strength</TableCell>
             <TableCell align="right" />
           </TableRow>
@@ -173,13 +176,7 @@ const SecuritySafesTable = ({
                     <ChainIndicator chainId={safe.chainId} responsive />
                   </TableCell>
                   <TableCell>
-                    <CountCell count={summary?.atRisk} />
-                  </TableCell>
-                  <TableCell>
-                    <CountCell count={summary?.needsAttention} />
-                  </TableCell>
-                  <TableCell>
-                    <CountCell count={summary?.healthy} />
+                    <ChecksCell summary={summary} isScanning={isScanning} />
                   </TableCell>
                   <TableCell>
                     <StrengthCell summary={summary} isScanning={isScanning} />
@@ -262,13 +259,7 @@ const SecuritySafesTable = ({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <CountCell count={aggregateSummary?.atRisk} />
-                  </TableCell>
-                  <TableCell>
-                    <CountCell count={aggregateSummary?.needsAttention} />
-                  </TableCell>
-                  <TableCell>
-                    <CountCell count={aggregateSummary?.healthy} />
+                    <ChecksCell summary={aggregateSummary} isScanning={aggregateScanning} />
                   </TableCell>
                   <TableCell>
                     <StrengthCell summary={aggregateSummary} isScanning={aggregateScanning} />
@@ -300,13 +291,7 @@ const SecuritySafesTable = ({
                         <ChainIndicator chainId={chain.chainId} responsive />
                       </TableCell>
                       <TableCell>
-                        <CountCell count={summary?.atRisk} />
-                      </TableCell>
-                      <TableCell>
-                        <CountCell count={summary?.needsAttention} />
-                      </TableCell>
-                      <TableCell>
-                        <CountCell count={summary?.healthy} />
+                        <ChecksCell summary={summary} isScanning={isScanning} />
                       </TableCell>
                       <TableCell>
                         <StrengthCell summary={summary} isScanning={isScanning} />
