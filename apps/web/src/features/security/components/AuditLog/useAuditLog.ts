@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useLazyTransactionsGetTransactionsHistoryV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Transaction, TransactionItem, DateLabel } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { isSettingsChangeTxInfo } from '@/utils/transaction-guards'
-import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 export type AuditLogWarning = {
   label: string
