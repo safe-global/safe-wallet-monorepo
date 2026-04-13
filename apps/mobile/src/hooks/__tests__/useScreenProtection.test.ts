@@ -13,12 +13,22 @@ jest.mock('react-native-capture-protection', () => ({
   },
 }))
 
+jest.mock('@/src/store/hooks', () => ({
+  useAppSelector: jest.fn(),
+}))
+
+jest.mock('@/src/store/settingsSlice', () => ({
+  selectScreenProtectionDisabled: jest.fn(),
+}))
+
 const mockUseFocusEffect = jest.requireMock('expo-router').useFocusEffect
 const mockCaptureProtection = jest.requireMock('react-native-capture-protection').CaptureProtection
+const { useAppSelector } = require('@/src/store/hooks')
 
 describe('useScreenProtection', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    useAppSelector.mockReturnValue(false)
   })
 
   it('should call useFocusEffect with correct parameters', () => {
@@ -77,5 +87,17 @@ describe('useScreenProtection', () => {
 
     expect(mockCaptureProtection.prevent).toHaveBeenCalledTimes(1)
     expect(mockCaptureProtection.prevent).toHaveBeenCalledWith(customOptions)
+  })
+
+  it('should skip screen protection when screenProtectionDisabled is true', () => {
+    useAppSelector.mockReturnValue(true)
+
+    renderHook(() => useScreenProtection())
+
+    const focusEffectCallback = mockUseFocusEffect.mock.calls[0][0]
+    const cleanup = focusEffectCallback()
+
+    expect(mockCaptureProtection.prevent).not.toHaveBeenCalled()
+    expect(cleanup).toBeUndefined()
   })
 })
