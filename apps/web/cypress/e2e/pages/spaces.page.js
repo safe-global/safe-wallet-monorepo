@@ -167,7 +167,7 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.contains('Sign in with').click()
+  cy.contains('Continue with').click()
 }
 
 export function waitForSpacesWelcomeReady() {

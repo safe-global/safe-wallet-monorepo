@@ -44,7 +44,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       </Typography>
 
       <Typography color="text.secondary" mb={3}>
-        To view or create a space, sign in with your wallet.
+        Sign in to view or create a Space.
       </Typography>
 
       <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
