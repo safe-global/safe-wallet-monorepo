@@ -78,14 +78,12 @@ const HydratedSidebar = (): ReactElement => {
     qualifiedSpaceId != null ? spaces?.find((space) => space.id === Number(qualifiedSpaceId)) : undefined
 
   const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
-  const spaceName = effectiveSelectedSpace?.name ?? ''
 
   const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
 
   return (
     <EnhancedSidebar
       type={sidebarType}
-      spaceName={spaceName}
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}
       onSpaceAdded={setAddedToSpace}

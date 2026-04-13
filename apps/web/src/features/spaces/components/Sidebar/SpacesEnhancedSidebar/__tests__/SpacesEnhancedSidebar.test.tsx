@@ -56,8 +56,8 @@ jest.mock('@/features/spaces/utils', () => ({
 }))
 
 jest.mock('../../index', () => ({
-  EnhancedSidebar: ({ type, spaceName }: { type: string; spaceName: string }) => (
-    <div data-testid="enhanced-sidebar">{`${type}:${spaceName}`}</div>
+  EnhancedSidebar: ({ type, selectedSpace }: { type: string; selectedSpace?: { name: string } }) => (
+    <div data-testid="enhanced-sidebar">{`${type}:${selectedSpace?.name ?? ''}`}</div>
   ),
 }))
 

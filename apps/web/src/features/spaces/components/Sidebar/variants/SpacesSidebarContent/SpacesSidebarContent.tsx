@@ -6,12 +6,7 @@ import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type { SpaceSelectorProps, SidebarItemConfig } from '../../types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 
-export const SpacesSidebarContent = ({
-  selectedSpace,
-  spaces,
-  spaceName,
-  spaceInitial,
-}: SpaceSelectorProps): ReactElement => {
+export const SpacesSidebarContent = ({ selectedSpace, spaces, spaceInitial }: SpaceSelectorProps): ReactElement => {
   const spaceId = useCurrentSpaceId()
   const isActiveMember = useIsActiveMember(selectedSpace?.id)
 
@@ -33,7 +28,6 @@ export const SpacesSidebarContent = ({
       setupGroup={setupGroup}
       selectedSpace={selectedSpace}
       spaces={spaces}
-      spaceName={spaceName}
       spaceInitial={spaceInitial}
     />
   )

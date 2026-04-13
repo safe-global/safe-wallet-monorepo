@@ -17,19 +17,17 @@ const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, App
 
 const buildWorkspaceHeader = (
   selectedSpace: SpaceItem | undefined,
-  spaceName: string | undefined,
   spaceInitial: string | undefined,
   spaces: SpaceItem[] | undefined,
   onSpaceAdded: ((space: SpaceItem) => void) | undefined,
 ): SafeWorkspaceHeaderProps =>
   selectedSpace
-    ? { variant: 'backToSpace', spaceName: spaceName ?? '', spaceInitial, spaceId: String(selectedSpace.id) }
+    ? { variant: 'backToSpace', spaceName: selectedSpace.name, spaceInitial, spaceId: String(selectedSpace.id) }
     : { variant: 'addToWorkspace', selectedSpace, spaces, onSpaceAdded }
 
 export const SafeSidebarContent = ({
   selectedSpace,
   spaces,
-  spaceName,
   spaceInitial,
   onSpaceAdded,
 }: SpaceSelectorProps): ReactElement => {
@@ -108,7 +106,7 @@ export const SafeSidebarContent = ({
     isItemActive,
   })
 
-  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceName, spaceInitial, spaces, onSpaceAdded)
+  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
   return <SafeSidebarVariant workspaceHeader={workspaceHeader} mainNavItems={mainNavItems} defiGroup={setupGroup} />
 }

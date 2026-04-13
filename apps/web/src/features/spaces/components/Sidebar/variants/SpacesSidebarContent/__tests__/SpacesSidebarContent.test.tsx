@@ -113,9 +113,7 @@ describe('SpacesSidebarContent', () => {
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {
-    render(
-      <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-    )
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
     expect(screen.getByText(/Main items:/)).toBeInTheDocument()
     expect(screen.getByText(/Setup items:/)).toBeInTheDocument()
@@ -124,9 +122,7 @@ describe('SpacesSidebarContent', () => {
   it('disables items requiring active membership when user is not active member', () => {
     mockUseIsActiveMember.mockReturnValue(false)
 
-    render(
-      <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-    )
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
     const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
     expect(options.isItemDisabled({ activeMemberOnly: true })).toBe(true)
@@ -135,9 +131,7 @@ describe('SpacesSidebarContent', () => {
   it('enables items requiring active membership when user is active member', () => {
     mockUseIsActiveMember.mockReturnValue(true)
 
-    render(
-      <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-    )
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
     const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
     expect(options.isItemDisabled({ activeMemberOnly: true })).toBe(false)
@@ -146,9 +140,7 @@ describe('SpacesSidebarContent', () => {
   it('generates links with current space ID', () => {
     mockUseCurrentSpaceId.mockReturnValue('123')
 
-    render(
-      <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-    )
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
     const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
     const link = options.getLink({ href: '/spaces/members' })
@@ -162,9 +154,7 @@ describe('SpacesSidebarContent', () => {
   it('handles undefined selectedSpace', () => {
     mockUseIsActiveMember.mockReturnValue(false)
 
-    render(
-      <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={undefined} spaces={mockSpaces} />,
-    )
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={undefined} spaces={mockSpaces} />)
 
     expect(screen.getByText(/Main items:/)).toBeInTheDocument()
   })
@@ -172,7 +162,7 @@ describe('SpacesSidebarContent', () => {
   it('is unaffected by geoblocking — nav items remain visible when user is blocked', () => {
     render(
       <GeoblockingContext.Provider value={true}>
-        <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />
+        <SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />
       </GeoblockingContext.Provider>,
     )
 

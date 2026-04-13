@@ -12,7 +12,6 @@ interface SidebarProps extends SpaceSelectorProps {
 
 export const EnhancedSidebar = ({
   type,
-  spaceName,
   spaceInitial,
   selectedSpace,
   spaces,
@@ -29,13 +28,7 @@ export const EnhancedSidebar = ({
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant
-        spaceName={spaceName}
-        spaceInitial={spaceInitial}
-        selectedSpace={selectedSpace}
-        spaces={spaces}
-        onSpaceAdded={onSpaceAdded}
-      />
+      <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} onSpaceAdded={onSpaceAdded} />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )

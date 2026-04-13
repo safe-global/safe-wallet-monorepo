@@ -87,12 +87,10 @@ const meta = {
   component: EnhancedSidebar,
   args: {
     type: 'safe' as const,
-    spaceName: 'Company Space',
     spaceInitial: 'C',
   },
   argTypes: {
     type: { control: false },
-    spaceName: { control: 'text' },
     spaceInitial: { control: 'text' },
   },
   parameters: {
@@ -114,12 +112,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar
-        type={args.type}
-        spaceName={args.spaceName}
-        spaceInitial={args.spaceInitial}
-        selectedSpace={STORY_SELECTED_SPACE}
-      />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} selectedSpace={STORY_SELECTED_SPACE} />
     </SafeSidebarLayout>
   ),
 }
@@ -137,12 +130,7 @@ export const WithTransactions: Story = {
   decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...mockTxQueueState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar
-        type={args.type}
-        spaceName={args.spaceName}
-        spaceInitial={args.spaceInitial}
-        selectedSpace={STORY_SELECTED_SPACE}
-      />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} selectedSpace={STORY_SELECTED_SPACE} />
     </SafeSidebarLayout>
   ),
 }
@@ -160,12 +148,7 @@ export const TransactionsActive: Story = {
   },
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar
-        type={args.type}
-        spaceName={args.spaceName}
-        spaceInitial={args.spaceInitial}
-        selectedSpace={STORY_SELECTED_SPACE}
-      />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} selectedSpace={STORY_SELECTED_SPACE} />
     </SafeSidebarLayout>
   ),
 }
@@ -189,12 +172,7 @@ export const OutdatedSafeVersion: Story = {
   decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...outdatedSafeState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar
-        type={args.type}
-        spaceName={args.spaceName}
-        spaceInitial={args.spaceInitial}
-        selectedSpace={STORY_SELECTED_SPACE}
-      />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} selectedSpace={STORY_SELECTED_SPACE} />
     </SafeSidebarLayout>
   ),
 }
@@ -385,7 +363,6 @@ export const VariantCounterfactualSafe: Story = {
 
 export const NotPartOfSpace: Story = {
   args: {
-    spaceName: '',
     spaceInitial: '',
   },
   decorators: [withMockProvider({ initialState: notInSpaceStoryState, shadcn: true })],
@@ -404,7 +381,7 @@ export const NotPartOfSpace: Story = {
   },
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} spaces={[]} />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} spaces={[]} />
     </SafeSidebarLayout>
   ),
 }

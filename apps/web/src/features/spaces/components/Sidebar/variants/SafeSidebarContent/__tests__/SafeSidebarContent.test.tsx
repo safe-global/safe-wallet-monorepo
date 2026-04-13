@@ -70,7 +70,7 @@ jest.mock('../../SafeSidebarVariant', () => ({
   },
 }))
 
-const defaultProps = { spaceName: 'Space', spaceInitial: 'S', spaces: [] }
+const defaultProps = { spaceInitial: 'S', spaces: [] }
 
 type CallArgs = [
   SidebarItemConfig[],

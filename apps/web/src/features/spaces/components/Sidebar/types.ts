@@ -32,7 +32,6 @@ export interface SpaceItem {
 }
 
 export interface SpaceSelectorProps {
-  spaceName?: string
   spaceInitial?: string
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
