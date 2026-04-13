@@ -31,7 +31,7 @@ const SecurityReportDrawer = ({
   onClose,
   onScanComplete,
 }: SecurityReportDrawerProps): ReactElement => {
-  const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
+  const { results, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const chain = useChain(selectedSafe?.chainId ?? '')
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
@@ -148,8 +148,6 @@ const SecurityReportDrawer = ({
                   key={`${selectedSafe.address}:${selectedSafe.chainId}`}
                   scanContext={scanContext}
                   results={results}
-                  loading={loading}
-                  errors={errors}
                   isComplete={isComplete}
                   safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
                 />

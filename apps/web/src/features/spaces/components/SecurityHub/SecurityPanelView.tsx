@@ -22,8 +22,6 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 type SecurityPanelViewProps = {
   scanContext: ScanContext | null
   results: Record<string, ScanResult>
-  loading: Record<string, boolean>
-  errors: Record<string, string>
   isComplete: boolean
   /** The `shortName:address` param used to deep-link a CTA to the correct Safe (e.g., "eth:0x..."). */
   safeQueryParam?: string
@@ -326,13 +324,13 @@ const PanelHeader = ({
 }: {
   results: Record<string, ScanResult>
   isComplete: boolean
-}): ReactElement => {
+}): ReactElement | null => {
   const summary = useMemo(() => computeSummary(results), [results])
 
   if (!isComplete && !summary) {
     return <Skeleton variant="rectangular" height={120} sx={{ borderRadius: '12px', mb: 3 }} />
   }
-  if (!summary) return null as unknown as ReactElement
+  if (!summary) return null
 
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
   const score = Math.round(clearRatio * 100)
