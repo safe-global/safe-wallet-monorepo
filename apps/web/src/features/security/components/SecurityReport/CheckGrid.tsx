@@ -19,6 +19,7 @@ type CheckGridProps = {
   errors?: Record<string, string>
   cardOverrides?: Record<string, CardOverride>
   checkFilter?: (def: CheckDef) => boolean
+  singleColumn?: boolean
 }
 
 const CATEGORY_LABELS: Record<CheckCategory, string> = {
@@ -28,7 +29,15 @@ const CATEGORY_LABELS: Record<CheckCategory, string> = {
 
 const CATEGORY_ORDER: CheckCategory[] = ['account', 'user']
 
-const CheckGrid = ({ results, loading, errors, cardOverrides, checkFilter }: CheckGridProps): ReactElement => {
+const CheckGrid = ({
+  results,
+  loading,
+  errors,
+  cardOverrides,
+  checkFilter,
+  singleColumn,
+}: CheckGridProps): ReactElement => {
+  const cardSize = singleColumn ? { xs: 12 } : { xs: 12, sm: 6, md: 4 }
   const grouped = useMemo(() => {
     const defs = Object.values(CHECK_DEFS).filter((def) => !checkFilter || checkFilter(def))
 
@@ -56,7 +65,7 @@ const CheckGrid = ({ results, loading, errors, cardOverrides, checkFilter }: Che
           )}
           <Grid container spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
             {defs.map((def) => (
-              <Grid key={def.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid key={def.id} size={cardSize}>
                 <CheckCard
                   def={def}
                   result={results[def.id]}
