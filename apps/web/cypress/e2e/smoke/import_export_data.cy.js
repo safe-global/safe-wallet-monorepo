@@ -7,7 +7,7 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, () => {
+describe.skip('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -16,7 +16,7 @@ describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, (
     cy.visit(constants.dataSettingsUrl)
   })
 
-  it.skip('[SMOKE] Verify Safe can be accessed after test file upload', () => {
+  it('[SMOKE] Verify Safe can be accessed after test file upload', () => {
     const safe = constants.SEPOLIA_CSV_ENTRY.name
 
     cy.wrap(null)

@@ -1,5 +1,5 @@
-import { useId, useState, type ReactElement } from 'react'
-import { Check, ChevronDown, ChevronUp, Plus, CircleFadingPlus, LayoutGrid, Loader2 } from 'lucide-react'
+import { useId, useMemo, useState, type ReactElement } from 'react'
+import { Check, ChevronsUpDown, Plus, CircleFadingPlus, LayoutGrid, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -48,6 +48,11 @@ export const SpaceSelectorDropdown = ({
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
 
+  const spaceColors = useMemo(
+    () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
+    [spaces],
+  )
+
   const handleSelectSpace = async (spaceId: number) => {
     if (triggerVariant === 'addToWorkspace') {
       const success = await addToSpace(spaceId)
@@ -70,10 +75,23 @@ export const SpaceSelectorDropdown = ({
     router.push(AppRoutes.welcome.spaces)
   }
 
+  const renderMenuItemWithTooltip = (menuItem: ReactElement, space: SpaceItem) => {
+    const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
+    if (!isAtLimit) return menuItem
+    return (
+      <Tooltip key={space.id}>
+        <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
+        <TooltipContent side="right">
+          {`You've reached the limit of Safes for this workspace (max. ${SAFE_ACCOUNTS_LIMIT} Safes per workspace)`}
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
   const renderSpaceMenuItem = (space: SpaceItem) => {
     const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
     const isDisabled = loadingSpaceId !== null || isAtLimit
-    const spaceColor = getDeterministicColor(space.name)
+    const spaceColor = spaceColors[space.id]
 
     const menuItem = (
       <DropdownMenuItem
@@ -96,16 +114,7 @@ export const SpaceSelectorDropdown = ({
       </DropdownMenuItem>
     )
 
-    if (!isAtLimit) return menuItem
-
-    return (
-      <Tooltip key={space.id}>
-        <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">
-          {`You've reached the limit of Safes for this workspace (max. ${SAFE_ACCOUNTS_LIMIT} Safes per workspace)`}
-        </TooltipContent>
-      </Tooltip>
-    )
+    return renderMenuItemWithTooltip(menuItem, space)
   }
 
   return (
@@ -151,10 +160,7 @@ export const SpaceSelectorDropdown = ({
               )}
               <span className={css.spaceSelectorSubtitle}>Space</span>
             </div>
-            <div className="ml-auto flex flex-col items-center shrink-0 -space-y-1" aria-hidden>
-              <ChevronUp className="size-4" />
-              <ChevronDown className="size-4" />
-            </div>
+            <ChevronsUpDown className="ml-auto size-4 shrink-0" aria-hidden />
           </>
         )}
       </DropdownMenuTrigger>

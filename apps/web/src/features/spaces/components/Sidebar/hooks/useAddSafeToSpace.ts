@@ -51,7 +51,8 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       const space = spaces.find((s) => s.id === spaceId)
       if (space) onSpaceAdded?.(space)
       return true
-    } catch {
+    } catch (error) {
+      console.error('Failed to add Safe to workspace.', error)
       dispatch(
         showNotification({
           message: 'Failed to add Safe to workspace.',
