@@ -1,9 +1,16 @@
 import { ArrowUpRight, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useCallback, useContext } from 'react'
+import { useRouter } from 'next/router'
 import { cn } from '@/utils/cn'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
 import SectionWrapper from '../../SectionWrapper'
+import { AppRoutes } from '@/config/routes'
+import { TxModalContext } from '@/components/tx-flow'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
+import { useAppDispatch } from '@/store'
+import { closeGlobalSearch } from '@/features/global-search/store'
 
 interface NavigationItem {
   icon: ReactNode
@@ -19,6 +26,48 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
 
 const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const filteredItems = useGlobalSearchFilter(NAVIGATION_ITEMS, query, 'label')
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+  const { setTxFlow } = useContext(TxModalContext)
+  const { link: txBuilderLink } = useTxBuilderApp()
+
+  const isSafeLevel = typeof router.query.safe === 'string'
+
+  const handleNavigation = useCallback(
+    (itemLabel: string) => {
+      setTxFlow(undefined)
+      dispatch(closeGlobalSearch())
+
+      if (!isSafeLevel) {
+        console.log(`[GlobalSearch] Navigate to: ${itemLabel}`)
+        return
+      }
+
+      switch (itemLabel) {
+        case 'Send':
+          setTxFlow(<TokenTransferFlow />, undefined, false)
+          break
+        case 'Swap':
+          router.push({ pathname: AppRoutes.swap, query: router.query })
+          break
+        case 'Transaction builder': {
+          const txBuilderQuery = typeof txBuilderLink.query === 'object' ? txBuilderLink.query : {}
+          router.push({
+            ...txBuilderLink,
+            query: { ...txBuilderQuery, ...router.query },
+          })
+          break
+        }
+        case 'Accounts':
+          router.push({
+            pathname: AppRoutes.balances.index,
+            query: router.query,
+          })
+          break
+      }
+    },
+    [isSafeLevel, dispatch, setTxFlow, router, txBuilderLink],
+  )
 
   if (filteredItems.length === 0) return null
 
@@ -33,6 +82,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
               'flex items-center cursor-pointer gap-3 px-4 py-2 font-bold text-sm text-foreground',
               'hover:bg-accent rounded-lg mx-2 transition-colors',
             )}
+            onClick={() => handleNavigation(item.label)}
           >
             <span className="text-muted-foreground">{item.icon}</span>
             {item.label}
