@@ -23,6 +23,8 @@ import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card } from '@/components/ui/card'
 
 const AddActionsAction = () => {
   return (
@@ -153,6 +155,11 @@ const SpaceDashboard = () => {
             )}
           </Grid>
         </Grid>
+        {safeItems.length > 0 && (
+          <div className="mt-4">
+            <SetupWidget loading={isOverviewLoading} horizontal />
+          </div>
+        )}
       </>
     </>
   )
