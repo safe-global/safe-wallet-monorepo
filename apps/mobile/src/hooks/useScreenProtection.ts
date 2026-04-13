@@ -1,6 +1,8 @@
 import { useFocusEffect } from 'expo-router'
 import { useCallback } from 'react'
 import { CaptureProtection } from 'react-native-capture-protection'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectScreenProtectionDisabled } from '@/src/store/settingsSlice'
 
 export interface ScreenProtectionOptions {
   screenshot?: boolean
@@ -21,13 +23,19 @@ export const useScreenProtection = (
     appSwitcher: true,
   },
 ) => {
+  const screenProtectionDisabled = useAppSelector(selectScreenProtectionDisabled)
+
   useFocusEffect(
     useCallback(() => {
+      if (screenProtectionDisabled) {
+        return
+      }
+
       CaptureProtection.prevent(options)
 
       return () => {
         CaptureProtection.allow()
       }
-    }, [options]),
+    }, [options, screenProtectionDisabled]),
   )
 }
