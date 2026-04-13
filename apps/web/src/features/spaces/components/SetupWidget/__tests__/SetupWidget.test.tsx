@@ -3,7 +3,7 @@ import SetupWidget from '../index'
 
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
-  useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [] })),
+  useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [], invitedMembers: [] })),
   useGetSpaceAddressBook: jest.fn(() => []),
 }))
 
@@ -11,6 +11,17 @@ jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
   isMultiChainSafeItem: jest.fn(() => false),
 }))
+
+jest.mock('../../SpaceAddressBook/Import/ImportAddressBookDialog', () => () => (
+  <div data-testid="import-address-book-dialog" />
+))
+
+jest.mock(
+  '../../AddAccounts',
+  () =>
+    ({ externalOpen }: { externalOpen?: boolean }) =>
+      externalOpen ? <div data-testid="add-accounts-dialog" /> : null,
+)
 
 describe('SetupWidget', () => {
   it('renders the widget title', () => {
@@ -44,14 +55,12 @@ describe('SetupWidget', () => {
     })
   })
 
-  it('logs to console when a step is clicked', () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation()
+  it('opens the import address book dialog when step is clicked', () => {
     render(<SetupWidget />)
 
     fireEvent.click(screen.getByText('Import your address book'))
 
-    expect(consoleSpy).toHaveBeenCalledWith('Setup step clicked:', 'address-book')
-    consoleSpy.mockRestore()
+    expect(screen.getByTestId('import-address-book-dialog')).toBeInTheDocument()
   })
 
   it('renders the test id', () => {
@@ -60,13 +69,13 @@ describe('SetupWidget', () => {
     expect(screen.getByTestId('space-dashboard-setup-widget')).toBeInTheDocument()
   })
 
-  it('sorts incomplete steps before completed ones', () => {
+  it('sorts completed steps before incomplete ones', () => {
     const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
       jest.requireMock<typeof import('@/features/spaces')>('@/features/spaces')
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
-    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [] })
+    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
 
     render(<SetupWidget />)
 
@@ -85,5 +94,21 @@ describe('SetupWidget', () => {
     expect(steps[1]).toHaveTextContent('Add your Safe accounts')
     expect(steps[2]).toHaveTextContent('Invite team members')
     expect(steps[3]).toHaveTextContent('Explore Spaces')
+  })
+
+  it('disables click on completed steps', () => {
+    const { useSpaceSafes, useGetSpaceAddressBook } =
+      jest.requireMock<typeof import('@/features/spaces')>('@/features/spaces')
+
+    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
+
+    render(<SetupWidget />)
+
+    // Click the completed "Import your address book" step
+    fireEvent.click(screen.getByText('Import your address book'))
+
+    // Dialog should NOT open since the step is completed
+    expect(screen.queryByTestId('import-address-book-dialog')).not.toBeInTheDocument()
   })
 })

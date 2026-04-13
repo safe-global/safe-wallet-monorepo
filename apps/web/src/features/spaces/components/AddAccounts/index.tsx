@@ -86,11 +86,19 @@ const _groupAndSort = (
 interface AddAccountsProps {
   buttonVariant?: 'outline' | 'default'
   buttonLabel?: string
+  externalOpen?: boolean
+  onExternalClose?: () => void
 }
 
-const AddAccounts = ({ buttonVariant = 'outline', buttonLabel = 'Add Accounts' }: AddAccountsProps = {}) => {
+const AddAccounts = ({
+  buttonVariant = 'outline',
+  buttonLabel = 'Add Accounts',
+  externalOpen,
+  onExternalClose,
+}: AddAccountsProps = {}) => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
+  const isOpen = externalOpen ?? open
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
   const hasResetForOpen = useRef(false)
@@ -203,13 +211,13 @@ const AddAccounts = ({ buttonVariant = 'outline', buttonLabel = 'Add Accounts' }
 
   // Reset form when modal opens
   useEffect(() => {
-    if (open && !hasResetForOpen.current) {
+    if (isOpen && !hasResetForOpen.current) {
       reset({ selectedSafes: defaultSelectedSafes })
       hasResetForOpen.current = true
-    } else if (!open) {
+    } else if (!isOpen) {
       hasResetForOpen.current = false
     }
-  }, [open, defaultSelectedSafes, reset])
+  }, [isOpen, defaultSelectedSafes, reset])
 
   const onSubmit = handleSubmit(async (data) => {
     const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
@@ -302,6 +310,7 @@ const AddAccounts = ({ buttonVariant = 'outline', buttonLabel = 'Add Accounts' }
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
+    onExternalClose?.()
   }
 
   useEffect(() => {
@@ -314,23 +323,25 @@ const AddAccounts = ({ buttonVariant = 'outline', buttonLabel = 'Add Accounts' }
 
   return (
     <>
-      <Button
-        size="lg"
-        className="font-bold px-4 py-0"
-        variant={buttonVariant}
-        disabled={!isAdmin}
-        onClick={() => setOpen(true)}
-        title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
-      >
-        <Plus
-          className={cn('size-4 mr-1', {
-            'text-green-500': buttonVariant === 'default',
-          })}
-        />
-        {buttonLabel}
-      </Button>
+      {externalOpen === undefined && (
+        <Button
+          size="lg"
+          className="font-bold px-4 py-0"
+          variant={buttonVariant}
+          disabled={!isAdmin}
+          onClick={() => setOpen(true)}
+          title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
+        >
+          <Plus
+            className={cn('size-4 mr-1', {
+              'text-green-500': buttonVariant === 'default',
+            })}
+          />
+          {buttonLabel}
+        </Button>
+      )}
 
-      <ModalDialog open={open} fullScreen hideChainIndicator>
+      <ModalDialog open={isOpen} fullScreen hideChainIndicator>
         <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
           <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-hidden overflow-x-hidden bg-secondary p-4">
             <div className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
