@@ -48,7 +48,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
             </span>
             <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
           </DialogTrigger>
-          <DialogContent className="max-w-[420px] p-0">
+          <DialogContent className="max-w-[420px] p-0" showCloseButton={false}>
             <AddToSpacePopupModal />
           </DialogContent>
         </Dialog>
