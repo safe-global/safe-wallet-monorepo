@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AppKit, AppKitProvider, useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { Platform } from 'react-native'
+import { FullWindowOverlay } from 'react-native-screens'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useImportSignerFlow } from '../hooks/useImportSignerFlow'
@@ -136,7 +138,7 @@ export function WalletConnectProvider({ children, instance }: WalletConnectProvi
       {instance && (
         <AppKitProvider instance={instance}>
           <WalletConnectContextBridge onContextReady={setContextValue} />
-          <AppKit />
+          <AppKit modalContentWrapper={Platform.OS === 'ios' ? FullWindowOverlay : undefined} />
         </AppKitProvider>
       )}
       {children}
