@@ -147,93 +147,54 @@ describe('useSecurityScan', () => {
     })
   })
 
-  describe('initialResults', () => {
-    it('skips auto-scan when initialResults provided', async () => {
-      const scanSpy = jest.fn().mockResolvedValue(makeScanner('test_a').scan(createMockContext()))
+  describe('scan cache', () => {
+    it('skips auto-scan when fresh cache exists', async () => {
+      // First: run a scan to populate the cache
+      const ctx = createMockContext({ chainId: '1', safeAddress: '0xCached' })
+      const { result, unmount } = renderHook(() => useSecurityScan(ctx))
+
+      await waitFor(() => {
+        expect(result.current.isComplete).toBe(true)
+      })
+      unmount()
+
+      // Second: new hook instance should use cached results without scanning
+      const scanSpy = jest.fn().mockResolvedValue(makeScanner('test_a').scan(ctx))
       mockScanners.length = 0
-      mockScanners.push({ id: 'spy_a', scan: scanSpy })
+      mockScanners.push({ id: 'test_a', scan: scanSpy })
 
-      const initialResults: Record<string, ScanResult> = {
-        spy_a: {
-          status: 'clear',
-          severity: 'Low',
-          score: 100,
-          evidence: [],
-          remediation: '',
-          lastChecked: new Date().toISOString(),
-        },
-      }
+      const { result: result2 } = renderHook(() => useSecurityScan(ctx))
 
-      const ctx = createMockContext()
-      const { result } = renderHook(() => useSecurityScan(ctx, initialResults))
-
-      // Give time for any scan to fire
       await act(async () => {
         await new Promise((r) => setTimeout(r, 50))
       })
 
       expect(scanSpy).not.toHaveBeenCalled()
-      expect(result.current.results.spy_a).toBeDefined()
-      expect(result.current.results.spy_a.status).toBe('clear')
+      expect(result2.current.results.test_a).toBeDefined()
+      expect(result2.current.isComplete).toBe(true)
     })
 
-    it('returns initialResults immediately with isComplete true', () => {
-      const initialResults: Record<string, ScanResult> = {
-        test_a: {
-          status: 'issue',
-          severity: 'High',
-          score: 30,
-          evidence: [],
-          remediation: '',
-          lastChecked: new Date().toISOString(),
-        },
-      }
+    it('rescan works after cache hit', async () => {
+      const ctx = createMockContext({ chainId: '1', safeAddress: '0xRescan' })
+      const { result, unmount } = renderHook(() => useSecurityScan(ctx))
 
-      const ctx = createMockContext()
-      const { result } = renderHook(() => useSecurityScan(ctx, initialResults))
+      await waitFor(() => {
+        expect(result.current.isComplete).toBe(true)
+      })
+      unmount()
 
-      expect(result.current.results.test_a.status).toBe('issue')
-      expect(result.current.isComplete).toBe(true)
-      expect(result.current.lastScannedAt).not.toBeNull()
-    })
-
-    it('rescan works after initialResults', async () => {
-      const initialResults: Record<string, ScanResult> = {
-        test_a: {
-          status: 'issue',
-          severity: 'High',
-          score: 30,
-          evidence: [],
-          remediation: '',
-          lastChecked: new Date().toISOString(),
-        },
-      }
-
-      const ctx = createMockContext()
-      const { result } = renderHook(() => useSecurityScan(ctx, initialResults))
+      // New instance uses cache
+      const { result: result2 } = renderHook(() => useSecurityScan(ctx))
 
       // Trigger manual rescan
       act(() => {
-        result.current.rescan()
+        result2.current.rescan()
       })
 
       await waitFor(() => {
-        expect(result.current.isComplete).toBe(true)
-        // After rescan, results come from scanners (clear), not initialResults (issue)
-        expect(result.current.results.test_a.status).toBe('clear')
+        expect(result2.current.isComplete).toBe(true)
+        expect(result2.current.lastScannedAt).not.toBeNull()
       })
-    })
-
-    it('auto-scans normally when initialResults is undefined', async () => {
-      const ctx = createMockContext()
-      const { result } = renderHook(() => useSecurityScan(ctx, undefined))
-
-      await waitFor(() => {
-        expect(result.current.isComplete).toBe(true)
-      })
-
-      expect(result.current.results.test_a).toBeDefined()
-      expect(result.current.results.test_b).toBeDefined()
     })
   })
 

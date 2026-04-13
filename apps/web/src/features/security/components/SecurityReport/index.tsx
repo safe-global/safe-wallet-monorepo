@@ -8,7 +8,6 @@ import CheckGrid, { type CardOverride } from './CheckGrid'
 
 type SecurityReportProps = {
   scanContext: ScanContext | null
-  initialResults?: Record<string, ScanResult>
   buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
   checkFilter?: (def: CheckDef) => boolean
   onScanComplete?: (
@@ -21,12 +20,11 @@ type SecurityReportProps = {
 
 const SecurityReport = ({
   scanContext,
-  initialResults,
   buildCardOverrides,
   checkFilter,
   onScanComplete,
 }: SecurityReportProps): ReactElement => {
-  const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext, initialResults)
+  const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
 
