@@ -12,6 +12,7 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
   const matchSafe = useMatchSafe()
 
   const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
+  console.log('### accounts', allSafes, filteredSafes)
 
   if (isLoading) {
     return (

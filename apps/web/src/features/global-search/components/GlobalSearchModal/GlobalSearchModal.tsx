@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -10,11 +11,22 @@ const GlobalSearchModal = () => {
   const [query, setQuery] = useState('')
   const open = useAppSelector(selectGlobalSearchOpen)
   const dispatch = useAppDispatch()
+  const router = useRouter()
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     dispatch(closeGlobalSearch())
     setQuery('')
-  }
+  }, [dispatch])
+
+  useEffect(() => {
+    if (!open) return
+
+    router.events.on('routeChangeStart', handleClose)
+
+    return () => {
+      router.events.off('routeChangeStart', handleClose)
+    }
+  }, [open, router.events, handleClose])
 
   if (!open) return null
 

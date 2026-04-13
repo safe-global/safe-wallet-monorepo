@@ -13,7 +13,7 @@ const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
     [allMultiChainSafes, allSingleSafes],
   )
   const matchSafe = useMatchSafe()
-
+  console.log('### trusted safes', allMultiChainSafes, allSingleSafes)
   const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
 
   if (filteredSafes.length === 0) {

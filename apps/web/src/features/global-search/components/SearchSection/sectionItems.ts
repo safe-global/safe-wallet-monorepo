@@ -1,7 +1,7 @@
+import { useRouter } from 'next/router'
 import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
 import { TrustedSafesSection } from './sections/TrustedSafes'
-import { useCurrentSpaceId } from '@/features/spaces'
 
 export interface SectionItemProps {
   query: string
@@ -17,7 +17,10 @@ export interface SectionItem {
 const useAlwaysActive = () => true
 
 const useNotInSpace = () => {
-  const spaceId = useCurrentSpaceId()
+  const { query } = useRouter()
+
+  const spaceId = query.spaceId
+
   return !spaceId
 }
 
@@ -28,7 +31,7 @@ export const sectionItems: SectionItem[] = [
     renderItem: NavigateToSection,
   },
   {
-    label: 'Accounts',
+    label: 'Safe accounts',
     useActivate: useAlwaysActive,
     renderItem: AccountsSection,
   },
