@@ -10,6 +10,7 @@ type SecurityReportProps = {
   scanContext: ScanContext | null
   buildCardOverrides?: (results: Record<string, ScanResult>) => Record<string, CardOverride>
   checkFilter?: (def: CheckDef) => boolean
+  singleColumn?: boolean
   onScanComplete?: (
     safeAddress: string,
     chainId: string,
@@ -22,6 +23,7 @@ const SecurityReport = ({
   scanContext,
   buildCardOverrides,
   checkFilter,
+  singleColumn,
   onScanComplete,
 }: SecurityReportProps): ReactElement => {
   const { results, loading, errors, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
@@ -66,6 +68,7 @@ const SecurityReport = ({
           errors={errors}
           cardOverrides={cardOverrides}
           checkFilter={checkFilter}
+          singleColumn={singleColumn}
         />
       </Box>
     </Fade>

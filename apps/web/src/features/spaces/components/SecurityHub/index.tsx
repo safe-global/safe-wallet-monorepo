@@ -1,5 +1,5 @@
 import { type ReactElement, type SyntheticEvent, useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { Box, Button, Collapse, Stack, Typography } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import { useSpaceSafes } from '@/features/spaces'
@@ -12,11 +12,8 @@ import { scanKey } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
-import SecurityReport from '@/features/security/components/SecurityReport'
-import AccountActivity from '@/features/security/components/AccountActivity'
-import SecurityTabs from '@/features/security/components/SecurityTabs'
-import type { CheckDef } from '@/features/security/data/securityChecks'
-import SearchInput from '../SearchInput'
+import SecurityReportDrawer from './SecurityReportDrawer'
+import WorkspaceHealthCard from './WorkspaceHealthCard'
 
 export type ChainEntry = {
   chainId: string
@@ -163,10 +160,8 @@ const useAutoScan = (
 const SecurityHub = (): ReactElement => {
   const { allSafes, isLoading } = useSpaceSafes()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
-  const [searchQuery, setSearchQuery] = useState('')
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [reportTab, setReportTab] = useState(0)
-  const reportRef = useRef<HTMLDivElement>(null)
   const [_scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
@@ -198,12 +193,6 @@ const SecurityHub = (): ReactElement => {
     }
   }, [isLoading, safes.length, startScan])
 
-  const filteredSafes = useMemo(() => {
-    if (!searchQuery) return safes
-    const q = searchQuery.toLowerCase()
-    return safes.filter((s) => (s.name ?? '').toLowerCase().includes(q) || s.address.toLowerCase().includes(q))
-  }, [safes, searchQuery])
-
   const handleViewReport = useCallback((address: string, chainId: string) => {
     setSelectedSafe((prev) => {
       if (prev && prev.address === address && prev.chainId === chainId) return null
@@ -222,31 +211,20 @@ const SecurityHub = (): ReactElement => {
 
   const selectedEntry = useMemo(() => safes.find((s) => s.address === selectedSafe?.address), [safes, selectedSafe])
   const scanContext = useSafeScanContext(selectedSafe, selectedEntry)
-  const selectedKey = selectedSafe ? scanKey(selectedSafe.address, selectedSafe.chainId) : null
 
-  // Scroll to report when a Safe is selected
-  useEffect(() => {
-    if (selectedSafe && reportRef.current) {
-      setTimeout(() => reportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 450)
-    }
-  }, [selectedSafe])
+  const handleCloseDrawer = useCallback(() => setSelectedSafe(null), [])
 
   return (
     <Box data-testid="security-hub">
-      <Typography variant="h1" mb={3}>
-        Security hub
-      </Typography>
-
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        flexDirection={{ xs: 'column', md: 'row' }}
-        flexWrap="nowrap"
-        gap={2}
-        mb={3}
-      >
-        <SearchInput onSearch={setSearchQuery} />
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2} mb={3} flexWrap="wrap">
+        <Box>
+          <Typography variant="h1" mb={0.5}>
+            Security
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Security posture across all accounts in this workspace.
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
@@ -268,40 +246,28 @@ const SecurityHub = (): ReactElement => {
         <Typography variant="body2" color="text.secondary">
           No Safe accounts in this space yet.
         </Typography>
-      ) : filteredSafes.length === 0 ? (
-        <Typography variant="h5" fontWeight="normal" color="primary.light">
-          No accounts match your search
-        </Typography>
       ) : (
-        <SecuritySafesTable
-          safes={filteredSafes}
-          onViewReport={handleViewReport}
-          selectedSafe={selectedSafe}
-          scanResults={allScanResults}
-          scanningKeys={scanningKeys}
-        />
+        <>
+          <WorkspaceHealthCard scanResults={allScanResults} totalDeployedTargets={deployedEntries.length} />
+          <SecuritySafesTable
+            safes={safes}
+            onViewReport={handleViewReport}
+            selectedSafe={selectedSafe}
+            scanResults={allScanResults}
+            scanningKeys={scanningKeys}
+          />
+        </>
       )}
 
-      <Collapse in={!!selectedSafe} timeout={{ enter: 400, exit: 200 }} unmountOnExit>
-        <Box mt={5} ref={reportRef}>
-          {selectedSafe && (
-            <>
-              <SecurityTabs value={reportTab} onChange={(_: SyntheticEvent, v: number) => setReportTab(v)} />
-
-              {reportTab === 0 && (
-                <SecurityReport
-                  key={selectedKey!}
-                  scanContext={scanContext}
-                  onScanComplete={handleScanComplete}
-                  checkFilter={(def: CheckDef) => def.category === 'account'}
-                />
-              )}
-
-              {reportTab === 1 && <AccountActivity chainId={selectedSafe.chainId} safeAddress={selectedSafe.address} />}
-            </>
-          )}
-        </Box>
-      </Collapse>
+      <SecurityReportDrawer
+        selectedSafe={selectedSafe}
+        selectedEntry={selectedEntry}
+        scanContext={scanContext}
+        reportTab={reportTab}
+        onTabChange={(_: SyntheticEvent, v: number) => setReportTab(v)}
+        onClose={handleCloseDrawer}
+        onScanComplete={handleScanComplete}
+      />
     </Box>
   )
 }
