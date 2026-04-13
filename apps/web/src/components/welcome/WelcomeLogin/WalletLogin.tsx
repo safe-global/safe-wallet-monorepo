@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react'
 import { WalletMinimal } from 'lucide-react'
 import css from './styles.module.css'
 
-export type WalletLoginButtonStyle = 'walletBtnPrimary' | 'walletBtnSecondary'
+// 'walletBtnStatic' is intentionally theme-agnostic — used on the welcome page which has a fixed white background
+export type WalletLoginButtonStyle = 'walletBtnPrimary' | 'walletBtnSecondary' | 'walletBtnStatic'
 
 export interface WalletLoginButtonText {
   connected?: string
@@ -58,13 +59,14 @@ const WalletLogin = ({
         className={css[buttonStyle]}
         data-testid="continue-with-wallet-btn"
         disabled={isLoading}
+        disableElevation
       >
         {isLoading ? (
           <CircularProgress size={20} sx={{ color: '#fff' }} />
         ) : (
           <Box justifyContent="space-between" display="flex" flexDirection="row" alignItems="center" gap={1}>
             <Box display="flex" flexDirection="column" alignItems="flex-start">
-              <Typography variant="subtitle2" fontWeight={700}>
+              <Typography variant="subtitle2" fontWeight={600}>
                 {buttonText?.connected ?? 'Continue with'} {wallet.label}
               </Typography>
               {wallet.address && (
