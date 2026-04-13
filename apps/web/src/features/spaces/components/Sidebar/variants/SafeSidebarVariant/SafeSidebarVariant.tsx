@@ -15,7 +15,7 @@ import css from '../../styles.module.css'
 import type { SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
-import { NewTransactionButton } from '../../NewTransactionButton'
+import { SidebarActionButton } from '../../NewTransactionButton'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -60,10 +60,10 @@ export const SafeSidebarVariant = ({
         </SidebarGroup>
       )}
 
-      {/* New Transaction */}
+      {/* Action Button */}
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarGroupContent>
-          <NewTransactionButton />
+          <SidebarActionButton />
         </SidebarGroupContent>
       </SidebarGroup>
 

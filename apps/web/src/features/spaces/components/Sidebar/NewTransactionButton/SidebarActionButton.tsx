@@ -8,7 +8,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import { Button } from '@/components/ui/button'
 
-export const NewTransactionButton = (): ReactElement => {
+export const SidebarActionButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { ActivateAccountButton } = useLoadFeature(CounterfactualFeature)

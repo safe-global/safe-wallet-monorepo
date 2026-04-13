@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { NewTransactionButton } from '../NewTransactionButton'
+import { SidebarActionButton } from '../SidebarActionButton'
 
 const mockSetTxFlow = jest.fn()
 const mockTrackEvent = jest.fn()
@@ -60,7 +60,7 @@ const renderWithContext = (ui: ReactElement) =>
     </TxModalContext.Provider>,
   )
 
-describe('NewTransactionButton', () => {
+describe('SidebarActionButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockCheckWalletOk = true
@@ -69,13 +69,13 @@ describe('NewTransactionButton', () => {
   })
 
   it('renders the New transaction button', () => {
-    renderWithContext(<NewTransactionButton />)
+    renderWithContext(<SidebarActionButton />)
     expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
     expect(screen.getByText('New transaction')).toBeInTheDocument()
   })
 
   it('opens the tx flow and tracks the event on click', () => {
-    renderWithContext(<NewTransactionButton />)
+    renderWithContext(<SidebarActionButton />)
     fireEvent.click(screen.getByTestId('new-tx-btn'))
 
     expect(mockSetTxFlow).toHaveBeenCalledTimes(1)
@@ -87,13 +87,13 @@ describe('NewTransactionButton', () => {
 
   it('disables the button when the wallet check fails', () => {
     mockCheckWalletOk = false
-    renderWithContext(<NewTransactionButton />)
+    renderWithContext(<SidebarActionButton />)
     expect(screen.getByTestId('new-tx-btn')).toBeDisabled()
   })
 
   it('renders ActivateAccountButton when Safe is counterfactual', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(true)
-    renderWithContext(<NewTransactionButton />)
+    renderWithContext(<SidebarActionButton />)
 
     expect(screen.getByText('Activate account')).toBeInTheDocument()
     expect(screen.queryByTestId('new-tx-btn')).not.toBeInTheDocument()

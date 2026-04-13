@@ -1,1 +1,1 @@
-export { NewTransactionButton } from './NewTransactionButton'
+export { SidebarActionButton } from './SidebarActionButton'

@@ -31,7 +31,7 @@ jest.mock('@/features/counterfactual', () => ({
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({
-  NewTransactionButton: () => (
+  SidebarActionButton: () => (
     <button type="button" data-testid="new-tx-btn">
       New transaction
     </button>
