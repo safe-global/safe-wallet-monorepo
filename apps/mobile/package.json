@@ -71,7 +71,7 @@
     "@react-navigation/native-stack": "^7.14.4",
     "@reduxjs/toolkit": "^2.11.0",
     "@reown/appkit-ethers-react-native": "^2.0.2",
-    "@reown/appkit-react-native": "^2.0.2",
+    "@reown/appkit-react-native": "^2.0.3",
     "@safe-global/protocol-kit": "^5.2.26",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
