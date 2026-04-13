@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Grid from '@mui/material/Grid2'
 import { flattenSafeItems } from '@/hooks/safes'
 import {
@@ -23,8 +23,8 @@ import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card } from '@/components/ui/card'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const AddActionsAction = () => {
   return (
@@ -60,6 +60,9 @@ const SpaceDashboard = () => {
     error: pendingTxError,
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
+  const [setupDismissed, setSetupDismissed] = useState(false)
+  const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
+  const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
 
@@ -107,6 +110,7 @@ const SpaceDashboard = () => {
   }
 
   const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
+  const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
   return (
     <>
@@ -140,8 +144,8 @@ const SpaceDashboard = () => {
             )}
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            {safeItems.length === 0 && !isSafesLoading ? (
-              <SetupWidget />
+            {showSetupWidget ? (
+              <SetupWidget onDismiss={() => setSetupDismissed(true)} />
             ) : (
               <PendingTxWidget
                 transactions={pendingTxs}
