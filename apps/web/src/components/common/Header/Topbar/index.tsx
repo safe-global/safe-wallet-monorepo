@@ -69,7 +69,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex flex-wrap items-center px-6 py-4 bg-secondary dark:bg-background ${
+        className={`flex flex-wrap items-start px-6 py-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'justify-between pl-2' : 'justify-between'
         }`}
       >

@@ -45,25 +45,27 @@ const SafenetStakingButton = () => {
 
   return (
     <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="lg"
-            onClick={handleClick}
-            disabled={navigating}
-            className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-            aria-label="Safenet staking"
-          />
-        }
-      >
-        {navigating ? <Loader2 className="size-5 animate-spin" /> : <SafeTokenIcon width={20} height={20} />}
-        {loading ? (
-          <Skeleton className="h-3 w-6" />
-        ) : (
-          <span className="text-xs text-muted-foreground font-normal">{safeBalance}</span>
-        )}
-      </TooltipTrigger>
+      <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+        <TooltipTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClick}
+              disabled={navigating}
+              className="cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+              aria-label="Safenet staking"
+            />
+          }
+        >
+          {navigating ? <Loader2 className="size-5 animate-spin" /> : <SafeTokenIcon width={20} height={20} />}
+          {loading ? (
+            <Skeleton className="h-3 w-6" />
+          ) : (
+            <span className="text-xs text-muted-foreground font-normal">{safeBalance}</span>
+          )}
+        </TooltipTrigger>
+      </div>
       <TooltipContent>Go to Safenet staking</TooltipContent>
     </Tooltip>
   )
