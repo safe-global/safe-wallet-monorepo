@@ -10,6 +10,7 @@ import type { UndeployedSafesState } from '@safe-global/utils/features/counterfa
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import { scanKey } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
+import { getScanResultsCache } from '@/features/security/hooks/useSecurityScan'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReportDrawer from './SecurityReportDrawer'
@@ -117,7 +118,11 @@ const useAutoScan = (
           if (completed === total) {
             completedRef.current.add(key)
             scanningRef.current = null
-            onComplete(currentTarget.address, currentTarget.chainId, Date.now(), results)
+            const timestamp = Date.now()
+            // Share results with useSecurityScan's module-level cache so the drawer reuses
+            // them instead of re-scanning when the user opens this Safe's report.
+            getScanResultsCache().set(key, { results, timestamp })
+            onComplete(currentTarget.address, currentTarget.chainId, timestamp, results)
             setScanningKeys((prev) => {
               const next = new Set(prev)
               next.delete(key)
@@ -162,27 +167,23 @@ const SecurityHub = (): ReactElement => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [reportTab, setReportTab] = useState(0)
-  const [_scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
 
   const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
 
-  const handleBatchScanComplete = useCallback(
-    (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
+  // Shared callback for scan completion from both the batch scanner and the drawer.
+  // Unused `timestamp` arg is accepted for signature symmetry with the cache writer.
+  const handleScanComplete = useCallback(
+    (address: string, chainId: string, _timestamp: number, results: Record<string, ScanResult>) => {
       const key = scanKey(address, chainId)
-      setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))
       setAllScanResults((prev) => ({ ...prev, [key]: results }))
     },
     [],
   )
 
-  const { scanningKeys, isRunning, justCompleted, startScan } = useAutoScan(
-    deployedEntries,
-    safes,
-    handleBatchScanComplete,
-  )
+  const { scanningKeys, isRunning, justCompleted, startScan } = useAutoScan(deployedEntries, safes, handleScanComplete)
 
   // Auto-scan on first load when safes are available
   const hasAutoScanned = useRef(false)
@@ -199,15 +200,6 @@ const SecurityHub = (): ReactElement => {
       return { address, chainId }
     })
   }, [])
-
-  const handleScanComplete = useCallback(
-    (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
-      const key = scanKey(address, chainId)
-      setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))
-      setAllScanResults((prev) => ({ ...prev, [key]: results }))
-    },
-    [],
-  )
 
   const selectedEntry = useMemo(() => safes.find((s) => s.address === selectedSafe?.address), [safes, selectedSafe])
   const scanContext = useSafeScanContext(selectedSafe, selectedEntry)

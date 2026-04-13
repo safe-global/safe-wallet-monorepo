@@ -4,8 +4,7 @@ import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { useChainsGetMasterCopiesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useTransactionsGetCreationTransactionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useGetMultipleSafeOverviewsQuery, useGetSafeOverviewQuery } from '@/store/api/gateway'
-import { useChain } from '@/hooks/useChains'
-import useChains from '@/hooks/useChains'
+import useChains, { useChain } from '@/hooks/useChains'
 import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/store'
@@ -111,7 +110,8 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       safeAddress: selected.address,
       nonce: safeInfo.nonce,
       balanceUsd: Number(safeOverview?.fiatTotal) || 0,
-      // TODO: wire real data when these scanners are activated
+      // The address_book and trusted_safe scanners aren't registered in SCANNERS; these stub
+      // values satisfy the ScanContext type until either the scanners are removed or wired.
       addressBookEntryCount: 0,
       queuedTxCount: safeOverview?.queued ?? 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
