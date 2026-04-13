@@ -26,12 +26,12 @@
     },
     "/v1/auth/me": {
       "get": {
-        "description": "Returns the authenticated user ID if a valid session cookie is present, 403 otherwise.",
+        "description": "Returns the authenticated user session if a valid session cookie is present, 403 otherwise. The response includes the user ID, the authentication method used, and (for SIWE users) the wallet signer address.",
         "operationId": "authGetMeV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Authenticated user ID",
+            "description": "Authenticated user session",
             "content": {
               "application/json": {
                 "schema": {
@@ -2519,6 +2519,46 @@
           }
         },
         "summary": "Leave a space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/membership": {
+      "get": {
+        "description": "Returns the membership record of the authenticated user for the given space. Returns 403 if the caller has no ACTIVE or INVITED membership in the space.",
+        "operationId": "membersGetMembershipV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID to fetch the caller's membership for",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Access forbidden - user not authenticated, or has no ACTIVE/INVITED membership in this space"
+          }
+        },
+        "summary": "Get the authenticated user's membership in a space",
         "tags": [
           "spaces"
         ]
@@ -5571,10 +5611,22 @@
         "properties": {
           "id": {
             "type": "string"
+          },
+          "authMethod": {
+            "type": "string",
+            "enum": [
+              "siwe",
+              "oidc"
+            ]
+          },
+          "signerAddress": {
+            "type": "string",
+            "description": "Wallet signer address. Present only for SIWE-authenticated users."
           }
         },
         "required": [
-          "id"
+          "id",
+          "authMethod"
         ]
       },
       "AuthNonce": {

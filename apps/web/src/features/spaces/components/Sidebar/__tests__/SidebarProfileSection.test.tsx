@@ -70,10 +70,10 @@ describe('SidebarProfileSection', () => {
   const adminMember = createMember({ role: 'ADMIN' as const })
   const invitedMember = createMember({ status: 'INVITED' as const })
 
-  it('renders member name and InitialsAvatar when authenticated with active membership', () => {
+  it('renders member name when active membership', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -83,10 +83,10 @@ describe('SidebarProfileSection', () => {
     expect(screen.getAllByText(activeMember.name).length).toBeGreaterThanOrEqual(1)
   })
 
-  it('renders skeleton when loading', () => {
+  it('renders skeleton when loading with no membership yet', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: undefined,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: true,
     })
 
@@ -96,10 +96,10 @@ describe('SidebarProfileSection', () => {
     expect(screen.getAllByTestId('skeleton')).toHaveLength(2)
   })
 
-  it('renders nothing when loaded but no membership found', () => {
+  it('renders nothing when loaded but no membership', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: undefined,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -111,7 +111,7 @@ describe('SidebarProfileSection', () => {
   it('renders nothing for invited members', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: invitedMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -123,7 +123,7 @@ describe('SidebarProfileSection', () => {
   it('shows popover content with member name, role, and signed in label', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -131,14 +131,14 @@ describe('SidebarProfileSection', () => {
 
     expect(screen.getByText('Signed in')).toBeInTheDocument()
     expect(screen.getByText('member')).toBeInTheDocument()
-    expect(screen.getAllByTestId('initials-avatar')).toHaveLength(2)
+    expect(screen.getAllByTestId('initials-avatar')).toHaveLength(1)
     expect(screen.getByText('Sign out')).toBeInTheDocument()
   })
 
   it('calls logout when sign-out button is clicked', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -152,7 +152,7 @@ describe('SidebarProfileSection', () => {
   it('displays admin for ADMIN role', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: adminMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -164,7 +164,7 @@ describe('SidebarProfileSection', () => {
   it('displays member for MEMBER role', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -176,33 +176,33 @@ describe('SidebarProfileSection', () => {
   it('falls back to "User" when member name is empty', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: { ...activeMember, name: '' },
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
     render(<SidebarProfileSection />)
 
-    expect(screen.getAllByText('User')).toHaveLength(4)
+    expect(screen.getAllByText('User')).toHaveLength(3)
   })
 
-  it('shows truncated wallet address in popover when user has wallets', () => {
-    const walletAddress = faker.finance.ethereumAddress()
+  it('shows truncated signer address when signerAddress is present', () => {
+    const signerAddress = faker.finance.ethereumAddress()
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress,
+      signerAddress,
       isLoading: false,
     })
 
     render(<SidebarProfileSection />)
 
-    const shortened = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+    const shortened = `${signerAddress.slice(0, 6)}...${signerAddress.slice(-4)}`
     expect(screen.getByText(shortened)).toBeInTheDocument()
   })
 
-  it('shows member name in popover when user has no wallets', () => {
+  it('shows member name in popover when signerAddress is absent', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 
@@ -214,7 +214,7 @@ describe('SidebarProfileSection', () => {
   it('renders separator dividers', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: activeMember,
-      walletAddress: undefined,
+      signerAddress: undefined,
       isLoading: false,
     })
 

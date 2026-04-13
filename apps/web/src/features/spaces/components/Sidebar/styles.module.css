@@ -256,6 +256,18 @@
   min-width: 0;
 }
 
+.profileTriggerAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 10%, transparent);
+  color: var(--color-text-secondary, #737373);
+}
+
 .profilePopover {
   display: flex;
   flex-direction: column;

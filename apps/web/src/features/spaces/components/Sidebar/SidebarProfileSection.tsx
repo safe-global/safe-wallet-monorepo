@@ -4,7 +4,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
-import { LogOut } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -40,8 +40,8 @@ export const SidebarProfileView = ({
                 />
               }
             >
-              <span className="shrink-0">
-                <InitialsAvatar name={memberName} size="small" rounded />
+              <span className={css.profileTriggerAvatar}>
+                <User className="size-4" />
               </span>
               <span className={css.profileName}>{memberName}</span>
             </PopoverTrigger>
@@ -96,15 +96,14 @@ const ProfileSkeleton = () => (
 )
 
 export const SidebarProfileSection = (): ReactElement | null => {
-  const { membership, walletAddress, isLoading } = useCurrentMemberProfile()
+  const { membership, signerAddress, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
 
   if (isLoading && !membership) return <ProfileSkeleton />
-
   if (!membership || membership.status !== MemberStatus.ACTIVE) return null
 
   const memberName = membership.name || 'User'
-  const displayName = walletAddress ? shortenAddress(walletAddress) : memberName
+  const displayName = signerAddress ? shortenAddress(signerAddress) : memberName
   const role = membership.role.toLowerCase()
 
   return <SidebarProfileView memberName={memberName} displayName={displayName} role={role} onSignOut={logout} />

@@ -1,4 +1,9 @@
-import { useMembersGetUsersV1Query, type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  useMembersGetMembershipV1Query,
+  useMembersGetUsersV1Query,
+  type Member,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -45,24 +50,22 @@ export const useCurrentMembership = (spaceId?: number) => {
   return allMembers.find((member) => member.user.id === user?.id)
 }
 
-export const useCurrentMemberProfile = (spaceId?: number) => {
-  const currentSpaceId = useCurrentSpaceId()
-  const actualSpaceId = spaceId ?? currentSpaceId
+export const useCurrentMemberProfile = () => {
+  const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: membersData, isLoading: isMembersLoading } = useMembersGetUsersV1Query(
-    { spaceId: Number(actualSpaceId) },
-    { skip: !isUserSignedIn },
-  )
-  const { currentData: user, isLoading: isUserLoading } = useUsersGetWithWalletsV1Query(undefined, {
+
+  const { data: session, isLoading: isSessionLoading } = useAuthGetMeV1Query(undefined, {
     skip: !isUserSignedIn,
   })
-  const members = membersData?.members || []
-  const membership = members.find((member) => member.user.id === user?.id)
+  const { currentData: membership, isLoading: isMembershipLoading } = useMembersGetMembershipV1Query(
+    { spaceId: Number(spaceId) },
+    { skip: !isUserSignedIn || !spaceId },
+  )
 
   return {
     membership,
-    walletAddress: user?.wallets?.[0]?.address,
-    isLoading: isMembersLoading || isUserLoading,
+    signerAddress: session?.authMethod === 'siwe' ? session.signerAddress : undefined,
+    isLoading: isSessionLoading || isMembershipLoading,
   }
 }
 

@@ -106,6 +106,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      membersGetMembershipV1: build.query<MembersGetMembershipV1ApiResponse, MembersGetMembershipV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/membership` }),
+        providesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
@@ -225,6 +229,11 @@ export type MembersGetUsersV1ApiArg = {
 }
 export type MembersSelfRemoveV1ApiResponse = unknown
 export type MembersSelfRemoveV1ApiArg = {
+  spaceId: number
+}
+export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ Member
+export type MembersGetMembershipV1ApiArg = {
+  /** Space ID to fetch the caller's membership for */
   spaceId: number
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
@@ -380,6 +389,8 @@ export const {
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,
+  useMembersGetMembershipV1Query,
+  useLazyMembersGetMembershipV1Query,
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
