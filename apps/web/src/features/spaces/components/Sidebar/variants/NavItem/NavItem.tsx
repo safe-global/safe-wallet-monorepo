@@ -59,7 +59,12 @@ export const NavItem = ({ item, isSpacesVariant = false }: NavItemProps): ReactE
       data-testid={dataTestId}
       onClick={handleClick}
     >
-      <item.icon />
+      <Tooltip>
+        <TooltipTrigger>
+          <item.icon />
+        </TooltipTrigger>
+        <TooltipContent side="right">{item.label}</TooltipContent>
+      </Tooltip>
       <span>{item.label}</span>
     </SidebarMenuButton>
   )

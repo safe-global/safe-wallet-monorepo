@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import css from '../../styles.module.css'
 import type { SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
@@ -103,7 +104,12 @@ export const SafeSidebarVariant = ({
                 render={<Link href={settingsHref} />}
                 data-testid="sidebar-settings-item"
               >
-                <Settings className="text-muted-foreground" />
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Settings className="text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Settings</TooltipContent>
+                </Tooltip>
                 <span>Settings</span>
               </SidebarMenuButton>
               {isOutdated && <span className={css.outdatedDot} aria-hidden />}
