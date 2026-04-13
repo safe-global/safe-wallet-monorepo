@@ -1,5 +1,5 @@
 import { getAvailableChainsNames } from './chains'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('getAvailableChainsNames', () => {
   it('returns an empty string when the chains array is empty', () => {
