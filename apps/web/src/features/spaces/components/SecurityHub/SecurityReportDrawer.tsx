@@ -151,6 +151,7 @@ const SecurityReportDrawer = ({
                   loading={loading}
                   errors={errors}
                   isComplete={isComplete}
+                  safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
                 />
               )}
 
