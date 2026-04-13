@@ -141,6 +141,7 @@ describe('useAddSafeToSpace', () => {
 
     await act(async () => {
       resolveRequest({ data: {} })
+      await Promise.resolve()
     })
 
     expect(result.current.loadingSpaceId).toBe(null)
@@ -173,18 +174,8 @@ describe('useAddSafeToSpace', () => {
     mockAddSafeToSpace.mockRejectedValue(new Error('Network error'))
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
-    act(() => {
-      void result.current.addToSpace(3)
-    })
-
-    expect(result.current.loadingSpaceId).toBe(3)
-
     await act(async () => {
-      try {
-        await result.current.addToSpace(3)
-      } catch {
-        // Ignore expected error
-      }
+      await result.current.addToSpace(3)
     })
 
     expect(result.current.loadingSpaceId).toBe(null)
@@ -253,5 +244,52 @@ describe('useAddSafeToSpace', () => {
     })
 
     expect(onSpaceAdded).not.toHaveBeenCalled()
+  })
+
+  describe('error path testing', () => {
+    it('returns false when chainId is empty string', async () => {
+      mockUseCurrentChain.mockReturnValue({ chainId: '' })
+      const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+      let success: boolean | undefined
+      await act(async () => {
+        success = await result.current.addToSpace(1)
+      })
+
+      expect(mockAddSafeToSpace).not.toHaveBeenCalled()
+      expect(success).toBe(false)
+    })
+
+    it('returns false when safe.address.value is null', async () => {
+      mockUseSafeInfo.mockReturnValue({ safe: { address: { value: null } } })
+      const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+      let success: boolean | undefined
+      await act(async () => {
+        success = await result.current.addToSpace(1)
+      })
+
+      expect(mockAddSafeToSpace).not.toHaveBeenCalled()
+      expect(success).toBe(false)
+    })
+
+    it('handles unknown error type without message', async () => {
+      mockAddSafeToSpace.mockRejectedValue({ notAnError: true })
+      const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+      await act(async () => {
+        await result.current.addToSpace(5)
+      })
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'notifications/add',
+          payload: expect.objectContaining({
+            message: 'Failed to add Safe to workspace. ',
+            variant: 'error',
+          }),
+        }),
+      )
+    })
   })
 })

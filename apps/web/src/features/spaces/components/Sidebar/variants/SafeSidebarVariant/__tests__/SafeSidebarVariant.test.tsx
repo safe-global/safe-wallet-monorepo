@@ -12,13 +12,14 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const mockUseSafeInfo = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
+const mockUseSidebarHydrated = jest.fn()
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({
+  useRouter: jest.fn(() => ({
     push: jest.fn(),
     query: {},
     pathname: '',
-  }),
+  })),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => ({
@@ -28,6 +29,10 @@ jest.mock('@/hooks/useSafeInfo', () => ({
 
 jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
+}))
+
+jest.mock('../../../hooks/useSidebarHydrated', () => ({
+  useSidebarHydrated: () => mockUseSidebarHydrated(),
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({
@@ -81,7 +86,8 @@ jest.mock('@/components/ui/sidebar', () => ({
     onClick?: () => void
     'data-testid'?: string
   }) => (
-    <button
+    <div
+      role="button"
       data-active={isActive}
       data-tooltip={tooltip}
       data-testid={dataTestId}
@@ -89,8 +95,14 @@ jest.mock('@/components/ui/sidebar', () => ({
       onClick={onClick}
     >
       {children}
-    </button>
+    </div>
   ),
+}))
+
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
+  TooltipContent: () => null,
 }))
 
 jest.mock('@/components/ui/avatar', () => ({
@@ -144,49 +156,47 @@ const createAddHeader = (
   ...overrides,
 })
 
-describe('SafeSidebarVariant', () => {
-  const MockIcon = () => <div>Icon</div>
+const MockIcon = () => <div>Icon</div>
 
+const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): ResolvedSidebarItem => ({
+  icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+  label: 'Item',
+  href: '/item',
+  isActive: false,
+  disabled: false,
+  link: { pathname: '/item', query: {} },
+  ...overrides,
+})
+
+describe('SafeSidebarVariant', () => {
   const mockMainNavItems: ResolvedSidebarItem[] = [
-    {
-      icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
-      label: 'Overview',
-      href: '/home',
-      isActive: false,
-      disabled: false,
-      link: { pathname: '/home', query: { spaceId: null } },
-    },
-    {
-      icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+    createMockNavItem({ label: 'Overview', href: '/home', link: { pathname: '/home', query: { spaceId: null } } }),
+    createMockNavItem({
       label: 'Transactions',
       href: '/transactions',
-      isActive: false,
-      disabled: false,
       link: { pathname: '/transactions', query: { spaceId: null } },
       badge: 2,
-    },
+    }),
   ]
 
   const mockDefiGroup: ResolvedSidebarGroup = {
     label: 'Defi',
-    items: [
-      {
-        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
-        label: 'Swap',
-        href: '/swap',
-        isActive: false,
-        disabled: false,
-        link: { pathname: '/swap', query: { spaceId: null } },
-      },
-    ],
+    items: [createMockNavItem({ label: 'Swap', href: '/swap', link: { pathname: '/swap', query: {} } })],
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    const mockUseRouter = jest.requireMock('next/router').useRouter as jest.Mock
+    mockUseRouter.mockReturnValue({
+      push: jest.fn(),
+      query: {},
+      pathname: '',
+    })
     mockUseSafeInfo.mockReturnValue({
       safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.3.0' },
     })
     mockUseIsCounterfactualSafe.mockReturnValue(false)
+    mockUseSidebarHydrated.mockReturnValue(true)
   })
 
   it('renders all navigation sections', () => {
@@ -236,40 +246,23 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('renders all main navigation items', () => {
-    const MockIcon = () => <div>Icon</div>
     const allNavItems: ResolvedSidebarItem[] = [
-      {
-        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
-        label: 'Overview',
-        href: AppRoutes.home,
-        isActive: false,
-        disabled: false,
-        link: { pathname: AppRoutes.home, query: {} },
-      },
-      {
-        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+      createMockNavItem({ label: 'Overview', href: AppRoutes.home, link: { pathname: AppRoutes.home, query: {} } }),
+      createMockNavItem({
         label: 'Assets',
         href: AppRoutes.balances.index,
-        isActive: false,
-        disabled: false,
         link: { pathname: AppRoutes.balances.index, query: {} },
-      },
-      {
-        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+      }),
+      createMockNavItem({
         label: 'Transactions',
         href: AppRoutes.transactions.history,
-        isActive: false,
-        disabled: false,
         link: { pathname: AppRoutes.transactions.history, query: {} },
-      },
-      {
-        icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+      }),
+      createMockNavItem({
         label: 'Apps',
         href: AppRoutes.apps.index,
-        isActive: false,
-        disabled: false,
         link: { pathname: AppRoutes.apps.index, query: {} },
-      },
+      }),
     ]
 
     render(
@@ -433,6 +426,184 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+  })
+
+  describe('conditional rendering edge cases', () => {
+    it('renders correctly with empty main navigation items', () => {
+      render(<SafeSidebarVariant workspaceHeader={createBackHeader()} mainNavItems={[]} defiGroup={mockDefiGroup} />)
+
+      expect(screen.getByText('Defi')).toBeInTheDocument()
+      expect(screen.getByText('Settings')).toBeInTheDocument()
+    })
+
+    it('hides DeFi group when it has no items', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={{ label: 'Defi', items: [] }}
+        />,
+      )
+
+      expect(screen.queryByText('Defi')).not.toBeInTheDocument()
+    })
+
+    it('renders DeFi group with single item', () => {
+      const singleDefiGroup: ResolvedSidebarGroup = {
+        label: 'Defi',
+        items: [createMockNavItem({ label: 'Stake', href: '/stake', link: { pathname: '/stake', query: {} } })],
+      }
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={singleDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Defi')).toBeInTheDocument()
+      expect(screen.getByText('Stake')).toBeInTheDocument()
+    })
+
+    it('renders DeFi group with multiple items', () => {
+      const multiDefiGroup: ResolvedSidebarGroup = {
+        label: 'Defi',
+        items: [
+          createMockNavItem({ label: 'Swap', href: '/swap', link: { pathname: '/swap', query: {} } }),
+          createMockNavItem({ label: 'Stake', href: '/stake', link: { pathname: '/stake', query: {} } }),
+          createMockNavItem({ label: 'Earn', href: '/earn', link: { pathname: '/earn', query: {} } }),
+        ],
+      }
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={multiDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Defi')).toBeInTheDocument()
+      expect(screen.getByText('Swap')).toBeInTheDocument()
+      expect(screen.getByText('Stake')).toBeInTheDocument()
+      expect(screen.getByText('Earn')).toBeInTheDocument()
+    })
+
+    it('renders without workspace header when not hydrated', () => {
+      mockUseSidebarHydrated.mockReturnValue(false)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Overview')).toBeInTheDocument()
+      expect(screen.getByText('Settings')).toBeInTheDocument()
+    })
+
+    it('marks Settings as active when on settings page', () => {
+      const mockRouter = jest.requireMock('next/router').useRouter as jest.Mock
+      mockRouter.mockReturnValue({
+        push: jest.fn(),
+        query: { safe: '0x123' },
+        pathname: AppRoutes.settings.setup,
+      })
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const settingsButton = screen.getByTestId('sidebar-settings-item')
+      expect(settingsButton).toHaveAttribute('data-active', 'true')
+    })
+
+    it('shows outdated dot for critical OUTDATED version state', () => {
+      mockUseSafeInfo.mockReturnValue({
+        safe: { implementationVersionState: ImplementationVersionState.OUTDATED, version: '1.0.0' },
+      })
+
+      const { container } = render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const outdatedDot = container.querySelector('span[aria-hidden]')
+      expect(outdatedDot).toBeInTheDocument()
+    })
+
+    it('does not show outdated dot when version is UNKNOWN', () => {
+      mockUseSafeInfo.mockReturnValue({
+        safe: { implementationVersionState: 'UNKNOWN' as unknown as ImplementationVersionState, version: null },
+      })
+
+      const { container } = render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()
+    })
+
+    it('renders sidebar with no props variations when all groups are empty', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: '' })}
+          mainNavItems={[]}
+          defiGroup={{ label: 'Defi', items: [] }}
+        />,
+      )
+
+      expect(screen.getByText('Settings')).toBeInTheDocument()
+      expect(screen.queryByText('Defi')).not.toBeInTheDocument()
+    })
+
+    it('handles backToSpace variant when isHydrated is true', () => {
+      const mockRouter = jest.requireMock('next/router').useRouter as jest.Mock
+      mockRouter.mockReturnValue({
+        push: jest.fn(),
+        query: { safe: '0xDeadBeef' },
+        pathname: '/home',
+      })
+
+      mockUseSidebarHydrated.mockReturnValue(true)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Main Workspace', spaceId: '1' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Main Workspace')).toBeInTheDocument()
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    })
+
+    it('renders action button in all variants', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
     })
   })
 })
