@@ -101,7 +101,7 @@ jobs:
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         id: create_release
         with:
           draft: true
