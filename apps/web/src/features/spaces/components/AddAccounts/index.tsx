@@ -232,7 +232,8 @@ const AddAccounts = () => {
         })
 
         if (result.error) {
-          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.')
+          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.'
+          setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
           return
         }
       }
