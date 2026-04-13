@@ -117,6 +117,8 @@ describe('Topbar', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
+      GlobalSearchModal: () => null,
+      GlobalSearchInput: () => null,
       WalletConnectWidget: () => null,
     })
   })
@@ -181,6 +183,8 @@ describe('Topbar', () => {
             <button onClick={onWalletDisconnect}>trigger-disconnect</button>
           </>
         ),
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => null,
         WalletConnectWidget: () => null,
       })
     })

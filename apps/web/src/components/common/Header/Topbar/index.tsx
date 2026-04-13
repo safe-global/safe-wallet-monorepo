@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
+import { GlobalSearchFeature } from '@/features/global-search'
 import { WalletConnectFeature } from '@/features/walletconnect'
 import { useDraftBatch } from '@/features/batching'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -31,6 +33,7 @@ interface TopbarProps {
 }
 
 const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
+  const dispatch = useAppDispatch()
   const isMobile = useIsMobile()
   const {
     wallet,
@@ -40,6 +43,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
+  const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
@@ -85,13 +89,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
         ) : null}
 
         {/* Left content */}
-        <div className="flex-1 min-w-0 max-md:order-last max-md:basis-full max-md:mt-2">
-          {isSpaceRoute ? (
-            // TODO: Global search
-            <div />
-          ) : (
-            <SpaceSafeBar />
-          )}
+        <div className="flex-1 min-w-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
+          {isSpaceRoute ? <GlobalSearchInput className="max-w-sm" /> : <SpaceSafeBar />}
         </div>
 
         {/* Right content: navigation buttons */}
@@ -111,6 +110,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             walletOpen={walletOpen}
             messages={unreadCount}
             showSearch={!isSpaceRoute}
+            onSearchClick={() => dispatch(openGlobalSearch())}
             onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
             onWalletClick={handleWalletClick}
             walletConnectSlot={<WalletConnectWidget />}
@@ -120,6 +120,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           />
         </div>
       </header>
+
+      <GlobalSearchModal />
 
       <NotificationsPopover ref={notificationsRef} />
 

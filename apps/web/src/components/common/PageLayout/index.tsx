@@ -18,6 +18,7 @@ import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -49,6 +50,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
+  useKeyboardObserver()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -60,7 +62,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   return (
     <>
       {!hideHeader && (
-        <div className={css.topbar}>
+        <div
+          className={classnames(css.topbar, {
+            [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+          })}
+        >
           <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </div>
       )}

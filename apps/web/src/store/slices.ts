@@ -31,3 +31,10 @@ export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
+export {
+  globalSearchSlice,
+  openGlobalSearch,
+  closeGlobalSearch,
+  toggleGlobalSearch,
+  selectGlobalSearchOpen,
+} from '@/features/global-search/store'
