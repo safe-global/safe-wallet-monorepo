@@ -231,7 +231,7 @@ export type MembersSelfRemoveV1ApiResponse = unknown
 export type MembersSelfRemoveV1ApiArg = {
   spaceId: number
 }
-export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ Member
+export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
 export type MembersGetMembershipV1ApiArg = {
   /** Space ID to fetch the caller's membership for */
   spaceId: number
@@ -286,7 +286,7 @@ export type CreateSpaceDto = {
 export type UserDto = {
   id: number
 }
-export type MemberDto = {
+export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
   invitedBy: string
@@ -296,7 +296,7 @@ export type MemberDto = {
 export type GetSpaceResponse = {
   id: number
   name: string
-  members: MemberDto[]
+  members: SpaceMemberDto[]
   /** Total count of Safes in the space */
   safeCount: number
 }
@@ -345,7 +345,7 @@ export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
 }
-export type Member = {
+export type MemberDto = {
   id: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
@@ -357,7 +357,7 @@ export type Member = {
   user: MemberUser
 }
 export type MembersDto = {
-  members: Member[]
+  members: MemberDto[]
 }
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
