@@ -12,7 +12,6 @@ import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
-import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined'
 import { SvgIcon } from '@mui/material'
 import { DEVELOPER_PORTAL_URL } from '@/config/constants'
 
@@ -44,7 +43,6 @@ export const navItems: NavItem[] = [
     href: AppRoutes.earn,
   },
   { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
-  { label: 'Security', icon: <ShieldOutlinedIcon />, href: AppRoutes.security },
   {
     label: 'Settings',
     icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
