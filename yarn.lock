@@ -12481,6 +12481,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reown/appkit-common-react-native@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@reown/appkit-common-react-native@npm:2.0.3"
+  dependencies:
+    bignumber.js: "npm:9.1.2"
+    dayjs: "npm:1.11.10"
+  peerDependencies:
+    react: ">=18"
+    react-native: ">=0.72"
+  checksum: 10/0bc780bea4ab8ef4246b07b16b824ec86fdb027b18462f5c35e7f16b3844c60ee01947bfeba5940abf4f78caa66f929524c95bc93c6c174284af4b9f3365af5d
+  languageName: node
+  linkType: hard
+
 "@reown/appkit-core-react-native@npm:2.0.2":
   version: 2.0.2
   resolution: "@reown/appkit-core-react-native@npm:2.0.2"
@@ -12494,6 +12507,22 @@ __metadata:
     react: ">=18"
     react-native: ">=0.72"
   checksum: 10/d08b860fc737e8aae2407bc5b1ab26940a32c697c4e98a6334d9e6bfbf854b0dfb72ac579571b4e1ad529125528c981cddeace69afd8e2bf846bee1f13a245d6
+  languageName: node
+  linkType: hard
+
+"@reown/appkit-core-react-native@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@reown/appkit-core-react-native@npm:2.0.3"
+  dependencies:
+    "@reown/appkit-common-react-native": "npm:2.0.3"
+    countries-and-timezones: "npm:3.7.2"
+    derive-valtio: "npm:0.2.0"
+    valtio: "npm:2.1.8"
+  peerDependencies:
+    "@walletconnect/react-native-compat": ">=2.16.1"
+    react: ">=18"
+    react-native: ">=0.72"
+  checksum: 10/c01b0a1587470cc6db8ecddd982f5f6727b02635c08ea70019786a7096baf3c7808cd4b916a2ccb42571f24e6c350cd822f58fa8c69209b0b9e24383f44fb70f
   languageName: node
   linkType: hard
 
@@ -12513,7 +12542,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-react-native@npm:2.0.2, @reown/appkit-react-native@npm:^2.0.2":
+"@reown/appkit-react-native@npm:2.0.2":
   version: 2.0.2
   resolution: "@reown/appkit-react-native@npm:2.0.2"
   dependencies:
@@ -12533,6 +12562,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@reown/appkit-react-native@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@reown/appkit-react-native@npm:2.0.3"
+  dependencies:
+    "@reown/appkit-common-react-native": "npm:2.0.3"
+    "@reown/appkit-core-react-native": "npm:2.0.3"
+    "@reown/appkit-ui-react-native": "npm:2.0.3"
+    "@walletconnect/universal-provider": "npm:2.21.10"
+    valtio: "npm:2.1.8"
+  peerDependencies:
+    "@walletconnect/react-native-compat": ">=2.16.1"
+    "@walletconnect/utils": ">=2.16.1"
+    react: ">=18"
+    react-native: ">=0.72"
+    react-native-safe-area-context: ">=4.4.0"
+    react-native-svg: ">=13.10"
+  checksum: 10/2c86ccbecb6924fa7e95633936b5fd9e597017e4ab243fc1dfc126e4d3ed6c27ed5c1c568f57b85650fcb0e11485e79da39a683aebd9ebb1305ffac2b7cfa759
+  languageName: node
+  linkType: hard
+
 "@reown/appkit-ui-react-native@npm:2.0.2":
   version: 2.0.2
   resolution: "@reown/appkit-ui-react-native@npm:2.0.2"
@@ -12545,6 +12594,21 @@ __metadata:
     react-native: ">=0.72"
     react-native-svg: ">=13.10"
   checksum: 10/44d66ee413a194967d5f04d2945cc7b6a961a547eb395c87aa42685dcb83b068345d2d1045d0d014b8547839dcf0b7829466c6844f33654e4b503fe4d1299551
+  languageName: node
+  linkType: hard
+
+"@reown/appkit-ui-react-native@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@reown/appkit-ui-react-native@npm:2.0.3"
+  dependencies:
+    "@reown/appkit-common-react-native": "npm:2.0.3"
+    polished: "npm:4.3.1"
+    qrcode: "npm:1.5.3"
+  peerDependencies:
+    react: ">=18"
+    react-native: ">=0.72"
+    react-native-svg: ">=13.10"
+  checksum: 10/a26135018206762ffdc940e7387fa5a6810823110a72a777f60b08a2b300234a000e7816173213eed408453ffb026b664a695dd5c0215e06b6ca892efa38e795
   languageName: node
   linkType: hard
 
@@ -13104,7 +13168,7 @@ __metadata:
     "@react-navigation/native-stack": "npm:^7.14.4"
     "@reduxjs/toolkit": "npm:^2.11.0"
     "@reown/appkit-ethers-react-native": "npm:^2.0.2"
-    "@reown/appkit-react-native": "npm:^2.0.2"
+    "@reown/appkit-react-native": "npm:^2.0.3"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
     "@safe-global/protocol-kit": "npm:^5.2.26"
     "@safe-global/store": "workspace:^"
