@@ -8,9 +8,14 @@ import type { SidebarGroupConfig, SidebarItemConfig } from '../../../types'
 const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()
 
+const mockRouterReplace = jest.fn()
+const mockRouterPathname = { current: AppRoutes.home }
+
 jest.mock('next/router', () => ({
   useRouter: () => ({
     query: { spaceId: '123', safe: 'eth:0x1' },
+    pathname: mockRouterPathname.current,
+    replace: mockRouterReplace,
   }),
 }))
 
@@ -92,6 +97,7 @@ describe('SafeSidebarContent', () => {
     mockIsRouteEnabled.mockReturnValue(true)
     mockUseQueuedTxsLength.mockReturnValue(2)
     mockUseSafeInfo.mockReturnValue({ safe: { deployed: true } })
+    mockRouterPathname.current = AppRoutes.home
     mockUseResolvedSidebarNav.mockReturnValue({
       mainNavItems: [],
       setupGroup: { label: 'Defi', items: [] },
@@ -238,28 +244,14 @@ describe('SafeSidebarContent', () => {
   })
 
   describe('getLink', () => {
-    it('redirects Transactions to queue route when queue is non-empty', () => {
+    it('passes href through unchanged for all items regardless of queue size', () => {
       mockUseQueuedTxsLength.mockReturnValue(3)
       render(<SafeSidebarContent {...defaultProps} />)
 
       const [, , { getLink }] = getCallArgs()
-      const result = getLink({ href: AppRoutes.transactions.history } as SidebarItemConfig)
-      expect(result.pathname).toBe(AppRoutes.transactions.queue)
-    })
-
-    it('keeps Transactions on history route when queue is empty', () => {
-      mockUseQueuedTxsLength.mockReturnValue(0)
-      render(<SafeSidebarContent {...defaultProps} />)
-
-      const [, , { getLink }] = getCallArgs()
-      const result = getLink({ href: AppRoutes.transactions.history } as SidebarItemConfig)
-      expect(result.pathname).toBe(AppRoutes.transactions.history)
-    })
-
-    it('passes href through unchanged for non-Transactions items', () => {
-      render(<SafeSidebarContent {...defaultProps} />)
-
-      const [, , { getLink }] = getCallArgs()
+      expect(getLink({ href: AppRoutes.transactions.history } as SidebarItemConfig).pathname).toBe(
+        AppRoutes.transactions.history,
+      )
       expect(getLink({ href: AppRoutes.home } as SidebarItemConfig).pathname).toBe(AppRoutes.home)
       expect(getLink({ href: AppRoutes.balances.index } as SidebarItemConfig).pathname).toBe(AppRoutes.balances.index)
       expect(getLink({ href: AppRoutes.apps.index } as SidebarItemConfig).pathname).toBe(AppRoutes.apps.index)
@@ -267,6 +259,35 @@ describe('SafeSidebarContent', () => {
       expect(getLink({ href: AppRoutes.bridge } as SidebarItemConfig).pathname).toBe(AppRoutes.bridge)
       expect(getLink({ href: AppRoutes.earn } as SidebarItemConfig).pathname).toBe(AppRoutes.earn)
       expect(getLink({ href: AppRoutes.stake } as SidebarItemConfig).pathname).toBe(AppRoutes.stake)
+    })
+  })
+
+  describe('queue redirect', () => {
+    it('redirects to queue when on history page and queue is non-empty', () => {
+      mockRouterPathname.current = AppRoutes.transactions.history
+      mockUseQueuedTxsLength.mockReturnValue(3)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      expect(mockRouterReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.transactions.queue,
+        query: expect.anything(),
+      })
+    })
+
+    it('does not redirect when on history page and queue is empty', () => {
+      mockRouterPathname.current = AppRoutes.transactions.history
+      mockUseQueuedTxsLength.mockReturnValue(0)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      expect(mockRouterReplace).not.toHaveBeenCalled()
+    })
+
+    it('does not redirect when on a non-history page even if queue is non-empty', () => {
+      mockRouterPathname.current = AppRoutes.home
+      mockUseQueuedTxsLength.mockReturnValue(5)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      expect(mockRouterReplace).not.toHaveBeenCalled()
     })
   })
 })

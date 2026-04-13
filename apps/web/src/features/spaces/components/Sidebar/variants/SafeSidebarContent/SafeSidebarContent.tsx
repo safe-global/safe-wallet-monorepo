@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
@@ -39,6 +39,13 @@ export const SafeSidebarContent = ({
   const isBlockedCountry = useContext(GeoblockingContext)
   const { safe } = useSafeInfo()
 
+  // prevents a re-render of nav items when tx data arrives later:
+  useEffect(() => {
+    if (Number(queueSize) > 0 && router.pathname === AppRoutes.transactions.history) {
+      void router.replace({ pathname: AppRoutes.transactions.queue, query: router.query })
+    }
+  }, [queueSize, router.pathname])
+
   const getLink = useCallback(
     (item: SidebarItemConfig) => {
       const spaceId = getQuerySpaceId(router.query)
@@ -48,13 +55,9 @@ export const SafeSidebarContent = ({
         ...(spaceId && { spaceId }),
       }
 
-      // Route Transactions to Queue if there are queued txs
-      const href =
-        item.href === AppRoutes.transactions.history && Number(queueSize) > 0 ? AppRoutes.transactions.queue : item.href
-
-      return { pathname: href, query }
+      return { pathname: item.href, query }
     },
-    [router.query, queueSize],
+    [router.query],
   )
 
   const isItemDisabled = useCallback(
