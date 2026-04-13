@@ -61,7 +61,9 @@ export const NavItem = ({ item, isSpacesVariant = false }: NavItemProps): ReactE
     >
       <Tooltip>
         <TooltipTrigger>
-          <item.icon />
+          <div className={item.isActive ? css.activeIcon : undefined}>
+            <item.icon />
+          </div>
         </TooltipTrigger>
         <TooltipContent side="right">{item.label}</TooltipContent>
       </Tooltip>

@@ -11,6 +11,11 @@
   stroke-width: 2;
 }
 
+.activeIcon svg {
+  stroke: #12ff80;
+  color: #12ff80;
+}
+
 .spaceSelector {
   display: flex;
   align-items: center;
