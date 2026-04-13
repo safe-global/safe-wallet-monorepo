@@ -23,7 +23,6 @@ import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
-import { Card } from '@/components/ui/card'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const AddActionsAction = () => {

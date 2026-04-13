@@ -1,4 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import type * as SpacesModule from '@/features/spaces'
 import SetupWidget from '../index'
 
 jest.mock('@/features/spaces', () => ({
@@ -18,18 +19,29 @@ jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(() => false),
 }))
 
-jest.mock('../../SpaceAddressBook/Import/ImportAddressBookDialog', () => () => (
-  <div data-testid="import-address-book-dialog" />
-))
+jest.mock(
+  '../../SpaceAddressBook/Import/ImportAddressBookDialog',
+  () =>
+    function MockImportAddressBookDialog() {
+      return <div data-testid="import-address-book-dialog" />
+    },
+)
 
 jest.mock(
   '../../AddAccounts',
   () =>
-    ({ externalOpen }: { externalOpen?: boolean }) =>
-      externalOpen ? <div data-testid="add-accounts-dialog" /> : null,
+    function MockAddAccounts({ externalOpen }: { externalOpen?: boolean }) {
+      return externalOpen ? <div data-testid="add-accounts-dialog" /> : null
+    },
 )
 
-jest.mock('../../SpaceInfoModal', () => () => <div data-testid="space-info-modal" />)
+jest.mock(
+  '../../SpaceInfoModal',
+  () =>
+    function MockSpaceInfoModal() {
+      return <div data-testid="space-info-modal" />
+    },
+)
 
 describe('SetupWidget', () => {
   it('renders the widget title', () => {
@@ -82,7 +94,7 @@ describe('SetupWidget', () => {
 
   it('sorts completed steps before incomplete ones', () => {
     const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof import('@/features/spaces')>('@/features/spaces')
+      jest.requireMock<typeof SpacesModule>('@/features/spaces')
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
@@ -116,8 +128,7 @@ describe('SetupWidget', () => {
   })
 
   it('disables click on completed steps', () => {
-    const { useSpaceSafes, useGetSpaceAddressBook } =
-      jest.requireMock<typeof import('@/features/spaces')>('@/features/spaces')
+    const { useSpaceSafes, useGetSpaceAddressBook } = jest.requireMock<typeof SpacesModule>('@/features/spaces')
 
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
