@@ -26,12 +26,12 @@
     },
     "/v1/auth/me": {
       "get": {
-        "description": "Returns the authenticated user session if a valid session cookie is present, 403 otherwise. The response includes the user ID, the authentication method used, and (for SIWE users) the wallet signer address.",
+        "description": "Returns the authenticated user ID if a valid session cookie is present, 403 otherwise.",
         "operationId": "authGetMeV1",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Authenticated user session",
+            "description": "Authenticated user ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -5611,22 +5611,10 @@
         "properties": {
           "id": {
             "type": "string"
-          },
-          "authMethod": {
-            "type": "string",
-            "enum": [
-              "siwe",
-              "oidc"
-            ]
-          },
-          "signerAddress": {
-            "type": "string",
-            "description": "Wallet signer address. Present only for SIWE-authenticated users."
           }
         },
         "required": [
-          "id",
-          "authMethod"
+          "id"
         ]
       },
       "AuthNonce": {

@@ -38,7 +38,6 @@ import { OperationType } from '@safe-global/types-kit'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
-import { isEmptyHexData } from '@/utils/hex'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
 import { getOriginPath } from './url'
@@ -533,10 +532,6 @@ export const decodeSafeTxToBaseTransactions = (safeTx: SafeTransaction): BaseTra
     })
   }
   return txs
-}
-
-export const isRejectionTx = (tx?: SafeTransaction) => {
-  return !!tx && !!tx.data.data && isEmptyHexData(tx.data.data) && tx.data.value === '0'
 }
 
 export const isTrustedTx = (tx: Transaction) => {

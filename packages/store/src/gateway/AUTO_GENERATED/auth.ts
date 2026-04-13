@@ -52,7 +52,7 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type AuthGetMeV1ApiResponse = /** status 200 Authenticated user session */ UserSession
+export type AuthGetMeV1ApiResponse = /** status 200 Authenticated user ID */ UserSession
 export type AuthGetMeV1ApiArg = void
 export type AuthGetNonceV1ApiResponse = /** status 200 Unique nonce generated for authentication */ AuthNonce
 export type AuthGetNonceV1ApiArg = void
@@ -87,9 +87,6 @@ export type OidcAuthCallbackV1ApiArg = {
 }
 export type UserSession = {
   id: string
-  authMethod: 'siwe' | 'oidc'
-  /** Wallet signer address. Present only for SIWE-authenticated users. */
-  signerAddress?: string
 }
 export type AuthNonce = {
   nonce: string

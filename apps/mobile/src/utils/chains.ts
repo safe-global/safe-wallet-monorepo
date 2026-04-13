@@ -1,4 +1,4 @@
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export const getAvailableChainsNames = (chains: Chain[]) => {
   if (chains.length === 0) {
