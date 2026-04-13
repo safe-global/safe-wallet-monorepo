@@ -4,6 +4,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { SpaceItem } from '../types'
 
 interface UseAddSafeToSpaceOptions {
@@ -23,6 +24,15 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
   const [addSafeToSpace] = useSpaceSafesCreateV1Mutation()
   const [loadingSpaceId, setLoadingSpaceId] = useState<number | null>(null)
 
+  const showError = (detail: string) =>
+    dispatch(
+      showNotification({
+        message: `Failed to add Safe to workspace. ${detail}`,
+        variant: 'error',
+        groupKey: 'add-safe-to-workspace-error',
+      }),
+    )
+
   const addToSpace = async (spaceId: number): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     setLoadingSpaceId(spaceId)
@@ -32,13 +42,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
         createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
       })
       if (result.error) {
-        dispatch(
-          showNotification({
-            message: 'Failed to add Safe to workspace.',
-            variant: 'error',
-            groupKey: 'add-safe-to-workspace-error',
-          }),
-        )
+        showError(getRtkQueryErrorMessage(result.error))
         return false
       }
       dispatch(
@@ -51,15 +55,8 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       const space = spaces.find((s) => s.id === spaceId)
       if (space) onSpaceAdded?.(space)
       return true
-    } catch (error) {
-      console.error('Failed to add Safe to workspace.', error)
-      dispatch(
-        showNotification({
-          message: 'Failed to add Safe to workspace.',
-          variant: 'error',
-          groupKey: 'add-safe-to-workspace-error',
-        }),
-      )
+    } catch (error: unknown) {
+      showError(error instanceof Error ? error.message : '')
       return false
     } finally {
       setLoadingSpaceId(null)

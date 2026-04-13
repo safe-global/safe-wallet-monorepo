@@ -89,7 +89,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace.',
+          message: 'Failed to add Safe to workspace. API error',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -160,7 +160,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace.',
+          message: 'Failed to add Safe to workspace. Network failure',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -188,5 +188,70 @@ describe('useAddSafeToSpace', () => {
     })
 
     expect(result.current.loadingSpaceId).toBe(null)
+  })
+
+  it('extracts the message from a FetchBaseQueryError data payload', async () => {
+    mockAddSafeToSpace.mockResolvedValue({
+      error: { status: 409, data: { message: 'Safe already exists in this workspace' } },
+    })
+    const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+    await act(async () => {
+      await result.current.addToSpace(5)
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          message: 'Failed to add Safe to workspace. Safe already exists in this workspace',
+          variant: 'error',
+        }),
+      }),
+    )
+  })
+
+  it('falls back to status code when FetchBaseQueryError has no data message', async () => {
+    mockAddSafeToSpace.mockResolvedValue({
+      error: { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' },
+    })
+    const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
+
+    await act(async () => {
+      await result.current.addToSpace(5)
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          message: 'Failed to add Safe to workspace. TypeError: Failed to fetch',
+          variant: 'error',
+        }),
+      }),
+    )
+  })
+
+  it('does not call onSpaceAdded when the spaceId is not in the spaces list', async () => {
+    const onSpaceAdded = jest.fn()
+    const spaces = [{ id: 10, name: 'Other', safeCount: 0 }]
+    const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
+
+    await act(async () => {
+      await result.current.addToSpace(99)
+    })
+
+    expect(onSpaceAdded).not.toHaveBeenCalled()
+  })
+
+  it('does not call onSpaceAdded when the API returns an error', async () => {
+    mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })
+    const onSpaceAdded = jest.fn()
+    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
+    const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
+
+    await act(async () => {
+      await result.current.addToSpace(5)
+    })
+
+    expect(onSpaceAdded).not.toHaveBeenCalled()
   })
 })
