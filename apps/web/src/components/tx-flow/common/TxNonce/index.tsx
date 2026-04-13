@@ -18,6 +18,7 @@ import { createFilterOptions } from '@mui/material/Autocomplete'
 import { Controller, useForm } from 'react-hook-form'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
 import NumberField from '@/components/common/NumberField'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
@@ -26,7 +27,6 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { getLatestTransactions } from '@/utils/tx-list'
 import { getTransactionType } from '@/hooks/useTransactionType'
 import usePreviousNonces from '@/hooks/usePreviousNonces'
-import { isRejectionTx } from '@/utils/transactions'
 
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -107,13 +107,14 @@ const MAX_NONCE_DIFFERENCE = 100
 
 const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNonce: string }) => {
   const { safeTx, setNonce } = useContext(SafeTxContext)
+  const { isRejection } = useContext(TxFlowContext)
   const previousNonces = usePreviousNonces().map((nonce) => nonce.toString())
   const { safe } = useSafeInfo()
   const [warning, setWarning] = useState<string>('')
 
   const showRecommendedNonceButton = recommendedNonce !== nonce
   const isEditable = !safeTx || safeTx?.signatures.size === 0
-  const readOnly = !isEditable || isRejectionTx(safeTx)
+  const readOnly = !isEditable || isRejection
 
   const formMethods = useForm({
     defaultValues: {

@@ -250,6 +250,7 @@ export function NestedSafesPopover({
   hasCompletedCuration,
   isLoading = false,
   hideCreationButton = false,
+  centered = false,
 }: {
   anchorEl: HTMLElement | null
   onClose: () => void
@@ -259,6 +260,7 @@ export function NestedSafesPopover({
   hasCompletedCuration: boolean
   isLoading?: boolean
   hideCreationButton?: boolean
+  centered?: boolean
 }): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
   const [userRequestedManage, setUserRequestedManage] = useState(false)
@@ -307,10 +309,14 @@ export function NestedSafesPopover({
   return (
     <Popover
       open={!!anchorEl}
-      anchorEl={anchorEl}
+      anchorEl={centered ? undefined : anchorEl}
+      anchorReference={centered ? 'anchorPosition' : 'anchorEl'}
+      anchorPosition={centered ? { top: window.innerHeight / 2, left: window.innerWidth / 2 } : undefined}
       onClose={canClose ? onClose : undefined}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      transformOrigin={
+        centered ? { vertical: 'center', horizontal: 'center' } : { vertical: 'top', horizontal: 'left' }
+      }
       slotProps={{
         paper: {
           sx: {
