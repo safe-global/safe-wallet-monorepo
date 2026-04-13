@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -20,6 +20,7 @@ import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDrop
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useSafeBarSafes } from './useSafeBarSafes'
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -102,7 +103,7 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { allSafes } = useSpaceSafes()
+  const { dropdownSafes: allSafes } = useSafeBarSafes()
   const { safe, safeAddress } = useSafeInfo()
   const currentChainId = useChainId()
   const { configs: chainConfigs } = useChains()

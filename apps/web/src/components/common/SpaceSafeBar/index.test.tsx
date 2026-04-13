@@ -13,10 +13,6 @@ const mockItems = [
   },
 ]
 
-jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: jest.fn(),
-}))
-
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
   useSpaceSafeSelectorItems: jest.fn(),
 }))
@@ -64,11 +60,9 @@ jest.mock('./SpaceBackLink', () => {
   return { __esModule: true, default: MockSpaceBackLink }
 })
 
-import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
-const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
 
@@ -88,37 +82,28 @@ describe('SpaceSafeBar', () => {
     })
   })
 
-  it('renders nothing when the user has no space (useIsQualifiedSafe returns false)', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-
-    const { container } = render(<SpaceSafeBar />)
-    expect(container.innerHTML).toBe('')
-  })
-
-  it('renders SafeSelectorDropdown when useIsQualifiedSafe returns true', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-
+  it('always renders SafeSelectorDropdown', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
 
-  it('renders SpaceChainSelector when useIsQualifiedSafe returns true', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-
+  it('always renders SpaceChainSelector', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('space-chain-selector')).toBeInTheDocument()
   })
 
-  it('passes items from the hook to SafeSelectorDropdown', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
+  it('always renders SpaceNestedSafesButton', () => {
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('space-nested-safes-button')).toBeInTheDocument()
+  })
 
+  it('passes items from the hook to SafeSelectorDropdown', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     const dropdown = getByTestId('safe-selector-dropdown')
     expect(JSON.parse(dropdown.getAttribute('data-items')!)).toEqual(mockItems)
   })
 
   it('passes isError=true to SafeSelectorDropdown when the overview query fails', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       items: [],
       selectedItemId: '',
@@ -132,8 +117,6 @@ describe('SpaceSafeBar', () => {
   })
 
   it('passes selectedItemId, onItemSelect, and onRetry to SafeSelectorDropdown', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-
     const { getByTestId } = render(<SpaceSafeBar />)
     const dropdown = getByTestId('safe-selector-dropdown')
 
@@ -142,22 +125,7 @@ describe('SpaceSafeBar', () => {
     expect(dropdown.getAttribute('data-has-on-retry')).toBe('true')
   })
 
-  it('renders nothing when there are no safes but isQualifiedSafe is false', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseSpaceSafeSelectorItems.mockReturnValue({
-      items: [],
-      selectedItemId: '',
-      handleItemSelect: jest.fn(),
-      isError: false,
-      refetch: jest.fn(),
-    })
-
-    const { container } = render(<SpaceSafeBar />)
-    expect(container.innerHTML).toBe('')
-  })
-
   it('renders SpaceBackLink when space data is available', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({
       space: { id: 42, name: 'Acme Corp' },
       handleBackToSpace: jest.fn(),
@@ -171,7 +139,6 @@ describe('SpaceSafeBar', () => {
   })
 
   it('does not render SpaceBackLink when space data is undefined', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({
       space: undefined,
       handleBackToSpace: jest.fn(),
@@ -181,15 +148,7 @@ describe('SpaceSafeBar', () => {
     expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
   })
 
-  it('renders SpaceNestedSafesButton when useIsQualifiedSafe returns true', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-
-    const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('space-nested-safes-button')).toBeInTheDocument()
-  })
-
   it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({
       space: { id: 1, name: 'Test Space' },
       handleBackToSpace: jest.fn(),

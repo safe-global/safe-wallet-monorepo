@@ -6,8 +6,11 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 // ── mocks ──────────────────────────────────────────────────────────────
 
 jest.mock('@/features/spaces', () => ({
-  useSpaceSafes: jest.fn(),
   useCurrentSpaceId: jest.fn(),
+}))
+
+jest.mock('./useSafeBarSafes', () => ({
+  useSafeBarSafes: jest.fn(),
 }))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -55,7 +58,8 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
+import { useSafeBarSafes } from './useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -122,8 +126,8 @@ function setupDefaults(
     overviewsError?: boolean
   } = {},
 ) {
-  ;(useSpaceSafes as jest.Mock).mockReturnValue({
-    allSafes: overrides.allSafes ?? [singleChainSafe],
+  ;(useSafeBarSafes as jest.Mock).mockReturnValue({
+    dropdownSafes: overrides.allSafes ?? [singleChainSafe],
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
@@ -505,7 +509,7 @@ describe('useSpaceSafeSelectorItems', () => {
       safe: { threshold: 3, owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }] },
       safeAddress: '0xabcdef', // lowercase vs mixed-case in item
     })
-    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [mixedCaseSafe] })
+    ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked
