@@ -1,10 +1,14 @@
 import React from 'react'
-import { renderHook as nativeRenderHook } from '@testing-library/react-native'
+import { renderHook as nativeRenderHook, act } from '@testing-library/react-native'
 import { renderHook, createTestStore } from '@/src/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { Provider } from 'react-redux'
-import { useWalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
+import {
+  useWalletConnectContext,
+  useOptionalWalletConnectContext,
+  WalletConnectProvider,
+} from '../WalletConnectContext'
 
 const mockAddress = getAddress(faker.finance.ethereumAddress())
 
@@ -44,28 +48,39 @@ jest.mock('../../hooks/useWalletConnectSigning', () => ({
   }),
 }))
 
+const mockAppKit = { open: mockOpen, disconnect: mockDisconnect }
+const mockAccount = { address: mockAddress, chainId: 1 }
+const mockWalletInfoResult = { walletInfo: { name: 'MetaMask' } }
+
 jest.mock('@reown/appkit-react-native', () => ({
-  AppKitProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   AppKit: () => null,
-  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
-  useAccount: () => ({ address: mockAddress, chainId: 1 }),
-  useWalletInfo: () => ({ walletInfo: { name: 'MetaMask' } }),
+  AppKitProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useAppKit: () => mockAppKit,
+  useAccount: () => mockAccount,
+  useWalletInfo: () => mockWalletInfoResult,
 }))
 
-jest.mock('@/src/config/appKit', () => ({
-  appKit: {},
-}))
+const mockInstance = {} as NonNullable<React.ComponentProps<typeof WalletConnectProvider>['instance']>
 
-const renderWithProvider = (storeOverrides?: Parameters<typeof createTestStore>[0]) => {
+/**
+ * Renders the hook inside WalletConnectProvider and flushes the bridge
+ * effect so the context value is available on `result.current`.
+ */
+async function renderWithProvider(storeOverrides?: Parameters<typeof createTestStore>[0]) {
   const store = createTestStore(storeOverrides)
 
-  return nativeRenderHook(() => useWalletConnectContext(), {
+  const rendered = nativeRenderHook(() => useOptionalWalletConnectContext(), {
     wrapper: ({ children }: { children: React.ReactNode }) => (
       <Provider store={store}>
-        <WalletConnectProvider>{children}</WalletConnectProvider>
+        <WalletConnectProvider instance={mockInstance}>{children}</WalletConnectProvider>
       </Provider>
     ),
   })
+
+  // Bridge propagates context via useEffect — flush it
+  await act(() => undefined)
+
+  return rendered
 }
 
 describe('WalletConnectContext', () => {
@@ -80,74 +95,91 @@ describe('WalletConnectContext', () => {
       jest.restoreAllMocks()
     })
 
-    it('provides all hook values through context', () => {
-      const { result } = renderWithProvider()
+    it('provides all hook values through context', async () => {
+      const { result } = await renderWithProvider()
+      const ctx = result.current
 
-      expect(result.current.initiateConnection).toBe(mockInitiateConnection)
-      expect(result.current.reconnect).toBe(mockReconnect)
-      expect(result.current.switchNetwork).toBe(mockSwitchNetwork)
-      expect(result.current.switchNetworkIfNeeded).toBe(mockSwitchNetworkIfNeeded)
-      expect(result.current.sign).toBe(mockSign)
-      expect(typeof result.current.open).toBe('function')
-      expect(typeof result.current.disconnect).toBe('function')
-      expect(result.current.isConnected).toBe(true)
-      expect(result.current.isWrongNetwork).toBe(false)
-      expect(result.current.hasProvider).toBe(true)
-      expect(result.current.address).toBe(mockAddress)
-      expect(result.current.chainId).toBe(1)
-      expect(result.current.walletInfo).toEqual({ name: 'MetaMask' })
+      expect(ctx).not.toBeNull()
+      expect(ctx?.initiateConnection).toBe(mockInitiateConnection)
+      expect(ctx?.reconnect).toBe(mockReconnect)
+      expect(ctx?.switchNetwork).toBe(mockSwitchNetwork)
+      expect(ctx?.switchNetworkIfNeeded).toBe(mockSwitchNetworkIfNeeded)
+      expect(ctx?.sign).toBe(mockSign)
+      expect(typeof ctx?.open).toBe('function')
+      expect(typeof ctx?.disconnect).toBe('function')
+      expect(ctx?.isConnected).toBe(true)
+      expect(ctx?.isWrongNetwork).toBe(false)
+      expect(ctx?.hasProvider).toBe(true)
+      expect(ctx?.address).toBe(mockAddress)
+      expect(ctx?.chainId).toBe(1)
+      expect(ctx?.walletInfo).toEqual({ name: 'MetaMask' })
+    })
+  })
+
+  describe('useOptionalWalletConnectContext', () => {
+    it('returns null when no instance is provided', () => {
+      const store = createTestStore()
+      const { result } = nativeRenderHook(() => useOptionalWalletConnectContext(), {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <Provider store={store}>
+            <WalletConnectProvider instance={null}>{children}</WalletConnectProvider>
+          </Provider>
+        ),
+      })
+
+      expect(result.current).toBeNull()
     })
   })
 
   describe('open and disconnect wrappers', () => {
-    it('delegates open to useAppKit', () => {
-      const { result } = renderWithProvider()
+    it('delegates open to useAppKit', async () => {
+      const { result } = await renderWithProvider()
 
-      result.current.open()
+      result.current?.open()
 
       expect(mockOpen).toHaveBeenCalled()
     })
 
-    it('delegates disconnect to useAppKit', () => {
-      const { result } = renderWithProvider()
+    it('delegates disconnect to useAppKit', async () => {
+      const { result } = await renderWithProvider()
 
-      result.current.disconnect()
+      result.current?.disconnect()
 
       expect(mockDisconnect).toHaveBeenCalled()
     })
   })
 
   describe('isWalletConnectSigner', () => {
-    it('returns true for walletconnect signers', () => {
+    it('returns true for walletconnect signers', async () => {
       const wcAddress = getAddress(faker.finance.ethereumAddress())
 
-      const { result } = renderWithProvider({
+      const { result } = await renderWithProvider({
         signers: {
           [wcAddress]: { value: wcAddress, name: 'WC Signer', type: 'walletconnect' },
         },
       })
 
-      expect(result.current.isWalletConnectSigner(wcAddress)).toBe(true)
+      expect(result.current?.isWalletConnectSigner(wcAddress)).toBe(true)
     })
 
-    it('returns false for non-walletconnect signers', () => {
+    it('returns false for non-walletconnect signers', async () => {
       const pkAddress = getAddress(faker.finance.ethereumAddress())
 
-      const { result } = renderWithProvider({
+      const { result } = await renderWithProvider({
         signers: {
           [pkAddress]: { value: pkAddress, name: 'PK Signer', type: 'private-key' },
         },
       })
 
-      expect(result.current.isWalletConnectSigner(pkAddress)).toBe(false)
+      expect(result.current?.isWalletConnectSigner(pkAddress)).toBe(false)
     })
 
-    it('returns false for unknown addresses', () => {
+    it('returns false for unknown addresses', async () => {
       const unknownAddress = getAddress(faker.finance.ethereumAddress())
 
-      const { result } = renderWithProvider()
+      const { result } = await renderWithProvider()
 
-      expect(result.current.isWalletConnectSigner(unknownAddress)).toBe(false)
+      expect(result.current?.isWalletConnectSigner(unknownAddress)).toBe(false)
     })
   })
 })
