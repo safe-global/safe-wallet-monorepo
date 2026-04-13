@@ -7,7 +7,15 @@ import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
 
-function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, onRetry }: SafeSelectorDropdownProps) {
+function SafeSelectorDropdown({
+  items,
+  selectedItemId,
+  onItemSelect,
+  isError,
+  onRetry,
+  header,
+  footer,
+}: SafeSelectorDropdownProps) {
   const { dropdownOpen, selectedChainId, selectedItem, isSingleSafe, handleOpenChange, handleSafeChange } =
     useSafeSelectorState({ items, selectedItemId, onItemSelect })
 
@@ -51,7 +59,13 @@ function SafeSelectorDropdown({ items, selectedItemId, onItemSelect, isError, on
             <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={selectedChainId} />
           </SelectValue>
         </SelectTrigger>
-        <SafeDropdownContainer items={items} selectedItemId={safeSelectValue} onItemSelect={safeItemSelect} />
+        <SafeDropdownContainer
+          items={items}
+          selectedItemId={safeSelectValue}
+          onItemSelect={safeItemSelect}
+          header={header}
+          footer={footer}
+        />
       </Select>
     </div>
   )

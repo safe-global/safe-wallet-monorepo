@@ -6,9 +6,11 @@ export interface SafeDropdownContainerProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect: (itemId: string) => void
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }
 
-const SafeDropdownContainer = ({ items, selectedItemId }: SafeDropdownContainerProps) => {
+const SafeDropdownContainer = ({ items, selectedItemId, header, footer }: SafeDropdownContainerProps) => {
   const filteredItems = items.filter((item) => item.id !== selectedItemId)
 
   return (
@@ -16,11 +18,12 @@ const SafeDropdownContainer = ({ items, selectedItemId }: SafeDropdownContainerP
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[14rem] overflow-y-auto bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[20rem] overflow-y-auto bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
+      {header}
       {filteredItems.map((item) => (
         <SelectItem
           key={item.id}
@@ -30,6 +33,7 @@ const SafeDropdownContainer = ({ items, selectedItemId }: SafeDropdownContainerP
           <SafeItem {...item} />
         </SelectItem>
       ))}
+      {footer}
     </SelectContent>
   )
 }

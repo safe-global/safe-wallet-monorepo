@@ -18,4 +18,6 @@ export interface SafeSelectorDropdownProps {
   onItemSelect?: (itemId: string) => void
   isError?: boolean
   onRetry?: () => void
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }
