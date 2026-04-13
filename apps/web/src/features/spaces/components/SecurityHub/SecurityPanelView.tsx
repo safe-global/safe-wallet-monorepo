@@ -2,6 +2,7 @@ import { type ReactElement, type ReactNode, useMemo, useState } from 'react'
 import { Box, Button, CircularProgress, Collapse, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
@@ -9,11 +10,13 @@ import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutl
 import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
+import Link from 'next/link'
 import type { EvidenceItem, ScanContext, ScanResult } from '@/features/security/data/scanners/types'
 import type { SecurityGrade } from '@/features/security/data/securityTypes'
 import { computeSummary } from '@/features/security/data/scanners/utils'
 import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
 import { ZERO_ADDRESS } from '@/features/security/data/scanners/constants'
+import { CHECK_DEFS } from '@/features/security/data/securityChecks'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 type SecurityPanelViewProps = {
@@ -22,6 +25,8 @@ type SecurityPanelViewProps = {
   loading: Record<string, boolean>
   errors: Record<string, string>
   isComplete: boolean
+  /** The `shortName:address` param used to deep-link a CTA to the correct Safe (e.g., "eth:0x..."). */
+  safeQueryParam?: string
 }
 
 const STRENGTH_DESCRIPTIONS: Record<StrengthLevel, string> = {
@@ -150,10 +155,71 @@ const Row = ({ leadIcon, title, trailing, expandedContent }: RowProps): ReactEle
   )
 }
 
-/** Expanded-row body: optional intro paragraph + evidence key/value list. */
-const EvidenceList = ({ intro, evidence }: { intro?: string; evidence?: EvidenceItem[] }): ReactElement | null => {
+type Cta = { label: string; href: string }
+
+/**
+ * Build a navigation CTA for a failing check. Returns null when:
+ *  - the row is passing (no action needed),
+ *  - we don't yet have a `safeQueryParam` (chain metadata still loading), or
+ *  - there's no CHECK_DEFS entry for this check id.
+ * Label precedence: `ScanResult.ctaLabelOverride` → `CHECK_DEFS[id].ctaLabel`.
+ */
+const buildCta = (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
+  if (!safeQueryParam) return null
+  const def = CHECK_DEFS[checkId]
+  if (!def) return null
+  if (result && isPassingStatus(result.status)) return null
+  const label = result?.ctaLabelOverride || def.ctaLabel
+  return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
+}
+
+const CtaLink = ({ cta }: { cta: Cta }): ReactElement => (
+  <Link
+    href={cta.href}
+    onClick={(e) => e.stopPropagation()}
+    style={{ textDecoration: 'none', alignSelf: 'flex-start', borderRadius: 4 }}
+    className="security-cta-link"
+  >
+    <Stack
+      direction="row"
+      spacing={0.75}
+      alignItems="center"
+      sx={{
+        color: 'primary.main',
+        cursor: 'pointer',
+        transition: 'color 0.15s',
+        '& .cta-icon': { transition: 'transform 0.15s' },
+        '&:hover': { color: 'primary.dark' },
+        '&:hover .cta-label': { textDecoration: 'underline' },
+        '&:hover .cta-icon': { transform: 'translateX(2px)' },
+        '.security-cta-link:focus-visible &': {
+          outline: '2px solid',
+          outlineColor: 'primary.main',
+          outlineOffset: 2,
+          borderRadius: 4,
+        },
+      }}
+    >
+      <Typography className="cta-label" variant="caption" fontWeight={700} sx={{ color: 'inherit', lineHeight: 1.5 }}>
+        {cta.label}
+      </Typography>
+      <ArrowForwardRoundedIcon className="cta-icon" sx={{ fontSize: 14, color: 'inherit' }} />
+    </Stack>
+  </Link>
+)
+
+/** Expanded-row body: optional intro paragraph + evidence key/value list + optional CTA. */
+const EvidenceList = ({
+  intro,
+  evidence,
+  cta,
+}: {
+  intro?: string
+  evidence?: EvidenceItem[]
+  cta?: Cta | null
+}): ReactElement | null => {
   const hasEvidence = !!evidence && evidence.length > 0
-  if (!intro && !hasEvidence) return null
+  if (!intro && !hasEvidence && !cta) return null
   return (
     <Stack spacing={0.75}>
       {intro && (
@@ -190,18 +256,19 @@ const EvidenceList = ({ intro, evidence }: { intro?: string; evidence?: Evidence
           )}
         </Stack>
       )}
+      {cta && <CtaLink cta={cta} />}
     </Stack>
   )
 }
 
 /** Build expanded body for a row backed by a ScanResult. Returns undefined when there's nothing to show. */
-const buildExpanded = (result: ScanResult | undefined): ReactNode => {
-  if (!result) return undefined
+const buildExpanded = (result: ScanResult | undefined, cta?: Cta | null): ReactNode => {
+  if (!result) return cta ? <EvidenceList cta={cta} /> : undefined
   const isOk = result.status === 'clear' || result.status === 'not_applicable'
   const intro = !isOk && result.remediation ? result.remediation : undefined
   const hasEvidence = result.evidence && result.evidence.length > 0
-  if (!intro && !hasEvidence) return undefined
-  return <EvidenceList intro={intro} evidence={result.evidence} />
+  if (!intro && !hasEvidence && !cta) return undefined
+  return <EvidenceList intro={intro} evidence={result.evidence} cta={cta} />
 }
 
 const SectionPanel = ({
@@ -322,9 +389,11 @@ const PanelHeader = ({
 const SignersSection = ({
   scanContext,
   results,
+  safeQueryParam,
 }: {
   scanContext: ScanContext
   results: Record<string, ScanResult>
+  safeQueryParam?: string
 }): ReactElement | null => {
   const signerIntegrityResult = results['signer_integrity']
   const multichainResult = results['multichain_setup']
@@ -335,6 +404,8 @@ const SignersSection = ({
 
   // Bucket per-signer rows into flagged vs screened.
   const signerItems: SectionRow[] = []
+  // All signer rows route back to the signer_integrity remediation page.
+  const signerCta = buildCta('signer_integrity', signerIntegrityResult, safeQueryParam)
   scanContext.owners.forEach((owner) => {
     const severity: SecurityGrade = signerIntegrityResult?.severity ?? 'Low'
     const status: ScanResult['status'] = signerIntegrityResult?.status ?? 'clear'
@@ -351,6 +422,7 @@ const SignersSection = ({
     }
 
     const signerEvidence: EvidenceItem[] = [{ label: 'Address', value: owner.value }]
+    const rowCta = isPassingStatus(status) ? null : signerCta
 
     signerItems.push({
       key: `signer-${owner.value}`,
@@ -360,7 +432,7 @@ const SignersSection = ({
         <Row
           leadIcon={<StatusIcon status={status} />}
           title={title}
-          expandedContent={<EvidenceList intro={intro} evidence={signerEvidence} />}
+          expandedContent={<EvidenceList intro={intro} evidence={signerEvidence} cta={rowCta} />}
         />
       ),
     })
@@ -374,6 +446,7 @@ const SignersSection = ({
   if (multichainResult && multichainResult.status !== 'not_applicable') {
     const ok = multichainResult.status === 'clear'
     const title = ok ? 'Signers are consistent across networks' : 'Signers differ across networks'
+    const multichainCta = buildCta('multichain_setup', multichainResult, safeQueryParam)
     multichainItem = {
       key: 'multichain',
       severity: multichainResult.severity,
@@ -382,7 +455,7 @@ const SignersSection = ({
         <Row
           leadIcon={<StatusIcon status={multichainResult.status} />}
           title={title}
-          expandedContent={buildExpanded(multichainResult)}
+          expandedContent={buildExpanded(multichainResult, multichainCta)}
         />
       ),
     }
@@ -452,9 +525,11 @@ const SignersSection = ({
 const SecurityChecksSection = ({
   scanContext,
   results,
+  safeQueryParam,
 }: {
   scanContext: ScanContext
   results: Record<string, ScanResult>
+  safeQueryParam?: string
 }): ReactElement | null => {
   const accountSetupResult = results['account_setup']
   const recoveryResult = results['recovery']
@@ -494,7 +569,14 @@ const SecurityChecksSection = ({
       severity: accountSetupResult.severity,
       isPassing: ok,
       node: (
-        <Row leadIcon={iconFor(accountSetupResult)} title={title} expandedContent={buildExpanded(accountSetupResult)} />
+        <Row
+          leadIcon={iconFor(accountSetupResult)}
+          title={title}
+          expandedContent={buildExpanded(
+            accountSetupResult,
+            buildCta('account_setup', accountSetupResult, safeQueryParam),
+          )}
+        />
       ),
     })
   }
@@ -511,7 +593,13 @@ const SecurityChecksSection = ({
       key: 'recovery',
       severity: recoveryResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(recoveryResult)} title={title} expandedContent={buildExpanded(recoveryResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(recoveryResult)}
+          title={title}
+          expandedContent={buildExpanded(recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -522,7 +610,13 @@ const SecurityChecksSection = ({
       key: 'version',
       severity: versionResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(versionResult)} title={title} expandedContent={buildExpanded(versionResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(versionResult)}
+          title={title}
+          expandedContent={buildExpanded(versionResult, buildCta('contract_version', versionResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -533,7 +627,13 @@ const SecurityChecksSection = ({
       key: 'factory',
       severity: factoryResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(factoryResult)} title={title} expandedContent={buildExpanded(factoryResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(factoryResult)}
+          title={title}
+          expandedContent={buildExpanded(factoryResult, buildCta('factory_validation', factoryResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -550,7 +650,13 @@ const SecurityChecksSection = ({
       key: 'guard',
       severity: guardResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(guardResult)} title={title} expandedContent={buildExpanded(guardResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(guardResult)}
+          title={title}
+          expandedContent={buildExpanded(guardResult, buildCta('guard', guardResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -570,7 +676,13 @@ const SecurityChecksSection = ({
       key: 'fallback',
       severity: fallbackResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(fallbackResult)} title={title} expandedContent={buildExpanded(fallbackResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(fallbackResult)}
+          title={title}
+          expandedContent={buildExpanded(fallbackResult, buildCta('fallback_handler', fallbackResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -584,7 +696,7 @@ const SecurityChecksSection = ({
           <Row
             leadIcon={iconFor(modulesResult)}
             title="No modules installed"
-            expandedContent={buildExpanded(modulesResult)}
+            expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
           />
         ),
       })
@@ -615,6 +727,7 @@ const SecurityChecksSection = ({
         ),
       })
     } else {
+      const modulesCta = buildCta('modules', modulesResult, safeQueryParam)
       activeModules.forEach((mod) => {
         const trusted = looksLikeKnownModule(mod.name)
         const severity: SecurityGrade = trusted ? 'Low' : 'High'
@@ -637,7 +750,9 @@ const SecurityChecksSection = ({
             <Row
               leadIcon={<StatusIcon status={status} />}
               title={title}
-              expandedContent={<EvidenceList intro={intro} evidence={perModuleEvidence} />}
+              expandedContent={
+                <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />
+              }
             />
           ),
         })
@@ -652,7 +767,16 @@ const SecurityChecksSection = ({
       key: 'scanning',
       severity: scanningResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(scanningResult)} title={title} expandedContent={buildExpanded(scanningResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(scanningResult)}
+          title={title}
+          expandedContent={buildExpanded(
+            scanningResult,
+            buildCta('transaction_scanning', scanningResult, safeQueryParam),
+          )}
+        />
+      ),
     })
   }
 
@@ -668,7 +792,13 @@ const SecurityChecksSection = ({
       key: 'pending',
       severity: pendingResult.severity,
       isPassing: ok,
-      node: <Row leadIcon={iconFor(pendingResult)} title={title} expandedContent={buildExpanded(pendingResult)} />,
+      node: (
+        <Row
+          leadIcon={iconFor(pendingResult)}
+          title={title}
+          expandedContent={buildExpanded(pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam))}
+        />
+      ),
     })
   }
 
@@ -719,7 +849,12 @@ const SecurityChecksSection = ({
 // ───────────────────────────────────────────────────────────────────────────────
 // Top-level
 
-const SecurityPanelView = ({ scanContext, results, isComplete }: SecurityPanelViewProps): ReactElement => {
+const SecurityPanelView = ({
+  scanContext,
+  results,
+  isComplete,
+  safeQueryParam,
+}: SecurityPanelViewProps): ReactElement => {
   const hasResults = Object.keys(results).length > 0
 
   if (!scanContext || (!hasResults && !isComplete)) {
@@ -735,8 +870,8 @@ const SecurityPanelView = ({ scanContext, results, isComplete }: SecurityPanelVi
   return (
     <Box>
       <PanelHeader results={results} isComplete={isComplete} />
-      <SecurityChecksSection scanContext={scanContext} results={results} />
-      <SignersSection scanContext={scanContext} results={results} />
+      <SecurityChecksSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
+      <SignersSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
     </Box>
   )
 }
