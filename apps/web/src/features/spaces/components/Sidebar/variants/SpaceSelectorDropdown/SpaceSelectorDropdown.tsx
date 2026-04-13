@@ -22,6 +22,8 @@ import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
 
+const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
+
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
@@ -78,7 +80,7 @@ export const SpaceSelectorDropdown = ({
         key={space.id}
         onClick={() => void handleSelectSpace(space.id)}
         disabled={isDisabled}
-        className={cn('gap-3 min-h-9 px-2 py-2', selectedSpace?.id === space.id && css.navItemActive)}
+        className={cn(MENU_ITEM_CLASS, selectedSpace?.id === space.id && css.navItemActive)}
       >
         <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
           <AvatarFallback className={css.spaceSelectorItemAvatarFallback} style={{ backgroundColor: spaceColor }}>
@@ -188,11 +190,11 @@ export const SpaceSelectorDropdown = ({
 
         <DropdownMenuSeparator className="my-1" />
 
-        <DropdownMenuItem onClick={handleCreateSpace} className="gap-3 min-h-9 px-2 py-2">
+        <DropdownMenuItem onClick={handleCreateSpace} className={MENU_ITEM_CLASS}>
           <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>Add new space</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleViewSpaces} className="gap-3 min-h-9 px-2 py-2">
+        <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
           <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>View all</span>
         </DropdownMenuItem>

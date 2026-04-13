@@ -21,6 +21,7 @@ export const BackToSpaceButton = ({
   const spaceAvatarColor = spaceName ? getDeterministicColor(spaceName) : undefined
 
   const handleClick = () => {
+    if (!spaceId) return
     router.push({
       pathname: AppRoutes.spaces.index,
       query: { spaceId },
