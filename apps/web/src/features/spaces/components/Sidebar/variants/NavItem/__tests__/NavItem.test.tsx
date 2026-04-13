@@ -103,7 +103,7 @@ describe('NavItem', () => {
     const { container } = render(<NavItem item={baseItem} />)
 
     expect(container.querySelector('svg')).toBeInTheDocument()
-    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByRole('link')).toHaveTextContent('Home')
   })
 
   it('renders as a link when not disabled', () => {
