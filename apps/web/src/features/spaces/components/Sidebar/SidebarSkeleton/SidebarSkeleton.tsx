@@ -2,28 +2,22 @@ import type { ReactElement } from 'react'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { SidebarTopBar } from '../SidebarTopBar'
-import css from '../styles.module.css'
+import { SidebarTopBar } from './SidebarTopBar'
 
-const Pulse = ({ className }: { className: string }): ReactElement => (
-  <div className={`bg-sidebar-border animate-pulse ${className}`} />
-)
-
-const NavRow = (): ReactElement => (
+const SkeletonRow = ({ heightClass }: { heightClass?: string } = {}): ReactElement => (
   <SidebarMenuItem>
-    <div className="relative flex h-9 min-h-9 w-full items-center rounded-md p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
-      <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:hidden">
-        <Pulse className="size-4 shrink-0 rounded-md" />
-        <Pulse className="h-4 min-h-4 flex-1 rounded-md" />
-      </div>
-      <Pulse className="hidden size-8 shrink-0 rounded-md group-data-[collapsible=icon]:block" />
+    <div className="flex items-center gap-2 px-3 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+      <div
+        className={`rounded bg-sidebar-border animate-pulse w-48 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 ${
+          heightClass ?? 'h-12'
+        }`}
+      />
     </div>
   </SidebarMenuItem>
 )
@@ -33,58 +27,29 @@ export const SidebarSkeleton = (): ReactElement => {
     <Sidebar
       collapsible="icon"
       variant="floating"
-      className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-none"
-      data-testid="sidebar-skeleton"
+      className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-[0_2px_8px_rgba(23,23,23,0.06)]"
     >
       <SidebarHeader>
         <SidebarTopBar />
+        <SkeletonRow heightClass="h-18" />
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className={`${css.sidebarGroup} mb-2`}>
+        <SidebarGroup>
           <SidebarGroupContent>
-            <Pulse className="h-9 w-full rounded-xs group-data-[collapsible=icon]:w-9" />
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
-              <NavRow />
-              <NavRow />
-              <NavRow />
-              <NavRow />
-              <NavRow />
-              <NavRow />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className={css.sidebarGroup}>
-          <div className="px-2 py-1 group-data-[collapsible=icon]:hidden">
-            <Pulse className="h-3 w-20 rounded-md" />
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0">
-              <NavRow />
-              <NavRow />
-              <NavRow />
-              <NavRow />
+            <SidebarMenu>
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+              <hr className="my-2 w-48 animate-pulse mx-auto" />
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu className="gap-0.5">
-          <NavRow />
-          <NavRow />
-        </SidebarMenu>
-        <div className="flex items-center gap-3 px-3 py-2">
-          <Pulse className="size-5 rounded-full" />
-          <Pulse className="h-4 w-24 rounded-md group-data-[collapsible=icon]:hidden" />
-        </div>
-      </SidebarFooter>
     </Sidebar>
   )
 }
