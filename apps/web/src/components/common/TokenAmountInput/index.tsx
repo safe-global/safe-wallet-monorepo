@@ -115,7 +115,7 @@ const TokenAmountInput = ({
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
   return (
-    <div>
+    <>
       <FormControl
         data-testid="token-amount-section"
         className={classNames(css.outline, { [css.error]: isAmountError })}
@@ -178,18 +178,12 @@ const TokenAmountInput = ({
           </TextField>
         </div>
       </FormControl>
-      <Typography
-        data-testid="fiat-display"
-        variant="caption"
-        color="text.secondary"
-        className={css.fiatDisplay}
-        sx={{
-          visibility: fiatValue != null ? 'visible' : 'hidden',
-        }}
-      >
-        <FiatValue value={fiatValue ?? 0} precise />
-      </Typography>
-    </div>
+      {fiatValue != null && (
+        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
+          <FiatValue value={fiatValue} precise />
+        </Typography>
+      )}
+    </>
   )
 }
 
