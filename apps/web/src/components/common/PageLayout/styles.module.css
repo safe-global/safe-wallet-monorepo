@@ -54,6 +54,7 @@
 
 .mainSpace {
   /* we need it in order to have higher importance than the .main class */
+  /* Must accommodate the absolute-positioned topbar height: py-4 (32px) + SpaceSafeBar BackLink min-h-[60px] + m-1 (8px) = ~100px */
   && {
     padding-top: var(--topbar-height);
   }
