@@ -69,6 +69,7 @@ describe('SidebarProfileSection', () => {
   const activeMember = createMember()
   const adminMember = createMember({ role: 'ADMIN' as const })
   const invitedMember = createMember({ status: 'INVITED' as const })
+  const declinedMember = createMember({ status: 'DECLINED' as const })
 
   it('renders member name when active membership', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
@@ -96,6 +97,19 @@ describe('SidebarProfileSection', () => {
     expect(screen.getAllByTestId('skeleton')).toHaveLength(2)
   })
 
+  it('renders profile (not skeleton) when refetching with cached membership', () => {
+    mockUseCurrentMemberProfile.mockReturnValue({
+      membership: activeMember,
+      signerAddress: undefined,
+      isLoading: true,
+    })
+
+    render(<SidebarProfileSection />)
+
+    expect(screen.getByTestId('sidebar-profile-section')).toBeInTheDocument()
+    expect(screen.queryByTestId('sidebar-profile-skeleton')).not.toBeInTheDocument()
+  })
+
   it('renders nothing when loaded but no membership', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: undefined,
@@ -111,6 +125,18 @@ describe('SidebarProfileSection', () => {
   it('renders nothing for invited members', () => {
     mockUseCurrentMemberProfile.mockReturnValue({
       membership: invitedMember,
+      signerAddress: undefined,
+      isLoading: false,
+    })
+
+    const { container } = render(<SidebarProfileSection />)
+
+    expect(container.innerHTML).toBe('')
+  })
+
+  it('renders nothing for declined members', () => {
+    mockUseCurrentMemberProfile.mockReturnValue({
+      membership: declinedMember,
       signerAddress: undefined,
       isLoading: false,
     })

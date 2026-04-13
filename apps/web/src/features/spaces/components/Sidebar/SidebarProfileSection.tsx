@@ -41,7 +41,7 @@ export const SidebarProfileView = ({
               }
             >
               <span className={css.profileTriggerAvatar}>
-                <User className="size-4" />
+                <User className="size-4" aria-hidden="true" />
               </span>
               <span className={css.profileName}>{memberName}</span>
             </PopoverTrigger>
@@ -72,7 +72,7 @@ export const SidebarProfileView = ({
                 data-testid="sidebar-profile-sign-out"
                 aria-label="Sign out"
               >
-                <LogOut className="size-4" />
+                <LogOut className="size-4" aria-hidden="true" />
                 <span>Sign out</span>
               </button>
             </PopoverContent>
