@@ -103,7 +103,7 @@ export const SafeSidebarVariant = ({
                 render={<Link href={settingsHref} />}
                 data-testid="sidebar-settings-item"
               >
-                <Settings />
+                <Settings className="text-muted-foreground" />
                 <span>Settings</span>
               </SidebarMenuButton>
               {isOutdated && <span className={css.outdatedDot} aria-hidden />}
