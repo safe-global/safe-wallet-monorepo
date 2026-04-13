@@ -30,27 +30,21 @@ export type ScanState = {
   rescan: () => void
 }
 
-const useSecurityScan = (ctx: ScanContext | null, initialResults?: Record<string, ScanResult>): ScanState => {
+const useSecurityScan = (ctx: ScanContext | null): ScanState => {
   const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
 
-  // Resolve initial state: explicit initialResults > cache > empty
-  const resolvedInitial = (() => {
-    if (initialResults && Object.keys(initialResults).length > 0) return initialResults
-    if (ctxKey) {
-      const cached = scanResultsCache.get(ctxKey)
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) return cached.results
-    }
-    return null
-  })()
+  // Resolve from module-level cache if fresh results exist
+  const cached = ctxKey ? scanResultsCache.get(ctxKey) : undefined
+  const resolved = cached && Date.now() - cached.timestamp < CACHE_TTL_MS ? cached : null
 
-  const [results, setResults] = useState<Record<string, ScanResult>>(resolvedInitial ?? {})
+  const [results, setResults] = useState<Record<string, ScanResult>>(resolved?.results ?? {})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [lastScannedAt, setLastScannedAt] = useState<number | null>(resolvedInitial ? Date.now() : null)
+  const [lastScannedAt, setLastScannedAt] = useState<number | null>(resolved?.timestamp ?? null)
   const scanIdRef = useRef(0)
   const ctxRef = useRef(ctx)
   ctxRef.current = ctx
-  const hasInitialResults = useRef(!!resolvedInitial)
+  const hasInitialResults = useRef(!!resolved)
 
   const executeScan = useCallback(
     (scannerId: string, scanFn: () => Promise<ScanResult>, guardId?: number, onAllComplete?: () => void) => {

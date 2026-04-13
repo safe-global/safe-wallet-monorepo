@@ -292,7 +292,6 @@ const SecurityHub = (): ReactElement => {
                 <SecurityReport
                   key={selectedKey!}
                   scanContext={scanContext}
-                  initialResults={selectedKey ? allScanResults[selectedKey] : undefined}
                   onScanComplete={handleScanComplete}
                   checkFilter={(def: CheckDef) => def.category === 'account'}
                 />
