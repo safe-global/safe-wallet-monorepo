@@ -43,6 +43,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
+import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -70,9 +71,6 @@ function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSaf
     return !safes[safeId]
   })
 }
-
-const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
-const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
 
 const _groupAndSort = (
   items: SafeItem[],

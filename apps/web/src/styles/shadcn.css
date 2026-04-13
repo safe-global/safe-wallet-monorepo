@@ -41,8 +41,8 @@
   --sidebar-accent-foreground: #171717;
   --sidebar-border: #e5e5e5;
   --sidebar-ring: #d4d4d4;
-  --z-sidebar: 9100;
-  --z-overlay: 9200;
+  --z-sidebar: 1300;
+  --z-overlay: 1400;
 }
 
 .dark.shadcn-scope,

@@ -5,7 +5,6 @@ import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
 import type { SpaceSelectorProps } from './types'
 import type { SidebarVariantType } from './variants'
-import css from './styles.module.css'
 
 interface SidebarProps extends SpaceSelectorProps {
   type: SidebarVariantType
@@ -13,10 +12,10 @@ interface SidebarProps extends SpaceSelectorProps {
 
 export const EnhancedSidebar = ({
   type,
-  spaceName,
   spaceInitial,
   selectedSpace,
   spaces,
+  onSpaceAdded,
 }: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
@@ -25,11 +24,11 @@ export const EnhancedSidebar = ({
       variant="floating"
       className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-[0_2px_8px_rgba(23,23,23,0.06)]"
     >
-      <SidebarHeader className={css.sidebarHeader}>
+      <SidebarHeader>
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
+      <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} onSpaceAdded={onSpaceAdded} />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )
