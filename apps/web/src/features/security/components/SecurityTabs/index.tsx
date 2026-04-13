@@ -17,7 +17,7 @@ const SecurityTabs = ({ value, onChange, compact }: SecurityTabsProps): ReactEle
     allowScrollButtonsMobile
     sx={{ mb: compact ? 2 : 3, minHeight: compact ? 36 : undefined }}
   >
-    {TABS.map((label, idx) => (
+    {TABS.map((label) => (
       <Tab
         key={label}
         label={label}
