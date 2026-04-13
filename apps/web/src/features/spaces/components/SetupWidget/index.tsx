@@ -1,14 +1,17 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { BookUser, Check, ChevronRight, Rocket, UsersRound, WalletCards } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import SafeWidget from '../SafeWidget'
 import { cn } from '@/utils/cn'
-import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } from '@/features/spaces'
+import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook, useCurrentSpaceId } from '@/features/spaces'
 import { flattenSafeItems } from '@/hooks/safes'
+import { addDays } from 'date-fns'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import ImportAddressBookDialog from '../SpaceAddressBook/Import/ImportAddressBookDialog'
 import AddAccounts from '../AddAccounts'
 import AddMemberModal from '../AddMemberModal'
+import SpaceInfoModal from '../SpaceInfoModal'
 import type { LucideIcon } from 'lucide-react'
 
 interface StepsDependencies {
@@ -46,6 +49,9 @@ const SETUP_STEPS: SetupStep[] = [
   { key: 'explore', label: 'Explore Spaces', icon: Rocket },
 ]
 
+const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
+const DISMISS_DAYS = 3
+
 interface SetupWidgetProps {
   onDismiss?: () => void
   horizontal?: boolean
@@ -57,9 +63,26 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   const [importOpen, setImportOpen] = useState(false)
   const [addAccountsOpen, setAddAccountsOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
+  const [exploreOpen, setExploreOpen] = useState(false)
+  const [dismissedSpaces = {}, setDismissedSpaces] = useLocalStorage<Record<string, number>>(DISMISS_STORAGE_KEY)
+  const spaceId = useCurrentSpaceId()
   const addressBook = useGetSpaceAddressBook()
   const { allSafes } = useSpaceSafes()
   const { activeMembers, invitedMembers } = useSpaceMembersByStatus()
+
+  // Clean up expired dismissals on mount
+  useEffect(() => {
+    const now = Date.now()
+    const expired = Object.entries(dismissedSpaces).filter(([, expiry]) => expiry <= now)
+
+    if (expired.length > 0) {
+      setDismissedSpaces((prev = {}) => {
+        const updated = { ...prev }
+        expired.forEach(([key]) => delete updated[key])
+        return updated
+      })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const deps: StepsDependencies = {
     addressBookCount: addressBook.length,
@@ -82,6 +105,8 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
       setAddAccountsOpen(true)
     } else if (stepKey === 'team-members') {
       setAddMemberOpen(true)
+    } else if (stepKey === 'explore') {
+      setExploreOpen(true)
     }
   }
 
@@ -89,11 +114,23 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
     setDismissed(true)
   }
 
-  if (loading) return null
+  const persistDismiss = () => {
+    if (spaceId) {
+      setDismissedSpaces((prev = {}) => ({
+        ...prev,
+        [spaceId]: addDays(new Date(), DISMISS_DAYS).getTime(),
+      }))
+    }
+    onDismiss?.()
+  }
+
+  const isDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
+
+  if (loading || isDismissedForSpace) return null
 
   return (
     <>
-      <AnimatePresence onExitComplete={onDismiss}>
+      <AnimatePresence onExitComplete={persistDismiss}>
         {!dismissed && (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
             <SafeWidget
@@ -166,6 +203,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
       {importOpen && <ImportAddressBookDialog handleClose={() => setImportOpen(false)} />}
       <AddAccounts externalOpen={addAccountsOpen} onExternalClose={() => setAddAccountsOpen(false)} />
       {addMemberOpen && <AddMemberModal onClose={() => setAddMemberOpen(false)} />}
+      {exploreOpen && <SpaceInfoModal onClose={() => setExploreOpen(false)} />}
     </>
   )
 }

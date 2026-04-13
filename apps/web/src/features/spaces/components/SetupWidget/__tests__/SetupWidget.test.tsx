@@ -5,6 +5,12 @@ jest.mock('@/features/spaces', () => ({
   useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
   useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [], invitedMembers: [] })),
   useGetSpaceAddressBook: jest.fn(() => []),
+  useCurrentSpaceId: jest.fn(() => '1'),
+}))
+
+jest.mock('@/services/local-storage/useLocalStorage', () => ({
+  __esModule: true,
+  default: jest.fn(() => [{}, jest.fn()]),
 }))
 
 jest.mock('@/hooks/safes', () => ({
@@ -22,6 +28,8 @@ jest.mock(
     ({ externalOpen }: { externalOpen?: boolean }) =>
       externalOpen ? <div data-testid="add-accounts-dialog" /> : null,
 )
+
+jest.mock('../../SpaceInfoModal', () => () => <div data-testid="space-info-modal" />)
 
 describe('SetupWidget', () => {
   it('renders the widget title', () => {
@@ -50,9 +58,12 @@ describe('SetupWidget', () => {
 
     fireEvent.click(screen.getByText('Dismiss'))
 
-    await waitFor(() => {
-      expect(screen.queryByText('Set up your Space')).not.toBeInTheDocument()
-    })
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Set up your Space')).not.toBeInTheDocument()
+      },
+      { timeout: 3000 },
+    )
   })
 
   it('opens the import address book dialog when step is clicked', () => {
@@ -94,6 +105,14 @@ describe('SetupWidget', () => {
     expect(steps[1]).toHaveTextContent('Add your Safe accounts')
     expect(steps[2]).toHaveTextContent('Invite team members')
     expect(steps[3]).toHaveTextContent('Explore Spaces')
+  })
+
+  it('opens the Introducing Spaces modal when Explore Spaces is clicked', () => {
+    render(<SetupWidget />)
+
+    fireEvent.click(screen.getByText('Explore Spaces'))
+
+    expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
   })
 
   it('disables click on completed steps', () => {
