@@ -331,4 +331,108 @@ describe('SafeSidebarVariant', () => {
       expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()
     })
   })
+
+  describe('workspace header variants', () => {
+    it('renders the backToSpace variant with space name and back button', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Development', spaceId: '42' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Development')).toBeInTheDocument()
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    })
+
+    it('uses the correct space initial for backToSpace variant avatar', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Enterprise', spaceInitial: 'E' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const avatarFallback = screen.getByTestId('space-avatar-fallback')
+      expect(avatarFallback).toHaveTextContent('E')
+    })
+
+    it('renders the addToWorkspace variant with the trigger button', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces: [] })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+
+    it('passes spaces array to addToWorkspace variant', () => {
+      const spaces = [
+        { id: 1, name: 'Team', safeCount: 5 },
+        { id: 2, name: 'Personal', safeCount: 2 },
+      ]
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+
+    it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
+      mockUseIsCounterfactualSafe.mockReturnValue(true)
+      const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
+    })
+
+    it('keeps backToSpace header visible when Safe is counterfactual', () => {
+      mockUseIsCounterfactualSafe.mockReturnValue(true)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Shared Workspace', spaceId: '100' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+      expect(screen.getByText('Shared Workspace')).toBeInTheDocument()
+    })
+
+    it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
+      const spaces = Array.from({ length: 5 }, (_, i) => ({
+        id: i + 1,
+        name: `Space ${i + 1}`,
+        safeCount: 0,
+      }))
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+  })
 })

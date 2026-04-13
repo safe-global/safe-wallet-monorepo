@@ -345,4 +345,94 @@ describe('SpaceSelectorDropdown', () => {
       expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
     })
   })
+
+  describe('space selector interactions and loading states', () => {
+    it('disables all space items while one is loading in addToWorkspace variant', () => {
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({
+        addToSpace: jest.fn(),
+        loadingSpaceId: 1,
+      })
+
+      const spaces = [
+        { id: 1, name: 'Alpha', safeCount: 0 },
+        { id: 2, name: 'Beta', safeCount: 0 },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+
+      expect(alphaButton).toBeDisabled()
+      expect(betaButton).toBeDisabled()
+    })
+
+    it('shows a loading spinner on the space item being added to in addToWorkspace variant', () => {
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({
+        addToSpace: jest.fn(),
+        loadingSpaceId: 1,
+      })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+
+      expect(alphaButton?.querySelector('svg')).toBeInTheDocument()
+    })
+
+    it('does not close the dropdown when adding a Safe fails', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(false)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      await act(async () => {
+        fireEvent.click(alphaButton!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+    })
+
+    it('navigates to the correct space in default variant when clicked', () => {
+      const spaces = [
+        { id: 10, name: 'Gamma', safeCount: 0 },
+        { id: 20, name: 'Delta', safeCount: 0 },
+      ]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+
+      const deltaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Delta')
+      fireEvent.click(deltaButton!)
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '20' } })
+    })
+  })
 })
