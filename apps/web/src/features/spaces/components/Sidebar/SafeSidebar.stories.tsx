@@ -186,25 +186,22 @@ const mockTxQueueState = {
 }
 
 export const WithTransactions: Story = {
-  decorators: [withMockProvider({ initialState: mockTxQueueState })],
+  decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...mockTxQueueState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
-      <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
+      <EnhancedSidebar type={args.type} spaceInitial={args.spaceInitial} selectedSpace={STORY_SELECTED_SPACE} />
     </SafeSidebarLayout>
   ),
 }
 
 export const TransactionsActive: Story = {
-  decorators: [withMockProvider({ initialState: mockTxQueueState })],
+  decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...mockTxQueueState }, shadcn: true })],
   parameters: {
     nextjs: {
       appDirectory: false,
       router: {
         pathname: '/transactions/queue',
-        query: {
-          spaceId: '1',
-          safe: 'eth:0x1234567890123456789012345678901234567890',
-        },
+        query: SAFE_SIDEBAR_ROUTER_QUERY,
       },
     },
   },
@@ -284,12 +281,14 @@ const outdatedSafeState = {
       version: '1.1.1',
       deployed: true,
       address: { value: '0x1234567890123456789012345678901234567890' },
+      owners: [],
+      threshold: 1,
     },
   },
 }
 
-export const OutdatedImplementation: Story = {
-  decorators: [withMockProvider({ initialState: outdatedSafeState, shadcn: true })],
+export const OutdatedSafeVersion: Story = {
+  decorators: [withMockProvider({ initialState: { ...safeSidebarStoryState, ...outdatedSafeState }, shadcn: true })],
   render: (args) => (
     <SafeSidebarLayout>
       <EnhancedSidebar type={args.type} spaceName={args.spaceName} spaceInitial={args.spaceInitial} />
