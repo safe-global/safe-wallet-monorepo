@@ -167,7 +167,7 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.contains('Continue with').click()
+  cy.get('[data-testid="continue-with-wallet-btn"]').click()
 }
 
 export function waitForSpacesWelcomeReady() {
