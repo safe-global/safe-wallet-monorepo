@@ -84,26 +84,6 @@ export function createAppKitInstance(networks: [Network, ...Network[]], defaultN
       '0b415a746fb9ee99cce155c2ceca0c6f6061b1dbca2d722b3ba16381d0562150', // SafePal
       '15c8b91ade1a4e58f3ce4e7a0dd7f42b47db0c8df7e0d84f63eb39bcb96c4e0f', // Bybit Wallet
     ],
-    customWallets: [
-      {
-        id: 'rabby',
-        name: 'Rabby',
-        homepage: 'https://rabby.io',
-        mobile_link: 'rabby://',
-        image_url: 'https://app.safe.global/images/apps/rabby.png',
-        app_store: 'https://apps.apple.com/us/app/rabby-wallet-crypto-evm/id6474381673',
-        play_store: 'https://play.google.com/store/apps/details?id=com.debank.rabbymobile',
-      },
-      {
-        id: 'phantom',
-        name: 'Phantom',
-        homepage: 'https://phantom.app',
-        mobile_link: 'phantom://',
-        image_url: 'https://app.safe.global/images/apps/phantom.png',
-        app_store: 'https://apps.apple.com/us/app/phantom-trade-markets/id1598432977',
-        play_store: 'https://play.google.com/store/apps/details?id=app.phantom',
-      },
-    ],
     themeVariables: {
       accent: '#12FF80',
     },
