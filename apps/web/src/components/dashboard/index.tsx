@@ -10,7 +10,6 @@ import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import SecurityIssuesWarning from '@/features/security/components/SecurityIssuesWarning'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -124,7 +123,6 @@ const Dashboard = (): ReactElement => {
           <ActionRequiredPanel>
             {supportsRecovery && <RecoveryHeader />}
             <NonPinnedWarning />
-            <SecurityIssuesWarning />
           </ActionRequiredPanel>
 
           {safe.deployed && <PendingTxsList />}

@@ -25,7 +25,6 @@ export interface ActionRequiredPanelProps {
  * <ActionRequiredPanel>
  *   <RecoveryHeader />
  *   <NonPinnedWarning />
- *   <SecurityIssuesWarning />
  * </ActionRequiredPanel>
  * ```
  */
