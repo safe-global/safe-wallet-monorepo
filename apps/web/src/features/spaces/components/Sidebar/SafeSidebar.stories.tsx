@@ -15,7 +15,6 @@ import type { RootState } from '@/store'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup, SpaceItem } from './types'
 import { AppRoutes } from '@/config/routes'
 import { Wallet, Coins, ArrowRightLeft, BookUser, LayoutGrid, Repeat2, Orbit, Database, TrendingUp } from 'lucide-react'
-import css from './styles.module.css'
 
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
@@ -327,7 +326,7 @@ const VariantLayout = ({ children }: { children: ReactNode }) => (
         variant="floating"
         className="!p-0 border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-[0_2px_8px_rgba(23,23,23,0.06)]"
       >
-        <SidebarHeader className={css.sidebarHeader} />
+        <SidebarHeader />
         {children}
       </Sidebar>
       <SidebarInset />

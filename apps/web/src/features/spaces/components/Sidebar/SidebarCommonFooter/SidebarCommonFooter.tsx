@@ -26,7 +26,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   }
 
   return (
-    <SidebarFooter data-testid="sidebar-common-footer" className={css.sidebarFooter}>
+    <SidebarFooter data-testid="sidebar-common-footer">
       {/* Dev Toggles - only in non-production */}
       {!IS_PRODUCTION && (
         <div className="flex flex-col gap-2 px-3 py-2 group-data-[collapsible=icon]:hidden">

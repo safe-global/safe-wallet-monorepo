@@ -24,7 +24,7 @@ export const SpacesSidebarVariant = ({
   setupGroup,
 }: SpacesSidebarVariantProps): ReactElement => {
   return (
-    <SidebarContent className={css.sidebarContent}>
+    <SidebarContent>
       <SidebarGroup className={css.sidebarGroup}>
         <SidebarMenu>
           <SidebarMenuItem>

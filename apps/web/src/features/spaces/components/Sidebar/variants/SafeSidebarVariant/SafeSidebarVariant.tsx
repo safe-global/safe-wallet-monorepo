@@ -49,7 +49,7 @@ export const SafeSidebarVariant = ({
     workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)
 
   return (
-    <SidebarContent className={css.sidebarContent}>
+    <SidebarContent>
       {shouldRenderWorkspaceHeaderGroup && (
         <SidebarGroup className={css.sidebarGroup}>
           <SidebarMenu>
