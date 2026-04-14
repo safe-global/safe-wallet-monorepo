@@ -9,10 +9,11 @@ jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
   useCurrentSpaceId: () => null,
+  useIsQualifiedSafe: () => false,
 }))
 
 jest.mock('@/hooks/safes', () => ({
-  useOwnedSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
+  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
   isMultiChainSafeItem: () => false,
   flattenSafeItems: (items: unknown[]) => items,
 }))
