@@ -44,24 +44,26 @@ describe('SidebarTopBar', () => {
     expect(logo).toHaveAttribute('aria-label', 'Safe')
   })
 
-  it('applies horizontal layout when sidebar is expanded', () => {
+  it('applies expanded top bar sizing and state when sidebar is expanded', () => {
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
 
     render(<SidebarTopBar />)
 
     const topBar = screen.getByTestId('sidebar-top-bar')
-    expect(topBar).toHaveClass('flex', 'items-center', 'justify-between')
+    expect(topBar).toHaveAttribute('data-sidebar-state', 'expanded')
+    expect(topBar).toHaveClass('min-h-10')
   })
 
-  it('applies vertical layout when sidebar is collapsed', () => {
+  it('applies collapsed top bar sizing and state when sidebar is collapsed', () => {
     const { useSidebar } = require('@/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
 
     render(<SidebarTopBar />)
 
     const topBar = screen.getByTestId('sidebar-top-bar')
-    expect(topBar).toHaveClass('flex-col', 'items-center', 'justify-center', 'gap-2')
+    expect(topBar).toHaveAttribute('data-sidebar-state', 'collapsed')
+    expect(topBar).toHaveClass('min-h-16')
   })
 
   it('navigates to /welcome when on /welcome/accounts', async () => {
