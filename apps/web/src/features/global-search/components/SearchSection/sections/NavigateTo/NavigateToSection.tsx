@@ -12,6 +12,7 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useAppDispatch } from '@/store'
 import { closeGlobalSearch } from '@/features/global-search/store'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useIsSwapFeatureEnabled } from '@/features/swap'
 
 interface NavigationItem {
   icon: ReactNode
@@ -32,6 +33,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const { setTxFlow } = useContext(TxModalContext)
   const { link: txBuilderLink } = useTxBuilderApp()
   const wallet = useWallet()
+  const isSwapEnabled = useIsSwapFeatureEnabled()
 
   const isSafeLevel = typeof router.query.safe === 'string'
 
@@ -77,7 +79,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
     <SectionWrapper label={label}>
       <div className="flex flex-col">
         {filteredItems.map((item) => {
-          const isDisabled = item.label === 'Send' && !wallet
+          const isDisabled = (item.label === 'Send' && !wallet) || (item.label === 'Swap' && !isSwapEnabled)
 
           return (
             <button

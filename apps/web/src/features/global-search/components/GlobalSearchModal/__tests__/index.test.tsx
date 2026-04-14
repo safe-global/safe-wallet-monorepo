@@ -6,6 +6,11 @@ import { mockWallet } from '@/tests/mocks/hooks'
 
 jest.mock('@/hooks/wallets/useWallet')
 
+const mockUseIsSwapFeatureEnabled = jest.fn().mockReturnValue(true)
+jest.mock('@/features/swap', () => ({
+  useIsSwapFeatureEnabled: () => mockUseIsSwapFeatureEnabled(),
+}))
+
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
   useCurrentSpaceId: () => null,
@@ -71,5 +76,19 @@ describe('GlobalSearchModal', () => {
     renderWithOpenSearch()
 
     expect(screen.getByText('Send').closest('button')).not.toBeDisabled()
+  })
+
+  it('disables Swap button when swap feature is not enabled on the current chain', () => {
+    mockUseIsSwapFeatureEnabled.mockReturnValue(false)
+    renderWithOpenSearch()
+
+    expect(screen.getByText('Swap').closest('button')).toBeDisabled()
+  })
+
+  it('enables Swap button when swap feature is enabled on the current chain', () => {
+    mockUseIsSwapFeatureEnabled.mockReturnValue(true)
+    renderWithOpenSearch()
+
+    expect(screen.getByText('Swap').closest('button')).not.toBeDisabled()
   })
 })

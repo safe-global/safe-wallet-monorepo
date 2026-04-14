@@ -14,7 +14,7 @@ const GlobalSearch = ({ value, onChange }: GlobalSearchProps) => {
         placeholder="Search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-9 "
+        className="pl-9 focus-visible:ring-1 focus-visible:ring-ring"
         aria-label="Search"
         autoFocus
       />
