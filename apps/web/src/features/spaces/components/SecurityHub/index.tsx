@@ -3,13 +3,14 @@ import { Box, Typography } from '@mui/material'
 import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/store/slices'
+import { selectUndeployedSafes, selectCurrency } from '@/store/slices'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import { scanKey, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
 import { getScanResultsCache, evictScanCache } from '@/features/security/hooks/useSecurityScan'
-import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReportDrawer from './SecurityReportDrawer'
 import WorkspaceHealthCard from './WorkspaceHealthCard'
@@ -69,6 +70,7 @@ const getDeployedEntries = (safes: SpaceSafeEntry[]): SelectedSafe[] =>
 const useAutoScan = (
   queue: SelectedSafe[],
   safes: SpaceSafeEntry[],
+  overviewMap: Record<string, OverviewData>,
   onComplete: (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => void,
 ) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -84,7 +86,10 @@ const useAutoScan = (
   const currentTarget = isRunning && currentIndex < queue.length ? queue[currentIndex] : null
   const currentEntry = currentTarget ? safes.find((s) => s.address === currentTarget.address) : undefined
 
-  const scanContext = useSafeScanContext(currentTarget, currentEntry)
+  // Pass pre-fetched overview data to avoid redundant per-Safe API requests.
+  // The batch query in SecurityHub already fetches all overviews — reuse that data.
+  const currentOverview = currentTarget ? overviewMap[scanKey(currentTarget.address, currentTarget.chainId)] : undefined
+  const scanContext = useSafeScanContext(currentTarget, currentEntry, currentOverview)
 
   // Run scanners when context is ready
   useEffect(() => {
@@ -179,6 +184,48 @@ const SecurityHub = (): ReactElement => {
 
   const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
 
+  // Batch overview query — single source of truth for balance/queue data.
+  // Shared by both the table (display) and scan context (scanner input),
+  // eliminating redundant per-Safe overview API requests during auto-scan.
+  const currency = useAppSelector(selectCurrency)
+  const safeItems: SafeItem[] = useMemo(
+    () =>
+      safes.flatMap((safe) =>
+        safe.chainEntries
+          .filter((c) => c.isDeployed)
+          .map((c) => ({
+            chainId: c.chainId,
+            address: safe.address,
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          })),
+      ),
+    [safes],
+  )
+  const { data: overviews } = useGetMultipleSafeOverviewsQuery(
+    { safes: safeItems, currency },
+    { skip: safeItems.length === 0 },
+  )
+  const { balanceMap, overviewMap } = useMemo(() => {
+    const bMap: Record<string, string | undefined> = {}
+    const oMap: Record<string, OverviewData> = {}
+    if (overviews) {
+      for (const ov of overviews) {
+        if (ov.address?.value && ov.chainId) {
+          const key = scanKey(ov.address.value, ov.chainId)
+          bMap[key] = ov.fiatTotal
+          oMap[key] = {
+            balanceUsd: Number(ov.fiatTotal) || 0,
+            queuedTxCount: ov.queued ?? 0,
+          }
+        }
+      }
+    }
+    return { balanceMap: bMap, overviewMap: oMap }
+  }, [overviews])
+
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
       const key = scanKey(address, chainId)
@@ -188,7 +235,7 @@ const SecurityHub = (): ReactElement => {
     [],
   )
 
-  const { scanningKeys, isRunning, startScan } = useAutoScan(deployedEntries, safes, handleScanComplete)
+  const { scanningKeys, isRunning, startScan } = useAutoScan(deployedEntries, safes, overviewMap, handleScanComplete)
 
   // Auto-scan when safes are available. Re-triggers if the Safe list changes
   // (e.g., user switches Safes via the selector).
@@ -213,7 +260,8 @@ const SecurityHub = (): ReactElement => {
   }, [])
 
   const selectedEntry = useMemo(() => safes.find((s) => s.address === selectedSafe?.address), [safes, selectedSafe])
-  const scanContext = useSafeScanContext(selectedSafe, selectedEntry)
+  const drawerOverview = selectedSafe ? overviewMap[scanKey(selectedSafe.address, selectedSafe.chainId)] : undefined
+  const scanContext = useSafeScanContext(selectedSafe, selectedEntry, drawerOverview)
 
   const handleCloseDrawer = useCallback(() => setSelectedSafe(null), [])
 
@@ -254,6 +302,7 @@ const SecurityHub = (): ReactElement => {
             scanTimestamps={scanTimestamps}
             scanningKeys={scanningKeys}
             gradeFilter={gradeFilter}
+            balanceMap={balanceMap}
           />
         </>
       )}

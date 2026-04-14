@@ -119,6 +119,7 @@ const renderTable = (overrides: Partial<Props> = {}) => {
     onViewReport: jest.fn(),
     selectedSafe: null,
     scanResults: buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }]),
+    balanceMap: {},
   }
   return render(<SecuritySafesTable {...defaults} {...overrides} />)
 }

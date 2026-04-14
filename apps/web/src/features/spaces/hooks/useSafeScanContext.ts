@@ -13,7 +13,16 @@ import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/mu
 import type { ScanContext } from '@/features/security/data/scanners/types'
 import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
 
-const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry | undefined): ScanContext | null => {
+export type OverviewData = {
+  balanceUsd: number
+  queuedTxCount: number
+}
+
+const useSafeScanContext = (
+  selected: SelectedSafe | null,
+  entry: SpaceSafeEntry | undefined,
+  overviewData?: OverviewData,
+): ScanContext | null => {
   const chainId = selected?.chainId ?? ''
   const address = selected?.address ?? ''
   const isMultichain = (entry?.chainEntries.length ?? 0) > 1
@@ -64,10 +73,12 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     { skip: !isMultichain || multichainSafeItems.length === 0 },
   )
 
-  // Fetch overview for balance data (fiatTotal) on the selected chain
+  // Fetch overview for balance data (fiatTotal) on the selected chain.
+  // Skip when pre-fetched overviewData is provided (e.g. from the batch query in SecurityHub)
+  // to avoid redundant per-Safe API requests during auto-scan.
   const { currentData: safeOverview, isLoading: isOverviewLoading } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed || !!overviewData },
   )
 
   const chain = useChain(chainId)
@@ -79,7 +90,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     // overview/masterCopies/creationTx resolve causes scanners to run with defaults
     // (balanceUsd=0, deployer=null, creationInfo=null) producing incorrect scores.
     if (!selected || !entry || !safeInfo || isSafeLoading) return null
-    if (isOverviewLoading || isMasterCopiesLoading || isCreationLoading) return null
+    if ((!overviewData && isOverviewLoading) || isMasterCopiesLoading || isCreationLoading) return null
     if (isMultichain && isOverviewsLoading) return null
     // Chain config must be loaded — otherwise feature flags (recovery, hypernative,
     // transaction scanning) all default to false, producing wrong scanner results.
@@ -122,8 +133,8 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       chainId: selected.chainId,
       safeAddress: selected.address,
       nonce: safeInfo.nonce,
-      balanceUsd: Number(safeOverview?.fiatTotal) || 0,
-      queuedTxCount: safeOverview?.queued ?? 0,
+      balanceUsd: overviewData?.balanceUsd ?? (Number(safeOverview?.fiatTotal) || 0),
+      queuedTxCount: overviewData?.queuedTxCount ?? safeOverview?.queued ?? 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
       chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
       chainSupportsTransactionScanning: chain ? hasFeature(chain, FEATURES.RISK_MITIGATION) : false,
@@ -146,6 +157,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     entry,
     safeInfo,
     isSafeLoading,
+    overviewData,
     isOverviewLoading,
     isMasterCopiesLoading,
     isCreationLoading,
