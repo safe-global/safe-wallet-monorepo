@@ -1,11 +1,14 @@
 import { type ReactElement, useMemo } from 'react'
 import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import type { ScanResult } from '@/features/security/data/scanners/types'
+import { getSafeGrade, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
 
 type WorkspaceHealthCardProps = {
   scanResults: Record<string, Record<string, ScanResult>>
   isScanning: boolean
+  activeFilter: SafeGrade | null
+  onFilterChange: (grade: SafeGrade) => void
 }
 
 type Aggregate = {
@@ -99,8 +102,22 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
   </Box>
 )
 
-const WorkspaceHealthCard = ({ scanResults, isScanning }: WorkspaceHealthCardProps): ReactElement => {
+const WorkspaceHealthCard = ({
+  scanResults,
+  isScanning,
+  activeFilter,
+  onFilterChange,
+}: WorkspaceHealthCardProps): ReactElement => {
   const aggregate = useMemo(() => computeAggregate(scanResults), [scanResults])
+
+  // Per-Safe grade counts for the filter chips
+  const gradeCounts = useMemo(() => {
+    const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
+    for (const safeResults of Object.values(scanResults)) {
+      counts[getSafeGrade(safeResults)]++
+    }
+    return counts
+  }, [scanResults])
 
   // Show skeleton while the scan queue is running — a partial aggregate would be misleading.
   if (!aggregate || isScanning) {
@@ -148,36 +165,60 @@ const WorkspaceHealthCard = ({ scanResults, isScanning }: WorkspaceHealthCardPro
             />
           </Stack>
           <Typography variant="body2" color="text.secondary" mb={2}>
-            Based on threshold adequacy, signer diversity, version currency, factory provenance, and signing activity
-            across all your accounts.
+            Aggregated score across all accounts based on signer setup, contract version, module configuration, and
+            transaction activity.
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {criticalCount > 0 && (
+            {gradeCounts.passing > 0 && (
               <Chip
-                label={`${criticalCount} Critical`}
+                label={`${gradeCounts.passing} Passing`}
                 size="small"
-                sx={{ backgroundColor: 'error.background', color: 'error.main', fontWeight: 700 }}
+                onClick={() => onFilterChange('passing')}
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  backgroundColor: activeFilter === 'passing' ? 'success.main' : 'success.background',
+                  color: activeFilter === 'passing' ? 'background.paper' : 'success.main',
+                }}
               />
             )}
-            {atRiskCount > 0 && (
+            {gradeCounts.needs_attention > 0 && (
               <Chip
-                label={`${atRiskCount} At risk`}
+                label={`${gradeCounts.needs_attention} Needs attention`}
                 size="small"
-                sx={{ backgroundColor: 'error.background', color: 'error.main', fontWeight: 700 }}
+                onClick={() => onFilterChange('needs_attention')}
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  backgroundColor: activeFilter === 'needs_attention' ? 'warning.main' : 'warning.background',
+                  color: activeFilter === 'needs_attention' ? 'background.paper' : 'warning.main',
+                }}
               />
             )}
-            {needsAttentionCount > 0 && (
+            {gradeCounts.at_risk > 0 && (
               <Chip
-                label={`${needsAttentionCount} Needs attention`}
+                label={`${gradeCounts.at_risk} At risk`}
                 size="small"
-                sx={{ backgroundColor: 'warning.background', color: 'warning.main', fontWeight: 700 }}
+                onClick={() => onFilterChange('at_risk')}
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  backgroundColor: activeFilter === 'at_risk' ? 'error.main' : 'error.background',
+                  color: activeFilter === 'at_risk' ? 'background.paper' : 'error.main',
+                }}
               />
             )}
-            {criticalCount === 0 && atRiskCount === 0 && needsAttentionCount === 0 && (
+            {gradeCounts.critical > 0 && (
               <Chip
-                label="All checks passing"
+                label={`${gradeCounts.critical} Critical`}
                 size="small"
-                sx={{ backgroundColor: 'success.background', color: 'success.main', fontWeight: 700 }}
+                onClick={() => onFilterChange('critical')}
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  backgroundColor: activeFilter === 'critical' ? 'error.main' : 'error.background',
+                  color: activeFilter === 'critical' ? 'background.paper' : 'error.main',
+                }}
               />
             )}
           </Stack>

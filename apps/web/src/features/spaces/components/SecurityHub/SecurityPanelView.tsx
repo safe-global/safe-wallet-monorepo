@@ -1,5 +1,6 @@
 import { type ReactElement, type ReactNode, useMemo, useState } from 'react'
 import { Box, Button, CircularProgress, Collapse, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import { motion } from 'framer-motion'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
@@ -269,18 +270,31 @@ const buildExpanded = (result: ScanResult | undefined, cta?: Cta | null): ReactN
   return <EvidenceList intro={intro} evidence={result.evidence} cta={cta} />
 }
 
+const MotionBox = motion.create(Box)
+
+/** Stagger delay per row within a section (seconds). */
+const ROW_STAGGER = 0.04
+
 const SectionPanel = ({
   title,
   rows,
   footer,
+  /** Base delay offset so sections appearing later start their stagger later. */
+  baseDelay = 0,
 }: {
   title: string
   rows: { key: string; node: ReactNode }[]
   footer?: ReactNode
+  baseDelay?: number
 }): ReactElement | null => {
   if (rows.length === 0 && !footer) return null
   return (
-    <Box sx={{ mb: 3 }}>
+    <MotionBox
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30, delay: baseDelay }}
+      sx={{ mb: 3 }}
+    >
       <Typography
         variant="caption"
         color="text.secondary"
@@ -304,14 +318,27 @@ const SectionPanel = ({
         }}
       >
         {rows.map((r, idx) => (
-          <Box key={r.key}>
+          <MotionBox
+            key={r.key}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, delay: baseDelay + (idx + 1) * ROW_STAGGER }}
+          >
             {idx > 0 && <Divider />}
             {r.node}
-          </Box>
+          </MotionBox>
         ))}
-        {footer}
+        {footer && (
+          <MotionBox
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.15, delay: baseDelay + (rows.length + 1) * ROW_STAGGER }}
+          >
+            {footer}
+          </MotionBox>
+        )}
       </Paper>
-    </Box>
+    </MotionBox>
   )
 }
 
@@ -514,7 +541,7 @@ const SignersSection = ({
       </>
     ) : undefined
 
-  return <SectionPanel title="Your signers" rows={failingRows} footer={footer} />
+  return <SectionPanel title="Your signers" rows={failingRows} footer={footer} baseDelay={0.16} />
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -841,7 +868,7 @@ const SecurityChecksSection = ({
       </>
     ) : undefined
 
-  return <SectionPanel title="Security checks" rows={failingRows} footer={footer} />
+  return <SectionPanel title="Security checks" rows={failingRows} footer={footer} baseDelay={0.08} />
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -867,7 +894,13 @@ const SecurityPanelView = ({
 
   return (
     <Box>
-      <PanelHeader results={results} isComplete={isComplete} />
+      <MotionBox
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      >
+        <PanelHeader results={results} isComplete={isComplete} />
+      </MotionBox>
       <SecurityChecksSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
       <SignersSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
     </Box>

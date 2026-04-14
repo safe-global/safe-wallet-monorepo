@@ -8,7 +8,7 @@ import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/store/slices'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import type { ScanResult } from '@/features/security/data/scanners/types'
-import { scanKey } from '@/features/security/data/scanners/utils'
+import { scanKey, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
 import { getScanResultsCache } from '@/features/security/hooks/useSecurityScan'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
@@ -181,6 +181,7 @@ const SecurityHub = (): ReactElement => {
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
   const [scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
+  const [gradeFilter, setGradeFilter] = useState<SafeGrade | null>(null)
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
 
@@ -258,7 +259,12 @@ const SecurityHub = (): ReactElement => {
         </Typography>
       ) : (
         <>
-          <WorkspaceHealthCard scanResults={allScanResults} isScanning={isRunning} />
+          <WorkspaceHealthCard
+            scanResults={allScanResults}
+            isScanning={isRunning}
+            activeFilter={gradeFilter}
+            onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
+          />
           <SecuritySafesTable
             safes={safes}
             onViewReport={handleViewReport}
@@ -266,6 +272,7 @@ const SecurityHub = (): ReactElement => {
             scanResults={allScanResults}
             scanTimestamps={scanTimestamps}
             scanningKeys={scanningKeys}
+            gradeFilter={gradeFilter}
           />
         </>
       )}
