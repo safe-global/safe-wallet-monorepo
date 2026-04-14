@@ -124,6 +124,39 @@ describe('useConnect', () => {
     expect(rejected?.message).toBe('User rejected')
   })
 
+  it('does not resolve when walletInfo fields are incomplete', async () => {
+    const { result, rerender } = renderHook(() => useConnect())
+
+    let resolved = false
+    act(() => {
+      result.current().then(() => {
+        resolved = true
+      })
+    })
+
+    // walletInfo present but missing icon
+    mockWalletState.address = '0xABC'
+    mockWalletState.isConnected = true
+    mockWalletState.walletInfo = { name: 'MetaMask', icon: '' }
+    rerender({})
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(resolved).toBe(false)
+
+    // Now provide complete walletInfo
+    mockWalletState.walletInfo = { name: 'MetaMask', icon: 'icon-url' }
+    rerender({})
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(resolved).toBe(true)
+  })
+
   it('does not resolve when no connect is pending', () => {
     const { rerender } = renderHook(() => useConnect())
 

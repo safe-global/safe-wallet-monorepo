@@ -25,13 +25,13 @@ export function useConnect() {
   const pendingRef = useRef<PendingConnect | null>(null)
 
   useEffect(() => {
-    if (!pendingRef.current || !isConnected || !address || !walletInfo) {
+    if (!pendingRef.current || !isConnected || !address || !walletInfo?.name || !walletInfo?.icon) {
       return
     }
 
     const { resolve } = pendingRef.current
     pendingRef.current = null
-    resolve({ address, walletName: walletInfo.name ?? '', walletIcon: walletInfo.icon ?? '' })
+    resolve({ address, walletName: walletInfo.name, walletIcon: walletInfo.icon })
   }, [isConnected, address, walletInfo])
 
   useStableAppKitEvent('CONNECT_ERROR', () => {
