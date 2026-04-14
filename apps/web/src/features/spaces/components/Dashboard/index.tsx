@@ -1,8 +1,4 @@
-import { useEffect } from 'react'
-import MembersCard from './MembersCard'
-import SpacesCTACard from './SpacesCTACard'
-import AddressBookCard from './ImportAddressBookCard'
-import { Grid2, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import Grid from '@mui/material/Grid2'
 import { flattenSafeItems } from '@/hooks/safes'
 import {
@@ -14,7 +10,6 @@ import {
   useSpacePendingTransactions,
   SpacesFeature,
 } from '@/features/spaces'
-import AddAccountsCard from './AddAccountsCard'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -27,11 +22,21 @@ import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
+import SetupWidget from '../SetupWidget'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
 const AddActionsAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
       <AddAccounts />
+    </Track>
+  )
+}
+
+const EmptyStateAddAction = () => {
+  return (
+    <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+      <AddAccounts buttonVariant="default" buttonLabel="Add account" />
     </Track>
   )
 }
@@ -42,7 +47,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { allSafes: safes } = useSpaceSafes()
+  const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
   const { activeMembers } = useSpaceMembersByStatus()
@@ -54,6 +59,9 @@ const SpaceDashboard = () => {
     error: pendingTxError,
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
+  const [setupDismissed, setSetupDismissed] = useState(false)
+  const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
+  const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
 
@@ -101,39 +109,43 @@ const SpaceDashboard = () => {
   }
 
   const remainingPendingTxCount = Math.max(0, pendingTxCount - PENDING_TX_DISPLAY_LIMIT)
+  const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
   return (
     <>
       {isInvited && <PreviewInvite />}
 
-      {safeItems.length > 0 ? (
-        <>
-          <Grid container>
-            <Grid size={12}>
-              <AggregatedBalance safeItems={safeItems} />
-            </Grid>
+      <>
+        <Grid container>
+          <Grid size={12}>
+            <AggregatedBalance safeItems={safeItems} accountsLoading={isOverviewLoading} />
           </Grid>
+        </Grid>
 
-          <Grid container spacing={3}>
-            <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
-              {$isReady ? (
-                <AccountsWidget
-                  accounts={accounts}
-                  loading={isOverviewLoading}
-                  remainingCount={remainingCount > 0 ? remainingCount : undefined}
-                  onViewAll={handleViewAll}
-                  onItemClick={handleItemClick}
-                  action={<AddActionsAction />}
-                  error={error}
-                  onRefresh={refetch}
-                />
-              ) : (
-                <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
-                  <div className="animate-pulse rounded-lg bg-muted" />
-                </SafeWidget>
-              )}
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+        <Grid container spacing={3}>
+          <Grid data-testid="dashboard-safe-list" size={{ xs: 12, md: 6 }}>
+            {$isReady ? (
+              <AccountsWidget
+                accounts={accounts}
+                loading={isOverviewLoading}
+                remainingCount={remainingCount > 0 ? remainingCount : undefined}
+                onViewAll={handleViewAll}
+                onItemClick={handleItemClick}
+                action={accounts.length > 0 ? <AddActionsAction /> : undefined}
+                emptyStateAction={<EmptyStateAddAction />}
+                error={error}
+                onRefresh={refetch}
+              />
+            ) : (
+              <SafeWidget title="Accounts" action={<AddActionsAction />} testId="space-dashboard-accounts-widget">
+                <div className="animate-pulse rounded-lg bg-muted" />
+              </SafeWidget>
+            )}
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            {showSetupWidget ? (
+              <SetupWidget onDismiss={() => setSetupDismissed(true)} />
+            ) : (
               <PendingTxWidget
                 transactions={pendingTxs}
                 loading={isPendingTxLoading}
@@ -143,34 +155,15 @@ const SpaceDashboard = () => {
                 onRefresh={refetchPendingTxs}
                 onItemClick={handlePendingTxItemClick}
               />
-            </Grid>
+            )}
           </Grid>
-        </>
-      ) : (
-        <>
-          <Typography variant="h1" fontWeight={700} mb={4}>
-            Getting started
-          </Typography>
-
-          <Grid container spacing={3}>
-            <Grid size={12}>
-              <AddAccountsCard />
-            </Grid>
-
-            <Grid2 size={{ xs: 12, md: 4 }}>
-              <AddressBookCard />
-            </Grid2>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <MembersCard />
-            </Grid>
-
-            <Grid2 size={{ xs: 12, md: 4 }}>
-              <SpacesCTACard />
-            </Grid2>
-          </Grid>
-        </>
-      )}
+        </Grid>
+        {safeItems.length > 0 && (
+          <div className="mt-4">
+            <SetupWidget loading={isOverviewLoading} horizontal />
+          </div>
+        )}
+      </>
     </>
   )
 }

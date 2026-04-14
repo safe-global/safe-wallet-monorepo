@@ -51,6 +51,7 @@ jest.mock('@/features/spaces', () => ({
   useIsInvited: jest.fn(),
   useTrackSpace: jest.fn(),
   useSpacePendingTransactions: jest.fn(),
+  useGetSpaceAddressBook: jest.fn(() => []),
   SpacesFeature: { name: 'spaces' },
 }))
 
@@ -62,6 +63,8 @@ jest.mock('@/features/myAccounts', () => ({
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
+
+jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
 
 jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
@@ -75,6 +78,7 @@ jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('@/features/spaces/components/AddAccounts', () => () => null)
+jest.mock('../../SetupWidget', () => () => null)
 jest.mock('@/components/common/Track', () => {
   const Track = ({ children }: { children: React.ReactNode }) => <>{children}</>
   Track.displayName = 'Track'
@@ -123,7 +127,7 @@ const restoreDefaultMocks = () => {
   const useSpaceAccountsDataMock = useSpaceAccountsData as jest.Mock
 
   useCurrentSpaceIdMock.mockReturnValue(MOCK_SPACE_ID)
-  useSpaceSafesMock.mockReturnValue({ allSafes: [{ address: MOCK_SAFE_ADDRESS, chainId: '1' }] })
+  useSpaceSafesMock.mockReturnValue({ allSafes: [{ address: MOCK_SAFE_ADDRESS, chainId: '1' }], isLoading: false })
   useSpaceMembersByStatusMock.mockReturnValue({ activeMembers: [] })
   useIsInvitedMock.mockReturnValue(false)
   useSpacePendingTransactionsMock.mockReturnValue({
