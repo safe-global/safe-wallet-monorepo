@@ -1,61 +1,43 @@
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 import { router } from 'expo-router'
 import { useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import { useOnAppKitConnect } from './useOnAppKitConnect'
+import { useConnect } from './useConnect'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
  * On address mismatch, navigates to ReconnectError which owns subsequent retries.
- *
- * Uses CONNECT_SUCCESS event subscription instead of useEffect to respond
- * directly to connection events. The pendingAddressRef guard ensures only
- * user-initiated reconnections (via reconnect()) trigger the flow —
- * auto-reconnects and connections from useImportSignerFlow are ignored.
  */
 export function useReconnectFlow() {
-  const { open, disconnect } = useAppKit()
+  const { disconnect } = useAppKit()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
-  const pendingAddressRef = useRef<string | null>(null)
-
-  useOnAppKitConnect(
-    (eventData) => {
-      if (!pendingAddressRef.current) {
-        return
-      }
-
-      const reconnectAddress = getAddress(pendingAddressRef.current)
-      pendingAddressRef.current = null
-
-      const connectedAddress = eventData.address
-
-      if (!connectedAddress || !sameAddress(reconnectAddress, connectedAddress)) {
-        disconnect()
-
-        router.push({
-          pathname: '/import-signers/reconnect-error',
-          params: { address: reconnectAddress },
-        })
-
-        return
-      }
-
-      switchNetworkIfNeeded()
-    },
-    () => {
-      pendingAddressRef.current = null
-    },
-  )
+  const connect = useConnect()
 
   const reconnect = useCallback(
     async (signerAddress: string) => {
-      await disconnect()
-      pendingAddressRef.current = signerAddress
-      open({ view: 'Connect' })
+      try {
+        const { address } = await connect()
+        const reconnectAddress = getAddress(signerAddress)
+
+        if (!sameAddress(reconnectAddress, address)) {
+          disconnect()
+
+          router.push({
+            pathname: '/import-signers/reconnect-error',
+            params: { address: reconnectAddress },
+          })
+
+          return
+        }
+
+        switchNetworkIfNeeded()
+      } catch {
+        // CONNECT_ERROR or USER_REJECTED — no action needed
+      }
     },
-    [disconnect, open],
+    [connect, disconnect, switchNetworkIfNeeded],
   )
 
   return { reconnect }
