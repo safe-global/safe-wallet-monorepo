@@ -1,5 +1,6 @@
 import { type ReactElement, useMemo } from 'react'
 import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import { getSafeGrade, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
@@ -9,6 +10,8 @@ type WorkspaceHealthCardProps = {
   isScanning: boolean
   activeFilter: SafeGrade | null
   onFilterChange: (grade: SafeGrade) => void
+  lastScannedAt: number | null
+  onRescan: () => void
 }
 
 type Aggregate = {
@@ -102,11 +105,23 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
   </Box>
 )
 
+const formatRelativeTime = (timestamp: number): string => {
+  const seconds = Math.round((Date.now() - timestamp) / 1000)
+  if (seconds < 60) return 'Just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
+
 const WorkspaceHealthCard = ({
   scanResults,
   isScanning,
   activeFilter,
   onFilterChange,
+  lastScannedAt,
+  onRescan,
 }: WorkspaceHealthCardProps): ReactElement => {
   const aggregate = useMemo(() => computeAggregate(scanResults), [scanResults])
 
@@ -169,59 +184,72 @@ const WorkspaceHealthCard = ({
             transaction activity.
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {gradeCounts.passing > 0 && (
-              <Chip
-                label={`${gradeCounts.passing} Passing`}
-                size="small"
-                onClick={() => onFilterChange('passing')}
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  backgroundColor: activeFilter === 'passing' ? 'success.main' : 'success.background',
-                  color: activeFilter === 'passing' ? 'background.paper' : 'success.main',
-                }}
-              />
-            )}
-            {gradeCounts.needs_attention > 0 && (
-              <Chip
-                label={`${gradeCounts.needs_attention} Needs attention`}
-                size="small"
-                onClick={() => onFilterChange('needs_attention')}
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  backgroundColor: activeFilter === 'needs_attention' ? 'warning.main' : 'warning.background',
-                  color: activeFilter === 'needs_attention' ? 'background.paper' : 'warning.main',
-                }}
-              />
-            )}
-            {gradeCounts.at_risk > 0 && (
-              <Chip
-                label={`${gradeCounts.at_risk} At risk`}
-                size="small"
-                onClick={() => onFilterChange('at_risk')}
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  backgroundColor: activeFilter === 'at_risk' ? 'error.main' : 'error.background',
-                  color: activeFilter === 'at_risk' ? 'background.paper' : 'error.main',
-                }}
-              />
-            )}
-            {gradeCounts.critical > 0 && (
-              <Chip
-                label={`${gradeCounts.critical} Critical`}
-                size="small"
-                onClick={() => onFilterChange('critical')}
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  backgroundColor: activeFilter === 'critical' ? 'error.main' : 'error.background',
-                  color: activeFilter === 'critical' ? 'background.paper' : 'error.main',
-                }}
-              />
-            )}
+            {(
+              [
+                { grade: 'passing' as const, label: 'Passing', bg: 'success', count: gradeCounts.passing },
+                {
+                  grade: 'needs_attention' as const,
+                  label: 'Needs attention',
+                  bg: 'warning',
+                  count: gradeCounts.needs_attention,
+                },
+                { grade: 'at_risk' as const, label: 'At risk', bg: 'error', count: gradeCounts.at_risk },
+                { grade: 'critical' as const, label: 'Critical', bg: 'error', count: gradeCounts.critical },
+              ] as const
+            )
+              .filter((c) => c.count > 0)
+              .map((c) => {
+                const isActive = activeFilter === c.grade
+                return (
+                  <Chip
+                    key={c.grade}
+                    label={`${c.count} ${c.label}`}
+                    size="small"
+                    onClick={() => onFilterChange(c.grade)}
+                    sx={{
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      transition: 'background-color 0.15s, color 0.15s',
+                      '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' },
+                      backgroundColor: isActive ? `${c.bg}.main` : `${c.bg}.background`,
+                      color: isActive ? 'background.paper' : `${c.bg}.main`,
+                      '&:hover': {
+                        backgroundColor: isActive ? `${c.bg}.main` : `${c.bg}.background`,
+                        color: isActive ? 'background.paper' : `${c.bg}.main`,
+                        opacity: 0.8,
+                      },
+                    }}
+                  />
+                )
+              })}
           </Stack>
+
+          {lastScannedAt && (
+            <Stack direction="row" alignItems="center" spacing={0.5} mt={2}>
+              <Typography variant="caption" color="text.secondary">
+                Last scanned {formatRelativeTime(lastScannedAt)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                ·
+              </Typography>
+              <Stack
+                direction="row"
+                spacing={0.5}
+                alignItems="center"
+                onClick={isScanning ? undefined : onRescan}
+                sx={{
+                  cursor: isScanning ? 'default' : 'pointer',
+                  color: isScanning ? 'text.disabled' : 'primary.main',
+                  '&:hover': isScanning ? {} : { color: 'primary.dark' },
+                }}
+              >
+                <RefreshRoundedIcon sx={{ fontSize: 14 }} />
+                <Typography variant="caption" fontWeight={700} sx={{ color: 'inherit' }}>
+                  {isScanning ? 'Scanning...' : 'Re-scan'}
+                </Typography>
+              </Stack>
+            </Stack>
+          )}
         </Box>
       </Stack>
     </Paper>

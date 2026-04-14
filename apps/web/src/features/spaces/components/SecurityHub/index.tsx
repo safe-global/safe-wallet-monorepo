@@ -1,7 +1,5 @@
 import { type ReactElement, useMemo, useState, useCallback, useEffect, useRef } from 'react'
-import { Box, Button, Stack, Typography } from '@mui/material'
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
+import { Box, Typography } from '@mui/material'
 import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
@@ -196,7 +194,7 @@ const SecurityHub = (): ReactElement => {
     [],
   )
 
-  const { scanningKeys, isRunning, justCompleted, startScan } = useAutoScan(deployedEntries, safes, handleScanComplete)
+  const { scanningKeys, isRunning, startScan } = useAutoScan(deployedEntries, safes, handleScanComplete)
 
   // Auto-scan when safes are available. Re-triggers if the Safe list changes
   // (e.g., user switches Safes via the selector).
@@ -227,27 +225,14 @@ const SecurityHub = (): ReactElement => {
 
   return (
     <Box data-testid="security-hub">
-      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2} mb={3} flexWrap="wrap">
-        <Box>
-          <Typography variant="h1" mb={0.5}>
-            Security
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Security posture across all accounts in this workspace.
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={justCompleted ? <CheckRoundedIcon /> : <RefreshRoundedIcon />}
-          onClick={startScan}
-          disabled={isRunning}
-          sx={{ whiteSpace: 'nowrap' }}
-        >
-          {isRunning ? 'Scanning...' : justCompleted ? 'Scan complete' : 'Re-scan all'}
-        </Button>
-      </Stack>
+      <Box mb={3}>
+        <Typography variant="h1" mb={0.5}>
+          Security
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Security posture across all accounts in this workspace.
+        </Typography>
+      </Box>
 
       {isLoading ? (
         <Typography variant="body2" color="text.secondary">
@@ -264,6 +249,8 @@ const SecurityHub = (): ReactElement => {
             isScanning={isRunning}
             activeFilter={gradeFilter}
             onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
+            lastScannedAt={Object.values(scanTimestamps).length > 0 ? Math.max(...Object.values(scanTimestamps)) : null}
+            onRescan={startScan}
           />
           <SecuritySafesTable
             safes={safes}
