@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { isMultiChainSafeItem, useOwnedSafesGrouped, flattenSafeItems } from '@/hooks/safes'
+import { isMultiChainSafeItem, useAllSafesGrouped, flattenSafeItems } from '@/hooks/safes'
 import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
@@ -7,14 +7,17 @@ import useMatchSafe from '@/features/global-search/hooks/useMatchSafe'
 import SectionWrapper from '../../SectionWrapper'
 
 const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
-  const { allMultiChainSafes, allSingleSafes } = useOwnedSafesGrouped()
-  const allSafes = useMemo(
-    () => flattenSafeItems([...(allMultiChainSafes ?? []), ...(allSingleSafes ?? [])]),
+  const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()
+  const pinnedSafes = useMemo(
+    () =>
+      flattenSafeItems([
+        ...(allMultiChainSafes?.filter((safe) => safe.isPinned) ?? []),
+        ...(allSingleSafes?.filter((safe) => safe.isPinned) ?? []),
+      ]),
     [allMultiChainSafes, allSingleSafes],
   )
   const matchSafe = useMatchSafe()
-  console.log('### trusted safes', allMultiChainSafes, allSingleSafes)
-  const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
+  const filteredSafes = useGlobalSearchFilter(pinnedSafes, query, matchSafe)
 
   if (filteredSafes.length === 0) {
     return null

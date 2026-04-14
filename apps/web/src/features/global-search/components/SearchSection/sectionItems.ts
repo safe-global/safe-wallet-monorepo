@@ -1,7 +1,9 @@
-import { useRouter } from 'next/router'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
 import { TrustedSafesSection } from './sections/TrustedSafes'
+import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
+import { useIsQualifiedSafe } from '@/features/spaces'
 
 export interface SectionItemProps {
   query: string
@@ -16,18 +18,16 @@ export interface SectionItem {
 
 const useAlwaysActive = () => true
 
-const useHasSpaceQuery = () => {
-  const { query } = useRouter()
+const useIsInSpace = () => {
+  const isSpaceRoute = useIsSpaceRoute()
+  const qualifiedSafe = useIsQualifiedSafe()
 
-  return !!query.spaceId
+  return qualifiedSafe || isSpaceRoute
 }
 
 const useNotInSpace = () => {
-  const { query } = useRouter()
-
-  const spaceId = query.spaceId
-
-  return !spaceId
+  const qualifiedSafe = useIsQualifiedSafe()
+  return !qualifiedSafe
 }
 
 export const sectionItems: SectionItem[] = [
@@ -38,7 +38,7 @@ export const sectionItems: SectionItem[] = [
   },
   {
     label: 'Safe accounts',
-    useActivate: useHasSpaceQuery,
+    useActivate: useIsInSpace,
     renderItem: AccountsSection,
   },
   {
