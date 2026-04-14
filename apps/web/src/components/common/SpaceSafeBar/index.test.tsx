@@ -56,6 +56,12 @@ jest.mock('./SpaceNestedSafesButton', () => {
   return { __esModule: true, default: MockSpaceNestedSafesButton }
 })
 
+jest.mock('./AccountsModal', () => {
+  const MockAccountsModal = () => <div data-testid="accounts-modal" />
+  MockAccountsModal.displayName = 'AccountsModal'
+  return { __esModule: true, default: MockAccountsModal }
+})
+
 jest.mock('./SpaceBackLink', () => {
   const MockSpaceBackLink = (props: Record<string, unknown>) => (
     <div

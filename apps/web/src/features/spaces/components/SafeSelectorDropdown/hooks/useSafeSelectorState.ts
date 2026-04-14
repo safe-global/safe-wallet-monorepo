@@ -42,6 +42,10 @@ export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: Us
     [onItemSelect],
   )
 
+  const closeDropdown = useCallback(() => {
+    setDropdownOpen(false)
+  }, [])
+
   return {
     dropdownOpen,
     selectedChainId,
@@ -49,5 +53,6 @@ export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: Us
     isSingleSafe,
     handleOpenChange,
     handleSafeChange,
+    closeDropdown,
   }
 }

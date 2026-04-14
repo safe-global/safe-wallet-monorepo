@@ -7,10 +7,17 @@ export interface SafeDropdownContainerProps {
   selectedItemId?: string
   onItemSelect: (itemId: string) => void
   header?: React.ReactNode
-  footer?: React.ReactNode
+  footer?: (close: () => void) => React.ReactNode
+  closeDropdown: () => void
 }
 
-const SafeDropdownContainer = ({ items, selectedItemId, header, footer }: SafeDropdownContainerProps) => {
+const SafeDropdownContainer = ({
+  items,
+  selectedItemId,
+  header,
+  footer,
+  closeDropdown,
+}: SafeDropdownContainerProps) => {
   const filteredItems = items.filter((item) => item.id !== selectedItemId)
 
   return (
@@ -33,7 +40,7 @@ const SafeDropdownContainer = ({ items, selectedItemId, header, footer }: SafeDr
           <SafeItem {...item} />
         </SelectItem>
       ))}
-      {footer}
+      {footer?.(closeDropdown)}
     </SelectContent>
   )
 }

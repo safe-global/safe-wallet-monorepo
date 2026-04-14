@@ -16,8 +16,15 @@ function SafeSelectorDropdown({
   header,
   footer,
 }: SafeSelectorDropdownProps) {
-  const { dropdownOpen, selectedChainId, selectedItem, isSingleSafe, handleOpenChange, handleSafeChange } =
-    useSafeSelectorState({ items, selectedItemId, onItemSelect })
+  const {
+    dropdownOpen,
+    selectedChainId,
+    selectedItem,
+    isSingleSafe,
+    handleOpenChange,
+    handleSafeChange,
+    closeDropdown,
+  } = useSafeSelectorState({ items, selectedItemId, onItemSelect })
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id
@@ -65,6 +72,7 @@ function SafeSelectorDropdown({
           onItemSelect={safeItemSelect}
           header={header}
           footer={footer}
+          closeDropdown={closeDropdown}
         />
       </Select>
     </div>
