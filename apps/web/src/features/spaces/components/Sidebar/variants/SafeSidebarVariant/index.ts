@@ -1,0 +1,1 @@
+export { SafeSidebarVariant } from './SafeSidebarVariant'

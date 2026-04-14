@@ -3,6 +3,7 @@ import {
   sharedTokenRef,
   resolveCaptchaReady,
   resetCaptchaPromise,
+  registerWidgetRefreshCallback,
 } from '@/components/common/Captcha/captchaHeadersInit'
 import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
 
@@ -11,6 +12,7 @@ jest.mock('@/components/common/Captcha/captchaHeadersInit', () => ({
   sharedTokenRef: { current: null },
   resolveCaptchaReady: jest.fn(),
   resetCaptchaPromise: jest.fn(),
+  registerWidgetRefreshCallback: jest.fn(),
 }))
 
 jest.mock('@safe-global/utils/config/constants', () => ({
@@ -77,6 +79,15 @@ describe('useCaptchaToken', () => {
       mountContainer(result)
       mountContainer(result)
       await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
+    })
+
+    it('registers the widget refresh callback after rendering', async () => {
+      const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
+      mountContainer(result)
+      await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
+
+      expect(registerWidgetRefreshCallback).toHaveBeenCalledTimes(1)
+      expect(registerWidgetRefreshCallback).toHaveBeenCalledWith(expect.any(Function))
     })
   })
 

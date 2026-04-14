@@ -2,21 +2,36 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
-import type { EventsControllerState } from '@reown/appkit-core-react-native'
+import { UserRejectedError } from '../useConnect'
+import type { ConnectResult } from '../useConnect'
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 const checksumAddress = getAddress(mockAddress)
 
 const mockRouterPush = jest.fn()
-const mockOpen = jest.fn()
-const mockDisconnect = jest.fn().mockResolvedValue(undefined)
+const mockDisconnect = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
+
+let mockConnectResolve: (result: ConnectResult) => void
+let mockConnectReject: (error: Error) => void
+
+const mockConnect = jest.fn(
+  () =>
+    new Promise<ConnectResult>((resolve, reject) => {
+      mockConnectResolve = resolve
+      mockConnectReject = reject
+    }),
+)
 
 jest.mock('expo-router', () => ({
   router: {
     push: (...args: unknown[]) => mockRouterPush(...args),
   },
+}))
+
+jest.mock('@reown/appkit-react-native', () => ({
+  useAppKit: () => ({ disconnect: mockDisconnect }),
 }))
 
 jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
@@ -27,82 +42,26 @@ jest.mock('../useSwitchNetwork', () => ({
   useSwitchNetwork: () => ({ switchNetworkIfNeeded: mockSwitchNetworkIfNeeded }),
 }))
 
-// Capture event subscriptions registered by useStableAppKitEvent.
-// Must remain the same object reference since jest.mock is hoisted.
-const eventSubscriptions: Record<string, ((state: EventsControllerState) => void) | undefined> = {}
-
-jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
-  useAccount: () => ({ isConnected: true, address: mockAddress }),
-  useWalletInfo: () => ({ walletInfo: { name: 'MetaMask', icon: 'metamask-icon' } }),
-  useAppKitEventSubscription: (event: string, callback: (state: EventsControllerState) => void) => {
-    eventSubscriptions[event] = callback
-  },
+jest.mock('../useConnect', () => ({
+  ...jest.requireActual('../useConnect'),
+  useConnect: () => mockConnect,
 }))
-
-function fireConnectSuccess(address?: string, walletName = 'MetaMask') {
-  const state = {
-    timestamp: Date.now(),
-    data: {
-      type: 'track' as const,
-      event: 'CONNECT_SUCCESS' as const,
-      address,
-      properties: { name: walletName },
-    },
-    pendingWalletImpressions: [],
-  }
-
-  eventSubscriptions['CONNECT_SUCCESS']?.(state as EventsControllerState)
-}
-
-function fireConnectError() {
-  const state = {
-    timestamp: Date.now(),
-    data: {
-      type: 'track' as const,
-      event: 'CONNECT_ERROR' as const,
-      properties: { message: 'Connection failed' },
-    },
-    pendingWalletImpressions: [],
-  }
-
-  eventSubscriptions['CONNECT_ERROR']?.(state as EventsControllerState)
-}
-
-function fireUserRejected() {
-  const state = {
-    timestamp: Date.now(),
-    data: {
-      type: 'track' as const,
-      event: 'USER_REJECTED' as const,
-      properties: { message: 'User rejected' },
-    },
-    pendingWalletImpressions: [],
-  }
-
-  eventSubscriptions['USER_REJECTED']?.(state as EventsControllerState)
-}
 
 const renderImportFlow = () => renderHook(() => useImportSignerFlow())
 
 describe('useImportSignerFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    Object.keys(eventSubscriptions).forEach((key) => {
-      eventSubscriptions[key] = undefined
-    })
   })
 
-  it('disconnects and opens the wallet modal when initiateConnection is called', async () => {
+  it('calls connect when initiateConnection is called', async () => {
     const { result } = renderImportFlow()
 
-    await act(async () => {
-      await result.current.initiateConnection()
+    act(() => {
+      result.current.initiateConnection()
     })
 
-    expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
+    expect(mockConnect).toHaveBeenCalled()
   })
 
   it('navigates to name-signer when connected address is an owner', async () => {
@@ -110,20 +69,17 @@ describe('useImportSignerFlow', () => {
 
     const { result } = renderImportFlow()
 
-    await act(async () => {
-      await result.current.initiateConnection()
+    act(() => {
+      result.current.initiateConnection()
     })
 
-    mockDisconnect.mockClear()
-
-    act(() => {
-      fireConnectSuccess(mockAddress)
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
     })
 
     await waitFor(() => {
       expect(mockValidateAddressOwnership).toHaveBeenCalledWith(checksumAddress)
       expect(mockSwitchNetworkIfNeeded).toHaveBeenCalled()
-      expect(mockDisconnect).not.toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/name-signer',
@@ -141,14 +97,12 @@ describe('useImportSignerFlow', () => {
 
     const { result } = renderImportFlow()
 
-    await act(async () => {
-      await result.current.initiateConnection()
+    act(() => {
+      result.current.initiateConnection()
     })
 
-    mockDisconnect.mockClear()
-
-    act(() => {
-      fireConnectSuccess(mockAddress)
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
     })
 
     await waitFor(() => {
@@ -156,154 +110,60 @@ describe('useImportSignerFlow', () => {
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/connect-signer-error',
+          params: expect.objectContaining({
+            address: checksumAddress,
+            walletIcon: 'icon',
+          }),
         }),
       )
     })
   })
 
-  it('disconnects and navigates to error when validation throws', async () => {
+  it('navigates to error when validation throws', async () => {
     mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
 
     const { result } = renderImportFlow()
 
-    await act(async () => {
-      await result.current.initiateConnection()
+    act(() => {
+      result.current.initiateConnection()
     })
 
-    mockDisconnect.mockClear()
-
-    act(() => {
-      fireConnectSuccess(mockAddress)
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
     })
 
     await waitFor(() => {
-      expect(mockDisconnect).toHaveBeenCalled()
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pathname: '/import-signers/connect-signer-error',
-        }),
-      )
+      expect(mockRouterPush).not.toHaveBeenCalled()
     })
   })
 
-  it('does not navigate when CONNECT_SUCCESS fires without user initiation', () => {
-    renderImportFlow()
+  it('does nothing when connect is rejected (user rejected)', async () => {
+    const { result } = renderImportFlow()
 
     act(() => {
-      fireConnectSuccess(mockAddress)
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectReject(new UserRejectedError())
     })
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
-  it('does not navigate again for the same CONNECT_SUCCESS event', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
-
+  it('does nothing when connect fails (connection error)', async () => {
     const { result } = renderImportFlow()
 
-    await act(async () => {
-      await result.current.initiateConnection()
-    })
-
     act(() => {
-      fireConnectSuccess(mockAddress)
+      result.current.initiateConnection()
     })
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1)
-    })
-
-    // Fire another CONNECT_SUCCESS without re-initiating — should be ignored
-    act(() => {
-      fireConnectSuccess(mockAddress)
-    })
-
-    expect(mockRouterPush).toHaveBeenCalledTimes(1)
-  })
-
-  it('allows navigation after re-initiating connection', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
-
-    const { result } = renderImportFlow()
-
-    // First connection
-    await act(async () => {
-      await result.current.initiateConnection()
-    })
-
-    act(() => {
-      fireConnectSuccess(mockAddress)
-    })
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1)
-    })
-
-    // Second connection
-    await act(async () => {
-      await result.current.initiateConnection()
-    })
-
-    act(() => {
-      fireConnectSuccess(mockAddress)
-    })
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(2)
-    })
-  })
-
-  it('ignores CONNECT_SUCCESS without address', async () => {
-    const { result } = renderImportFlow()
 
     await act(async () => {
-      await result.current.initiateConnection()
-    })
-
-    act(() => {
-      fireConnectSuccess(undefined)
+      mockConnectReject(new Error('Connection failed'))
     })
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
-  })
-
-  it('resets connectInitiatedRef on CONNECT_ERROR', async () => {
-    const { result } = renderImportFlow()
-
-    await act(async () => {
-      await result.current.initiateConnection()
-    })
-
-    act(() => {
-      fireConnectError()
-    })
-
-    // Now fire a CONNECT_SUCCESS — should be ignored since ref was reset
-    act(() => {
-      fireConnectSuccess(mockAddress)
-    })
-
-    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
-  })
-
-  it('resets connectInitiatedRef on USER_REJECTED', async () => {
-    const { result } = renderImportFlow()
-
-    await act(async () => {
-      await result.current.initiateConnection()
-    })
-
-    act(() => {
-      fireUserRejected()
-    })
-
-    // Now fire a CONNECT_SUCCESS — should be ignored since ref was reset
-    act(() => {
-      fireConnectSuccess(mockAddress)
-    })
-
-    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
   })
 })

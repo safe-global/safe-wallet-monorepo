@@ -17,12 +17,12 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
 
   return (
     <Track {...WALLETCONNECT_EVENTS.POPUP_OPENED}>
-      <div className="relative">
+      <div className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
         <Button
           variant="ghost"
-          size="icon-lg"
+          size="icon-sm"
           onClick={onClick}
-          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+          className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
           aria-label="WalletConnect"
         >
           <WalletConnectIcon className="size-5 fill-current text-muted-foreground" />
@@ -46,7 +46,7 @@ const WcIcon = ({ sessionCount, sessionIcon, isError, onClick }: WcIconProps): R
 
         {!isError && sessionCount > 1 && (
           <span
-            className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
+            className="absolute z-10 flex items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
             aria-label={`${sessionCount} WalletConnect sessions`}
           >
             {sessionCount}

@@ -570,7 +570,7 @@ function SidebarGroupContent({ className, ...props }: ComponentProps<'div'>) {
     <div
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
-      className={cn('text-sm w-full', className)}
+      className={cn('text-sm w-full group-data-[collapsible=icon]:text-center', className)}
       {...props}
     />
   )

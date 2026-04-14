@@ -110,23 +110,28 @@ export function HeaderNavigation({
     <div className={cn('flex items-center gap-1')}>
       {/* TODO: Global search button */}
       {showSearch && (
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          onClick={onSearchClick}
-          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-          aria-label="Search"
-        >
-          <Search className="size-5 text-muted-foreground" />
-        </Button>
+        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onSearchClick}
+            className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+            aria-label="Search"
+          >
+            <Search className="size-5 text-muted-foreground" />
+          </Button>
+        </div>
       )}
 
-      <div className="relative" data-testid="notifications-center">
+      <div
+        className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
+        data-testid="notifications-center"
+      >
         <Button
           variant="ghost"
-          size="icon-lg"
+          size="icon-sm"
           onClick={onNotificationsClick}
-          className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+          className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
           aria-label="Notifications"
         >
           <Bell className="size-5 text-muted-foreground" />
@@ -134,7 +139,7 @@ export function HeaderNavigation({
 
         {messages > 0 && (
           <span
-            className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
+            className="absolute z-10 flex items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
             aria-label={`${messages} unread messages`}
           >
             {messages > 99 ? '99+' : messages}
@@ -147,12 +152,15 @@ export function HeaderNavigation({
       {showBatch && (
         <BatchTooltip>
           <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={batchCount}>
-            <div className="relative" data-track="batching: Batch sidebar open">
+            <div
+              className="relative flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]"
+              data-track="batching: Batch sidebar open"
+            >
               <Button
                 variant="ghost"
-                size="icon-lg"
+                size="icon-sm"
                 onClick={onBatchClick}
-                className="cursor-pointer shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
+                className="cursor-pointer rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
                 aria-label="Batch transactions"
               >
                 <Layers className="size-5 text-muted-foreground" />
@@ -160,7 +168,7 @@ export function HeaderNavigation({
 
               {batchCount > 0 && (
                 <span
-                  className="absolute z-10 flex items-center justify-center rounded-full bg-[var(--color-secondary-main)] text-white text-[10px] font-bold leading-none min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
+                  className="absolute z-10 flex items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground min-w-[18px] h-[18px] px-1 -top-[2px] -right-[4px]"
                   aria-label={`${batchCount} batched transactions`}
                 >
                   {batchCount > 99 ? '99+' : batchCount}
@@ -172,38 +180,40 @@ export function HeaderNavigation({
       )}
 
       <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
-        <Button
-          variant="ghost"
-          size="lg"
-          onClick={onWalletClick}
-          className="cursor-pointer gap-1.5 shrink-0 rounded-lg bg-card hover:bg-muted/30 transition-colors"
-          aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
-          data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
-        >
-          {isConnected && identiconUrl ? (
-            <div className="relative shrink-0">
-              <img src={identiconUrl} alt="Wallet identicon" className="size-6 rounded-full" />
-              {providerIconSrc && (
-                <img
-                  src={providerIconSrc}
-                  alt={`${walletLabel ?? 'Wallet'} logo`}
-                  className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-card bg-background p-px"
-                />
-              )}
-            </div>
-          ) : (
-            <Wallet className="size-5 text-muted-foreground" />
-          )}
-          <span className="text-xs text-muted-foreground font-normal">
-            {isConnected ? walletDisplayName : 'Connect Wallet'}
-          </span>
-          {isConnected &&
-            (walletOpen ? (
-              <ChevronUp className="size-3.5 text-muted-foreground" />
+        <div className="flex self-stretch items-stretch rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onWalletClick}
+            className="cursor-pointer gap-1.5 rounded-lg bg-transparent hover:bg-muted/30 transition-colors m-1"
+            aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
+            data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
+          >
+            {isConnected && identiconUrl ? (
+              <div className="relative shrink-0">
+                <img src={identiconUrl} alt="Wallet identicon" className="size-6 rounded-full" />
+                {providerIconSrc && (
+                  <img
+                    src={providerIconSrc}
+                    alt={`${walletLabel ?? 'Wallet'} logo`}
+                    className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-card bg-background p-px"
+                  />
+                )}
+              </div>
             ) : (
-              <ChevronDown className="size-3.5 text-muted-foreground" />
-            ))}
-        </Button>
+              <Wallet className="size-5 text-muted-foreground" />
+            )}
+            <span className="text-xs text-muted-foreground font-normal">
+              {isConnected ? walletDisplayName : 'Connect Wallet'}
+            </span>
+            {isConnected &&
+              (walletOpen ? (
+                <ChevronUp className="size-3.5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="size-3.5 text-muted-foreground" />
+              ))}
+          </Button>
+        </div>
       </Track>
     </div>
   )

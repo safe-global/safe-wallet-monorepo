@@ -34,51 +34,27 @@ jest.mock('../variants', () => ({
 
 describe('EnhancedSidebar', () => {
   const mockSpaces: SpaceItem[] = [
-    { id: 1, name: 'Space 1' },
-    { id: 2, name: 'Space 2' },
+    { id: 1, name: 'Space 1', safeCount: 0 },
+    { id: 2, name: 'Space 2', safeCount: 0 },
   ]
 
-  const mockSelectedSpace: SpaceItem = { id: 1, name: 'Space 1' }
+  const mockSelectedSpace: SpaceItem = { id: 1, name: 'Space 1', safeCount: 0 }
 
   it('renders all required components', () => {
-    render(
-      <EnhancedSidebar
-        type="spaces"
-        spaceName="Test Space"
-        spaceInitial="T"
-        selectedSpace={mockSelectedSpace}
-        spaces={mockSpaces}
-      />,
-    )
+    render(<EnhancedSidebar type="spaces" spaceInitial="T" selectedSpace={mockSelectedSpace} spaces={mockSpaces} />)
 
     expect(screen.getByText('Top Bar')).toBeInTheDocument()
     expect(screen.getByText('Footer')).toBeInTheDocument()
   })
 
   it('renders spaces variant when type is spaces', () => {
-    render(
-      <EnhancedSidebar
-        type="spaces"
-        spaceName="Test Space"
-        spaceInitial="T"
-        selectedSpace={mockSelectedSpace}
-        spaces={mockSpaces}
-      />,
-    )
+    render(<EnhancedSidebar type="spaces" spaceInitial="T" selectedSpace={mockSelectedSpace} spaces={mockSpaces} />)
 
     expect(screen.getByText('Spaces Variant')).toBeInTheDocument()
   })
 
   it('renders safe variant when type is safe', () => {
-    render(
-      <EnhancedSidebar
-        type="safe"
-        spaceName="Test Space"
-        spaceInitial="T"
-        selectedSpace={mockSelectedSpace}
-        spaces={mockSpaces}
-      />,
-    )
+    render(<EnhancedSidebar type="safe" spaceInitial="T" selectedSpace={mockSelectedSpace} spaces={mockSpaces} />)
 
     expect(screen.getByText('Safe Variant')).toBeInTheDocument()
   })
