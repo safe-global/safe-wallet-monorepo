@@ -4,7 +4,6 @@ import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@/compone
 import { withMockProvider } from '@/storybook/preview'
 import { createChainData } from '@/stories/mocks'
 import { EnhancedSidebar } from './index'
-import { SidebarSkeleton } from './SidebarSkeleton'
 import { SafeSidebarVariant } from './variants/SafeSidebarVariant'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
@@ -178,9 +177,14 @@ export const OutdatedSafeVersion: Story = {
 }
 
 export const Skeleton: Story = {
-  render: () => (
+  render: (args) => (
     <SafeSidebarLayout>
-      <SidebarSkeleton />
+      <EnhancedSidebar
+        type={args.type}
+        spaceInitial={args.spaceInitial}
+        selectedSpace={STORY_SELECTED_SPACE}
+        isLoading
+      />
     </SafeSidebarLayout>
   ),
 }

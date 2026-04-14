@@ -26,10 +26,14 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
 import { containerVariants, itemVariants } from '../../constants'
 
+const MAIN_NAV_SKELETON_COUNT = 5
+const DEFI_GROUP_SKELETON_COUNT = 4
+
 export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
+  isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
@@ -49,6 +53,10 @@ export const SafeSidebarVariant = ({
 
   const shouldRenderWorkspaceHeaderGroup =
     workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)
+
+  // Use provided items or create placeholders for skeleton
+  const displayMainNavItems = mainNavItems || Array(MAIN_NAV_SKELETON_COUNT).fill(null)
+  const displayDefiItems = defiGroup?.items || Array(DEFI_GROUP_SKELETON_COUNT).fill(null)
 
   return (
     <SidebarContent>
@@ -79,23 +87,23 @@ export const SafeSidebarVariant = ({
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0">
-                {mainNavItems.map((item) => (
-                  <NavItem key={item.href} item={item} />
+                {displayMainNavItems.map((item, index) => (
+                  <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </motion.div>
 
-        {/* DeFi Group - only show if has items */}
-        {defiGroup.items.length > 0 && (
+        {/* DeFi Group */}
+        {(defiGroup?.items?.length ?? 0) > 0 && (
           <motion.div variants={itemVariants}>
             <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
+              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0">
-                  {defiGroup.items.map((item) => (
-                    <NavItem key={item.href} item={item} />
+                  {displayDefiItems.map((item, index) => (
+                    <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -112,8 +120,9 @@ export const SafeSidebarVariant = ({
                   <SidebarMenuButton
                     size="lg"
                     isActive={isSettingsActive}
+                    disabled={isLoading}
                     className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-                    render={<Link href={settingsHref} />}
+                    render={!isLoading ? <Link href={settingsHref} /> : undefined}
                     data-testid="sidebar-settings-item"
                   >
                     <Tooltip>

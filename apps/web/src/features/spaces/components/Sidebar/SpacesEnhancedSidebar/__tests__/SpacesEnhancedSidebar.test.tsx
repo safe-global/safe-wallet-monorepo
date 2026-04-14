@@ -61,10 +61,6 @@ jest.mock('../../index', () => ({
   ),
 }))
 
-jest.mock('../../SidebarSkeleton', () => ({
-  SidebarSkeleton: () => <div data-testid="sidebar-skeleton">Skeleton</div>,
-}))
-
 describe('SpacesEnhancedSidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -80,12 +76,12 @@ describe('SpacesEnhancedSidebar', () => {
     mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
-  it('renders skeleton while hydration is pending', () => {
+  it('does not render sidebar content until hydration completes', () => {
     mockUseSidebarHydrated.mockReturnValue(false)
 
     render(<SpacesEnhancedSidebar />)
 
-    expect(screen.getByTestId('sidebar-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-provider')).toBeInTheDocument()
     expect(screen.queryByTestId('enhanced-sidebar')).not.toBeInTheDocument()
   })
 

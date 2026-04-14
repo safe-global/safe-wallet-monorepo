@@ -10,7 +10,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { SafeWorkspaceHeaderProps, SpaceSelectorProps, SidebarItemConfig, SpaceItem } from '../../types'
+import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { getQuerySpaceId } from '../../utils'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
@@ -30,7 +30,8 @@ export const SafeSidebarContent = ({
   spaces,
   spaceInitial,
   onSpaceAdded,
-}: SpaceSelectorProps): ReactElement => {
+  isLoading = false,
+}: SidebarVariantContentProps): ReactElement => {
   const router = useRouter()
   const chain = useCurrentChain()
   const queueSize = useQueuedTxsLength()
@@ -108,5 +109,12 @@ export const SafeSidebarContent = ({
 
   const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
 
-  return <SafeSidebarVariant workspaceHeader={workspaceHeader} mainNavItems={mainNavItems} defiGroup={setupGroup} />
+  return (
+    <SafeSidebarVariant
+      workspaceHeader={workspaceHeader}
+      mainNavItems={mainNavItems}
+      defiGroup={setupGroup}
+      isLoading={isLoading}
+    />
+  )
 }

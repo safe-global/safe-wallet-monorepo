@@ -8,6 +8,7 @@ import type { SidebarVariantType } from './variants'
 
 interface SidebarProps extends SpaceSelectorProps {
   type: SidebarVariantType
+  isLoading?: boolean
 }
 
 export const EnhancedSidebar = ({
@@ -16,6 +17,7 @@ export const EnhancedSidebar = ({
   selectedSpace,
   spaces,
   onSpaceAdded,
+  isLoading = false,
 }: SidebarProps): ReactElement => {
   const Variant = getSidebarVariant(type)
   return (
@@ -28,7 +30,13 @@ export const EnhancedSidebar = ({
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} onSpaceAdded={onSpaceAdded} />
+      <Variant
+        spaceInitial={spaceInitial}
+        selectedSpace={selectedSpace}
+        spaces={spaces}
+        onSpaceAdded={onSpaceAdded}
+        isLoading={isLoading}
+      />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )
