@@ -16,6 +16,7 @@ import type { UndeployedSafesState } from '@/features/counterfactual/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -185,7 +186,7 @@ export function useSpaceSafeSelectorItems() {
           source: 'space_selector',
         },
       )
-      router.push({ pathname: router.pathname, query: { safe: `${chain.shortName}:${address}` } })
+      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
     },
     [chainConfigs, router, spaceId],
   )

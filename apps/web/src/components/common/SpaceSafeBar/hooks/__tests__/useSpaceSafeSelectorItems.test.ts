@@ -155,7 +155,7 @@ function setupDefaults(
   })
   ;(useAppSelector as jest.Mock).mockReturnValue('usd')
   ;(useWallet as jest.Mock).mockReturnValue({ address: '0xWallet' })
-  ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, pathname: '/home' })
+  ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
 }
 
 // ── tests ──────────────────────────────────────────────────────────────

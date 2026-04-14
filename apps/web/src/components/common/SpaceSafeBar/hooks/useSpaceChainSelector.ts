@@ -4,6 +4,7 @@ import { isMultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -53,7 +54,7 @@ export function useSpaceChainSelector() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({ pathname: router.pathname, query: { safe: `${chain.shortName}:${safeAddress}` } })
+      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
     },
     [chainConfigs, router, safeAddress, spaceId],
   )
