@@ -73,12 +73,16 @@ function setupDefaults() {
     currentData: mockSafeInfo,
     isLoading: false,
   })
-  ;(useChainsGetMasterCopiesV1Query as jest.Mock).mockReturnValue({ currentData: [] })
-  ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({ currentData: undefined })
-  ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
-    data: { fiatTotal: '1000', queued: 2 },
+  ;(useChainsGetMasterCopiesV1Query as jest.Mock).mockReturnValue({ currentData: [], isLoading: false })
+  ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({
+    currentData: undefined,
+    isLoading: false,
   })
-  ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({ data: undefined })
+  ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
+    currentData: { fiatTotal: '1000', queued: 2 },
+    isLoading: false,
+  })
+  ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({ currentData: undefined, isLoading: false })
   ;(useChain as jest.Mock).mockReturnValue({ chainId: CHAIN_ID, features: [] })
   ;(useChains as jest.Mock).mockReturnValue({ configs: [] })
   ;(useAppSelector as jest.Mock).mockReturnValue({})
@@ -135,7 +139,8 @@ describe('useSafeScanContext', () => {
 
   it('includes correct balanceUsd from safeOverview.fiatTotal', () => {
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
-      data: { fiatTotal: '50000.5', queued: 0 },
+      currentData: { fiatTotal: '50000.5', queued: 0 },
+      isLoading: false,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current?.balanceUsd).toBe(50000.5)
@@ -143,7 +148,8 @@ describe('useSafeScanContext', () => {
 
   it('includes correct queuedTxCount from safeOverview.queued', () => {
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
-      data: { fiatTotal: '0', queued: 7 },
+      currentData: { fiatTotal: '0', queued: 7 },
+      isLoading: false,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current?.queuedTxCount).toBe(7)
