@@ -104,7 +104,8 @@ const WorkspaceHealthCard = ({ scanResults, totalDeployedTargets }: WorkspaceHea
   const scannedCount = Object.keys(scanResults).length
   const isScanning = scannedCount < totalDeployedTargets
 
-  if (!aggregate) {
+  // Show loading state until ALL scans complete — a partial aggregate would be misleading.
+  if (!aggregate || isScanning) {
     return (
       <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
         <Stack direction="row" spacing={3} alignItems="center">
@@ -114,7 +115,7 @@ const WorkspaceHealthCard = ({ scanResults, totalDeployedTargets }: WorkspaceHea
               Workspace health
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {isScanning ? 'Scanning your accounts...' : 'No data available yet.'}
+              Scanning your accounts...
             </Typography>
           </Box>
         </Stack>

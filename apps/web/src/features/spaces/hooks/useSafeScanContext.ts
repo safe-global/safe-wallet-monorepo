@@ -57,13 +57,15 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
         : [],
     [isMultichain, entry],
   )
-  const { data: safeOverviews, isLoading: isOverviewsLoading } = useGetMultipleSafeOverviewsQuery(
+  // Use `currentData` (not `data`) — `data` can briefly return the PREVIOUS Safe's overview
+  // when useAutoScan advances from one Safe to the next, before RTK Query resolves the new args.
+  const { currentData: safeOverviews, isLoading: isOverviewsLoading } = useGetMultipleSafeOverviewsQuery(
     { safes: multichainSafeItems, currency },
     { skip: !isMultichain || multichainSafeItems.length === 0 },
   )
 
   // Fetch overview for balance data (fiatTotal) on the selected chain
-  const { data: safeOverview, isLoading: isOverviewLoading } = useGetSafeOverviewQuery(
+  const { currentData: safeOverview, isLoading: isOverviewLoading } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
     { skip: !selected || !isDeployed },
   )
@@ -79,6 +81,9 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     if (!selected || !entry || !safeInfo || isSafeLoading) return null
     if (isOverviewLoading || isMasterCopiesLoading || isCreationLoading) return null
     if (isMultichain && isOverviewsLoading) return null
+    // Chain config must be loaded — otherwise feature flags (recovery, hypernative,
+    // transaction scanning) all default to false, producing wrong scanner results.
+    if (!chain) return null
 
     // Resolve deployer using the same logic as useMasterCopies + OutdatedMastercopyWarning
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))
@@ -143,6 +148,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     isMasterCopiesLoading,
     isCreationLoading,
     isOverviewsLoading,
+    chain,
     masterCopies,
     latestVersion,
     isMultichain,

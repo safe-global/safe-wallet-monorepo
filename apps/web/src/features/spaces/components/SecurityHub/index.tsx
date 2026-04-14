@@ -98,8 +98,6 @@ const useAutoScan = (
     if (scanningRef.current === key) return
     scanningRef.current = key
 
-    setScanningKeys((prev) => new Set(prev).add(key))
-
     let completed = 0
     const total = SCANNERS.length
     const results: Record<string, ScanResult> = {}
@@ -154,10 +152,14 @@ const useAutoScan = (
   const startScan = useCallback(() => {
     completedRef.current = new Set()
     scanningRef.current = null
+    // Pre-populate ALL keys as scanning so every row shows a loading state immediately.
+    // Each key is removed individually on completion. For multichain parents,
+    // `isAnyChainScanning` stays true until the last chain-child finishes.
+    setScanningKeys(new Set(queue.map((q) => scanKey(q.address, q.chainId))))
     setCurrentIndex(0)
     setJustCompleted(false)
     setIsRunning(true)
-  }, [])
+  }, [queue])
 
   return { scanningKeys, isRunning, justCompleted, startScan }
 }
