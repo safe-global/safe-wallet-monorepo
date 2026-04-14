@@ -1,6 +1,7 @@
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Settings } from 'lucide-react'
+import { motion } from 'motion/react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -23,6 +24,7 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
+import { containerVariants, itemVariants } from '../../constants'
 
 export const SafeSidebarVariant = ({
   workspaceHeader,
@@ -50,73 +52,85 @@ export const SafeSidebarVariant = ({
 
   return (
     <SidebarContent>
-      {shouldRenderWorkspaceHeaderGroup && (
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-      )}
+      <motion.div variants={containerVariants} initial="hidden" animate="visible">
+        {shouldRenderWorkspaceHeaderGroup && (
+          <motion.div variants={itemVariants}>
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </motion.div>
+        )}
 
-      {/* Action Button */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarActionButton />
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* Action Button */}
+        <motion.div variants={itemVariants}>
+          <SidebarGroup className={css.sidebarGroup}>
+            <SidebarGroupContent>
+              <SidebarActionButton />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </motion.div>
 
-      {/* Main Navigation */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarMenu className="gap-0">
-            {mainNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* Main Navigation */}
+        <motion.div variants={itemVariants}>
+          <SidebarGroup className={css.sidebarGroup}>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0">
+                {mainNavItems.map((item) => (
+                  <NavItem key={item.href} item={item} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </motion.div>
 
-      {/* DeFi Group - only show if has items */}
-      {defiGroup.items.length > 0 && (
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0">
-              {defiGroup.items.map((item) => (
-                <NavItem key={item.href} item={item} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      )}
+        {/* DeFi Group - only show if has items */}
+        {defiGroup.items.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0">
+                  {defiGroup.items.map((item) => (
+                    <NavItem key={item.href} item={item} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </motion.div>
+        )}
 
-      {/* Settings */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarMenu className="gap-0">
-            <SidebarMenuItem className="relative">
-              <SidebarMenuButton
-                size="lg"
-                isActive={isSettingsActive}
-                className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-                render={<Link href={settingsHref} />}
-                data-testid="sidebar-settings-item"
-              >
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Settings className="text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Settings</TooltipContent>
-                </Tooltip>
-                <span>Settings</span>
-              </SidebarMenuButton>
-              {isOutdated && <span className={css.outdatedDot} aria-hidden />}
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* Settings */}
+        <motion.div variants={itemVariants}>
+          <SidebarGroup className={css.sidebarGroup}>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0">
+                <SidebarMenuItem className="relative">
+                  <SidebarMenuButton
+                    size="lg"
+                    isActive={isSettingsActive}
+                    className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
+                    render={<Link href={settingsHref} />}
+                    data-testid="sidebar-settings-item"
+                  >
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Settings className="text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right">Settings</TooltipContent>
+                    </Tooltip>
+                    <span>Settings</span>
+                  </SidebarMenuButton>
+                  {isOutdated && <span className={css.outdatedDot} aria-hidden />}
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </motion.div>
+      </motion.div>
     </SidebarContent>
   )
 }
