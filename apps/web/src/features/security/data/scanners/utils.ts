@@ -37,3 +37,22 @@ export const severityRank = (severity: string): number => {
   const order: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
   return order[severity] ?? 4
 }
+
+/** Per-Safe grade based on its worst check result. */
+export type SafeGrade = 'critical' | 'at_risk' | 'needs_attention' | 'passing'
+
+export const getSafeGrade = (results: Record<string, ScanResult>): SafeGrade => {
+  let hasIssue = false
+  let hasPartial = false
+
+  for (const result of Object.values(results)) {
+    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
+    if (result.severity === 'Critical') return 'critical'
+    if (result.status === 'issue') hasIssue = true
+    if (result.status === 'partial') hasPartial = true
+  }
+
+  if (hasIssue) return 'at_risk'
+  if (hasPartial) return 'needs_attention'
+  return 'passing'
+}

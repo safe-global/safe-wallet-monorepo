@@ -21,7 +21,14 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
 import { getStrengthLevel, getStrengthColor } from '@/features/security/data/securityScoring'
 import type { ScanResult } from '@/features/security/data/scanners/types'
-import { scanKey, computeSummary, severityRank, type GradeSummary } from '@/features/security/data/scanners/utils'
+import {
+  scanKey,
+  computeSummary,
+  severityRank,
+  getSafeGrade,
+  type GradeSummary,
+  type SafeGrade,
+} from '@/features/security/data/scanners/utils'
 import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
@@ -120,6 +127,7 @@ type SecuritySafesTableProps = {
   scanResults: Record<string, Record<string, ScanResult>>
   scanTimestamps?: Record<string, number>
   scanningKeys?: Set<string>
+  gradeFilter?: SafeGrade | null
 }
 
 const SecuritySafesTable = ({
@@ -129,6 +137,7 @@ const SecuritySafesTable = ({
   scanResults,
   scanTimestamps,
   scanningKeys,
+  gradeFilter,
 }: SecuritySafesTableProps): ReactElement => {
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const chainShortNames = useMemo(() => {
@@ -212,6 +221,20 @@ const SecuritySafesTable = ({
     return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
   }
 
+  // Filter safes by grade when a chip filter is active
+  const filteredSafes = useMemo(() => {
+    if (!gradeFilter) return safes
+    return safes.filter((safe) => {
+      // For multichain Safes, match if ANY chain matches the grade
+      for (const chain of safe.chainEntries) {
+        const key = scanKey(safe.address, chain.chainId)
+        const results = scanResults[key]
+        if (results && getSafeGrade(results) === gradeFilter) return true
+      }
+      return false
+    })
+  }, [safes, scanResults, gradeFilter])
+
   return (
     <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
       <Table sx={{ tableLayout: 'fixed' }}>
@@ -227,7 +250,7 @@ const SecuritySafesTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {safes.map((safe) => {
+          {filteredSafes.map((safe) => {
             const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
             const isExpanded = expandedAddresses.has(safe.address)
 
