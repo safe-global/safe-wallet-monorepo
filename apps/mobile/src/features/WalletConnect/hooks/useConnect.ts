@@ -8,6 +8,20 @@ export interface ConnectResult {
   walletIcon: string
 }
 
+export class ConnectError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ConnectError'
+  }
+}
+
+export class UserRejectedError extends Error {
+  constructor() {
+    super('User rejected the connection request')
+    this.name = 'UserRejectedError'
+  }
+}
+
 interface PendingConnect {
   resolve: (result: ConnectResult) => void
   reject: (error: Error) => void
@@ -40,7 +54,7 @@ export function useConnect() {
     }
     const { reject } = pendingRef.current
     pendingRef.current = null
-    reject(new Error('Connection failed'))
+    reject(new ConnectError('Connection failed'))
   })
 
   useStableAppKitEvent('USER_REJECTED', () => {
@@ -49,7 +63,7 @@ export function useConnect() {
     }
     const { reject } = pendingRef.current
     pendingRef.current = null
-    reject(new Error('User rejected'))
+    reject(new UserRejectedError())
   })
 
   const connect = useCallback(() => {

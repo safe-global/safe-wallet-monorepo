@@ -5,7 +5,7 @@ import { useAppKit } from '@reown/appkit-react-native'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import Logger from '@/src/utils/logger'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import { useConnect } from './useConnect'
+import { useConnect, UserRejectedError } from './useConnect'
 
 /**
  * Handles the signer import flow: ownership validation and navigation
@@ -39,7 +39,7 @@ export function useImportSignerFlow() {
         })
       }
     } catch (error) {
-      if (error instanceof Error && error.message !== 'User rejected') {
+      if (!(error instanceof UserRejectedError)) {
         Logger.error('Error during signer import:', error)
       }
     }

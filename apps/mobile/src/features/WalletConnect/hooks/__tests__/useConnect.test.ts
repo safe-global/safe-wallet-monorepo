@@ -1,5 +1,5 @@
 import { renderHook, act } from '@/src/tests/test-utils'
-import { useConnect } from '../useConnect'
+import { useConnect, ConnectError, UserRejectedError } from '../useConnect'
 
 const mockOpen = jest.fn()
 
@@ -100,7 +100,7 @@ describe('useConnect', () => {
       await Promise.resolve()
     })
 
-    expect(rejected?.message).toBe('Connection failed')
+    expect(rejected).toBeInstanceOf(ConnectError)
   })
 
   it('rejects on USER_REJECTED', async () => {
@@ -121,7 +121,7 @@ describe('useConnect', () => {
       await Promise.resolve()
     })
 
-    expect(rejected?.message).toBe('User rejected')
+    expect(rejected).toBeInstanceOf(UserRejectedError)
   })
 
   it('does not resolve when walletInfo fields are incomplete', async () => {

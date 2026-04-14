@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
+import { UserRejectedError } from '../useConnect'
 import type { ConnectResult } from '../useConnect'
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
@@ -37,6 +38,7 @@ jest.mock('../useSwitchNetwork', () => ({
 }))
 
 jest.mock('../useConnect', () => ({
+  ...jest.requireActual('../useConnect'),
   useConnect: () => mockConnect,
 }))
 
@@ -105,7 +107,7 @@ describe('useReconnectFlow', () => {
     })
 
     await act(async () => {
-      mockConnectReject(new Error('User rejected'))
+      mockConnectReject(new UserRejectedError())
     })
 
     expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
