@@ -45,7 +45,8 @@ const ListIcon = () => (
   </ListItemIcon>
 )
 
-const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/en/articles/285386-spaces'
+const SPACE_HELP_ARTICLE_LINK =
+  'https://help.safe.global/articles/8240597068-Spaces:-Team-Collaboration-for-Safe-Accounts'
 
 const SpaceInfoModal = ({
   showButtons = true,

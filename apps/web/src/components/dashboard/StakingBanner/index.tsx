@@ -14,7 +14,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
 
-const LEARN_MORE_LINK = 'https://help.safe.global/en/articles/222615-safe-staking'
+const LEARN_MORE_LINK = 'https://help.safe.global/articles/7497206492-Safe{Staking}'
 
 const StakingBanner = ({
   hideLocalStorageKey = 'hideStakingBanner',
