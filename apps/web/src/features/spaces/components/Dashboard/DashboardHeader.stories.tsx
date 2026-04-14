@@ -24,6 +24,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     value: '$123,456.01',
+    noAssets: false,
     onSend: () => {},
     onReceive: () => {},
     onSwap: () => {},
