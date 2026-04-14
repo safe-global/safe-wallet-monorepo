@@ -20,7 +20,7 @@ describe('useResolvedSidebarNav', () => {
     label: 'Setup',
     items: [
       { icon: mockIcon, label: 'Settings', href: '/settings' },
-      { icon: mockIcon, label: 'Security hub', href: '/security', activeMemberOnly: true },
+      { icon: mockIcon, label: 'Security', href: '/security', activeMemberOnly: true },
     ],
   }
 
@@ -109,7 +109,7 @@ describe('useResolvedSidebarNav', () => {
 
       expect(result.current.setupGroup.items).toHaveLength(2)
       expect(result.current.setupGroup.items[0]?.label).toBe('Settings')
-      expect(result.current.setupGroup.items[1]?.label).toBe('Security hub')
+      expect(result.current.setupGroup.items[1]?.label).toBe('Security')
     })
 
     it('applies isItemDisabled to setup group items', () => {

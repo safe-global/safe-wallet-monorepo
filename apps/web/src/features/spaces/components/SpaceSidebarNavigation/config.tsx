@@ -48,7 +48,7 @@ export const navItems: DynamicNavItem[] = [
     href: AppRoutes.spaces.addressBook,
   },
   {
-    label: 'Security hub',
+    label: 'Security',
     icon: <SecurityIcon />,
     href: AppRoutes.spaces.security,
   },
