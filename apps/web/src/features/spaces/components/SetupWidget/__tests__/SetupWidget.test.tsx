@@ -9,9 +9,17 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 
+const mockSetDismissedSpaces = jest.fn()
+const mockSetCompletedSpaces = jest.fn()
+
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
-  default: jest.fn(() => [{}, jest.fn()]),
+  default: jest.fn((key: string) => {
+    if (key === 'setupWidgetCompleted') {
+      return [{}, mockSetCompletedSpaces]
+    }
+    return [{}, mockSetDismissedSpaces]
+  }),
 }))
 
 jest.mock('@/hooks/safes', () => ({
@@ -38,12 +46,38 @@ jest.mock(
 jest.mock(
   '../../SpaceInfoModal',
   () =>
-    function MockSpaceInfoModal() {
-      return <div data-testid="space-info-modal" />
+    function MockSpaceInfoModal({ onClose }: { onClose: () => void }) {
+      return (
+        <div data-testid="space-info-modal">
+          <button data-testid="close-space-info-modal" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      )
     },
 )
 
 describe('SetupWidget', () => {
+  beforeEach(() => {
+    mockSetDismissedSpaces.mockClear()
+    mockSetCompletedSpaces.mockClear()
+
+    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
+    useLocalStorage.default.mockImplementation((key: string) => {
+      if (key === 'setupWidgetCompleted') {
+        return [{}, mockSetCompletedSpaces]
+      }
+      return [{}, mockSetDismissedSpaces]
+    })
+
+    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
+      jest.requireMock<typeof SpacesModule>('@/features/spaces')
+
+    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [] })
+    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
+  })
+
   it('renders the widget title', () => {
     render(<SetupWidget />)
 
@@ -125,6 +159,57 @@ describe('SetupWidget', () => {
     fireEvent.click(screen.getByText('Explore Spaces'))
 
     expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
+  })
+
+  it('marks the space as completed when Explore Spaces modal is closed and all steps are done', () => {
+    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
+      jest.requireMock<typeof SpacesModule>('@/features/spaces')
+
+    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
+    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({
+      activeMembers: [{ id: '1' }, { id: '2' }],
+      invitedMembers: [],
+    })
+
+    render(<SetupWidget />)
+
+    fireEvent.click(screen.getByText('Explore Spaces'))
+    expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('close-space-info-modal'))
+
+    expect(mockSetCompletedSpaces).toHaveBeenCalledWith(expect.any(Function))
+
+    const updaterFn = mockSetCompletedSpaces.mock.calls[0][0]
+    const result = updaterFn({})
+    expect(result).toEqual({ '1': true })
+  })
+
+  it('does not mark the space as completed when Explore Spaces modal is closed but steps are incomplete', () => {
+    render(<SetupWidget />)
+
+    fireEvent.click(screen.getByText('Explore Spaces'))
+    expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('close-space-info-modal'))
+
+    expect(mockSetCompletedSpaces).not.toHaveBeenCalled()
+  })
+
+  it('does not render when the space setup is completed', () => {
+    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
+
+    useLocalStorage.default.mockImplementation((key: string) => {
+      if (key === 'setupWidgetCompleted') {
+        return [{ '1': true }, mockSetCompletedSpaces]
+      }
+      return [{}, mockSetDismissedSpaces]
+    })
+
+    render(<SetupWidget />)
+
+    expect(screen.queryByText('Set up your Space')).not.toBeInTheDocument()
   })
 
   it('disables click on completed steps', () => {

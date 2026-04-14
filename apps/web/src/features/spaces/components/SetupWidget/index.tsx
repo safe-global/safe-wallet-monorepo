@@ -50,6 +50,7 @@ const SETUP_STEPS: SetupStep[] = [
 ]
 
 const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
+const COMPLETED_STORAGE_KEY = 'setupWidgetCompleted'
 const DISMISS_DAYS = 3
 
 interface SetupWidgetProps {
@@ -65,6 +66,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [exploreOpen, setExploreOpen] = useState(false)
   const [dismissedSpaces = {}, setDismissedSpaces] = useLocalStorage<Record<string, number>>(DISMISS_STORAGE_KEY)
+  const [completedSpaces = {}, setCompletedSpaces] = useLocalStorage<Record<string, boolean>>(COMPLETED_STORAGE_KEY)
   const spaceId = useCurrentSpaceId()
   const addressBook = useGetSpaceAddressBook()
   const { allSafes } = useSpaceSafes()
@@ -110,6 +112,19 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
     }
   }
 
+  const allRequiredStepsCompleted = SETUP_STEPS.every((step) => !step.activeFn || step.activeFn(deps))
+
+  const handleExploreClose = () => {
+    setExploreOpen(false)
+
+    if (spaceId && allRequiredStepsCompleted) {
+      setCompletedSpaces((prev = {}) => ({
+        ...prev,
+        [spaceId]: true,
+      }))
+    }
+  }
+
   const handleDismiss = () => {
     setDismissed(true)
   }
@@ -125,8 +140,9 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   }
 
   const isDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
+  const isCompletedForSpace = spaceId ? completedSpaces[spaceId] === true : false
 
-  if (loading || isDismissedForSpace) return null
+  if (loading || isDismissedForSpace || isCompletedForSpace) return null
 
   return (
     <>
@@ -203,7 +219,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
       {importOpen && <ImportAddressBookDialog handleClose={() => setImportOpen(false)} />}
       <AddAccounts externalOpen={addAccountsOpen} onExternalClose={() => setAddAccountsOpen(false)} />
       {addMemberOpen && <AddMemberModal onClose={() => setAddMemberOpen(false)} />}
-      {exploreOpen && <SpaceInfoModal onClose={() => setExploreOpen(false)} />}
+      {exploreOpen && <SpaceInfoModal onClose={handleExploreClose} />}
     </>
   )
 }
