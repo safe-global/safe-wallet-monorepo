@@ -163,7 +163,7 @@ const WorkspaceHealthCard = ({
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5} mb={0.5} flexWrap="wrap">
             <Typography variant="h5" fontWeight={700}>
-              Workspace health
+              Security score
             </Typography>
             <Chip
               label={level}
@@ -180,21 +180,43 @@ const WorkspaceHealthCard = ({
             />
           </Stack>
           <Typography variant="body2" color="text.secondary" mb={2}>
-            Aggregated score across all accounts based on signer setup, contract version, module configuration, and
-            transaction activity.
+            Combined score from all security checks across your accounts.
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             {(
               [
-                { grade: 'passing' as const, label: 'Passing', bg: 'success', count: gradeCounts.passing },
+                {
+                  grade: 'critical' as const,
+                  label: 'Critical',
+                  activeBg: 'error.dark',
+                  inactiveBg: 'error.background',
+                  text: 'error.dark',
+                  count: gradeCounts.critical,
+                },
+                {
+                  grade: 'at_risk' as const,
+                  label: 'At risk',
+                  activeBg: 'error.main',
+                  inactiveBg: 'error.background',
+                  text: 'error.main',
+                  count: gradeCounts.at_risk,
+                },
                 {
                   grade: 'needs_attention' as const,
-                  label: 'Needs attention',
-                  bg: 'warning',
+                  label: 'Needs review',
+                  activeBg: 'warning.main',
+                  inactiveBg: 'warning.background',
+                  text: 'warning.main',
                   count: gradeCounts.needs_attention,
                 },
-                { grade: 'at_risk' as const, label: 'At risk', bg: 'error', count: gradeCounts.at_risk },
-                { grade: 'critical' as const, label: 'Critical', bg: 'error', count: gradeCounts.critical },
+                {
+                  grade: 'passing' as const,
+                  label: 'Healthy',
+                  activeBg: 'success.main',
+                  inactiveBg: 'success.background',
+                  text: 'success.main',
+                  count: gradeCounts.passing,
+                },
               ] as const
             )
               .filter((c) => c.count > 0)
@@ -211,11 +233,11 @@ const WorkspaceHealthCard = ({
                       fontWeight: 700,
                       transition: 'background-color 0.15s, color 0.15s',
                       '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' },
-                      backgroundColor: isActive ? `${c.bg}.main` : `${c.bg}.background`,
-                      color: isActive ? 'background.paper' : `${c.bg}.main`,
+                      backgroundColor: isActive ? c.activeBg : c.inactiveBg,
+                      color: isActive ? 'background.paper' : c.text,
                       '&:hover': {
-                        backgroundColor: isActive ? `${c.bg}.main` : `${c.bg}.background`,
-                        color: isActive ? 'background.paper' : `${c.bg}.main`,
+                        backgroundColor: isActive ? c.activeBg : c.inactiveBg,
+                        color: isActive ? 'background.paper' : c.text,
                         opacity: 0.8,
                       },
                     }}

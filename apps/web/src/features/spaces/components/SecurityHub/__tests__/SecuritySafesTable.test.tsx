@@ -49,6 +49,14 @@ jest.mock('@safe-global/store/gateway', () => ({
   }),
 }))
 
+jest.mock('@/store/api/gateway', () => ({
+  useGetMultipleSafeOverviewsQuery: () => ({ data: [] }),
+}))
+
+jest.mock('@/store', () => ({
+  useAppSelector: () => 'usd',
+}))
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 const mkResult = (status: ScanResult['status'] = 'clear'): ScanResult => ({
@@ -118,11 +126,10 @@ const renderTable = (overrides: Partial<Props> = {}) => {
 // ─── tests ────────────────────────────────────────────────────────────────────
 
 describe('SecuritySafesTable', () => {
-  it('renders a single-chain safe row with name, network icon, findings, and score', () => {
+  it('renders a single-chain safe row with name and network icon', () => {
     renderTable()
     expect(screen.getByText('My Vault')).toBeInTheDocument()
     expect(screen.getByTestId('chain-1')).toBeInTheDocument()
-    expect(screen.getByText(/out of.*checks passing/)).toBeInTheDocument()
   })
 
   it('calls onViewReport when a deployed row is clicked', () => {
@@ -155,7 +162,7 @@ describe('SecuritySafesTable', () => {
       scanningKeys: new Set([key]),
       scanResults: {},
     })
-    expect(container.querySelectorAll('.MuiCircularProgress-root').length).toBeGreaterThanOrEqual(1)
+    expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThanOrEqual(1)
   })
 
   describe('multichain safes', () => {

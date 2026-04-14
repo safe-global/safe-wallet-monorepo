@@ -1,19 +1,17 @@
-import { type ReactElement, useState, useCallback, useMemo, Fragment } from 'react'
+import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef, Fragment, forwardRef } from 'react'
 import {
   Box,
   IconButton,
-  Paper,
   Skeleton,
   Stack,
   Table,
-  TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Tooltip,
   Typography,
 } from '@mui/material'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
@@ -34,10 +32,26 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/slices'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 
 const DASH = '—'
+
+// motion-enabled elements for table animations
+const MotionTableRow = motion.create(
+  forwardRef<HTMLTableRowElement, React.ComponentProps<typeof TableRow>>(function MotionTableRowInner(props, ref) {
+    return <TableRow ref={ref} {...props} />
+  }),
+)
+const MotionTbody = motion.create('tbody')
+
+const ROW_VARIANTS = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+}
 
 const ScoreCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
   if (isScanning) {
@@ -56,11 +70,11 @@ const ScoreCell = ({ summary, isScanning }: { summary: GradeSummary | null; isSc
   const color = getStrengthColor(level)
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack direction="row" alignItems="center" spacing={0.75}>
       <Box
         sx={{
-          width: 10,
-          height: 10,
+          width: 8,
+          height: 8,
           borderRadius: '50%',
           backgroundColor: color,
           flexShrink: 0,
@@ -110,6 +124,14 @@ const VersionCell = ({ results, isScanning }: { results?: Record<string, ScanRes
   )
 }
 
+const formatBalance = (fiatTotal?: string | null): string => {
+  const value = Number(fiatTotal)
+  if (!fiatTotal || !Number.isFinite(value) || value === 0) return DASH
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
+  return `$${value.toFixed(0)}`
+}
+
 const formatRelativeTime = (timestamp: number): string => {
   const seconds = Math.round((Date.now() - timestamp) / 1000)
   if (seconds < 60) return 'Just now'
@@ -149,6 +171,40 @@ const SecuritySafesTable = ({
     }
     return map
   }, [chainsData])
+
+  // Fetch overviews for balance display. Uses RTK Query cache from the auto-scan's earlier fetches.
+  const currency = useAppSelector(selectCurrency)
+  const safeItems = useMemo(
+    () =>
+      safes.flatMap((safe) =>
+        safe.chainEntries
+          .filter((c) => c.isDeployed)
+          .map((c) => ({
+            chainId: c.chainId,
+            address: safe.address,
+            isReadOnly: false,
+            isPinned: false,
+            lastVisited: 0,
+            name: undefined,
+          })),
+      ),
+    [safes],
+  )
+  const { data: overviews } = useGetMultipleSafeOverviewsQuery(
+    { safes: safeItems, currency },
+    { skip: safeItems.length === 0 },
+  )
+  const balanceMap = useMemo(() => {
+    const map: Record<string, string | undefined> = {}
+    if (overviews) {
+      for (const ov of overviews) {
+        if (ov.address?.value && ov.chainId) {
+          map[scanKey(ov.address.value, ov.chainId)] = ov.fiatTotal
+        }
+      }
+    }
+    return map
+  }, [overviews])
 
   // Link the Safe name to that Safe's home dashboard. The per-Safe security view
   // now lives entirely inside this hub's drawer — clicking the row still opens it.
@@ -221,6 +277,12 @@ const SecuritySafesTable = ({
     return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
   }
 
+  // Skip initial-load stagger after the first render — filter transitions should be instant
+  const hasAnimatedRef = useRef(false)
+  useEffect(() => {
+    hasAnimatedRef.current = true
+  }, [])
+
   // Filter safes by grade when a chip filter is active
   const filteredSafes = useMemo(() => {
     if (!gradeFilter) return safes
@@ -236,21 +298,63 @@ const SecuritySafesTable = ({
   }, [safes, scanResults, gradeFilter])
 
   return (
-    <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
-      <Table sx={{ tableLayout: 'fixed' }}>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ width: '26%' }}>Account</TableCell>
-            <TableCell sx={{ width: '14%' }}>Network</TableCell>
-            <TableCell sx={{ width: '12%' }}>Threshold</TableCell>
-            <TableCell sx={{ width: '12%' }}>Version</TableCell>
-            <TableCell sx={{ width: '12%' }}>Score</TableCell>
-            <TableCell sx={{ width: '14%' }}>Last scanned</TableCell>
-            <TableCell sx={{ width: '10%' }} align="right" />
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredSafes.map((safe) => {
+    <Table
+      sx={{
+        tableLayout: 'fixed',
+        borderCollapse: 'separate',
+        borderSpacing: '0 6px',
+        '& th': {
+          border: 'none',
+          borderBottom: 'none !important',
+          py: 0.5,
+          px: 2.5,
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          color: 'text.primary',
+          opacity: 0.6,
+        },
+        '& td': {
+          border: 'none',
+          height: 72,
+          py: 0,
+          px: 2.5,
+          backgroundColor: 'background.paper',
+          transition: 'background-color 0.12s',
+          verticalAlign: 'middle',
+          '& .MuiTypography-body2': { fontWeight: 500, fontSize: '0.875rem' },
+          '& .MuiTypography-caption': { fontSize: '0.75rem' },
+        },
+        '& tbody tr:hover td': {
+          backgroundColor: 'success.background',
+        },
+        '& th:first-of-type': { pl: 0 },
+        '& td:first-of-type': { borderTopLeftRadius: 12, borderBottomLeftRadius: 12, pl: 3 },
+        '& td:last-of-type': { borderTopRightRadius: 12, borderBottomRightRadius: 12, pr: 3, overflow: 'hidden' },
+      }}
+    >
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ width: '26%' }}>Account</TableCell>
+          <TableCell sx={{ width: '12%' }}>Network</TableCell>
+          <TableCell sx={{ width: '10%' }}>Balance</TableCell>
+          <TableCell sx={{ width: '10%' }}>Threshold</TableCell>
+          <TableCell sx={{ width: '9%' }}>Version</TableCell>
+          <TableCell sx={{ width: '11%' }}>Score</TableCell>
+          <TableCell sx={{ width: '13%' }}>Last scanned</TableCell>
+          <TableCell sx={{ width: '9%' }} />
+        </TableRow>
+      </TableHead>
+      <AnimatePresence mode="wait">
+        <MotionTbody
+          key={gradeFilter ?? 'all'}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          {filteredSafes.map((safe, safeIdx) => {
             const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
             const isExpanded = expandedAddresses.has(safe.address)
 
@@ -264,39 +368,56 @@ const SecuritySafesTable = ({
               const isDeployed = safe.chainEntries[0]?.isDeployed !== false
 
               return (
-                <TableRow
+                <MotionTableRow
                   key={key}
+                  variants={ROW_VARIANTS}
+                  initial={hasAnimatedRef.current ? false : 'hidden'}
+                  animate="visible"
+                  transition={{ duration: 0.2, delay: hasAnimatedRef.current ? 0 : safeIdx * 0.03 }}
                   selected={isSelected}
                   hover={isDeployed}
                   onClick={isDeployed ? () => onViewReport(safe.address, safe.chainId) : undefined}
                   sx={isDeployed ? { cursor: 'pointer' } : {}}
                 >
                   <TableCell>
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                      <Identicon address={safe.address} size={32} />
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        noWrap
-                        component={safeHref ? Link : 'span'}
-                        {...(safeHref ? { href: safeHref } : {})}
-                        title={safe.name || safe.address}
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                        sx={{
-                          maxWidth: 160,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          '&:hover': safeHref ? { textDecoration: 'underline' } : {},
-                        }}
-                      >
-                        {safe.name || shortenAddress(safe.address)}
-                      </Typography>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Identicon address={safe.address} size={40} />
+                      <Stack sx={{ minWidth: 0, gap: '6px' }}>
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          component={safeHref ? Link : 'span'}
+                          {...(safeHref ? { href: safeHref } : {})}
+                          title={safe.name || safe.address}
+                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                          sx={{
+                            display: 'block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            '&:hover': safeHref ? { textDecoration: 'underline' } : {},
+                          }}
+                        >
+                          {safe.name || shortenAddress(safe.address)}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1 }}>
+                          {shortenAddress(safe.address)}
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </TableCell>
                   <TableCell>
                     <ChainIndicator chainId={safe.chainId} onlyLogo />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.primary">
+                      {isScanning ? (
+                        <Skeleton variant="rounded" width={50} height={20} />
+                      ) : (
+                        formatBalance(balanceMap[key])
+                      )}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
@@ -328,7 +449,7 @@ const SecuritySafesTable = ({
                       </Tooltip>
                     )}
                   </TableCell>
-                </TableRow>
+                </MotionTableRow>
               )
             }
 
@@ -338,43 +459,57 @@ const SecuritySafesTable = ({
 
             return (
               <Fragment key={safe.address}>
-                <TableRow
+                <MotionTableRow
+                  variants={ROW_VARIANTS}
+                  initial={hasAnimatedRef.current ? false : 'hidden'}
+                  animate="visible"
+                  transition={{ duration: 0.2, delay: hasAnimatedRef.current ? 0 : safeIdx * 0.03 }}
                   hover
                   sx={{ cursor: 'pointer', '& > *': { borderBottom: isExpanded ? 0 : undefined } }}
                   onClick={() => toggleExpand(safe.address)}
                 >
                   <TableCell>
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                      <Identicon address={safe.address} size={32} />
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        noWrap
-                        title={safe.name || safe.address}
-                        sx={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {safe.name || shortenAddress(safe.address)}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toggleExpand(safe.address)
-                        }}
-                      >
-                        <ExpandMoreRoundedIcon
-                          sx={{
-                            fontSize: 18,
-                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s',
-                          }}
-                        />
-                      </IconButton>
-                      {showMultichainWarning && (
-                        <Tooltip title="Signer setup differs across networks">
-                          <WarningAmberRoundedIcon sx={{ fontSize: 18, color: 'warning.main' }} />
-                        </Tooltip>
-                      )}
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Identicon address={safe.address} size={40} />
+                      <Stack sx={{ minWidth: 0, gap: '6px' }}>
+                        <Stack direction="row" alignItems="center" spacing={0.75}>
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            title={safe.name || safe.address}
+                            sx={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {safe.name || shortenAddress(safe.address)}
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleExpand(safe.address)
+                            }}
+                            sx={{ p: 0.25 }}
+                          >
+                            <ExpandMoreRoundedIcon
+                              sx={{
+                                fontSize: 18,
+                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.2s',
+                              }}
+                            />
+                          </IconButton>
+                          {showMultichainWarning && (
+                            <Tooltip title="Signer setup differs across networks">
+                              <WarningAmberRoundedIcon sx={{ fontSize: 18, color: 'warning.main' }} />
+                            </Tooltip>
+                          )}
+                        </Stack>
+                        <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1 }}>
+                          {shortenAddress(safe.address)}
+                        </Typography>
+                      </Stack>
                     </Stack>
                   </TableCell>
                   <TableCell>
@@ -386,6 +521,17 @@ const SecuritySafesTable = ({
                         </Typography>
                       )}
                     </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.primary">
+                      {(() => {
+                        let total = 0
+                        for (const c of safe.chainEntries) {
+                          total += Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0
+                        }
+                        return formatBalance(String(total))
+                      })()}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" color="text.secondary">
@@ -414,86 +560,98 @@ const SecuritySafesTable = ({
                     })()}
                   </TableCell>
                   <TableCell align="right" />
-                </TableRow>
+                </MotionTableRow>
 
-                {safe.chainEntries.map((chain) => {
-                  const key = scanKey(safe.address, chain.chainId)
-                  const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
-                  const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
-                  const isScanning = scanningKeys?.has(key)
-                  const childHref = getSafeSecurityHref(safe.address, chain.chainId)
+                {isExpanded &&
+                  safe.chainEntries.map((chain, childIdx) => {
+                    const key = scanKey(safe.address, chain.chainId)
+                    const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
+                    const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
+                    const isScanning = scanningKeys?.has(key)
+                    const childHref = getSafeSecurityHref(safe.address, chain.chainId)
 
-                  return (
-                    <TableRow
-                      key={key}
-                      selected={isSelected}
-                      hover={chain.isDeployed}
-                      onClick={chain.isDeployed ? () => onViewReport(safe.address, chain.chainId) : undefined}
-                      sx={{
-                        display: isExpanded ? 'table-row' : 'none',
-                        backgroundColor: 'background.paper',
-                        cursor: chain.isDeployed ? 'pointer' : 'default',
-                      }}
-                    >
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          component={childHref ? Link : 'span'}
-                          {...(childHref ? { href: childHref } : {})}
-                          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                          sx={{
-                            pl: 5.5,
-                            textDecoration: 'none',
-                            color: 'text.secondary',
-                            '&:hover': childHref ? { textDecoration: 'underline' } : {},
-                          }}
-                        >
-                          {safe.name || shortenAddress(safe.address)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <ChainIndicator chainId={chain.chainId} onlyLogo />
-                      </TableCell>
-                      <TableCell>
-                        <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
-                      </TableCell>
-                      <TableCell>
-                        <VersionCell results={scanResults[key]} isScanning={isScanning} />
-                      </TableCell>
-                      <TableCell>
-                        <ScoreCell summary={summary} isScanning={isScanning} />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" color="text.secondary">
-                          {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        {chain.isDeployed ? (
-                          <ChevronRightRoundedIcon
+                    return (
+                      <MotionTableRow
+                        key={key}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.15, delay: childIdx * 0.03 }}
+                        selected={isSelected}
+                        hover={chain.isDeployed}
+                        onClick={chain.isDeployed ? () => onViewReport(safe.address, chain.chainId) : undefined}
+                        sx={{
+                          backgroundColor: 'background.paper',
+                          cursor: chain.isDeployed ? 'pointer' : 'default',
+                        }}
+                      >
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            component={childHref ? Link : 'span'}
+                            {...(childHref ? { href: childHref } : {})}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             sx={{
-                              color: isSelected ? 'primary.main' : 'text.secondary',
-                              verticalAlign: 'middle',
+                              pl: 5.5,
+                              textDecoration: 'none',
+                              color: 'text.secondary',
+                              '&:hover': childHref ? { textDecoration: 'underline' } : {},
                             }}
-                          />
-                        ) : (
-                          <Tooltip title="Safe not yet deployed on this network">
-                            <Typography variant="caption" color="text.disabled" noWrap>
-                              Not deployed
-                            </Typography>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
+                          >
+                            {safe.name || shortenAddress(safe.address)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <ChainIndicator chainId={chain.chainId} onlyLogo />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.primary">
+                            {isScanning ? (
+                              <Skeleton variant="rounded" width={50} height={20} />
+                            ) : (
+                              formatBalance(balanceMap[key])
+                            )}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
+                        </TableCell>
+                        <TableCell>
+                          <VersionCell results={scanResults[key]} isScanning={isScanning} />
+                        </TableCell>
+                        <TableCell>
+                          <ScoreCell summary={summary} isScanning={isScanning} />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="caption" color="text.secondary">
+                            {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          {chain.isDeployed ? (
+                            <ChevronRightRoundedIcon
+                              sx={{
+                                color: isSelected ? 'primary.main' : 'text.secondary',
+                                verticalAlign: 'middle',
+                              }}
+                            />
+                          ) : (
+                            <Tooltip title="Safe not yet deployed on this network">
+                              <Typography variant="caption" color="text.disabled" noWrap sx={{ fontSize: '0.65rem' }}>
+                                Not deployed
+                              </Typography>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                      </MotionTableRow>
+                    )
+                  })}
               </Fragment>
             )
           })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </MotionTbody>
+      </AnimatePresence>
+    </Table>
   )
 }
 
