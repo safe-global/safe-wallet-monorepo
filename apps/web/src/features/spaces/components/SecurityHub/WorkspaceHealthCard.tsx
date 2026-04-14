@@ -1,11 +1,11 @@
 import { type ReactElement, useMemo } from 'react'
-import { Box, Chip, CircularProgress, Paper, Stack, Typography } from '@mui/material'
+import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
 
 type WorkspaceHealthCardProps = {
   scanResults: Record<string, Record<string, ScanResult>>
-  totalDeployedTargets: number
+  isScanning: boolean
 }
 
 type Aggregate = {
@@ -99,24 +99,23 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
   </Box>
 )
 
-const WorkspaceHealthCard = ({ scanResults, totalDeployedTargets }: WorkspaceHealthCardProps): ReactElement => {
+const WorkspaceHealthCard = ({ scanResults, isScanning }: WorkspaceHealthCardProps): ReactElement => {
   const aggregate = useMemo(() => computeAggregate(scanResults), [scanResults])
-  const scannedCount = Object.keys(scanResults).length
-  const isScanning = scannedCount < totalDeployedTargets
 
-  // Show loading state until ALL scans complete — a partial aggregate would be misleading.
+  // Show skeleton while the scan queue is running — a partial aggregate would be misleading.
   if (!aggregate || isScanning) {
     return (
       <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
-        <Stack direction="row" spacing={3} alignItems="center">
-          <CircularProgress size={80} thickness={4} sx={{ color: 'border.light' }} />
-          <Box>
-            <Typography variant="h5" fontWeight={700} mb={0.5}>
-              Workspace health
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Scanning your accounts...
-            </Typography>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
+          <Skeleton variant="circular" width={120} height={120} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Skeleton variant="rounded" width={180} height={24} sx={{ mb: 1 }} />
+            <Skeleton variant="rounded" width={320} height={16} sx={{ mb: 0.5 }} />
+            <Skeleton variant="rounded" width={260} height={16} sx={{ mb: 2 }} />
+            <Stack direction="row" spacing={1}>
+              <Skeleton variant="rounded" width={80} height={20} sx={{ borderRadius: '10px' }} />
+              <Skeleton variant="rounded" width={100} height={20} sx={{ borderRadius: '10px' }} />
+            </Stack>
           </Box>
         </Stack>
       </Paper>

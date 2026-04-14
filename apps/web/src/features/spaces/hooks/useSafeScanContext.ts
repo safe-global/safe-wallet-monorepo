@@ -70,6 +70,15 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     { skip: !selected || !isDeployed },
   )
 
+  // --- TEMPORARY DIAGNOSTIC — remove before merge ---
+  if (selected && safeOverview !== undefined) {
+    console.warn('[Overview]', chainId, address.slice(0, 10), {
+      fiatTotal: safeOverview?.fiatTotal,
+      queued: safeOverview?.queued,
+      raw: safeOverview,
+    })
+  }
+
   const chain = useChain(chainId)
   const latestVersion = getLatestSafeVersion(chain)
   const { configs: allChains } = useChains()
@@ -107,7 +116,7 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       }
     }
 
-    return {
+    const ctx = {
       owners: safeInfo.owners,
       threshold: safeInfo.threshold,
       modules: safeInfo.modules ?? null,
@@ -139,6 +148,29 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
           }
         : null,
     }
+
+    // --- TEMPORARY DIAGNOSTIC — remove before merge ---
+    console.warn('[ScanContext]', ctx.chainId, ctx.safeAddress.slice(0, 10), {
+      threshold: ctx.threshold,
+      owners: ctx.owners.length,
+      version: ctx.version,
+      latestVersion: ctx.latestVersion,
+      implState: ctx.implementationVersionState,
+      deployer: ctx.masterCopyDeployer,
+      balanceUsd: ctx.balanceUsd,
+      queued: ctx.queuedTxCount,
+      guard: ctx.guard?.value?.slice(0, 10) ?? 'none',
+      fallback: ctx.fallbackHandler?.value?.slice(0, 10) ?? 'none',
+      modules: ctx.modules?.length ?? 0,
+      recovery: ctx.chainSupportsRecovery,
+      hypernative: ctx.chainSupportsHypernative,
+      txScanning: ctx.chainSupportsTransactionScanning,
+      multichain: ctx.isMultichain,
+      consistent: ctx.multichainSignersConsistent,
+      hasCreation: !!ctx.creationInfo,
+    })
+
+    return ctx
   }, [
     selected,
     entry,

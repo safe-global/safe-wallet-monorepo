@@ -1,10 +1,9 @@
 import { type ReactElement, useState, useCallback, useMemo, Fragment } from 'react'
 import {
   Box,
-  Button,
-  CircularProgress,
   IconButton,
   Paper,
+  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -35,7 +34,7 @@ const DASH = '—'
 
 const ScoreCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
   if (isScanning) {
-    return <CircularProgress size={16} thickness={5} />
+    return <Skeleton variant="rounded" width={60} height={20} />
   }
   if (!summary) {
     return (
@@ -70,15 +69,48 @@ const ScoreCell = ({ summary, isScanning }: { summary: GradeSummary | null; isSc
   )
 }
 
-const FindingsCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
-  if (isScanning) {
-    return <CircularProgress size={16} thickness={5} />
+/** Extract a specific evidence label's value from a ScanResult. */
+const getEvidence = (
+  results: Record<string, ScanResult> | undefined,
+  scannerId: string,
+  label: string,
+): string | null => {
+  const evidence = results?.[scannerId]?.evidence
+  if (!evidence) return null
+  for (const item of evidence) {
+    if (typeof item !== 'string' && item.label === label) return item.value
   }
+  return null
+}
+
+const ThresholdCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
+  if (isScanning) return <Skeleton variant="rounded" width={50} height={20} />
+  const threshold = getEvidence(results, 'account_setup', 'Threshold')
   return (
     <Typography variant="body2" color="text.primary">
-      {summary ? `${summary.passing} out of ${summary.applicableCount} checks passing` : DASH}
+      {threshold ?? DASH}
     </Typography>
   )
+}
+
+const VersionCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
+  if (isScanning) return <Skeleton variant="rounded" width={50} height={20} />
+  const version = getEvidence(results, 'contract_version', 'Current version')
+  return (
+    <Typography variant="body2" color="text.primary">
+      {version ?? DASH}
+    </Typography>
+  )
+}
+
+const formatRelativeTime = (timestamp: number): string => {
+  const seconds = Math.round((Date.now() - timestamp) / 1000)
+  if (seconds < 60) return 'Just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }
 
 type SecuritySafesTableProps = {
@@ -86,6 +118,7 @@ type SecuritySafesTableProps = {
   onViewReport: (address: string, chainId: string) => void
   selectedSafe: SelectedSafe | null
   scanResults: Record<string, Record<string, ScanResult>>
+  scanTimestamps?: Record<string, number>
   scanningKeys?: Set<string>
 }
 
@@ -94,6 +127,7 @@ const SecuritySafesTable = ({
   onViewReport,
   selectedSafe,
   scanResults,
+  scanTimestamps,
   scanningKeys,
 }: SecuritySafesTableProps): ReactElement => {
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
@@ -180,14 +214,16 @@ const SecuritySafesTable = ({
 
   return (
     <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
-      <Table>
+      <Table sx={{ tableLayout: 'fixed' }}>
         <TableHead>
           <TableRow>
-            <TableCell>Account</TableCell>
-            <TableCell>Network</TableCell>
-            <TableCell>Findings</TableCell>
-            <TableCell>Score</TableCell>
-            <TableCell align="right" />
+            <TableCell sx={{ width: '26%' }}>Account</TableCell>
+            <TableCell sx={{ width: '14%' }}>Network</TableCell>
+            <TableCell sx={{ width: '12%' }}>Threshold</TableCell>
+            <TableCell sx={{ width: '12%' }}>Version</TableCell>
+            <TableCell sx={{ width: '12%' }}>Score</TableCell>
+            <TableCell sx={{ width: '14%' }}>Last scanned</TableCell>
+            <TableCell sx={{ width: '10%' }} align="right" />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -240,10 +276,18 @@ const SecuritySafesTable = ({
                     <ChainIndicator chainId={safe.chainId} onlyLogo />
                   </TableCell>
                   <TableCell>
-                    <FindingsCell summary={summary} isScanning={isScanning} />
+                    <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
+                  </TableCell>
+                  <TableCell>
+                    <VersionCell results={scanResults[key]} isScanning={isScanning} />
                   </TableCell>
                   <TableCell>
                     <ScoreCell summary={summary} isScanning={isScanning} />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="text.secondary">
+                      {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
+                    </Typography>
                   </TableCell>
                   <TableCell align="right">
                     {isDeployed ? (
@@ -255,11 +299,9 @@ const SecuritySafesTable = ({
                       />
                     ) : (
                       <Tooltip title="Safe not yet deployed on this network">
-                        <span>
-                          <Button variant="text" size="small" disabled>
-                            Not deployed
-                          </Button>
-                        </span>
+                        <Typography variant="caption" color="text.disabled" noWrap>
+                          Not deployed
+                        </Typography>
                       </Tooltip>
                     )}
                   </TableCell>
@@ -323,10 +365,30 @@ const SecuritySafesTable = ({
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <FindingsCell summary={aggregateSummary} isScanning={aggregateScanning} />
+                    <Typography variant="body2" color="text.secondary">
+                      {DASH}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
+                      {DASH}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
+                  </TableCell>
+                  <TableCell>
+                    {(() => {
+                      const timestamps = safe.chainEntries
+                        .map((c) => scanTimestamps?.[scanKey(safe.address, c.chainId)])
+                        .filter((t): t is number => !!t)
+                      const oldest = timestamps.length > 0 ? Math.min(...timestamps) : null
+                      return (
+                        <Typography variant="caption" color="text.secondary">
+                          {oldest ? formatRelativeTime(oldest) : DASH}
+                        </Typography>
+                      )
+                    })()}
                   </TableCell>
                   <TableCell align="right" />
                 </TableRow>
@@ -371,10 +433,18 @@ const SecuritySafesTable = ({
                         <ChainIndicator chainId={chain.chainId} onlyLogo />
                       </TableCell>
                       <TableCell>
-                        <FindingsCell summary={summary} isScanning={isScanning} />
+                        <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
+                      </TableCell>
+                      <TableCell>
+                        <VersionCell results={scanResults[key]} isScanning={isScanning} />
                       </TableCell>
                       <TableCell>
                         <ScoreCell summary={summary} isScanning={isScanning} />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary">
+                          {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
+                        </Typography>
                       </TableCell>
                       <TableCell align="right">
                         {chain.isDeployed ? (
@@ -386,11 +456,9 @@ const SecuritySafesTable = ({
                           />
                         ) : (
                           <Tooltip title="Safe not yet deployed on this network">
-                            <span>
-                              <Button variant="text" size="small" disabled>
-                                Not deployed
-                              </Button>
-                            </span>
+                            <Typography variant="caption" color="text.disabled" noWrap>
+                              Not deployed
+                            </Typography>
                           </Tooltip>
                         )}
                       </TableCell>

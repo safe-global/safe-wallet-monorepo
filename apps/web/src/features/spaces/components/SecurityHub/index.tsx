@@ -117,6 +117,17 @@ const useAutoScan = (
             completedRef.current.add(key)
             scanningRef.current = null
             const timestamp = Date.now()
+            // --- TEMPORARY DIAGNOSTIC — remove before merge ---
+            const passing = Object.values(results).filter(
+              (r) => r.status === 'clear' || r.status === 'not_applicable' || r.status === 'inconclusive',
+            ).length
+            const total2 = Object.keys(results).length
+            console.warn(
+              '[AutoScan]',
+              key,
+              `${passing}/${total2} passing`,
+              Object.fromEntries(Object.entries(results).map(([id, r]) => [id, `${r.status}:${r.severity}`])),
+            )
             // Share results with useSecurityScan's module-level cache so the drawer reuses
             // them instead of re-scanning when the user opens this Safe's report.
             getScanResultsCache().set(key, { results, timestamp })
@@ -169,31 +180,37 @@ const SecurityHub = (): ReactElement => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
+  const [scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
 
   const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
 
-  // Shared callback for scan completion from both the batch scanner and the drawer.
-  // Unused `timestamp` arg is accepted for signature symmetry with the cache writer.
   const handleScanComplete = useCallback(
-    (address: string, chainId: string, _timestamp: number, results: Record<string, ScanResult>) => {
+    (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
       const key = scanKey(address, chainId)
       setAllScanResults((prev) => ({ ...prev, [key]: results }))
+      setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))
     },
     [],
   )
 
   const { scanningKeys, isRunning, justCompleted, startScan } = useAutoScan(deployedEntries, safes, handleScanComplete)
 
-  // Auto-scan on first load when safes are available
-  const hasAutoScanned = useRef(false)
+  // Auto-scan when safes are available. Re-triggers if the Safe list changes
+  // (e.g., user switches Safes via the selector).
+  const lastScannedKeysRef = useRef<string>('')
   useEffect(() => {
-    if (!isLoading && safes.length > 0 && !hasAutoScanned.current) {
-      hasAutoScanned.current = true
+    if (isLoading || safes.length === 0) return
+    const currentKeys = deployedEntries
+      .map((e) => scanKey(e.address, e.chainId))
+      .sort()
+      .join(',')
+    if (currentKeys !== lastScannedKeysRef.current) {
+      lastScannedKeysRef.current = currentKeys
       startScan()
     }
-  }, [isLoading, safes.length, startScan])
+  }, [isLoading, safes.length, deployedEntries, startScan])
 
   const handleViewReport = useCallback((address: string, chainId: string) => {
     setSelectedSafe((prev) => {
@@ -241,12 +258,13 @@ const SecurityHub = (): ReactElement => {
         </Typography>
       ) : (
         <>
-          <WorkspaceHealthCard scanResults={allScanResults} totalDeployedTargets={deployedEntries.length} />
+          <WorkspaceHealthCard scanResults={allScanResults} isScanning={isRunning} />
           <SecuritySafesTable
             safes={safes}
             onViewReport={handleViewReport}
             selectedSafe={selectedSafe}
             scanResults={allScanResults}
+            scanTimestamps={scanTimestamps}
             scanningKeys={scanningKeys}
           />
         </>

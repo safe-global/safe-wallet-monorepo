@@ -7,7 +7,7 @@ import { SCANNERS } from '../data/scanners/registry'
  * (e.g., sidebar + main security page) reuse results instead of running
  * duplicate scans. Keyed by `chainId:safeAddress`. TTL: 60 seconds.
  */
-const CACHE_TTL_MS = 60_000
+const CACHE_TTL_MS = 3_600_000 // 1 hour
 const scanResultsCache = new Map<string, { results: Record<string, ScanResult>; timestamp: number }>()
 
 export const getScanResultsCache = () => scanResultsCache
@@ -33,18 +33,13 @@ export type ScanState = {
 const useSecurityScan = (ctx: ScanContext | null): ScanState => {
   const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
 
-  // Resolve from module-level cache if fresh results exist
-  const cached = ctxKey ? scanResultsCache.get(ctxKey) : undefined
-  const resolved = cached && Date.now() - cached.timestamp < CACHE_TTL_MS ? cached : null
-
-  const [results, setResults] = useState<Record<string, ScanResult>>(resolved?.results ?? {})
+  const [results, setResults] = useState<Record<string, ScanResult>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [lastScannedAt, setLastScannedAt] = useState<number | null>(resolved?.timestamp ?? null)
+  const [lastScannedAt, setLastScannedAt] = useState<number | null>(null)
   const scanIdRef = useRef(0)
   const ctxRef = useRef(ctx)
   ctxRef.current = ctx
-  const hasInitialResults = useRef(!!resolved)
 
   const executeScan = useCallback(
     (scannerId: string, scanFn: () => Promise<ScanResult>, guardId?: number, onAllComplete?: () => void) => {
@@ -107,9 +102,20 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
 
   useEffect(() => {
     if (ctxKey) {
-      if (hasInitialResults.current) {
-        // Skip auto-scan — we already have results from the caller
-        hasInitialResults.current = false
+      // Check cache when ctxKey first becomes available — not just on mount.
+      // When the drawer opens, ctx starts as null (queries loading) so the mount-time
+      // cache check misses. By the time ctx resolves, we need to check again here.
+      const freshCached = scanResultsCache.get(ctxKey)
+      const freshResolved = freshCached && Date.now() - freshCached.timestamp < CACHE_TTL_MS ? freshCached : null
+      // --- TEMPORARY DIAGNOSTIC — remove before merge ---
+      console.warn('[useSecurityScan]', ctxKey, freshResolved ? 'CACHE HIT' : 'CACHE MISS', {
+        cacheExists: !!freshCached,
+        age: freshCached ? Date.now() - freshCached.timestamp : null,
+        ttl: CACHE_TTL_MS,
+      })
+      if (freshResolved) {
+        setResults(freshResolved.results)
+        setLastScannedAt(freshResolved.timestamp)
         return
       }
       runScan()
