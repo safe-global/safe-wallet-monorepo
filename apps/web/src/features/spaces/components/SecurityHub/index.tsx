@@ -1,4 +1,4 @@
-import { type ReactElement, type SyntheticEvent, useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { type ReactElement, useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
@@ -166,7 +166,6 @@ const SecurityHub = (): ReactElement => {
   const { allSafes, isLoading } = useSpaceSafes()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
-  const [reportTab, setReportTab] = useState(0)
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
@@ -255,8 +254,6 @@ const SecurityHub = (): ReactElement => {
         selectedSafe={selectedSafe}
         selectedEntry={selectedEntry}
         scanContext={scanContext}
-        reportTab={reportTab}
-        onTabChange={(_: SyntheticEvent, v: number) => setReportTab(v)}
         onClose={handleCloseDrawer}
         onScanComplete={handleScanComplete}
       />

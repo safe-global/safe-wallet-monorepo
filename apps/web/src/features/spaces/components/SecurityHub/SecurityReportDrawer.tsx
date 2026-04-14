@@ -1,10 +1,8 @@
-import { type ReactElement, type SyntheticEvent, useEffect, useRef } from 'react'
+import { type ReactElement, useEffect, useRef } from 'react'
 import { Box, Drawer, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanContext, ScanResult } from '@/features/security/data/scanners/types'
-import AccountActivity from '@/features/security/components/AccountActivity'
-import SecurityTabs from '@/features/security/components/SecurityTabs'
 import Identicon from '@/components/common/Identicon'
 import useSecurityScan from '@/features/security/hooks/useSecurityScan'
 import { useChain } from '@/hooks/useChains'
@@ -16,8 +14,6 @@ type SecurityReportDrawerProps = {
   selectedSafe: SelectedSafe | null
   selectedEntry: SpaceSafeEntry | undefined
   scanContext: ScanContext | null
-  reportTab: number
-  onTabChange: (event: SyntheticEvent, value: number) => void
   onClose: () => void
   onScanComplete: (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => void
 }
@@ -26,8 +22,6 @@ const SecurityReportDrawer = ({
   selectedSafe,
   selectedEntry,
   scanContext,
-  reportTab,
-  onTabChange,
   onClose,
   onScanComplete,
 }: SecurityReportDrawerProps): ReactElement => {
@@ -137,24 +131,14 @@ const SecurityReportDrawer = ({
             </Stack>
           </Box>
 
-          <Box sx={{ flex: 1, overflowY: 'auto' }}>
-            <Box sx={{ px: 3, pt: 2 }}>
-              <SecurityTabs value={reportTab} onChange={onTabChange} compact />
-            </Box>
-
-            <Box sx={{ px: 3, pb: 3 }}>
-              {reportTab === 0 && (
-                <SecurityPanelView
-                  key={`${selectedSafe.address}:${selectedSafe.chainId}`}
-                  scanContext={scanContext}
-                  results={results}
-                  isComplete={isComplete}
-                  safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
-                />
-              )}
-
-              {reportTab === 1 && <AccountActivity chainId={selectedSafe.chainId} safeAddress={selectedSafe.address} />}
-            </Box>
+          <Box sx={{ flex: 1, overflowY: 'auto', px: 3, pt: 2, pb: 3 }}>
+            <SecurityPanelView
+              key={`${selectedSafe.address}:${selectedSafe.chainId}`}
+              scanContext={scanContext}
+              results={results}
+              isComplete={isComplete}
+              safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+            />
           </Box>
         </>
       )}
