@@ -1,21 +1,36 @@
 import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
+import type { ConnectResult } from '../useConnect'
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
+const checksumAddress = getAddress(mockAddress)
 
 const mockRouterPush = jest.fn()
-const mockRouterDismiss = jest.fn()
-const mockOpen = jest.fn()
 const mockDisconnect = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
 
+let mockConnectResolve: (result: ConnectResult) => void
+let mockConnectReject: (error: Error) => void
+
+const mockConnect = jest.fn(
+  () =>
+    new Promise<ConnectResult>((resolve, reject) => {
+      mockConnectResolve = resolve
+      mockConnectReject = reject
+    }),
+)
+
 jest.mock('expo-router', () => ({
   router: {
     push: (...args: unknown[]) => mockRouterPush(...args),
-    dismiss: (...args: unknown[]) => mockRouterDismiss(...args),
   },
+}))
+
+jest.mock('@reown/appkit-react-native', () => ({
+  useAppKit: () => ({ disconnect: mockDisconnect }),
 }))
 
 jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
@@ -26,71 +41,50 @@ jest.mock('../useSwitchNetwork', () => ({
   useSwitchNetwork: () => ({ switchNetworkIfNeeded: mockSwitchNetworkIfNeeded }),
 }))
 
-// Mutable state object the hook reads on each render
-const mockWalletState = {
-  address: undefined as string | undefined,
-  isConnected: false,
-  walletInfo: undefined as { name: string } | undefined,
-}
-
-jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect }),
-  useAccount: () => ({
-    isConnected: mockWalletState.isConnected,
-    address: mockWalletState.address,
-  }),
-  useWalletInfo: () => ({ walletInfo: mockWalletState.walletInfo }),
+jest.mock('../useConnect', () => ({
+  useConnect: () => mockConnect,
 }))
-
-const setConnected = (address: string, walletName = 'MetaMask') => {
-  mockWalletState.address = address
-  mockWalletState.isConnected = true
-  mockWalletState.walletInfo = { name: walletName }
-}
-
-const setDisconnected = () => {
-  mockWalletState.address = undefined
-  mockWalletState.isConnected = false
-  mockWalletState.walletInfo = undefined
-}
 
 const renderImportFlow = () => renderHook(() => useImportSignerFlow())
 
 describe('useImportSignerFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    setDisconnected()
   })
 
-  it('opens the wallet modal when initiateConnection is called', () => {
+  it('calls connect when initiateConnection is called', async () => {
     const { result } = renderImportFlow()
 
     act(() => {
       result.current.initiateConnection()
     })
 
-    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
+    expect(mockConnect).toHaveBeenCalled()
   })
 
   it('navigates to name-signer when connected address is an owner', async () => {
     mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
 
-    const { result, rerender } = renderImportFlow()
+    const { result } = renderImportFlow()
 
     act(() => {
       result.current.initiateConnection()
     })
 
-    setConnected(mockAddress)
-    rerender({})
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
 
     await waitFor(() => {
-      expect(mockValidateAddressOwnership).toHaveBeenCalled()
+      expect(mockValidateAddressOwnership).toHaveBeenCalledWith(checksumAddress)
       expect(mockSwitchNetworkIfNeeded).toHaveBeenCalled()
-      expect(mockDisconnect).not.toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/name-signer',
+          params: expect.objectContaining({
+            address: checksumAddress,
+            walletName: 'MetaMask',
+          }),
         }),
       )
     })
@@ -99,107 +93,75 @@ describe('useImportSignerFlow', () => {
   it('disconnects and navigates to error when connected address is not an owner', async () => {
     mockValidateAddressOwnership.mockResolvedValue({ isOwner: false })
 
-    const { result, rerender } = renderImportFlow()
+    const { result } = renderImportFlow()
 
     act(() => {
       result.current.initiateConnection()
     })
 
-    setConnected(mockAddress)
-    rerender({})
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
 
     await waitFor(() => {
       expect(mockDisconnect).toHaveBeenCalled()
       expect(mockRouterPush).toHaveBeenCalledWith(
         expect.objectContaining({
           pathname: '/import-signers/connect-signer-error',
+          params: expect.objectContaining({
+            address: checksumAddress,
+            walletIcon: 'icon',
+          }),
         }),
       )
     })
   })
 
-  it('disconnects and navigates to error when validation throws', async () => {
+  it('navigates to error when validation throws', async () => {
     mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
 
-    const { result, rerender } = renderImportFlow()
+    const { result } = renderImportFlow()
 
     act(() => {
       result.current.initiateConnection()
     })
 
-    setConnected(mockAddress)
-    rerender({})
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
 
     await waitFor(() => {
-      expect(mockDisconnect).toHaveBeenCalled()
-      expect(mockRouterPush).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pathname: '/import-signers/connect-signer-error',
-        }),
-      )
+      expect(mockRouterPush).not.toHaveBeenCalled()
     })
   })
 
-  it('does not navigate when wallet connects without user initiation', () => {
-    setConnected(mockAddress)
+  it('does nothing when connect is rejected (user rejected)', async () => {
+    const { result } = renderImportFlow()
 
-    renderImportFlow()
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectReject(new Error('User rejected'))
+    })
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
-  it('does not navigate again for the same address after reconnect', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
-
-    const { result, rerender } = renderImportFlow()
+  it('does nothing when connect fails (connection error)', async () => {
+    const { result } = renderImportFlow()
 
     act(() => {
       result.current.initiateConnection()
     })
 
-    setConnected(mockAddress)
-    rerender({})
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1)
+    await act(async () => {
+      mockConnectReject(new Error('Connection failed'))
     })
 
-    rerender({})
-
-    expect(mockRouterPush).toHaveBeenCalledTimes(1)
-  })
-
-  it('allows navigation after disconnect and reconnect', async () => {
-    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
-
-    const { result, rerender } = renderImportFlow()
-
-    act(() => {
-      result.current.initiateConnection()
-    })
-
-    setConnected(mockAddress)
-    rerender({})
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(1)
-    })
-
-    // Disconnect
-    setDisconnected()
-    rerender({})
-
-    // Reconnect
-    act(() => {
-      result.current.initiateConnection()
-    })
-
-    setConnected(mockAddress)
-    rerender({})
-
-    await waitFor(() => {
-      expect(mockRouterPush).toHaveBeenCalledTimes(2)
-    })
+    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 })

@@ -1,58 +1,44 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 import { router } from 'expo-router'
-import { useAccount, useAppKit } from '@reown/appkit-react-native'
+import { useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import { useStableAppKitEvent } from './useStableAppKitEvent'
+import { useConnect } from './useConnect'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
  * On address mismatch, navigates to ReconnectError which owns subsequent retries.
  */
 export function useReconnectFlow() {
-  const { open, disconnect } = useAppKit()
-  const { address, isConnected: walletIsConnected } = useAccount()
+  const { disconnect } = useAppKit()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
-  const pendingAddressRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    if (!pendingAddressRef.current || !walletIsConnected || !address) {
-      return
-    }
-
-    const reconnectAddress = getAddress(pendingAddressRef.current)
-    pendingAddressRef.current = null
-
-    if (!sameAddress(reconnectAddress, address)) {
-      disconnect()
-
-      router.push({
-        pathname: '/import-signers/reconnect-error',
-        params: { address: reconnectAddress },
-      })
-
-      return
-    }
-
-    switchNetworkIfNeeded()
-  }, [walletIsConnected, address, disconnect, switchNetworkIfNeeded])
+  const connect = useConnect()
 
   const reconnect = useCallback(
-    (signerAddress: string) => {
-      pendingAddressRef.current = signerAddress
-      open({ view: 'Connect' })
+    async (signerAddress: string) => {
+      try {
+        const { address } = await connect()
+        const reconnectAddress = getAddress(signerAddress)
+
+        if (!sameAddress(reconnectAddress, address)) {
+          disconnect()
+
+          router.push({
+            pathname: '/import-signers/reconnect-error',
+            params: { address: reconnectAddress },
+          })
+
+          return
+        }
+
+        switchNetworkIfNeeded()
+      } catch {
+        // CONNECT_ERROR or USER_REJECTED — no action needed
+      }
     },
-    [open],
+    [connect, disconnect, switchNetworkIfNeeded],
   )
-
-  useStableAppKitEvent('CONNECT_ERROR', () => {
-    pendingAddressRef.current = null
-  })
-
-  useStableAppKitEvent('USER_REJECTED', () => {
-    pendingAddressRef.current = null
-  })
 
   return { reconnect }
 }

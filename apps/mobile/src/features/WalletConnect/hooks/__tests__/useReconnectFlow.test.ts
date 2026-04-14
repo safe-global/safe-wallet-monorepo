@@ -1,14 +1,26 @@
 import { faker } from '@faker-js/faker'
-import { renderHook, act } from '@/src/tests/test-utils'
+import { getAddress } from 'ethers'
+import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
+import type { ConnectResult } from '../useConnect'
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 const mockOtherAddress = faker.finance.ethereumAddress() as `0x${string}`
 
 const mockRouterPush = jest.fn()
-const mockOpen = jest.fn()
 const mockDisconnect = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
+
+let mockConnectResolve: (result: ConnectResult) => void
+let mockConnectReject: (error: Error) => void
+
+const mockConnect = jest.fn(
+  () =>
+    new Promise<ConnectResult>((resolve, reject) => {
+      mockConnectResolve = resolve
+      mockConnectReject = reject
+    }),
+)
 
 jest.mock('expo-router', () => ({
   router: {
@@ -16,93 +28,85 @@ jest.mock('expo-router', () => ({
   },
 }))
 
-// Mutable state object the mock reads on each render
-const mockWalletState = {
-  address: undefined as string | undefined,
-  isConnected: false,
-  walletInfo: undefined as { name: string } | undefined,
-}
-
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect, switchNetwork: jest.fn() }),
-  useAccount: () => ({ address: mockWalletState.address, isConnected: mockWalletState.isConnected }),
-  useWalletInfo: () => ({ walletInfo: mockWalletState.walletInfo }),
+  useAppKit: () => ({ disconnect: mockDisconnect }),
 }))
 
 jest.mock('../useSwitchNetwork', () => ({
-  useSwitchNetwork: () => ({
-    switchNetworkIfNeeded: mockSwitchNetworkIfNeeded,
-    switchNetwork: jest.fn(),
-  }),
+  useSwitchNetwork: () => ({ switchNetworkIfNeeded: mockSwitchNetworkIfNeeded }),
 }))
 
-const setConnected = (address: string, walletName = 'MetaMask') => {
-  mockWalletState.address = address
-  mockWalletState.isConnected = true
-  mockWalletState.walletInfo = { name: walletName }
-}
-
-const setDisconnected = () => {
-  mockWalletState.address = undefined
-  mockWalletState.isConnected = false
-  mockWalletState.walletInfo = undefined
-}
+jest.mock('../useConnect', () => ({
+  useConnect: () => mockConnect,
+}))
 
 const renderReconnectFlow = () => renderHook(() => useReconnectFlow())
 
 describe('useReconnectFlow', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    setDisconnected()
   })
 
-  it('opens the wallet modal when reconnect is called', () => {
+  it('calls connect when reconnect is called', () => {
     const { result } = renderReconnectFlow()
 
     act(() => {
       result.current.reconnect(mockAddress)
     })
 
-    expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
+    expect(mockConnect).toHaveBeenCalled()
   })
 
-  it('switches network when reconnected address matches', () => {
-    const { result, rerender } = renderReconnectFlow()
+  it('switches network when reconnected address matches', async () => {
+    const { result } = renderReconnectFlow()
 
     act(() => {
       result.current.reconnect(mockAddress)
     })
 
-    setConnected(mockAddress)
-    rerender({})
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
 
-    expect(mockSwitchNetworkIfNeeded).toHaveBeenCalled()
-    expect(mockDisconnect).not.toHaveBeenCalled()
-    expect(mockRouterPush).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockSwitchNetworkIfNeeded).toHaveBeenCalled()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+      expect(mockRouterPush).not.toHaveBeenCalled()
+    })
   })
 
-  it('disconnects and navigates to error when address does not match', () => {
-    const { result, rerender } = renderReconnectFlow()
+  it('disconnects and navigates to error when address does not match', async () => {
+    const { result } = renderReconnectFlow()
 
     act(() => {
       result.current.reconnect(mockAddress)
     })
 
-    setConnected(mockOtherAddress)
-    rerender({})
+    await act(async () => {
+      mockConnectResolve({ address: mockOtherAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
 
-    expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockRouterPush).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pathname: '/import-signers/reconnect-error',
-      }),
-    )
+    await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(mockRouterPush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/import-signers/reconnect-error',
+          params: { address: getAddress(mockAddress) },
+        }),
+      )
+    })
   })
 
-  it('does not act when wallet connects without reconnect initiation', () => {
-    setConnected(mockAddress)
+  it('does nothing when connect is rejected', async () => {
+    const { result } = renderReconnectFlow()
 
-    renderReconnectFlow()
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(new Error('User rejected'))
+    })
 
     expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
     expect(mockDisconnect).not.toHaveBeenCalled()
