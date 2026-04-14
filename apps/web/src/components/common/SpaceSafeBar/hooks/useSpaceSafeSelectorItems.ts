@@ -12,6 +12,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -148,7 +149,7 @@ export function useSpaceSafeSelectorItems() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({ pathname: router.pathname, query: { safe: `${chain.shortName}:${address}` } })
+      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
     },
     [chainConfigs, router, spaceId],
   )
