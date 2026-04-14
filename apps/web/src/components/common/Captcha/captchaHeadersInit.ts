@@ -1,6 +1,12 @@
-import { setPrepareHeadersHook } from '@safe-global/store/gateway/cgwClient'
+import { setPrepareHeadersHook, setHandleResponseHook } from '@safe-global/store/gateway/cgwClient'
 
 export const sharedTokenRef: { current: string | null } = { current: null }
+
+const widgetRefreshCallbackRef: { current: (() => void) | null } = { current: null }
+
+export function registerWidgetRefreshCallback(callback: () => void) {
+  widgetRefreshCallbackRef.current = callback
+}
 
 // Promise-based waiting for captcha readiness
 // This allows HTTP requests to wait indefinitely until captcha is ready
@@ -49,5 +55,21 @@ export function initializeCaptchaHeaders() {
     }
 
     return headers
+  })
+
+  setHandleResponseHook(async (response: Response) => {
+    if (response.status !== 401) return
+    // No widget registered means captcha is disabled — don't reset the promise or we'll deadlock
+    if (!widgetRefreshCallbackRef.current) return
+    try {
+      const data = await response.clone().json()
+      if (data?.message === 'Invalid CAPTCHA token') {
+        sharedTokenRef.current = null
+        resetCaptchaPromise()
+        widgetRefreshCallbackRef.current()
+      }
+    } catch {
+      // Ignore non-JSON or unreadable responses
+    }
   })
 }
