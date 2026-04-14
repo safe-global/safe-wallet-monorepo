@@ -2,7 +2,6 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
 import { TrustedSafesSection } from './sections/TrustedSafes'
-import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
 import { useIsQualifiedSafe } from '@/features/spaces'
 
 export interface SectionItemProps {
