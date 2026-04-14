@@ -76,6 +76,10 @@ const useAutoScan = (
   const [isRunning, setIsRunning] = useState(false)
   const completedRef = useRef<Set<string>>(new Set())
   const scanningRef = useRef<string | null>(null)
+  // Store onComplete in a ref to avoid stale closure — the effect captures
+  // this ref instead of the callback directly.
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   const currentTarget = isRunning && currentIndex < queue.length ? queue[currentIndex] : null
   const currentEntry = currentTarget ? safes.find((s) => s.address === currentTarget.address) : undefined
@@ -115,21 +119,10 @@ const useAutoScan = (
             completedRef.current.add(key)
             scanningRef.current = null
             const timestamp = Date.now()
-            // --- TEMPORARY DIAGNOSTIC — remove before merge ---
-            const passing = Object.values(results).filter(
-              (r) => r.status === 'clear' || r.status === 'not_applicable' || r.status === 'inconclusive',
-            ).length
-            const total2 = Object.keys(results).length
-            console.warn(
-              '[AutoScan]',
-              key,
-              `${passing}/${total2} passing`,
-              Object.fromEntries(Object.entries(results).map(([id, r]) => [id, `${r.status}:${r.severity}`])),
-            )
             // Share results with useSecurityScan's module-level cache so the drawer reuses
             // them instead of re-scanning when the user opens this Safe's report.
             getScanResultsCache().set(key, { results, timestamp })
-            onComplete(currentTarget.address, currentTarget.chainId, timestamp, results)
+            onCompleteRef.current(currentTarget.address, currentTarget.chainId, timestamp, results)
             setScanningKeys((prev) => {
               const next = new Set(prev)
               next.delete(key)

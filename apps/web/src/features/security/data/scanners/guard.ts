@@ -53,15 +53,6 @@ export const guardScanner: SecurityScanner = {
 
     const hasGuard = guard !== null && guard.value !== ZERO_ADDRESS
 
-    // --- TEMPORARY DIAGNOSTIC — remove before merge ---
-    console.warn('[GuardScanner]', ctx.safeAddress.slice(0, 10), {
-      hasGuard,
-      chainSupportsHypernative,
-      balanceUsd: ctx.balanceUsd,
-      threshold: HIGH_VALUE_THRESHOLD_USD,
-      wouldTriggerTier3: !hasGuard && chainSupportsHypernative && ctx.balanceUsd > HIGH_VALUE_THRESHOLD_USD,
-    })
-
     // Tier 1: Untrusted guard detected
     if (hasGuard && !isTrustedGuard(guard.name, chainId, guard.value)) {
       const guardLabel = guard.name || `${guard.value.slice(0, 10)}...`

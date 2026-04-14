@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { ScanContext, ScanResult } from '../data/scanners/types'
 import { SCANNERS } from '../data/scanners/registry'
+import { scanKey } from '../data/scanners/utils'
 
 /**
  * Module-level cache so multiple hook instances sharing the same ctxKey
- * (e.g., sidebar + main security page) reuse results instead of running
- * duplicate scans. Keyed by `chainId:safeAddress`. TTL: 60 seconds.
+ * reuse results instead of running duplicate scans. TTL: 1 hour.
  */
-const CACHE_TTL_MS = 3_600_000 // 1 hour
+const CACHE_TTL_MS = 3_600_000
 const scanResultsCache = new Map<string, { results: Record<string, ScanResult>; timestamp: number }>()
 
 export const getScanResultsCache = () => scanResultsCache
@@ -31,7 +31,7 @@ export type ScanState = {
 }
 
 const useSecurityScan = (ctx: ScanContext | null): ScanState => {
-  const ctxKey = ctx ? `${ctx.chainId}:${ctx.safeAddress}` : null
+  const ctxKey = ctx ? scanKey(ctx.safeAddress, ctx.chainId) : null
 
   const [results, setResults] = useState<Record<string, ScanResult>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
@@ -86,7 +86,7 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
             const now = Date.now()
             setLastScannedAt(now)
             // Write to module-level cache so other hook instances (sidebar) reuse results
-            const key = ctxRef.current ? `${ctxRef.current.chainId}:${ctxRef.current.safeAddress}` : null
+            const key = ctxRef.current ? scanKey(ctxRef.current.safeAddress, ctxRef.current.chainId) : null
             if (key) {
               // Read final results from state updater to avoid closure staleness
               setResults((final) => {
@@ -107,12 +107,6 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
       // cache check misses. By the time ctx resolves, we need to check again here.
       const freshCached = scanResultsCache.get(ctxKey)
       const freshResolved = freshCached && Date.now() - freshCached.timestamp < CACHE_TTL_MS ? freshCached : null
-      // --- TEMPORARY DIAGNOSTIC — remove before merge ---
-      console.warn('[useSecurityScan]', ctxKey, freshResolved ? 'CACHE HIT' : 'CACHE MISS', {
-        cacheExists: !!freshCached,
-        age: freshCached ? Date.now() - freshCached.timestamp : null,
-        ttl: CACHE_TTL_MS,
-      })
       if (freshResolved) {
         setResults(freshResolved.results)
         setLastScannedAt(freshResolved.timestamp)
