@@ -274,7 +274,7 @@ describe('SpaceSelectorDropdown', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
-      expect(screen.getByText(/You've reached the limit of Safes for this workspace/)).toBeInTheDocument()
+      expect(screen.getByText(/You can have up to /)).toBeInTheDocument()
     })
 
     it('does not show a limit tooltip for a space below the limit', () => {
@@ -283,7 +283,7 @@ describe('SpaceSelectorDropdown', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
-      expect(screen.queryByText(/You've reached the limit of Safes for this workspace/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/You can have up to /)).not.toBeInTheDocument()
     })
 
     it('does not disable spaces at the limit in the default variant', () => {
@@ -304,9 +304,7 @@ describe('SpaceSelectorDropdown', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
-      expect(
-        screen.getByText(`You've reached the limit of Safes for this workspace (max. ${LIMIT} Safes per workspace)`),
-      ).toBeInTheDocument()
+      expect(screen.getByText(`You can have up to ${LIMIT} Safes per workspace`)).toBeInTheDocument()
     })
   })
 
