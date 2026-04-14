@@ -61,7 +61,7 @@ const mockSetupGroup: ResolvedSidebarGroup = {
     },
     {
       icon: Shield,
-      label: 'Security hub',
+      label: 'Security',
       href: AppRoutes.spaces.security,
       isActive: false,
       disabled: false,
