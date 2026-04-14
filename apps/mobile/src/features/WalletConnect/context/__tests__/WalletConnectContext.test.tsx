@@ -23,7 +23,6 @@ const mockDisconnect = jest.fn()
 jest.mock('../../hooks/useImportSignerFlow', () => ({
   useImportSignerFlow: () => ({
     initiateConnection: mockInitiateConnection,
-    isConnected: true,
   }),
 }))
 
@@ -49,7 +48,7 @@ jest.mock('../../hooks/useWalletConnectSigning', () => ({
 }))
 
 const mockAppKit = { open: mockOpen, disconnect: mockDisconnect }
-const mockAccount = { address: mockAddress, chainId: 1 }
+const mockAccount = { address: mockAddress, chainId: 1, isConnected: true }
 const mockWalletInfoResult = { walletInfo: { name: 'MetaMask' } }
 
 jest.mock('@reown/appkit-react-native', () => ({

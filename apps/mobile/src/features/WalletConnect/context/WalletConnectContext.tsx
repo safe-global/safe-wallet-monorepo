@@ -11,11 +11,12 @@ import { useWalletConnectSigning } from '../hooks/useWalletConnectSigning'
 import { useChainSync } from '../hooks/useChainSync'
 
 interface WalletConnectContextValue
-  extends Pick<ReturnType<typeof useImportSignerFlow>, 'initiateConnection' | 'isConnected'>,
+  extends Pick<ReturnType<typeof useImportSignerFlow>, 'initiateConnection'>,
     Pick<ReturnType<typeof useReconnectFlow>, 'reconnect'>,
     Pick<ReturnType<typeof useSwitchNetwork>, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
     Pick<ReturnType<typeof useWalletConnectSigning>, 'sign' | 'hasProvider'> {
   isWalletConnectSigner: (address: string) => boolean
+  isConnected: ReturnType<typeof useAccount>['isConnected']
   address: ReturnType<typeof useAccount>['address']
   chainId: ReturnType<typeof useAccount>['chainId']
   walletInfo: ReturnType<typeof useWalletInfo>['walletInfo']
@@ -48,13 +49,13 @@ export function useOptionalWalletConnectContext(): WalletConnectContextValue | n
  * the given callback. Must be rendered inside AppKitProvider.
  */
 function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: WalletConnectContextValue) => void }) {
-  const { initiateConnection, isConnected } = useImportSignerFlow()
+  const { initiateConnection } = useImportSignerFlow()
   const { reconnect } = useReconnectFlow()
   const { switchNetwork, switchNetworkIfNeeded, isWrongNetwork } = useSwitchNetwork()
   const { sign, hasProvider } = useWalletConnectSigning()
   useChainSync()
   const appKitHook = useAppKit()
-  const { address, chainId } = useAccount()
+  const { address, chainId, isConnected } = useAccount()
   const { walletInfo } = useWalletInfo()
   const signers = useAppSelector(selectSigners)
 
