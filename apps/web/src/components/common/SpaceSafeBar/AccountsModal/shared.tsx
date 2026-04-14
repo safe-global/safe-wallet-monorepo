@@ -19,7 +19,6 @@ export function SafeIdenticon({ address, size = ICON_SIZE }: { address: string; 
     return <Skeleton className="rounded-full shrink-0" style={{ width: size, height: size }} />
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { blo } = require('blo') as { blo: (addr: `0x${string}`) => string }
 
   return (
