@@ -88,6 +88,7 @@ const AggregatedBalance = ({
       <div className={isDimmed ? 'opacity-50' : undefined}>
         <DashboardHeader
           value={formattedValue}
+          noAssets={isDimmed}
           onSend={handleSend}
           onReceive={handleReceive}
           onSwap={handleSwap}

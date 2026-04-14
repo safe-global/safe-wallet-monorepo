@@ -1,41 +1,21 @@
-import { type ReactElement, useContext, useMemo, useCallback } from 'react'
-import { Button, Card, Box, Stack } from '@mui/material'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import Track from '@/components/common/Track'
-import QrCodeButton from '@/components/sidebar/QrCodeButton'
-import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
-import SwapIcon from '@/public/images/common/swap.svg'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { type ReactElement, useMemo } from 'react'
+import { Card, Box, Stack } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
-import ArrowIconSE from '@/public/images/common/arrow-down-left.svg'
-import { AppRoutes } from '@/config/routes'
-import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import CheckWallet from '@/components/common/CheckWallet'
 import OverviewSkeleton from './OverviewSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
+import { ActionsTrayFeature } from '@/features/actions-tray'
 import { useLoadFeature } from '@/features/__core__'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
-  const { setTxFlow } = useContext(TxModalContext)
-  const router = useRouter()
-  const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const portfolio = useLoadFeature(PortfolioFeature)
+  const { ActionsTray } = useLoadFeature(ActionsTrayFeature)
 
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
-
-  const handleOnSend = useCallback(() => {
-    setTxFlow(<NewTxFlow />, undefined, false)
-    trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
-  }, [setTxFlow])
 
   const items = useMemo(() => {
     return balances.items.filter((item) => item.balance !== '0')
@@ -46,7 +26,7 @@ const Overview = (): ReactElement => {
   if (isLoading) return <OverviewSkeleton />
 
   return (
-    <Card sx={{ border: 0, px: 3, pt: 2.5, pb: 1.5 }} component="section">
+    <Card sx={{ border: 0, px: 3, pt: 2.5, borderRadius: '16px', pb: 1.5 }} component="section">
       {!portfolio.$isDisabled && (
         <Box display="flex" justifyContent="flex-end" mb={-3}>
           <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
@@ -60,88 +40,7 @@ const Overview = (): ReactElement => {
         >
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
 
-          {safe.deployed && (
-            <Stack
-              direction="row"
-              alignItems={{ xs: 'flex-start', md: 'center' }}
-              flexWrap={{ xs: 'wrap', md: 'nowrap' }}
-              gap={1}
-              width={{ xs: 1, md: 'auto' }}
-              mt={{ xs: 2, md: 0 }}
-            >
-              {!noAssets && (
-                <Box flex={1}>
-                  <CheckWallet>
-                    {(isOk) => (
-                      <Button
-                        onClick={handleOnSend}
-                        size="medium"
-                        variant="contained"
-                        disableElevation
-                        startIcon={<ArrowIconNW fontSize="small" />}
-                        fullWidth
-                        disabled={!isOk}
-                      >
-                        Send
-                      </Button>
-                    )}
-                  </CheckWallet>
-                </Box>
-              )}
-
-              {isSwapFeatureEnabled && !noAssets && (
-                <Box flex={1}>
-                  <CheckWallet>
-                    {(isOk) => {
-                      const btn = (
-                        <Button
-                          data-testid="overview-swap-btn"
-                          size="medium"
-                          variant="contained"
-                          color="background"
-                          disableElevation
-                          startIcon={<SwapIcon fontSize="small" />}
-                          fullWidth
-                          disabled={!isOk}
-                        >
-                          Swap
-                        </Button>
-                      )
-
-                      return (
-                        <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                          {isOk ? (
-                            <Link href={{ pathname: AppRoutes.swap, query: router.query }} passHref type="button">
-                              {btn}
-                            </Link>
-                          ) : (
-                            btn
-                          )}
-                        </Track>
-                      )
-                    }}
-                  </CheckWallet>
-                </Box>
-              )}
-
-              <Box flex={1}>
-                <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-                  <QrCodeButton>
-                    <Button
-                      size="medium"
-                      variant="contained"
-                      color="background"
-                      disableElevation
-                      startIcon={<ArrowIconSE fontSize="small" />}
-                      fullWidth
-                    >
-                      Receive
-                    </Button>
-                  </QrCodeButton>
-                </Track>
-              </Box>
-            </Stack>
-          )}
+          {safe.deployed && <ActionsTray noAssets={noAssets} />}
         </Stack>
       </Box>
     </Card>
