@@ -317,19 +317,19 @@ describe('TokenAmountInput', () => {
       expect(fiatDisplay.textContent).toContain('500')
     })
 
-    it('should hide fiat value when amount is empty', () => {
+    it('should not render fiat value when amount is empty', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="" />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
 
-    it('should hide fiat value when amount is "0"', () => {
+    it('should not render fiat value when amount is "0"', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="0" />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
 
-    it('should hide fiat value when token has no fiatConversion', () => {
+    it('should not render fiat value when token has no fiatConversion', () => {
       const balancesNoFiat: Balances['items'] = [
         {
           ...mockBalances[1],
@@ -339,10 +339,10 @@ describe('TokenAmountInput', () => {
 
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesNoFiat} />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
 
-    it('should hide fiat value when fiatConversion is "0"', () => {
+    it('should not render fiat value when fiatConversion is "0"', () => {
       const balancesZeroFiat: Balances['items'] = [
         {
           ...mockBalances[1],
@@ -352,19 +352,19 @@ describe('TokenAmountInput', () => {
 
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="50" balances={balancesZeroFiat} />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
 
-    it('should hide fiat value when selectedToken is undefined', () => {
+    it('should not render fiat value when selectedToken is undefined', () => {
       render(<FiatTestWrapper defaultTokenAddress="0x0000000000000000000000000000000000000001" defaultAmount="50" />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
 
-    it('should hide fiat value for negative amounts', () => {
+    it('should not render fiat value for negative amounts', () => {
       render(<FiatTestWrapper defaultTokenAddress={USDC_ADDRESS} defaultAmount="-5" />)
 
-      expect(screen.getByTestId('fiat-display')).not.toBeVisible()
+      expect(screen.queryByTestId('fiat-display')).not.toBeInTheDocument()
     })
   })
 })

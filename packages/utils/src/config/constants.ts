@@ -26,12 +26,16 @@ export const TENDERLY_ORG_NAME =
   process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || process.env.EXPO_PUBLIC_TENDERLY_ORG_NAME || ''
 
 // Captcha — set to empty string to disable CAPTCHA entirely
-export const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
-  process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ||
-  process.env.NEXT_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
-  process.env.EXPO_PUBLIC_TURNSTILE_TEST_SITE_KEY ||
-  ''
+const IS_PRODUCTION =
+  process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' || process.env.EXPO_PUBLIC_IS_PRODUCTION === 'true'
+
+const TURNSTILE_SITE_KEY_PRODUCTION =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION || process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION || ''
+
+const TURNSTILE_SITE_KEY_STAGING =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING || process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY_STAGING || ''
+
+export const TURNSTILE_SITE_KEY = IS_PRODUCTION ? TURNSTILE_SITE_KEY_PRODUCTION : TURNSTILE_SITE_KEY_STAGING
 
 // Help Center
 export const HELP_CENTER_URL = 'https://help.safe.global'
