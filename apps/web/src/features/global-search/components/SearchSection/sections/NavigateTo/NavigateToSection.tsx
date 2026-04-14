@@ -11,6 +11,7 @@ import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useAppDispatch } from '@/store'
 import { closeGlobalSearch } from '@/features/global-search/store'
+import useWallet from '@/hooks/wallets/useWallet'
 
 interface NavigationItem {
   icon: ReactNode
@@ -30,6 +31,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const dispatch = useAppDispatch()
   const { setTxFlow } = useContext(TxModalContext)
   const { link: txBuilderLink } = useTxBuilderApp()
+  const wallet = useWallet()
 
   const isSafeLevel = typeof router.query.safe === 'string'
 
@@ -74,20 +76,26 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
   return (
     <SectionWrapper label={label}>
       <div className="flex flex-col">
-        {filteredItems.map((item) => (
-          <button
-            key={item.label}
-            type="button"
-            className={cn(
-              'flex items-center cursor-pointer gap-3 px-4 py-2 font-bold text-sm text-foreground',
-              'hover:bg-accent rounded-lg mx-2 transition-colors',
-            )}
-            onClick={() => handleNavigation(item.label)}
-          >
-            <span className="text-muted-foreground">{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
+        {filteredItems.map((item) => {
+          const isDisabled = item.label === 'Send' && !wallet
+
+          return (
+            <button
+              key={item.label}
+              type="button"
+              disabled={isDisabled}
+              className={cn(
+                'flex items-center gap-3 px-4 py-2 font-bold text-sm text-foreground',
+                'rounded-lg mx-2 transition-colors',
+                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-accent',
+              )}
+              onClick={() => handleNavigation(item.label)}
+            >
+              <span className="text-muted-foreground">{item.icon}</span>
+              {item.label}
+            </button>
+          )
+        })}
       </div>
     </SectionWrapper>
   )

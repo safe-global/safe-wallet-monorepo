@@ -2,6 +2,9 @@ import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { GlobalSearchModal } from '../index'
 import type { RootState } from '@/store'
+import { mockWallet } from '@/tests/mocks/hooks'
+
+jest.mock('@/hooks/wallets/useWallet')
 
 jest.mock('@/features/spaces', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
@@ -51,5 +54,21 @@ describe('GlobalSearchModal', () => {
     await user.type(input, 'test query')
 
     expect(input).toHaveValue('test query')
+  })
+
+  it('disables Send button when wallet is not connected', () => {
+    mockWallet(null)
+    renderWithOpenSearch()
+
+    expect(screen.getByText('Send').closest('button')).toBeDisabled()
+    expect(screen.getByText('Swap').closest('button')).not.toBeDisabled()
+    expect(screen.getByText('Transaction builder').closest('button')).not.toBeDisabled()
+  })
+
+  it('enables Send button when wallet is connected', () => {
+    mockWallet()
+    renderWithOpenSearch()
+
+    expect(screen.getByText('Send').closest('button')).not.toBeDisabled()
   })
 })

@@ -16,6 +16,12 @@ export interface SectionItem {
 
 const useAlwaysActive = () => true
 
+const useHasSpaceQuery = () => {
+  const { query } = useRouter()
+
+  return !!query.spaceId
+}
+
 const useNotInSpace = () => {
   const { query } = useRouter()
 
@@ -32,7 +38,7 @@ export const sectionItems: SectionItem[] = [
   },
   {
     label: 'Safe accounts',
-    useActivate: useAlwaysActive,
+    useActivate: useHasSpaceQuery,
     renderItem: AccountsSection,
   },
   {

@@ -31,7 +31,7 @@ const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
               safe={safe}
               hideContextMenu
               showPending={false}
-              className="px-0 sm:px-0 hover:bg-card"
+              className="px-2 sm:px-2 -mx-2"
             />
           )
         })}
