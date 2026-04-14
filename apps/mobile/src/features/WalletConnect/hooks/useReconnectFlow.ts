@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { router } from 'expo-router'
-import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { useAccount, useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
+import { useStableAppKitEvent } from './useStableAppKitEvent'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
@@ -12,12 +13,11 @@ import { useSwitchNetwork } from './useSwitchNetwork'
 export function useReconnectFlow() {
   const { open, disconnect } = useAppKit()
   const { address, isConnected: walletIsConnected } = useAccount()
-  const { walletInfo } = useWalletInfo()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
   const pendingAddressRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!pendingAddressRef.current || !walletIsConnected || !address || !walletInfo) {
+    if (!pendingAddressRef.current || !walletIsConnected || !address) {
       return
     }
 
@@ -36,7 +36,7 @@ export function useReconnectFlow() {
     }
 
     switchNetworkIfNeeded()
-  }, [walletIsConnected, address, walletInfo, disconnect, switchNetworkIfNeeded])
+  }, [walletIsConnected, address, disconnect, switchNetworkIfNeeded])
 
   const reconnect = useCallback(
     (signerAddress: string) => {
@@ -45,6 +45,14 @@ export function useReconnectFlow() {
     },
     [open],
   )
+
+  useStableAppKitEvent('CONNECT_ERROR', () => {
+    pendingAddressRef.current = null
+  })
+
+  useStableAppKitEvent('USER_REJECTED', () => {
+    pendingAddressRef.current = null
+  })
 
   return { reconnect }
 }

@@ -5,6 +5,7 @@ import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
 import Logger from '@/src/utils/logger'
 import { useSwitchNetwork } from './useSwitchNetwork'
+import { useStableAppKitEvent } from './useStableAppKitEvent'
 
 /**
  * Handles the signer import flow: ownership validation and navigation
@@ -22,22 +23,25 @@ export function useImportSignerFlow() {
 
   const isConnected = Boolean(walletIsConnected && address && walletInfo)
 
-  const pushConnectSignerError = useCallback(() => {
-    if (!address) {
-      return
-    }
+  const pushConnectSignerError = useCallback(
+    (address: string) => {
+      if (!address) {
+        return
+      }
 
-    disconnect()
+      disconnect()
 
-    router.push({
-      pathname: '/import-signers/connect-signer-error',
-      params: { address: getAddress(address), walletIcon: walletInfo?.icon ?? '' },
-    })
-  }, [address, disconnect, walletInfo?.icon])
+      router.push({
+        pathname: '/import-signers/connect-signer-error',
+        params: { address: getAddress(address), walletIcon: walletInfo?.icon ?? '' },
+      })
+    },
+    [disconnect, walletInfo?.icon],
+  )
 
   // Validate ownership then navigate when the user initiates a new connection
   useEffect(() => {
-    if (!connectInitiatedRef.current || !isConnected || !address || !walletInfo) {
+    if (!connectInitiatedRef.current || !isConnected || !address) {
       return
     }
 
@@ -57,20 +61,20 @@ export function useImportSignerFlow() {
             pathname: '/import-signers/name-signer',
             params: {
               address: checksumAddress,
-              walletName: walletInfo.name ?? '',
+              walletName: walletInfo?.name ?? '',
             },
           })
         } else {
-          pushConnectSignerError()
+          pushConnectSignerError(checksumAddress)
         }
       } catch (error) {
         Logger.error('Error validating signer ownership:', error)
-        pushConnectSignerError()
+        pushConnectSignerError(checksumAddress)
       }
     }
 
     validateAndNavigate()
-  }, [isConnected, address, walletInfo, validateAddressOwnership, switchNetworkIfNeeded, pushConnectSignerError])
+  }, [isConnected, address, walletInfo?.name, validateAddressOwnership, switchNetworkIfNeeded, pushConnectSignerError])
 
   // Reset guard when wallet disconnects so reconnection triggers navigation
   useEffect(() => {
@@ -83,6 +87,14 @@ export function useImportSignerFlow() {
     connectInitiatedRef.current = true
     open({ view: 'Connect' })
   }, [open])
+
+  useStableAppKitEvent('CONNECT_ERROR', () => {
+    connectInitiatedRef.current = false
+  })
+
+  useStableAppKitEvent('USER_REJECTED', () => {
+    connectInitiatedRef.current = false
+  })
 
   return { initiateConnection, isConnected }
 }
