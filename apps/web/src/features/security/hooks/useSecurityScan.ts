@@ -8,9 +8,25 @@ import { scanKey } from '../data/scanners/utils'
  * reuse results instead of running duplicate scans. TTL: 1 hour.
  */
 const CACHE_TTL_MS = 3_600_000
+const MAX_CACHE_SIZE = 50
 const scanResultsCache = new Map<string, { results: Record<string, ScanResult>; timestamp: number }>()
 
+/** Evict the oldest entry if the cache exceeds the size limit. */
+const evictIfNeeded = () => {
+  if (scanResultsCache.size <= MAX_CACHE_SIZE) return
+  let oldestKey: string | null = null
+  let oldestTs = Infinity
+  for (const [k, v] of scanResultsCache) {
+    if (v.timestamp < oldestTs) {
+      oldestTs = v.timestamp
+      oldestKey = k
+    }
+  }
+  if (oldestKey) scanResultsCache.delete(oldestKey)
+}
+
 export const getScanResultsCache = () => scanResultsCache
+export { evictIfNeeded as evictScanCache }
 
 const SCANNER_TIMEOUT_MS = 15_000
 
@@ -91,6 +107,7 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
               // Read final results from state updater to avoid closure staleness
               setResults((final) => {
                 scanResultsCache.set(key, { results: final, timestamp: now })
+                evictIfNeeded()
                 return final
               })
             }

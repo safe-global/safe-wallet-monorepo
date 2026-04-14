@@ -28,11 +28,13 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Unsupported mastercopy — same check as UnsupportedMastercopyWarning
     if (!isValidMasterCopy(implementationVersionState)) {
+      // isMigrationToL2Possible only reads nonce, chainId, and implementationVersionState
+      // from SafeState. We cast to satisfy the type, but only these 3 fields are accessed.
       const canMigrateL2 = isMigrationToL2Possible({
         nonce,
         chainId,
         implementationVersionState,
-      } as SafeState)
+      } as Pick<SafeState, 'nonce' | 'chainId' | 'implementationVersionState'> as SafeState)
 
       return {
         status: 'issue',

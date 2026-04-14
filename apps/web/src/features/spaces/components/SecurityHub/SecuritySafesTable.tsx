@@ -24,6 +24,7 @@ import {
   computeSummary,
   severityRank,
   getSafeGrade,
+  formatTimestamp,
   type GradeSummary,
   type SafeGrade,
 } from '@/features/security/data/scanners/utils'
@@ -132,14 +133,60 @@ const formatBalance = (fiatTotal?: string | null): string => {
   return `$${value.toFixed(0)}`
 }
 
-const formatRelativeTime = (timestamp: number): string => {
-  const seconds = Math.round((Date.now() - timestamp) / 1000)
-  if (seconds < 60) return 'Just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  return `${Math.floor(hours / 24)}d ago`
+// Pure helper functions — extracted from component body for testability and to avoid recreation per render
+const getAggregateSummary = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+): GradeSummary | null => {
+  let totalPassing = 0
+  let totalApplicable = 0
+  let worstGradeRank = 4
+  let hasCriticalIssue = false
+  let hasAny = false
+
+  for (const chain of safe.chainEntries) {
+    const key = scanKey(safe.address, chain.chainId)
+    const results = scanResults[key]
+    if (!results) continue
+    const summary = computeSummary(results)
+    if (!summary) continue
+    hasAny = true
+    totalPassing += summary.passing
+    totalApplicable += summary.applicableCount
+    if (summary.hasCriticalIssue) hasCriticalIssue = true
+    const rank = severityRank(summary.grade)
+    if (rank < worstGradeRank) worstGradeRank = rank
+  }
+
+  if (!hasAny) return null
+  const gradeMap = ['Critical', 'High', 'Medium', 'Low'] as const
+  return {
+    passing: totalPassing,
+    applicableCount: totalApplicable,
+    grade: gradeMap[worstGradeRank] ?? 'Low',
+    hasCriticalIssue,
+  }
+}
+
+const hasMultichainWarning = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+): boolean => {
+  for (const chain of safe.chainEntries) {
+    const key = scanKey(safe.address, chain.chainId)
+    const results = scanResults[key]
+    if (!results) continue
+    const multichainResult = results['multichain_setup']
+    if (multichainResult && multichainResult.status !== 'clear' && multichainResult.status !== 'not_applicable') {
+      return true
+    }
+  }
+  return false
+}
+
+const isAnyChainScanning = (safe: SpaceSafeEntry, scanningKeys?: Set<string>): boolean => {
+  if (!scanningKeys) return false
+  return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
 }
 
 type SecuritySafesTableProps = {
@@ -227,55 +274,6 @@ const SecuritySafesTable = ({
       return next
     })
   }, [])
-
-  const getAggregateSummary = (safe: SpaceSafeEntry): GradeSummary | null => {
-    let totalPassing = 0
-    let totalApplicable = 0
-    let worstGradeRank = 4
-    let hasCriticalIssue = false
-    let hasAny = false
-
-    for (const chain of safe.chainEntries) {
-      const key = scanKey(safe.address, chain.chainId)
-      const results = scanResults[key]
-      if (!results) continue
-      const summary = computeSummary(results)
-      if (!summary) continue
-      hasAny = true
-      totalPassing += summary.passing
-      totalApplicable += summary.applicableCount
-      if (summary.hasCriticalIssue) hasCriticalIssue = true
-      const rank = severityRank(summary.grade)
-      if (rank < worstGradeRank) worstGradeRank = rank
-    }
-
-    if (!hasAny) return null
-    const gradeMap = ['Critical', 'High', 'Medium', 'Low'] as const
-    return {
-      passing: totalPassing,
-      applicableCount: totalApplicable,
-      grade: gradeMap[worstGradeRank] ?? 'Low',
-      hasCriticalIssue,
-    }
-  }
-
-  const hasMultichainWarning = (safe: SpaceSafeEntry): boolean => {
-    for (const chain of safe.chainEntries) {
-      const key = scanKey(safe.address, chain.chainId)
-      const results = scanResults[key]
-      if (!results) continue
-      const multichainResult = results['multichain_setup']
-      if (multichainResult && multichainResult.status !== 'clear' && multichainResult.status !== 'not_applicable') {
-        return true
-      }
-    }
-    return false
-  }
-
-  const isAnyChainScanning = (safe: SpaceSafeEntry): boolean => {
-    if (!scanningKeys) return false
-    return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
-  }
 
   // Skip initial-load stagger after the first render — filter transitions should be instant
   const hasAnimatedRef = useRef(false)
@@ -430,7 +428,7 @@ const SecuritySafesTable = ({
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">
-                      {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
+                      {scanTimestamps?.[key] ? formatTimestamp(scanTimestamps[key]) : DASH}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
@@ -453,9 +451,17 @@ const SecuritySafesTable = ({
               )
             }
 
-            const aggregateSummary = getAggregateSummary(safe)
-            const aggregateScanning = isAnyChainScanning(safe)
-            const showMultichainWarning = hasMultichainWarning(safe)
+            const aggregateSummary = getAggregateSummary(safe, scanResults)
+            const aggregateScanning = isAnyChainScanning(safe, scanningKeys)
+            const showMultichainWarning = hasMultichainWarning(safe, scanResults)
+            const totalBalance = safe.chainEntries.reduce(
+              (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
+              0,
+            )
+            const chainTimestamps = safe.chainEntries
+              .map((c) => scanTimestamps?.[scanKey(safe.address, c.chainId)])
+              .filter((t): t is number => !!t)
+            const oldestTimestamp = chainTimestamps.length > 0 ? Math.min(...chainTimestamps) : null
 
             return (
               <Fragment key={safe.address}>
@@ -524,13 +530,7 @@ const SecuritySafesTable = ({
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" color="text.primary">
-                      {(() => {
-                        let total = 0
-                        for (const c of safe.chainEntries) {
-                          total += Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0
-                        }
-                        return formatBalance(String(total))
-                      })()}
+                      {formatBalance(String(totalBalance))}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -547,17 +547,9 @@ const SecuritySafesTable = ({
                     <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
                   </TableCell>
                   <TableCell>
-                    {(() => {
-                      const timestamps = safe.chainEntries
-                        .map((c) => scanTimestamps?.[scanKey(safe.address, c.chainId)])
-                        .filter((t): t is number => !!t)
-                      const oldest = timestamps.length > 0 ? Math.min(...timestamps) : null
-                      return (
-                        <Typography variant="caption" color="text.secondary">
-                          {oldest ? formatRelativeTime(oldest) : DASH}
-                        </Typography>
-                      )
-                    })()}
+                    <Typography variant="caption" color="text.secondary">
+                      {oldestTimestamp ? formatTimestamp(oldestTimestamp) : DASH}
+                    </Typography>
                   </TableCell>
                   <TableCell align="right" />
                 </MotionTableRow>
@@ -624,7 +616,7 @@ const SecuritySafesTable = ({
                         </TableCell>
                         <TableCell>
                           <Typography variant="caption" color="text.secondary">
-                            {scanTimestamps?.[key] ? formatRelativeTime(scanTimestamps[key]) : DASH}
+                            {scanTimestamps?.[key] ? formatTimestamp(scanTimestamps[key]) : DASH}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
