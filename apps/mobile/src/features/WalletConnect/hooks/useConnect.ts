@@ -48,6 +48,12 @@ export function useConnect() {
     resolve({ address, walletName: walletInfo.name, walletIcon: walletInfo.icon })
   }, [isConnected, address, walletInfo])
 
+  useEffect(() => {
+    return () => {
+      pendingRef.current = null
+    }
+  }, [])
+
   useStableAppKitEvent('CONNECT_ERROR', () => {
     if (!pendingRef.current) {
       return

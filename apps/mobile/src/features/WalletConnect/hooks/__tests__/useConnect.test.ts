@@ -177,6 +177,30 @@ describe('useConnect', () => {
     })
   })
 
+  it('clears pending promise on unmount', async () => {
+    const { result, unmount } = renderHook(() => useConnect())
+
+    let settled = false
+    act(() => {
+      result.current().then(
+        () => {
+          settled = true
+        },
+        () => {
+          settled = true
+        },
+      )
+    })
+
+    unmount()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(settled).toBe(false)
+  })
+
   it('handles sequential connect calls', async () => {
     const { result, rerender } = renderHook(() => useConnect())
 
