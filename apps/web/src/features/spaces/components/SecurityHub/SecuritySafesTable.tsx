@@ -33,9 +33,6 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
-import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/slices'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 
@@ -197,6 +194,7 @@ type SecuritySafesTableProps = {
   scanTimestamps?: Record<string, number>
   scanningKeys?: Set<string>
   gradeFilter?: SafeGrade | null
+  balanceMap: Record<string, string | undefined>
 }
 
 const SecuritySafesTable = ({
@@ -207,6 +205,7 @@ const SecuritySafesTable = ({
   scanTimestamps,
   scanningKeys,
   gradeFilter,
+  balanceMap,
 }: SecuritySafesTableProps): ReactElement => {
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const chainShortNames = useMemo(() => {
@@ -218,40 +217,6 @@ const SecuritySafesTable = ({
     }
     return map
   }, [chainsData])
-
-  // Fetch overviews for balance display. Uses RTK Query cache from the auto-scan's earlier fetches.
-  const currency = useAppSelector(selectCurrency)
-  const safeItems = useMemo(
-    () =>
-      safes.flatMap((safe) =>
-        safe.chainEntries
-          .filter((c) => c.isDeployed)
-          .map((c) => ({
-            chainId: c.chainId,
-            address: safe.address,
-            isReadOnly: false,
-            isPinned: false,
-            lastVisited: 0,
-            name: undefined,
-          })),
-      ),
-    [safes],
-  )
-  const { data: overviews } = useGetMultipleSafeOverviewsQuery(
-    { safes: safeItems, currency },
-    { skip: safeItems.length === 0 },
-  )
-  const balanceMap = useMemo(() => {
-    const map: Record<string, string | undefined> = {}
-    if (overviews) {
-      for (const ov of overviews) {
-        if (ov.address?.value && ov.chainId) {
-          map[scanKey(ov.address.value, ov.chainId)] = ov.fiatTotal
-        }
-      }
-    }
-    return map
-  }, [overviews])
 
   // Link the Safe name to that Safe's home dashboard. The per-Safe security view
   // now lives entirely inside this hub's drawer — clicking the row still opens it.

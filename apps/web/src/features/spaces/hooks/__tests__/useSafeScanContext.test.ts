@@ -190,4 +190,28 @@ describe('useSafeScanContext', () => {
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current?.creationInfo).toBeNull()
   })
+
+  it('uses overviewData when provided instead of querying the API', () => {
+    // Override the query mock to return different values — these should be ignored
+    ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
+      currentData: { fiatTotal: '999999', queued: 99 },
+      isLoading: false,
+    })
+    const overviewData = { balanceUsd: 42000, queuedTxCount: 3 }
+    const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, overviewData))
+    expect(result.current?.balanceUsd).toBe(42000)
+    expect(result.current?.queuedTxCount).toBe(3)
+  })
+
+  it('skips overview loading guard when overviewData is provided', () => {
+    // Simulate the overview query still loading — should NOT block context creation
+    ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
+      currentData: undefined,
+      isLoading: true,
+    })
+    const overviewData = { balanceUsd: 500, queuedTxCount: 1 }
+    const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, overviewData))
+    expect(result.current).not.toBeNull()
+    expect(result.current?.balanceUsd).toBe(500)
+  })
 })
