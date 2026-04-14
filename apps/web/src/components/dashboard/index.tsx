@@ -10,6 +10,11 @@ import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
+import {
+  InconsistentSignerSetupWarning,
+  OutdatedMastercopyWarning,
+  UnsupportedMastercopyWarning,
+} from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -122,6 +127,9 @@ const Dashboard = (): ReactElement => {
         <div className={css.rightCol}>
           <ActionRequiredPanel>
             {supportsRecovery && <RecoveryHeader />}
+            <InconsistentSignerSetupWarning />
+            <OutdatedMastercopyWarning />
+            <UnsupportedMastercopyWarning />
             <NonPinnedWarning />
           </ActionRequiredPanel>
 
