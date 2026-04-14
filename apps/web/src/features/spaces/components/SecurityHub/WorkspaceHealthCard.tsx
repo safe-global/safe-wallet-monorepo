@@ -139,7 +139,7 @@ const WorkspaceHealthCard = ({
     )
   }
 
-  const { color, level, criticalCount, needsAttentionCount, atRiskCount, scorePct } = aggregate
+  const { color, level, scorePct } = aggregate
 
   return (
     <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
