@@ -54,7 +54,7 @@ export const SafeSidebarVariant = ({
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
         {shouldRenderWorkspaceHeaderGroup && (
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} className="mb-2">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -66,7 +66,7 @@ export const SafeSidebarVariant = ({
         )}
 
         {/* Action Button */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="mb-2">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
               <SidebarActionButton />
