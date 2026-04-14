@@ -29,13 +29,14 @@ const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
         {filteredSafes.map((safe, index) => {
           const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
           return (
-            <SafeCardReadOnly
-              key={key}
-              safe={safe}
-              hideContextMenu
-              showPending={false}
-              className="px-2 sm:px-2 -mx-2"
-            />
+            <div key={key} data-search-item className="group/search-focus">
+              <SafeCardReadOnly
+                safe={safe}
+                hideContextMenu
+                showPending={false}
+                className="group-data-[focused]/search-focus:bg-muted/50 px-2 sm:px-2 -mx-2"
+              />
+            </div>
           )
         })}
       </div>

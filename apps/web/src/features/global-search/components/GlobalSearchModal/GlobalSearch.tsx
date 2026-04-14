@@ -16,6 +16,7 @@ const GlobalSearch = ({ value, onChange }: GlobalSearchProps) => {
         onChange={(e) => onChange(e.target.value)}
         className="pl-9 "
         aria-label="Search"
+        autoFocus
       />
     </div>
   )

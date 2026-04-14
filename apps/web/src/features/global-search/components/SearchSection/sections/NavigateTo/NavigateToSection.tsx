@@ -84,10 +84,13 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
               key={item.label}
               type="button"
               disabled={isDisabled}
+              data-search-item
               className={cn(
                 'flex items-center gap-3 px-4 py-2 font-bold text-sm text-foreground',
                 'rounded-lg mx-2 transition-colors',
-                isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-accent',
+                isDisabled
+                  ? 'cursor-not-allowed opacity-50'
+                  : 'cursor-pointer hover:bg-accent data-[focused]:bg-accent',
               )}
               onClick={() => handleNavigation(item.label)}
             >
