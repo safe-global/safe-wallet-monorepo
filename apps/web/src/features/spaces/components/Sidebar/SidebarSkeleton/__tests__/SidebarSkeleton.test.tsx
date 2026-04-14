@@ -5,8 +5,10 @@ import { SidebarSkeleton } from '../SidebarSkeleton'
 jest.mock('@/components/ui/sidebar', () => ({
   Sidebar: ({ children }: { children: ReactNode }) => <div data-testid="sidebar">{children}</div>,
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarFooter: ({ children, ...props }: { children: ReactNode }) => <footer {...props}>{children}</footer>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div data-testid="skeleton-row">{children}</div>,
@@ -22,6 +24,7 @@ describe('SidebarSkeleton', () => {
 
     expect(screen.getByTestId('sidebar')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-top-bar')).toBeInTheDocument()
-    expect(screen.getAllByTestId('skeleton-row')).toHaveLength(8)
+    expect(screen.getByTestId('sidebar-skeleton-footer')).toBeInTheDocument()
+    expect(screen.getAllByTestId('skeleton-row')).toHaveLength(13)
   })
 })
