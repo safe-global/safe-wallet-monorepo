@@ -8,7 +8,7 @@ import type { UndeployedSafesState } from '@safe-global/utils/features/counterfa
 import type { ScanResult } from '@/features/security/data/scanners/types'
 import { scanKey, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { SCANNERS } from '@/features/security/data/scanners/registry'
-import { getScanResultsCache } from '@/features/security/hooks/useSecurityScan'
+import { getScanResultsCache, evictScanCache } from '@/features/security/hooks/useSecurityScan'
 import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReportDrawer from './SecurityReportDrawer'
@@ -122,6 +122,7 @@ const useAutoScan = (
             // Share results with useSecurityScan's module-level cache so the drawer reuses
             // them instead of re-scanning when the user opens this Safe's report.
             getScanResultsCache().set(key, { results, timestamp })
+            evictScanCache()
             onCompleteRef.current(currentTarget.address, currentTarget.chainId, timestamp, results)
             setScanningKeys((prev) => {
               const next = new Set(prev)

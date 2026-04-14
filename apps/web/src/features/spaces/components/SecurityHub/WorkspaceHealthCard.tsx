@@ -2,7 +2,7 @@ import { type ReactElement, useMemo } from 'react'
 import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanResult } from '@/features/security/data/scanners/types'
-import { getSafeGrade, type SafeGrade } from '@/features/security/data/scanners/utils'
+import { getSafeGrade, formatTimestamp, type SafeGrade } from '@/features/security/data/scanners/utils'
 import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
 
 type WorkspaceHealthCardProps = {
@@ -104,16 +104,6 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
     </Box>
   </Box>
 )
-
-const formatRelativeTime = (timestamp: number): string => {
-  const seconds = Math.round((Date.now() - timestamp) / 1000)
-  if (seconds < 60) return 'Just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  return `${Math.floor(hours / 24)}d ago`
-}
 
 const WorkspaceHealthCard = ({
   scanResults,
@@ -249,7 +239,7 @@ const WorkspaceHealthCard = ({
           {lastScannedAt && (
             <Stack direction="row" alignItems="center" spacing={0.5} mt={2}>
               <Typography variant="caption" color="text.secondary">
-                Last scanned {formatRelativeTime(lastScannedAt)}
+                Last scanned {formatTimestamp(lastScannedAt)}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 ·
