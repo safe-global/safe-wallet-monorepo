@@ -3,10 +3,11 @@ import React from 'react'
 import { BlurView } from 'expo-blur'
 import { TabBarIcon } from '@/src/components/navigation/TabBarIcon'
 import { Navbar as AssetsNavbar } from '@/src/features/Assets/components/Navbar/Navbar'
-import { Platform, Pressable, StyleSheet } from 'react-native'
-import { useTheme } from 'tamagui'
+import { Pressable, StyleSheet } from 'react-native'
+import { useTheme, View } from 'tamagui'
 import { useTheme as useCurrentTheme } from '@/src/theme/hooks/useTheme'
 import TransactionHeader from '@/src/features/TxHistory/components/TransactionHeader'
+import { isAndroid } from '@/src/config/constants'
 
 function TabBarBackground() {
   const { isDark } = useCurrentTheme()
@@ -14,8 +15,8 @@ function TabBarBackground() {
   // expo-blur on Android requires BlurTargetView wrapping the content behind the blur,
   // but the tab navigator's internal view hierarchy prevents the ref from capturing screen
   // content. See https://github.com/expo/expo/issues/44165
-  if (Platform.OS === 'android') {
-    return null
+  if (isAndroid) {
+    return <View style={StyleSheet.absoluteFill} backgroundColor={'$backgroundSheet'} opacity={0.98} />
   }
 
   return <BlurView intensity={80} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
