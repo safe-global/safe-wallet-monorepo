@@ -83,6 +83,12 @@ GitHub → Actions → "🚀 Start Web Release"
 
 > **Note:** Due to commit signing restrictions, the back-merge cannot be pushed directly to `dev`. A PR is created automatically and linked in the Slack notification. Please review and merge the back-merge PR to keep `dev` in sync with `main`.
 
+**If creation of automatic back-merge PR failed**
+
+1. Create a back-merge PR manualy: `back-merge-from-main-branch -> dev`
+2. Review and approve
+3. **IMPORTANT:** Merge the PR to `dev` **WITHOUT SQUASHING** to preserve the history
+
 ---
 
 ## Configuration
