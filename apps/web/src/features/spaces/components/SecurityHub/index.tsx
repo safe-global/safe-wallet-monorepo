@@ -230,7 +230,7 @@ const SecurityHub = (): ReactElement => {
           Security
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Security posture across all accounts in this workspace.
+          Overview of security checks across your accounts.
         </Typography>
       </Box>
 
