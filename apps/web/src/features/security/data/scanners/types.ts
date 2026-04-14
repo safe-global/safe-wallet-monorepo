@@ -16,13 +16,11 @@ export type ScanContext = {
   isNonCriticalUpdate: boolean
   masterCopyDeployer: 'Gnosis' | 'Circles' | null
   nonce: number
-  addressBookEntryCount: number
   queuedTxCount: number
   balanceUsd: number
   chainSupportsRecovery: boolean
   chainSupportsHypernative: boolean
   chainSupportsTransactionScanning: boolean
-  isTrustedSafe: boolean
   isMultichain: boolean
   multichainSignersConsistent: boolean
   multichainDeviatingChains: string[]
