@@ -110,14 +110,10 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
       safeAddress: selected.address,
       nonce: safeInfo.nonce,
       balanceUsd: Number(safeOverview?.fiatTotal) || 0,
-      // The address_book and trusted_safe scanners aren't registered in SCANNERS; these stub
-      // values satisfy the ScanContext type until either the scanners are removed or wired.
-      addressBookEntryCount: 0,
       queuedTxCount: safeOverview?.queued ?? 0,
       chainSupportsRecovery: chain ? hasFeature(chain, FEATURES.RECOVERY) : false,
       chainSupportsHypernative: chain ? hasFeature(chain, FEATURES.HYPERNATIVE) : false,
       chainSupportsTransactionScanning: chain ? hasFeature(chain, FEATURES.RISK_MITIGATION) : false,
-      isTrustedSafe: false,
       isMultichain,
       multichainSignersConsistent,
       multichainDeviatingChains,
