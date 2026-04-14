@@ -27,10 +27,13 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
   )
 
   // Fetch master copies for deployer resolution
-  const { currentData: masterCopies } = useChainsGetMasterCopiesV1Query({ chainId }, { skip: !selected || !isDeployed })
+  const { currentData: masterCopies, isLoading: isMasterCopiesLoading } = useChainsGetMasterCopiesV1Query(
+    { chainId },
+    { skip: !selected || !isDeployed },
+  )
 
   // Fetch creation transaction for factory/deployment validation
-  const { currentData: creationTx } = useTransactionsGetCreationTransactionV1Query(
+  const { currentData: creationTx, isLoading: isCreationLoading } = useTransactionsGetCreationTransactionV1Query(
     { chainId, safeAddress: address },
     { skip: !selected || !isDeployed },
   )
@@ -54,13 +57,13 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
         : [],
     [isMultichain, entry],
   )
-  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
+  const { data: safeOverviews, isLoading: isOverviewsLoading } = useGetMultipleSafeOverviewsQuery(
     { safes: multichainSafeItems, currency },
     { skip: !isMultichain || multichainSafeItems.length === 0 },
   )
 
   // Fetch overview for balance data (fiatTotal) on the selected chain
-  const { data: safeOverview } = useGetSafeOverviewQuery(
+  const { data: safeOverview, isLoading: isOverviewLoading } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
     { skip: !selected || !isDeployed },
   )
@@ -70,7 +73,12 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
   const { configs: allChains } = useChains()
 
   return useMemo(() => {
+    // Wait for ALL dependent queries — not just safeInfo. Returning a context before
+    // overview/masterCopies/creationTx resolve causes scanners to run with defaults
+    // (balanceUsd=0, deployer=null, creationInfo=null) producing incorrect scores.
     if (!selected || !entry || !safeInfo || isSafeLoading) return null
+    if (isOverviewLoading || isMasterCopiesLoading || isCreationLoading) return null
+    if (isMultichain && isOverviewsLoading) return null
 
     // Resolve deployer using the same logic as useMasterCopies + OutdatedMastercopyWarning
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))
@@ -131,6 +139,10 @@ const useSafeScanContext = (selected: SelectedSafe | null, entry: SpaceSafeEntry
     entry,
     safeInfo,
     isSafeLoading,
+    isOverviewLoading,
+    isMasterCopiesLoading,
+    isCreationLoading,
+    isOverviewsLoading,
     masterCopies,
     latestVersion,
     isMultichain,
