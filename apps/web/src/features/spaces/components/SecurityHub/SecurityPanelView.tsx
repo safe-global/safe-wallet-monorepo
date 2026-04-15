@@ -39,26 +39,6 @@ const GRADE_BG_BY_STRENGTH: Record<StrengthLevel, string> = {
   Critical: 'error.background',
 }
 
-// Heuristic for per-module trust display (matches modules scanner name-list)
-const KNOWN_MODULE_NAME_FRAGMENTS = [
-  'delay',
-  'allowance',
-  'spending limit',
-  'roles',
-  'scope guard',
-  'bridge',
-  'reality',
-  'optimistic',
-  'exit',
-  'connext',
-]
-
-const looksLikeKnownModule = (name?: string | null): boolean => {
-  if (!name) return false
-  const lower = name.toLowerCase()
-  return KNOWN_MODULE_NAME_FRAGMENTS.some((known) => lower.includes(known))
-}
-
 /**
  * A row is considered "passing" (bucketed into the accordion) when the user has no action to take.
  * `inconclusive` means "we couldn't determine" (e.g. 3rd-party screening API unavailable) — treating
@@ -777,7 +757,7 @@ const SecurityChecksSection = ({
     } else {
       const modulesCta = buildCta('modules', modulesResult, safeQueryParam)
       activeModules.forEach((mod) => {
-        const trusted = looksLikeKnownModule(mod.name)
+        const trusted = security.isKnownModuleByName(mod.name)
         const severity: SecurityGrade = trusted ? 'Low' : 'High'
         const status: ScanResult['status'] = trusted ? 'clear' : 'issue'
         // Show the module's name as the title for both trusted and unrecognized modules — users

@@ -23,6 +23,7 @@ import {
   withScannerTimeout,
 } from './data/scanners/utils'
 import { getStrengthLevel, getStrengthColor } from './data/securityScoring'
+import { isKnownModuleByName } from './data/scanners/modules'
 import { getScanResultsCache, evictScanCache } from './hooks/useSecurityScan'
 
 const feature: SecurityContract = {
@@ -36,6 +37,7 @@ const feature: SecurityContract = {
   getSafeGrade,
   formatTimestamp,
   withScannerTimeout,
+  isKnownModuleByName,
   getStrengthLevel,
   getStrengthColor,
   // Module-level cache accessors

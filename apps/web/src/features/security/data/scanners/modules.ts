@@ -22,6 +22,17 @@ const KNOWN_MODULE_NAMES = [
 ]
 
 /**
+ * Name-only variant of the module trust check. Returns true if the module name
+ * contains a known fragment (case-insensitive). Exposed so the UI can mark
+ * individual modules as trusted without rerunning the full scanner.
+ */
+export const isKnownModuleByName = (name?: string | null): boolean => {
+  if (!name) return false
+  const lower = name.toLowerCase()
+  return KNOWN_MODULE_NAMES.some((known) => lower.includes(known))
+}
+
+/**
  * Check if a module address matches a known Zodiac deployment.
  */
 const isKnownZodiacModule = (chainId: string, moduleAddress: string): boolean => {
@@ -62,12 +73,7 @@ const isKnownAllowanceModule = (chainId: string, moduleAddress: string): boolean
  */
 const isKnownModule = (chainId: string, moduleAddress: string, moduleName?: string | null): boolean => {
   // Layer 1: API-provided name
-  if (moduleName) {
-    const lower = moduleName.toLowerCase()
-    if (KNOWN_MODULE_NAMES.some((known) => lower.includes(known))) {
-      return true
-    }
-  }
+  if (isKnownModuleByName(moduleName)) return true
 
   // Layer 2: Known deployment addresses
   return isKnownZodiacModule(chainId, moduleAddress) || isKnownAllowanceModule(chainId, moduleAddress)
