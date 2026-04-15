@@ -14,7 +14,14 @@ import type { SecurityContract } from './contract'
 import { SCANNERS } from './data/scanners/registry'
 import { CHECK_DEFS } from './data/securityChecks'
 import { ZERO_ADDRESS } from './data/scanners/constants'
-import { scanKey, computeSummary, severityRank, getSafeGrade, formatTimestamp } from './data/scanners/utils'
+import {
+  scanKey,
+  computeSummary,
+  severityRank,
+  getSafeGrade,
+  formatTimestamp,
+  withScannerTimeout,
+} from './data/scanners/utils'
 import { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import { getScanResultsCache, evictScanCache } from './hooks/useSecurityScan'
 
@@ -28,6 +35,7 @@ const feature: SecurityContract = {
   severityRank,
   getSafeGrade,
   formatTimestamp,
+  withScannerTimeout,
   getStrengthLevel,
   getStrengthColor,
   // Module-level cache accessors

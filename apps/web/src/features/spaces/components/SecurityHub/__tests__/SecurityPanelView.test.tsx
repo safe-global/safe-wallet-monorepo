@@ -19,7 +19,6 @@ jest.mock('next/link', () => {
 // Return the resolved feature synchronously so components see $isReady=true.
 // require() inside the factory since jest.mock is hoisted above ES imports.
 jest.mock('@/features/__core__', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
     ...jest.requireActual('@/features/__core__'),

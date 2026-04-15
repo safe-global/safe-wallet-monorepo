@@ -73,6 +73,7 @@ type AutoScanServices = {
   scanKey: SecurityContract['scanKey']
   getScanResultsCache: SecurityContract['getScanResultsCache']
   evictScanCache: SecurityContract['evictScanCache']
+  withScannerTimeout: SecurityContract['withScannerTimeout']
 }
 
 // Hook: scans one Safe at a time from a queue, reports results
@@ -106,7 +107,7 @@ const useAutoScan = (
   useEffect(() => {
     if (!scanContext || !currentTarget || !isRunning || !services) return
 
-    const { scanners, scanKey, getScanResultsCache, evictScanCache } = services
+    const { scanners, scanKey, getScanResultsCache, evictScanCache, withScannerTimeout } = services
     const key = scanKey(currentTarget.address, currentTarget.chainId)
     if (completedRef.current.has(key)) {
       setCurrentIndex((i) => i + 1)
@@ -122,12 +123,13 @@ const useAutoScan = (
     const results: Record<string, ScanResult> = {}
 
     scanners.forEach((scanner) => {
-      scanner
-        .scan(scanContext)
+      withScannerTimeout(scanner.scan(scanContext))
         .then((result) => {
           results[scanner.id] = result
         })
         .catch((err) => {
+          // Includes "Scanner timed out" rejections from withScannerTimeout — a hung
+          // scanner now releases the slot so the queue can proceed to the next Safe.
           console.error(`[SecurityHub] Scanner ${scanner.id} failed:`, err)
         })
         .finally(() => {
@@ -203,9 +205,17 @@ const SecurityHub = (): ReactElement => {
             scanKey: security.scanKey,
             getScanResultsCache: security.getScanResultsCache,
             evictScanCache: security.evictScanCache,
+            withScannerTimeout: security.withScannerTimeout,
           }
         : null,
-    [security.$isReady, security.scanners, security.scanKey, security.getScanResultsCache, security.evictScanCache],
+    [
+      security.$isReady,
+      security.scanners,
+      security.scanKey,
+      security.getScanResultsCache,
+      security.evictScanCache,
+      security.withScannerTimeout,
+    ],
   )
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])

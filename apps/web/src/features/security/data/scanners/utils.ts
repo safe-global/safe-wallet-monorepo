@@ -4,6 +4,20 @@ import { getGrade } from '../securityScoring'
 
 export const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
 
+/** Maximum time a single scanner is allowed to run before being rejected. */
+export const SCANNER_TIMEOUT_MS = 15_000
+
+/**
+ * Wraps a scanner promise with a timeout. If the scanner doesn't resolve within
+ * SCANNER_TIMEOUT_MS, the returned promise rejects with "Scanner timed out".
+ * Protects the scan queue from hanging on a slow/unresponsive scanner.
+ */
+export const withScannerTimeout = <T>(promise: Promise<T>): Promise<T> =>
+  Promise.race([
+    promise,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Scanner timed out')), SCANNER_TIMEOUT_MS)),
+  ])
+
 export const formatTimestamp = (ts?: number): string => {
   if (!ts) return '—'
   const now = Date.now()
