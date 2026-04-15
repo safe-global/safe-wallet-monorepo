@@ -126,7 +126,7 @@ describe('useSafeBarSafes', () => {
 
     // Fallback should be injected
     expect(result.current.dropdownSafes).toHaveLength(2)
-    const fallback = result.current.dropdownSafes[0]
+    const fallback = result.current.dropdownSafes[0] as SafeItem
     expect(fallback.address).toBe('0xUnknownSafe')
     expect(fallback.chainId).toBe('11155111')
     expect(fallback.isReadOnly).toBe(true)
@@ -185,7 +185,8 @@ describe('useSafeBarSafes', () => {
     const { result } = renderHook(() => useSafeBarSafes())
 
     // Should use the real entry from allKnownSafes, not the fallback
-    expect(result.current.dropdownSafes[0].name).toBe('Known Name')
-    expect(result.current.dropdownSafes[0].isReadOnly).toBe(false)
+    const injected = result.current.dropdownSafes[0] as SafeItem
+    expect(injected.name).toBe('Known Name')
+    expect(injected.isReadOnly).toBe(false)
   })
 })
