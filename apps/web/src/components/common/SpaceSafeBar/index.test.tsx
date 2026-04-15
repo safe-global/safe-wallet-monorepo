@@ -62,6 +62,17 @@ jest.mock('./AccountsModal', () => {
   return { __esModule: true, default: MockAccountsModal }
 })
 
+jest.mock('@/features/myAccounts', () => ({
+  MyAccountsFeature: {},
+  useSafeSelectionModal: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
+}))
+
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: () => ({
+    SafeSelectionModal: () => null,
+  }),
+}))
+
 jest.mock('./SpaceBackLink', () => {
   const MockSpaceBackLink = (props: Record<string, unknown>) => (
     <div
