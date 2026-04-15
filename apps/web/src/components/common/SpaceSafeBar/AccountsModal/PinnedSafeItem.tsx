@@ -39,7 +39,7 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
     <Link
       href={href}
       onClick={onNavigate}
-      className="flex items-center gap-3 rounded-md px-2 py-2 no-underline hover:bg-muted/50 transition-colors"
+      className="flex items-center gap-3 rounded-md px-2 py-2 no-underline hover:bg-muted/30 transition-colors"
     >
       <ChainLogo chainId={safeItem.chainId} size={20} />
 
@@ -88,7 +88,7 @@ const PinnedSafeItem = ({ safeItem, onNavigate }: PinnedSafeItemProps) => {
   return (
     <div
       ref={elementRef}
-      className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/50 transition-colors"
+      className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/30 transition-colors"
     >
       <Link href={href} onClick={onNavigate} className="flex flex-1 min-w-0 items-center gap-3 no-underline">
         {/* Avatar with threshold overlay */}

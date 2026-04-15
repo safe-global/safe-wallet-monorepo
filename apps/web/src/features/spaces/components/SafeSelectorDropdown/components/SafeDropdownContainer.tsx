@@ -76,7 +76,7 @@ const SafeDropdownContainer = ({
       <SelectItem
         key={item.id}
         value={item.id}
-        className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/50 cursor-pointer"
+        className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
       >
         <SafeItem {...item} />
       </SelectItem>

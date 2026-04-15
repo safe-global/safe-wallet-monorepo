@@ -38,7 +38,7 @@ const PinnedMultiSafeItem = ({ item, onNavigate }: PinnedMultiSafeItemProps) => 
       {/* overflow-hidden so hover bg respects rounded-xl corners */}
       <div className="rounded-md border border-border bg-card mb-2 overflow-hidden">
         {/* Hoverable header row — same hover as single-chain card */}
-        <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/50 transition-colors">
+        <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/30 transition-colors">
           {/* Collapsible trigger covers the main content area */}
           <CollapsibleTrigger className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 text-left">
             {/* Avatar with threshold overlay */}
