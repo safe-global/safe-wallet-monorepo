@@ -12,8 +12,8 @@
 }
 
 .activeIcon svg {
-  stroke: #12ff80;
-  color: #12ff80;
+  stroke: #22c55e;
+  color: #22c55e;
 }
 
 .spaceSelector {
@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  border: 2px dashed var(--sidebar-border, #e5e5e5);
+  border: 1px dashed var(--sidebar-border, #e5e5e5);
   border-radius: 8px;
   cursor: pointer;
 }
@@ -161,6 +161,11 @@
   border-radius: var(--rounded-lg, 12px);
 }
 
+.transactionsBadgeActive {
+  background-color: var(--accent-secondary, #c4fddd);
+  color: var(--accent-secondary-foreground, #121312);
+}
+
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
 :global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
   display: none !important;
@@ -181,6 +186,7 @@
   min-height: 40px;
   padding: 8px;
   gap: 0;
+  border: none;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceLabel {

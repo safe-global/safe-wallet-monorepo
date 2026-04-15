@@ -110,7 +110,10 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       {interactive}
       {item.badge !== undefined && item.badge > 0 && (
         <>
-          <span className={css.transactionsBadge} aria-label={getBadgeAriaLabel(item.label, item.badge)}>
+          <span
+            className={cn(css.transactionsBadge, item.isActive && css.transactionsBadgeActive)}
+            aria-label={getBadgeAriaLabel(item.label, item.badge)}
+          >
             {item.badge}
           </span>
           <span className={css.transactionsBadgeDot} aria-hidden />
