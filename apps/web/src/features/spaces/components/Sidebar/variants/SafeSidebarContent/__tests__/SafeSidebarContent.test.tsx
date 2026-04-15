@@ -117,7 +117,45 @@ describe('SafeSidebarContent', () => {
 
     expect(options.isItemActive(transactionsItem, AppRoutes.transactions.queue)).toBe(true)
     expect(options.isItemActive(transactionsItem, AppRoutes.transactions.history)).toBe(true)
+    expect(options.isItemActive(transactionsItem, AppRoutes.transactions.messages)).toBe(true)
+    expect(options.isItemActive(transactionsItem, AppRoutes.transactions.msg)).toBe(true)
+    expect(options.isItemActive(transactionsItem, AppRoutes.transactions.tx)).toBe(true)
     expect(options.isItemActive(transactionsItem, AppRoutes.home)).toBe(false)
+  })
+
+  it('marks Assets as active on balances sub-routes', () => {
+    render(<SafeSidebarContent {...defaultProps} />)
+
+    const [, , options] = getCallArgs()
+
+    const assetsItem = {
+      icon: ArrowUpRight,
+      label: 'Assets',
+      href: AppRoutes.balances.index,
+    } as SidebarItemConfig
+
+    expect(options.isItemActive(assetsItem, AppRoutes.balances.index)).toBe(true)
+    expect(options.isItemActive(assetsItem, AppRoutes.balances.nfts)).toBe(true)
+    expect(options.isItemActive(assetsItem, AppRoutes.balances.positions)).toBe(true)
+    expect(options.isItemActive(assetsItem, AppRoutes.home)).toBe(false)
+  })
+
+  it('marks Apps as active on app sub-routes', () => {
+    render(<SafeSidebarContent {...defaultProps} />)
+
+    const [, , options] = getCallArgs()
+
+    const appsItem = {
+      icon: ArrowUpRight,
+      label: 'Apps',
+      href: AppRoutes.apps.index,
+    } as SidebarItemConfig
+
+    expect(options.isItemActive(appsItem, AppRoutes.apps.index)).toBe(true)
+    expect(options.isItemActive(appsItem, AppRoutes.apps.custom)).toBe(true)
+    expect(options.isItemActive(appsItem, AppRoutes.apps.bookmarked)).toBe(true)
+    expect(options.isItemActive(appsItem, AppRoutes.apps.open)).toBe(true)
+    expect(options.isItemActive(appsItem, AppRoutes.home)).toBe(false)
   })
 
   describe('geoblocking', () => {
