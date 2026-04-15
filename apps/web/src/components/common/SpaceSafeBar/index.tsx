@@ -124,7 +124,7 @@ function SpaceSafeBar() {
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
       {isQualifiedSafe && space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
-      <SpaceChainSelector />
+      <SpaceChainSelector isLoading={isLoading} />
       <SpaceNestedSafesButton />
       <SafeSelectorDropdown
         items={items}

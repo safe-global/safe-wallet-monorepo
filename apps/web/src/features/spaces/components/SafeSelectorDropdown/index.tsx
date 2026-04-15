@@ -1,4 +1,5 @@
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
@@ -6,6 +7,22 @@ import SafeSelectorError from './components/SafeSelectorError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
+
+function SafeSelectorDropdownSkeleton() {
+  return (
+    <div className="w-full sm:w-[430px] min-h-[calc(68px)] flex items-center gap-4 rounded-lg p-2 pl-6 bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <Skeleton className="size-8 shrink-0 rounded-full" />
+      <div className="flex flex-1 flex-col gap-1.5">
+        <Skeleton className="h-3.5 w-24 rounded" />
+        <Skeleton className="h-3 w-32 rounded" />
+      </div>
+      <div className="flex flex-col items-end gap-1.5">
+        <Skeleton className="h-3.5 w-14 rounded" />
+        <Skeleton className="h-5 w-12 rounded-full" />
+      </div>
+    </div>
+  )
+}
 
 function SafeSelectorDropdown({
   items,
@@ -34,6 +51,7 @@ function SafeSelectorDropdown({
 
   if (!selectedItem) {
     if (isError) return <SafeSelectorError onRetry={onRetry} />
+    if (isLoading) return <SafeSelectorDropdownSkeleton />
     return null
   }
 

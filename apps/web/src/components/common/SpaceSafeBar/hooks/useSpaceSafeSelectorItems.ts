@@ -147,11 +147,13 @@ export function useSpaceSafeSelectorItems() {
     [chainConfigs, router, spaceId],
   )
 
+  const itemsNotReady = items.length === 0 && !overviewsError
+
   return {
     items,
     selectedItemId,
     handleItemSelect,
-    isLoading: overviewsLoading,
+    isLoading: overviewsLoading || itemsNotReady,
     isError: overviewsError,
     refetch: refetchOverviews,
   }
