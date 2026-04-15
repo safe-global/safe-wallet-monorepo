@@ -52,7 +52,8 @@ describe('SidebarTopBar', () => {
 
     const topBar = screen.getByTestId('sidebar-top-bar')
     expect(topBar).toHaveAttribute('data-sidebar-state', 'expanded')
-    expect(topBar).toHaveClass('min-h-10')
+    expect(topBar).toHaveClass('min-h-16')
+    expect(topBar).toHaveStyle({ transform: 'scaleY(0.625)' })
   })
 
   it('applies collapsed top bar sizing and state when sidebar is collapsed', () => {
