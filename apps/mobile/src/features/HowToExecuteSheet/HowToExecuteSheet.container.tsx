@@ -51,6 +51,16 @@ const getActiveSignerRightNode = (
   )
 }
 
+const getSignerExecutionMethod = (signer: SignerInfo): ExecutionMethod => {
+  if (signer.type === 'ledger') {
+    return ExecutionMethod.WITH_LEDGER
+  }
+  if (signer.type === 'walletconnect') {
+    return ExecutionMethod.WITH_WC
+  }
+  return ExecutionMethod.WITH_PK
+}
+
 export const HowToExecuteSheetContainer = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -133,20 +143,19 @@ export const HowToExecuteSheetContainer = () => {
           {/* Signers List */}
           <View gap="$2">
             {items.map((item) => {
+              const signerMethod = getSignerExecutionMethod(item)
+              const isSelected = executionMethod === signerMethod && activeSigner?.value === item.value
+
               return (
                 <View
                   key={item.value}
                   width="100%"
                   borderRadius={'$4'}
-                  backgroundColor={
-                    executionMethod === ExecutionMethod.WITH_PK && activeSigner?.value === item.value
-                      ? '$backgroundSecondary'
-                      : 'transparent'
-                  }
+                  backgroundColor={isSelected ? '$backgroundSecondary' : 'transparent'}
                 >
                   <SignersCard
                     transparent
-                    onPress={() => handleExecutionMethodSelect(ExecutionMethod.WITH_PK, item)}
+                    onPress={() => handleExecutionMethodSelect(signerMethod, item)}
                     name={<ContactDisplayNameContainer address={item.value as Address} />}
                     address={item.value as Address}
                     balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${

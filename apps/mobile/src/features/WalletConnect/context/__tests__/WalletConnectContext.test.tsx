@@ -57,6 +57,7 @@ jest.mock('@reown/appkit-react-native', () => ({
   useAppKit: () => mockAppKit,
   useAccount: () => mockAccount,
   useWalletInfo: () => mockWalletInfoResult,
+  useProvider: () => ({ provider: undefined }),
 }))
 
 const mockInstance = {} as NonNullable<React.ComponentProps<typeof WalletConnectProvider>['instance']>

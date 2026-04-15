@@ -64,7 +64,7 @@ export const useExecutionFlow = ({
       return
     }
 
-    // Standard flow - execute directly
+    // WalletConnect and standard flow - execute directly
     try {
       setIsExecuting(true)
       await execute()
