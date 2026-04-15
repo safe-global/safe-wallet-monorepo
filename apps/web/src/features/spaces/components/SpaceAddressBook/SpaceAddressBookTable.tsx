@@ -21,8 +21,6 @@ type SpaceAddressBookTableProps = {
   hasWallet: boolean
 }
 
-const PAGE_SIZE = 25
-
 function SpaceAddressBookTable({ entries, hasWallet }: SpaceAddressBookTableProps) {
   const chains = useChains()
 
@@ -82,11 +80,7 @@ function SpaceAddressBookTable({ entries, hasWallet }: SpaceAddressBookTableProp
       actions: {
         rawValue: '',
         sticky: true,
-        content: (
-          <div className={tableCss.actions}>
-            <SpaceAddressBookActions entry={entry} />
-          </div>
-        ),
+        content: <div className={tableCss.actions}>{hasWallet && <SpaceAddressBookActions entry={entry} />}</div>,
       },
     },
   }))

@@ -98,7 +98,7 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
 
   return (
     <>
-      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen}>
+      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} disabled={disabled}>
         Add contact
       </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
