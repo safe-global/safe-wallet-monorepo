@@ -43,11 +43,14 @@ jest.mock('@/src/utils/logger', () => ({
 }))
 
 import { executeWalletConnectTx } from './walletConnectExecutor'
+import { faker } from '@faker-js/faker'
+
+const VALID_TX_HASH = faker.string.hexadecimal({ length: 64, prefix: '0x' })
 
 const mockChain = { chainId: '1' } as Chain
 const mockActiveSafe: SafeInfo = { address: '0xSafe', chainId: '1' }
 
-const createMockProvider = (txHash = '0xTxHash'): Provider =>
+const createMockProvider = (txHash = VALID_TX_HASH): Provider =>
   ({
     request: jest.fn().mockResolvedValue(txHash),
   }) as unknown as Provider
@@ -117,7 +120,7 @@ describe('executeWalletConnectTx', () => {
       txId: 'tx123',
       chainId: '1',
       safeAddress: '0xSafe',
-      txHash: '0xTxHash',
+      txHash: VALID_TX_HASH,
       walletAddress: '0xSigner',
       walletNonce: 5,
     })
@@ -161,7 +164,7 @@ describe('executeWalletConnectTx', () => {
     const mockProvider = {
       request: jest.fn().mockImplementation(() => {
         callOrder.push('provider.request')
-        return Promise.resolve('0xTxHash')
+        return Promise.resolve(VALID_TX_HASH)
       }),
     } as unknown as Provider
 
@@ -186,6 +189,36 @@ describe('executeWalletConnectTx', () => {
     })
 
     expect(callOrder).toEqual(['getUserNonce', 'provider.request'])
+  })
+
+  it.each([
+    null,
+    undefined,
+    '',
+    'not-a-hash',
+    '0x123',
+    '0xZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ',
+  ])('should throw when provider returns invalid tx hash: %s', async (invalidHash) => {
+    const mockProvider = {
+      request: jest.fn().mockResolvedValue(invalidHash),
+    } as unknown as Provider
+
+    const mockSDK = createMockSDK()
+    const mockSafeTx = createMockSafeTx(['0xOtherSigner'])
+
+    mockGetSafeSDK.mockReturnValue(mockSDK)
+    mockFetchTransactionDetails.mockResolvedValue({ detailedExecutionInfo: {} })
+    mockCreateExistingTx.mockResolvedValue(mockSafeTx)
+
+    await expect(
+      executeWalletConnectTx({
+        chain: mockChain,
+        activeSafe: mockActiveSafe,
+        txId: 'tx123',
+        signerAddress: '0xSigner',
+        provider: mockProvider,
+      }),
+    ).rejects.toThrow('invalid transaction hash')
   })
 
   it('should handle provider rejection', async () => {

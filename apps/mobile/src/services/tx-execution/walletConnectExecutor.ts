@@ -12,6 +12,8 @@ import type { SafeInfo } from '@/src/types/address'
 import type { Provider } from '@reown/appkit-common-react-native'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
+const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/
+
 interface ExecuteWalletConnectTxParams {
   chain: Chain
   activeSafe: SafeInfo
@@ -91,6 +93,10 @@ export const executeWalletConnectTx = async ({
       },
     ],
   })
+
+  if (!txHashResult || !TX_HASH_REGEX.test(txHashResult)) {
+    throw new Error(`WalletConnect returned an invalid transaction hash: ${txHashResult}`)
+  }
 
   logger.info('Transaction executed via WalletConnect', {
     signerAddress,
