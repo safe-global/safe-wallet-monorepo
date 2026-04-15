@@ -12,7 +12,15 @@ import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { SafeItem } from '@/hooks/safes'
-import { ICON_SIZE, SafeIdenticon, ChainLogo, NameSourceIcon, ReadOnlyBadge, NotActivatedBadge } from './shared'
+import {
+  ICON_SIZE,
+  SafeIdenticon,
+  ChainLogo,
+  NameSourceIcon,
+  ReadOnlyBadge,
+  NotActivatedBadge,
+  CopyAddressButton,
+} from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
 export interface PinnedSafeItemProps {
@@ -94,21 +102,26 @@ const PinnedSafeItem = ({ safeItem, onNavigate }: PinnedSafeItemProps) => {
         </div>
 
         {/* Name + address + optional status badge */}
-        <div className="flex min-w-0 max-w-[160px] flex-[1_1_0] flex-col gap-0.5 overflow-hidden">
+        <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
           <div className="flex items-center gap-1 min-w-0">
             <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
             {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
           </div>
-          <span className="truncate text-xs text-muted-foreground">{shortenAddress(safeItem.address)}</span>
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="truncate text-xs text-muted-foreground">{shortenAddress(safeItem.address)}</span>
+            <CopyAddressButton address={safeItem.address} />
+          </div>
           {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
           {!undeployedSafe && safeItem.isReadOnly && <ReadOnlyBadge />}
         </div>
 
-        {/* Chain logo — follows name */}
-        <ChainLogo chainId={safeItem.chainId} />
+        {/* Chain logo — centered between name and balance via equal margins */}
+        <div className="mx-auto shrink-0">
+          <ChainLogo chainId={safeItem.chainId} />
+        </div>
 
-        {/* Balance — pushed to the right edge, just before bookmark */}
-        <div className="ml-auto flex shrink-0 items-center">
+        {/* Balance — fixed width so chain icon alignment is consistent */}
+        <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
           {!hasOverview && !undeployedSafe ? (
             <Skeleton className="h-3 w-12" />
           ) : safeOverview?.fiatTotal !== undefined ? (

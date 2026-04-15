@@ -2,8 +2,9 @@
  * Shared shadcn-only primitives used by PinnedSafeItem and PinnedMultiSafeItem.
  * No MUI dependencies.
  */
+import { type MouseEvent, useState } from 'react'
 import { isAddress } from 'ethers'
-import { Eye, AlertCircle, Cloud } from 'lucide-react'
+import { Eye, AlertCircle, Cloud, Copy, Check } from 'lucide-react'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -109,6 +110,37 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
         )}
       </TooltipTrigger>
       <TooltipContent>From your {source} address book</TooltipContent>
+    </Tooltip>
+  )
+}
+
+/** Copy address button — click to copy, shows check icon for 2s */
+export function CopyAddressButton({ address }: { address: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = (e: MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    navigator.clipboard.writeText(address)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer"
+            aria-label="Copy address"
+          />
+        }
+      >
+        {copied ? <Check className="size-3.5 text-green-600" /> : <Copy className="size-3.5 text-muted-foreground" />}
+      </TooltipTrigger>
+      <TooltipContent>{copied ? 'Copied!' : 'Copy address'}</TooltipContent>
     </Tooltip>
   )
 }

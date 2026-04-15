@@ -10,7 +10,7 @@ import { usePinActions } from '@/features/myAccounts/hooks/usePinActions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import type { MultiChainSafeItem } from '@/hooks/safes'
-import { ICON_SIZE, SafeIdenticon, StackedChainLogos, NameSourceIcon } from './shared'
+import { ICON_SIZE, SafeIdenticon, StackedChainLogos, NameSourceIcon, CopyAddressButton } from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
@@ -52,19 +52,24 @@ const PinnedMultiSafeItem = ({ item, onNavigate }: PinnedMultiSafeItemProps) => 
             </div>
 
             {/* Name + address — capped so chain icons don't crowd the right edge */}
-            <div className="flex min-w-0 max-w-[160px] flex-[1_1_0] flex-col gap-0.5 overflow-hidden">
+            <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
               <div className="flex items-center gap-1 min-w-0">
                 <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
               </div>
-              <span className="truncate text-xs text-muted-foreground">{shortenAddress(address)}</span>
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="truncate text-xs text-muted-foreground">{shortenAddress(address)}</span>
+                <CopyAddressButton address={address} />
+              </div>
             </div>
 
-            {/* Stacked chain logos — follows name */}
-            <StackedChainLogos safes={sortedSafes} />
+            {/* Chain logos — centered between name and balance via equal margins */}
+            <div className="mx-auto shrink-0">
+              <StackedChainLogos safes={sortedSafes} />
+            </div>
 
-            {/* Balance — pushed to the right edge, just before bookmark */}
-            <div className="ml-auto flex shrink-0 items-center">
+            {/* Balance — fixed width so chain icon alignment is consistent */}
+            <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
               {isTotalLoading ? (
                 <Skeleton className="h-3 w-12" />
               ) : totalFiatValue !== undefined ? (
