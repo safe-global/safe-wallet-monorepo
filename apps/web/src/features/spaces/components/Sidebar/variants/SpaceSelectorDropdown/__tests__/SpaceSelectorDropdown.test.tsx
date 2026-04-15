@@ -13,10 +13,11 @@ jest.mock('../../../hooks/useAddSafeToSpace', () => ({
 }))
 
 const mockPush = jest.fn()
+let mockRouterQuery: Record<string, string> = { spaceId: '1' }
 jest.mock('next/router', () => ({
   useRouter: () => ({
     pathname: '/spaces',
-    query: { spaceId: '1' },
+    query: mockRouterQuery,
     push: mockPush,
   }),
 }))
@@ -144,6 +145,7 @@ jest.mock('@/components/ui/dropdown-menu', () => {
 describe('SpaceSelectorDropdown', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockRouterQuery = { spaceId: '1' }
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -204,6 +206,20 @@ describe('SpaceSelectorDropdown', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
+  })
+
+  it('includes safe query param in create space navigation when safe is in the URL', () => {
+    mockRouterQuery = { spaceId: '1', safe: '1:0xdeadbeef' }
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('Add new space'))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.createSpace,
+      query: { safe: '1:0xdeadbeef' },
+    })
   })
 
   it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View all" is clicked', () => {

@@ -67,7 +67,8 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
-    router.push(AppRoutes.spaces.createSpace)
+    const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
+    router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
   }
 
   const handleViewSpaces = () => {

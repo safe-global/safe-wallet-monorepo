@@ -19,7 +19,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, query: {} }),
 }))
 
 jest.mock('@/store', () => ({

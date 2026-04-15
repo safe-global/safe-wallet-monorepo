@@ -40,7 +40,8 @@ const useSpaceSubmit = (
       }),
     )
 
-    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
+    const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
+    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
   }
 
   const createSpace = async (name: string) => {
@@ -60,7 +61,11 @@ const useSpaceSubmit = (
         }),
       )
 
-      router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId: newSpaceId } })
+      const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
+      router.push({
+        pathname: AppRoutes.welcome.selectSafes,
+        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
+      })
     }
 
     if (response.error) {

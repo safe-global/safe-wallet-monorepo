@@ -3,15 +3,33 @@ import type { ReactElement, ReactNode } from 'react'
 import { AddToSpacePopupModal } from '../AddToSpacePopupModal'
 import { AppRoutes } from '@/config/routes'
 
+let mockRouterQuery: Record<string, string> = {}
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ query: mockRouterQuery }),
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt }: { alt: string }) => <img alt={alt} />,
 }))
 
+const serializeHref = (href: string | { pathname: string; query?: Record<string, string> }): string => {
+  if (typeof href === 'string') return href
+  const params = new URLSearchParams(href.query).toString()
+  return params ? `${href.pathname}?${params}` : href.pathname
+}
+
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, render: renderProp }: { children: ReactNode; render?: ReactElement<{ href?: string }> }) =>
+  Button: ({
+    children,
+    render: renderProp,
+  }: {
+    children: ReactNode
+    render?: ReactElement<{ href?: string | { pathname: string; query?: Record<string, string> } }>
+  }) =>
     renderProp?.props?.href ? (
-      <a href={renderProp.props.href}>{children}</a>
+      <a href={serializeHref(renderProp.props.href)}>{children}</a>
     ) : (
       <button type="button">{children}</button>
     ),
@@ -31,6 +49,10 @@ jest.mock('@/components/ui/dialog', () => ({
 }))
 
 describe('AddToSpacePopupModal', () => {
+  beforeEach(() => {
+    mockRouterQuery = {}
+  })
+
   it('renders the "Add to Space" title', () => {
     render(<AddToSpacePopupModal />)
 
@@ -50,6 +72,14 @@ describe('AddToSpacePopupModal', () => {
 
     const link = screen.getByRole('link', { name: /Create a Space/i })
     expect(link).toHaveAttribute('href', AppRoutes.spaces.createSpace)
+  })
+
+  it('includes safe query param in "Create a Space" link when safe is in the URL', () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    render(<AddToSpacePopupModal />)
+
+    const link = screen.getByRole('link', { name: /Create a Space/i })
+    expect(link).toHaveAttribute('href', `${AppRoutes.spaces.createSpace}?safe=1%3A0xdeadbeef`)
   })
 
   it('renders a close button', () => {

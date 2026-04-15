@@ -9,6 +9,11 @@ const mockDispatch = jest.fn()
 const mockTrackEvent = jest.fn()
 
 let mockSpaceSafes: Array<SafeItem | MultiChainSafeItem> = []
+let mockRouterQuery: Record<string, string> = {}
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ query: mockRouterQuery, isReady: true }),
+}))
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
@@ -55,6 +60,7 @@ describe('useOnboardingSubmit', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockSpaceSafes = []
+    mockRouterQuery = {}
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
   })
@@ -280,5 +286,33 @@ describe('useOnboardingSubmit', () => {
 
     expect(mockDispatch).toHaveBeenCalled()
     expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('should preselect safe from URL when space has no existing safes', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['1:0xdeadbeef']).toBe(true)
+  })
+
+  it('should not preselect from URL when space already has safes', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    mockSpaceSafes = [buildSafeItem('5', '0xother')]
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['5:0xother']).toBe(true)
+    expect(selectedSafes['1:0xdeadbeef']).toBeUndefined()
   })
 })

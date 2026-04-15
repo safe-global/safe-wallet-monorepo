@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -14,6 +15,12 @@ const BENEFITS = [
 ]
 
 export const AddToSpacePopupModal = (): ReactElement => {
+  const router = useRouter()
+  const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const createSpaceHref = safe
+    ? { pathname: AppRoutes.spaces.createSpace, query: { safe } }
+    : AppRoutes.spaces.createSpace
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between px-5 py-5">
@@ -52,7 +59,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
           ))}
         </div>
 
-        <Button className="w-full gap-2 rounded-xl" render={<Link href={AppRoutes.spaces.createSpace} />}>
+        <Button className="w-full gap-2 rounded-xl" render={<Link href={createSpaceHref} />}>
           <Plus className="size-5" />
           Create a Space
         </Button>

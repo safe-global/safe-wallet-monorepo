@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/router'
 import { flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import {
@@ -20,6 +21,8 @@ const parseSafeKey = (key: string) => {
 }
 
 const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void) => {
+  const router = useRouter()
+  const safeFromUrl = typeof router.query.safe === 'string' ? router.query.safe : undefined
   const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
@@ -56,6 +59,14 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
     }
     reset({ selectedSafes: selected })
   }, [spaceSafes, reset])
+
+  const hasInitializedFromUrl = useRef(false)
+
+  useEffect(() => {
+    if (hasInitializedFromUrl.current || !safeFromUrl || !router.isReady || spaceSafes.length > 0) return
+    hasInitializedFromUrl.current = true
+    reset({ selectedSafes: { [safeFromUrl]: true } })
+  }, [safeFromUrl, router.isReady, spaceSafes, reset])
   const selectedSafes = watch('selectedSafes')
   const selectedSafesLength = Object.entries(selectedSafes).filter(
     ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
