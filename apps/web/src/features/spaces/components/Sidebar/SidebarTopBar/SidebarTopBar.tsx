@@ -20,19 +20,12 @@ export const SidebarTopBar = (): ReactElement => {
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className="relative w-full transition-transform duration-200 ease-linear origin-top min-h-16"
-      style={{
-        transform: isCollapsed ? 'scaleY(1)' : 'scaleY(0.625)',
-      }}
+      className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
     >
       <button
         type="button"
         onClick={handleLogoClick}
-        className={cn(
-          'absolute z-10 flex size-6 shrink-0 cursor-pointer items-center justify-center',
-          'transition-[left,top] duration-200 ease-linear',
-          isCollapsed ? 'left-[calc(50%-0.75rem)] top-0' : 'left-0 top-[calc(50%-0.75rem)]',
-        )}
+        className={cn('absolute left-3 top-3 z-10 flex size-6 shrink-0 cursor-pointer items-center justify-center')}
         data-testid="logo-container"
       >
         <img
@@ -54,8 +47,8 @@ export const SidebarTopBar = (): ReactElement => {
       <SidebarTrigger
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
-          'transition-[left,top] duration-200 ease-linear',
-          isCollapsed ? 'left-[calc(50%-1rem)] top-8' : 'left-[calc(100%-2rem)] top-[calc(50%-1rem)]',
+          'transition-[left,transform] duration-200 ease-linear',
+          isCollapsed ? 'left-1/2 top-10 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-3',
         )}
         data-testid="sidebar-trigger"
       />

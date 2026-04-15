@@ -86,36 +86,10 @@ export const SafeSidebarVariant = ({
         <motion.div variants={itemVariants}>
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0">
+              <SidebarMenu className="gap-0.5">
                 {displayMainNavItems.map((item, index) => (
                   <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </motion.div>
-
-        {/* DeFi Group */}
-        {(defiGroup?.items?.length ?? 0) > 0 && (
-          <motion.div variants={itemVariants}>
-            <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu className="gap-0">
-                  {displayDefiItems.map((item, index) => (
-                    <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </motion.div>
-        )}
-
-        {/* Settings */}
-        <motion.div variants={itemVariants}>
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0">
                 <SidebarMenuItem className="relative">
                   <SidebarMenuButton
                     size="lg"
@@ -139,6 +113,22 @@ export const SafeSidebarVariant = ({
             </SidebarGroupContent>
           </SidebarGroup>
         </motion.div>
+
+        {/* DeFi Group */}
+        {(defiGroup?.items?.length ?? 0) > 0 && (
+          <motion.div variants={itemVariants}>
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0">
+                  {displayDefiItems.map((item, index) => (
+                    <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </motion.div>
+        )}
       </motion.div>
     </SidebarContent>
   )
