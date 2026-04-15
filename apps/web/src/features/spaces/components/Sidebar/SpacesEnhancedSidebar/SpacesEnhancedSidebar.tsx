@@ -11,7 +11,6 @@ import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import type { SpaceItem } from '../types'
 import { getQuerySpaceId } from '../utils'
 import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
-import { SidebarSkeleton } from '../SidebarSkeleton'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
@@ -48,7 +47,7 @@ export const SpacesEnhancedSidebar = ({
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
-      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
+      {isHydrated ? <HydratedSidebar /> : <></>}
     </SidebarProvider>
   )
 }
@@ -61,8 +60,14 @@ const HydratedSidebar = (): ReactElement => {
   const [addedToSpace, setAddedToSpace] = useState<SpaceItem | undefined>()
   const isQualifiedSafe = useIsQualifiedSafe()
 
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: currentUser, isLoading: isUserLoading } = useUsersGetWithWalletsV1Query(undefined, {
+    skip: !isUserSignedIn,
+  })
+  const { currentData: spaces, isLoading: isSpacesLoading } = useSpacesGetV1Query(undefined, {
+    skip: !isUserSignedIn,
+  })
+
+  const isLoadingData = isUserSignedIn && (isUserLoading || isSpacesLoading)
 
   const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
 
@@ -87,6 +92,7 @@ const HydratedSidebar = (): ReactElement => {
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}
       onSpaceAdded={setAddedToSpace}
+      isLoading={isLoadingData}
     />
   )
 }

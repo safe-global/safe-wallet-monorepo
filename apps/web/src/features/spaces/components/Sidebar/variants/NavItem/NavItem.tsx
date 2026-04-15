@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import Link from 'next/link'
 import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { cn } from '@/utils/cn'
 import type { ResolvedSidebarItem } from '../../types'
 import { getSidebarItemTestId } from '../../utils'
 import css from '../../styles.module.css'
@@ -31,13 +32,37 @@ const customNavEvents: Record<
 const getBadgeAriaLabel = (label: string, count: number): string =>
   `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
 
+const SkeletonPulse = ({ className }: { className: string }): ReactElement => (
+  <div className={cn('bg-sidebar-border animate-pulse', className)} />
+)
+
+const NavItemSkeleton = (): ReactElement => (
+  <div className="relative flex h-9 min-h-9 w-full items-center rounded-md p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
+    <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:hidden">
+      <SkeletonPulse className="size-4 shrink-0 rounded-md" />
+      <SkeletonPulse className="h-4 min-h-4 flex-1 rounded-md" />
+    </div>
+    <SkeletonPulse className="hidden size-8 shrink-0 rounded-md group-data-[collapsible=icon]:block" />
+  </div>
+)
+
 interface NavItemProps {
-  item: ResolvedSidebarItem
+  item: ResolvedSidebarItem | null
   /** Spaces sidebar: per-label test ids; no tooltip wrapper so disabled state reaches the DOM. */
   isSpacesVariant?: boolean
+  /** Show skeleton loading state instead of actual item content. */
+  isLoading?: boolean
 }
 
-export const NavItem = ({ item, isSpacesVariant = false }: NavItemProps): ReactElement => {
+export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: NavItemProps): ReactElement => {
+  if (isLoading || !item) {
+    return (
+      <SidebarMenuItem>
+        <NavItemSkeleton />
+      </SidebarMenuItem>
+    )
+  }
+
   const dataTestId = isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item'
 
   const handleClick = () => {

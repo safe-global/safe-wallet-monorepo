@@ -19,6 +19,7 @@
 .spaceSelector {
   display: flex;
   align-items: center;
+  justify-content: flex-start !important;
   gap: 12px;
   width: 100%;
   min-height: 40px;
