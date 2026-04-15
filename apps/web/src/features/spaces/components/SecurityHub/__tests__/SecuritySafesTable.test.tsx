@@ -2,8 +2,10 @@ import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../SecuritySafesTable'
 import type { SpaceSafeEntry, SelectedSafe } from '../index'
-import type { ScanResult } from '@/features/security/data/scanners/types'
-import { scanKey } from '@/features/security/data/scanners/utils'
+import type { ScanResult } from '@/features/security/types'
+// Helper: mirrors security.scanKey exactly. Import inline to avoid a feature-handle
+// mock setup in tests that don't exercise the security feature directly.
+const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
 
 // ─── mocks ────────────────────────────────────────────────────────────────────
 
@@ -56,6 +58,21 @@ jest.mock('@/store/api/gateway', () => ({
 jest.mock('@/store', () => ({
   useAppSelector: () => 'usd',
 }))
+
+// useLoadFeature needs Redux/chain context; return the resolved feature synchronously.
+jest.mock('@/features/__core__', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const securityFeatureImpl = require('@/features/security/feature').default
+  return {
+    ...jest.requireActual('@/features/__core__'),
+    useLoadFeature: () => ({
+      ...securityFeatureImpl,
+      $isReady: true,
+      $isDisabled: false,
+      $error: undefined,
+    }),
+  }
+})
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 

@@ -5,10 +5,10 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes, selectCurrency } from '@/store/slices'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
-import type { ScanResult } from '@/features/security/data/scanners/types'
-import { scanKey, type SafeGrade } from '@/features/security/data/scanners/utils'
-import { SCANNERS } from '@/features/security/data/scanners/registry'
-import { getScanResultsCache, evictScanCache } from '@/features/security/hooks/useSecurityScan'
+import type { ScanResult, SafeGrade, SecurityScanner } from '@/features/security/types'
+import { SecurityFeature } from '@/features/security'
+import { useLoadFeature } from '@/features/__core__'
+import type { SecurityContract } from '@/features/security'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
 import SecuritySafesTable from './SecuritySafesTable'
@@ -66,11 +66,21 @@ const getDeployedEntries = (safes: SpaceSafeEntry[]): SelectedSafe[] =>
     safe.chainEntries.filter((c) => c.isDeployed).map((c) => ({ address: safe.address, chainId: c.chainId })),
   )
 
+// Services this hook needs from the security feature. Callers obtain these via
+// useLoadFeature and pass them in once the feature is $isReady.
+type AutoScanServices = {
+  scanners: SecurityScanner[]
+  scanKey: SecurityContract['scanKey']
+  getScanResultsCache: SecurityContract['getScanResultsCache']
+  evictScanCache: SecurityContract['evictScanCache']
+}
+
 // Hook: scans one Safe at a time from a queue, reports results
 const useAutoScan = (
   queue: SelectedSafe[],
   safes: SpaceSafeEntry[],
   overviewMap: Record<string, OverviewData>,
+  services: AutoScanServices | null,
   onComplete: (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => void,
 ) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -88,13 +98,15 @@ const useAutoScan = (
 
   // Pass pre-fetched overview data to avoid redundant per-Safe API requests.
   // The batch query in SecurityHub already fetches all overviews — reuse that data.
-  const currentOverview = currentTarget ? overviewMap[scanKey(currentTarget.address, currentTarget.chainId)] : undefined
+  const currentOverview =
+    currentTarget && services ? overviewMap[services.scanKey(currentTarget.address, currentTarget.chainId)] : undefined
   const scanContext = useSafeScanContext(currentTarget, currentEntry, currentOverview)
 
   // Run scanners when context is ready
   useEffect(() => {
-    if (!scanContext || !currentTarget || !isRunning) return
+    if (!scanContext || !currentTarget || !isRunning || !services) return
 
+    const { scanners, scanKey, getScanResultsCache, evictScanCache } = services
     const key = scanKey(currentTarget.address, currentTarget.chainId)
     if (completedRef.current.has(key)) {
       setCurrentIndex((i) => i + 1)
@@ -106,10 +118,10 @@ const useAutoScan = (
     scanningRef.current = key
 
     let completed = 0
-    const total = SCANNERS.length
+    const total = scanners.length
     const results: Record<string, ScanResult> = {}
 
-    SCANNERS.forEach((scanner) => {
+    scanners.forEach((scanner) => {
       scanner
         .scan(scanContext)
         .then((result) => {
@@ -139,7 +151,7 @@ const useAutoScan = (
         })
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scanContext, currentTarget?.address, currentTarget?.chainId, isRunning])
+  }, [scanContext, currentTarget?.address, currentTarget?.chainId, isRunning, services])
 
   const [justCompleted, setJustCompleted] = useState(false)
   const completionTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -158,27 +170,43 @@ const useAutoScan = (
   useEffect(() => () => clearTimeout(completionTimerRef.current), [])
 
   const startScan = useCallback(() => {
+    if (!services) return
     completedRef.current = new Set()
     scanningRef.current = null
     // Pre-populate ALL keys as scanning so every row shows a loading state immediately.
     // Each key is removed individually on completion. For multichain parents,
     // `isAnyChainScanning` stays true until the last chain-child finishes.
-    setScanningKeys(new Set(queue.map((q) => scanKey(q.address, q.chainId))))
+    setScanningKeys(new Set(queue.map((q) => services.scanKey(q.address, q.chainId))))
     setCurrentIndex(0)
     setJustCompleted(false)
     setIsRunning(true)
-  }, [queue])
+  }, [queue, services])
 
   return { scanningKeys, isRunning, justCompleted, startScan }
 }
 
 const SecurityHub = (): ReactElement => {
+  const security = useLoadFeature(SecurityFeature)
   const { allSafes, isLoading } = useSpaceSafes()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
   const [scanTimestamps, setScanTimestamps] = useState<Record<string, number>>({})
   const [gradeFilter, setGradeFilter] = useState<SafeGrade | null>(null)
+
+  // Build the services bundle passed to useAutoScan. Null until the feature loads.
+  const autoScanServices = useMemo(
+    () =>
+      security.$isReady
+        ? {
+            scanners: security.scanners,
+            scanKey: security.scanKey,
+            getScanResultsCache: security.getScanResultsCache,
+            evictScanCache: security.evictScanCache,
+          }
+        : null,
+    [security.$isReady, security.scanners, security.scanKey, security.getScanResultsCache, security.evictScanCache],
+  )
 
   const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
 
@@ -211,10 +239,10 @@ const SecurityHub = (): ReactElement => {
   const { balanceMap, overviewMap } = useMemo(() => {
     const bMap: Record<string, string | undefined> = {}
     const oMap: Record<string, OverviewData> = {}
-    if (overviews) {
+    if (overviews && security.$isReady) {
       for (const ov of overviews) {
         if (ov.address?.value && ov.chainId) {
-          const key = scanKey(ov.address.value, ov.chainId)
+          const key = security.scanKey(ov.address.value, ov.chainId)
           bMap[key] = ov.fiatTotal
           oMap[key] = {
             balanceUsd: Number(ov.fiatTotal) || 0,
@@ -224,33 +252,40 @@ const SecurityHub = (): ReactElement => {
       }
     }
     return { balanceMap: bMap, overviewMap: oMap }
-  }, [overviews])
+  }, [overviews, security.$isReady, security.scanKey])
 
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
-      const key = scanKey(address, chainId)
+      if (!security.$isReady) return
+      const key = security.scanKey(address, chainId)
       setAllScanResults((prev) => ({ ...prev, [key]: results }))
       setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))
     },
-    [],
+    [security.$isReady, security.scanKey],
   )
 
-  const { scanningKeys, isRunning, startScan } = useAutoScan(deployedEntries, safes, overviewMap, handleScanComplete)
+  const { scanningKeys, isRunning, startScan } = useAutoScan(
+    deployedEntries,
+    safes,
+    overviewMap,
+    autoScanServices,
+    handleScanComplete,
+  )
 
   // Auto-scan when safes are available. Re-triggers if the Safe list changes
   // (e.g., user switches Safes via the selector).
   const lastScannedKeysRef = useRef<string>('')
   useEffect(() => {
-    if (isLoading || safes.length === 0) return
+    if (isLoading || safes.length === 0 || !security.$isReady) return
     const currentKeys = deployedEntries
-      .map((e) => scanKey(e.address, e.chainId))
+      .map((e) => security.scanKey(e.address, e.chainId))
       .sort()
       .join(',')
     if (currentKeys !== lastScannedKeysRef.current) {
       lastScannedKeysRef.current = currentKeys
       startScan()
     }
-  }, [isLoading, safes.length, deployedEntries, startScan])
+  }, [isLoading, safes.length, deployedEntries, startScan, security.$isReady, security.scanKey])
 
   const handleViewReport = useCallback((address: string, chainId: string) => {
     setSelectedSafe((prev) => {
@@ -260,7 +295,10 @@ const SecurityHub = (): ReactElement => {
   }, [])
 
   const selectedEntry = useMemo(() => safes.find((s) => s.address === selectedSafe?.address), [safes, selectedSafe])
-  const drawerOverview = selectedSafe ? overviewMap[scanKey(selectedSafe.address, selectedSafe.chainId)] : undefined
+  const drawerOverview =
+    selectedSafe && security.$isReady
+      ? overviewMap[security.scanKey(selectedSafe.address, selectedSafe.chainId)]
+      : undefined
   const scanContext = useSafeScanContext(selectedSafe, selectedEntry, drawerOverview)
 
   const handleCloseDrawer = useCallback(() => setSelectedSafe(null), [])

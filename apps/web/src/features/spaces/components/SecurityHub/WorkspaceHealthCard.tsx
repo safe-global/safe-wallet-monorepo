@@ -1,9 +1,9 @@
 import { type ReactElement, useMemo } from 'react'
 import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
-import type { ScanResult } from '@/features/security/data/scanners/types'
-import { getSafeGrade, formatTimestamp, type SafeGrade } from '@/features/security/data/scanners/utils'
-import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
+import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
+import { SecurityFeature } from '@/features/security'
+import { useLoadFeature } from '@/features/__core__'
 
 type WorkspaceHealthCardProps = {
   scanResults: Record<string, Record<string, ScanResult>>
@@ -14,19 +14,24 @@ type WorkspaceHealthCardProps = {
   onRescan: () => void
 }
 
-type Aggregate = {
+type AggregateCounts = {
   passing: number
   applicableCount: number
   criticalCount: number
   needsAttentionCount: number
   atRiskCount: number
   hasCriticalIssue: boolean
+}
+
+type Aggregate = AggregateCounts & {
   level: StrengthLevel
   color: string
   scorePct: number
 }
 
-const computeAggregate = (scanResults: Record<string, Record<string, ScanResult>>): Aggregate | null => {
+// Pure reducer — no feature-service calls. The strength level/color are derived
+// inside the component where useLoadFeature gives access to the scoring utils.
+const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>): AggregateCounts | null => {
   let passing = 0
   let applicableCount = 0
   let criticalCount = 0
@@ -52,22 +57,7 @@ const computeAggregate = (scanResults: Record<string, Record<string, ScanResult>
 
   if (!hasAny) return null
 
-  const clearRatio = applicableCount > 0 ? passing / applicableCount : 0
-  const level = getStrengthLevel(clearRatio, hasCriticalIssue)
-  const color = getStrengthColor(level)
-  const scorePct = Math.round(clearRatio * 100)
-
-  return {
-    passing,
-    applicableCount,
-    criticalCount,
-    needsAttentionCount,
-    atRiskCount,
-    hasCriticalIssue,
-    level,
-    color,
-    scorePct,
-  }
+  return { passing, applicableCount, criticalCount, needsAttentionCount, atRiskCount, hasCriticalIssue }
 }
 
 const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) => (
@@ -113,18 +103,28 @@ const WorkspaceHealthCard = ({
   lastScannedAt,
   onRescan,
 }: WorkspaceHealthCardProps): ReactElement => {
-  const aggregate = useMemo(() => computeAggregate(scanResults), [scanResults])
+  const security = useLoadFeature(SecurityFeature)
+
+  const aggregate = useMemo<Aggregate | null>(() => {
+    const counts = computeCounts(scanResults)
+    if (!counts || !security.$isReady) return null
+    const clearRatio = counts.applicableCount > 0 ? counts.passing / counts.applicableCount : 0
+    const level = security.getStrengthLevel(clearRatio, counts.hasCriticalIssue)
+    const color = security.getStrengthColor(level)
+    return { ...counts, level, color, scorePct: Math.round(clearRatio * 100) }
+  }, [scanResults, security.$isReady, security.getStrengthLevel, security.getStrengthColor])
 
   // Per-Safe grade counts for the filter chips
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
+    if (!security.$isReady) return counts
     for (const safeResults of Object.values(scanResults)) {
-      counts[getSafeGrade(safeResults)]++
+      counts[security.getSafeGrade(safeResults)]++
     }
     return counts
-  }, [scanResults])
+  }, [scanResults, security.$isReady, security.getSafeGrade])
 
-  // Show skeleton while the scan queue is running — a partial aggregate would be misleading.
+  // Show skeleton while the scan queue is running or feature still loading — partial data misleads.
   if (!aggregate || isScanning) {
     return (
       <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
@@ -239,7 +239,7 @@ const WorkspaceHealthCard = ({
           {lastScannedAt && (
             <Stack direction="row" alignItems="center" spacing={0.5} mt={2}>
               <Typography variant="caption" color="text.secondary">
-                Last scanned {formatTimestamp(lastScannedAt)}
+                Last scanned {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 ·
