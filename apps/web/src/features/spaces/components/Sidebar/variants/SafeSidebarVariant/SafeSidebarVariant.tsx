@@ -86,7 +86,7 @@ export const SafeSidebarVariant = ({
         <motion.div variants={itemVariants}>
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0">
+              <SidebarMenu className="gap-0.5">
                 {displayMainNavItems.map((item, index) => (
                   <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
