@@ -18,6 +18,7 @@ import type {
   formatTimestamp,
   withScannerTimeout,
 } from './data/scanners/utils'
+import type { isKnownModuleByName } from './data/scanners/modules'
 import type { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import type { CHECK_DEFS } from './data/securityChecks'
 import type { ZERO_ADDRESS } from './data/scanners/constants'
@@ -35,6 +36,7 @@ export interface SecurityContract {
   getSafeGrade: typeof getSafeGrade
   formatTimestamp: typeof formatTimestamp
   withScannerTimeout: typeof withScannerTimeout
+  isKnownModuleByName: typeof isKnownModuleByName
   getStrengthLevel: typeof getStrengthLevel
   getStrengthColor: typeof getStrengthColor
   // Module-level scan-result cache accessors
