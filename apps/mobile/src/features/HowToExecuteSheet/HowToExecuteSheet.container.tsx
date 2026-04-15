@@ -2,7 +2,6 @@ import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
 import React from 'react'
 import { Text, View, ScrollView } from 'tamagui'
 import { Container } from '@/src/components/Container'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { Address } from 'blo'
@@ -31,23 +30,18 @@ import { RelayUnavailable } from './components/RelayUnavailable/RelayUnavailable
 import { hasFeature } from '@safe-global/utils/utils/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppDispatch } from '@/src/store/hooks'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
 
-const getActiveSignerRightNode = (
-  totalFee: bigint,
-  item: SignerInfo & { balance: string },
-  executionMethod: ExecutionMethod,
-  activeSigner?: SignerInfo,
-) => {
-  if (activeSigner?.value === item.value && executionMethod !== ExecutionMethod.WITH_RELAY) {
-    return <SafeFontIcon name="check" color="$color" />
-  }
-
+const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }) => {
   return (
-    toBigInt(item.balance) < totalFee && (
-      <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
-        <Text color="$colorSecondary">Not enough gas</Text>
-      </Container>
-    )
+    <View flexDirection="row" alignItems="center" gap="$2">
+      {toBigInt(item.balance) < totalFee && (
+        <Container backgroundColor="$backgroundSecondary" paddingVertical="$1" paddingHorizontal="$3">
+          <Text color="$colorSecondary">Not enough gas</Text>
+        </Container>
+      )}
+      <SignerTypeBadge address={item.value as Address} testID={`signer-type-badge-${item.value}`} />
+    </View>
   )
 }
 
@@ -152,7 +146,7 @@ export const HowToExecuteSheetContainer = () => {
                     balance={`${item.balance ? formatVisualAmount(item.balance, activeChain.nativeCurrency.decimals) : '0'} ${
                       activeChain.nativeCurrency.symbol
                     }`}
-                    rightNode={getActiveSignerRightNode(totalFee, item, executionMethod, activeSigner)}
+                    rightNode={getActiveSignerRightNode(totalFee, item)}
                   />
                 </View>
               )

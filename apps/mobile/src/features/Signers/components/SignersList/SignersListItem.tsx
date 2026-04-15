@@ -3,7 +3,6 @@ import { MenuView, NativeActionEvent, MenuAction } from '@react-native-menu/menu
 import { useSignersActions } from './hooks/useSignersActions'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
-import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SignerSection } from './SignersList'
 import { View } from 'tamagui'
@@ -17,6 +16,8 @@ import { ImportedBadge } from './ImportedBadge'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 import { router } from 'expo-router'
 import logger from '@/src/utils/logger'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
+import { Address } from '@/src/types/address'
 
 interface SignersListItemProps {
   item: AddressInfo
@@ -86,12 +87,11 @@ function SignersListItem({ item, signersGroup }: SignersListItemProps) {
             rightNode={
               <View flexDirection="row" alignItems="center" flexShrink={0} gap="$2">
                 {signer?.type === 'private-key' && <ImportedBadge />}
-
-                {signer?.type === 'walletconnect' && (
-                  <WalletConnectBadge address={item.value} testID={`wc-badge-${item.value}`} skipStatus />
-                )}
-
-                {/* Invisible spacer matching menu width so card content doesn't overlap */}
+                <SignerTypeBadge
+                  address={item.value as Address}
+                  testID={`signer-type-badge-${item.value}`}
+                  skipStatus
+                />
                 <View width={32} />
               </View>
             }

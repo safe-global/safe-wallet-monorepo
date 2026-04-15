@@ -21,13 +21,13 @@ import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/tr
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { toBigInt } from 'ethers'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
+import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
 
 const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }) => {
   return (
     <View flexDirection="row" alignItems="center" gap="$2">
       {toBigInt(item.balance) < totalFee && <Text>Insufficient balance</Text>}
-      <WalletConnectBadge address={item.value} testID="signer-wc-badge" />
+      <SignerTypeBadge address={item.value as Address} testID={`signer-type-badge-${item.value}`} />
     </View>
   )
 }
