@@ -181,6 +181,7 @@
   min-height: 40px;
   padding: 8px;
   gap: 0;
+  border: none;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceLabel {
