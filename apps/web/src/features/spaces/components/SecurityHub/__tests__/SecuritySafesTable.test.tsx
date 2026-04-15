@@ -61,7 +61,6 @@ jest.mock('@/store', () => ({
 
 // useLoadFeature needs Redux/chain context; return the resolved feature synchronously.
 jest.mock('@/features/__core__', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
     ...jest.requireActual('@/features/__core__'),

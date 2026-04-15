@@ -10,7 +10,14 @@
  */
 
 import type { SCANNERS } from './data/scanners/registry'
-import type { scanKey, computeSummary, severityRank, getSafeGrade, formatTimestamp } from './data/scanners/utils'
+import type {
+  scanKey,
+  computeSummary,
+  severityRank,
+  getSafeGrade,
+  formatTimestamp,
+  withScannerTimeout,
+} from './data/scanners/utils'
 import type { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import type { CHECK_DEFS } from './data/securityChecks'
 import type { ZERO_ADDRESS } from './data/scanners/constants'
@@ -27,6 +34,7 @@ export interface SecurityContract {
   severityRank: typeof severityRank
   getSafeGrade: typeof getSafeGrade
   formatTimestamp: typeof formatTimestamp
+  withScannerTimeout: typeof withScannerTimeout
   getStrengthLevel: typeof getStrengthLevel
   getStrengthColor: typeof getStrengthColor
   // Module-level scan-result cache accessors

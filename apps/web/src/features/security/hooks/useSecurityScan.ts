@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { ScanContext, ScanResult } from '../data/scanners/types'
 import { SCANNERS } from '../data/scanners/registry'
-import { scanKey } from '../data/scanners/utils'
+import { scanKey, withScannerTimeout } from '../data/scanners/utils'
 
 /**
  * Module-level cache so multiple hook instances sharing the same ctxKey
@@ -27,14 +27,6 @@ const evictIfNeeded = () => {
 
 export const getScanResultsCache = () => scanResultsCache
 export { evictIfNeeded as evictScanCache }
-
-const SCANNER_TIMEOUT_MS = 15_000
-
-const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> =>
-  Promise.race([
-    promise,
-    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Scanner timed out')), ms)),
-  ])
 
 export type ScanState = {
   results: Record<string, ScanResult>
@@ -98,7 +90,7 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
       executeScan(
         scanner.id,
         async () => {
-          const result = await withTimeout(scanner.scan(currentCtx), SCANNER_TIMEOUT_MS)
+          const result = await withScannerTimeout(scanner.scan(currentCtx))
           // Capture into the local accumulator before returning so the completion
           // callback can write the cache without reading from setState.
           accumulatedResults[scanner.id] = result
