@@ -7,6 +7,8 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { unpinSafe } from '@/store/addedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { useSafeItemData } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
@@ -35,10 +37,15 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
   const chain = useChain(safeItem.chainId)
   const hasOverview = safeOverview !== undefined
 
+  const handleNavigate = () => {
+    trackEvent({ ...OVERVIEW_EVENTS.OPEN_SAFE, label: OVERVIEW_LABELS.top_bar })
+    onNavigate?.()
+  }
+
   return (
     <Link
       href={href}
-      onClick={onNavigate}
+      onClick={handleNavigate}
       className="flex items-center gap-3 rounded-md px-2 py-2 no-underline hover:bg-muted/30 transition-colors"
     >
       <ChainLogo chainId={safeItem.chainId} size={20} />
@@ -83,6 +90,12 @@ const PinnedSafeItem = ({ safeItem, onNavigate }: PinnedSafeItemProps) => {
         variant: 'success',
       }),
     )
+    trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
+  }
+
+  const handleNavigate = () => {
+    trackEvent({ ...OVERVIEW_EVENTS.OPEN_SAFE, label: OVERVIEW_LABELS.top_bar })
+    onNavigate?.()
   }
 
   return (
@@ -90,7 +103,7 @@ const PinnedSafeItem = ({ safeItem, onNavigate }: PinnedSafeItemProps) => {
       ref={elementRef}
       className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/30 transition-colors"
     >
-      <Link href={href} onClick={onNavigate} className="flex flex-1 min-w-0 items-center gap-3 no-underline">
+      <Link href={href} onClick={handleNavigate} className="flex flex-1 min-w-0 items-center gap-3 no-underline">
         {/* Avatar with threshold overlay */}
         <div className="relative shrink-0">
           <SafeIdenticon address={safeItem.address} size={ICON_SIZE} />

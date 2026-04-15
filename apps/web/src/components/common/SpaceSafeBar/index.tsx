@@ -10,6 +10,8 @@ import { MyAccountsFeature, useSafeSelectionModal } from '@/features/myAccounts'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { pinSafe, unpinSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, PIN_SAFE_LABELS } from '@/services/analytics/events/overview'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
@@ -98,6 +100,7 @@ function SpaceSafeBar() {
           variant: 'success',
         }),
       )
+      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
     } else {
       dispatch(pinSafe({ chainId, address: safeAddress }))
       dispatch(
@@ -108,17 +111,27 @@ function SpaceSafeBar() {
           variant: 'success',
         }),
       )
+      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
     }
   }
 
+  const handleOpenAccountsModal = () => {
+    setAccountsModalOpen(true)
+  }
+
+  const handleOpenSelectionModal = () => {
+    trackEvent(OVERVIEW_EVENTS.OPEN_TRUSTED_SAFES_MODAL)
+    selectionModal.open()
+  }
+
   const dropdownHeader = !isQualifiedSafe ? (
-    <DropdownHeader onOpen={() => setAccountsModalOpen(true)} isPinned={isPinned} onPin={handleTogglePin} />
+    <DropdownHeader onOpen={handleOpenAccountsModal} isPinned={isPinned} onPin={handleTogglePin} />
   ) : undefined
   // footer is a render prop so DropdownFooter can close the Select before opening
   // SafeSelectionModal (MUI). TODO: revert to ReactNode once SafeSelectionModal
   // is migrated to shadcn — see SafeSelectorDropdownProps.footer for details.
   const dropdownFooter = !isQualifiedSafe
-    ? (close: () => void) => <DropdownFooter onManage={selectionModal.open} onClose={close} />
+    ? (close: () => void) => <DropdownFooter onManage={handleOpenSelectionModal} onClose={close} />
     : undefined
 
   return (

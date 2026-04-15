@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Search, Bookmark, CircleFadingPlus, Plus, ChevronRight } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -6,6 +6,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import PinnedSafeItem from './PinnedSafeItem'
 import PinnedMultiSafeItem from './PinnedMultiSafeItem'
 
@@ -40,6 +42,21 @@ const AccountsModal = ({ open, onClose, onManage }: AccountsModalProps) => {
       return name.includes(query) || address.includes(query)
     })
   }, [allItems, search])
+
+  // Track search with debounce
+  const searchTracked = useRef(false)
+  useEffect(() => {
+    if (!search.trim()) {
+      searchTracked.current = false
+      return
+    }
+    if (searchTracked.current) return
+    const timer = setTimeout(() => {
+      trackEvent(OVERVIEW_EVENTS.SEARCH)
+      searchTracked.current = true
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const handleManage = () => {
     onClose()
@@ -100,7 +117,15 @@ const AccountsModal = ({ open, onClose, onManage }: AccountsModalProps) => {
 
         <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
           <Button
-            render={<Link href={AppRoutes.newSafe.load} onClick={onClose} />}
+            render={
+              <Link
+                href={AppRoutes.newSafe.load}
+                onClick={() => {
+                  trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: OVERVIEW_LABELS.top_bar })
+                  onClose()
+                }}
+              />
+            }
             variant="secondary"
             size="lg"
             className="flex-1"
@@ -109,7 +134,15 @@ const AccountsModal = ({ open, onClose, onManage }: AccountsModalProps) => {
             Add existing
           </Button>
           <Button
-            render={<Link href={AppRoutes.newSafe.create} onClick={onClose} />}
+            render={
+              <Link
+                href={AppRoutes.newSafe.create}
+                onClick={() => {
+                  trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: OVERVIEW_LABELS.top_bar })
+                  onClose()
+                }}
+              />
+            }
             variant="default"
             size="lg"
             className="flex-1"

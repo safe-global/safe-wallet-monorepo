@@ -7,6 +7,8 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useMultiAccountItemData } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { usePinActions } from '@/features/myAccounts'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import type { MultiChainSafeItem } from '@/hooks/safes'
@@ -21,6 +23,13 @@ interface PinnedMultiSafeItemProps {
 
 const PinnedMultiSafeItem = ({ item, onNavigate }: PinnedMultiSafeItemProps) => {
   const [open, setOpen] = useState(false)
+
+  const handleOpenChange = (next: boolean) => {
+    if (next && !open) {
+      trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
+    }
+    setOpen(next)
+  }
   const currency = useAppSelector(selectCurrency)
   const { address, sortedSafes, safeOverviews, sharedSetup, totalFiatValue, name } = useMultiAccountItemData(item)
   const addressBookItem = useAddressBookItem(address, sortedSafes[0]?.chainId)
@@ -34,7 +43,7 @@ const PinnedMultiSafeItem = ({ item, onNavigate }: PinnedMultiSafeItemProps) => 
   }
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible open={open} onOpenChange={handleOpenChange}>
       {/* overflow-hidden so hover bg respects rounded-xl corners */}
       <div className="rounded-md border border-border bg-card mb-2 overflow-hidden">
         {/* Hoverable header row — same hover as single-chain card */}
