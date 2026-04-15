@@ -17,17 +17,10 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import type { SpaceSafeEntry, SelectedSafe } from './index'
-import { getStrengthLevel, getStrengthColor } from '@/features/security/data/securityScoring'
-import type { ScanResult } from '@/features/security/data/scanners/types'
-import {
-  scanKey,
-  computeSummary,
-  severityRank,
-  getSafeGrade,
-  formatTimestamp,
-  type GradeSummary,
-  type SafeGrade,
-} from '@/features/security/data/scanners/utils'
+import type { ScanResult, GradeSummary, SafeGrade } from '@/features/security/types'
+import { SecurityFeature } from '@/features/security'
+import { useLoadFeature } from '@/features/__core__'
+import type { SecurityContract } from '@/features/security'
 import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
@@ -51,7 +44,14 @@ const ROW_VARIANTS = {
   visible: { opacity: 1 },
 }
 
-const ScoreCell = ({ summary, isScanning }: { summary: GradeSummary | null; isScanning?: boolean }) => {
+type ScoreCellProps = {
+  summary: GradeSummary | null
+  isScanning?: boolean
+  getStrengthLevel: SecurityContract['getStrengthLevel']
+  getStrengthColor: SecurityContract['getStrengthColor']
+}
+
+const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
   if (isScanning) {
     return <Skeleton variant="rounded" width={60} height={20} />
   }
@@ -130,10 +130,15 @@ const formatBalance = (fiatTotal?: string | null): string => {
   return `$${value.toFixed(0)}`
 }
 
-// Pure helper functions — extracted from component body for testability and to avoid recreation per render
+// Pure helper functions — extracted from component body for testability and to avoid recreation per render.
+// Utilities are threaded in via parameters (not imported) to comply with feature architecture —
+// callers obtain them from useLoadFeature(SecurityFeature).
+type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
+
 const getAggregateSummary = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
+  utils: SecurityUtils,
 ): GradeSummary | null => {
   let totalPassing = 0
   let totalApplicable = 0
@@ -142,16 +147,16 @@ const getAggregateSummary = (
   let hasAny = false
 
   for (const chain of safe.chainEntries) {
-    const key = scanKey(safe.address, chain.chainId)
+    const key = utils.scanKey(safe.address, chain.chainId)
     const results = scanResults[key]
     if (!results) continue
-    const summary = computeSummary(results)
+    const summary = utils.computeSummary(results)
     if (!summary) continue
     hasAny = true
     totalPassing += summary.passing
     totalApplicable += summary.applicableCount
     if (summary.hasCriticalIssue) hasCriticalIssue = true
-    const rank = severityRank(summary.grade)
+    const rank = utils.severityRank(summary.grade)
     if (rank < worstGradeRank) worstGradeRank = rank
   }
 
@@ -168,6 +173,7 @@ const getAggregateSummary = (
 const hasMultichainWarning = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
+  scanKey: SecurityContract['scanKey'],
 ): boolean => {
   for (const chain of safe.chainEntries) {
     const key = scanKey(safe.address, chain.chainId)
@@ -181,7 +187,11 @@ const hasMultichainWarning = (
   return false
 }
 
-const isAnyChainScanning = (safe: SpaceSafeEntry, scanningKeys?: Set<string>): boolean => {
+const isAnyChainScanning = (
+  safe: SpaceSafeEntry,
+  scanningKeys: Set<string> | undefined,
+  scanKey: SecurityContract['scanKey'],
+): boolean => {
   if (!scanningKeys) return false
   return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
 }
@@ -207,6 +217,7 @@ const SecuritySafesTable = ({
   gradeFilter,
   balanceMap,
 }: SecuritySafesTableProps): ReactElement => {
+  const security = useLoadFeature(SecurityFeature)
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const chainShortNames = useMemo(() => {
     if (!chainsData) return {}
@@ -249,16 +260,25 @@ const SecuritySafesTable = ({
   // Filter safes by grade when a chip filter is active
   const filteredSafes = useMemo(() => {
     if (!gradeFilter) return safes
+    if (!security.$isReady) return safes
     return safes.filter((safe) => {
       // For multichain Safes, match if ANY chain matches the grade
       for (const chain of safe.chainEntries) {
-        const key = scanKey(safe.address, chain.chainId)
+        const key = security.scanKey(safe.address, chain.chainId)
         const results = scanResults[key]
-        if (results && getSafeGrade(results) === gradeFilter) return true
+        if (results && security.getSafeGrade(results) === gradeFilter) return true
       }
       return false
     })
-  }, [safes, scanResults, gradeFilter])
+  }, [safes, scanResults, gradeFilter, security.$isReady, security.scanKey, security.getSafeGrade])
+
+  // Gate remaining render on feature load. Utilities are synchronous call-site primitives —
+  // pulling them via useLoadFeature means we must wait for the module to resolve.
+  // Since FEATURES.SPACES is already enabled on this page, this is a very brief state.
+  if (!security.$isReady) return <></>
+
+  // After the $isReady check, services are guaranteed to be defined.
+  const { scanKey, computeSummary, formatTimestamp, getStrengthLevel, getStrengthColor } = security
 
   return (
     <Table
@@ -389,7 +409,12 @@ const SecuritySafesTable = ({
                     <VersionCell results={scanResults[key]} isScanning={isScanning} />
                   </TableCell>
                   <TableCell>
-                    <ScoreCell summary={summary} isScanning={isScanning} />
+                    <ScoreCell
+                      summary={summary}
+                      isScanning={isScanning}
+                      getStrengthLevel={getStrengthLevel}
+                      getStrengthColor={getStrengthColor}
+                    />
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">
@@ -416,9 +441,9 @@ const SecuritySafesTable = ({
               )
             }
 
-            const aggregateSummary = getAggregateSummary(safe, scanResults)
-            const aggregateScanning = isAnyChainScanning(safe, scanningKeys)
-            const showMultichainWarning = hasMultichainWarning(safe, scanResults)
+            const aggregateSummary = getAggregateSummary(safe, scanResults, security)
+            const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
+            const showMultichainWarning = hasMultichainWarning(safe, scanResults, scanKey)
             const totalBalance = safe.chainEntries.reduce(
               (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
               0,
@@ -509,7 +534,12 @@ const SecuritySafesTable = ({
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
+                    <ScoreCell
+                      summary={aggregateSummary}
+                      isScanning={aggregateScanning}
+                      getStrengthLevel={getStrengthLevel}
+                      getStrengthColor={getStrengthColor}
+                    />
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">
@@ -577,7 +607,12 @@ const SecuritySafesTable = ({
                           <VersionCell results={scanResults[key]} isScanning={isScanning} />
                         </TableCell>
                         <TableCell>
-                          <ScoreCell summary={summary} isScanning={isScanning} />
+                          <ScoreCell
+                            summary={summary}
+                            isScanning={isScanning}
+                            getStrengthLevel={getStrengthLevel}
+                            getStrengthColor={getStrengthColor}
+                          />
                         </TableCell>
                         <TableCell>
                           <Typography variant="caption" color="text.secondary">

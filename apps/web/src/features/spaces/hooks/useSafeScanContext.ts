@@ -10,7 +10,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
-import type { ScanContext } from '@/features/security/data/scanners/types'
+import type { ScanContext } from '@/features/security/types'
 import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
 
 export type OverviewData = {

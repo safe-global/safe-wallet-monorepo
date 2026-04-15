@@ -12,12 +12,9 @@ import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import Link from 'next/link'
-import type { EvidenceItem, ScanContext, ScanResult } from '@/features/security/data/scanners/types'
-import type { SecurityGrade } from '@/features/security/data/securityTypes'
-import { computeSummary } from '@/features/security/data/scanners/utils'
-import { getStrengthLevel, getStrengthColor, type StrengthLevel } from '@/features/security/data/securityScoring'
-import { ZERO_ADDRESS } from '@/features/security/data/scanners/constants'
-import { CHECK_DEFS } from '@/features/security/data/securityChecks'
+import type { EvidenceItem, ScanContext, ScanResult, SecurityGrade, StrengthLevel } from '@/features/security/types'
+import { SecurityFeature, type SecurityContract } from '@/features/security'
+import { useLoadFeature } from '@/features/__core__'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 type SecurityPanelViewProps = {
@@ -157,20 +154,26 @@ const Row = ({ leadIcon, title, trailing, expandedContent }: RowProps): ReactEle
 type Cta = { label: string; href: string }
 
 /**
- * Build a navigation CTA for a failing check. Returns null when:
+ * Factory that binds `checkDefs` to a CTA builder. Consumers obtain `checkDefs`
+ * via useLoadFeature and pass it once; the returned function is then used at
+ * each render site.
+ *
+ * The returned CTA builder returns null when:
  *  - the row is passing (no action needed),
  *  - we don't yet have a `safeQueryParam` (chain metadata still loading), or
- *  - there's no CHECK_DEFS entry for this check id.
- * Label precedence: `ScanResult.ctaLabelOverride` → `CHECK_DEFS[id].ctaLabel`.
+ *  - there's no checkDefs entry for this check id.
+ * Label precedence: `ScanResult.ctaLabelOverride` → `checkDefs[id].ctaLabel`.
  */
-const buildCta = (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
-  if (!safeQueryParam) return null
-  const def = CHECK_DEFS[checkId]
-  if (!def) return null
-  if (result && isPassingStatus(result.status)) return null
-  const label = result?.ctaLabelOverride || def.ctaLabel
-  return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
-}
+const makeBuildCta =
+  (checkDefs: SecurityContract['checkDefs']) =>
+  (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
+    if (!safeQueryParam) return null
+    const def = checkDefs[checkId]
+    if (!def) return null
+    if (result && isPassingStatus(result.status)) return null
+    const label = result?.ctaLabelOverride || def.ctaLabel
+    return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
+  }
 
 const CtaLink = ({ cta }: { cta: Cta }): ReactElement => (
   <Link
@@ -352,17 +355,18 @@ const PanelHeader = ({
   results: Record<string, ScanResult>
   isComplete: boolean
 }): ReactElement | null => {
-  const summary = useMemo(() => computeSummary(results), [results])
+  const security = useLoadFeature(SecurityFeature)
+  const summary = useMemo(() => (security.$isReady ? security.computeSummary(results) : null), [results, security])
 
-  if (!isComplete && !summary) {
+  if (!security.$isReady || (!isComplete && !summary)) {
     return <Skeleton variant="rectangular" height={120} sx={{ borderRadius: '12px', mb: 3 }} />
   }
   if (!summary) return null
 
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
   const score = Math.round(clearRatio * 100)
-  const level = getStrengthLevel(clearRatio, summary.hasCriticalIssue)
-  const color = getStrengthColor(level)
+  const level = security.getStrengthLevel(clearRatio, summary.hasCriticalIssue)
+  const color = security.getStrengthColor(level)
   const failureCount = summary.applicableCount - summary.passing
   const actionLine =
     failureCount === 0
@@ -420,10 +424,18 @@ const SignersSection = ({
   results: Record<string, ScanResult>
   safeQueryParam?: string
 }): ReactElement | null => {
+  const security = useLoadFeature(SecurityFeature)
+  const buildCta = useMemo(
+    () => (security.$isReady ? makeBuildCta(security.checkDefs) : null),
+    [security.$isReady, security.checkDefs],
+  )
+
   const signerIntegrityResult = results['signer_integrity']
   const multichainResult = results['multichain_setup']
 
   const [passingExpanded, setPassingExpanded] = useState(false)
+
+  if (!security.$isReady || !buildCta) return null
 
   type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
@@ -556,6 +568,12 @@ const SecurityChecksSection = ({
   results: Record<string, ScanResult>
   safeQueryParam?: string
 }): ReactElement | null => {
+  const security = useLoadFeature(SecurityFeature)
+  const buildCta = useMemo(
+    () => (security.$isReady ? makeBuildCta(security.checkDefs) : null),
+    [security.$isReady, security.checkDefs],
+  )
+
   const accountSetupResult = results['account_setup']
   const recoveryResult = results['recovery']
   const versionResult = results['contract_version']
@@ -566,16 +584,21 @@ const SecurityChecksSection = ({
   const pendingResult = results['pending_tx']
   const scanningResult = results['transaction_scanning']
 
+  // Modules collapse: when N > 2, summarize and let user expand
+  const [modulesExpanded, setModulesExpanded] = useState(false)
+  // Passing checks accordion
+  const [passingExpanded, setPassingExpanded] = useState(false)
+
+  // Feature not yet loaded — render nothing; the panel skeleton covers this state.
+  // This guard runs AFTER all hooks to respect Rules of Hooks.
+  if (!security.$isReady || !buildCta) return null
+
+  const ZERO_ADDRESS = security.zeroAddress
   const hasGuard = scanContext.guard !== null && scanContext.guard.value !== ZERO_ADDRESS
   const hasFallback = scanContext.fallbackHandler !== null && scanContext.fallbackHandler.value !== ZERO_ADDRESS
   const activeModules = (scanContext.modules ?? []).filter((m) => m.value !== ZERO_ADDRESS)
 
-  // Modules collapse: when N > 2, summarize and let user expand
-  const [modulesExpanded, setModulesExpanded] = useState(false)
   const showModuleSummary = activeModules.length > 2 && !modulesExpanded
-
-  // Passing checks accordion
-  const [passingExpanded, setPassingExpanded] = useState(false)
 
   type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
   const items: SectionRow[] = []
