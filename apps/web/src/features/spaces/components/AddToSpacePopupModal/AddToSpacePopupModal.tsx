@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -59,10 +58,13 @@ export const AddToSpacePopupModal = (): ReactElement => {
           ))}
         </div>
 
-        <Button className="w-full gap-2 rounded-xl" render={<Link href={createSpaceHref} />}>
+        <DialogClose
+          render={<Button className="w-full gap-2 rounded-xl" />}
+          onClick={() => void router.push(createSpaceHref)}
+        >
           <Plus className="size-5" />
           Create a Space
-        </Button>
+        </DialogClose>
       </div>
     </div>
   )
