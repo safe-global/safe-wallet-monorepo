@@ -17,7 +17,11 @@ export const SidebarTopBar = (): ReactElement => {
   }
 
   return (
-    <div data-testid="sidebar-top-bar" data-sidebar-state={state} className="relative w-full min-h-16">
+    <div
+      data-testid="sidebar-top-bar"
+      data-sidebar-state={state}
+      className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
+    >
       <button
         type="button"
         onClick={handleLogoClick}
