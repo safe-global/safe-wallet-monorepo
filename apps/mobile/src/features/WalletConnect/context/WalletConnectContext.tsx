@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { AppKit, AppKitProvider, useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { AppKit, AppKitProvider, useAccount, useAppKit, useProvider, useWalletInfo } from '@reown/appkit-react-native'
+import type { Provider } from '@reown/appkit-common-react-native'
 import { Platform } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
 import { useAppSelector } from '@/src/store/hooks'
@@ -15,6 +16,7 @@ interface WalletConnectContextValue
     Pick<ReturnType<typeof useReconnectFlow>, 'reconnect'>,
     Pick<ReturnType<typeof useSwitchNetwork>, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
     Pick<ReturnType<typeof useWalletConnectSigning>, 'sign' | 'hasProvider'> {
+  provider: Provider | undefined
   isWalletConnectSigner: (address: string) => boolean
   isConnected: ReturnType<typeof useAccount>['isConnected']
   address: ReturnType<typeof useAccount>['address']
@@ -53,6 +55,7 @@ function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: Wa
   const { reconnect } = useReconnectFlow()
   const { switchNetwork, switchNetworkIfNeeded, isWrongNetwork } = useSwitchNetwork()
   const { sign, hasProvider } = useWalletConnectSigning()
+  const { provider } = useProvider()
   useChainSync()
   const appKitHook = useAppKit()
   const { address, chainId, isConnected } = useAccount()
@@ -85,6 +88,7 @@ function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: Wa
       isWrongNetwork,
       sign,
       hasProvider,
+      provider,
       address,
       chainId,
       walletInfo,
@@ -101,6 +105,7 @@ function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: Wa
       isWrongNetwork,
       sign,
       hasProvider,
+      provider,
       address,
       chainId,
       walletInfo,
