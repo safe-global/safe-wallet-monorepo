@@ -20,10 +20,10 @@ export const SidebarTopBar = (): ReactElement => {
     <div
       data-testid="sidebar-top-bar"
       data-sidebar-state={state}
-      className={cn(
-        'relative w-full transition-[min-height] duration-200 ease-linear',
-        isCollapsed ? 'min-h-16' : 'min-h-10',
-      )}
+      className="relative w-full transition-transform duration-200 ease-linear origin-top min-h-16"
+      style={{
+        transform: isCollapsed ? 'scaleY(1)' : 'scaleY(0.625)',
+      }}
     >
       <button
         type="button"
