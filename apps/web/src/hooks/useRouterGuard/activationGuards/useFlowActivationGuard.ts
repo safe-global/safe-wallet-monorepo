@@ -38,7 +38,11 @@ const guardRules: GuardRule[] = [
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: ({ isSpacesPath }) => redirect(isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index),
+    action: ({ isSpacesPath, query }) => {
+      const target = isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+    },
   },
 
   // Authenticated but has no spaces → onboarding

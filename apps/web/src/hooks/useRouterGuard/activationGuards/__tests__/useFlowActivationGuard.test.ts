@@ -266,6 +266,61 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({ success: true })
     })
+
+    it('should preserve ?safe= in the welcome/spaces redirect when unauthenticated on a spaces path', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: '1:0xdeadbeef' },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+      })
+    })
+
+    it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
+      setupMocks({
+        pathname: '/other',
+        query: { safe: '5:0xcafe' },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+        isSpaceRoute: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.index}?safe=5%3A0xcafe`,
+      })
+    })
+
+    it('should not append ?safe= when safe query param is not a string', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: ['a', 'b'] } as unknown as Record<string, string>,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
   })
 
   // -----------------------------------------------------------------------
