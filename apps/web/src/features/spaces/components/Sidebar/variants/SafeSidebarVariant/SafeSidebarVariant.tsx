@@ -49,7 +49,7 @@ export const SafeSidebarVariant = ({
     pathname: AppRoutes.settings.setup,
     query: safeAddress ? { safe: safeAddress } : {},
   }
-  const isSettingsActive = router.pathname === AppRoutes.settings.setup
+  const isSettingsActive = router.pathname.startsWith(AppRoutes.settings.index)
 
   const shouldRenderWorkspaceHeaderGroup =
     workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)

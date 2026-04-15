@@ -526,6 +526,26 @@ describe('SafeSidebarVariant', () => {
       expect(settingsButton).toHaveAttribute('data-active', 'true')
     })
 
+    it('marks Settings as active when on settings sub-tab page', () => {
+      const mockRouter = jest.requireMock('next/router').useRouter as jest.Mock
+      mockRouter.mockReturnValue({
+        push: jest.fn(),
+        query: { safe: '0x123' },
+        pathname: AppRoutes.settings.security,
+      })
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const settingsButton = screen.getByTestId('sidebar-settings-item')
+      expect(settingsButton).toHaveAttribute('data-active', 'true')
+    })
+
     it('shows outdated dot for critical OUTDATED version state', () => {
       mockUseSafeInfo.mockReturnValue({
         safe: { implementationVersionState: ImplementationVersionState.OUTDATED, version: '1.0.0' },
