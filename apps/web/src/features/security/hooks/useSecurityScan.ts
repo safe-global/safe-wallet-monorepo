@@ -86,6 +86,9 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
     const currentScanId = ++scanIdRef.current
     const total = SCANNERS.length
     let completedCount = 0
+    // Local accumulator — avoids reading state from inside a setState updater
+    // (which would violate React's purity contract and double-fire under StrictMode).
+    const accumulatedResults: Record<string, ScanResult> = {}
 
     setResults({})
     setErrors({})
@@ -94,22 +97,24 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
     SCANNERS.forEach((scanner) => {
       executeScan(
         scanner.id,
-        () => withTimeout(scanner.scan(currentCtx), SCANNER_TIMEOUT_MS),
+        async () => {
+          const result = await withTimeout(scanner.scan(currentCtx), SCANNER_TIMEOUT_MS)
+          // Capture into the local accumulator before returning so the completion
+          // callback can write the cache without reading from setState.
+          accumulatedResults[scanner.id] = result
+          return result
+        },
         currentScanId,
         () => {
           completedCount++
           if (completedCount === total) {
             const now = Date.now()
             setLastScannedAt(now)
-            // Write to module-level cache so other hook instances (sidebar) reuse results
+            // Write to module-level cache so other hook instances (sidebar) reuse results.
             const key = ctxRef.current ? scanKey(ctxRef.current.safeAddress, ctxRef.current.chainId) : null
             if (key) {
-              // Read final results from state updater to avoid closure staleness
-              setResults((final) => {
-                scanResultsCache.set(key, { results: final, timestamp: now })
-                evictIfNeeded()
-                return final
-              })
+              scanResultsCache.set(key, { results: accumulatedResults, timestamp: now })
+              evictIfNeeded()
             }
           }
         },

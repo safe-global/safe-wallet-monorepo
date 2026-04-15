@@ -51,6 +51,7 @@ export const navItems: DynamicNavItem[] = [
     label: 'Security',
     icon: <SecurityIcon />,
     href: AppRoutes.spaces.security,
+    activeMemberOnly: true,
   },
   {
     label: 'Settings',

@@ -325,6 +325,7 @@ const SecurityHub = (): ReactElement => {
       ) : (
         <>
           <WorkspaceHealthCard
+            safes={safes}
             scanResults={allScanResults}
             isScanning={isRunning}
             activeFilter={gradeFilter}

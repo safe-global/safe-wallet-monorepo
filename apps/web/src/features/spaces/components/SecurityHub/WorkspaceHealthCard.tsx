@@ -4,8 +4,10 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
+import type { SpaceSafeEntry } from './index'
 
 type WorkspaceHealthCardProps = {
+  safes: SpaceSafeEntry[]
   scanResults: Record<string, Record<string, ScanResult>>
   isScanning: boolean
   activeFilter: SafeGrade | null
@@ -96,6 +98,7 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
 )
 
 const WorkspaceHealthCard = ({
+  safes,
   scanResults,
   isScanning,
   activeFilter,
@@ -114,15 +117,25 @@ const WorkspaceHealthCard = ({
     return { ...counts, level, color, scorePct: Math.round(clearRatio * 100) }
   }, [scanResults, security.$isReady, security.getStrengthLevel, security.getStrengthColor])
 
-  // Per-Safe grade counts for the filter chips
+  // Per-Safe grade counts for the filter chips.
+  // Iterate over `safes` (not scanResults) so multichain safes are counted once per
+  // distinct grade — not once per chain entry. This keeps chip counts consistent with
+  // the table's filter semantics ("show safes where ANY chain matches this grade").
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
     if (!security.$isReady) return counts
-    for (const safeResults of Object.values(scanResults)) {
-      counts[security.getSafeGrade(safeResults)]++
+    for (const safe of safes) {
+      const gradesFound = new Set<SafeGrade>()
+      for (const chain of safe.chainEntries) {
+        const key = security.scanKey(safe.address, chain.chainId)
+        const results = scanResults[key]
+        if (!results) continue
+        gradesFound.add(security.getSafeGrade(results))
+      }
+      for (const grade of gradesFound) counts[grade]++
     }
     return counts
-  }, [scanResults, security.$isReady, security.getSafeGrade])
+  }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
   // Show skeleton while the scan queue is running or feature still loading — partial data misleads.
   if (!aggregate || isScanning) {
