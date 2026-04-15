@@ -1,8 +1,7 @@
 import AddAccounts from '../AddAccounts'
 import EmptySafeAccounts from './EmptySafeAccounts'
 import { Stack, Typography } from '@mui/material'
-import { useEffect, useState, useMemo } from 'react'
-import useDebounce from '@safe-global/utils/hooks/useDebounce'
+import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
@@ -15,7 +14,6 @@ import {
   _getSingleChainAccounts,
   getComparator,
   useAllOwnedSafes,
-  useSafesSearch,
 } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
@@ -23,11 +21,8 @@ import { useSpaceSafes, useIsAdmin, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
-import { SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { trackEvent } from '@/services/analytics'
-import SearchInput from '../SearchInput'
 import AccountsSafesList from './AccountsSafesList'
 
 const _groupAndSort = (
@@ -40,8 +35,6 @@ const _groupAndSort = (
 }
 
 const SpaceSafeAccounts = () => {
-  const [rawSearchQuery, setRawSearchQuery] = useState('')
-  const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
@@ -80,16 +73,7 @@ const SpaceSafeAccounts = () => {
     [spaceSafeItems, sortComparator],
   )
 
-  const filteredSafes = useSafesSearch(displaySafes, debouncedSearchQuery)
-
-  const safeList = debouncedSearchQuery ? filteredSafes : displaySafes
-  const hasResults = safeList.length > 0
-
-  useEffect(() => {
-    if (debouncedSearchQuery) {
-      trackEvent({ ...SPACE_EVENTS.SEARCH_ACCOUNTS, label: SPACE_LABELS.accounts_page })
-    }
-  }, [debouncedSearchQuery])
+  const hasResults = displaySafes.length > 0
 
   return (
     <>
@@ -97,23 +81,13 @@ const SpaceSafeAccounts = () => {
       <Typography variant="h1" mb={3}>
         Safe Accounts
       </Typography>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        gap={2}
-        mb={3}
-        flexWrap="nowrap"
-        flexDirection={{ xs: 'column-reverse', md: 'row' }}
-      >
-        <SearchInput onSearch={setRawSearchQuery} />
-
-        {isAdmin && (
+      {isAdmin && (
+        <Stack direction="row" justifyContent="flex-end" mb={3}>
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
             <AddAccounts />
           </Track>
-        )}
-      </Stack>
+        </Stack>
+      )}
 
       {isSpaceSafesError ? (
         <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
@@ -133,14 +107,10 @@ const SpaceSafeAccounts = () => {
             Retry
           </button>
         </div>
-      ) : debouncedSearchQuery && !hasResults ? (
-        <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
-          Found 0 results
-        </Typography>
       ) : !hasResults && allSafes && allSafes.length === 0 ? (
         <EmptySafeAccounts />
       ) : (
-        <AccountsSafesList safes={safeList} similarAddresses={similarAddresses} />
+        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
       )}
     </>
   )

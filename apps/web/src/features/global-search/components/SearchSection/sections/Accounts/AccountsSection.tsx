@@ -12,7 +12,6 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
   const matchSafe = useMatchSafe()
 
   const filteredSafes = useGlobalSearchFilter(allSafes, query, matchSafe)
-  console.log('### accounts', allSafes, filteredSafes)
 
   if (isLoading) {
     return (
@@ -35,13 +34,14 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
         {filteredSafes.map((safe, index) => {
           const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
           return (
-            <SafeCardReadOnly
-              key={key}
-              safe={safe}
-              hideContextMenu
-              showPending={false}
-              className="px-0 sm:px-0 hover:bg-card"
-            />
+            <div key={key} data-search-item className="group/search-focus">
+              <SafeCardReadOnly
+                safe={safe}
+                hideContextMenu
+                showPending={false}
+                className="group-data-[focused]/search-focus:bg-accent px-2 sm:px-2 -mx-2"
+              />
+            </div>
           )
         })}
       </div>
