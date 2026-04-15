@@ -49,6 +49,9 @@ const customJestConfig = {
       statements: 76,
     },
   },
+  // Jest only picks up .test.* files. Playwright E2E tests use .spec.* (see apps/web/playwright/).
+  // This enforces the split at the config layer so Jest never accidentally runs Playwright files.
+  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)test.[jt]s?(x)'],
   // Exclude storybook snapshot tests from main test run - they have their own CI workflow
   testPathIgnorePatterns: ['/node_modules/', '/.next/', '\\.stories\\.test\\.tsx$'],
 }

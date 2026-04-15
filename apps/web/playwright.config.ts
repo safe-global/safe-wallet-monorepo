@@ -11,8 +11,8 @@ import { defineConfig, devices } from '@playwright/test'
  * - prodhealthcheck: Real production data
  */
 export default defineConfig({
-  testDir: './e2e/tests',
-  outputDir: './e2e/test-results',
+  testDir: './playwright/tests',
+  outputDir: './playwright/test-results',
 
   /* Fail the build on CI if test.only is left in source */
   forbidOnly: !!process.env.CI,
@@ -23,13 +23,13 @@ export default defineConfig({
   /* Parallel workers: use half CPU cores in CI to avoid memory pressure */
   workers: process.env.CI ? '50%' : undefined,
 
-  /* Reporter configuration */
+  /* Reporter configuration — keep all Playwright output inside ./playwright/ */
   reporter: process.env.CI
     ? [
-        ['html', { open: 'never' }],
-        ['junit', { outputFile: './e2e/test-results/junit-report.xml' }],
+        ['html', { open: 'never', outputFolder: './playwright/playwright-report' }],
+        ['junit', { outputFile: './playwright/test-results/junit-report.xml' }],
       ]
-    : [['html', { open: 'on-failure' }]],
+    : [['html', { open: 'on-failure', outputFolder: './playwright/playwright-report' }]],
 
   /* Shared settings for all projects */
   use: {
@@ -58,7 +58,7 @@ export default defineConfig({
   projects: [
     {
       name: 'smoke',
-      testDir: './e2e/tests/smoke',
+      testDir: './playwright/tests/smoke',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -66,7 +66,7 @@ export default defineConfig({
     },
     {
       name: 'regression',
-      testDir: './e2e/tests/regression',
+      testDir: './playwright/tests/regression',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -74,7 +74,7 @@ export default defineConfig({
     },
     {
       name: 'happypath',
-      testDir: './e2e/tests/happypath',
+      testDir: './playwright/tests/happypath',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
@@ -82,7 +82,7 @@ export default defineConfig({
     },
     {
       name: 'visual',
-      testDir: './e2e/tests/visual',
+      testDir: './playwright/tests/visual',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
@@ -90,7 +90,7 @@ export default defineConfig({
     },
     {
       name: 'prodhealthcheck',
-      testDir: './e2e/tests/prodhealthcheck',
+      testDir: './playwright/tests/prodhealthcheck',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },

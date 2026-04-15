@@ -12,7 +12,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@e2e/*": ["./*"]
+      "@playwright-tests/*": ["./*"]
     }
   },
   "include": ["**/*.ts"],

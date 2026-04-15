@@ -11,8 +11,8 @@
 report.json
 
 # playwright
-apps/web/e2e/test-results/
-apps/web/e2e/playwright-report/
+apps/web/playwright/test-results/
+apps/web/playwright/playwright-report/
 apps/web/blob-report/
 
 # generated types
