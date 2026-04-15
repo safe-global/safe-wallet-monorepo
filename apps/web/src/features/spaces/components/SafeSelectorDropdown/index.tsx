@@ -11,12 +11,13 @@ function SafeSelectorDropdown({
   items,
   selectedItemId,
   onItemSelect,
+  isLoading,
   isError,
   onRetry,
   header,
   footer,
 }: SafeSelectorDropdownProps) {
-  const hasDropdownContent = Boolean(header) || Boolean(footer)
+  const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   const {
     dropdownOpen,
     selectedChainId,
@@ -32,11 +33,8 @@ function SafeSelectorDropdown({
   const safeItemSelect = onItemSelect ?? (() => {})
 
   if (!selectedItem) {
+    if (isError) return <SafeSelectorError onRetry={onRetry} />
     return null
-  }
-
-  if (isError) {
-    return <SafeSelectorError onRetry={onRetry} />
   }
 
   return (
@@ -71,6 +69,9 @@ function SafeSelectorDropdown({
           items={items}
           selectedItemId={safeSelectValue}
           onItemSelect={safeItemSelect}
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={onRetry}
           header={header}
           footer={footer}
           closeDropdown={closeDropdown}

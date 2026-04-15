@@ -151,6 +151,7 @@ export function useSpaceSafeSelectorItems() {
     items,
     selectedItemId,
     handleItemSelect,
+    isLoading: overviewsLoading,
     isError: overviewsError,
     refetch: refetchOverviews,
   }

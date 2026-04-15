@@ -16,6 +16,7 @@ export interface SafeSelectorDropdownProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
+  isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
   header?: React.ReactNode

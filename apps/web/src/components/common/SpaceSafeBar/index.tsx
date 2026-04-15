@@ -74,7 +74,7 @@ function SpaceSafeBar() {
   const pathname = usePathname()
   const dispatch = useAppDispatch()
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { items, selectedItemId, handleItemSelect, isError, refetch } = useSpaceSafeSelectorItems()
+  const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
   const [accountsModalOpen, setAccountsModalOpen] = useState(false)
   const selectionModal = useSafeSelectionModal()
@@ -130,6 +130,7 @@ function SpaceSafeBar() {
         items={items}
         selectedItemId={selectedItemId}
         onItemSelect={handleItemSelect}
+        isLoading={isLoading}
         isError={isError}
         onRetry={refetch}
         header={dropdownHeader}
