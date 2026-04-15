@@ -68,7 +68,7 @@ export const executeWalletConnectTx = async ({
 
   if (threshold > safeTx.signatures.size) {
     const missing = threshold - safeTx.signatures.size
-    throw new Error(`There ${missing > 1 ? 'are' : 'is'} ${missing} signature${maybePlural(missing)} missing`)
+    throw new Error(`Transaction requires ${missing} more signature${maybePlural(missing)}`)
   }
 
   const encodedTx = await sdk.getEncodedTransaction(safeTx)
