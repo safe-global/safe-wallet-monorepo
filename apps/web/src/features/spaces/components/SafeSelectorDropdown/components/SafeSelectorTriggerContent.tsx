@@ -1,6 +1,12 @@
+import { useState, type MouseEvent } from 'react'
 import { blo } from 'blo'
+import { Bookmark, Check } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { pinSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
@@ -12,6 +18,10 @@ export interface SafeSelectorTriggerContentProps {
 }
 
 function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelectorTriggerContentProps) {
+  const dispatch = useAppDispatch()
+  const addedSafes = useAppSelector(selectAllAddedSafes)
+  const [justPinned, setJustPinned] = useState(false)
+
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
 
@@ -21,6 +31,25 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     selectedItem.address,
     chainShortName,
   )
+
+  const isPinned = Boolean(addedSafes[selectedChainId]?.[selectedItem.address])
+
+  const handlePin = (e: MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    dispatch(pinSafe({ chainId: selectedChainId, address: selectedItem.address }))
+    dispatch(
+      showNotification({
+        title: 'Safe trusted',
+        message: displayName,
+        groupKey: `pin-safe-${selectedItem.address}`,
+        variant: 'success',
+      }),
+    )
+    setJustPinned(true)
+    setTimeout(() => setJustPinned(false), 2000)
+  }
+
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
       <Avatar size="sm" data-testid="safe-selector-trigger-identicon">
@@ -39,6 +68,24 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           </Typography>
         )}
       </div>
+      {!isPinned && !justPinned && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                onClick={handlePin}
+                className="shrink-0 rounded p-1 hover:bg-muted transition-colors cursor-pointer"
+                aria-label="Trust this safe"
+              />
+            }
+          >
+            <Bookmark className="size-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent>Trust this safe</TooltipContent>
+        </Tooltip>
+      )}
+      {justPinned && <Check className="size-4 text-green-600 shrink-0" />}
       <SafeBalanceBlock
         isLoading={selectedItem.isLoading ?? false}
         balance={selectedItem.balance}

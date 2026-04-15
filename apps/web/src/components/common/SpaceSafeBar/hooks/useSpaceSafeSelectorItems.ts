@@ -29,12 +29,6 @@ const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   shortName: chain?.shortName ?? chainId,
 })
 
-const sumFiatTotals = (overviews: SafeOverview[]): number =>
-  overviews.reduce((sum, o) => {
-    const fiat = parseFloat(o.fiatTotal || '0')
-    return isNaN(fiat) ? sum : sum + fiat
-  }, 0)
-
 const resolveThresholdAndOwners = (
   isCurrentSafe: boolean,
   safe: { threshold: number; owners?: { value: string }[] },
@@ -64,19 +58,17 @@ function buildMultiChainItem(
   const chainIds = item.safes.map((s) => s.chainId)
   const orderedChainIds = isCurrentSafe ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)] : chainIds
 
-  const safeOverviews =
-    overviews?.filter(
-      (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
-    ) ?? []
-  const firstOverview = safeOverviews[0] as SafeOverview | undefined
+  const currentChainOverview = overviews?.find(
+    (o) => sameAddress(o.address.value, item.address) && o.chainId === currentChainId,
+  )
 
   return {
     id: `${orderedChainIds[0]}:${item.address}`,
     name: item.name ?? '',
     address: item.address,
-    ...resolveThresholdAndOwners(isCurrentSafe, safe, firstOverview),
-    balance: sumFiatTotals(safeOverviews).toString(),
-    isLoading: overviewsLoading && safeOverviews.length === 0,
+    ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
+    balance: currentChainOverview?.fiatTotal ?? '0',
+    isLoading: overviewsLoading && !currentChainOverview,
     chains: mapChainIds(chainConfigs, orderedChainIds),
   }
 }

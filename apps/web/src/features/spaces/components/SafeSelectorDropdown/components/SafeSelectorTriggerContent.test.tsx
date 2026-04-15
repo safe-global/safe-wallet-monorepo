@@ -8,6 +8,11 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
 }))
 
+jest.mock('@/store', () => ({
+  useAppDispatch: () => jest.fn(),
+  useAppSelector: () => ({}),
+}))
+
 jest.mock('./SafeBalanceBlock', () => {
   const Mock = () => <div data-testid="safe-balance-block" />
   Mock.displayName = 'SafeBalanceBlock'

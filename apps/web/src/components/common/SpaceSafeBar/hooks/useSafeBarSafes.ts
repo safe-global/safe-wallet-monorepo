@@ -1,7 +1,9 @@
 import { useMemo } from 'react'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, type AllSafeItems } from '@/hooks/safes'
+import type { SafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 /**
@@ -16,6 +18,7 @@ export function useSafeBarSafes() {
   const isInSpaceContext = useIsQualifiedSafe()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const { safeAddress } = useSafeInfo()
+  const currentChainId = useChainId()
 
   const allSafeItems = useAllSafes()
 
@@ -34,26 +37,37 @@ export function useSafeBarSafes() {
     [allGrouped.allMultiChainSafes, allGrouped.allSingleSafes],
   )
 
-  // Inject the current safe into pinnedSafes if it's not already there,
-  // by finding it in allKnownSafes (which includes all visited safes).
+  // Fallback SafeItem for the current safe when it's not in any list
+  // (e.g. navigated via URL to a safe that isn't pinned or owned).
+  const fallbackCurrentSafe = useMemo<SafeItem | undefined>(() => {
+    if (!safeAddress || !currentChainId) return undefined
+    return {
+      chainId: currentChainId,
+      address: safeAddress,
+      isReadOnly: true,
+      isPinned: false,
+      lastVisited: 0,
+      name: undefined,
+    }
+  }, [safeAddress, currentChainId])
+
+  // Inject the current safe into pinnedSafes if it's not already there.
   const dropdownSafes = useMemo<AllSafeItems>(() => {
     if (!safeAddress) return pinnedSafes
-    const isInPinned = pinnedSafes.some((s) => sameAddress(s.address, safeAddress))
-    if (isInPinned) return pinnedSafes
-    const currentSafe = allKnownSafes.find((s) => sameAddress(s.address, safeAddress))
-    if (!currentSafe) return pinnedSafes
-    return [currentSafe, ...pinnedSafes]
-  }, [pinnedSafes, allKnownSafes, safeAddress])
+    if (pinnedSafes.some((s) => sameAddress(s.address, safeAddress))) return pinnedSafes
+    const current = allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe
+    if (!current) return pinnedSafes
+    return [current, ...pinnedSafes]
+  }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe])
 
-  // Same for chain selector — allKnownSafes usually has it, but be safe.
+  // Same for chain selector.
   const chainSelectorSafes = useMemo<AllSafeItems>(() => {
     if (!safeAddress) return allKnownSafes
-    const isInList = allKnownSafes.some((s) => sameAddress(s.address, safeAddress))
-    if (isInList) return allKnownSafes
-    const currentSafe = dropdownSafes.find((s) => sameAddress(s.address, safeAddress))
-    if (!currentSafe) return allKnownSafes
-    return [currentSafe, ...allKnownSafes]
-  }, [allKnownSafes, dropdownSafes, safeAddress])
+    if (allKnownSafes.some((s) => sameAddress(s.address, safeAddress))) return allKnownSafes
+    const current = fallbackCurrentSafe
+    if (!current) return allKnownSafes
+    return [current, ...allKnownSafes]
+  }, [allKnownSafes, safeAddress, fallbackCurrentSafe])
 
   return {
     dropdownSafes: isInSpaceContext ? spaceSafes : dropdownSafes,

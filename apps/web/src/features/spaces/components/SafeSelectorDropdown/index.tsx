@@ -16,6 +16,7 @@ function SafeSelectorDropdown({
   header,
   footer,
 }: SafeSelectorDropdownProps) {
+  const hasDropdownContent = Boolean(header) || Boolean(footer)
   const {
     dropdownOpen,
     selectedChainId,
@@ -24,7 +25,7 @@ function SafeSelectorDropdown({
     handleOpenChange,
     handleSafeChange,
     closeDropdown,
-  } = useSafeSelectorState({ items, selectedItemId, onItemSelect })
+  } = useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id

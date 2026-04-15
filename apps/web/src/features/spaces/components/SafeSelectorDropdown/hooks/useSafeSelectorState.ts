@@ -5,6 +5,8 @@ interface UseSafeSelectorStateProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
+  /** When true, the dropdown can open even with a single safe (e.g. header/footer present). */
+  forceOpenable?: boolean
 }
 
 const getSelectedItem = (items: SafeItemData[], selectedItemId?: string) => {
@@ -15,12 +17,17 @@ const getFirstChainId = (item: SafeItemData | undefined) => {
   return item?.chains?.[0]?.chainId ?? ''
 }
 
-export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: UseSafeSelectorStateProps) => {
+export const useSafeSelectorState = ({
+  items,
+  selectedItemId,
+  onItemSelect,
+  forceOpenable,
+}: UseSafeSelectorStateProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedChainId, setSelectedChainId] = useState<string>('')
 
   const selectedItem = useMemo(() => getSelectedItem(items, selectedItemId), [items, selectedItemId])
-  const isSingleSafe = items.length <= 1
+  const isSingleSafe = items.length <= 1 && !forceOpenable
 
   useEffect(() => {
     const chainId = getFirstChainId(selectedItem)

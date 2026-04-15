@@ -222,8 +222,8 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(item.chains).toHaveLength(2)
     expect(item.chains[0].chainId).toBe('1') // current chain first
     expect(item.chains[1].chainId).toBe('137')
-    // balance = sum of all chain balances
-    expect(item.balance).toBe('5000')
+    // balance = current chain only (chainId '1')
+    expect(item.balance).toBe('3000')
   })
 
   it('places the current chainId first in chains list for selected multi-chain safe', () => {
