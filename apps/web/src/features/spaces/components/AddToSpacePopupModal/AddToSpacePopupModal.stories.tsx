@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { withMockProvider } from '@/storybook/preview'
 import { AddToSpacePopupModal } from './AddToSpacePopupModal'
 
@@ -21,9 +22,11 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   decorators: [
     (Story) => (
-      <div className="w-[423px]">
-        <Story />
-      </div>
+      <Dialog open>
+        <DialogContent className="w-[423px] max-w-none p-0">
+          <Story />
+        </DialogContent>
+      </Dialog>
     ),
   ],
 }
