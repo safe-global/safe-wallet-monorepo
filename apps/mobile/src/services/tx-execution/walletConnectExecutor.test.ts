@@ -140,6 +140,28 @@ describe('executeWalletConnectTx', () => {
     ).rejects.toThrow('Safe SDK not initialized')
   })
 
+  it('should not add duplicate pre-validated signature when signer already approved on-chain', async () => {
+    const mockProvider = createMockProvider()
+    // Signer has already approved on-chain (returned by getOwnersWhoApprovedTx)
+    const mockSDK = createMockSDK(1, ['0xSigner'], ['0xSigner'])
+    const mockSafeTx = createMockSafeTx()
+
+    mockGetSafeSDK.mockReturnValue(mockSDK)
+    mockFetchTransactionDetails.mockResolvedValue({ detailedExecutionInfo: {} })
+    mockCreateExistingTx.mockResolvedValue(mockSafeTx)
+
+    await executeWalletConnectTx({
+      chain: mockChain,
+      activeSafe: mockActiveSafe,
+      txId: 'tx123',
+      signerAddress: '0xSigner',
+      provider: mockProvider,
+    })
+
+    // addSignature should be called once (from ownersWhoApprovedTx), not twice
+    expect(mockSafeTx.addSignature).toHaveBeenCalledTimes(1)
+  })
+
   it('should throw when threshold is not met', async () => {
     const mockSDK = createMockSDK(3, ['0xSigner'], [])
     const mockSafeTx = createMockSafeTx()

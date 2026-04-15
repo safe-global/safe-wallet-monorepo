@@ -62,7 +62,7 @@ export const executeWalletConnectTx = async ({
 
   // If executor is an owner and we still need signatures, add pre-validated
   const isOwner = owners.some((o) => sameAddress(o, signerAddress))
-  if (threshold > safeTx.signatures.size && isOwner) {
+  if (threshold > safeTx.signatures.size && isOwner && !safeTx.signatures.has(signerAddress.toLowerCase())) {
     safeTx.addSignature(generatePreValidatedSignature(signerAddress))
   }
 
