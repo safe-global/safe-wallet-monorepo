@@ -11,6 +11,7 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 const EXECUTE_ACTION = 'execute'
+const EXECUTE_THROUGH_ROLE_ACTION = 'executeThroughRole'
 const SIGN_ACTION = 'sign'
 
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
@@ -30,15 +31,17 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
   const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
-  // Auto-select Execute if available on first load, otherwise respect user's stored preference
+  // Auto-select the best action: Execute > Execute through role > first available
   const slotId = useMemo(() => {
     const executeAvailable = slotIds.includes(EXECUTE_ACTION)
+    const executeRoleAvailable = slotIds.includes(EXECUTE_THROUGH_ROLE_ACTION)
     const initialSubmitAction = slotIds?.[0]
 
     // If no stored preference or stored action is not available in current slots
     if (submitAction === undefined || !slotIds.includes(submitAction)) {
-      // Prefer Execute if available, otherwise use first option
-      return executeAvailable ? EXECUTE_ACTION : initialSubmitAction
+      if (executeAvailable) return EXECUTE_ACTION
+      if (executeRoleAvailable) return EXECUTE_THROUGH_ROLE_ACTION
+      return initialSubmitAction
     }
     // Use stored preference (respect user's choice)
     return submitAction
