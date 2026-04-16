@@ -55,7 +55,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
-  const [txOrigin, setTxOrigin] = useState<string>()
+  const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
+    typeof window !== 'undefined' ? JSON.stringify({ url: window.location.origin, name: '' }) : undefined,
+  )
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
