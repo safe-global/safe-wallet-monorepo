@@ -3,7 +3,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useTrackSpace from '../useTrackSpace'
 import type { AllSafeItems } from '@/hooks/safes'
-import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
@@ -20,7 +20,7 @@ const mockTrackEvent = trackEvent as jest.Mock
 
 describe('useTrackSpace', () => {
   const safes = [{ id: '1' }, { id: '2' }] as unknown as AllSafeItems
-  const members = [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }] as unknown as Member[]
+  const members = [{ id: 'm1' }, { id: 'm2' }, { id: 'm3' }] as unknown as MemberDto[]
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -45,12 +45,12 @@ describe('useTrackSpace', () => {
   })
 
   it('tracks each event only once per instance even if deps change', () => {
-    const { rerender } = renderHook(({ s, m }: { s: AllSafeItems; m: Member[] }) => useTrackSpace(s, m), {
+    const { rerender } = renderHook(({ s, m }: { s: AllSafeItems; m: MemberDto[] }) => useTrackSpace(s, m), {
       initialProps: { s: safes, m: members },
     })
 
     const updatedSafes = [...safes, { id: '3' }] as unknown as AllSafeItems
-    const updatedMembers = [...members, { id: 'm4' }] as unknown as Member[]
+    const updatedMembers = [...members, { id: 'm4' }] as unknown as MemberDto[]
 
     rerender({ s: updatedSafes, m: updatedMembers })
 

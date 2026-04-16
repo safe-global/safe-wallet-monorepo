@@ -24,6 +24,32 @@
         ]
       }
     },
+    "/v1/auth/me": {
+      "get": {
+        "description": "Returns the authenticated user session if a valid session cookie is present, 403 otherwise. The response includes the user ID, the authentication method used, and (for SIWE users) the wallet signer address.",
+        "operationId": "authGetMeV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated user session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSession"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authenticated"
+          }
+        },
+        "summary": "Get authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/auth/nonce": {
       "get": {
         "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
@@ -91,6 +117,128 @@
           }
         },
         "summary": "Logout user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/logout/redirect": {
+      "post": {
+        "description": "Clears the authentication cookie and redirects the browser. For OIDC users, redirects through identity platform to clear their session cookie. For SiWe users, redirects directly to the app.",
+        "operationId": "authLogoutWithRedirectV1",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects to identity platform logout (OIDC) or directly to the app."
+          },
+          "400": {
+            "description": "Invalid redirect URL"
+          }
+        },
+        "summary": "Logout (with redirect)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/authorize": {
+      "get": {
+        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
+        "operationId": "oidcAuthAuthorizeV1",
+        "parameters": [
+          {
+            "name": "redirect_url",
+            "required": false,
+            "in": "query",
+            "description": "URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI.",
+            "schema": {
+              "example": "/settings",
+              "type": "string"
+            }
+          },
+          {
+            "name": "connection",
+            "required": false,
+            "in": "query",
+            "description": "OIDC connection name to route to a specific identity provider.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to OIDC authorize endpoint"
+          }
+        },
+        "summary": "Start OIDC authorization code flow",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/callback": {
+      "get": {
+        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the provided post-login URL or a configured default one.",
+        "operationId": "oidcAuthCallbackV1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Authorization code returned by the OIDC provider",
+            "schema": {
+              "example": "SplxlOBeZQQYbYS6WxSbIA",
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "State parameter returned by the OIDC provider",
+            "schema": {
+              "example": "af0ifjsldkj",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "required": false,
+            "in": "query",
+            "description": "Error parameter returned by the OIDC provider",
+            "schema": {
+              "example": "access_denied",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "required": false,
+            "in": "query",
+            "description": "Description of the error returned by the OIDC provider (if failed)",
+            "schema": {
+              "example": "The user has denied the request",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the post-login URL. On error, includes error query parameter."
+          }
+        },
+        "summary": "Handle OIDC authorization callback",
         "tags": [
           "auth"
         ]
@@ -1821,9 +1969,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to create spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Create space",
@@ -1854,9 +1999,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to view spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Get user spaces",
@@ -1867,7 +2009,7 @@
     },
     "/v1/spaces/create-with-user": {
       "post": {
-        "description": "Creates a new space and automatically creates a user account if one does not exist for the authenticated wallet.",
+        "description": "Creates a new space for the authenticated user. Activates the user if their status is PENDING.",
         "operationId": "spacesCreateWithUserV1",
         "parameters": [],
         "requestBody": {
@@ -1883,7 +2025,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space and user created successfully",
+            "description": "Space created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1939,7 +2081,7 @@
             "description": "Forbidden resource - user is not a member of this space"
           },
           "404": {
-            "description": "Space not found or user not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space by ID",
@@ -1991,7 +2133,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space",
@@ -2025,7 +2167,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete space",
@@ -2364,19 +2506,59 @@
             "description": "Membership deleted"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Not authenticated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer or space not found"
+            "description": "Space not found"
           },
           "409": {
             "description": "Cannot remove last admin"
           }
         },
         "summary": "Leave a space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/membership": {
+      "get": {
+        "description": "Returns the membership record of the authenticated user for the given space. Returns 403 if the caller has no ACTIVE or INVITED membership in the space.",
+        "operationId": "membersGetMembershipV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID to fetch the caller's membership for",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Access forbidden - user not authenticated, or has no ACTIVE/INVITED membership in this space"
+          }
+        },
+        "summary": "Get the authenticated user's membership in a space",
         "tags": [
           "spaces"
         ]
@@ -2471,10 +2653,10 @@
             "description": "Alias updated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer, space or member not found"
+            "description": "Space or member not found"
           }
         },
         "summary": "Update member alias",
@@ -5424,6 +5606,29 @@
           "name"
         ]
       },
+      "UserSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "authMethod": {
+            "type": "string",
+            "enum": [
+              "siwe",
+              "oidc"
+            ]
+          },
+          "signerAddress": {
+            "type": "string",
+            "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          }
+        },
+        "required": [
+          "id",
+          "authMethod"
+        ]
+      },
       "AuthNonce": {
         "type": "object",
         "properties": {
@@ -5449,6 +5654,15 @@
           "message",
           "signature"
         ]
+      },
+      "LogoutDto": {
+        "type": "object",
+        "properties": {
+          "redirect_url": {
+            "type": "string",
+            "description": "Post-logout redirect URL (must be same-origin as pre-configured URL)"
+          }
+        }
       },
       "NativeToken": {
         "type": "object",
@@ -7772,6 +7986,14 @@
           },
           "lastUpdatedBy": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -7779,7 +8001,9 @@
           "address",
           "chainIds",
           "createdBy",
-          "lastUpdatedBy"
+          "lastUpdatedBy",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "SpaceAddressBookDto": {
@@ -7873,7 +8097,7 @@
           "id"
         ]
       },
-      "MemberDto": {
+      "SpaceMemberDto": {
         "type": "object",
         "properties": {
           "role": {
@@ -7921,7 +8145,7 @@
           "members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MemberDto"
+              "$ref": "#/components/schemas/SpaceMemberDto"
             }
           },
           "safeCount": {
@@ -8138,7 +8362,7 @@
           "status"
         ]
       },
-      "Member": {
+      "MemberDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -8198,7 +8422,7 @@
           "members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Member"
+              "$ref": "#/components/schemas/MemberDto"
             }
           }
         },
@@ -13025,7 +13249,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
+            "description": "Optional signer address filter:\n\u2022 Omitted (undefined): Deletes subscriptions regardless of signer address\n\u2022 null: Deletes only subscriptions with no signer address\n\u2022 Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": [
