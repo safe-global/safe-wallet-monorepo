@@ -1,12 +1,10 @@
 import React from 'react'
 import { View } from 'tamagui'
 import { ImportSignersContainer } from '@/src/features/ImportSigners'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-function ImportSignersPage() {
-  const { bottom } = useSafeAreaInsets()
 
+function ImportSignersPage() {
   return (
-    <View style={{ flex: 1 }} paddingBottom={bottom}>
+    <View style={{ flex: 1 }}>
       <ImportSignersContainer />
     </View>
   )

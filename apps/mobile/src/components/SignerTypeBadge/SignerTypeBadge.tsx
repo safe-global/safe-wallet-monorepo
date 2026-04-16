@@ -1,57 +1,33 @@
 import React from 'react'
-import { Badge } from '@/src/components/Badge'
-import { SafeSkeleton } from '@/src/components/SafeSkeleton'
-import { BadgeThemeTypes } from '@/src/components/Badge/Badge'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
-import { SafeFontIcon } from '../SafeFontIcon'
+import { LedgerSignerBadge } from '@/src/features/Ledger/components/LedgerSignerBadge'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 
 interface SignerBadgeProps {
   address: `0x${string}`
   size?: number
   fontSize?: number
-  theme?: BadgeThemeTypes
-  isLoading?: boolean
-  bordered?: boolean
   testID?: string
+  skipStatus?: boolean
 }
 
 export const SignerTypeBadge = ({
   address,
-  size = 24,
+  size = 32,
   fontSize = 10,
-  theme = 'badge_warning',
-  isLoading = false,
-  bordered = false,
   testID,
+  skipStatus = false,
 }: SignerBadgeProps) => {
   const signer = useAppSelector((state) => selectSignerByAddress(state, address))
 
-  if (isLoading) {
-    return <SafeSkeleton radius="round" height={size} width={size} />
+  if (signer?.type === 'walletconnect') {
+    return <WalletConnectBadge address={address} testID={testID} size={size} skipStatus={skipStatus} />
   }
 
   if (signer?.type === 'ledger') {
-    return (
-      <Badge
-        content={<SafeFontIcon name="hardware" size={12} color="$color" />}
-        textContentProps={{
-          fontSize,
-          fontWeight: 500,
-        }}
-        circleSize={size}
-        themeName={theme}
-        circleProps={
-          bordered
-            ? {
-                bordered: true,
-                borderColor: '$colorContrast',
-              }
-            : undefined
-        }
-        testID={testID}
-      />
-    )
+    return <LedgerSignerBadge size={size} fontSize={fontSize} testID={testID} />
   }
+
   return null
 }
