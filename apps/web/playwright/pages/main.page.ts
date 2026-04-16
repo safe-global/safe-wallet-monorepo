@@ -6,10 +6,10 @@ export class BasePage {
 
   // ── Navigation ───────────────────────────────────────────────────────────────
 
-  async goto(url: string, options?: { readySelector?: Locator }) {
+  async goto(url: string, options?: { readySelector?: Locator; timeout?: number }) {
     await safeGoto(this.page, url)
     if (options?.readySelector) {
-      await expect(options.readySelector).toBeVisible()
+      await expect(options.readySelector).toBeVisible({ timeout: options.timeout ?? 120_000 })
     }
   }
 

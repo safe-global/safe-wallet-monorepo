@@ -1,5 +1,5 @@
 import { type Page, type Locator, expect } from '@playwright/test'
-import { BasePage } from './base.page'
+import { BasePage } from './main.page'
 import staticSafes from '../data/safes/static'
 import * as constants from '../data/constants'
 

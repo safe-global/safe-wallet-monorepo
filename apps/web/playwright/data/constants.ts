@@ -7,6 +7,7 @@
 
 // ── URLs / Routes ──────────────────────────────────────────────────────────────
 export const welcomeUrl = '/welcome'
+export const welcomeAccountsUrl = '/welcome/accounts'
 export const homeUrl = '/home?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='

@@ -1,5 +1,5 @@
 import { type Page, type Locator, expect } from '@playwright/test'
-import { BasePage } from './base.page'
+import { BasePage } from './main.page'
 
 export class AssetsPage extends BasePage {
   // ── Selectors ────────────────────────────────────────────────────────────────

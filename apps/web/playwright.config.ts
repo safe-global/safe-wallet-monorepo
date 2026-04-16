@@ -25,10 +25,10 @@ export default defineConfig({
 
   /* Test timeout: Playwright's test timeout wraps EVERYTHING (beforeEach + navigation
    * + assertions), unlike Cypress which only times out individual commands.
-   * Next.js dev server is slow on first compile — 30s default is not enough.
-   * Cypress uses pageLoadTimeout: 60s + defaultCommandTimeout: 10s with no overall cap.
-   * We set 60s locally, 90s in CI (retries hit cold pages). */
-  timeout: process.env.CI ? 90_000 : 60_000,
+   * Safe{Wallet} API responses can take 60s+ on Sepolia — the page renders with
+   * hidden widgets until data arrives. 180s gives enough headroom for navigation
+   * + readySelector wait + actual test assertions. */
+  timeout: process.env.CI ? 180_000 : 120_000,
 
   /* Reporter configuration — keep all Playwright output inside ./playwright/ */
   reporter: process.env.CI
@@ -52,7 +52,7 @@ export default defineConfig({
     /* Trace on first retry — DOM snapshots, network, console */
     trace: 'on-first-retry',
 
-    /* Timeouts matching Cypress config */
+    /* Timeouts — actionTimeout for clicks/fills, navigationTimeout for page.goto(). */
     actionTimeout: 10_000,
     navigationTimeout: 60_000,
 

@@ -19,28 +19,32 @@ export const test = base.extend<SafePageFixtures>({
   safePage: async ({ page }, use) => {
     // Pre-seed localStorage before any navigation — mirrors Cypress beforeEach() in e2e.js
     await page.addInitScript(() => {
-      const getDate = () => new Date().toISOString()
+      try {
+        const getDate = () => new Date().toISOString()
 
-      // Cookie consent
-      const cookieState = { necessary: true, updates: true, analytics: true, terms: true }
-      window.localStorage.setItem('SAFE_v2__cookies_terms', JSON.stringify(cookieState))
+        // Cookie consent
+        const cookieState = { necessary: true, updates: true, analytics: true, terms: true }
+        window.localStorage.setItem('SAFE_v2__cookies_terms', JSON.stringify(cookieState))
 
-      // Safe Labs terms
-      window.localStorage.setItem('SAFE_v2__safe-labs-terms', JSON.stringify({ v1: true }))
+        // Safe Labs terms
+        window.localStorage.setItem('SAFE_v2__safe-labs-terms', JSON.stringify({ v1: true }))
 
-      // Beamer notification suppression
-      const beamerProductId = 'bAnQuYms57089'
-      window.localStorage.setItem(`_BEAMER_FIRST_VISIT_${beamerProductId}`, getDate())
-      window.localStorage.setItem(`_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_${beamerProductId}`, getDate())
+        // Beamer notification suppression
+        const beamerProductId = 'bAnQuYms57089'
+        window.localStorage.setItem(`_BEAMER_FIRST_VISIT_${beamerProductId}`, getDate())
+        window.localStorage.setItem(`_BEAMER_BOOSTED_ANNOUNCEMENT_DATE_${beamerProductId}`, getDate())
 
-      // Safe Apps info modal
-      window.localStorage.setItem(
-        'SAFE_v2__SafeApps__infoModal',
-        JSON.stringify({ 'https://safe-apps-test-app.pages.dev': { consentsAccepted: true } }),
-      )
+        // Safe Apps info modal
+        window.localStorage.setItem(
+          'SAFE_v2__SafeApps__infoModal',
+          JSON.stringify({ 'https://safe-apps-test-app.pages.dev': { consentsAccepted: true } }),
+        )
 
-      // Suppress outreach popup
-      window.sessionStorage.setItem('SAFE_v2__outreachPopup_session_v2', String(Date.now()))
+        // Suppress outreach popup
+        window.sessionStorage.setItem('SAFE_v2__outreachPopup_session_v2', String(Date.now()))
+      } catch {
+        // Silently skip sandboxed iframes where localStorage is not accessible
+      }
     })
 
     await use(page)
@@ -89,10 +93,14 @@ export async function safeGoto(page: Page, url: string) {
     if (chainId) {
       await page.addInitScript(
         ({ chainId, address }) => {
-          const existing = JSON.parse(window.localStorage.getItem('SAFE_v2__addedSafes') || '{}')
-          if (!existing[chainId]) existing[chainId] = {}
-          existing[chainId][address] = { ethBalance: '0', owners: [], threshold: 1 }
-          window.localStorage.setItem('SAFE_v2__addedSafes', JSON.stringify(existing))
+          try {
+            const existing = JSON.parse(window.localStorage.getItem('SAFE_v2__addedSafes') || '{}')
+            if (!existing[chainId]) existing[chainId] = {}
+            existing[chainId][address] = { ethBalance: '0', owners: [], threshold: 1 }
+            window.localStorage.setItem('SAFE_v2__addedSafes', JSON.stringify(existing))
+          } catch {
+            // Silently skip sandboxed iframes where localStorage is not accessible
+          }
         },
         { chainId, address },
       )
@@ -100,14 +108,15 @@ export async function safeGoto(page: Page, url: string) {
   }
 
   // Navigate with retry on 429 (rate limit) — matches Cypress retry logic.
-  // Uses 'domcontentloaded' instead of 'load' because Safe{Wallet} keeps WebSocket/SSE
-  // connections open to the gateway — the 'load' event never fires in an SPA with
-  // persistent connections. Actual page readiness is handled by readySelector in BasePage.goto().
+  // Uses 'commit' because Safe{Wallet} keeps WebSocket/SSE connections open to the
+  // gateway — neither 'load' nor 'domcontentloaded' fire reliably in an SPA with
+  // persistent connections. 'commit' resolves as soon as the server starts sending
+  // the response. Actual page readiness is handled by readySelector in MainPage.goto().
   const maxRetries = 3
   const retryDelay = 6000
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await page.goto(url, { waitUntil: 'domcontentloaded' })
+    const response = await page.goto(url, { waitUntil: 'commit' })
 
     if (response && response.status() === 429 && attempt < maxRetries) {
       await page.waitForTimeout(retryDelay)
@@ -150,7 +159,11 @@ export async function setLocalStorage(
     // Page may be on about:blank — use addInitScript to defer until navigation
     await page.addInitScript(
       ({ key, value }) => {
-        window.localStorage.setItem(key, value)
+        try {
+          window.localStorage.setItem(key, value)
+        } catch {
+          // Silently skip sandboxed iframes where localStorage is not accessible
+        }
       },
       { key, value: serialized },
     )
