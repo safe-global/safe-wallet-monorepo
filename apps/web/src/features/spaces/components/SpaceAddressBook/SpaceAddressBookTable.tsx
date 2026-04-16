@@ -14,15 +14,17 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
+  isPrivate?: boolean
 }
 
 type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
+  renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
 }
 
 const PAGE_SIZE = 25
 
-function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
+function SpaceAddressBookTable({ entries, renderExtraAction }: SpaceAddressBookTableProps) {
   const chains = useChains()
   const [page, setPage] = useState(0)
 
@@ -121,7 +123,10 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
 
               {/* Actions */}
               <TableCell className="text-right">
-                {!entry.isLocal && <SpaceAddressBookActions entry={entry} />}
+                <span className="inline-flex items-center gap-1">
+                  {renderExtraAction?.(entry)}
+                  {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
+                </span>
               </TableCell>
             </TableRow>
           ))}
