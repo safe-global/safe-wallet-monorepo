@@ -190,9 +190,12 @@ const SpaceAddressBook = () => {
                     entries={filteredMine}
                     showAddedBy={false}
                     renderExtraAction={(entry) =>
-                      entry.isPrivate ? (
+                      entry.isPrivate || entry.isLocal ? (
                         <RequestToAddButton
                           address={entry.address}
+                          name={entry.name}
+                          chainIds={entry.chainIds}
+                          isLocal={entry.isLocal}
                           alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
                         />
                       ) : null
