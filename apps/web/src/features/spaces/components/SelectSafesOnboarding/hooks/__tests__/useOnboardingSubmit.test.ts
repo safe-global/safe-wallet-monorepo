@@ -3,6 +3,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useOnboardingSubmit from '../useOnboardingSubmit'
 import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../constants'
 
 const mockChains: Chain[] = []
 
@@ -114,7 +115,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
-    expect(selectedSafes['multichain_0xccc']).toBe(true)
+    expect(selectedSafes[`${MULTICHAIN_SAFE_KEY_PREFIX}0xccc`]).toBe(true)
     expect(selectedSafes['1:0xccc']).toBe(true)
     expect(selectedSafes['10:0xccc']).toBe(true)
   })
@@ -187,12 +188,12 @@ describe('useOnboardingSubmit', () => {
     })
   })
 
-  it('should skip multichain_ keys when counting selected safes', async () => {
+  it(`should skip ${MULTICHAIN_SAFE_KEY_PREFIX} keys when counting selected safes`, async () => {
     const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
 
     act(() => {
       result.current.formMethods.setValue('selectedSafes', {
-        multichain_0xaaa: true,
+        [`${MULTICHAIN_SAFE_KEY_PREFIX}0xaaa`]: true,
         '1:0xaaa': true,
         '10:0xaaa': true,
       })
@@ -381,7 +382,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
-    expect(selectedSafes[`multichain_${addr}`]).toBe(true)
+    expect(selectedSafes[`${MULTICHAIN_SAFE_KEY_PREFIX}${addr}`]).toBe(true)
     expect(selectedSafes[`1:${addr}`]).toBe(true)
     expect(selectedSafes[`137:${addr}`]).toBe(true)
     expect(selectedSafes[`42161:${addr}`]).toBe(true)
@@ -402,7 +403,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
-    expect(selectedSafes[`multichain_${addr}`]).toBe(true)
+    expect(selectedSafes[`${MULTICHAIN_SAFE_KEY_PREFIX}${addr}`]).toBe(true)
     expect(selectedSafes[`1:${addr}`]).toBe(true)
     expect(selectedSafes[`137:${addr}`]).toBe(true)
   })
@@ -421,7 +422,7 @@ describe('useOnboardingSubmit', () => {
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
     expect(selectedSafes[`1:${singleAddr}`]).toBe(true)
-    expect(selectedSafes[`multichain_${otherAddr}`]).toBeUndefined()
+    expect(selectedSafes[`${MULTICHAIN_SAFE_KEY_PREFIX}${otherAddr}`]).toBeUndefined()
   })
 
   it('should upgrade to multichain selection when allSafes loads after initial render', async () => {
@@ -448,7 +449,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
-    expect(selectedSafes[`multichain_${addr}`]).toBe(true)
+    expect(selectedSafes[`${MULTICHAIN_SAFE_KEY_PREFIX}${addr}`]).toBe(true)
     expect(selectedSafes[`1:${addr}`]).toBe(true)
     expect(selectedSafes[`137:${addr}`]).toBe(true)
   })

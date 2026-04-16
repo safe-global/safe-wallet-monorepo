@@ -19,6 +19,7 @@ import useChains from '@/hooks/useChains'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 /**
  * Converts safe query parameter (`prefix:address`) to form key (`chainId:address`).
@@ -131,7 +132,7 @@ const useOnboardingSubmit = (
   }, [safeFromUrl, router.isReady, spaceSafes, reset, chains, allSafes])
   const selectedSafes = watch('selectedSafes')
   const selectedSafesLength = Object.entries(selectedSafes).filter(
-    ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
+    ([key, isSelected]) => isSelected && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
   ).length
 
   const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
@@ -141,7 +142,7 @@ const useOnboardingSubmit = (
       .filter(
         ([key, isSelected]) =>
           isSelected &&
-          !key.startsWith('multichain_') &&
+          !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
           !flatSpaceSafes.some((s) => {
             const { chainId, address } = parseSafeKey(key)
             return s.address === address && s.chainId === chainId

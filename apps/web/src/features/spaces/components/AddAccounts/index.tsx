@@ -44,6 +44,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -55,7 +56,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   return Object.entries(safes).filter(
     ([key, isSelected]) =>
       isSelected &&
-      !key.startsWith('multichain_') &&
+      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
       !flatSafeItems.some((spaceSafe) => {
         const [chainId, address] = key.split(':')
         return spaceSafe.address === address && spaceSafe.chainId === chainId
