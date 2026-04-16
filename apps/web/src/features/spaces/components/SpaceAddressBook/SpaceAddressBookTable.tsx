@@ -19,12 +19,13 @@ export type AddressBookEntry = SpaceAddressBookItemDto & {
 
 type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
+  showAddedBy?: boolean
   renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
 }
 
 const PAGE_SIZE = 25
 
-function SpaceAddressBookTable({ entries, renderExtraAction }: SpaceAddressBookTableProps) {
+function SpaceAddressBookTable({ entries, showAddedBy = true, renderExtraAction }: SpaceAddressBookTableProps) {
   const chains = useChains()
   const [page, setPage] = useState(0)
 
@@ -44,8 +45,8 @@ function SpaceAddressBookTable({ entries, renderExtraAction }: SpaceAddressBookT
             <TableHead className="w-[20%]">Name</TableHead>
             <TableHead className="w-[35%]">Address</TableHead>
             <TableHead className="w-[15%]">Chains</TableHead>
-            <TableHead className="w-[20%]">Added by</TableHead>
-            <TableHead className="w-[10%]" />
+            {showAddedBy && <TableHead className="w-[20%]">Added by</TableHead>}
+            <TableHead className={showAddedBy ? 'w-[10%]' : 'w-[30%]'} />
           </TableRow>
         </TableHeader>
 
@@ -109,17 +110,19 @@ function SpaceAddressBookTable({ entries, renderExtraAction }: SpaceAddressBookT
               </TableCell>
 
               {/* Added by */}
-              <TableCell>
-                {entry.createdBy ? (
-                  <EthHashInfo
-                    address={entry.createdBy}
-                    avatarSize={20}
-                    onlyName
-                    showPrefix={false}
-                    showCopyButton={false}
-                  />
-                ) : null}
-              </TableCell>
+              {showAddedBy && (
+                <TableCell>
+                  {entry.createdBy ? (
+                    <EthHashInfo
+                      address={entry.createdBy}
+                      avatarSize={20}
+                      onlyName
+                      showPrefix={false}
+                      showCopyButton={false}
+                    />
+                  ) : null}
+                </TableCell>
+              )}
 
               {/* Actions */}
               <TableCell className="text-right">

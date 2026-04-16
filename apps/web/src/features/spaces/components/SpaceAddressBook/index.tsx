@@ -183,6 +183,7 @@ const SpaceAddressBook = () => {
                 ) : (
                   <SpaceAddressBookTable
                     entries={filteredMine}
+                    showAddedBy={false}
                     renderExtraAction={(entry) =>
                       entry.isPrivate ? <RequestToAddButton address={entry.address} /> : null
                     }
