@@ -47,7 +47,7 @@ const SelectSafeModal = () => {
     <>
       {opened && (
         <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-          <DialogContent className="flex max-h-[520px] flex-col gap-0 p-0">
+          <DialogContent className="flex max-h-[520px] flex-col gap-0 overflow-clip p-0">
             <DialogHeader className="shrink-0 p-5 pb-0">
               <DialogTitle className="text-xl font-semibold">{safeModalTitles[actionType]}</DialogTitle>
             </DialogHeader>
@@ -56,7 +56,7 @@ const SelectSafeModal = () => {
               <SafeSearch value={query} onChange={setQuery} />
             </div>
 
-            <div className="relative min-h-0 flex-1 overflow-y-auto px-4 pb-10">
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-10">
               {isLoading ? (
                 <div className="flex flex-col gap-1.5">
                   <Skeleton className="h-[72px] w-full rounded-3xl" />
@@ -79,9 +79,9 @@ const SelectSafeModal = () => {
                   ))}
                 </div>
               )}
-
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent" />
             </div>
+
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-background to-transparent" />
           </DialogContent>
         </Dialog>
       )}

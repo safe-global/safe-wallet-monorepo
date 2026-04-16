@@ -1,5 +1,5 @@
-import { ArrowUpRight, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
-import { type ReactNode, useCallback, useContext } from 'react'
+import { ArrowUpRight, Coins, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
+import { type ReactNode, useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { cn } from '@/utils/cn'
 import type { SectionItemProps } from '../../sectionItems'
@@ -13,39 +13,72 @@ import { useAppDispatch } from '@/store'
 import { closeGlobalSearch } from '@/features/global-search/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
 
 interface NavigationItem {
   icon: ReactNode
   label: string
 }
 
-const NAVIGATION_ITEMS: NavigationItem[] = [
+const COMMON_ITEMS: NavigationItem[] = [
   { icon: <ArrowUpRight className="size-5" />, label: 'Send' },
   { icon: <Repeat2 className="size-5" />, label: 'Swap' },
   { icon: <SquareDashedBottomCode className="size-5" />, label: 'Transaction builder' },
-  { icon: <WalletCards className="size-5" />, label: 'Accounts' },
 ]
 
+const SAFE_LEVEL_ITEM: NavigationItem = { icon: <Coins className="size-5" />, label: 'Assets' }
+const SPACE_LEVEL_ITEM: NavigationItem = { icon: <WalletCards className="size-5" />, label: 'Accounts' }
+
 const NavigateToSection = ({ query, label }: SectionItemProps) => {
-  const filteredItems = useGlobalSearchFilter(NAVIGATION_ITEMS, query, 'label')
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { setTxFlow } = useContext(TxModalContext)
   const { link: txBuilderLink } = useTxBuilderApp()
   const wallet = useWallet()
   const isSwapEnabled = useIsSwapFeatureEnabled()
+  const isSpaceRoute = useIsSpaceRoute()
+
+  const navigationItems = useMemo(
+    () => [...COMMON_ITEMS, isSpaceRoute ? SPACE_LEVEL_ITEM : SAFE_LEVEL_ITEM],
+    [isSpaceRoute],
+  )
+
+  const filteredItems = useGlobalSearchFilter(navigationItems, query, 'label')
 
   const isSafeLevel = typeof router.query.safe === 'string'
+
+  const spaceActionByLabel: Record<string, ESafeAction> = useMemo(
+    () => ({
+      Send: ESafeAction.Send,
+      Swap: ESafeAction.Swap,
+      'Transaction builder': ESafeAction.BuildTransaction,
+    }),
+    [],
+  )
 
   const handleNavigation = useCallback(
     (itemLabel: string) => {
       setTxFlow(undefined)
       dispatch(closeGlobalSearch())
 
-      if (!isSafeLevel) {
-        console.log(`[GlobalSearch] Navigate to: ${itemLabel}`)
+      // Space route: open SelectSafeModal for action items
+      if (isSpaceRoute) {
+        const safeAction = spaceActionByLabel[itemLabel]
+        if (safeAction) {
+          dispatch(openSafeActionsModal({ type: safeAction }))
+          return
+        }
+
+        // Accounts item — navigate to space accounts
+        router.push({
+          pathname: AppRoutes.spaces.safeAccounts,
+          query: { spaceId: router.query.spaceId },
+        })
         return
       }
+
+      if (!isSafeLevel) return
 
       switch (itemLabel) {
         case 'Send':
@@ -62,7 +95,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
           })
           break
         }
-        case 'Accounts':
+        case 'Assets':
           router.push({
             pathname: AppRoutes.balances.index,
             query: router.query,
@@ -70,7 +103,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
           break
       }
     },
-    [isSafeLevel, dispatch, setTxFlow, router, txBuilderLink],
+    [isSpaceRoute, isSafeLevel, dispatch, setTxFlow, router, txBuilderLink, spaceActionByLabel],
   )
 
   if (filteredItems.length === 0) return null
