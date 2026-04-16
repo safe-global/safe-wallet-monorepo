@@ -104,9 +104,9 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
     <Tooltip>
       <TooltipTrigger render={<span className="inline-flex shrink-0 items-center" />}>
         {source === ContactSource.local ? (
-          <AddressBookIcon className="size-3 text-border" />
+          <AddressBookIcon className="size-3 text-muted-foreground stroke-[2.5]" />
         ) : (
-          <Cloud className="size-3 text-border" />
+          <Cloud className="size-3 text-muted-foreground stroke-[2.5]" />
         )}
       </TooltipTrigger>
       <TooltipContent>From your {source} address book</TooltipContent>
