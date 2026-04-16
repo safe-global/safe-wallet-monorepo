@@ -9,6 +9,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 import { CircularProgress } from '@mui/material'
+import { Badge } from '@/components/ui/badge'
 
 type RequestToAddButtonProps = {
   address: string
@@ -95,7 +96,7 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
   }
 
   if (isDone) {
-    return <span className="text-muted-foreground text-xs">Requested</span>
+    return <Badge variant="secondary">Requested</Badge>
   }
 
   return (

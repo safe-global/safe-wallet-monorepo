@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Box, Chip, Tooltip, CircularProgress } from '@mui/material'
+import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -158,7 +159,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                   )}
                 </span>
               ) : (
-                <Chip label="Pending" size="small" />
+                <Badge variant="secondary">Pending</Badge>
               )}
             </TableCell>
           </TableRow>

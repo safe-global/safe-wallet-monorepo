@@ -19,6 +19,7 @@ import { cn } from '@/utils/cn'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -195,7 +196,7 @@ const SpaceAddressBook = () => {
                       if (entry.isDuplicate) {
                         return (
                           <span className="inline-flex items-center gap-2">
-                            <span className="text-muted-foreground text-xs">Already shared</span>
+                            <Badge variant="secondary">Already shared</Badge>
                             <RemoveDuplicateButton
                               address={entry.address}
                               chainIds={entry.chainIds}
