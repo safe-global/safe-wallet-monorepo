@@ -1,6 +1,7 @@
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Settings } from 'lucide-react'
+import { motion } from 'motion/react'
 import {
   SidebarContent,
   SidebarGroup,
@@ -23,11 +24,16 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
+import { containerVariants, itemVariants } from '../../constants'
+
+const MAIN_NAV_SKELETON_COUNT = 5
+const DEFI_GROUP_SKELETON_COUNT = 4
 
 export const SafeSidebarVariant = ({
   workspaceHeader,
   mainNavItems,
   defiGroup,
+  isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
@@ -43,80 +49,87 @@ export const SafeSidebarVariant = ({
     pathname: AppRoutes.settings.setup,
     query: safeAddress ? { safe: safeAddress } : {},
   }
-  const isSettingsActive = router.pathname === AppRoutes.settings.setup
+  const isSettingsActive = router.pathname.startsWith(AppRoutes.settings.index)
 
   const shouldRenderWorkspaceHeaderGroup =
     workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)
 
+  // Use provided items or create placeholders for skeleton
+  const displayMainNavItems = mainNavItems || Array(MAIN_NAV_SKELETON_COUNT).fill(null)
+  const displayDefiItems = defiGroup?.items || Array(DEFI_GROUP_SKELETON_COUNT).fill(null)
+
   return (
     <SidebarContent>
-      {shouldRenderWorkspaceHeaderGroup && (
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-      )}
+      <motion.div variants={containerVariants} initial="hidden" animate="visible">
+        {shouldRenderWorkspaceHeaderGroup && (
+          <motion.div variants={itemVariants} className="mb-2">
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </motion.div>
+        )}
 
-      {/* Action Button */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarActionButton />
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* Action Button */}
+        <motion.div variants={itemVariants} className="mb-2">
+          <SidebarGroup className={css.sidebarGroup}>
+            <SidebarGroupContent>
+              <SidebarActionButton />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </motion.div>
 
-      {/* Main Navigation */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarMenu className="gap-0">
-            {mainNavItems.map((item) => (
-              <NavItem key={item.href} item={item} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* Main Navigation */}
+        <motion.div variants={itemVariants}>
+          <SidebarGroup className={css.sidebarGroup}>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-0.5">
+                {displayMainNavItems.map((item, index) => (
+                  <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
+                ))}
+                <SidebarMenuItem className="relative">
+                  <SidebarMenuButton
+                    size="lg"
+                    isActive={isSettingsActive}
+                    disabled={isLoading}
+                    className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
+                    render={!isLoading ? <Link href={settingsHref} /> : undefined}
+                    data-testid="sidebar-settings-item"
+                  >
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Settings className="text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent side="right">Settings</TooltipContent>
+                    </Tooltip>
+                    <span>Settings</span>
+                  </SidebarMenuButton>
+                  {isOutdated && <span className={css.outdatedDot} aria-hidden />}
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </motion.div>
 
-      {/* DeFi Group - only show if has items */}
-      {defiGroup.items.length > 0 && (
-        <SidebarGroup className={css.sidebarGroup}>
-          <SidebarGroupLabel>{defiGroup.label}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0">
-              {defiGroup.items.map((item) => (
-                <NavItem key={item.href} item={item} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      )}
-
-      {/* Settings */}
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupContent>
-          <SidebarMenu className="gap-0">
-            <SidebarMenuItem className="relative">
-              <SidebarMenuButton
-                size="lg"
-                isActive={isSettingsActive}
-                className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-                render={<Link href={settingsHref} />}
-                data-testid="sidebar-settings-item"
-              >
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Settings className="text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Settings</TooltipContent>
-                </Tooltip>
-                <span>Settings</span>
-              </SidebarMenuButton>
-              {isOutdated && <span className={css.outdatedDot} aria-hidden />}
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
+        {/* DeFi Group */}
+        {(defiGroup?.items?.length ?? 0) > 0 && (
+          <motion.div variants={itemVariants}>
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarGroupLabel>{defiGroup?.label ?? ''}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0">
+                  {displayDefiItems.map((item, index) => (
+                    <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </motion.div>
+        )}
+      </motion.div>
     </SidebarContent>
   )
 }

@@ -81,9 +81,7 @@ export const SpaceSelectorDropdown = ({
     return (
       <Tooltip key={space.id}>
         <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">
-          {`You've reached the limit of Safes for this workspace (max. ${SAFE_ACCOUNTS_LIMIT} Safes per workspace)`}
-        </TooltipContent>
+        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per workspace`}</TooltipContent>
       </Tooltip>
     )
   }

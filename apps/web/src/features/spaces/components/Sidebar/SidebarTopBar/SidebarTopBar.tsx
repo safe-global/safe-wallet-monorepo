@@ -19,16 +19,13 @@ export const SidebarTopBar = (): ReactElement => {
   return (
     <div
       data-testid="sidebar-top-bar"
-      className={
-        isCollapsed
-          ? 'flex flex-col items-center justify-center gap-2 w-full'
-          : 'flex items-center justify-between w-full'
-      }
+      data-sidebar-state={state}
+      className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
     >
       <button
         type="button"
         onClick={handleLogoClick}
-        className="relative shrink-0 size-6 flex items-center justify-center cursor-pointer"
+        className={cn('absolute left-3 top-3 z-10 flex size-6 shrink-0 cursor-pointer items-center justify-center')}
         data-testid="logo-container"
       >
         <img
@@ -49,8 +46,9 @@ export const SidebarTopBar = (): ReactElement => {
       </button>
       <SidebarTrigger
         className={cn(
-          'shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
-          isCollapsed && 'mt-2',
+          'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',
+          'transition-[left,transform] duration-200 ease-linear',
+          isCollapsed ? 'left-1/2 top-10 -translate-x-1/2' : 'left-[calc(100%-2rem)] top-3',
         )}
         data-testid="sidebar-trigger"
       />
