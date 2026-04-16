@@ -11,11 +11,13 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import useChains from '@/hooks/useChains'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { cn } from '@/utils/cn'
 import { formatDate } from './ActivityLog'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
   isPrivate?: boolean
+  isDuplicate?: boolean
 }
 
 type SpaceAddressBookTableProps = {
@@ -52,19 +54,20 @@ function SpaceAddressBookTable({
             <TableHead className="w-[20%]">Name</TableHead>
             <TableHead className="w-[35%]">Address</TableHead>
             <TableHead className="w-[15%]">Chains</TableHead>
-            {showAddedBy && <TableHead className="w-[20%]">Added by</TableHead>}
-            {showLastUpdated && <TableHead className="w-[15%]">Last updated</TableHead>}
+            <TableHead className="w-[20%]">
+              {showAddedBy ? 'Added by' : showLastUpdated ? 'Last updated' : ''}
+            </TableHead>
             <TableHead className="w-[10%]" />
           </TableRow>
         </TableHeader>
 
         <TableBody>
           {paginatedEntries.map((entry) => (
-            <TableRow key={entry.address}>
+            <TableRow key={entry.address} className={entry.isDuplicate ? 'opacity-50' : ''}>
               {/* Name */}
               <TableCell className="font-bold">
                 <Tooltip title={entry.name} arrow>
-                  <div className="flex items-center gap-1.5 overflow-hidden">
+                  <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
                     {entry.isLocal && (
                       <SvgIcon
                         component={AddressBookIcon}
@@ -117,29 +120,22 @@ function SpaceAddressBookTable({
                 </Tooltip>
               </TableCell>
 
-              {/* Added by */}
-              {showAddedBy && (
-                <TableCell>
-                  {entry.createdBy ? (
-                    <EthHashInfo
-                      address={entry.createdBy}
-                      avatarSize={20}
-                      onlyName
-                      showPrefix={false}
-                      showCopyButton={false}
-                    />
-                  ) : null}
-                </TableCell>
-              )}
-
-              {/* Last updated */}
-              {showLastUpdated && (
-                <TableCell>
+              {/* 4th column: Added by / Last updated / empty */}
+              <TableCell>
+                {showAddedBy && entry.createdBy ? (
+                  <EthHashInfo
+                    address={entry.createdBy}
+                    avatarSize={20}
+                    onlyName
+                    showPrefix={false}
+                    showCopyButton={false}
+                  />
+                ) : showLastUpdated ? (
                   <span className="text-muted-foreground text-xs">
                     {formatDate(entry.updatedAt || entry.createdAt)}
                   </span>
-                </TableCell>
-              )}
+                ) : null}
+              </TableCell>
 
               {/* Actions */}
               <TableCell className="text-right">

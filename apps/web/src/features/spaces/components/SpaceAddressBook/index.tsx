@@ -31,6 +31,7 @@ import ActivityLog from './ActivityLog'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
+import RemoveDuplicateButton from './RemoveDuplicateButton'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -44,14 +45,6 @@ const SpaceAddressBook = () => {
   const privateContacts = useGetPrivateAddressBook()
   const pendingRequests = useGetAddressBookRequests()
   const allLocalAddressBooks = useAllAddressBooks()
-
-  const mySpaceContacts: AddressBookEntry[] = useMemo(
-    () =>
-      addressBookItems
-        .filter((item) => user?.wallets.some((w) => sameAddress(w.address, item.createdBy)))
-        .map((item) => ({ ...item, isLocal: false, isPrivate: false })),
-    [addressBookItems, user?.wallets],
-  )
 
   const privateEntries: AddressBookEntry[] = useMemo(
     () => privateContacts.map((item) => ({ ...item, isLocal: false, isPrivate: true })),
@@ -85,14 +78,23 @@ const SpaceAddressBook = () => {
     }))
   }, [allLocalAddressBooks, user?.wallets])
 
-  // My contacts = space contacts I created + my private contacts + local contacts (deduped)
+  // My contacts = private contacts + local contacts (no space contacts)
+  // Contacts that duplicate a space address are marked and sorted to the bottom
   const myContacts: AddressBookEntry[] = useMemo(() => {
-    const spaceAndPrivate = [...mySpaceContacts, ...privateEntries]
+    const spaceAddresses = new Set(addressBookItems.map((item) => item.address.toLowerCase()))
+
     const uniqueLocal = localContacts.filter(
-      (local) => !spaceAndPrivate.some((existing) => sameAddress(existing.address, local.address)),
+      (local) => !privateEntries.some((priv) => sameAddress(priv.address, local.address)),
     )
-    return [...spaceAndPrivate, ...uniqueLocal]
-  }, [mySpaceContacts, privateEntries, localContacts])
+    const allMine = [...privateEntries, ...uniqueLocal]
+
+    // Mark duplicates and sort them to the bottom
+    const marked = allMine.map((entry) => ({
+      ...entry,
+      isDuplicate: spaceAddresses.has(entry.address.toLowerCase()),
+    }))
+    return marked.sort((a, b) => Number(a.isDuplicate) - Number(b.isDuplicate))
+  }, [privateEntries, localContacts, addressBookItems])
 
   const filteredAllRaw = useAddressBookSearch(addressBookItems, searchQuery)
   const filteredAll: AddressBookEntry[] = useMemo(
@@ -189,8 +191,17 @@ const SpaceAddressBook = () => {
                   <SpaceAddressBookTable
                     entries={filteredMine}
                     showAddedBy={false}
-                    showLastUpdated
                     renderExtraAction={(entry) => {
+                      if (entry.isDuplicate) {
+                        return (
+                          <RemoveDuplicateButton
+                            address={entry.address}
+                            chainIds={entry.chainIds}
+                            isLocal={entry.isLocal}
+                            isPrivate={entry.isPrivate}
+                          />
+                        )
+                      }
                       if (isAdmin && entry.isLocal) {
                         return (
                           <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />

@@ -1,0 +1,60 @@
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { useAddressBooksDeletePrivateItemV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
+import { removeAddressBookEntry } from '@/store/addressBookSlice'
+import { showNotification } from '@/store/notificationsSlice'
+import { useAppDispatch } from '@/store'
+import { CircularProgress } from '@mui/material'
+
+type RemoveDuplicateButtonProps = {
+  address: string
+  chainIds: string[]
+  isLocal?: boolean
+  isPrivate?: boolean
+}
+
+const RemoveDuplicateButton = ({ address, chainIds, isLocal, isPrivate }: RemoveDuplicateButtonProps) => {
+  const spaceId = useCurrentSpaceId()
+  const dispatch = useAppDispatch()
+  const [deletePrivate] = useAddressBooksDeletePrivateItemV1Mutation()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [removed, setRemoved] = useState(false)
+
+  const handleRemove = async () => {
+    if (removed) return
+
+    try {
+      setIsSubmitting(true)
+
+      if (isLocal) {
+        for (const chainId of chainIds) {
+          dispatch(removeAddressBookEntry({ chainId, address }))
+        }
+      }
+
+      if (isPrivate && spaceId) {
+        await deletePrivate({ spaceId: Number(spaceId), address })
+      }
+
+      setRemoved(true)
+      dispatch(
+        showNotification({ message: 'Duplicate contact removed', variant: 'success', groupKey: 'remove-dup-success' }),
+      )
+    } catch {
+      dispatch(
+        showNotification({ message: 'Failed to remove contact', variant: 'error', groupKey: 'remove-dup-error' }),
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Button variant="outline" size="sm" onClick={handleRemove} disabled={isSubmitting || removed}>
+      {isSubmitting ? <CircularProgress size={14} /> : removed ? 'Removed' : 'Remove'}
+    </Button>
+  )
+}
+
+export default RemoveDuplicateButton
