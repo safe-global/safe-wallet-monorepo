@@ -5,8 +5,6 @@ import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
 import { Button } from '@/components/ui/button'
-import { useLoadFeature } from '@/features/__core__'
-import { MyAccountsFeature, useSafeSelectionModal } from '@/features/myAccounts'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { pinSafe, unpinSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -23,16 +21,10 @@ import AccountsModal from './AccountsModal'
 
 const HIDDEN_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.spaces]
 
-function DropdownHeader({ onOpen, isPinned, onPin }: { onOpen: () => void; isPinned: boolean; onPin: () => void }) {
+function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
   return (
     <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-      <button
-        onClick={onOpen}
-        className="flex items-center gap-1 text-sm font-semibold text-secondary-foreground cursor-pointer bg-transparent border-0"
-      >
-        Trusted Safes
-        <ChevronRight className="size-4" />
-      </button>
+      <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
       <button
         type="button"
         onClick={(e) => {
@@ -48,23 +40,10 @@ function DropdownHeader({ onOpen, isPinned, onPin }: { onOpen: () => void; isPin
   )
 }
 
-function DropdownFooter({ onManage, onClose }: { onManage: () => void; onClose: () => void }) {
+function DropdownFooter({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="px-4 py-3">
-      <Button
-        variant="secondary"
-        size="sm"
-        className="w-full"
-        onClick={() => {
-          // Explicitly close the dropdown before opening SafeSelectionModal.
-          // SafeSelectionModal is a MUI Dialog and lives outside Radix UI's
-          // DismissableLayer chain, so the Select won't auto-close when it opens.
-          // TODO: Remove onClose() once SafeSelectionModal is migrated to shadcn —
-          // a Radix Dialog will automatically dismiss this Select via DismissableLayer.
-          onClose()
-          onManage()
-        }}
-      >
+      <Button variant="secondary" size="sm" className="w-full" onClick={onOpen}>
         All accounts
         <ChevronRight className="size-4" />
       </Button>
@@ -79,8 +58,6 @@ function SpaceSafeBar() {
   const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
   const [accountsModalOpen, setAccountsModalOpen] = useState(false)
-  const selectionModal = useSafeSelectionModal()
-  const { SafeSelectionModal } = useLoadFeature(MyAccountsFeature)
   const { safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const addedSafes = useAppSelector(selectAllAddedSafes)
@@ -119,20 +96,9 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const handleOpenSelectionModal = () => {
-    trackEvent(OVERVIEW_EVENTS.OPEN_TRUSTED_SAFES_MODAL)
-    selectionModal.open()
-  }
+  const dropdownHeader = !isQualifiedSafe ? <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} /> : undefined
 
-  const dropdownHeader = !isQualifiedSafe ? (
-    <DropdownHeader onOpen={handleOpenAccountsModal} isPinned={isPinned} onPin={handleTogglePin} />
-  ) : undefined
-  // footer is a render prop so DropdownFooter can close the Select before opening
-  // SafeSelectionModal (MUI). TODO: revert to ReactNode once SafeSelectionModal
-  // is migrated to shadcn — see SafeSelectorDropdownProps.footer for details.
-  const dropdownFooter = !isQualifiedSafe
-    ? (close: () => void) => <DropdownFooter onManage={handleOpenSelectionModal} onClose={close} />
-    : undefined
+  const dropdownFooter = !isQualifiedSafe ? <DropdownFooter onOpen={handleOpenAccountsModal} /> : undefined
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
@@ -149,12 +115,7 @@ function SpaceSafeBar() {
         header={dropdownHeader}
         footer={dropdownFooter}
       />
-      <AccountsModal
-        open={accountsModalOpen}
-        onClose={() => setAccountsModalOpen(false)}
-        onManage={selectionModal.open}
-      />
-      <SafeSelectionModal modal={selectionModal} />
+      <AccountsModal open={accountsModalOpen} onClose={() => setAccountsModalOpen(false)} />
     </div>
   )
 }

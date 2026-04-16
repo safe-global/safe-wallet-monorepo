@@ -223,7 +223,7 @@ export const LoadingWithHeaderFooter: Story = {
         <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
       </div>
     )
-    const footer = () => (
+    const footer = (
       <div className="px-4 py-3">
         <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
       </div>
@@ -250,7 +250,7 @@ export const ErrorWithHeaderFooter: Story = {
         <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
       </div>
     )
-    const footer = () => (
+    const footer = (
       <div className="px-4 py-3">
         <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
       </div>

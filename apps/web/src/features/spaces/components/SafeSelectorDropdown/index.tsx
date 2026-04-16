@@ -35,15 +35,8 @@ function SafeSelectorDropdown({
   footer,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
-  const {
-    dropdownOpen,
-    selectedChainId,
-    selectedItem,
-    isSingleSafe,
-    handleOpenChange,
-    handleSafeChange,
-    closeDropdown,
-  } = useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
+  const { dropdownOpen, selectedChainId, selectedItem, isSingleSafe, handleOpenChange, handleSafeChange } =
+    useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id
@@ -92,7 +85,6 @@ function SafeSelectorDropdown({
           onRetry={onRetry}
           header={header}
           footer={footer}
-          closeDropdown={closeDropdown}
         />
       </Select>
     </div>

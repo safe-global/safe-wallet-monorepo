@@ -145,6 +145,32 @@ export function CopyAddressButton({ address }: { address: string }) {
   )
 }
 
+/** Skeleton row mimicking a safe card — used while data is loading */
+export function SafeItemSkeleton() {
+  return (
+    <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-3 mb-2">
+      <Skeleton className="size-9 rounded-full shrink-0" />
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+        <Skeleton className="h-3.5 w-28" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+      <Skeleton className="size-5 rounded-full shrink-0" />
+      <Skeleton className="h-3.5 w-14 ml-auto" />
+    </div>
+  )
+}
+
+/** Loading skeleton showing multiple safe card placeholders */
+export function SafeListSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <>
+      {Array.from({ length: count }, (_, i) => (
+        <SafeItemSkeleton key={i} />
+      ))}
+    </>
+  )
+}
+
 /** Read-only badge — outlined pill with eye icon */
 export function ReadOnlyBadge() {
   return (
