@@ -2,6 +2,7 @@ import React from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { LedgerSignerBadge } from '@/src/features/Ledger/components/LedgerSignerBadge'
+import { PasskeySignerBadge } from '@/src/features/PasskeySetup/components/PasskeySignerBadge'
 import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 
 interface SignerBadgeProps {
@@ -27,6 +28,10 @@ export const SignerTypeBadge = ({
 
   if (signer?.type === 'ledger') {
     return <LedgerSignerBadge size={size} fontSize={fontSize} testID={testID} />
+  }
+
+  if (signer?.type === 'passkey') {
+    return <PasskeySignerBadge size={size} fontSize={fontSize} testID={testID} />
   }
 
   return null

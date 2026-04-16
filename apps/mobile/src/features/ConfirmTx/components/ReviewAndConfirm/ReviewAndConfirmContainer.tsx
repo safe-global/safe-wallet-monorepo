@@ -34,6 +34,30 @@ export function ReviewAndConfirmContainer() {
       return
     }
 
+    // Passkey signers have their own OS biometric prompt via WebAuthn get()
+    // Skip the app-level biometrics opt-in to avoid double-prompt
+    if (activeSigner?.type === 'passkey') {
+      try {
+        await executeSign()
+        if (isMounted()) {
+          router.replace({
+            pathname: '/signing-success',
+            params: { txId },
+          })
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to sign transaction'
+
+        if (isMounted()) {
+          router.push({
+            pathname: '/signing-error',
+            params: { description: errorMessage },
+          })
+        }
+      }
+      return
+    }
+
     // If active signer is a Ledger device, start the Ledger-specific signing flow
     if (activeSigner?.type === 'ledger') {
       router.push({

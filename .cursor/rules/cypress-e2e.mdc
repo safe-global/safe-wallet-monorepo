@@ -1,15 +1,15 @@
 ---
 description: Cypress E2E test automation rules and best practices for Safe Wallet
 globs:
-  - "**/cypress/**/*.cy.js"
-  - "**/cypress/**/*.pages.js"
-  - "**/cypress/support/localstorage_data.js"
-  - "**/cypress/support/constants.js"
-  - "**/cypress/support/e2e.js"
-  - "**/cypress/support/commands.js"
-  - "**/cypress/support/safe-apps-commands.js"
-  - "**/cypress/support/safes/safesHandler.js"
-  - "**/cypress/e2e/pages/main.page.js"
+  - '**/cypress/**/*.cy.js'
+  - '**/cypress/**/*.pages.js'
+  - '**/cypress/support/localstorage_data.js'
+  - '**/cypress/support/constants.js'
+  - '**/cypress/support/e2e.js'
+  - '**/cypress/support/commands.js'
+  - '**/cypress/support/safe-apps-commands.js'
+  - '**/cypress/support/safes/safesHandler.js'
+  - '**/cypress/e2e/pages/main.page.js'
 alwaysApply: false
 ---
 
@@ -25,10 +25,10 @@ alwaysApply: false
 - **MANDATORY**: Each test suite can contain only ONE describe block
 - **FORMAT**: `it('Verify that [expected behavior]', () => {})`
 - **EXAMPLES**:
-    - ✅ `'Verify that user can create a new transaction'`
-    - ✅ `'Verify that total asset value is displayed correctly'`
-    - ❌ `'Create a new transaction'`
-    - ❌ `'Test transaction creation'`
+  - ✅ `'Verify that user can create a new transaction'`
+  - ✅ `'Verify that total asset value is displayed correctly'`
+  - ❌ `'Create a new transaction'`
+  - ❌ `'Test transaction creation'`
 
 ### Test Suite Structure
 
@@ -50,7 +50,6 @@ describe('Feature Name tests', () => {
     // Test implementation
   })
 })
-
 ```
 
 ## Page Object Model (POM)
@@ -77,7 +76,6 @@ export function verifyTotalAssetValueIsDisplayed() {
 export function clickSendButton() {
   cy.get(sendButton).click()
 }
-
 ```
 
 ### Test File Implementation
@@ -95,7 +93,6 @@ describe('Dashboard tests', () => {
     dashboard.clickSendButton()
   })
 })
-
 ```
 
 ## Element Selection Strategy
@@ -113,7 +110,7 @@ describe('Dashboard tests', () => {
 1. **data-testid attributes**: `'[data-testid="send-button"]'`, `'[data-testid="get-cli-link"]'` — use for links and CTAs as well; add `data-testid` (or `actionTestId` on ActionCard) in the component when missing.
 2. **Semantic HTML**: `'[role="button"]'`, `'[type="submit"]'`
 3. **Text content**: `cy.contains('Send')` (for non-link elements when no testid exists)
-4. **ARIA labels**: `'[aria-label="Send transaction"]'`
+4. **ARIA labels**: `'[aria-label="6 transaction"]'`
 
 ### Links and external CTAs
 
@@ -146,12 +143,12 @@ When test IDs are missing, add them to React components. If a testid already exi
 
 - **Purpose**: Truly generic, reusable functions used across multiple pages
 - **Examples**:
-    - Button clicks: `clickButton()`, `clickButtonByText()`
-    - Input interactions: `typeInInput()`, `clearInput()`
-    - Visibility checks: `verifyElementVisible()`, `verifyElementExists()`
-    - Text verification: `verifyTextContent()`, `verifyTextExists()`
-    - Navigation: `navigateToPage()`, `goBack()`
-    - Wait utilities: `waitForElement()`, `waitForPageLoad()`
+  - Button clicks: `clickButton()`, `clickButtonByText()`
+  - Input interactions: `typeInInput()`, `clearInput()`
+  - Visibility checks: `verifyElementVisible()`, `verifyElementExists()`
+  - Text verification: `verifyTextContent()`, `verifyTextExists()`
+  - Navigation: `navigateToPage()`, `goBack()`
+  - Wait utilities: `waitForElement()`, `waitForPageLoad()`
 - **Rule**: Only functions that are used by 3+ different page files should be in `main.page.js`
 
 ### Page-Specific Functions and Helpers (feature.pages.js)
@@ -191,23 +188,23 @@ export function clickSendButton() {
 
 // ❌ INCORRECT: Helper function in main.page.js when it's page-specific
 // main.page.js - WRONG
-export function formatAssetValue(value) { // ❌ Only used in dashboard, shouldn't be here
+export function formatAssetValue(value) {
+  // ❌ Only used in dashboard, shouldn't be here
   return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
-
 ```
 
 ### Decision Tree for Function Placement
 
 1. **Is the function used by 3+ different page files?**
-    - ✅ YES → Place in `main.page.js`
-    - ❌ NO → Continue to step 2
+   - ✅ YES → Place in `main.page.js`
+   - ❌ NO → Continue to step 2
 2. **Is the function specific to one page/feature?**
-    - ✅ YES → Place in that page's `.pages.js` file
-    - ❌ NO → Check if it's a helper for a specific page
+   - ✅ YES → Place in that page's `.pages.js` file
+   - ❌ NO → Check if it's a helper for a specific page
 3. **Is the function a helper that supports a specific page's functionality?**
-    - ✅ YES → Place in that page's `.pages.js` file (even if it's a "helper")
-    - ❌ NO → Re-evaluate - might need to be split or refactored
+   - ✅ YES → Place in that page's `.pages.js` file (even if it's a "helper")
+   - ❌ NO → Re-evaluate - might need to be split or refactored
 
 ### Function Naming Convention
 
@@ -249,7 +246,6 @@ export function verifyDashboardTotalAmount() {
 export function navigateToDashboardTab() {
   main.clickButton(dashboardTab)
 }
-
 ```
 
 ### Function Reusability
@@ -290,16 +286,17 @@ cypress/
 
 **Where to find things (use these; do not reinvent):**
 
-| Need | Location |
-|------|----------|
-| Safe addresses for tests | `support/safes/safesHandler.js` → `getSafes(CATEGORIES.static)`; fixtures in `fixtures/safes/` |
-| URL paths, localStorage key strings | `support/constants.js` (e.g. `constants.BALANCE_URL`, `constants.localStorageKeys.SAFE_v2__addedSafes`) |
-| localStorage data (addedSafes, addressBook, etc.) | `support/localstorage_data.js` — add new scenarios as named consts here |
-| Wallet connect / signing | `support/utils/wallet.js` |
-| Custom Cypress commands | `support/commands.js`, `support/safe-apps-commands.js` |
-| Page selectors and flows | `e2e/pages/*.pages.js`, `e2e/pages/main.page.js` |
+| Need                                              | Location                                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Safe addresses for tests                          | `support/safes/safesHandler.js` → `getSafes(CATEGORIES.static)`; fixtures in `fixtures/safes/`          |
+| URL paths, localStorage key strings               | `support/constants.js` (e.g. `constants.BALANCE_URL`, `constants.localStorageKeys.SAFE_v2__addedSafes`) |
+| localStorage data (addedSafes, addressBook, etc.) | `support/localstorage_data.js` — add new scenarios as named consts here                                 |
+| Wallet connect / signing                          | `support/utils/wallet.js`                                                                               |
+| Custom Cypress commands                           | `support/commands.js`, `support/safe-apps-commands.js`                                                  |
+| Page selectors and flows                          | `e2e/pages/*.pages.js`, `e2e/pages/main.page.js`                                                        |
 
 Test categories:
+
 - **smoke/** — critical path, functional (runs on every PR)
 - **smoke/visual/** — visual regression for Chromatic (only runs in Chromatic E2E workflow, not in smoke CI)
 - **regression/** — feature tests
@@ -337,7 +334,6 @@ describe('Test Suite', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
   })
 })
-
 ```
 
 ### localStorage Data (addedSafes, addressBook, undeployedSafes, etc.)
@@ -393,21 +389,16 @@ See **Where to find things** table. In addition: use `getSafes(CATEGORIES.static
 const transactionItem = '[data-testid="transaction-item"]'
 
 export function waitForTransactionToLoad() {
-  cy.get(transactionItem, { timeout: 30000 })
-    .should('be.visible')
-    .and('contain.text', 'Transaction')
+  cy.get(transactionItem, { timeout: 30000 }).should('be.visible').and('contain.text', 'Transaction')
 }
 
 // main.page.js
 export function waitForElementWithText(selector, text, timeout = 30000) {
-  cy.get(selector, { timeout })
-    .should('be.visible')
-    .and('contain.text', text)
+  cy.get(selector, { timeout }).should('be.visible').and('contain.text', text)
 }
 
 // Handle network issues
 cy.intercept('GET', '/api/transactions', { fixture: 'transactions.json' })
-
 ```
 
 ## Performance Guidelines
@@ -480,20 +471,20 @@ it('[Category] Verify that [behavior] - [ID]', () => {
 
 When creating or updating tests, ensure:
 
-- [ ]  Test name uses "Verify that" format
-- [ ]  Only one describe block per test suite
-- [ ]  All element selectors are in page files
-- [ ]  Functions are created for element interactions
-- [ ]  No direct selector usage in test files
-- [ ]  No class-based selectors used
-- [ ]  data-testid: reuse existing test IDs; add new ones only when the element has none (including links/CTAs; do not use `cy.contains('a', ...)` or `.should('have.attr', 'href'/'target')`)
-- [ ]  **Functions: search page files first; reuse. New: 3+ pages → main.page.js; else → that page's .pages.js**
-- [ ]  **Reuse existing functions instead of creating duplicates**
-- [ ]  **Test data/setup: use support + fixtures (constants, localstorage_data.js, getSafes, addToLocalStorage/addToAppLocalStorage); do not add new setup helpers or inline large payloads**
-- [ ]  Appropriate wait strategies (no hard-coded waits)
-- [ ]  Test data loaded from fixtures or constants
-- [ ]  Error handling implemented
-- [ ]  Comments added for complex logic
+- [ ] Test name uses "Verify that" format
+- [ ] Only one describe block per test suite
+- [ ] All element selectors are in page files
+- [ ] Functions are created for element interactions
+- [ ] No direct selector usage in test files
+- [ ] No class-based selectors used
+- [ ] data-testid: reuse existing test IDs; add new ones only when the element has none (including links/CTAs; do not use `cy.contains('a', ...)` or `.should('have.attr', 'href'/'target')`)
+- [ ] **Functions: search page files first; reuse. New: 3+ pages → main.page.js; else → that page's .pages.js**
+- [ ] **Reuse existing functions instead of creating duplicates**
+- [ ] **Test data/setup: use support + fixtures (constants, localstorage_data.js, getSafes, addToLocalStorage/addToAppLocalStorage); do not add new setup helpers or inline large payloads**
+- [ ] Appropriate wait strategies (no hard-coded waits)
+- [ ] Test data loaded from fixtures or constants
+- [ ] Error handling implemented
+- [ ] Comments added for complex logic
 
 ## Examples
 
@@ -553,7 +544,6 @@ describe('Dashboard tests', () => {
     dashboard.clickSendButton()
   })
 })
-
 ```
 
 ### ❌ Bad Test Structure

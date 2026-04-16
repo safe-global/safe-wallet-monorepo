@@ -7,7 +7,7 @@ import { Signer } from '@/src/store/signersSlice'
 /**
  * Execution path types for the confirm flow
  */
-export type ExecutionPath = 'ledger' | 'walletconnect' | 'biometrics' | 'standard'
+export type ExecutionPath = 'passkey' | 'ledger' | 'walletconnect' | 'biometrics' | 'standard'
 
 /**
  * Determines the execution method based on user selection, relay availability, and signer type
@@ -18,6 +18,11 @@ export const getExecutionMethod = (
   chain: Chain,
   signer?: Signer,
 ): ExecutionMethod => {
+  // Passkey signers must always use relay (no EOA with ETH)
+  if (signer?.type === 'passkey') {
+    return ExecutionMethod.WITH_RELAY
+  }
+
   // Relay takes priority if requested and available
   const isRelayEnabled = !!chain && hasFeature(chain, FEATURES.RELAYING)
   if (requestedMethod === ExecutionMethod.WITH_RELAY && isRelayAvailable && isRelayEnabled) {
@@ -70,6 +75,11 @@ export const determineExecutionPath = (
   isBiometricsEnabled: boolean,
   executionMethod?: ExecutionMethod,
 ): ExecutionPath => {
+  // Passkey signers use their own OS biometric prompt, always relay
+  if (activeSigner?.type === 'passkey') {
+    return 'passkey'
+  }
+
   // If relay is selected, use standard path (relay uses existing signatures, doesn't need Ledger signing)
   if (executionMethod === ExecutionMethod.WITH_RELAY) {
     return 'standard'

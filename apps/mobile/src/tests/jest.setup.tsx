@@ -298,6 +298,11 @@ jest.mock('expo-datadog', () => require('@datadog/mobile-react-native/jest'))
 
 jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'))
 
+jest.mock('react-native-passkeys', () => ({
+  create: jest.fn(),
+  get: jest.fn(),
+}))
+
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
