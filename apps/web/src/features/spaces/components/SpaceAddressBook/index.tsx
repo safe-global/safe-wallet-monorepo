@@ -194,12 +194,15 @@ const SpaceAddressBook = () => {
                     renderExtraAction={(entry) => {
                       if (entry.isDuplicate) {
                         return (
-                          <RemoveDuplicateButton
-                            address={entry.address}
-                            chainIds={entry.chainIds}
-                            isLocal={entry.isLocal}
-                            isPrivate={entry.isPrivate}
-                          />
+                          <span className="inline-flex items-center gap-2">
+                            <span className="text-muted-foreground text-xs">Already shared</span>
+                            <RemoveDuplicateButton
+                              address={entry.address}
+                              chainIds={entry.chainIds}
+                              isLocal={entry.isLocal}
+                              isPrivate={entry.isPrivate}
+                            />
+                          </span>
                         )
                       }
                       if (isAdmin && entry.isLocal) {
