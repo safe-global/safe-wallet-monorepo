@@ -19,7 +19,12 @@ import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
 
-/** Maps `?safe=` (shortName:addr or chainId:addr) to form keys `chainId:address`. */
+/**
+ * Converts safe query parameter (`prefix:address`) to form key (`chainId:address`).
+ * Supports numeric chainId or chain shortName as prefix. Returns undefined if invalid.
+ * @param safeParam - Safe parameter from URL (e.g., "1:0xabc..." or "eth:0xabc...")
+ * @param chains - Array of chains for resolving shortName to chainId
+ */
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
   const { prefix, address } = parsePrefixedAddress(safeParam)
   if (!address || !prefix) {
