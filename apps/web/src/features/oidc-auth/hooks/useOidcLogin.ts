@@ -14,8 +14,15 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 export const useOidcLogin = () => {
   const loginWithRedirect = useCallback((connection: OidcConnection, redirectUrl?: string) => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+
+    // Strip any stale `error` param so the callback can trust that an `error`
+    // in the return URL genuinely came from the OIDC provider, not from a
+    // previous failed attempt still present in the URL.
+    const cleanRedirectUrl = new URL(redirectUrl ?? window.location.href)
+    cleanRedirectUrl.searchParams.delete('error')
+
     const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
-    url.searchParams.set('redirect_url', redirectUrl ?? window.location.href)
+    url.searchParams.set('redirect_url', cleanRedirectUrl.toString())
     url.searchParams.set('connection', connection)
     window.location.href = url.toString()
   }, [])

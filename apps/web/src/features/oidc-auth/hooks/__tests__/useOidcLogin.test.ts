@@ -68,4 +68,19 @@ describe('useOidcLogin', () => {
     const redirectUrl = new URL(window.location.href)
     expect(redirectUrl.searchParams.get('redirect_url')).toBe(customUrl)
   })
+
+  it('should strip stale error param from redirect_url', () => {
+    window.location.href = 'https://app.safe.global/welcome/spaces?error=previous_failure&chain=eth'
+    const { result } = renderHook(() => useOidcLogin())
+
+    act(() => {
+      result.current.loginWithRedirect(OidcConnection.EMAIL)
+    })
+
+    const redirectUrl = new URL(window.location.href)
+    const returnUrl = redirectUrl.searchParams.get('redirect_url')!
+
+    expect(returnUrl).not.toContain('error=')
+    expect(returnUrl).toContain('chain=eth')
+  })
 })
