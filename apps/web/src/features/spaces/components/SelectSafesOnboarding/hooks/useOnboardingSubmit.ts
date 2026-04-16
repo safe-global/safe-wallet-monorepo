@@ -16,6 +16,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import useChains from '@/hooks/useChains'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
 
 /** Maps `?safe=` (shortName:addr or chainId:addr) to form keys `chainId:address`. */
@@ -51,7 +52,7 @@ const useOnboardingSubmit = (
 ) => {
   const router = useRouter()
   const { configs: chains } = useChains()
-  const safeFromUrl = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const safeFromUrl = useSafeQueryParam() || undefined
   const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()

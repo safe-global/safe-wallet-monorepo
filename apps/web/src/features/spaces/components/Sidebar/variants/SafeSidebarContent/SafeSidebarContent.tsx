@@ -12,6 +12,7 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { getQuerySpaceId } from '../../utils'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -37,6 +38,7 @@ export const SafeSidebarContent = ({
   const queueSize = useQueuedTxsLength()
   const isBlockedCountry = useContext(GeoblockingContext)
   const { safe } = useSafeInfo()
+  const safeAddress = useSafeQueryParam() || undefined
 
   // prevents a re-render of nav items when tx data arrives later:
   useEffect(() => {
@@ -48,7 +50,6 @@ export const SafeSidebarContent = ({
   const getLink = useCallback(
     (item: SidebarItemConfig) => {
       const spaceId = getQuerySpaceId(router.query)
-      const safeAddress = typeof router.query.safe === 'string' ? router.query.safe : undefined
       const query: { spaceId?: string | null; safe?: string } = {
         ...(safeAddress && { safe: safeAddress }),
         ...(spaceId && { spaceId }),
@@ -56,7 +57,7 @@ export const SafeSidebarContent = ({
 
       return { pathname: item.href, query }
     },
-    [router.query],
+    [router.query, safeAddress],
   )
 
   const isItemDisabled = useCallback(

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { DialogClose, DialogTitle } from '@/components/ui/dialog'
 import { AppRoutes } from '@/config/routes'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const BENEFITS = [
   'Keep all related Safes in one shared workspace',
@@ -15,7 +16,7 @@ const BENEFITS = [
 
 export const AddToSpacePopupModal = (): ReactElement => {
   const router = useRouter()
-  const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const safe = useSafeQueryParam() || undefined
   const createSpaceHref = safe
     ? { pathname: AppRoutes.spaces.createSpace, query: { safe } }
     : AppRoutes.spaces.createSpace

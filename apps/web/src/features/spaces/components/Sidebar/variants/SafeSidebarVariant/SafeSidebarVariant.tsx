@@ -24,6 +24,7 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '../../constants'
 
 const MAIN_NAV_SKELETON_COUNT = 5
@@ -40,7 +41,7 @@ export const SafeSidebarVariant = ({
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const isHydrated = useSidebarHydrated()
 
-  const safeAddress = isHydrated && typeof router.query.safe === 'string' ? router.query.safe : undefined
+  const safeAddress = isHydrated ? useSafeQueryParam() || undefined : undefined
   const isOutdated =
     isHydrated &&
     safe.implementationVersionState === ImplementationVersionState.OUTDATED &&

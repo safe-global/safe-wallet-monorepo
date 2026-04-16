@@ -21,6 +21,7 @@ import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
 
@@ -45,6 +46,7 @@ export const SpaceSelectorDropdown = ({
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
+  const safe = useSafeQueryParam() || undefined
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
 
@@ -67,7 +69,6 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
-    const safe = typeof router.query.safe === 'string' ? router.query.safe : undefined
     router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
   }
 
