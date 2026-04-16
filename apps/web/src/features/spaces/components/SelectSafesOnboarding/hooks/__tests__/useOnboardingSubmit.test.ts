@@ -1,7 +1,15 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useOnboardingSubmit from '../useOnboardingSubmit'
 import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
+
+const mockChains: Chain[] = []
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockChains }),
+}))
 
 const mockAddSafesToSpace = jest.fn().mockResolvedValue({ data: {} })
 const mockRemoveSafesFromSpace = jest.fn().mockResolvedValue({ data: {} })
@@ -61,6 +69,7 @@ describe('useOnboardingSubmit', () => {
     jest.clearAllMocks()
     mockSpaceSafes = []
     mockRouterQuery = {}
+    mockChains.splice(0, mockChains.length)
     mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
   })
@@ -299,6 +308,24 @@ describe('useOnboardingSubmit', () => {
 
     const selectedSafes = result.current.formMethods.getValues('selectedSafes')
     expect(selectedSafes['1:0xdeadbeef']).toBe(true)
+  })
+
+  it('should preselect safe from URL when query uses chain shortName', async () => {
+    mockRouterQuery = { safe: 'sep:0x0000000000000000000000000000000000000001' }
+    mockChains.push({
+      chainId: '11155111',
+      chainName: 'Sepolia',
+      shortName: 'sep',
+    } as Chain)
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['11155111:0x0000000000000000000000000000000000000001']).toBe(true)
   })
 
   it('should not preselect from URL when space already has safes', async () => {

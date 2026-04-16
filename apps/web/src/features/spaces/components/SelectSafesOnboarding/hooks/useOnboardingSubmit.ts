@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import {
@@ -12,8 +14,28 @@ import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import useChains from '@/hooks/useChains'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
+
+/** Maps `?safe=` (shortName:addr or chainId:addr) to form keys `chainId:address`. */
+const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
+  const { prefix, address } = parsePrefixedAddress(safeParam)
+  if (!address || !prefix) {
+    return undefined
+  }
+
+  if (/^\d+$/.test(prefix)) {
+    return `${prefix}:${address}`
+  }
+
+  const chain = chains.find((c) => c.shortName.toLowerCase() === prefix.toLowerCase())
+  if (!chain) {
+    return undefined
+  }
+
+  return `${chain.chainId}:${address}`
+}
 
 const parseSafeKey = (key: string) => {
   const [chainId, address] = key.split(':')
@@ -22,6 +44,7 @@ const parseSafeKey = (key: string) => {
 
 const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void) => {
   const router = useRouter()
+  const { configs: chains } = useChains()
   const safeFromUrl = typeof router.query.safe === 'string' ? router.query.safe : undefined
   const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
@@ -64,9 +87,18 @@ const useOnboardingSubmit = (spaceId: string | undefined, onSuccess: () => void)
 
   useEffect(() => {
     if (hasInitializedFromUrl.current || !safeFromUrl || !router.isReady || spaceSafes.length > 0) return
+
+    const formKey = safeParamToFormKey(safeFromUrl, chains)
+    if (!formKey) {
+      const { prefix } = parsePrefixedAddress(safeFromUrl)
+      if (prefix && !/^\d+$/.test(prefix) && chains.length === 0) return
+      hasInitializedFromUrl.current = true
+      return
+    }
+
     hasInitializedFromUrl.current = true
-    reset({ selectedSafes: { [safeFromUrl]: true } })
-  }, [safeFromUrl, router.isReady, spaceSafes, reset])
+    reset({ selectedSafes: { [formKey]: true } })
+  }, [safeFromUrl, router.isReady, spaceSafes, reset, chains])
   const selectedSafes = watch('selectedSafes')
   const selectedSafesLength = Object.entries(selectedSafes).filter(
     ([key, isSelected]) => isSelected && !key.startsWith('multichain_'),
