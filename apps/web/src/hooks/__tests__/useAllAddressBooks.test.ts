@@ -20,6 +20,7 @@ jest.mock('@/store', () => ({
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: jest.fn(),
   useGetSpaceAddressBook: jest.fn(),
+  useGetPrivateAddressBook: jest.fn(() => []),
 }))
 
 jest.mock('@/store/authSlice', () => ({
