@@ -63,7 +63,7 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
-          <DialogTitle>All accounts</DialogTitle>
+          <DialogTitle>All Accounts</DialogTitle>
         </DialogHeader>
 
         <div className="shrink-0 px-4 py-3">

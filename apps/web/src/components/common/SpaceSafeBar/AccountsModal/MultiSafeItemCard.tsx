@@ -6,6 +6,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useMultiAccountItemData, usePinActions } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import { ICON_SIZE, SafeIdenticon, StackedChainLogos, NameSourceIcon, CopyAddressButton } from './shared'
@@ -20,7 +21,9 @@ const MultiSafeItemCard = ({ item }: MultiSafeItemCardProps) => {
   const { address, sortedSafes, safeOverviews, sharedSetup, totalFiatValue, name } = useMultiAccountItemData(item)
   const addressBookItem = useAddressBookItem(address, sortedSafes[0]?.chainId)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
-  const displayName = name ?? shortenAddress(address)
+  const chainId = sortedSafes[0]?.chainId ?? ''
+  const resolvedName = useSafeDisplayName(address, chainId, name)
+  const displayName = resolvedName || shortenAddress(address)
   const isTotalLoading = totalFiatValue === undefined
   const isPinned = item.isPinned
 

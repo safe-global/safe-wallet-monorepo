@@ -10,6 +10,7 @@ import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS } from '@/services/analytics/events/overview'
 import { useSafeItemData } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { SafeItem } from '@/hooks/safes'
 import {
@@ -32,7 +33,8 @@ const SafeItemCard = ({ safeItem }: SafeItemCardProps) => {
   const currency = useAppSelector(selectCurrency)
   const { name, safeOverview, threshold, owners, elementRef, undeployedSafe, isActivating } = useSafeItemData(safeItem)
   const addressBookItem = useAddressBookItem(safeItem.address, safeItem.chainId)
-  const displayName = name ?? shortenAddress(safeItem.address)
+  const resolvedName = useSafeDisplayName(safeItem.address, safeItem.chainId, name)
+  const displayName = resolvedName || shortenAddress(safeItem.address)
   const hasOverview = safeOverview !== undefined
 
   const handleTogglePin = (e: MouseEvent) => {

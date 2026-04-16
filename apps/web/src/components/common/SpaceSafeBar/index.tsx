@@ -44,7 +44,7 @@ function DropdownFooter({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="px-4 py-3">
       <Button variant="secondary" size="sm" className="w-full" onClick={onOpen}>
-        All accounts
+        All Accounts
         <ChevronRight className="size-4" />
       </Button>
     </div>
