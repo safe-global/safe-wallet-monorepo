@@ -8,7 +8,10 @@ test.describe('[SMOKE] Assets tests', () => {
 
   test.beforeEach(async ({ safePage }) => {
     assets = new AssetsPage(safePage)
-    await assets.goto(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+    // Wait for the token list table to be visible — proves API data has loaded
+    await assets.goto(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
+      readySelector: assets.tokenListTable,
+    })
   })
 
   test('Verify that the native token is visible', async () => {

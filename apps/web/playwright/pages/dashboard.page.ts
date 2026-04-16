@@ -3,11 +3,6 @@ import { BasePage } from './base.page'
 import staticSafes from '../data/safes/static'
 import * as constants from '../data/constants'
 
-/**
- * DashboardPage — page object for the Safe dashboard (home).
- *
- * Ported from cypress/e2e/pages/dashboard.pages.js
- */
 export class DashboardPage extends BasePage {
   // ── Selectors ────────────────────────────────────────────────────────────────
 
@@ -36,7 +31,6 @@ export class DashboardPage extends BasePage {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
 
-  /** Click on a pending transaction by index */
   async clickOnTxByIndex(index: number) {
     const item = this.pendingTxItem.nth(index)
     await expect(item).toHaveAttribute('href', /safe=.{3,}/)
@@ -44,12 +38,10 @@ export class DashboardPage extends BasePage {
     await expect(this.page.locator('[data-testid="tx-details"]')).toBeVisible()
   }
 
-  /** Click the "View all" link to go to the transaction queue */
   async clickOnViewAllBtn() {
     await this.viewAllLink.click()
   }
 
-  /** Expand the action required panel */
   async expandActionRequiredPanel() {
     await expect(this.actionRequiredPanel).toBeVisible({ timeout: 30_000 })
     await this.actionRequiredPanelToggle.click()
@@ -58,14 +50,12 @@ export class DashboardPage extends BasePage {
 
   // ── Assertions ───────────────────────────────────────────────────────────────
 
-  /** Verify the overview widget shows Send/Receive buttons and the Total label */
   async verifyOverviewWidgetData() {
     const overviewSection = this.page.locator('section').filter({ has: this.page.locator('div:has-text("Total")') })
     await expect(overviewSection.getByRole('button', { name: 'Send' })).toBeVisible()
     await expect(overviewSection.getByRole('button', { name: 'Receive' })).toBeVisible()
   }
 
-  /** Verify the transaction queue widget is displayed with queued transactions */
   async verifyTxQueueWidget() {
     const txQueueSection = this.page
       .locator('section')
@@ -74,14 +64,12 @@ export class DashboardPage extends BasePage {
     await expect(txQueueSection).toBeVisible()
     await expect(txQueueSection.locator(':text("This Safe has no queued transactions")')).not.toBeVisible()
 
-    // Verify a queued Send transaction exists
     await expect(
       txQueueSection.locator(`a[href^="/transactions/tx?id=multisig_0x"]`).filter({
         hasText: `Send-0.00002 ${constants.tokenAbbreviation.sep}`,
       }),
     ).toBeVisible()
 
-    // Verify the "View all" link
     await expect(
       txQueueSection.locator(
         `a[href="${constants.transactionQueueUrl}${encodeURIComponent(staticSafes.SEP_STATIC_SAFE_2)}"]`,
@@ -89,7 +77,6 @@ export class DashboardPage extends BasePage {
     ).toContainText('View all')
   }
 
-  /** Verify the "Explore what's possible" section */
   async verifyExplorePossibleSection() {
     const section = this.page
       .locator('section')
@@ -97,12 +84,10 @@ export class DashboardPage extends BasePage {
     await expect(section).toContainText('Swap tokens instantly')
   }
 
-  /** Verify data in the pending tx widget */
   async verifyDataInPendingTx(data: string[]) {
     await this.checkTextsExistWithinElement('[data-testid="pending-tx-widget"]', data)
   }
 
-  /** Verify a specific tx item exists in pending transactions */
   async verifyTxItemInPendingTx(data: string[]) {
     const items = this.pendingTxItem
     const count = await items.count()
@@ -119,7 +104,6 @@ export class DashboardPage extends BasePage {
     expect(matchFound).toBe(true)
   }
 
-  /** Verify the empty transaction section */
   async verifyEmptyTxSection() {
     await expect(this.noTxText).toBeVisible()
   }

@@ -58,33 +58,36 @@ export { expect } from '@playwright/test'
  * @param page - Playwright Page instance (use safePage from fixture)
  * @param url - Relative URL (e.g., '/home?safe=sep:0x...')
  */
+// Map chain prefix to chain ID for addedSafes structure
+const chainMap: Record<string, string> = {
+  eth: '1',
+  gor: '5',
+  sep: '11155111',
+  gno: '100',
+  matic: '137',
+  bnb: '56',
+  aurora: '1313161554',
+  avax: '43114',
+  linea: '59144',
+  zksync: '324',
+  base: '8453',
+  oeth: '10',
+}
+
 export async function safeGoto(page: Page, url: string) {
-  // Extract Safe address from URL and trust it in localStorage before navigation
+  // Extract Safe address from URL and trust it in localStorage.
+  // Uses addInitScript() instead of page.evaluate() because the page may still
+  // be on about:blank — where localStorage access is blocked by browser security.
+  // addInitScript runs in the page context AFTER navigation starts, before app JS loads.
   const safeMatch = url.match(/safe=([\w]+:0x[a-fA-F0-9]{40})/)
   if (safeMatch) {
     const safeAddress = safeMatch[1]
     const chainPrefix = safeAddress.split(':')[0]
     const address = safeAddress.split(':')[1]
-
-    // Map chain prefix to chain ID for addedSafes structure
-    const chainMap: Record<string, string> = {
-      eth: '1',
-      gor: '5',
-      sep: '11155111',
-      gno: '100',
-      matic: '137',
-      bnb: '56',
-      aurora: '1313161554',
-      avax: '43114',
-      linea: '59144',
-      zksync: '324',
-      base: '8453',
-      oeth: '10',
-    }
-
     const chainId = chainMap[chainPrefix]
+
     if (chainId) {
-      await page.evaluate(
+      await page.addInitScript(
         ({ chainId, address }) => {
           const existing = JSON.parse(window.localStorage.getItem('SAFE_v2__addedSafes') || '{}')
           if (!existing[chainId]) existing[chainId] = {}
@@ -96,7 +99,10 @@ export async function safeGoto(page: Page, url: string) {
     }
   }
 
-  // Navigate with retry on 429 (rate limit) — matches Cypress retry logic
+  // Navigate with retry on 429 (rate limit) — matches Cypress retry logic.
+  // Uses 'domcontentloaded' instead of 'load' because Safe{Wallet} keeps WebSocket/SSE
+  // connections open to the gateway — the 'load' event never fires in an SPA with
+  // persistent connections. Actual page readiness is handled by readySelector in BasePage.goto().
   const maxRetries = 3
   const retryDelay = 6000
 
@@ -115,14 +121,38 @@ export async function safeGoto(page: Page, url: string) {
 // ── localStorage helpers ───────────────────────────────────────────────────────
 
 /**
- * Set a value in the app's localStorage. Call before navigation or with reload after.
+ * Set a value in the app's localStorage.
+ *
+ * - Call BEFORE navigation (safeGoto): uses addInitScript so it runs in the page
+ *   context after navigation starts, avoiding the about:blank SecurityError.
+ * - Call AFTER navigation: uses page.evaluate directly (page has an origin, so
+ *   localStorage is accessible). Follow with page.reload() to pick up changes.
+ *
  * Replaces Cypress main.addToLocalStorage() and main.addToAppLocalStorage().
  */
-export async function setLocalStorage(page: Page, key: string, value: unknown) {
-  await page.evaluate(
-    ({ key, value }) => {
-      window.localStorage.setItem(key, JSON.stringify(value))
-    },
-    { key, value: value as string },
-  )
+export async function setLocalStorage(
+  page: Page,
+  key: string,
+  value: unknown,
+  options?: { afterNavigation?: boolean },
+) {
+  const serialized = typeof value === 'string' ? value : JSON.stringify(value)
+
+  if (options?.afterNavigation) {
+    // Page already has an origin — safe to evaluate directly
+    await page.evaluate(
+      ({ key, value }) => {
+        window.localStorage.setItem(key, value)
+      },
+      { key, value: serialized },
+    )
+  } else {
+    // Page may be on about:blank — use addInitScript to defer until navigation
+    await page.addInitScript(
+      ({ key, value }) => {
+        window.localStorage.setItem(key, value)
+      },
+      { key, value: serialized },
+    )
+  }
 }

@@ -380,6 +380,10 @@ The repo provides automated verification:
 
 ### E2E Tests (Web only)
 
+The web app currently runs **two E2E frameworks in parallel** during the Cypress → Playwright migration. Both use the same category taxonomy (smoke / visual / regression / happypath).
+
+#### Cypress
+
 Located in `apps/web/cypress/e2e/`. Full conventions and patterns: `apps/web/cypress/CLAUDE.md`.
 
 | Category   | Folder            | CI                           | Purpose                                    |
@@ -395,6 +399,48 @@ yarn workspace @safe-global/web cypress:run    # headless
 ```
 
 Coverage report: `apps/web/cypress/COVERAGE.md`
+
+#### Playwright
+
+Located in `apps/web/playwright/`. Full conventions and patterns: `apps/web/playwright/CLAUDE.md` (to be added in Phase 2 of the migration).
+
+| Category        | Folder                   | CI        | Purpose                         |
+| --------------- | ------------------------ | --------- | ------------------------------- |
+| Smoke           | `tests/smoke/`           | Every PR  | Critical path functional tests  |
+| Visual          | `tests/visual/`          | Manual    | Argos visual regression         |
+| Regression      | `tests/regression/`      | On-demand | Feature tests                   |
+| Happy path      | `tests/happypath/`       | On-demand | User journey tests              |
+| Prodhealthcheck | `tests/prodhealthcheck/` | Scheduled | Post-deploy checks against prod |
+
+First-time setup — install the browser binaries (once per machine):
+
+```bash
+yarn workspace @safe-global/web exec playwright install chromium
+```
+
+Run tests locally (start the dev server first with `yarn workspace @safe-global/web dev`):
+
+```bash
+yarn workspace @safe-global/web playwright:open          # interactive UI mode
+yarn workspace @safe-global/web playwright:run           # headless, all projects
+yarn workspace @safe-global/web playwright:smoke         # smoke only
+yarn workspace @safe-global/web playwright:regression    # regression only
+yarn workspace @safe-global/web playwright:happypath     # happy path only
+yarn workspace @safe-global/web playwright:visual        # visual only (Argos)
+yarn workspace @safe-global/web playwright:codegen       # record a new test
+yarn workspace @safe-global/web playwright:report        # open last HTML report
+```
+
+Run a single file or match by title:
+
+```bash
+yarn workspace @safe-global/web exec playwright test playwright/tests/smoke/dashboard.spec.ts
+yarn workspace @safe-global/web exec playwright test -g "native token is visible"
+```
+
+**File naming contract:** Playwright uses `*.spec.ts`. Jest unit tests use `*.test.ts(x)`. This split is enforced in `apps/web/jest.config.cjs` via `testMatch` — do not rename Playwright files to `.test.ts` or they will collide with Jest.
+
+**Wallet credentials:** tests that need a signer read `CYPRESS_WALLET_CREDENTIALS` (reused from the Cypress setup) or `WALLET_CREDENTIALS` from `.env`.
 
 ### Test Coverage
 

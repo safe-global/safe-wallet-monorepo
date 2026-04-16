@@ -23,6 +23,13 @@ export default defineConfig({
   /* Parallel workers: use half CPU cores in CI to avoid memory pressure */
   workers: process.env.CI ? '50%' : undefined,
 
+  /* Test timeout: Playwright's test timeout wraps EVERYTHING (beforeEach + navigation
+   * + assertions), unlike Cypress which only times out individual commands.
+   * Next.js dev server is slow on first compile — 30s default is not enough.
+   * Cypress uses pageLoadTimeout: 60s + defaultCommandTimeout: 10s with no overall cap.
+   * We set 60s locally, 90s in CI (retries hit cold pages). */
+  timeout: process.env.CI ? 90_000 : 60_000,
+
   /* Reporter configuration — keep all Playwright output inside ./playwright/ */
   reporter: process.env.CI
     ? [
@@ -52,6 +59,14 @@ export default defineConfig({
     /* Locale override — matches Cypress e2e.js Emulation.setLocaleOverride */
     locale: 'en-US',
     timezoneId: 'UTC',
+  },
+
+  /* Expect timeout: how long auto-retrying assertions (toBeVisible, toHaveText, etc.)
+   * wait before failing. Default is 5s — too short when API responses take up to 60s.
+   * Matches Cypress defaultCommandTimeout behavior (10s) but increased for slow APIs.
+   * Individual tests can override: expect(locator).toBeVisible({ timeout: 90_000 }) */
+  expect: {
+    timeout: 60_000,
   },
 
   /* Test projects by category */

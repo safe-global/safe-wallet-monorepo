@@ -1,11 +1,6 @@
 import { type Page, type Locator, expect } from '@playwright/test'
 import { BasePage } from './base.page'
 
-/**
- * AssetsPage — page object for the balances/assets view.
- *
- * Ported from cypress/e2e/pages/assets.pages.js
- */
 export class AssetsPage extends BasePage {
   // ── Selectors ────────────────────────────────────────────────────────────────
 
@@ -17,7 +12,6 @@ export class AssetsPage extends BasePage {
   readonly sendBtn: Locator
   readonly tablePagination: Locator
 
-  // Token name constants
   static readonly currencyAave = 'AAVE'
   static readonly currencyTestTokenA = 'TestTokenA'
   static readonly currencyTestTokenB = 'TestTokenB'
@@ -40,7 +34,6 @@ export class AssetsPage extends BasePage {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
 
-  /** Toggle the "Show all tokens" switch in the manage tokens menu */
   async toggleShowAllTokens(shouldShow: boolean) {
     await this.manageTokensButton.click()
     await expect(this.manageTokensMenu).toBeVisible()
@@ -52,12 +45,10 @@ export class AssetsPage extends BasePage {
       await checkbox.click({ force: true })
     }
 
-    // Close menu by clicking outside
     await this.page.mouse.click(0, 0)
     await expect(this.manageTokensMenu).not.toBeVisible()
   }
 
-  /** Toggle the "Hide small balances" (dust filter) switch */
   async toggleHideDust(shouldHide: boolean) {
     await this.manageTokensButton.click()
     await expect(this.manageTokensMenu).toBeVisible()
@@ -69,19 +60,16 @@ export class AssetsPage extends BasePage {
       await checkbox.click({ force: true })
     }
 
-    // Close menu by clicking outside
     await this.page.mouse.click(0, 0)
     await expect(this.manageTokensMenu).not.toBeVisible()
   }
 
   // ── Assertions ───────────────────────────────────────────────────────────────
 
-  /** Verify that a token name is present in the asset list */
   async verifyTokenIsPresent(tokenName: string) {
     await expect(this.tokenListTable).toContainText(tokenName)
   }
 
-  /** Verify the tokens tab is selected */
   async verifyTokensTabIsSelected(expected: string) {
     const tokensTab = this.page.locator('[role="tab"]').filter({ hasText: 'Tokens' })
     await expect(tokensTab).toHaveAttribute('aria-selected', expected)

@@ -194,6 +194,111 @@ npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/*.cy.
 
 Some tests will require signer private keys, please include them in your .env file
 
+### Playwright tests
+
+Playwright tests live in `apps/web/playwright/` and run alongside Cypress during the Cypress → Playwright migration. Test categories (smoke / regression / happypath / visual / prodhealthcheck) mirror the Cypress structure.
+
+**First-time setup:**
+
+Install the browser binaries (only needed once):
+
+```
+yarn workspace @safe-global/web exec playwright install chromium
+```
+
+**Run against a local dev server** (start it first with `yarn workspace @safe-global/web dev`):
+
+Interactive UI mode — pick and debug tests visually:
+
+```
+yarn workspace @safe-global/web playwright:open
+```
+
+Headless run of all projects:
+
+```
+yarn workspace @safe-global/web playwright:run
+```
+
+Run a specific category:
+
+```
+yarn workspace @safe-global/web playwright:smoke
+yarn workspace @safe-global/web playwright:regression
+yarn workspace @safe-global/web playwright:happypath
+yarn workspace @safe-global/web playwright:visual
+```
+
+Run a single test file:
+
+```
+yarn workspace @safe-global/web exec playwright test playwright/tests/smoke/dashboard.spec.ts
+```
+
+Run a single test by title substring:
+
+```
+yarn workspace @safe-global/web exec playwright test -g "native token is visible"
+```
+
+**Using `npx` directly** (run from `apps/web/` so the config file is picked up):
+
+Run a single test file:
+
+```
+npx playwright test playwright/tests/smoke/dashboard.spec.ts
+```
+
+Run all files in a folder (glob):
+
+```
+npx playwright test playwright/tests/smoke/
+```
+
+Run tests by title substring (works across all files):
+
+```
+npx playwright test -g "native token is visible"
+```
+
+Run a specific project in headless mode:
+
+```
+npx playwright test --project=smoke
+```
+
+Open interactive UI mode:
+
+```
+npx playwright test --ui
+```
+
+Open the last HTML report:
+
+```
+npx playwright show-report playwright/playwright-report
+```
+
+**Against a built static server** (`yarn serve` on port 8080, mirrors `cypress:ci`):
+
+```
+yarn workspace @safe-global/web playwright:ci
+```
+
+**Record new tests** — opens a browser that generates Playwright code as you click:
+
+```
+yarn workspace @safe-global/web playwright:codegen
+```
+
+**View the last HTML report** (opens traces, screenshots, and videos for failed runs):
+
+```
+yarn workspace @safe-global/web playwright:report
+```
+
+Some tests will require signer private keys — include them in your `.env` file under `CYPRESS_WALLET_CREDENTIALS` (reused by the Playwright wallet fixture) or `WALLET_CREDENTIALS`.
+
 ## Component template
 
 To create a new component from a template:

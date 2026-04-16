@@ -10,7 +10,10 @@ test.describe('[SMOKE] Dashboard tests', () => {
 
   test.beforeEach(async ({ safePage }) => {
     dashboard = new DashboardPage(safePage)
-    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+    // Wait for the assets widget to be visible — proves the dashboard data has loaded
+    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2, {
+      readySelector: dashboard.assetsWidget,
+    })
   })
 
   test('Verify the overview widget is displayed', async () => {
@@ -31,9 +34,10 @@ test.describe('[SMOKE] Dashboard tests', () => {
     const mockData = JSON.parse(fs.readFileSync(path.join(fixtureDir, 'pending_tx.json'), 'utf-8'))
 
     await safePage.route('**/queued*', (route) => route.fulfill({ json: mockData }))
-    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2, {
+      readySelector: dashboard.pendingTxWidget,
+    })
 
-    await expect(dashboard.pendingTxWidget).toBeVisible({ timeout: 30_000 })
     await dashboard.verifyElementsCount('[data-testid="tx-pending-item"]', 1)
     await dashboard.verifyDataInPendingTx(['Send', '-0.00002 ETH', '1/1'])
   })
@@ -44,7 +48,9 @@ test.describe('[SMOKE] Dashboard tests', () => {
     const mockData = JSON.parse(fs.readFileSync(path.join(fixtureDir, 'pending_tx_order.json'), 'utf-8'))
 
     await safePage.route('**/queued*', (route) => route.fulfill({ json: mockData }))
-    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2)
+    await dashboard.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2, {
+      readySelector: dashboard.pendingTxWidget,
+    })
 
     await dashboard.verifyTxItemInPendingTx(['Batch', '3 actions', '1/2'])
     await dashboard.verifyTxItemInPendingTx(['addOwnerWithThreshold', '1/2'])
