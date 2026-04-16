@@ -30,6 +30,7 @@ import PendingRequestsTable from './PendingRequestsTable'
 import ActivityLog from './ActivityLog'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
+import AddToWorkspaceButton from './AddToWorkspaceButton'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -189,17 +190,25 @@ const SpaceAddressBook = () => {
                   <SpaceAddressBookTable
                     entries={filteredMine}
                     showAddedBy={false}
-                    renderExtraAction={(entry) =>
-                      entry.isPrivate || entry.isLocal ? (
-                        <RequestToAddButton
-                          address={entry.address}
-                          name={entry.name}
-                          chainIds={entry.chainIds}
-                          isLocal={entry.isLocal}
-                          alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
-                        />
-                      ) : null
-                    }
+                    renderExtraAction={(entry) => {
+                      if (isAdmin && entry.isLocal) {
+                        return (
+                          <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                        )
+                      }
+                      if (entry.isPrivate || entry.isLocal) {
+                        return (
+                          <RequestToAddButton
+                            address={entry.address}
+                            name={entry.name}
+                            chainIds={entry.chainIds}
+                            isLocal={entry.isLocal}
+                            alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                          />
+                        )
+                      }
+                      return null
+                    }}
                   />
                 )}
               </TabsContent>
