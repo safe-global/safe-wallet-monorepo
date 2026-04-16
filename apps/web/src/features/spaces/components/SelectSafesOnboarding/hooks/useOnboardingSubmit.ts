@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
 import {
@@ -27,7 +28,7 @@ import { getSafeId, getMultiChainSafeId } from '../components/SafeCard'
  */
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
   const { prefix, address } = parsePrefixedAddress(safeParam)
-  if (!address || !prefix) {
+  if (!address || !prefix || !isValidAddress(address)) {
     return undefined
   }
 
