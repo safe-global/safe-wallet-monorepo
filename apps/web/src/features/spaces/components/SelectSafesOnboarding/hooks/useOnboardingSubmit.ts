@@ -96,17 +96,18 @@ const useOnboardingSubmit = (
     reset({ selectedSafes: selected })
   }, [spaceSafes, reset])
 
-  const hasInitializedFromUrl = useRef(false)
-  const hasTentativeSelection = useRef(false)
+  // Tracks URL pre-selection progress: idle → tentative (single-chain selected, awaiting
+  // more owned safes to load) → done (multichain group resolved, or param invalid/unresolvable).
+  const urlSelectionState = useRef<'idle' | 'tentative' | 'done'>('idle')
 
   useEffect(() => {
-    if (hasInitializedFromUrl.current || !safeFromUrl || !router.isReady || spaceSafes.length > 0) return
+    if (urlSelectionState.current === 'done' || !safeFromUrl || !router.isReady || spaceSafes.length > 0) return
 
     const formKey = safeParamToFormKey(safeFromUrl, chains)
     if (!formKey) {
       const { prefix } = parsePrefixedAddress(safeFromUrl)
       if (prefix && !/^\d+$/.test(prefix) && chains.length === 0) return
-      hasInitializedFromUrl.current = true
+      urlSelectionState.current = 'done'
       return
     }
 
@@ -119,12 +120,12 @@ const useOnboardingSubmit = (
       for (const subSafe of multiChainGroup.safes) {
         selected[getSafeId(subSafe)] = true
       }
-      hasInitializedFromUrl.current = true
+      urlSelectionState.current = 'done'
       reset({ selectedSafes: selected })
-    } else if (!hasTentativeSelection.current) {
+    } else if (urlSelectionState.current === 'idle') {
       // Select the single key once. Don't finalize — owned safes from other
       // chains may still be loading, which could form a multichain group later.
-      hasTentativeSelection.current = true
+      urlSelectionState.current = 'tentative'
       reset({ selectedSafes: { [formKey]: true } })
     }
   }, [safeFromUrl, router.isReady, spaceSafes, reset, chains, allSafes])
