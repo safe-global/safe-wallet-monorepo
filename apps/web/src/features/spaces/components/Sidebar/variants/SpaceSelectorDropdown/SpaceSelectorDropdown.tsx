@@ -16,7 +16,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
+import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
@@ -196,10 +196,25 @@ export const SpaceSelectorDropdown = ({
 
         <DropdownMenuSeparator className="my-1" />
 
-        <DropdownMenuItem onClick={handleCreateSpace} className={MENU_ITEM_CLASS}>
-          <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-          <span>Add new space</span>
-        </DropdownMenuItem>
+        {(() => {
+          const isAtSpacesLimit = spaces.length >= SPACES_LIMIT
+          const addSpaceMenuItem = (
+            <DropdownMenuItem onClick={handleCreateSpace} disabled={isAtSpacesLimit} className={MENU_ITEM_CLASS}>
+              <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
+              <span>Add new space</span>
+            </DropdownMenuItem>
+          )
+
+          if (!isAtSpacesLimit) return addSpaceMenuItem
+
+          return (
+            <Tooltip key="add-space-tooltip">
+              <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
+              <TooltipContent side="right">You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+            </Tooltip>
+          )
+        })()}
+
         <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
           <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>View all</span>

@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { getDeterministicColor } from '@/features/spaces'
-import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../../constants'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../../constants'
 import { truncateSpaceName } from '../../../utils'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 
@@ -609,6 +609,101 @@ describe('SpaceSelectorDropdown', () => {
       })
 
       expect(mockAddToSpace).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('spaces limit (max 10 workspaces)', () => {
+    it('disables "Add new space" button when spaces are at the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).toBeDisabled()
+    })
+
+    it('shows a tooltip when "Add new space" button is disabled due to spaces limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+    })
+
+    it('does not disable "Add new space" button when spaces are below the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).not.toBeDisabled()
+    })
+
+    it('does not show a tooltip when "Add new space" button is enabled', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.queryByText(`You can have up to ${SPACES_LIMIT} workspaces`)).not.toBeInTheDocument()
+    })
+
+    it('disables "Add new space" button when spaces exceed the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT + 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).toBeDisabled()
+    })
+
+    it('shows the correct limit message in the tooltip', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
     })
   })
 })
