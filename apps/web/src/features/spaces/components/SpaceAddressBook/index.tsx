@@ -1,171 +1,62 @@
-import { useMemo, useState } from 'react'
-import { Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useIsInvited, useIsAdmin, useAddressBookSearch, useGetSpaceAddressBook } from '@/features/spaces'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
 import EmptyAddressBook from './EmptyAddressBook'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
-import ActivityLog from './ActivityLog'
 import ImportAddressBook from './Import'
+import SearchInput from '../SearchInput'
+import { useState } from 'react'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState('workspace')
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-  const isDarkMode = useDarkMode()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const addressBookItems = useGetSpaceAddressBook()
-  const allLocalAddressBooks = useAllAddressBooks()
 
-  const mySpaceContacts: AddressBookEntry[] = useMemo(
-    () =>
-      addressBookItems
-        .filter((item) => user?.wallets.some((w) => sameAddress(w.address, item.createdBy)))
-        .map((item) => ({ ...item, isLocal: false })),
-    [addressBookItems, user?.wallets],
-  )
-
-  const localContacts: AddressBookEntry[] = useMemo(() => {
-    // Aggregate local contacts across all chains, grouping chainIds per address
-    const walletAddress = user?.wallets[0]?.address ?? ''
-    const byAddress = new Map<string, { address: string; name: string; chainIds: Set<string> }>()
-    for (const [chainId, book] of Object.entries(allLocalAddressBooks)) {
-      for (const [address, name] of Object.entries(book)) {
-        const key = address.toLowerCase()
-        const existing = byAddress.get(key)
-        if (existing) {
-          existing.chainIds.add(chainId)
-        } else {
-          byAddress.set(key, { address, name, chainIds: new Set([chainId]) })
-        }
-      }
-    }
-    return Array.from(byAddress.values()).map(({ address, name, chainIds }) => ({
-      name,
-      address,
-      chainIds: Array.from(chainIds),
-      createdBy: walletAddress,
-      lastUpdatedBy: '',
-      isLocal: true,
-    }))
-  }, [allLocalAddressBooks, user?.wallets])
-
-  // Merge space contacts created by me + local contacts (excluding duplicates already in space)
-  const myContacts: AddressBookEntry[] = useMemo(() => {
-    const uniqueLocal = localContacts.filter(
-      (local) => !mySpaceContacts.some((space) => sameAddress(space.address, local.address)),
-    )
-    return [...mySpaceContacts, ...uniqueLocal]
-  }, [mySpaceContacts, localContacts])
-
-  const filteredAllRaw = useAddressBookSearch(addressBookItems, searchQuery)
-  const filteredAll: AddressBookEntry[] = useMemo(
-    () => filteredAllRaw.map((item) => ({ ...item, isLocal: false })),
-    [filteredAllRaw],
-  )
-  const filteredMine = useAddressBookSearch(myContacts, searchQuery) as AddressBookEntry[]
+  const filteredAddressBook = useAddressBookSearch(addressBookItems, searchQuery)
 
   return (
     <>
       {isInvited && <PreviewInvite />}
+      <Typography variant="h1" mb={3}>
+        Address book
+      </Typography>
 
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        {/* Header row: title + subtitle left, buttons right */}
-        <div className="mt-6 mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <Typography variant="h1">Address book</Typography>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Org-verified contacts are shared with all Workspace members.
-            </p>
-          </div>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        mb={3}
+        flexWrap="wrap"
+        gap={2}
+        flexDirection={{ xs: 'column-reverse', md: 'row' }}
+      >
+        <SearchInput onSearch={setSearchQuery} />
 
-          {isAdmin && (
-            <div className="flex shrink-0 gap-2">
-              <ImportAddressBook />
-              <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                <AddContact />
-              </Track>
-            </div>
-          )}
-        </div>
-
-        {addressBookItems.length === 0 && localContacts.length === 0 ? (
-          <EmptyAddressBook />
-        ) : (
-          <Tabs
-            defaultValue="workspace"
-            onValueChange={(val) => {
-              setSearchQuery('')
-              setActiveTab(val)
-            }}
-          >
-            <TabsList variant="line">
-              <TabsTrigger value="workspace" className="cursor-pointer">
-                Workspace contacts ({addressBookItems.length})
-              </TabsTrigger>
-              <TabsTrigger value="mine" className="cursor-pointer">
-                My contacts ({myContacts.length})
-              </TabsTrigger>
-              <TabsTrigger value="activity" className="cursor-pointer">
-                Activity log
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Search bar below tabs (hidden on activity tab) */}
-            {activeTab !== 'activity' && (
-              <div className="relative mt-4 mb-4 w-full sm:max-w-[320px]">
-                <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-                <Input
-                  placeholder="Search"
-                  aria-label="Search contacts by name or address"
-                  className="bg-white pl-8 dark:bg-white/10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div className="bg-card rounded-lg border p-4">
-              <TabsContent value="workspace">
-                {searchQuery && filteredAll.length === 0 ? (
-                  <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
-                ) : (
-                  <SpaceAddressBookTable entries={filteredAll} />
-                )}
-              </TabsContent>
-
-              <TabsContent value="mine">
-                {searchQuery && filteredMine.length === 0 ? (
-                  <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
-                ) : filteredMine.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
-                ) : (
-                  <SpaceAddressBookTable entries={filteredMine} />
-                )}
-              </TabsContent>
-
-              <TabsContent value="activity">
-                <ActivityLog entries={filteredAll} />
-              </TabsContent>
-            </div>
-          </Tabs>
+        {isAdmin && (
+          <Stack direction="row" gap={1}>
+            <ImportAddressBook />
+            <Track {...SPACE_EVENTS.ADD_ADDRESS}>
+              <AddContact />
+            </Track>
+          </Stack>
         )}
-      </div>
+      </Stack>
+
+      {searchQuery && !filteredAddressBook.length && (
+        <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
+          Found 0 results
+        </Typography>
+      )}
+
+      {addressBookItems.length === 0 ? (
+        <EmptyAddressBook />
+      ) : (
+        filteredAddressBook.length > 0 && <SpaceAddressBookTable entries={filteredAddressBook} />
+      )}
     </>
   )
 }

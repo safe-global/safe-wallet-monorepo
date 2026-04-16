@@ -18,6 +18,7 @@ import { selectActiveChain } from '@/src/store/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { getExecutionMethod } from './helpers'
 import { parseFeeParams } from '@/src/utils/feeParams'
+import { useOptionalWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 import useGasFee from '../../hooks/useGasFee'
 import { useTransactionExecution } from '../../hooks/useTransactionExecution'
 import { useExecutionFunds } from '../../hooks/useExecutionFunds'
@@ -67,12 +68,16 @@ export function ReviewAndExecuteContainer() {
     [estimatedFeeParams],
   )
 
+  // WalletConnect provider
+  const wcContext = useOptionalWalletConnectContext()
+
   // Execution
   const { execute } = useTransactionExecution({
     txId: txId || '',
     executionMethod,
     signerAddress: activeSigner?.value || '',
     feeParams,
+    wcProvider: wcContext?.provider,
   })
 
   // Execution flow (state + handler)

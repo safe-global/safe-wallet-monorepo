@@ -13,7 +13,9 @@ import useSafeInfo from '@/src/hooks/useSafeInfo'
 import { executePrivateKeyTx } from '@/src/services/tx-execution/privateKeyExecutor'
 import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
+import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
   IDLE = 'idle',
@@ -28,6 +30,7 @@ interface UseTransactionExecutionProps {
   signerAddress: string
   feeParams: EstimatedFeeValues | null
   executionMethod: ExecutionMethod
+  wcProvider?: Provider
 }
 
 export function useTransactionExecution({
@@ -35,6 +38,7 @@ export function useTransactionExecution({
   signerAddress,
   executionMethod,
   feeParams,
+  wcProvider,
 }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
   const dispatch = useAppDispatch()
@@ -75,6 +79,18 @@ export function useTransactionExecution({
         feeParams,
       })
     },
+    [ExecutionMethod.WITH_WC]: async () => {
+      if (!wcProvider) {
+        throw new Error('WalletConnect provider not available')
+      }
+      return await executeWalletConnectTx({
+        chain: activeChain,
+        activeSafe,
+        txId,
+        signerAddress,
+        provider: wcProvider,
+      })
+    },
   }
 
   const execute = useCallback(async () => {
@@ -101,7 +117,18 @@ export function useTransactionExecution({
 
       throw error
     }
-  }, [executionMethod, activeChain, activeSafe, safe, txId, signerAddress, feeParams, relayMutation, dispatch])
+  }, [
+    executionMethod,
+    activeChain,
+    activeSafe,
+    safe,
+    txId,
+    signerAddress,
+    feeParams,
+    relayMutation,
+    wcProvider,
+    dispatch,
+  ])
 
   const retry = useCallback(() => {
     execute()

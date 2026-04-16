@@ -19,7 +19,7 @@ export const PendingTxInfo = ({ createdAt, pendingTx }: { createdAt: number | nu
         </View>
       )}
 
-      {pendingTx?.type === ExecutionMethod.WITH_PK && (
+      {(pendingTx?.type === ExecutionMethod.WITH_PK || pendingTx?.type === ExecutionMethod.WITH_WC) && (
         <View alignItems="center" flexDirection="row" justifyContent="space-between">
           <Text color="$textSecondaryLight">Transaction hash</Text>
           <HashDisplay value={pendingTx.txHash} showVisualIdentifier={false} />

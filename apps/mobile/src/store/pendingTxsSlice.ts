@@ -10,7 +10,7 @@ export enum PendingStatus {
 }
 
 type PendingSingleTxBase = {
-  type: ExecutionMethod.WITH_PK
+  type: ExecutionMethod.WITH_PK | ExecutionMethod.WITH_WC
   chainId: string
   safeAddress: string
   txHash: string
@@ -59,7 +59,7 @@ export const pendingTxsSlice = createSlice({
       action: PayloadAction<
         | {
             txId: string
-            type: ExecutionMethod.WITH_PK
+            type: ExecutionMethod.WITH_PK | ExecutionMethod.WITH_WC
             chainId: string
             safeAddress: string
             txHash: string
