@@ -22,7 +22,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = () => {
+const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -107,7 +107,7 @@ const AddContact = () => {
     <>
       <ShadcnButton size="sm" onClick={handleOpen}>
         <PlusIcon />
-        Add contact
+        {label}
       </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>

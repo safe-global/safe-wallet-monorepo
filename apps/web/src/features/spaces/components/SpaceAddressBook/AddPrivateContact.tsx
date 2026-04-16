@@ -97,7 +97,7 @@ const AddPrivateContact = () => {
     <>
       <ShadcnButton size="sm" variant="outline" onClick={handleOpen}>
         <PlusIcon />
-        Add contact
+        Add private contact
       </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add private contact" hideChainIndicator>
         <FormProvider {...methods}>

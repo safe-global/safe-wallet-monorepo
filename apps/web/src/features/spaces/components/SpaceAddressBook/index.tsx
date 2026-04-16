@@ -120,16 +120,15 @@ const SpaceAddressBook = () => {
           </div>
 
           <div className="flex shrink-0 gap-2">
-            {isAdmin ? (
+            {isAdmin && activeTab === 'workspace' && (
               <>
                 <ImportAddressBook />
                 <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                  <AddContact />
+                  <AddContact label="Add contact to workspace" />
                 </Track>
               </>
-            ) : (
-              <AddPrivateContact />
             )}
+            {activeTab === 'mine' && <AddPrivateContact />}
           </div>
         </div>
 
