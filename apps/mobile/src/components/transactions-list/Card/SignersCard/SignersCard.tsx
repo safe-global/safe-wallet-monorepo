@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react'
 import { Text, View, type TextProps } from 'tamagui'
 import { Identicon } from '@/src/components/Identicon'
-import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { EthAddress } from '@/src/components/EthAddress'
 import { Address } from '@/src/types/address'
-import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
 
 type SignersCardProps = {
   name?: string | React.ReactNode
@@ -98,13 +96,7 @@ export function SignersCard({
           )}
         </View>
       }
-      leftNode={
-        <View width="$10">
-          <BadgeWrapper badge={<SignerTypeBadge address={address} theme="badge_background" />} position="bottom-right">
-            <Identicon address={address} size={40} />
-          </BadgeWrapper>
-        </View>
-      }
+      leftNode={<Identicon address={address} size={40} />}
       rightNode={rightNode}
     />
   )
