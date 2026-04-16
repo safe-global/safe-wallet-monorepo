@@ -14,8 +14,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
-  createdAt?: string
-  updatedAt?: string
 }
 
 type SpaceAddressBookTableProps = {

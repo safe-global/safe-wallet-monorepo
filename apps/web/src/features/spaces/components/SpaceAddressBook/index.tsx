@@ -61,6 +61,8 @@ const SpaceAddressBook = () => {
       chainIds: Array.from(chainIds),
       createdBy: walletAddress,
       lastUpdatedBy: '',
+      createdAt: '',
+      updatedAt: '',
       isLocal: true,
     }))
   }, [allLocalAddressBooks, user?.wallets])

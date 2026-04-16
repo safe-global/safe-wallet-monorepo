@@ -7,6 +7,8 @@ const makeEntry = (overrides: Partial<AddressBookEntry> = {}): AddressBookEntry 
   chainIds: ['1'],
   createdBy: '0xaaaa',
   lastUpdatedBy: '0xbbbb',
+  createdAt: '',
+  updatedAt: '',
   isLocal: false,
   ...overrides,
 })
