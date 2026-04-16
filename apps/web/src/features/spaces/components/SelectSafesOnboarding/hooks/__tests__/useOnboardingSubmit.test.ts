@@ -328,6 +328,38 @@ describe('useOnboardingSubmit', () => {
     expect(selectedSafes['11155111:0x0000000000000000000000000000000000000001']).toBe(true)
   })
 
+  it('should not preselect from URL when shortName does not match any chain', async () => {
+    mockRouterQuery = { safe: 'unknownchain:0xdeadbeef' }
+    mockChains.push({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' } as Chain)
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess))
+
+    // Wait a tick to allow effects to settle
+    await act(async () => {})
+
+    expect(result.current.selectedSafesLength).toBe(0)
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['1:0xdeadbeef']).toBeUndefined()
+  })
+
+  it('should preselect safe from URL when shortName is uppercase', async () => {
+    mockRouterQuery = { safe: 'SEP:0x0000000000000000000000000000000000000001' }
+    mockChains.push({
+      chainId: '11155111',
+      chainName: 'Sepolia',
+      shortName: 'sep',
+    } as Chain)
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['11155111:0x0000000000000000000000000000000000000001']).toBe(true)
+  })
+
   it('should not preselect from URL when space already has safes', async () => {
     mockRouterQuery = { safe: '1:0xdeadbeef' }
     mockSpaceSafes = [buildSafeItem('5', '0xother')]
