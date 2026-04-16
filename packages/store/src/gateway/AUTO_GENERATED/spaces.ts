@@ -130,6 +130,69 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      addressBooksGetPrivateItemsV1: build.query<
+        AddressBooksGetPrivateItemsV1ApiResponse,
+        AddressBooksGetPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/private` }),
+        providesTags: ['spaces'],
+      }),
+      addressBooksUpsertPrivateItemsV1: build.mutation<
+        AddressBooksUpsertPrivateItemsV1ApiResponse,
+        AddressBooksUpsertPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private`,
+          method: 'PUT',
+          body: queryArg.upsertAddressBookItemsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksDeletePrivateItemV1: build.mutation<
+        AddressBooksDeletePrivateItemV1ApiResponse,
+        AddressBooksDeletePrivateItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksGetRequestsV1: build.query<AddressBooksGetRequestsV1ApiResponse, AddressBooksGetRequestsV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/requests` }),
+        providesTags: ['spaces'],
+      }),
+      addressBooksCreateRequestV1: build.mutation<
+        AddressBooksCreateRequestV1ApiResponse,
+        AddressBooksCreateRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests`,
+          method: 'POST',
+          body: queryArg.createAddressBookRequestDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksApproveRequestV1: build.mutation<
+        AddressBooksApproveRequestV1ApiResponse,
+        AddressBooksApproveRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/approve`,
+          method: 'PUT',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksRejectRequestV1: build.mutation<
+        AddressBooksRejectRequestV1ApiResponse,
+        AddressBooksRejectRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/reject`,
+          method: 'PUT',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -257,6 +320,53 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
+export type AddressBooksGetPrivateItemsV1ApiResponse =
+  /** status 200 Private address book items retrieved successfully */ SpaceAddressBookDto
+export type AddressBooksGetPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type AddressBooksUpsertPrivateItemsV1ApiResponse =
+  /** status 200 Private address book updated successfully */ SpaceAddressBookDto
+export type AddressBooksUpsertPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type AddressBooksDeletePrivateItemV1ApiResponse = unknown
+export type AddressBooksDeletePrivateItemV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address to remove */
+  address: string
+}
+export type AddressBooksGetRequestsV1ApiResponse =
+  /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
+export type AddressBooksGetRequestsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type AddressBooksCreateRequestV1ApiResponse =
+  /** status 201 Request created successfully */ AddressBookRequestItemDto
+export type AddressBooksCreateRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  createAddressBookRequestDto: CreateAddressBookRequestDto
+}
+export type AddressBooksApproveRequestV1ApiResponse = unknown
+export type AddressBooksApproveRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID */
+  requestId: number
+}
+export type AddressBooksRejectRequestV1ApiResponse = unknown
+export type AddressBooksRejectRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID */
+  requestId: number
+}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
@@ -368,6 +478,24 @@ export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
 }
+export type AddressBookRequestItemDto = {
+  id: number
+  name: string
+  address: string
+  chainIds: string[]
+  requestedBy: string
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  createdAt: string
+  updatedAt: string
+}
+export type AddressBookRequestsDto = {
+  spaceId: string
+  data: AddressBookRequestItemDto[]
+}
+export type CreateAddressBookRequestDto = {
+  /** Address of the private contact to request adding to space */
+  address: string
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -396,4 +524,13 @@ export const {
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useAddressBooksGetPrivateItemsV1Query,
+  useLazyAddressBooksGetPrivateItemsV1Query,
+  useAddressBooksUpsertPrivateItemsV1Mutation,
+  useAddressBooksDeletePrivateItemV1Mutation,
+  useAddressBooksGetRequestsV1Query,
+  useLazyAddressBooksGetRequestsV1Query,
+  useAddressBooksCreateRequestV1Mutation,
+  useAddressBooksApproveRequestV1Mutation,
+  useAddressBooksRejectRequestV1Mutation,
 } = injectedRtkApi

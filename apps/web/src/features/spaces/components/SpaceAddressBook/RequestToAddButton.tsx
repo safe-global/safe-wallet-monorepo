@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { useCreateAddressBookRequestMutation } from '@safe-global/store/gateway/privateAddressBookApi'
+import { useAddressBooksCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
@@ -9,7 +9,7 @@ import { CircularProgress } from '@mui/material'
 const RequestToAddButton = ({ address }: { address: string }) => {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
-  const [createRequest] = useCreateAddressBookRequestMutation()
+  const [createRequest] = useAddressBooksCreateRequestV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleRequest = async () => {
@@ -19,7 +19,7 @@ const RequestToAddButton = ({ address }: { address: string }) => {
       setIsSubmitting(true)
       const result = await createRequest({
         spaceId: Number(spaceId),
-        address,
+        createAddressBookRequestDto: { address },
       })
 
       if (result.error) {
