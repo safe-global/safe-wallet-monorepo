@@ -3,7 +3,7 @@ import { isMultiChainSafeItem, useAllSafesGrouped, flattenSafeItems } from '@/ho
 import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '@/features/global-search/hooks/useGlobalSearchFilter'
-import useMatchSafe from '@/features/global-search/hooks/useMatchSafe'
+import useMatchSafe from '@/hooks/useMatchSafe'
 import SectionWrapper from '../../SectionWrapper'
 
 const TrustedSafesSection = ({ query, label }: SectionItemProps) => {

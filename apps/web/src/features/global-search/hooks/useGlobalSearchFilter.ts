@@ -1,5 +1,6 @@
-import { useEffect, useId, useMemo, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useSectionVisibility } from '@/features/global-search/components/SearchSection/SectionVisibilityContext'
+import useSearchFilter from '@/hooks/useSearchFilter'
 
 type FilterFn<T> = (item: T, query: string) => boolean
 
@@ -17,14 +18,7 @@ const useGlobalSearchFilter = <T>(items: T[], query: string, filterBy: keyof T |
   const id = useId()
   const idRef = useRef(id)
 
-  const filteredItems = useMemo(() => {
-    const trimmed = query.trim().toLowerCase()
-    if (!trimmed) return items
-
-    const matchFn: FilterFn<T> =
-      typeof filterBy === 'function' ? filterBy : (item) => String(item[filterBy]).toLowerCase().includes(trimmed)
-    return items.filter((item) => matchFn(item, trimmed))
-  }, [items, query, filterBy])
+  const filteredItems = useSearchFilter(items, query, filterBy)
 
   useEffect(() => {
     const currentId = idRef.current

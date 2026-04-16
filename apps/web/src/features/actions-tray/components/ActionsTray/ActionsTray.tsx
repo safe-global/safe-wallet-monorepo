@@ -15,6 +15,8 @@ import { NewTxFlow } from '@/components/tx-flow/flows'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
+import { useAppDispatch } from '@/store'
+import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
 
 const PassThrough = ({ children }: { children: (ok: boolean) => ReactNode }) => <Fragment>{children(true)}</Fragment>
 
@@ -26,6 +28,7 @@ interface ActionsTrayProps {
 const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const { link: txBuilderLink } = useTxBuilderApp()
   const isDarkMode = useDarkMode()
@@ -34,10 +37,33 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   const Wallet = isSpace ? PassThrough : CheckWallet
   const secondaryVariant = isSpace ? 'outline' : 'secondary'
 
+  const openModal = useCallback(
+    (type: ESafeAction) => {
+      dispatch(openSafeActionsModal({ type }))
+    },
+    [dispatch],
+  )
+
   const handleOnSend = useCallback(() => {
+    if (isSpace) {
+      openModal(ESafeAction.Send)
+      return
+    }
     setTxFlow(<NewTxFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
-  }, [setTxFlow])
+  }, [isSpace, openModal, setTxFlow])
+
+  const handleOnSwap = useCallback(() => {
+    openModal(ESafeAction.Swap)
+  }, [openModal])
+
+  const handleOnReceive = useCallback(() => {
+    openModal(ESafeAction.Receive)
+  }, [openModal])
+
+  const handleOnBuildTx = useCallback(() => {
+    openModal(ESafeAction.BuildTransaction)
+  }, [openModal])
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
@@ -54,47 +80,79 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
         )}
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
-          <QrCodeButton>
-            <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')}>
+          {isSpace ? (
+            <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')} onClick={handleOnReceive}>
               <ArrowDownLeft className="size-5" />
               Receive
             </Button>
-          </QrCodeButton>
+          ) : (
+            <QrCodeButton>
+              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')}>
+                <ArrowDownLeft className="size-5" />
+                Receive
+              </Button>
+            </QrCodeButton>
+          )}
         </Track>
 
         {isSwapFeatureEnabled && !noAssets && (
           <Wallet>
             {(isOk) => (
               <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                <Button
-                  variant={secondaryVariant}
-                  className={cn('px-6 hover:bg-border')}
-                  data-testid="overview-swap-btn"
-                  disabled={!isOk}
-                  render={isOk ? <Link href={{ pathname: AppRoutes.swap, query: router.query }} /> : undefined}
-                >
-                  <Repeat className="size-5" strokeWidth={1.5} />
-                  Swap
-                </Button>
+                {isSpace ? (
+                  <Button
+                    variant={secondaryVariant}
+                    className={cn('px-6 hover:bg-border')}
+                    data-testid="overview-swap-btn"
+                    disabled={!isOk}
+                    onClick={handleOnSwap}
+                  >
+                    <Repeat className="size-5" strokeWidth={1.5} />
+                    Swap
+                  </Button>
+                ) : (
+                  <Button
+                    variant={secondaryVariant}
+                    className={cn('px-6 hover:bg-border')}
+                    data-testid="overview-swap-btn"
+                    disabled={!isOk}
+                    render={isOk ? <Link href={{ pathname: AppRoutes.swap, query: router.query }} /> : undefined}
+                  >
+                    <Repeat className="size-5" strokeWidth={1.5} />
+                    Swap
+                  </Button>
+                )}
               </Track>
             )}
           </Wallet>
         )}
 
         <Wallet>
-          {(isOk) => (
-            <Button
-              variant={secondaryVariant}
-              size={isSpace ? 'default' : 'icon'}
-              className={cn(isSpace ? 'px-6' : 'rounded-lg', 'hover:bg-border')}
-              disabled={!isOk}
-              render={isOk ? <Link href={txBuilderLink} /> : undefined}
-              aria-label="Transaction builder"
-            >
-              <SquareDashedBottomCode className={cn('size-5', !isSpace && 'text-muted-foreground')} strokeWidth={1.5} />
-              {isSpace && 'Build transaction'}
-            </Button>
-          )}
+          {(isOk) =>
+            isSpace ? (
+              <Button
+                variant={secondaryVariant}
+                className="px-6 hover:bg-border"
+                disabled={!isOk}
+                onClick={handleOnBuildTx}
+                aria-label="Transaction builder"
+              >
+                <SquareDashedBottomCode className="size-5" strokeWidth={1.5} />
+                Build transaction
+              </Button>
+            ) : (
+              <Button
+                variant={secondaryVariant}
+                size="icon"
+                className="rounded-lg hover:bg-border"
+                disabled={!isOk}
+                render={isOk ? <Link href={txBuilderLink} /> : undefined}
+                aria-label="Transaction builder"
+              >
+                <SquareDashedBottomCode className="size-5 text-muted-foreground" strokeWidth={1.5} />
+              </Button>
+            )
+          }
         </Wallet>
       </div>
     </div>
