@@ -1,5 +1,4 @@
 import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
-import { Button as ShadcnButton } from '@/components/ui/button'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -99,10 +98,9 @@ const AddContact = () => {
 
   return (
     <>
-      <ShadcnButton size="sm" onClick={handleOpen}>
-        <PlusIcon />
+      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen}>
         Add contact
-      </ShadcnButton>
+      </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
