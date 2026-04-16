@@ -24,6 +24,13 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
 }))
 
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeQueryParam: () => {
+    const safe = mockRouterQuery.safe
+    return typeof safe === 'string' ? safe : ''
+  },
+}))
+
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))

@@ -10,6 +10,13 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ query: mockRouterQuery, push: mockPush }),
 }))
 
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeQueryParam: () => {
+    const safe = mockRouterQuery.safe
+    return typeof safe === 'string' ? safe : ''
+  },
+}))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt }: { alt: string }) => <img alt={alt} />,
