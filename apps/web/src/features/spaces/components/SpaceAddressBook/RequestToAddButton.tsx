@@ -94,9 +94,13 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
     }
   }
 
+  if (isDone) {
+    return <span className="text-muted-foreground text-xs">Requested</span>
+  }
+
   return (
-    <Button variant="outline" size="sm" onClick={handleRequest} disabled={isSubmitting || isDone}>
-      {isSubmitting ? <CircularProgress size={14} /> : isDone ? 'Requested' : 'Request to add'}
+    <Button variant="outline" size="sm" onClick={handleRequest} disabled={isSubmitting}>
+      {isSubmitting ? <CircularProgress size={14} /> : 'Request to add'}
     </Button>
   )
 }
