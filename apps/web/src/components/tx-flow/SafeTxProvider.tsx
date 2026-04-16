@@ -5,6 +5,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
+import { getTxOrigin } from '@/utils/transactions'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -56,7 +57,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
-    typeof window !== 'undefined' ? JSON.stringify({ url: window.location.origin, name: '' }) : undefined,
+    typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
   )
 
   // Signed txs cannot be updated
