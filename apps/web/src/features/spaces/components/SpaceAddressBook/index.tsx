@@ -100,6 +100,11 @@ const SpaceAddressBook = () => {
   )
   const filteredMine = useAddressBookSearch(myContacts, searchQuery) as AddressBookEntry[]
 
+  const pendingAddresses = useMemo(
+    () => new Set(pendingRequests.map((r) => r.address.toLowerCase())),
+    [pendingRequests],
+  )
+
   const hasAnyContacts = addressBookItems.length > 0 || privateContacts.length > 0 || localContacts.length > 0
 
   return (
@@ -185,7 +190,12 @@ const SpaceAddressBook = () => {
                     entries={filteredMine}
                     showAddedBy={false}
                     renderExtraAction={(entry) =>
-                      entry.isPrivate ? <RequestToAddButton address={entry.address} /> : null
+                      entry.isPrivate ? (
+                        <RequestToAddButton
+                          address={entry.address}
+                          alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                        />
+                      ) : null
                     }
                   />
                 )}
