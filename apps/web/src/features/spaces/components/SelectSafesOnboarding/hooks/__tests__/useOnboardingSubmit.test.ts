@@ -360,6 +360,86 @@ describe('useOnboardingSubmit', () => {
     expect(selectedSafes['11155111:0x0000000000000000000000000000000000000001']).toBe(true)
   })
 
+  it('should preselect all sub-safes when URL address matches a multichain group', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    const multiChainGroup = buildMultiChainSafeItem('0xdeadbeef', ['1', '137', '42161'])
+    const allSafes = [multiChainGroup, buildSafeItem('1', '0xother')]
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess, allSafes))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(3)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['multichain_0xdeadbeef']).toBe(true)
+    expect(selectedSafes['1:0xdeadbeef']).toBe(true)
+    expect(selectedSafes['137:0xdeadbeef']).toBe(true)
+    expect(selectedSafes['42161:0xdeadbeef']).toBe(true)
+    expect(selectedSafes['1:0xother']).toBeUndefined()
+  })
+
+  it('should preselect multichain group when URL uses shortName prefix', async () => {
+    mockRouterQuery = { safe: 'eth:0xdeadbeef' }
+    mockChains.push({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' } as Chain)
+    const multiChainGroup = buildMultiChainSafeItem('0xdeadbeef', ['1', '137'])
+    const allSafes = [multiChainGroup]
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess, allSafes))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(2)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['multichain_0xdeadbeef']).toBe(true)
+    expect(selectedSafes['1:0xdeadbeef']).toBe(true)
+    expect(selectedSafes['137:0xdeadbeef']).toBe(true)
+  })
+
+  it('should preselect single key when address is not in a multichain group', async () => {
+    mockRouterQuery = { safe: '1:0xsingle' }
+    const allSafes = [buildSafeItem('1', '0xsingle'), buildMultiChainSafeItem('0xother', ['1', '137'])]
+
+    const { result } = renderHook(() => useOnboardingSubmit('99', onSuccess, allSafes))
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['1:0xsingle']).toBe(true)
+    expect(selectedSafes['multichain_0xother']).toBeUndefined()
+  })
+
+  it('should upgrade to multichain selection when allSafes loads after initial render', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    const emptyAllSafes: Array<SafeItem | MultiChainSafeItem> = []
+
+    const { result, rerender } = renderHook(({ safes }) => useOnboardingSubmit('99', onSuccess, safes), {
+      initialProps: { safes: emptyAllSafes },
+    })
+
+    // Initially: single key selected, not finalized
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(1)
+    })
+    expect(result.current.formMethods.getValues('selectedSafes')).toEqual({ '1:0xdeadbeef': true })
+
+    // allSafes loads with a multichain group
+    const multiChainGroup = buildMultiChainSafeItem('0xdeadbeef', ['1', '137'])
+    rerender({ safes: [multiChainGroup] })
+
+    await waitFor(() => {
+      expect(result.current.selectedSafesLength).toBe(2)
+    })
+
+    const selectedSafes = result.current.formMethods.getValues('selectedSafes')
+    expect(selectedSafes['multichain_0xdeadbeef']).toBe(true)
+    expect(selectedSafes['1:0xdeadbeef']).toBe(true)
+    expect(selectedSafes['137:0xdeadbeef']).toBe(true)
+  })
+
   it('should not preselect from URL when space already has safes', async () => {
     mockRouterQuery = { safe: '1:0xdeadbeef' }
     mockSpaceSafes = [buildSafeItem('5', '0xother')]
