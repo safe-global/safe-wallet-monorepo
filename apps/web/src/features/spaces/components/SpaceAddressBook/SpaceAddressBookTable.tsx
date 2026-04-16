@@ -43,6 +43,7 @@ function SpaceAddressBookTable({
     setPage(0)
   }, [entries])
 
+  const hasMiddleColumn = showAddedBy || showLastUpdated
   const totalPages = Math.ceil(entries.length / PAGE_SIZE)
   const paginatedEntries = entries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
@@ -52,12 +53,10 @@ function SpaceAddressBookTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[20%]">Name</TableHead>
-            <TableHead className="w-[35%]">Address</TableHead>
+            <TableHead className="w-[30%]">Address</TableHead>
             <TableHead className="w-[15%]">Chains</TableHead>
-            <TableHead className="w-[20%]">
-              {showAddedBy ? 'Added by' : showLastUpdated ? 'Last updated' : ''}
-            </TableHead>
-            <TableHead className="w-[10%]" />
+            {hasMiddleColumn && <TableHead className="w-[20%]">{showAddedBy ? 'Added by' : 'Last updated'}</TableHead>}
+            <TableHead className={hasMiddleColumn ? 'w-[15%]' : 'w-[35%]'} />
           </TableRow>
         </TableHeader>
 
@@ -120,22 +119,24 @@ function SpaceAddressBookTable({
                 </Tooltip>
               </TableCell>
 
-              {/* 4th column: Added by / Last updated / empty */}
-              <TableCell>
-                {showAddedBy && entry.createdBy ? (
-                  <EthHashInfo
-                    address={entry.createdBy}
-                    avatarSize={20}
-                    onlyName
-                    showPrefix={false}
-                    showCopyButton={false}
-                  />
-                ) : showLastUpdated ? (
-                  <span className="text-muted-foreground text-xs">
-                    {formatDate(entry.updatedAt || entry.createdAt)}
-                  </span>
-                ) : null}
-              </TableCell>
+              {/* 4th column: Added by / Last updated (only if applicable) */}
+              {hasMiddleColumn && (
+                <TableCell>
+                  {showAddedBy && entry.createdBy ? (
+                    <EthHashInfo
+                      address={entry.createdBy}
+                      avatarSize={20}
+                      onlyName
+                      showPrefix={false}
+                      showCopyButton={false}
+                    />
+                  ) : showLastUpdated ? (
+                    <span className="text-muted-foreground text-xs">
+                      {formatDate(entry.updatedAt || entry.createdAt)}
+                    </span>
+                  ) : null}
+                </TableCell>
+              )}
 
               {/* Actions */}
               <TableCell className="text-right">
