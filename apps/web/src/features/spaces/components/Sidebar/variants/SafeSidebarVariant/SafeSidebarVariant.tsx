@@ -40,8 +40,8 @@ export const SafeSidebarVariant = ({
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const isHydrated = useSidebarHydrated()
-
-  const safeAddress = isHydrated ? useSafeQueryParam() || undefined : undefined
+  const safeFromQuery = useSafeQueryParam()
+  const safeAddress = isHydrated ? safeFromQuery || undefined : undefined
   const isOutdated =
     isHydrated &&
     safe.implementationVersionState === ImplementationVersionState.OUTDATED &&
