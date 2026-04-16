@@ -11,6 +11,7 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import useChains from '@/hooks/useChains'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { formatDate } from './ActivityLog'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -20,12 +21,18 @@ export type AddressBookEntry = SpaceAddressBookItemDto & {
 type SpaceAddressBookTableProps = {
   entries: AddressBookEntry[]
   showAddedBy?: boolean
+  showLastUpdated?: boolean
   renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
 }
 
 const PAGE_SIZE = 25
 
-function SpaceAddressBookTable({ entries, showAddedBy = true, renderExtraAction }: SpaceAddressBookTableProps) {
+function SpaceAddressBookTable({
+  entries,
+  showAddedBy = true,
+  showLastUpdated = false,
+  renderExtraAction,
+}: SpaceAddressBookTableProps) {
   const chains = useChains()
   const [page, setPage] = useState(0)
 
@@ -46,7 +53,8 @@ function SpaceAddressBookTable({ entries, showAddedBy = true, renderExtraAction 
             <TableHead className="w-[35%]">Address</TableHead>
             <TableHead className="w-[15%]">Chains</TableHead>
             {showAddedBy && <TableHead className="w-[20%]">Added by</TableHead>}
-            <TableHead className={showAddedBy ? 'w-[10%]' : 'w-[30%]'} />
+            {showLastUpdated && <TableHead className="w-[15%]">Last updated</TableHead>}
+            <TableHead className="w-[10%]" />
           </TableRow>
         </TableHeader>
 
@@ -121,6 +129,15 @@ function SpaceAddressBookTable({ entries, showAddedBy = true, renderExtraAction 
                       showCopyButton={false}
                     />
                   ) : null}
+                </TableCell>
+              )}
+
+              {/* Last updated */}
+              {showLastUpdated && (
+                <TableCell>
+                  <span className="text-muted-foreground text-xs">
+                    {formatDate(entry.updatedAt || entry.createdAt)}
+                  </span>
                 </TableCell>
               )}
 

@@ -189,6 +189,7 @@ const SpaceAddressBook = () => {
                   <SpaceAddressBookTable
                     entries={filteredMine}
                     showAddedBy={false}
+                    showLastUpdated
                     renderExtraAction={(entry) => {
                       if (isAdmin && entry.isLocal) {
                         return (
