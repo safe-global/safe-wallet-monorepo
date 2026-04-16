@@ -124,7 +124,7 @@ const SpaceAddressBook = () => {
               <>
                 <ImportAddressBook />
                 <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                  <AddContact label="Add contact to workspace" />
+                  <AddContact label="Add shared contact" />
                 </Track>
               </>
             )}
