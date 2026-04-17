@@ -19,24 +19,22 @@ const OWNER_ADDRESS = '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
  */
 const NON_OWNER_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
-/**
- * Setup happy path: connect a wallet that IS an owner of the active Safe.
- *
- * - Onboards with the test Safe
- * - Configures walletConnectE2eState to resolve with an owner address
- * - Navigates to the tabs (home)
- */
-export const setupConnectSignerOwner = (dispatch: Dispatch, router: Router) => {
-  walletConnectE2eState.reset()
-  walletConnectE2eState.set({
-    connectResult: {
-      address: OWNER_ADDRESS,
-      walletName: 'E2E Wallet',
-      walletIcon: 'https://safe-wallet-web.dev.5afe.dev/images/safe-logo-green.png',
-    },
-    isOwner: true,
-  })
+const WALLET_NAME = 'E2E Wallet'
+const WALLET_ICON = 'https://safe-wallet-web.dev.5afe.dev/images/safe-logo-green.png'
 
+/**
+ * Set the WC e2e state for the next connection attempt.
+ * Does NOT touch Redux or navigation.
+ */
+const setWcState = (address: string, isOwner: boolean) => {
+  walletConnectE2eState.set({
+    connectResult: { address, walletName: WALLET_NAME, walletIcon: WALLET_ICON },
+    isOwner,
+  })
+}
+
+/** Onboard with the test Safe and navigate to home. */
+const onboardAndNavigate = (dispatch: Dispatch, router: Router) => {
   dispatch(
     addSafe({
       address: mockedActiveSafeInfo.address.value as Address,
@@ -49,30 +47,21 @@ export const setupConnectSignerOwner = (dispatch: Dispatch, router: Router) => {
 }
 
 /**
- * Setup error path: connect a wallet that is NOT an owner of the active Safe.
- *
- * - Onboards with the test Safe
- * - Configures walletConnectE2eState to resolve with a non-owner address
- * - Navigates to the tabs (home)
+ * Switch the WC e2e state to resolve as an owner on the next connection attempt.
+ * Use mid-test on the error screen before tapping "Connect a different wallet".
  */
+export const switchToOwnerState = () => setWcState(OWNER_ADDRESS, true)
+
+/** Setup happy path: onboard + configure WC mock to return an owner address. */
+export const setupConnectSignerOwner = (dispatch: Dispatch, router: Router) => {
+  walletConnectE2eState.reset()
+  setWcState(OWNER_ADDRESS, true)
+  onboardAndNavigate(dispatch, router)
+}
+
+/** Setup error path: onboard + configure WC mock to return a non-owner address. */
 export const setupConnectSignerNonOwner = (dispatch: Dispatch, router: Router) => {
   walletConnectE2eState.reset()
-  walletConnectE2eState.set({
-    connectResult: {
-      address: NON_OWNER_ADDRESS,
-      walletName: 'E2E Wallet',
-      walletIcon: 'https://safe-wallet-web.dev.5afe.dev/images/safe-logo-green.png',
-    },
-    isOwner: false,
-  })
-
-  dispatch(
-    addSafe({
-      address: mockedActiveSafeInfo.address.value as Address,
-      info: { [mockedActiveSafeInfo.chainId]: mockedActiveSafeInfo },
-    }),
-  )
-  dispatch(setActiveSafe(mockedActiveAccount))
-  dispatch(updatePromptAttempts(1))
-  router.replace('/(tabs)')
+  setWcState(NON_OWNER_ADDRESS, false)
+  onboardAndNavigate(dispatch, router)
 }
