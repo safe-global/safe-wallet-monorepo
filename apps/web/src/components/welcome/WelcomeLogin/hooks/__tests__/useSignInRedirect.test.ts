@@ -38,11 +38,12 @@ const defaultProps: DefaultProps = {
 
 interface SetupOptions {
   isAuthenticated?: boolean
+  isOidcLoginPending?: boolean
   routerQuery?: Record<string, string>
   props?: Partial<DefaultProps>
 }
 
-const setupMocks = ({ isAuthenticated = true, routerQuery = {} }: SetupOptions = {}) => {
+const setupMocks = ({ isAuthenticated = true, isOidcLoginPending = false, routerQuery = {} }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({
     pathname: '/welcome',
     query: routerQuery,
@@ -55,6 +56,7 @@ const setupMocks = ({ isAuthenticated = true, routerQuery = {} }: SetupOptions =
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
         lastUsedSpace: null,
         isStoreHydrated: true,
+        isOidcLoginPending,
       },
     }
     return selector(fakeState as unknown as store.RootState)
@@ -221,6 +223,49 @@ describe('useSignInRedirect', () => {
       await act(async () => {
         result.current.setHasSignedIn(true)
       })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('when OIDC sign-in completes', () => {
+    it('should redirect new users to create space page after OIDC login', async () => {
+      // Start with OIDC login pending
+      const useAppSelectorSpy = jest.spyOn(store, 'useAppSelector')
+
+      setupMocks({ isAuthenticated: false, isOidcLoginPending: true })
+
+      const { rerender } = renderHook(() => useSignInRedirect(defaultProps))
+
+      expect(mockPush).not.toHaveBeenCalled()
+
+      // Simulate OIDC callback completing: pending → false, authenticated → true
+      useAppSelectorSpy.mockImplementation((selector) => {
+        const fakeState = {
+          auth: {
+            sessionExpiresAt: Date.now() + 86400000,
+            lastUsedSpace: null,
+            isStoreHydrated: true,
+            isOidcLoginPending: false,
+          },
+        }
+        return selector(fakeState as unknown as store.RootState)
+      })
+
+      await act(async () => {
+        rerender()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.createSpace,
+        query: {},
+      })
+    })
+
+    it('should not redirect if OIDC login was never pending', async () => {
+      setupMocks({ isAuthenticated: true, isOidcLoginPending: false })
+
+      renderHook(() => useSignInRedirect(defaultProps))
 
       expect(mockPush).not.toHaveBeenCalled()
     })

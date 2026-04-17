@@ -1,17 +1,20 @@
 import type { listenerMiddlewareInstance, RootState } from '@/store/index'
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 type AuthPayload = {
   sessionExpiresAt: number | null
   lastUsedSpace: string | null
   isStoreHydrated: boolean
+  isOidcLoginPending: boolean
 }
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
   lastUsedSpace: null,
   isStoreHydrated: false,
+  isOidcLoginPending: false,
 }
 
 export const authSlice = createSlice({
@@ -29,10 +32,14 @@ export const authSlice = createSlice({
     setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
       state.lastUsedSpace = payload
     },
+
+    setIsOidcLoginPending: (state, { payload }: PayloadAction<boolean>) => {
+      state.isOidcLoginPending = payload
+    },
   },
 })
 
-export const { setAuthenticated, setUnauthenticated, setLastUsedSpace } = authSlice.actions
+export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setIsOidcLoginPending } = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
@@ -46,12 +53,16 @@ export const selectIsStoreHydrated = (state: RootState): boolean => {
   return state.auth.isStoreHydrated
 }
 
+export const selectIsOidcLoginPending = (state: RootState): boolean => {
+  return state.auth.isOidcLoginPending
+}
+
 export const authListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   listenerMiddleware.startListening({
     actionCreator: authSlice.actions.setUnauthenticated,
     effect: (_action, { dispatch }) => {
-      // @ts-ignore TS2322: Type string is not assignable to type FullTagDescription<never>
-      dispatch(cgwClient.util.invalidateTags(['spaces', 'users']))
+      dispatch(spacesApi.util.invalidateTags(['spaces']))
+      dispatch(usersApi.util.invalidateTags(['users']))
     },
   })
 }

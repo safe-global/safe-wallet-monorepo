@@ -21,7 +21,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = () => {
+const AddContact = ({ disabled }: { disabled?: boolean }) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -98,7 +98,7 @@ const AddContact = () => {
 
   return (
     <>
-      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen}>
+      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} disabled={disabled}>
         Add contact
       </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
