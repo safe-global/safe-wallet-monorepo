@@ -48,18 +48,28 @@ const initialState: WalletConnectE2eState = {
 let listeners: (() => void)[] = []
 let state: WalletConnectE2eState = { ...initialState }
 
+function notifyListeners() {
+  for (const listener of listeners) {
+    try {
+      listener()
+    } catch (error) {
+      console.error('[E2E] walletConnectE2eState listener error:', error)
+    }
+  }
+}
+
 function get(): WalletConnectE2eState {
   return state
 }
 
 function set(next: Partial<WalletConnectE2eState>) {
   state = { ...state, ...next }
-  listeners.forEach((l) => l())
+  notifyListeners()
 }
 
 function reset() {
   state = { ...initialState }
-  listeners.forEach((l) => l())
+  notifyListeners()
 }
 
 function subscribe(listener: () => void): () => void {
