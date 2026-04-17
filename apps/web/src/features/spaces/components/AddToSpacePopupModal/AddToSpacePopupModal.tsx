@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { DialogClose, DialogTitle } from '@/components/ui/dialog'
 import { AppRoutes } from '@/config/routes'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const BENEFITS = [
   'Keep all related Safes in one shared workspace',
@@ -14,6 +15,10 @@ const BENEFITS = [
 ]
 
 export const AddToSpacePopupModal = (): ReactElement => {
+  const router = useRouter()
+  const safe = useSafeQueryParam()
+  const createSpaceHref = { pathname: AppRoutes.spaces.createSpace, query: { safe } }
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex items-center justify-between px-5 py-5">
@@ -52,10 +57,13 @@ export const AddToSpacePopupModal = (): ReactElement => {
           ))}
         </div>
 
-        <Button className="w-full gap-2 rounded-xl" render={<Link href={AppRoutes.spaces.createSpace} />}>
+        <DialogClose
+          render={<Button className="w-full gap-2 rounded-xl" />}
+          onClick={() => void router.push(createSpaceHref)}
+        >
           <Plus className="size-5" />
           Create a Space
-        </Button>
+        </DialogClose>
       </div>
     </div>
   )

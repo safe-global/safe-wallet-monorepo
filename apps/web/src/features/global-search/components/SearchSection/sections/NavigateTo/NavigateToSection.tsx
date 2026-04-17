@@ -13,6 +13,7 @@ import { useAppDispatch } from '@/store'
 import { closeGlobalSearch } from '@/features/global-search/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 interface NavigationItem {
   icon: ReactNode
@@ -35,7 +36,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const wallet = useWallet()
   const isSwapEnabled = useIsSwapFeatureEnabled()
 
-  const isSafeLevel = typeof router.query.safe === 'string'
+  const isSafeLevel = !!useSafeQueryParam()
 
   const handleNavigation = useCallback(
     (itemLabel: string) => {
