@@ -1,0 +1,630 @@
+# Playwright E2E Automation Rules
+
+**Quick reference:** Test names = "Verify that …". All locators in `.page.ts` as `readonly` class properties. No raw `page.*` calls in test files. No `page.waitForTimeout()`. Use `BasePage.goto()` for all navigation. See **Implementation Checklist** at the end.
+
+## 0. Core Concept — Page Objects vs Fixtures vs Tests
+
+Before reading the detailed rules, internalize these three roles. They are distinct and must never be mixed.
+
+| Layer           | Role                                                                                                                                                            | Answers the question                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Page Object** | Describes **HOW** to interact with a page. Holds locators and action methods. Has no opinion on test state or correctness.                                      | "What can a user do on this page?"            |
+| **Fixture**     | Manages **WHEN** to set up and tear down the environment. Creates page object instances, seeds data, authenticates, cleans up. Runs before and after each test. | "What does this test need before it can run?" |
+| **Test File**   | Declares **WHAT** to verify. Calls page object methods, then asserts the result. Contains all `expect()` calls.                                                 | "Did the application behave correctly?"       |
+
+### Decision rule for the AI
+
+When writing or reviewing code, classify every line into one of the three layers:
+
+- Is it a locator or a method that clicks/fills/navigates? → **Page object.**
+- Is it creating a page object instance, navigating to a starting URL, seeding data, logging in, or cleaning up? → **Fixture.**
+- Is it calling `expect()` or defining test-specific values? → **Test file.**
+
+If a line doesn't fit cleanly, ask: "Would I reuse this across multiple tests?" If yes → page object or fixture. If no → test file.
+
+### How they connect — data flow
+
+```
+Fixture creates PageObject → passes it to Test via `use()` → Test calls PageObject methods → Test asserts with `expect()`
+```
+
+### Common mistakes the AI must catch
+
+| Mistake                                                                 | What's wrong                                                      | Fix                                                                              |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `expect()` inside a page object method                                  | Page object is asserting — that's the test's job                  | Move the `expect()` to the test file; return raw values from page object instead |
+| `new OwnersPage(page)` inside a test file                               | Test is doing setup — that's the fixture's job                    | Create a fixture that instantiates and returns it                                |
+| Locators written directly in a test (`page.getByRole(...)`) for actions | Test is doing interaction plumbing — that's the page object's job | Add a method to the page object and call it from the test                        |
+| `beforeEach` that creates page objects in every test file               | Duplicated setup — that's what fixtures solve                     | Convert to a fixture and import the custom test                                  |
+| Fixture that calls `expect()` to verify setup worked                    | Fixture is asserting — it should only set up and tear down        | Remove the assertion, or throw an error instead                                  |
+
+### Concrete example showing all three layers
+
+```typescript
+// ---- LAYER 1: PAGE OBJECT (pages/owners.page.ts) ----
+// Knows HOW to interact with the owners settings UI.
+// Contains: locators + action methods + getters.
+// Does NOT contain: expect(), test data, setup/teardown.
+export class OwnersPage extends BasePage {
+  readonly replaceOwnerBtn: Locator
+  readonly newOwnerName: Locator
+  readonly newOwnerAddress: Locator
+  readonly safeAccountNonce: Locator
+
+  constructor(page: Page) {
+    super(page)
+    this.replaceOwnerBtn = page.locator('span[data-track="settings: Replace owner"] > span > button')
+    this.newOwnerName = page.locator('input[name="newOwner.name"]')
+    this.newOwnerAddress = page.locator('input[name="newOwner.address"]')
+    this.safeAccountNonce = page.getByText('Safe Account nonce')
+  }
+
+  async openReplaceOwnerWindow(index: number) {
+    await this.replaceOwnerBtn.nth(index).click({ force: true })
+  }
+
+  get replaceOwnerBtnFirst(): Locator {
+    return this.replaceOwnerBtn.first()
+  }
+}
+
+// ---- LAYER 2: FIXTURE (fixtures/owners.fixture.ts) ----
+// Knows WHEN to set up the page object.
+// Contains: instantiation, navigation, data seeding.
+// Does NOT contain: expect(), locators, action logic.
+export const test = walletTest.extend<{ ownersPage: OwnersPage }>({
+  ownersPage: async ({ safePage }, use) => {
+    const ownersPage = new OwnersPage(safePage)
+    await use(ownersPage)
+  },
+})
+
+// ---- LAYER 3: TEST (tests/smoke/replace_owner.spec.ts) ----
+// Knows WHAT to verify. Receives ready-to-use objects from fixtures.
+// Contains: expect() assertions, test-specific data.
+// Does NOT contain: locators, page object creation, setup/teardown.
+test('Verify that "Replace" icon is visible', async ({ ownersPage, safePage, walletCredentials }) => {
+  await ownersPage.goto(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4, {
+    readySelector: ownersPage.safeAccountNonce,
+  })
+  await connectSigner(safePage, walletCredentials.OWNER_4_PRIVATE_KEY)
+  await expect(ownersPage.replaceOwnerBtnFirst).toBeVisible()
+  await expect(ownersPage.replaceOwnerBtnFirst).toBeEnabled()
+})
+```
+
+## 1. Page Objects
+
+A page object encapsulates a single page or a significant UI component. It is a class that wraps locators and user-facing actions.
+
+### What BELONGS in a page object
+
+- **Locators** — all element selectors live here as `readonly` properties, defined in the constructor.
+- **User actions** — public async methods that represent what a real user can do: `clickSubmit()`, `fillName()`, `openReplaceOwnerWindow()`.
+- **Navigation helpers** — the `goto()` method inherited from `BasePage` handles navigation with `waitUntil: 'commit'`, Safe auto-trust, and 429 retry.
+- **Getters for UI state** — methods that return text, counts, or visibility of elements (e.g., `getErrorMessage()`, `getItemCount()`). These return raw values, not assertion results.
+- **Composition** — a page object may contain instances of smaller component objects (e.g., `this.navbar = new NavigationBar(page)`).
+
+### What DOES NOT belong in a page object
+
+- **Assertions** — never use `expect()` inside a page object. Assertions belong exclusively in test files.
+- **Test data** — never hardcode test values. Pass all data as method parameters.
+- **Test logic** — no conditional flows based on test scenarios. Page objects describe what can be done, not what should be verified.
+- **Hard waits** — no `page.waitForTimeout(N)`. Playwright auto-waits on locator actions. Only add explicit waits (`waitForURL`, `waitForLoadState`) for actual navigation transitions.
+- **Internal state tracking** — page objects should reflect the live UI, not maintain stale internal variables.
+
+### Constructor rules
+
+- Every page object extends `BasePage` from `pages/main.page.ts` and takes a Playwright `Page` instance.
+- All locators are initialized in the constructor as `readonly` properties.
+- Never use CSS class selectors, XPath, or DOM-structure-dependent selectors.
+
+### Locator strategy
+
+Choose the locator type based on the element's context. Both semantic locators and `data-testid` are resilient to DOM changes.
+
+**Use semantic locators** (`getByRole`, `getByLabel`, `getByText`) when:
+
+- The element has a clear, stable, user-visible identity (a button labeled "Submit", an input labeled "Email").
+- You want to simultaneously validate accessibility.
+- The visible text is stable and not subject to frequent localization or A/B testing.
+
+**Use `getByTestId`** when:
+
+- The element has no meaningful user-facing text or role (wrapper divs, generic icon buttons).
+- The visible text is duplicated across the page (e.g., five identical "Edit" buttons in a list).
+- The UI text is frequently localized or A/B tested — `data-testid` stays stable.
+- The element is in a complex, data-heavy UI (transaction lists, address fields, wallet selectors) where semantic locators would be ambiguous.
+
+| Situation                           | Recommended locator | Example                                                                                          |
+| ----------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| Button with unique label            | `getByRole`         | `page.getByRole('button', { name: 'Submit' })`                                                   |
+| Form input with label               | `getByLabel`        | `page.getByLabel('Email address')`                                                               |
+| Unique visible text                 | `getByText`         | `page.getByText('Welcome back')`                                                                 |
+| Input with placeholder only         | `getByPlaceholder`  | `page.getByPlaceholder('Search...')`                                                             |
+| Multiple similar elements in a list | `getByTestId`       | `page.getByTestId('tx-row-0x123')`                                                               |
+| Generic icon-only button            | `getByTestId`       | `page.getByTestId('copy-address-btn')`                                                           |
+| Localized / A/B tested text         | `getByTestId`       | `page.getByTestId('cta-primary')`                                                                |
+| Element inside specific container   | chain + filter      | `page.getByRole('listitem').filter({ hasText: 'Item 1' }).getByRole('button', { name: 'Edit' })` |
+| No other option works               | `page.locator()`    | `page.locator('[data-custom="value"]')` — last resort                                            |
+
+**Key principle:** a healthy codebase uses a mix. Semantic locators are the default because they test what users see and catch accessibility regressions. `getByTestId` is a first-class alternative when semantic locators are ambiguous, duplicated, or unstable — not a fallback.
+
+### Prohibited selectors
+
+- **NEVER** CSS class names: `'.MuiTypography-root'`, `'[class*="MuiButton"]'`
+- **NEVER** XPath: `'//div[@class="header"]'`
+- **NEVER** CSS styling: `'.red-button'`
+- **NEVER** bare tags: `'div'`, `'span'`, `'button'`
+- **NEVER** assert `href` or `target` attributes on links — use `data-testid`
+
+### Return type rules
+
+- Action methods that stay on the same page → `Promise<void>`.
+- Action methods that navigate to a different page → return a new page object instance: `Promise<OtherPage>`.
+- Getter methods → return the raw value: `Promise<string>`, `Promise<number>`, `Promise<boolean>`.
+
+### Page object template
+
+```typescript
+import { type Page, type Locator } from '@playwright/test'
+import { BasePage } from './main.page'
+
+export class FeaturePage extends BasePage {
+  // ── Locators ────────────────────────────────────────────────────
+  readonly submitBtn: Locator
+  readonly nameInput: Locator
+  readonly errorMessage: Locator
+
+  // ── Static labels / regex ───────────────────────────────────────
+  static readonly submitBtnLabel = 'Submit'
+
+  constructor(page: Page) {
+    super(page)
+    this.submitBtn = page.getByRole('button', { name: FeaturePage.submitBtnLabel })
+    this.nameInput = page.getByLabel('Name')
+    this.errorMessage = page.getByRole('alert')
+  }
+
+  // ── Actions ─────────────────────────────────────────────────────
+
+  async fillName(name: string) {
+    await this.nameInput.fill(name)
+  }
+
+  async clickSubmit() {
+    await this.submitBtn.click()
+  }
+
+  // ── Getters ─────────────────────────────────────────────────────
+
+  async getError(): Promise<string> {
+    return this.errorMessage.textContent() ?? ''
+  }
+}
+```
+
+### BasePage (main.page.ts) — shared utilities
+
+`BasePage` provides methods used by 3+ page objects:
+
+- `goto(url, { readySelector, timeout })` — navigation with `waitUntil: 'commit'`, Safe auto-trust, 429 retry
+- `setLocalStorage()` / `setLocalStorageAndReload()` — localStorage seeding
+- `closeOutreachPopup()` / `closeSecurityNotice()` — dismiss common popups
+- `verifyElementsCount()`, `verifyValuesExist()`, `checkTextsExistWithinElement()` — shared verification
+- `tableRow`, `modalTitle`, `nextPageBtn` — common locator getters
+
+### Function placement decision tree
+
+1. **Used by 3+ page objects?** → `BasePage` in `main.page.ts`
+2. **Specific to one page/feature?** → That page's `.page.ts` file
+3. **Cross-cutting helper (not a POM method)?** → `helpers/*.ts`
+
+## 2. Fixtures
+
+Fixtures replace `beforeEach`/`afterEach` hooks. They encapsulate setup AND teardown in one place, are reusable across files, composable, and on-demand.
+
+### What BELONGS in fixtures
+
+- **Page object instantiation and setup** — create the page object, navigate to the page, prepare initial state, then `use()` it, then clean up.
+- **Authentication / wallet state** — connect a signer, provide a signed-in page.
+- **API/database seeding** — create test data via API before the test, clean it up after.
+- **Shared environment setup** — anything that multiple tests need as a precondition (a created user, a populated list, a configured setting).
+- **Overrides of built-in fixtures** — e.g., override `page` to pre-seed localStorage (`safePage`).
+- **Worker-scoped resources** — expensive setup shared across tests in a worker. Use `{ scope: 'worker' }`.
+- **Automatic fixtures** — cross-cutting concerns like logging, screenshot-on-failure. Use `{ auto: true }`.
+
+### What DOES NOT belong in fixtures
+
+- **Assertions** — fixtures set up and tear down. They do not verify behavior.
+- **Test-specific logic** — if setup is unique to one test, put it in the test body, not a fixture.
+- **Hardcoded test data that varies per test** — use fixture options (`{ option: true }`) for configurable values.
+
+### Structure rules
+
+- Define fixtures in `playwright/fixtures/*.fixture.ts`.
+- Export a custom `test` object created with `base.extend<MyFixtures>({...})`.
+- Export `expect` from `@playwright/test` alongside the custom `test`.
+- All test files import `{ test, expect }` from a fixtures file, **never directly from `@playwright/test`**.
+- Fixture setup runs **before** `await use(value)`. Teardown runs **after** it.
+
+### Safe{Wallet} fixture chain
+
+```
+base.fixture.ts (safePage — cookie consent, terms, Beamer)
+  └── wallet.fixture.ts (walletCredentials — owner private keys from env)
+  └── api-mock.fixture.ts (mockRoute — API interception helper)
+```
+
+Pick the fixture that provides what your test needs:
+
+```typescript
+// No wallet, no mocks
+import { test, expect } from '../../fixtures/base.fixture'
+
+// With wallet connection
+import { test, expect, connectSigner } from '../../fixtures/wallet.fixture'
+
+// With API mocks
+import { test, expect } from '../../fixtures/api-mock.fixture'
+```
+
+### Available fixtures
+
+| Fixture             | Source                | Purpose                                            |
+| ------------------- | --------------------- | -------------------------------------------------- |
+| `safePage`          | `base.fixture.ts`     | Page with cookie consent, terms, Beamer pre-seeded |
+| `walletCredentials` | `wallet.fixture.ts`   | Owner private keys from `WALLET_CREDENTIALS` env   |
+| `mockRoute`         | `api-mock.fixture.ts` | API route interception helper                      |
+
+### Fixture example
+
+```typescript
+// fixtures/dashboard.fixture.ts
+import { test as baseTest } from './base.fixture'
+import { DashboardPage } from '../pages/dashboard.page'
+
+export const test = baseTest.extend<{ dashboardPage: DashboardPage }>({
+  dashboardPage: async ({ safePage }, use) => {
+    const dashboardPage = new DashboardPage(safePage)
+    await use(dashboardPage)
+  },
+})
+
+export { expect } from '@playwright/test'
+```
+
+## 3. Test Files
+
+Test files contain the actual test scenarios. They orchestrate page objects and make assertions.
+
+### What BELONGS in test files
+
+- **Assertions** — all `expect()` calls live here and only here. Use web-first assertions that auto-retry.
+- **Test scenarios** — the sequence of user actions and the expected outcomes.
+- **Test-specific data** — values that are unique to a particular test case.
+- **Test-specific setup** — minor one-off preparation that doesn't warrant a fixture.
+- **`test.describe` blocks** — for logical grouping by feature or scenario.
+
+### What DOES NOT belong in test files
+
+- **Locators** — never write raw selectors in tests. Use page object properties/methods.
+- **Direct page interactions** — avoid `page.click()`, `page.fill()` etc. directly in tests. Use page object methods.
+- **Complex setup/teardown** — move to fixtures.
+- **Reusable helper logic** — if used in more than one test file, extract to a page object or fixture.
+
+### Assertion rules
+
+Always use web-first assertions (auto-retrying):
+
+```typescript
+// CORRECT — auto-retries until timeout
+await expect(page.getByText('welcome')).toBeVisible()
+
+// WRONG — does not auto-retry
+expect(await page.getByText('welcome').isVisible()).toBe(true)
+```
+
+- Never use manual/non-awaited assertions for async UI state.
+- Use `expect.soft()` when you want to check multiple things without stopping at the first failure.
+- Every `expect()` on a locator must be `await`ed.
+
+### Test isolation rules
+
+- Each test must be completely independent — own storage, session, data, cookies.
+- Never rely on test execution order.
+- Never share mutable state between tests.
+- A little duplication is acceptable if it keeps tests clearer.
+
+### Test naming
+
+- **MANDATORY**: All test names MUST use "Verify that" format
+- **MANDATORY**: Each test suite can contain only ONE describe block
+- **FORMAT**: `test('Verify that [expected behavior]', async () => {})`
+- **EXAMPLES**:
+  - `'Verify that user can create a new transaction'`
+  - `'Verify that total asset value is displayed correctly'`
+  - `'Create a new transaction'`
+  - `'Test transaction creation'`
+
+### Test body pattern: preconditions → actions → assertions
+
+```typescript
+import { test, expect, connectSigner } from '../../fixtures/wallet.fixture'
+import { OwnersPage } from '../../pages/owners.page'
+import { staticSafes } from '../../data/safes'
+import * as constants from '../../data/constants'
+
+test.describe('[SMOKE] Replace Owners tests', () => {
+  let owners: OwnersPage
+
+  test.beforeEach(async ({ safePage }) => {
+    owners = new OwnersPage(safePage)
+  })
+
+  test('Verify that "Replace" icon is visible', async ({ safePage, walletCredentials }) => {
+    // Navigate
+    await owners.goto(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4, {
+      readySelector: owners.safeAccountNonce,
+    })
+    // Action
+    await connectSigner(safePage, walletCredentials.OWNER_4_PRIVATE_KEY)
+    // Assertions — always at end, always in test file
+    await expect(owners.replaceOwnerBtnFirst).toBeVisible()
+    await expect(owners.replaceOwnerBtnFirst).toBeEnabled()
+  })
+})
+```
+
+## 4. File Organization
+
+```
+playwright/
+├── tests/              # Test specs (*.spec.ts — NEVER *.test.ts)
+│   ├── smoke/          # Critical path (CI on every PR)
+│   ├── visual/         # Visual regression (Argos)
+│   ├── regression/     # Feature tests
+│   ├── happypath/      # User journey tests
+│   └── prodhealthcheck/# Post-deploy checks
+├── pages/              # Page Object Model (*.page.ts)
+│   ├── main.page.ts    # BasePage — shared utilities (3+ page objects use)
+│   ├── dashboard.page.ts
+│   ├── owners.page.ts
+│   └── assets.page.ts
+├── fixtures/           # Playwright fixtures
+│   ├── base.fixture.ts # safePage (localStorage pre-seeded)
+│   ├── wallet.fixture.ts # walletCredentials + connectSigner re-export
+│   └── api-mock.fixture.ts # mockRoute helper
+├── helpers/            # Cross-cutting helpers (not page objects)
+│   ├── wallet.ts       # connectSigner, dismissCookieBanner, etc.
+│   └── api-assertions.ts # Backend validation helpers
+└── data/
+    ├── constants.ts    # URLs, API endpoints, localStorage keys
+    ├── safes/          # Safe address registries (static.ts, index.ts)
+    └── mocks/          # Mock JSON fixtures
+```
+
+### Where to find things
+
+| Need                     | Location                                             |
+| ------------------------ | ---------------------------------------------------- |
+| Safe addresses           | `data/safes/` → `staticSafes.SEP_STATIC_SAFE_*`      |
+| URL paths, API patterns  | `data/constants.ts`                                  |
+| localStorage keys        | `data/constants.ts` → `localStorageKeys.*`           |
+| Wallet connection        | `helpers/wallet.ts` (re-exported via wallet fixture) |
+| Mock API responses       | `data/mocks/*.json`                                  |
+| Page selectors and flows | `pages/*.page.ts`                                    |
+| Base utilities           | `pages/main.page.ts` → `BasePage`                    |
+
+### Test categories
+
+| Category        | Folder                   | CI trigger               | Naming                    |
+| --------------- | ------------------------ | ------------------------ | ------------------------- |
+| Smoke           | `tests/smoke/`           | Every PR                 | `[SMOKE] Verify that ...` |
+| Visual          | `tests/visual/`          | `workflow_dispatch` only | `[VISUAL] Screenshot ...` |
+| Regression      | `tests/regression/`      | On-demand                | `Verify that ...`         |
+| Happy path      | `tests/happypath/`       | On-demand                | `Verify that ...`         |
+| Prodhealthcheck | `tests/prodhealthcheck/` | Scheduled                | `Verify that ...`         |
+
+## 5. Quick Reference — Where Does It Go?
+
+| Element                                  | Page Object         | Fixture                      | Test File             |
+| ---------------------------------------- | ------------------- | ---------------------------- | --------------------- |
+| Locators / selectors (semantic + testid) | **YES**             | no                           | no                    |
+| User action methods                      | **YES**             | no                           | no                    |
+| Page object instantiation                | no                  | **YES**                      | rarely (simple cases) |
+| Navigation to starting URL               | YES (`goto` method) | YES (call `goto` in fixture) | no                    |
+| Test data seeding via API                | no                  | **YES**                      | no                    |
+| Authentication / wallet setup            | no                  | **YES**                      | no                    |
+| Teardown / cleanup                       | no                  | **YES**                      | no                    |
+| `expect()` assertions                    | **NEVER**           | **NEVER**                    | **YES** — only here   |
+| Test-specific values                     | no                  | no                           | **YES**               |
+| `test.describe` grouping                 | no                  | no                           | **YES**               |
+| Reusable across files                    | **YES**             | **YES**                      | no                    |
+
+## 6. Safe{Wallet}-Specific Patterns
+
+### Navigation
+
+**MANDATORY**: All navigation goes through `BasePage.goto()`:
+
+```typescript
+await page.goto(url, {
+  readySelector: page.someElement, // Wait for this element
+  timeout: 120_000, // Optional, defaults to 120s
+})
+```
+
+- Uses `waitUntil: 'commit'` — Safe{Wallet} keeps WebSocket connections open, so `'load'` and `'domcontentloaded'` never resolve reliably.
+- Auto-trusts the Safe from the URL in localStorage.
+- Retries on 429 (rate limit) with 6s backoff, up to 3 times.
+
+**NEVER** use `safePage.goto()` directly in tests — always use `BasePage.goto()`.
+
+### Wallet connection
+
+```typescript
+import { test, expect, connectSigner } from '../../fixtures/wallet.fixture'
+
+test('Verify that owner action is visible', async ({ safePage, walletCredentials }) => {
+  const page = new MyPage(safePage)
+  await page.goto(url, { readySelector: page.someElement })
+  await connectSigner(safePage, walletCredentials.OWNER_1_PRIVATE_KEY)
+  // assertions...
+})
+```
+
+### Shadow DOM (onboard-v2)
+
+The onboard-v2 wallet SDK uses shadow DOM (`mode: 'open'`). Playwright auto-pierce doesn't reliably work with it.
+
+**Pattern:** Use `page.evaluate()` with explicit `el.shadowRoot` traversal:
+
+```typescript
+await page.evaluate((btnText) => {
+  const el = document.querySelector('onboard-v2')
+  const shadow = el?.shadowRoot
+  if (!shadow) throw new Error('onboard-v2 shadow root not found')
+  const buttons = shadow.querySelectorAll('button')
+  for (const btn of buttons) {
+    if (btn.textContent?.includes(btnText)) {
+      btn.click()
+      return
+    }
+  }
+  throw new Error(`"${btnText}" button not found`)
+}, 'Private key')
+```
+
+See `helpers/wallet.ts` for the full implementation.
+
+### localStorage setup
+
+```typescript
+// Before navigation — uses addInitScript (page may be on about:blank)
+await basePage.setLocalStorage('SAFE_v2__addedSafes', myData)
+await basePage.goto(url)
+
+// After navigation — uses page.evaluate directly, then reload
+await basePage.setLocalStorageAndReload('SAFE_v2__addedSafes', myData)
+```
+
+### Safe addresses
+
+Always use the `staticSafes` registry — never hardcode addresses:
+
+```typescript
+import { staticSafes } from '../../data/safes'
+import * as constants from '../../data/constants'
+
+await page.goto(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_2, {
+  readySelector: page.totalAssets,
+})
+```
+
+### API mocking
+
+```typescript
+import pendingTx from '../../data/mocks/pending_tx/pending_tx.json' with { type: 'json' }
+
+// In test or fixture:
+await mockRoute(safePage, '**/queued*', pendingTx)
+```
+
+## 7. Function Naming Convention
+
+| Prefix     | Purpose                        | Example                         |
+| ---------- | ------------------------------ | ------------------------------- |
+| `click*`   | Click an element               | `clickSubmitBtn()`              |
+| `open*`    | Open dropdown/modal/panel      | `openReplaceOwnerWindow(index)` |
+| `expand*`  | Expand collapsible section     | `expandTxDetails()`             |
+| `type*`    | Type into an input             | `typeOwnerAddress(address)`     |
+| `fill*`    | Fill a form field              | `fillName(name)`                |
+| `goto*`    | Navigate to a URL              | `goto(url, options)`            |
+| `verify*`  | Assert state (visibility, URL) | `verifyReplaceBtnIsEnabled()`   |
+| `dismiss*` | Close/dismiss popup or banner  | `dismissCookieBanner()`         |
+| `wait*`    | Explicit wait for a condition  | `waitForConnectionStatus()`     |
+| `get*`     | Return a raw value from UI     | `getErrorMessage()`             |
+
+## 8. Wait Strategies
+
+### Prohibited
+
+- **NEVER**: `page.waitForTimeout(N)` — use auto-waiting assertions
+- **NEVER**: `page.waitForSelector()` — legacy; use `locator.waitFor()`
+- **NEVER**: Polling loops with `sleep` — use Playwright built-in retries
+
+### Preferred
+
+```typescript
+// Wait via assertion (auto-retries until timeout)
+await expect(locator).toBeVisible({ timeout: 30_000 })
+await expect(locator).toHaveText('Expected', { timeout: 10_000 })
+
+// Wait for a locator to exist in DOM
+await locator.waitFor({ state: 'visible', timeout: 30_000 })
+
+// Wait for wallet SDK readiness (via DOM attribute)
+await page.locator('html[data-wallet-ready="true"]').waitFor({ timeout: 60_000 })
+```
+
+## 9. Anti-Patterns to Reject
+
+1. **Assertions in page objects** — move `expect()` to the test file.
+2. **Raw locators in test files** — extract to a page object.
+3. **CSS class or XPath selectors** — replace with `getByRole`, `getByLabel`, `getByText`, or `getByTestId`.
+4. **Using `getByTestId` when a clear semantic locator exists** — if the button says "Submit" and that text is stable, use `getByRole('button', { name: 'Submit' })`.
+5. **Using `getByRole`/`getByText` when the text is ambiguous or duplicated** — use `getByTestId` or chain+filter.
+6. **`expect(await locator.isVisible()).toBe(true)`** — replace with `await expect(locator).toBeVisible()`.
+7. **Shared mutable state between tests** — make each test independent.
+8. **`beforeEach`/`afterEach` in every file for the same setup** — convert to a fixture.
+9. **Hardcoded waits (`page.waitForTimeout`)** — rely on Playwright auto-waiting or web-first assertions.
+10. **Page objects that track internal state** — read state from the live UI instead.
+11. **Skipping `await` on assertions** — every `expect()` on a locator must be `await`ed.
+12. **`test.only` or `test.describe.only`** — never committed.
+13. **Conditional logic in tests** (`if (await locator.isVisible())`) — tests must be deterministic.
+14. **Direct `safePage.goto(url)`** — always use `BasePage.goto()` for navigation.
+15. **`*.test.ts` file extension** — use `*.spec.ts` (`.test.ts` collides with Jest).
+
+## 10. Cypress → Playwright Translation
+
+| Cypress pattern                             | Playwright equivalent                                       |
+| ------------------------------------------- | ----------------------------------------------------------- |
+| `cy.get('[data-testid="x"]')`               | `page.getByTestId('x')` (in page object constructor)        |
+| `cy.contains('Text')`                       | `page.getByText('Text')` (in page object constructor)       |
+| `cy.get(sel).should('be.visible')`          | `await expect(locator).toBeVisible()`                       |
+| `cy.get(sel).click()`                       | `await locator.click()`                                     |
+| `cy.get(sel).type('text')`                  | `await locator.fill('text')`                                |
+| `cy.wait(1000)`                             | `await expect(locator).toBeVisible()` (auto-wait)           |
+| `cy.intercept('GET', url, fixture)`         | `await page.route(url, route => route.fulfill({body}))`     |
+| `cy.visit(url)`                             | `await basePage.goto(url, { readySelector })`               |
+| `Cypress.Commands.add()`                    | `base.extend<>()` in `fixtures/*.fixture.ts`                |
+| `cy.get('onboard-v2').shadow().find(...)`   | `page.evaluate()` with `el.shadowRoot` traversal            |
+| `cy.window().then(win => win.localStorage)` | `basePage.setLocalStorage()` / `setLocalStorageAndReload()` |
+| Selectors in `.pages.js` as `const` strings | Selectors as `readonly Locator` properties in class         |
+| Functions in `.pages.js`                    | Methods in `.page.ts` class extending `BasePage`            |
+| `main.page.js` general functions            | `BasePage` methods in `main.page.ts`                        |
+| `getSafes(CATEGORIES.static)`               | `staticSafes` — sync import from `data/safes/`              |
+
+## 11. Implementation Checklist
+
+When creating or updating tests, ensure:
+
+- [ ] Test name uses "Verify that" format
+- [ ] Only one describe block per test suite
+- [ ] All locators defined as `readonly` properties in page object constructor
+- [ ] No `expect()` calls in page objects — assertions only in test files
+- [ ] No raw `page.*` calls in test files — all via page object methods
+- [ ] Locators use semantic locators or `getByTestId` — never CSS classes or XPath
+- [ ] `data-testid`: reuse existing; add new only when missing
+- [ ] Page object creation in fixtures, not test files (or simple `beforeEach`)
+- [ ] Functions: search page files first; reuse. 3+ pages → `BasePage`; else → that page's `.page.ts`
+- [ ] Navigation via `BasePage.goto()` with `readySelector`
+- [ ] No `page.waitForTimeout(N)` — use auto-waiting
+- [ ] No `test.only` or `test.describe.only`
+- [ ] No conditional logic (`if/else`) in test bodies
+- [ ] Safe addresses from `staticSafes`, not hardcoded
+- [ ] File named `*.spec.ts` (not `*.test.ts`)
+- [ ] Wallet connection via `connectSigner()` from wallet fixture
+- [ ] Every `expect()` on a locator is `await`ed
+- [ ] Action methods return `Promise<void>` or new page object; getters return raw values
