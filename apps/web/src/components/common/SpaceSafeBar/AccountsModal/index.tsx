@@ -109,12 +109,14 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
                         key={item.address}
                         item={item}
                         isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                        onClose={onClose}
                       />
                     ) : (
                       <SafeItemCard
                         key={`${item.chainId}:${item.address}`}
                         safeItem={item}
                         isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                        onClose={onClose}
                       />
                     ),
                   )}
@@ -134,12 +136,14 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
                         key={item.address}
                         item={item}
                         isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                        onClose={onClose}
                       />
                     ) : (
                       <SafeItemCard
                         key={`${item.chainId}:${item.address}`}
                         safeItem={item}
                         isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                        onClose={onClose}
                       />
                     ),
                   )}

@@ -11,6 +11,7 @@ jest.mock('@/features/myAccounts', () => ({
     elementRef: { current: null },
     undeployedSafe: undefined,
     isActivating: false,
+    href: { pathname: '/home', query: { safe: 'eth:0x0000000000000000000000000000000000000000' } },
   }),
 }))
 
@@ -32,6 +33,8 @@ jest.mock('@/services/analytics', () => ({
 }))
 
 describe('SafeItemCard', () => {
+  const noopClose = jest.fn()
+
   it('hides read-only badge when high similarity is shown', () => {
     const safeItem = safeItemBuilder()
       .with({
@@ -40,7 +43,7 @@ describe('SafeItemCard', () => {
       })
       .build()
 
-    render(<SafeItemCard safeItem={safeItem} isSimilar />)
+    render(<SafeItemCard safeItem={safeItem} isSimilar onClose={noopClose} />)
 
     expect(screen.getByText('High similarity')).toBeInTheDocument()
     expect(screen.queryByText('Read-only')).not.toBeInTheDocument()
@@ -53,7 +56,7 @@ describe('SafeItemCard', () => {
       })
       .build()
 
-    render(<SafeItemCard safeItem={safeItem} />)
+    render(<SafeItemCard safeItem={safeItem} onClose={noopClose} />)
 
     expect(screen.queryByText('High similarity')).not.toBeInTheDocument()
     expect(screen.getByText('Read-only')).toBeInTheDocument()
