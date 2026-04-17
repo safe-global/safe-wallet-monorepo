@@ -45,18 +45,21 @@ tags:
     id: 'name-signer-input'
 - assertVisible: 'E2E Wallet - 3472'
 
-# Test validation: clear name and type a name that is too long (>20 chars)
+# Test validation: clear name — button should be disabled when empty
 - tapOn:
     id: 'clear-name-button'
+- assertVisible:
+    id: 'name-signer-continue'
+    enabled: false
+
+# Test validation: type a name that is too long (>20 chars) — button should stay disabled
 - tapOn:
     id: 'name-signer-input'
 - inputText: 'This name is way too long'
 - assertVisible: 'Name must be at most 20 characters long'
-# Continue button should be disabled — tapping should not navigate away
 - assertVisible:
     id: 'name-signer-continue'
-- assertNotVisible:
-    id: 'import-success'
+    enabled: false
 
 # Clear the too-long text and type a valid custom name
 - hideKeyboard
@@ -66,7 +69,10 @@ tags:
     id: 'name-signer-input'
 - inputText: 'My WC Signer'
 
-# Tap Continue
+# Continue button should be re-enabled with valid input
+- assertVisible:
+    id: 'name-signer-continue'
+    enabled: true
 - tapOn:
     id: 'name-signer-continue'
 
