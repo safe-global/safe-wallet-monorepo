@@ -15,7 +15,12 @@ const injectedRtkApi = api
         providesTags: ['relay'],
       }),
       relayGetRelaysRemainingV1: build.query<RelayGetRelaysRemainingV1ApiResponse, RelayGetRelaysRemainingV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}` }),
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/relay/${queryArg.safeAddress}`,
+          params: {
+            safeTxHash: queryArg.safeTxHash,
+          },
+        }),
         providesTags: ['relay'],
       }),
     }),
@@ -43,6 +48,7 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  safeTxHash: string
 }
 export type Relay = {
   taskId: string
@@ -53,6 +59,8 @@ export type RelayDto = {
   data: string
   /** Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato). */
   gasLimit?: string | null
+  /** Safe transaction hash for relay-fee eligibility check */
+  safeTxHash?: string
 }
 export type RelayTaskStatusReceipt = {
   transactionHash: string

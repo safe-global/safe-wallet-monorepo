@@ -1,5 +1,7 @@
 import {
   authSlice,
+  setIsOidcLoginPending,
+  selectIsOidcLoginPending,
   setAuthenticated,
   setUnauthenticated,
   setLastUsedSpace,
@@ -84,6 +86,35 @@ describe('authSlice', () => {
       } as unknown as RootState
 
       expect(lastUsedSpace(rootState)).toBe('space-abc')
+    })
+  })
+
+  describe('setIsOidcLoginPending', () => {
+    it('should default to false', () => {
+      const state = authSlice.reducer(undefined, { type: 'unknown' })
+
+      expect(state.isOidcLoginPending).toBe(false)
+    })
+
+    it('should set isOidcLoginPending to true', () => {
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+
+      expect(state.isOidcLoginPending).toBe(true)
+    })
+
+    it('should set isOidcLoginPending back to false', () => {
+      const prev = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+      const state = authSlice.reducer(prev, setIsOidcLoginPending(false))
+
+      expect(state.isOidcLoginPending).toBe(false)
+    })
+  })
+
+  describe('selectIsOidcLoginPending', () => {
+    it('should return the current pending state', () => {
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+
+      expect(selectIsOidcLoginPending({ auth: state } as unknown as RootState)).toBe(true)
     })
   })
 })

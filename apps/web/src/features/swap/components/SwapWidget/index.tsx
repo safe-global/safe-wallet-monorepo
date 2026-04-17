@@ -55,7 +55,7 @@ const SwapWidget = ({ sell }: Params) => {
   const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
-  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi'
+  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.finance' : 'https://swap.cow.finance'
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
   const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
@@ -118,7 +118,7 @@ const SwapWidget = ({ sell }: Params) => {
     },
     content: {
       feeLabel: 'Widget Fee',
-      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/en/articles/178530-how-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
+      feeTooltipMarkdown: `The [tiered widget fee](https://help.safe.global/articles/9969629388-How-does-the-widget-fee-work-for-native-swaps) incurred here is charged by CoW Protocol for the operation of this widget. The fee is automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the Safe Community. Neither the Safe Ecosystem Foundation nor ${BRAND_NAME} operate the CoW Swap Widget and/or CoW Swap`,
     },
   })
 

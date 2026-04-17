@@ -1,4 +1,9 @@
-import { useMembersGetUsersV1Query, type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  useMembersGetMembershipV1Query,
+  useMembersGetUsersV1Query,
+  type MemberDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -43,6 +48,25 @@ export const useCurrentMembership = (spaceId?: number) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   return allMembers.find((member) => member.user.id === user?.id)
+}
+
+export const useCurrentMemberProfile = () => {
+  const spaceId = useCurrentSpaceId()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+
+  const { data: session, isLoading: isSessionLoading } = useAuthGetMeV1Query(undefined, {
+    skip: !isUserSignedIn,
+  })
+  const { currentData: membership, isLoading: isMembershipLoading } = useMembersGetMembershipV1Query(
+    { spaceId: Number(spaceId) },
+    { skip: !isUserSignedIn || !spaceId },
+  )
+
+  return {
+    membership,
+    signerAddress: session?.authMethod === 'siwe' ? session.signerAddress : undefined,
+    isLoading: isSessionLoading || isMembershipLoading,
+  }
 }
 
 export const useIsActiveMember = (spaceId?: number) => {
