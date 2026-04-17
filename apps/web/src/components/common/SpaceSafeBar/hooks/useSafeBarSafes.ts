@@ -27,15 +27,19 @@ export function useSafeBarSafes() {
   const pinnedGrouped = useAllSafesGrouped(pinnedItems)
   const allGrouped = useAllSafesGrouped(allSafeItems ?? [])
 
-  const pinnedSafes = useMemo<AllSafeItems>(
-    () => [...(pinnedGrouped.allMultiChainSafes ?? []), ...(pinnedGrouped.allSingleSafes ?? [])],
-    [pinnedGrouped.allMultiChainSafes, pinnedGrouped.allSingleSafes],
-  )
+  const pinnedSafes = useMemo<AllSafeItems>(() => {
+    const multiChainSafes = pinnedGrouped.allMultiChainSafes ?? []
+    const singleSafes = pinnedGrouped.allSingleSafes ?? []
 
-  const allKnownSafes = useMemo<AllSafeItems>(
-    () => [...(allGrouped.allMultiChainSafes ?? []), ...(allGrouped.allSingleSafes ?? [])],
-    [allGrouped.allMultiChainSafes, allGrouped.allSingleSafes],
-  )
+    return [...multiChainSafes, ...singleSafes]
+  }, [pinnedGrouped.allMultiChainSafes, pinnedGrouped.allSingleSafes])
+
+  const allKnownSafes = useMemo<AllSafeItems>(() => {
+    const multiChainSafes = allGrouped.allMultiChainSafes ?? []
+    const singleSafes = allGrouped.allSingleSafes ?? []
+
+    return [...multiChainSafes, ...singleSafes]
+  }, [allGrouped.allMultiChainSafes, allGrouped.allSingleSafes])
 
   // Fallback SafeItem for the current safe when it's not in any list
   // (e.g. navigated via URL to a safe that isn't pinned or owned).
