@@ -1,3 +1,4 @@
+import { getEip3770NetworkPrefixFromChainId, getChainIdFromEip3770NetworkPrefix } from '@safe-global/protocol-kit'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import type { SafeVersion } from '@safe-global/types-kit'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
@@ -139,4 +140,22 @@ export const getLatestSafeVersion = (
 
 export const isNonCriticalUpdate = (version?: string | null) => {
   return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
+}
+
+/** Returns the EIP-3770 short name for a given chainId, or undefined if not found. */
+export const getEip3770ShortName = (chainId: string | bigint): string | undefined => {
+  try {
+    return getEip3770NetworkPrefixFromChainId(BigInt(chainId))
+  } catch {
+    return undefined
+  }
+}
+
+/** Returns the chainId (as a string) for a given EIP-3770 short name, or undefined if not found. */
+export const getEip3770ChainId = (shortName: string): string | undefined => {
+  try {
+    return getChainIdFromEip3770NetworkPrefix(shortName).toString()
+  } catch {
+    return undefined
+  }
 }

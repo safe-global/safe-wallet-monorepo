@@ -33,8 +33,8 @@
     "ts-node": "^10.9.2"
   },
   "peerDependencies": {
-    "@safe-global/protocol-kit": "^5.x",
+    "@safe-global/protocol-kit": "^7.1.x",
     "@safe-global/store": "*",
-    "@safe-global/types-kit": "^1.x"
+    "@safe-global/types-kit": "^3.1.x"
   }
 }

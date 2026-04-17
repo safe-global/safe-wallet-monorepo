@@ -25,7 +25,8 @@ jest.mock('@/src/hooks/coreSDK/safeCoreSDK', () => ({
 jest.mock('@/src/services/web3', () => ({
   getUserNonce: (...args: unknown[]) => mockGetUserNonce(...args),
 }))
-jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
+  ...jest.requireActual('@safe-global/protocol-kit'),
   generatePreValidatedSignature: (address: string) => ({
     signer: address,
     data: `pre-validated-${address}`,

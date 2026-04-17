@@ -2,7 +2,7 @@ import { signTx } from './sign'
 import { proposeTx } from './create'
 import { createConnectedWallet } from '@/src/services/web3'
 import type { SafeInfo } from '@/src/types/address'
-import { SigningMethod } from '@safe-global/protocol-kit'
+import { SigningMethod } from '@safe-global/types-kit'
 import {
   generateChecksummedAddress,
   generateSignature,
