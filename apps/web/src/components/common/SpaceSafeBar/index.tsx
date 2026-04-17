@@ -133,13 +133,18 @@ function SpaceSafeBar() {
   const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)
   const showConnectWallet = !wallet && !hasPinnedSafes
 
-  const dropdownFooter = !isQualifiedSafe ? (
-    showConnectWallet ? (
-      (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
-    ) : (
-      <DropdownFooter onOpen={handleOpenAccountsModal} />
-    )
-  ) : undefined
+  const dropdownFooter = !isQualifiedSafe
+    ? showConnectWallet
+      ? (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
+      : (close: () => void) => (
+          <DropdownFooter
+            onOpen={() => {
+              close()
+              handleOpenAccountsModal()
+            }}
+          />
+        )
+    : undefined
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
