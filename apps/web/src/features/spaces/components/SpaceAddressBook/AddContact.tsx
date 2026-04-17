@@ -22,7 +22,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = ({ disabled }: { disabled?: boolean }) => {
+const AddContact = () => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -147,7 +147,7 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+              <Button type="submit" variant="contained" disableElevation>
                 {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>

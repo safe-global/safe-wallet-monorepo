@@ -48,7 +48,7 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
-  safeTxHash: string
+  safeTxHash?: string
 }
 export type Relay = {
   taskId: string
