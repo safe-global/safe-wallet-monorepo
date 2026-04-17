@@ -14,6 +14,18 @@ const EXECUTE_ACTION = 'execute'
 const EXECUTE_THROUGH_ROLE_ACTION = 'executeThroughRole'
 const SIGN_ACTION = 'sign'
 
+// Priority order for auto-selection when no stored preference exists
+const AUTO_SELECT_PRIORITY = [EXECUTE_ACTION, EXECUTE_THROUGH_ROLE_ACTION]
+
+const resolveSlotId = (slotIds: string[], storedAction: string | undefined): string | undefined => {
+  // Respect the user's stored choice if it's still available
+  if (storedAction !== undefined && slotIds.includes(storedAction)) {
+    return storedAction
+  }
+  // Otherwise pick the highest-priority available action, falling back to the first slot
+  return AUTO_SELECT_PRIORITY.find((id) => slotIds.includes(id)) ?? slotIds[0]
+}
+
 export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const { txId, submitError, isRejectedByUser } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
@@ -31,21 +43,7 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const options = useMemo(() => slotItems.map(({ label, id }) => ({ label, id })), [slotItems])
   const [submitAction, setSubmitAction] = useLocalStorage<string>(COMBO_SUBMIT_ACTION)
 
-  // Auto-select the best action: Execute > Execute through role > first available
-  const slotId = useMemo(() => {
-    const executeAvailable = slotIds.includes(EXECUTE_ACTION)
-    const executeRoleAvailable = slotIds.includes(EXECUTE_THROUGH_ROLE_ACTION)
-    const initialSubmitAction = slotIds?.[0]
-
-    // If no stored preference or stored action is not available in current slots
-    if (submitAction === undefined || !slotIds.includes(submitAction)) {
-      if (executeAvailable) return EXECUTE_ACTION
-      if (executeRoleAvailable) return EXECUTE_THROUGH_ROLE_ACTION
-      return initialSubmitAction
-    }
-    // Use stored preference (respect user's choice)
-    return submitAction
-  }, [slotIds, submitAction])
+  const slotId = useMemo(() => resolveSlotId(slotIds, submitAction), [slotIds, submitAction])
 
   // Show warning if Execute is available but user selected Sign (either manually or from stored preference)
   const executeAvailable = slotIds.includes(EXECUTE_ACTION)

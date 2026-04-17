@@ -38,11 +38,14 @@ const ExecuteThroughRole = ({
     [setShouldExecute, onChange],
   )
 
+  // `role` is guaranteed by `useShouldRegisterSlot`, but narrow the type explicitly
+  if (!role) return null
+
   return (
     <ExecuteThroughRoleForm
       safeTx={safeTx}
       disableSubmit={isSubmitDisabled || disabled}
-      role={role!}
+      role={role}
       onSubmit={onSubmit}
       onSubmitSuccess={handleSubmit}
       onChange={onChangeSubmitOption}
