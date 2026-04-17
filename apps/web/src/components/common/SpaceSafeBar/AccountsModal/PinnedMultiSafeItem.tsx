@@ -12,7 +12,14 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/ov
 import { Skeleton } from '@/components/ui/skeleton'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import type { MultiChainSafeItem } from '@/hooks/safes'
-import { ICON_SIZE, SafeIdenticon, StackedChainLogos, NameSourceIcon, CopyAddressButton } from './shared'
+import {
+  ICON_SIZE,
+  SafeIdenticon,
+  StackedChainLogos,
+  NameSourceIcon,
+  CopyAddressButton,
+  ShortAddressWithTooltip,
+} from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
@@ -67,7 +74,7 @@ const PinnedMultiSafeItem = ({ item, onNavigate }: PinnedMultiSafeItemProps) => 
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
               </div>
               <div className="flex items-center gap-1 min-w-0">
-                <span className="truncate text-xs text-muted-foreground">{shortenAddress(address)}</span>
+                <ShortAddressWithTooltip address={address} />
                 <CopyAddressButton address={address} />
               </div>
             </div>

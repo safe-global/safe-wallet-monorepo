@@ -21,14 +21,17 @@ import {
   ReadOnlyBadge,
   NotActivatedBadge,
   CopyAddressButton,
+  SimilarityBadge,
+  ShortAddressWithTooltip,
 } from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
 interface SafeItemCardProps {
   safeItem: SafeItem
+  isSimilar?: boolean
 }
 
-const SafeItemCard = ({ safeItem }: SafeItemCardProps) => {
+const SafeItemCard = ({ safeItem, isSimilar }: SafeItemCardProps) => {
   const dispatch = useAppDispatch()
   const currency = useAppSelector(selectCurrency)
   const { name, safeOverview, threshold, owners, elementRef, undeployedSafe, isActivating } = useSafeItemData(safeItem)
@@ -88,11 +91,12 @@ const SafeItemCard = ({ safeItem }: SafeItemCardProps) => {
             {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
           </div>
           <div className="flex items-center gap-1 min-w-0">
-            <span className="truncate text-xs text-muted-foreground">{shortenAddress(safeItem.address)}</span>
+            <ShortAddressWithTooltip address={safeItem.address} />
             <CopyAddressButton address={safeItem.address} />
           </div>
+          {isSimilar && <SimilarityBadge />}
           {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
-          {!undeployedSafe && safeItem.isReadOnly && <ReadOnlyBadge />}
+          {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
         </div>
 
         {/* Chain logo */}

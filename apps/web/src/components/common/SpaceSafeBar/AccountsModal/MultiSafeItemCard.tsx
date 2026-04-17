@@ -9,14 +9,23 @@ import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { MultiChainSafeItem } from '@/hooks/safes'
-import { ICON_SIZE, SafeIdenticon, StackedChainLogos, NameSourceIcon, CopyAddressButton } from './shared'
+import {
+  ICON_SIZE,
+  SafeIdenticon,
+  StackedChainLogos,
+  NameSourceIcon,
+  CopyAddressButton,
+  SimilarityBadge,
+  ShortAddressWithTooltip,
+} from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
+  isSimilar?: boolean
 }
 
-const MultiSafeItemCard = ({ item }: MultiSafeItemCardProps) => {
+const MultiSafeItemCard = ({ item, isSimilar }: MultiSafeItemCardProps) => {
   const currency = useAppSelector(selectCurrency)
   const { address, sortedSafes, safeOverviews, sharedSetup, totalFiatValue, name } = useMultiAccountItemData(item)
   const addressBookItem = useAddressBookItem(address, sortedSafes[0]?.chainId)
@@ -57,9 +66,10 @@ const MultiSafeItemCard = ({ item }: MultiSafeItemCardProps) => {
               {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
             </div>
             <div className="flex items-center gap-1 min-w-0">
-              <span className="truncate text-xs text-muted-foreground">{shortenAddress(address)}</span>
+              <ShortAddressWithTooltip address={address} />
               <CopyAddressButton address={address} />
             </div>
+            {isSimilar && <SimilarityBadge />}
           </div>
 
           {/* Stacked chain logos */}

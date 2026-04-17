@@ -6,6 +6,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { SafeListSkeleton } from './shared'
@@ -30,6 +31,8 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
     const single = allSingleSafes ?? []
     return [...multi, ...single].sort((a, b) => (b.lastVisited ?? 0) - (a.lastVisited ?? 0))
   }, [allMultiChainSafes, allSingleSafes])
+
+  const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])
 
   // Apply search filter
   const filteredItems = useMemo(() => {
@@ -102,9 +105,17 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
                   </div>
                   {trustedItems.map((item) =>
                     isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard key={item.address} item={item} />
+                      <MultiSafeItemCard
+                        key={item.address}
+                        item={item}
+                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                      />
                     ) : (
-                      <SafeItemCard key={`${item.chainId}:${item.address}`} safeItem={item} />
+                      <SafeItemCard
+                        key={`${item.chainId}:${item.address}`}
+                        safeItem={item}
+                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                      />
                     ),
                   )}
                 </>
@@ -119,9 +130,17 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
                   </div>
                   {otherItems.map((item) =>
                     isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard key={item.address} item={item} />
+                      <MultiSafeItemCard
+                        key={item.address}
+                        item={item}
+                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                      />
                     ) : (
-                      <SafeItemCard key={`${item.chainId}:${item.address}`} safeItem={item} />
+                      <SafeItemCard
+                        key={`${item.chainId}:${item.address}`}
+                        safeItem={item}
+                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
+                      />
                     ),
                   )}
                 </>

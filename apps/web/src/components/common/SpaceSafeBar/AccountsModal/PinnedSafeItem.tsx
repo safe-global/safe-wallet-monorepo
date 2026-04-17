@@ -22,6 +22,7 @@ import {
   ReadOnlyBadge,
   NotActivatedBadge,
   CopyAddressButton,
+  ShortAddressWithTooltip,
 } from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
@@ -121,7 +122,7 @@ const PinnedSafeItem = ({ safeItem, onNavigate }: PinnedSafeItemProps) => {
             {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
           </div>
           <div className="flex items-center gap-1 min-w-0">
-            <span className="truncate text-xs text-muted-foreground">{shortenAddress(safeItem.address)}</span>
+            <ShortAddressWithTooltip address={safeItem.address} />
             <CopyAddressButton address={safeItem.address} />
           </div>
           {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}

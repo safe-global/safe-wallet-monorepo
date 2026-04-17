@@ -4,10 +4,12 @@
  */
 import { type MouseEvent, useState } from 'react'
 import { isAddress } from 'ethers'
-import { Eye, AlertCircle, Cloud, Copy, Check } from 'lucide-react'
+import { Eye, AlertCircle, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { cn } from '@/utils/cn'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import type { SafeItem } from '@/hooks/safes'
@@ -114,6 +116,44 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
   )
 }
 
+/** Full `0x` address in tooltip — bold first 4 hex chars (after prefix) and last 4 chars */
+const TooltipFullAddress = ({ address }: { address: string }) => {
+  if (!address.startsWith('0x') || address.length < 10) {
+    return address
+  }
+  return (
+    <>
+      {address.slice(0, 2)}
+      <strong className="font-bold">{address.slice(2, 6)}</strong>
+      {address.slice(6, -4)}
+      <strong className="font-bold">{address.slice(-4)}</strong>
+    </>
+  )
+}
+
+/** Shortened address; hover shows full address in a tooltip */
+export function ShortAddressWithTooltip({ address, className }: { address: string; className?: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span
+            className={cn('w-fit max-w-full min-w-0 cursor-help truncate text-xs text-muted-foreground', className)}
+          />
+        }
+      >
+        {shortenAddress(address)}
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="max-w-[min(100vw-2rem,22rem)] text-left font-mono text-[11px] leading-snug break-all"
+      >
+        <TooltipFullAddress address={address} />
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 /** Copy address button — click to copy, shows check icon for 2s */
 export function CopyAddressButton({ address }: { address: string }) {
   const [copied, setCopied] = useState(false)
@@ -127,21 +167,14 @@ export function CopyAddressButton({ address }: { address: string }) {
   }
 
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer"
-            aria-label="Copy address"
-          />
-        }
-      >
-        {copied ? <Check className="size-3.5 text-green-600" /> : <Copy className="size-3.5 text-muted-foreground" />}
-      </TooltipTrigger>
-      <TooltipContent>{copied ? 'Copied!' : 'Copy address'}</TooltipContent>
-    </Tooltip>
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer"
+      aria-label={copied ? 'Copied' : 'Copy address'}
+    >
+      {copied ? <Check className="size-3.5 text-green-600" /> : <Copy className="size-3.5 text-muted-foreground" />}
+    </button>
   )
 }
 
@@ -193,6 +226,16 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
     >
       <AlertCircle className="size-3 shrink-0" />
       {isActivating ? 'Activating account' : 'Not activated'}
+    </span>
+  )
+}
+
+/** "High similarity" warning badge */
+export function SimilarityBadge() {
+  return (
+    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700">
+      <TriangleAlert className="size-3 shrink-0" />
+      High similarity
     </span>
   )
 }
