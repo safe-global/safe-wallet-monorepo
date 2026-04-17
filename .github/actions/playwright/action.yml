@@ -1,0 +1,58 @@
+name: 'Playwright setup'
+
+description: >
+  Install and cache Playwright browsers. Does not run tests — callers compose
+  this with their own test step so orchestration (sharding, env, reporter flags)
+  stays visible at the workflow level.
+
+inputs:
+  browser:
+    description: 'Browser to install (chromium | firefox | webkit | all)'
+    required: false
+    default: 'chromium'
+  with-deps:
+    description: 'Install system-level dependencies via apt-get. Usually unnecessary on ubuntu-latest runners — leave false unless a custom/minimal runner is used.'
+    required: false
+    default: 'false'
+
+outputs:
+  cache-hit:
+    description: 'Whether Playwright browsers were restored from cache'
+    value: ${{ steps.cache.outputs.cache-hit }}
+  version:
+    description: 'Resolved @playwright/test version (for downstream cache keys, etc.)'
+    value: ${{ steps.version.outputs.version }}
+
+runs:
+  using: 'composite'
+  steps:
+    # Pin the cache key to the @playwright/test version resolved from the
+    # lockfile. Upgrading Playwright invalidates the cache automatically.
+    - name: Resolve Playwright version
+      id: version
+      shell: bash
+      working-directory: apps/web
+      run: |
+        VERSION=$(node -p "require('@playwright/test/package.json').version")
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "Playwright: $VERSION"
+
+    - name: Cache browsers
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.version.outputs.version }}-${{ inputs.browser }}
+        restore-keys: |
+          playwright-${{ runner.os }}-${{ steps.version.outputs.version }}-
+
+    - name: Install browsers
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: apps/web
+      run: |
+        if [ "${{ inputs.with-deps }}" = "true" ]; then
+          yarn exec playwright install --with-deps ${{ inputs.browser }}
+        else
+          yarn exec playwright install ${{ inputs.browser }}
+        fi

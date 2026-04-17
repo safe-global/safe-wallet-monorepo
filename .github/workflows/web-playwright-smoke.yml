@@ -1,0 +1,175 @@
+name: Web Playwright Smoke
+
+# Smoke-level Playwright suite — fast critical-path checks that gate PRs.
+# Independent of the Cypress pipeline so the two can evolve separately during
+# the Cypress → Playwright migration.
+#
+# Design notes:
+# - Matrix-sharded from day 1 (currently 1 shard) so scaling just means bumping
+#   SHARD_TOTAL below — no structural changes.
+# - Uses the Playwright blob reporter per shard, merged into one HTML report by
+#   the `merge-reports` job. This keeps per-shard isolation without fragmenting
+#   the artifact consumers see.
+# - Traces / videos / screenshots uploaded on failure only to save storage.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - '.github/workflows/web-playwright-smoke.yml'
+      - '.github/actions/playwright/**'
+      - '!**/*.md'
+      - '!apps/web/cypress/**'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+  workflow_dispatch:
+
+# Cancel superseded PR runs; keep every main/dev run for historical signal.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Smoke (${{ matrix.shard }}/${{ matrix.shard_total }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Expand when the suite grows — e.g. shard: [1, 2, 3, 4] and
+        # shard_total: [4]. Both lists must stay in sync.
+        shard: [1]
+        shard_total: [1]
+
+    steps:
+      # fetch-depth: 1 (default) — tests and build don't need git history.
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Set up Playwright
+        uses: ./.github/actions/playwright
+
+      - name: Build web app
+        uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+        env:
+          # Reuses the Cypress build path in actions/build: skips SRI and
+          # Datadog sourcemap upload — appropriate for test builds.
+          NODE_ENV: cypress
+
+      - name: Run Playwright smoke (${{ matrix.shard }}/${{ matrix.shard_total }})
+        working-directory: apps/web
+        run: >-
+          yarn exec playwright test
+          --project=smoke
+          --shard=${{ matrix.shard }}/${{ matrix.shard_total }}
+          --reporter=blob,github,line
+          --pass-with-no-tests
+        env:
+          CI: 'true'
+          BASE_URL: 'http://localhost:8080'
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
+
+      # Always upload blob reports (even on test failure) so merge-reports can
+      # produce a complete HTML report.
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-smoke-${{ matrix.shard }}
+          path: apps/web/blob-report
+          retention-days: 3
+          if-no-files-found: ignore
+
+      # Upload traces/videos/screenshots on failure only — they're large.
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failures-smoke-${{ matrix.shard }}
+          path: apps/web/playwright/test-results
+          retention-days: 5
+          if-no-files-found: ignore
+
+  merge-reports:
+    name: Merge reports
+    # Runs even if some shards failed so PR authors always get a single HTML report.
+    if: ${{ !cancelled() }}
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: apps/web/all-blob-reports
+          pattern: blob-report-smoke-*
+          merge-multiple: true
+
+      - name: Merge into HTML report
+        working-directory: apps/web
+        run: yarn exec playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-report
+          path: apps/web/playwright-report
+          retention-days: 5
+          if-no-files-found: ignore
+
+      # Surface the overall pass/fail at the job level, since merge-reports
+      # itself never fails on test results.
+      - name: Fail job if any shard failed
+        if: ${{ contains(needs.test.result, 'failure') }}
+        run: |
+          echo "One or more shards failed. See individual shard jobs and the merged HTML report."
+          exit 1
+
+  notify:
+    name: Notify Slack
+    if: failure() && github.event_name == 'push'
+    needs: [test, merge-reports]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Post to Slack
+        uses: slackapi/slack-github-action@v3.0.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Playwright smoke failed on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Playwright Smoke Failed*\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• Author: ${{ github.actor }}\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }

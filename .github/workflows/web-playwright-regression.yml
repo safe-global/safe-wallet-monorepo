@@ -1,0 +1,208 @@
+name: Web Playwright Regression & E2E
+
+# Deeper Playwright suites (regression + happypath/e2e) that are too slow or
+# too dependent on real backend state to run on every PR.
+#
+# Triggers:
+#   1. push to dev         — validate what just merged
+#   2. schedule (nightly)  — catch environmental drift (CGW, RPC, test data)
+#   3. workflow_dispatch   — on-demand from the Actions UI; select the suite
+#                            and GitHub's built-in branch picker handles the ref
+#
+# Structure:
+#   - Matrix job per requested suite (regression / happypath), each with its
+#     own shard matrix so growth is linear and debuggable.
+#   - Blob reports merged into one HTML per suite in the `merge-reports` job.
+#   - Single Slack notification on failure.
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+  schedule:
+    # 02:17 UTC daily — off-peak window, avoids the top-of-hour stampede on
+    # GitHub's runner pool (fewer queued minutes).
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Which suite to run'
+        type: choice
+        required: true
+        default: 'all'
+        options:
+          - all
+          - regression
+          - happypath
+
+# Let simultaneous dev-push and schedule runs coexist (different event_name),
+# but cancel superseded runs within the same event context.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Decide which suites run. Single source of truth for the matrix below.
+  plan:
+    name: Plan suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    outputs:
+      suites: ${{ steps.select.outputs.suites }}
+    steps:
+      - id: select
+        shell: bash
+        run: |
+          EVENT='${{ github.event_name }}'
+          INPUT='${{ github.event.inputs.suite }}'
+
+          # Schedule + push → always run both. Manual dispatch → honour input.
+          if [ "$EVENT" = 'workflow_dispatch' ] && [ -n "$INPUT" ] && [ "$INPUT" != 'all' ]; then
+            SUITES="[\"$INPUT\"]"
+          else
+            SUITES='["regression","happypath"]'
+          fi
+
+          echo "suites=$SUITES" >> "$GITHUB_OUTPUT"
+          echo "Running suites: $SUITES"
+
+  test:
+    name: ${{ matrix.suite }} (${{ matrix.shard }}/${{ matrix.shard_total }})
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(needs.plan.outputs.suites) }}
+        # Regression and happypath start with a single shard — bump both
+        # lists together as the suites grow (e.g. [1,2,3,4] + [4]).
+        shard: [1]
+        shard_total: [1]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Set up Playwright
+        uses: ./.github/actions/playwright
+
+      - name: Build web app
+        uses: ./.github/actions/build
+        with:
+          secrets: ${{ toJSON(secrets) }}
+        env:
+          NODE_ENV: cypress
+
+      - name: Run Playwright ${{ matrix.suite }} (${{ matrix.shard }}/${{ matrix.shard_total }})
+        working-directory: apps/web
+        run: >-
+          yarn exec playwright test
+          --project=${{ matrix.suite }}
+          --shard=${{ matrix.shard }}/${{ matrix.shard_total }}
+          --reporter=blob,github,line
+          --pass-with-no-tests
+        env:
+          CI: 'true'
+          BASE_URL: 'http://localhost:8080'
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
+
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.suite }}-${{ matrix.shard }}
+          path: apps/web/blob-report
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failures-${{ matrix.suite }}-${{ matrix.shard }}
+          path: apps/web/playwright/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  merge-reports:
+    name: Merge ${{ matrix.suite }} report
+    if: ${{ !cancelled() }}
+    needs: [plan, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(needs.plan.outputs.suites) }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        uses: ./.github/actions/yarn
+
+      - name: Download blob reports for ${{ matrix.suite }}
+        uses: actions/download-artifact@v4
+        with:
+          path: apps/web/all-blob-reports
+          pattern: blob-report-${{ matrix.suite }}-*
+          merge-multiple: true
+
+      - name: Merge into HTML report
+        working-directory: apps/web
+        run: yarn exec playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ matrix.suite }}-report
+          path: apps/web/playwright-report
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # Fail the merge job if any shard of this suite failed, so the suite
+      # status is visible at job level (merge itself always succeeds).
+      - name: Fail if any ${{ matrix.suite }} shard failed
+        if: ${{ contains(needs.test.result, 'failure') }}
+        run: |
+          echo "One or more shards for ${{ matrix.suite }} failed."
+          exit 1
+
+  notify:
+    name: Notify Slack
+    if: failure() && github.event_name != 'workflow_dispatch'
+    needs: [test, merge-reports]
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Post to Slack
+        uses: slackapi/slack-github-action@v3.0.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "❌ Playwright regression/e2e failed (${{ github.event_name }}) on ${{ github.ref_name }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Playwright Regression/E2E Failed*\n• Trigger: `${{ github.event_name }}`\n• Branch: `${{ github.ref_name }}`\n• Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n• <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
