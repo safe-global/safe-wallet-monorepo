@@ -80,15 +80,7 @@ describe('AddToSpacePopupModal', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 
-  it('navigates to createSpace route when "Create a Space" is clicked without ?safe=', () => {
-    render(<AddToSpacePopupModal />)
-
-    fireEvent.click(screen.getByRole('button', { name: /Create a Space/i }))
-
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
-  })
-
-  it('includes ?safe= in navigation when safe is in the URL', () => {
+  it('navigates to createSpace with safe query param when "Create a Space" is clicked', () => {
     mockRouterQuery = { safe: '1:0xdeadbeef' }
     render(<AddToSpacePopupModal />)
 
@@ -98,23 +90,5 @@ describe('AddToSpacePopupModal', () => {
       pathname: AppRoutes.spaces.createSpace,
       query: { safe: '1:0xdeadbeef' },
     })
-  })
-
-  it('does not include ?safe= when safe param is an array', () => {
-    mockRouterQuery = { safe: ['a', 'b'] } as unknown as Record<string, string>
-    render(<AddToSpacePopupModal />)
-
-    fireEvent.click(screen.getByRole('button', { name: /Create a Space/i }))
-
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
-  })
-
-  it('does not include ?safe= when safe param is empty string', () => {
-    mockRouterQuery = { safe: '' }
-    render(<AddToSpacePopupModal />)
-
-    fireEvent.click(screen.getByRole('button', { name: /Create a Space/i }))
-
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
   })
 })

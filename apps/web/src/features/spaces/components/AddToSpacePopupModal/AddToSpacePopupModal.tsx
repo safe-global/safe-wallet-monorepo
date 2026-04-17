@@ -16,10 +16,8 @@ const BENEFITS = [
 
 export const AddToSpacePopupModal = (): ReactElement => {
   const router = useRouter()
-  const safe = useSafeQueryParam() || undefined
-  const createSpaceHref = safe
-    ? { pathname: AppRoutes.spaces.createSpace, query: { safe } }
-    : AppRoutes.spaces.createSpace
+  const safe = useSafeQueryParam()
+  const createSpaceHref = { pathname: AppRoutes.spaces.createSpace, query: { safe } }
 
   return (
     <div className="flex flex-col w-full">
