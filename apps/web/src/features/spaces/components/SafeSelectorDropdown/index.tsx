@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
-import SafeSelectorError from './components/SafeSelectorError'
+import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
@@ -50,7 +50,7 @@ function SafeSelectorDropdown({
   const safeItemSelect = onItemSelect ?? (() => {})
 
   if (!selectedItem) {
-    if (isError) return <SafeSelectorError onRetry={onRetry} />
+    if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     if (isLoading) return <SafeSelectorDropdownSkeleton />
     return null
   }

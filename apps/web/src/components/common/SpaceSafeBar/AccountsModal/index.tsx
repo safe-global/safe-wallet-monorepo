@@ -6,9 +6,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import useWallet from '@/hooks/wallets/useWallet'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
+import InlineRetryError from '@/components/common/InlineRetryError'
 import { SafeListSkeleton } from './shared'
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
@@ -21,6 +24,11 @@ interface AccountsModalProps {
 const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
   const [search, setSearch] = useState('')
   const allSafes = useAllSafes()
+  const { address: walletAddress = '' } = useWallet() || {}
+  const { error: ownedSafesError, refetch: refetchOwnedSafes } = useOwnersGetAllSafesByOwnerV2Query(
+    { ownerAddress: walletAddress },
+    { skip: walletAddress === '' },
+  )
 
   // Group ALL safes into single/multi-chain
   const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(allSafes ?? [])
@@ -88,6 +96,11 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+          {ownedSafesError && (
+            <div className="px-2 pb-2 pt-1">
+              <InlineRetryError message="Failed to load owned safes" onRetry={refetchOwnedSafes} />
+            </div>
+          )}
           {!allSafes ? (
             <SafeListSkeleton />
           ) : filteredItems.length === 0 ? (
