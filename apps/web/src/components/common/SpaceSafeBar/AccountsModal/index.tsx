@@ -8,6 +8,8 @@ import { AppRoutes } from '@/config/routes'
 import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
@@ -23,12 +25,26 @@ interface AccountsModalProps {
 
 const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
   const [search, setSearch] = useState('')
+  const dispatch = useAppDispatch()
   const allSafes = useAllSafes()
   const { address: walletAddress = '' } = useWallet() || {}
   const { error: ownedSafesError, refetch: refetchOwnedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: walletAddress },
     { skip: walletAddress === '' },
   )
+
+  useEffect(() => {
+    if (!open || !ownedSafesError) return
+    dispatch(
+      showNotification({
+        title: 'Failed to load owned safes',
+        message: 'Some of your accounts may be missing. Please try again.',
+        groupKey: 'owned-safes-fetch-error',
+        variant: 'error',
+        link: { onClick: () => void refetchOwnedSafes(), title: 'Retry' },
+      }),
+    )
+  }, [open, ownedSafesError, refetchOwnedSafes, dispatch])
 
   // Group ALL safes into single/multi-chain
   const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(allSafes ?? [])
