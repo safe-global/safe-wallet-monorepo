@@ -62,10 +62,32 @@ jobs:
       - name: Set up Playwright
         uses: ./.github/actions/playwright
 
+      # Filter repo/org secrets down to only what `actions/build` actually uses
+      # (NEXT_PUBLIC_* + DATADOG_*). Keeps CYPRESS_WALLET_CREDENTIALS and other
+      # test-only / operational secrets out of the build blast radius
+      # (CodeQL "Excessive Secrets Exposure").
+      - name: Filter secrets for build
+        id: build-secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          set -euo pipefail
+          FILTERED=$(echo "$ALL_SECRETS" | jq -c '
+            with_entries(select(.key | test("^NEXT_PUBLIC_|^DATADOG_")))
+          ')
+          # Register as a masked value so it cannot appear in subsequent logs.
+          echo "::add-mask::$FILTERED"
+          {
+            echo 'json<<EOF_SECRETS'
+            echo "$FILTERED"
+            echo 'EOF_SECRETS'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build web app
         uses: ./.github/actions/build
         with:
-          secrets: ${{ toJSON(secrets) }}
+          secrets: ${{ steps.build-secrets.outputs.json }}
         env:
           # Reuses the Cypress build path in actions/build: skips SRI and
           # Datadog sourcemap upload — appropriate for test builds.
