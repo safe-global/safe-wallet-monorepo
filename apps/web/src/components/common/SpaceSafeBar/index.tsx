@@ -14,6 +14,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import { useAllSafes } from '@/hooks/safes'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
@@ -82,16 +84,21 @@ function SpaceSafeBar() {
   const { safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const addedSafes = useAppSelector(selectAllAddedSafes)
+  const allSafeItems = useAllSafes()
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
 
   if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
 
+  // Check if current safe is pinned on any chain
   const isPinned = Boolean(addedSafes[chainId]?.[safeAddress])
 
   const handleTogglePin = () => {
+    // Find all chains where this safe address exists
+    const safesOnAllChains = allSafeItems?.filter((s) => sameAddress(s.address, safeAddress)) ?? []
+
     if (isPinned) {
-      dispatch(unpinSafe({ chainId, address: safeAddress }))
+      safesOnAllChains.forEach((s) => dispatch(unpinSafe({ chainId: s.chainId, address: s.address })))
       dispatch(
         showNotification({
           title: 'Safe removed',
@@ -102,7 +109,9 @@ function SpaceSafeBar() {
       )
       trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
     } else {
-      dispatch(pinSafe({ chainId, address: safeAddress }))
+      // If safe is only known on current chain (e.g. navigated via URL), pin just that
+      const toPinList = safesOnAllChains.length > 0 ? safesOnAllChains : [{ chainId, address: safeAddress }]
+      toPinList.forEach((s) => dispatch(pinSafe({ chainId: s.chainId, address: s.address })))
       dispatch(
         showNotification({
           title: 'Safe trusted',

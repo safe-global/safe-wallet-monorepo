@@ -77,6 +77,15 @@ jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))
 
 jest.mock('@/hooks/useChainId', () => () => '1')
 
+jest.mock('@/hooks/safes', () => ({
+  ...jest.requireActual('@/hooks/safes'),
+  useAllSafes: () => [],
+}))
+
+jest.mock('@/hooks/wallets/useWallet', () => () => null)
+
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => () => jest.fn())
+
 jest.mock('@/store', () => ({
   useAppDispatch: () => jest.fn(),
   useAppSelector: () => ({}),
