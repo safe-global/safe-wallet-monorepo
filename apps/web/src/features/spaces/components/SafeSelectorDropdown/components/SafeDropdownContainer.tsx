@@ -13,7 +13,8 @@ export interface SafeDropdownContainerProps {
   isError?: boolean
   onRetry?: () => void
   header?: React.ReactNode
-  footer?: React.ReactNode
+  footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  closeDropdown: () => void
 }
 
 function SafeItemSkeleton() {
@@ -58,6 +59,7 @@ const SafeDropdownContainer = ({
   onRetry,
   header,
   footer,
+  closeDropdown,
 }: SafeDropdownContainerProps) => {
   const filteredItems = items.filter((item) => item.id !== selectedItemId)
 
@@ -93,7 +95,7 @@ const SafeDropdownContainer = ({
     >
       {header}
       {renderContent()}
-      {footer}
+      {typeof footer === 'function' ? footer(closeDropdown) : footer}
     </SelectContent>
   )
 }

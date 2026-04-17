@@ -20,5 +20,5 @@ export interface SafeSelectorDropdownProps {
   isError?: boolean
   onRetry?: () => void
   header?: React.ReactNode
-  footer?: React.ReactNode
+  footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
 }

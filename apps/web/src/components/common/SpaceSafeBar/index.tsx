@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bookmark, ChevronRight } from 'lucide-react'
+import { Bookmark, ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
@@ -12,6 +12,8 @@ import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS } from '@/services/analytics/events/overview'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
+import useWallet from '@/hooks/wallets/useWallet'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
@@ -51,6 +53,25 @@ function DropdownFooter({ onOpen }: { onOpen: () => void }) {
   )
 }
 
+function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; onClose: () => void }) {
+  return (
+    <div className="px-4 py-3">
+      <Button
+        variant="secondary"
+        size="sm"
+        className="w-full"
+        onClick={() => {
+          onClose()
+          onConnect()
+        }}
+      >
+        <Wallet className="size-4" />
+        Connect wallet
+      </Button>
+    </div>
+  )
+}
+
 function SpaceSafeBar() {
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -61,6 +82,8 @@ function SpaceSafeBar() {
   const { safeAddress } = useSafeInfo()
   const chainId = useChainId()
   const addedSafes = useAppSelector(selectAllAddedSafes)
+  const wallet = useWallet()
+  const connectWallet = useConnectWallet()
 
   if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
 
@@ -98,7 +121,16 @@ function SpaceSafeBar() {
 
   const dropdownHeader = !isQualifiedSafe ? <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} /> : undefined
 
-  const dropdownFooter = !isQualifiedSafe ? <DropdownFooter onOpen={handleOpenAccountsModal} /> : undefined
+  const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)
+  const showConnectWallet = !wallet && !hasPinnedSafes
+
+  const dropdownFooter = !isQualifiedSafe ? (
+    showConnectWallet ? (
+      (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
+    ) : (
+      <DropdownFooter onOpen={handleOpenAccountsModal} />
+    )
+  ) : undefined
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
