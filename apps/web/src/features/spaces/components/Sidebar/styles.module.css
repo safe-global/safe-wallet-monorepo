@@ -245,3 +245,93 @@
 .footerMenuAction:hover {
   background: transparent !important;
 }
+
+.profileName {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.profileTriggerAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 10%, transparent);
+  color: var(--color-text-secondary, #737373);
+}
+
+.profilePopover {
+  display: flex;
+  flex-direction: column;
+  gap: 12px !important;
+  padding: 16px !important;
+  width: 13.5rem !important;
+  background-color: var(--secondary) !important;
+  box-shadow: none !important;
+  --ring-width: 0px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.profileSignedIn {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileRole {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  text-transform: capitalize;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileSignOut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  color: var(--color-text-primary, #171717);
+  background: none;
+  border: none;
+  width: 100%;
+}
+
+.profileSignOut:hover {
+  opacity: 0.7;
+}
+
+:global(.group[data-collapsible='icon']) {
+  .profileName {
+    display: none !important;
+  }
+
+  .profileTrigger {
+    height: 3rem !important;
+    width: 3rem !important;
+  }
+}

@@ -9,7 +9,7 @@ import type {
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 import { type SafeTransactionData, type SafeSignature, type SafeTransaction } from '@safe-global/types-kit'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Operation } from '@safe-global/store/gateway/types'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 

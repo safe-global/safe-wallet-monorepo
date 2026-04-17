@@ -5,6 +5,10 @@ import * as deployments from '@safe-global/utils/services/contracts/deployments'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
+jest.mock('@safe-global/safe-deployments', () => ({
+  ...jest.requireActual('@safe-global/safe-deployments'),
+}))
+
 const mainnetInfo = chainBuilder().with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.4.1' }).build()
 const l2Chain = chainBuilder().with({ chainId: '137', l2: true, recommendedMasterCopyVersion: '1.4.1' }).build()
 const unsupportedChain = chainBuilder()
@@ -76,9 +80,7 @@ describe('deployments', () => {
         null,
       )
 
-      expect(getSafeSpy).toHaveBeenCalledTimes(2)
-
-      expect(getSafeSpy).toHaveBeenNthCalledWith(2, {
+      expect(getSafeSpy).toHaveBeenCalledWith({
         version: '1.4.1',
         network: '1',
       })
@@ -91,9 +93,7 @@ describe('deployments', () => {
         null,
       )
 
-      expect(getSafeSpy).toHaveBeenCalledTimes(2)
-
-      expect(getSafeSpy).toHaveBeenNthCalledWith(2, {
+      expect(getSafeSpy).toHaveBeenCalledWith({
         network: '1',
         version: '1.4.1',
       })

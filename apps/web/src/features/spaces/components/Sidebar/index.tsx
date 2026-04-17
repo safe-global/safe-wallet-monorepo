@@ -3,6 +3,7 @@ import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
+import { SidebarProfileSection } from './SidebarProfileSection'
 import type { SpaceSelectorProps } from './types'
 import type { SidebarVariantType } from './variants'
 import css from './styles.module.css'
@@ -31,6 +32,7 @@ export const EnhancedSidebar = ({
 
       <Variant spaceName={spaceName} spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} />
       <SidebarCommonFooter />
+      <SidebarProfileSection />
     </Sidebar>
   )
 }

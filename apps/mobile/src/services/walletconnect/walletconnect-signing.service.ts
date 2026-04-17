@@ -1,6 +1,7 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeVersion } from '@safe-global/types-kit'
-import { generateTypedData, SigningMethod } from '@safe-global/protocol-kit'
+import { generateTypedData } from '@safe-global/protocol-kit'
+import { SigningMethod } from '@safe-global/types-kit'
 import { TypedDataEncoder } from 'ethers'
 import { createExistingTx } from '../tx/tx-sender/create'
 import extractTxInfo from '../tx/extractTx'

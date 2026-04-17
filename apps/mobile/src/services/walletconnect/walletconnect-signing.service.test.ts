@@ -3,7 +3,7 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import type { SafeInfo } from '@/src/types/address'
 import type { Provider } from '@reown/appkit-common-react-native'
 import { signWithWalletConnect } from './walletconnect-signing.service'
-import { SigningMethod } from '@safe-global/protocol-kit'
+import { SigningMethod } from '@safe-global/types-kit'
 
 const mockFetchTransactionDetails = jest.fn()
 const mockExtractTxInfo = jest.fn()

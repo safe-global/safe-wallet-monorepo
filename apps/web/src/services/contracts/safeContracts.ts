@@ -4,15 +4,15 @@ import {
   getCanonicalMultiSendCallOnlyAddress,
 } from '@safe-global/utils/services/contracts/deployments'
 import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
-import { SafeProvider } from '@safe-global/protocol-kit'
 import {
-  getCompatibilityFallbackHandlerContractInstance,
-  getMultiSendCallOnlyContractInstance,
-  getSafeContractInstance,
-  getSafeProxyFactoryContractInstance,
-  getSignMessageLibContractInstance,
-} from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
-import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
+  SafeProvider,
+  getCompatibilityFallbackHandlerContract,
+  getMultiSendCallOnlyContract,
+  getSafeContract,
+  getSafeProxyFactoryContract,
+  getSignMessageLibContract,
+} from '@safe-global/protocol-kit'
+import type { SafeBaseContract } from '@safe-global/protocol-kit'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -30,7 +30,11 @@ const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider
     version = safeSDK?.getContractVersion() ?? null
   }
 
-  return getSafeContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider, safe.address.value)
+  return getSafeContract({
+    safeProvider,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customSafeAddress: safe.address.value,
+  })
 }
 
 export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {
@@ -61,13 +65,11 @@ export const getReadOnlyGnosisSafeContract = async (
 
   const isL1SafeSingleton = isL1 ?? !_isL2(chain, _getValidatedGetContractProps(version).safeVersion)
 
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
+  return getSafeContract({
     safeProvider,
-    undefined,
-    undefined,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
     isL1SafeSingleton,
-  )
+  })
 }
 
 // MultiSend
@@ -105,11 +107,11 @@ export const getReadOnlyMultiSendCallOnlyContract = async (
     customContractAddress = getCanonicalMultiSendCallOnlyAddress(version)
   }
 
-  return getMultiSendCallOnlyContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
+  return getMultiSendCallOnlyContract({
     safeProvider,
-    customContractAddress,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customContracts: customContractAddress ? { multiSendCallOnlyAddress: customContractAddress } : undefined,
+  })
 }
 
 // GnosisSafeProxyFactory
@@ -124,11 +126,11 @@ export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['ve
     version = safeSDK?.getContractVersion() ?? null
   }
 
-  return getSafeProxyFactoryContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
+  return getSafeProxyFactoryContract({
     safeProvider,
-    contractAddress,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customContracts: contractAddress ? { safeProxyFactoryAddress: contractAddress } : undefined,
+  })
 }
 
 // Fallback handler
@@ -143,10 +145,10 @@ export const getReadOnlyFallbackHandlerContract = async (safeVersion: SafeState[
     version = safeSDK?.getContractVersion() ?? null
   }
 
-  return getCompatibilityFallbackHandlerContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
+  return getCompatibilityFallbackHandlerContract({
     safeProvider,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+  })
 }
 
 // Sign messages deployment
@@ -162,5 +164,8 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeState['
   // For unsupported mastercopies, use the SDK version if available
   const version = safeVersion ?? safeSDK.getContractVersion()
 
-  return getSignMessageLibContractInstance(_getValidatedGetContractProps(version).safeVersion, safeProvider)
+  return getSignMessageLibContract({
+    safeProvider,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+  })
 }

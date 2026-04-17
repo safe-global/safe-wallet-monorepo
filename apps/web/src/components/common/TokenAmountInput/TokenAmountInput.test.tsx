@@ -3,7 +3,7 @@ import { render, screen } from '@/tests/test-utils'
 import { FormProvider, useForm, useFieldArray } from 'react-hook-form'
 import TokenAmountInput from './index'
 import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 

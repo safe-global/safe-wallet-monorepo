@@ -13,6 +13,7 @@ jest.mock('@safe-global/safe-deployments', () => ({
 }))
 
 jest.mock('@safe-global/protocol-kit', () => ({
+  ...jest.requireActual('@safe-global/protocol-kit'),
   __esModule: true,
   default: {
     init: jest.fn(),

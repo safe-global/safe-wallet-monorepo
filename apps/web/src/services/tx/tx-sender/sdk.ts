@@ -1,14 +1,16 @@
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
-import { SafeProvider, SigningMethod } from '@safe-global/protocol-kit'
+import { SafeProvider } from '@safe-global/protocol-kit'
 import {
-  generatePreValidatedSignature,
-  isSafeMultisigTransactionResponse,
-  sameString,
-} from '@safe-global/protocol-kit/dist/src/utils'
+  SigningMethod,
+  OperationType,
+  type SafeTransaction,
+  type SafeMultisigTransactionResponse,
+} from '@safe-global/types-kit'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Eip1193Provider, JsonRpcSigner } from 'ethers'
 import { isHardwareWallet, isWalletConnect } from '@/utils/wallets'
-import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
 import { getChainConfig } from '@/utils/chains'
 import { createWeb3, getWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { toQuantity } from 'ethers'
@@ -160,9 +162,10 @@ export const prepareTxExecution = async (safeTransaction: SafeTransaction, provi
     throw new Error('Safe is not deployed')
   }
 
-  const transaction = isSafeMultisigTransactionResponse(safeTransaction)
-    ? await sdk.toSafeTransactionType(safeTransaction)
-    : safeTransaction
+  const transaction =
+    'isExecuted' in safeTransaction
+      ? await sdk.toSafeTransactionType(safeTransaction as unknown as SafeMultisigTransactionResponse)
+      : safeTransaction
 
   const signedSafeTransaction = await sdk.copyTransaction(transaction)
 
@@ -213,7 +216,7 @@ export const prepareApproveTxHash = async (hash: string, provider: Eip1193Provid
   if (!signerAddress) {
     throw new Error('SafeProvider must be initialized with a signer to use this method')
   }
-  const addressIsOwner = owners.some((owner: string) => signerAddress && sameString(owner, signerAddress))
+  const addressIsOwner = owners.some((owner: string) => signerAddress && sameAddress(owner, signerAddress))
   if (!addressIsOwner) {
     throw new Error('Transaction hashes can only be approved by Safe owners')
   }

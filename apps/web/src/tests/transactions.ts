@@ -1,9 +1,9 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { OperationType } from '@safe-global/types-kit'
 
 import type { SafeTransaction } from '@safe-global/types-kit'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
+import { EthSafeTransaction } from '@safe-global/protocol-kit'
 import { TransactionStatus } from '@safe-global/safe-apps-sdk'
 
 export const createMockTransactionDetails = ({
