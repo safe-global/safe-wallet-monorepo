@@ -1,5 +1,11 @@
 import type { ILogger, IObservabilityProvider } from '../types'
-import { datadogRum, type RumEvent, type RumErrorEvent, type RumEventDomainContext } from '@datadog/browser-rum'
+import {
+  datadogRum,
+  type RumEvent,
+  type RumErrorEvent,
+  type RumEventDomainContext,
+  type RumErrorEventDomainContext,
+} from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
   DATADOG_RUM_APPLICATION_ID,
@@ -69,15 +75,13 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   if (event.type !== 'error') return true
 
   const errorEvent = event as RumErrorEvent
-  const errorContext = context as { error?: { originalError?: unknown; stack?: string } } | undefined
-
   if (isKnownNoise(errorEvent.error.message)) return false
-
   if (originatesFromExtension(errorEvent.error.stack)) return false
 
-  const originalErrorStack =
-    errorContext?.error?.originalError instanceof Error ? errorContext.error.originalError.stack : undefined
-  if (originatesFromExtension(originalErrorStack ?? errorContext?.error?.stack)) return false
+  // context.error is the raw value originally passed to addError/captureException
+  const { error: rawError } = context as RumErrorEventDomainContext
+  const rawStack = rawError instanceof Error ? rawError.stack : undefined
+  if (originatesFromExtension(rawStack)) return false
 
   return true
 }

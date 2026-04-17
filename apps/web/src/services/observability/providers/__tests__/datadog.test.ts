@@ -252,13 +252,18 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent(event, {} as any)).toBe(false)
     })
 
-    it('drops errors whose original error stack points at an extension', async () => {
+    it('drops errors whose raw Error stack (from context) points at an extension', async () => {
       const { filterRumEvent } = await import('../datadog')
       const event = buildErrorEvent()
-      const ctx: any = {
-        error: { originalError: Object.assign(new Error('x'), { stack: 'safari-web-extension://abc/x.js:1:1' }) },
-      }
-      expect(filterRumEvent(event, ctx)).toBe(false)
+      const rawError = Object.assign(new Error('x'), { stack: 'safari-web-extension://abc/x.js:1:1' })
+      expect(filterRumEvent(event, { error: rawError } as any)).toBe(false)
+    })
+
+    it('keeps errors when context.error is not an Error instance', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({ stack: 'at foo (https://app.safe.global/x.js:1:1)' })
+      expect(filterRumEvent(event, { error: 'some string' } as any)).toBe(true)
+      expect(filterRumEvent(event, { error: undefined } as any)).toBe(true)
     })
 
     it('drops known browser noise messages', async () => {
