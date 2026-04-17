@@ -54,7 +54,7 @@ export function useOptionalWalletConnectContext(): WalletConnectContextValue | n
 
 interface WalletConnectProviderProps {
   children: React.ReactNode
-  instance: unknown
+  instance?: unknown
 }
 
 export function WalletConnectProvider({ children }: WalletConnectProviderProps) {
@@ -117,9 +117,8 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     Logger.info('[E2E] switchNetworkIfNeeded called')
   }, [])
 
-  const sign = useCallback(async (_params: unknown) => {
-    Logger.info('[E2E] sign called')
-    return {} as unknown
+  const sign = useCallback(async (_params: unknown): Promise<unknown> => {
+    throw new Error('E2E: Signing not implemented in test mode')
   }, [])
 
   const disconnect = useCallback(async () => {
