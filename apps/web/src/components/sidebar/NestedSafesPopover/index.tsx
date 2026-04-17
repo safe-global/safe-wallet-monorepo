@@ -311,11 +311,7 @@ export function NestedSafesPopover({
       open={!!anchorEl}
       anchorEl={centered ? undefined : anchorEl}
       anchorReference={centered ? 'anchorPosition' : 'anchorEl'}
-      anchorPosition={
-        centered && typeof window !== 'undefined'
-          ? { top: window.innerHeight / 2, left: window.innerWidth / 2 }
-          : undefined
-      }
+      anchorPosition={centered && anchorEl ? { top: window.innerHeight / 2, left: window.innerWidth / 2 } : undefined}
       onClose={canClose ? onClose : undefined}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={
