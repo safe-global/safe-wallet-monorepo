@@ -14,9 +14,7 @@ type Story = StoryObj<typeof meta>
 const defaultArgs: FeesPreviewData = {
   canCoverFees: true,
   executionFee: {
-    label: 'Execution fee (0.05%)',
-    amount: '0.02733',
-    currency: 'ETH',
+    label: 'Execution fee',
     isFree: true,
   },
   gasFee: { label: 'Gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$97.30' },
@@ -52,7 +50,7 @@ export const Error: Story = {
 export const FallbackEOA: Story = {
   args: {
     canCoverFees: false,
-    executionFee: { label: 'Execution fee (0.05%)', amount: '0.02733', currency: 'ETH', isFree: true },
+    executionFee: { label: 'Execution fee', isFree: true },
     gasFee: { label: 'Gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$97.30' },
     totalOutgoing: { primary: { amount: '0.60126', currency: 'ETH' }, fiatTotal: '$1,768.95' },
     availableGasTokens: [{ symbol: 'ETH', logoUri: '' }],
@@ -82,7 +80,7 @@ export const ConfirmationTwoCurrencies: Story = {
 export const FallbackEOATwoCurrencies: Story = {
   args: {
     canCoverFees: false,
-    executionFee: { label: 'Execution fee (0.05%)', amount: '0.02733', currency: 'ETH', isFree: true },
+    executionFee: { label: 'Execution fee', isFree: true },
     gasFee: { label: 'Gas fee', amount: '0.02733', currency: 'ETH', fiatAmount: '$97.30' },
     totalOutgoing: {
       primary: { amount: '0.5466', currency: 'ETH' },

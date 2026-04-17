@@ -4,7 +4,7 @@ import type { FeesPreviewData } from '../../hooks/useFeesPreview'
 
 const defaultProps: FeesPreviewData = {
   canCoverFees: true,
-  executionFee: { label: 'Execution fee (0.05%)', amount: '0.02733', currency: 'ETH', isFree: true },
+  executionFee: { label: 'Execution fee', isFree: true },
   gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH', fiatAmount: '$97.30' },
   totalOutgoing: { primary: { amount: '0.60126', currency: 'ETH' }, fiatTotal: '$1,768.85' },
   availableGasTokens: [{ symbol: 'ETH', logoUri: '' }],
@@ -20,13 +20,12 @@ describe('FeesPreview', () => {
     expect(screen.getByText(/How fees work/)).toBeInTheDocument()
   })
 
-  it('renders payment source toggle with Safe wallet active by default', () => {
+  it('renders payment source selector with Safe active by default', () => {
     render(<FeesPreview {...defaultProps} />)
 
-    expect(screen.getByText('Pay fees from')).toBeInTheDocument()
-    expect(screen.getByText('Safe wallet')).toBeInTheDocument()
-    expect(screen.getByText('Signing wallet')).toBeInTheDocument()
-    expect(screen.getByText('using')).toBeInTheDocument()
+    expect(screen.getByText('Pay fees from:')).toBeInTheDocument()
+    expect(screen.getByTestId('payment-source-selector')).toHaveTextContent('Safe')
+    expect(screen.getByText('Fees token:')).toBeInTheDocument()
   })
 
   it('renders gas token selector', () => {
@@ -35,11 +34,11 @@ describe('FeesPreview', () => {
     expect(screen.getByText('ETH')).toBeInTheDocument()
   })
 
-  it('renders execution fee as FREE with strikethrough', () => {
+  it('renders execution fee as FREE only (no amount, no percentage)', () => {
     render(<FeesPreview {...defaultProps} />)
 
     expect(screen.getByText('FREE')).toBeInTheDocument()
-    expect(screen.getByText('0.02733 ETH')).toBeInTheDocument()
+    expect(screen.queryByText(/Execution fee \(/)).not.toBeInTheDocument()
   })
 
   it('renders gas fee with fiat', () => {
@@ -57,10 +56,11 @@ describe('FeesPreview', () => {
     expect(screen.getByText('$1,768.85')).toBeInTheDocument()
   })
 
-  it('shows total outgoing when Signing wallet selected', () => {
+  it('keeps total outgoing visible after switching payment source to Signer', () => {
     render(<FeesPreview {...defaultProps} />)
 
-    fireEvent.click(screen.getByText('Signing wallet'))
+    fireEvent.click(screen.getByTestId('payment-source-selector'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Signer' }))
 
     expect(screen.getByText('Total outgoing')).toBeInTheDocument()
   })
@@ -103,15 +103,15 @@ describe('FeesPreview', () => {
   describe('fallback EOA (canCoverFees: false)', () => {
     const fallbackProps: FeesPreviewData = {
       canCoverFees: false,
-      executionFee: { label: 'Execution fee', amount: '0.00273', currency: 'ETH', isFree: true },
+      executionFee: { label: 'Execution fee', isFree: true },
       gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
     }
 
-    it('does not render payment source toggle', () => {
+    it('does not render payment source selector', () => {
       render(<FeesPreview {...fallbackProps} />)
 
-      expect(screen.queryByText('Pay fees from')).not.toBeInTheDocument()
-      expect(screen.queryByText('Safe wallet')).not.toBeInTheDocument()
+      expect(screen.queryByText('Pay fees from:')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('payment-source-selector')).not.toBeInTheDocument()
     })
 
     it('renders fee rows', () => {
@@ -121,18 +121,11 @@ describe('FeesPreview', () => {
       expect(screen.getByText('Gas fee')).toBeInTheDocument()
     })
 
-    it('renders fallback EOA info alert', () => {
+    it('renders signer fallback notice', () => {
       render(<FeesPreview {...fallbackProps} />)
 
-      expect(screen.getByTestId('fallback-eoa-banner')).toBeInTheDocument()
-    })
-
-    it('dismisses fallback EOA banner on close', () => {
-      render(<FeesPreview {...fallbackProps} />)
-
-      fireEvent.click(screen.getByLabelText('Dismiss'))
-
-      expect(screen.queryByTestId('fallback-eoa-banner')).not.toBeInTheDocument()
+      expect(screen.getByText(/Fees will be paid from the signer/)).toBeInTheDocument()
+      expect(screen.getByText(/Fees can.*t currently be paid from your Safe/)).toBeInTheDocument()
     })
 
     it('does not render total outgoing', () => {

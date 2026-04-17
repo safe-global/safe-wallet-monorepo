@@ -47,7 +47,7 @@ const FeeRow = ({
         <>
           <div className={css.feeAmount}>
             {isFree && (
-              <Typography variant="body2" component="span" color="success.main" fontWeight={700} mr={1}>
+              <Typography variant="body2" component="span" color="success.main" fontWeight={700} mr={amount ? 1 : 0}>
                 FREE
               </Typography>
             )}
