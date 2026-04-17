@@ -1,5 +1,5 @@
 import type { AllSafeItems } from '@/hooks/safes'
-import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useEffect } from 'react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -7,7 +7,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 let isTotalSafesTracked = false
 let isTotalMembersTracked = false
 
-const useTrackSpace = (safes: AllSafeItems, activeMembers: Member[]) => {
+const useTrackSpace = (safes: AllSafeItems, activeMembers: MemberDto[]) => {
   useEffect(() => {
     if (isTotalSafesTracked) return
 

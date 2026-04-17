@@ -1,13 +1,12 @@
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { zeroPadValue, Interface } from 'ethers'
+import { zeroPadValue, Interface, toBeHex } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'
 import * as safeContracts from '@/services/contracts/safeContracts'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
-import { toBeHex } from 'ethers'
+import { EthSafeTransaction } from '@safe-global/protocol-kit'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import * as Web3 from '@/hooks/wallets/web3ReadOnly'
 import {
   NONCE_STORAGE_POSITION,

@@ -53,7 +53,7 @@ jest.mock('@/src/hooks/coreSDK/safeCoreSDK', () => ({
   getSafeSDK: () => mockGetSafeSDK(),
 }))
 
-jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
   generatePreValidatedSignature: (owner: string) => ({ signer: owner, data: '0xPreValidated' }),
 }))
 

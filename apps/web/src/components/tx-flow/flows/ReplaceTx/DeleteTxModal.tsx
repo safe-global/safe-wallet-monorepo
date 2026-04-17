@@ -118,7 +118,7 @@ const InternalDeleteTxModal = ({
 
         <Box mt={2}>
           Make sure that you are aware of the{' '}
-          <ExternalLink href="https://help.safe.global/en/articles/40836-why-do-i-need-to-pay-for-cancelling-a-transaction">
+          <ExternalLink href="https://help.safe.global/articles/4016097317-Why-do-I-need-to-pay-for-cancelling-a-transaction?">
             potential risks
           </ExternalLink>{' '}
           related to deleting a transaction off-chain.

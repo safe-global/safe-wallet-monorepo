@@ -1,5 +1,5 @@
 import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 /**

@@ -4,7 +4,7 @@ import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { type SafeTransaction } from '@safe-global/types-kit'
 import { id } from 'ethers'
 import { type SecurityResponse, type SecurityModule, SecuritySeverity } from '../types'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import {
   APPROVAL_SIGNATURE_HASH,
   INCREASE_ALLOWANCE_SIGNATURE_HASH,

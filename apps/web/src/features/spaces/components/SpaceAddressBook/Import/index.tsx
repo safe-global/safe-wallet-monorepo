@@ -3,7 +3,7 @@ import { Button, SvgIcon } from '@mui/material'
 import { useState } from 'react'
 import ImportAddressBookDialog from './ImportAddressBookDialog'
 
-const ImportAddressBook = () => {
+const ImportAddressBook = ({ disabled }: { disabled?: boolean }) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -13,6 +13,7 @@ const ImportAddressBook = () => {
         size="small"
         startIcon={<SvgIcon component={ImportIcon} inheritViewBox fontSize="small" color="primary" />}
         onClick={() => setOpen(true)}
+        disabled={disabled}
       >
         Import
       </Button>

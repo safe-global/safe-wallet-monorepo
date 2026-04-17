@@ -12,7 +12,8 @@ import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import * as txSender from '@/services/tx/tx-sender/dispatch'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { type OnboardAPI } from '@web3-onboard/core'
-import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
+import { AbiCoder, encodeBytes32String } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import ExecuteThroughRoleForm from '../index'
 import * as hooksModule from '../hooks'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -147,7 +148,7 @@ describe('ExecuteThroughRoleForm', () => {
     mockConnectedWalletAddress(MEMBER_ADDRESS)
 
     const safeTx = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
       operation: OperationType.Call,

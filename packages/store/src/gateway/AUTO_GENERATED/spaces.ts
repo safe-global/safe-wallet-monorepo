@@ -106,6 +106,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      membersGetMembershipV1: build.query<MembersGetMembershipV1ApiResponse, MembersGetMembershipV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/membership` }),
+        providesTags: ['spaces'],
+      }),
       membersUpdateRoleV1: build.mutation<MembersUpdateRoleV1ApiResponse, MembersUpdateRoleV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/role`,
@@ -158,8 +162,7 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse =
-  /** status 200 Space and user created successfully */ CreateSpaceResponse
+export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateWithUserV1ApiArg = {
   /** Space creation data including the name of the space */
   createSpaceDto: CreateSpaceDto
@@ -228,6 +231,11 @@ export type MembersSelfRemoveV1ApiResponse = unknown
 export type MembersSelfRemoveV1ApiArg = {
   spaceId: number
 }
+export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
+export type MembersGetMembershipV1ApiArg = {
+  /** Space ID to fetch the caller's membership for */
+  spaceId: number
+}
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
   /** Space ID containing the member */
@@ -278,7 +286,7 @@ export type CreateSpaceDto = {
 export type UserDto = {
   id: number
 }
-export type MemberDto = {
+export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
   invitedBy: string
@@ -288,7 +296,7 @@ export type MemberDto = {
 export type GetSpaceResponse = {
   id: number
   name: string
-  members: MemberDto[]
+  members: SpaceMemberDto[]
   /** Total count of Safes in the space */
   safeCount: number
 }
@@ -337,7 +345,7 @@ export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
 }
-export type Member = {
+export type MemberDto = {
   id: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
@@ -349,7 +357,7 @@ export type Member = {
   user: MemberUser
 }
 export type MembersDto = {
-  members: Member[]
+  members: MemberDto[]
 }
 export type UpdateRoleDto = {
   role: 'ADMIN' | 'MEMBER'
@@ -381,6 +389,8 @@ export const {
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,
+  useMembersGetMembershipV1Query,
+  useLazyMembersGetMembershipV1Query,
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,

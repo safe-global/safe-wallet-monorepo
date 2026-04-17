@@ -8,7 +8,7 @@ import {
 } from '../transaction-calldata'
 import { Safe__factory, ERC20__factory, ERC721__factory } from '@safe-global/utils/types/contracts'
 import { Multi_send__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.3.0'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType } from '@safe-global/types-kit'
 
 describe('transaction-calldata utils', () => {
