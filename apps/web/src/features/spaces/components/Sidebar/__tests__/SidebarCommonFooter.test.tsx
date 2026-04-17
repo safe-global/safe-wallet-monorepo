@@ -114,7 +114,7 @@ describe('SidebarCommonFooter', () => {
     render(<SidebarCommonFooter />)
 
     const helpLink = screen.getByRole('link', { name: /Help/i })
-    expect(helpLink).toHaveAttribute('href', 'https://help.safe.global/en/')
+    expect(helpLink).toHaveAttribute('href', 'https://help.safe.global')
     expect(helpLink).toHaveAttribute('target', '_blank')
     expect(helpLink).toHaveAttribute('rel', 'noopener noreferrer')
   })
