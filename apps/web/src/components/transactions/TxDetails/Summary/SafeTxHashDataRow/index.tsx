@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { type SafeTransactionData, type SafeVersion } from '@safe-global/types-kit'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getDomainHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'

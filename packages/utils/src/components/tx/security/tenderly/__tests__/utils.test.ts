@@ -1,4 +1,5 @@
-import { toBeHex, ZeroAddress } from 'ethers'
+import { toBeHex } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   getStateOverwrites,
   THRESHOLD_STORAGE_POSITION,
@@ -26,13 +27,13 @@ describe('getStateOverwrites', () => {
     chainId: '1',
     nonce: 5,
     threshold: 2,
-    guard: { value: ZeroAddress },
+    guard: { value: ZERO_ADDRESS },
     version: '1.4.1',
     owners: mockOwners.map((owner) => ({ value: owner })),
-    implementation: { value: ZeroAddress },
+    implementation: { value: ZERO_ADDRESS },
     implementationVersionState: ImplementationVersionState.UP_TO_DATE,
     modules: [],
-    fallbackHandler: { value: ZeroAddress },
+    fallbackHandler: { value: ZERO_ADDRESS },
     collectiblesTag: '0',
     txQueuedTag: '0',
     txHistoryTag: '0',
@@ -54,8 +55,8 @@ describe('getStateOverwrites', () => {
       safeTxGas: '0',
       baseGas: '0',
       gasPrice: '0',
-      gasToken: ZeroAddress,
-      refundReceiver: ZeroAddress,
+      gasToken: ZERO_ADDRESS,
+      refundReceiver: ZERO_ADDRESS,
       nonce: 5,
     },
     signatures: new Map<string, SafeSignature>(),
@@ -113,7 +114,7 @@ describe('getStateOverwrites', () => {
 
     const result = getStateOverwrites(params)
     expect(result).toEqual({
-      [GUARD_STORAGE_POSITION]: toBeHex(ZeroAddress, 32),
+      [GUARD_STORAGE_POSITION]: toBeHex(ZERO_ADDRESS, 32),
     })
   })
 
@@ -134,7 +135,7 @@ describe('getStateOverwrites', () => {
     expect(result).toEqual({
       [THRESHOLD_STORAGE_POSITION]: THRESHOLD_OVERWRITE,
       [NONCE_STORAGE_POSITION]: toBeHex('0x6', 32),
-      [GUARD_STORAGE_POSITION]: toBeHex(ZeroAddress, 32),
+      [GUARD_STORAGE_POSITION]: toBeHex(ZERO_ADDRESS, 32),
     })
   })
 })

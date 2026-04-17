@@ -8,7 +8,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import type { SafeAccountConfig } from '@safe-global/protocol-kit'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 export const SAFE_CREATION_DATA_ERRORS = {
   TX_NOT_FOUND: 'The Safe creation transaction could not be found. Please retry later.',
