@@ -73,7 +73,7 @@ import {
 } from '@safe-global/utils/types/contracts'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType } from '@safe-global/types-kit'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import type {

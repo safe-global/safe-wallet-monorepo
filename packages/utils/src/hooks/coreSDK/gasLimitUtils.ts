@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { SafeProvider } from '@safe-global/protocol-kit'
+import { SafeProvider, estimateTxBaseGas, getCompatibilityFallbackHandlerContract } from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { estimateTxBaseGas } from '@safe-global/protocol-kit/dist/src/utils/transactions/gas'
-import {
-  getCompatibilityFallbackHandlerContract,
-  getSimulateTxAccessorContract,
-} from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
-import { type JsonRpcProvider } from 'ethers'
+import { getSimulateTxAccessorDeployment } from '@safe-global/safe-deployments'
+import { Interface, type JsonRpcProvider } from 'ethers'
 import { encodeSignatures } from '../../services/encodeSignatures'
 import chains from '../../config/chains'
+
+const SIMULATE_TX_ACCESSOR_ABI = [
+  'function simulate(address to, uint256 value, bytes data, uint8 operation) returns (uint256 estimate, bool success, bytes returnData)',
+]
 
 export const getEncodedSafeTx = (
   safeSDK: Safe,
@@ -89,14 +89,14 @@ export const getGasLimitForZkSync = async (
     customContracts,
   })
 
-  const simulateTxAccessorContract = await getSimulateTxAccessorContract({
-    safeProvider,
-    safeVersion,
-    customContracts,
-  })
+  const simulateTxAccessorDeployment = getSimulateTxAccessorDeployment({ version: safeVersion })
+  const simulateTxAccessorAddress =
+    customContracts?.simulateTxAccessorAddress ?? simulateTxAccessorDeployment?.defaultAddress
+  if (!simulateTxAccessorAddress) throw new Error('SimulateTxAccessor deployment not found')
+  const simulateTxAccessorIface = new Interface(SIMULATE_TX_ACCESSOR_ABI)
 
   // 2. Add a simulate call to the predicted SafeProxy as second transaction
-  const transactionDataToEstimate: string = simulateTxAccessorContract.encode('simulate', [
+  const transactionDataToEstimate: string = simulateTxAccessorIface.encodeFunctionData('simulate', [
     safeTx.data.to,
     // @ts-ignore value type mismatch
     safeTx.data.value,
@@ -105,7 +105,7 @@ export const getGasLimitForZkSync = async (
   ])
 
   const safeFunctionToEstimate: string = fallbackHandlerContract.encode('simulate', [
-    simulateTxAccessorContract.getAddress(),
+    simulateTxAccessorAddress,
     transactionDataToEstimate as `0x${string}`,
   ])
 

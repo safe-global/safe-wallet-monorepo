@@ -1,11 +1,11 @@
 import InitialsAvatar from '../InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
-import type { Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 
-const MemberName = ({ member }: { member: Member }) => {
+const MemberName = ({ member }: { member: MemberDto }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const isCurrentUser = member.user.id === user?.id

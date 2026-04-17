@@ -4,7 +4,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'

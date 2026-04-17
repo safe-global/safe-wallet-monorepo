@@ -7,7 +7,7 @@ import type {
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import type { HypernativeBalanceChange } from '../../types/hypernative.type'
 import type { ThreatAnalysisResponseDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
-import { ZeroAddress } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
 describe('mapHypernativeResponse', () => {
@@ -45,7 +45,7 @@ describe('mapHypernativeResponse', () => {
     return {
       changeType: 'receive',
       tokenSymbol: 'ETH',
-      tokenAddress: ZeroAddress as `0x${string}`,
+      tokenAddress: ZERO_ADDRESS as `0x${string}`,
       usdValue,
       amount,
       chain: 'ethereum',

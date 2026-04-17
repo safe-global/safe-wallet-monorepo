@@ -18,9 +18,10 @@ const headCells = [
 
 type SpaceAddressBookTableProps = {
   entries: SpaceAddressBookItemDto[]
+  hasWallet: boolean
 }
 
-function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
+function SpaceAddressBookTable({ entries, hasWallet }: SpaceAddressBookTableProps) {
   const chains = useChains()
 
   const rows = entries.map((entry) => ({
@@ -79,11 +80,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
       actions: {
         rawValue: '',
         sticky: true,
-        content: (
-          <div className={tableCss.actions}>
-            <SpaceAddressBookActions entry={entry} />
-          </div>
-        ),
+        content: <div className={tableCss.actions}>{hasWallet && <SpaceAddressBookActions entry={entry} />}</div>,
       },
     },
   }))

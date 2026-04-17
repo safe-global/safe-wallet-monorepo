@@ -1,4 +1,4 @@
-import chains from './chains'
+import chains from '@safe-global/utils/config/chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 type Environment = 'development' | 'production' | 'test' | 'cypress'

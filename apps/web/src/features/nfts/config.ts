@@ -1,4 +1,4 @@
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 
 type NftPlatform = {
