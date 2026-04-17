@@ -7,20 +7,16 @@ import { walletConnectE2eState } from '@/src/features/WalletConnect/context/wall
 import { mockedActiveAccount, mockedActiveSafeInfo } from './mockData'
 import { Address } from '@/src/types/address'
 
-/**
- * Known owner of the test Safe (0x2f3e...Fbb6 on Sepolia).
- * Used for the happy path: ownership validation will succeed.
- */
-const OWNER_ADDRESS = '0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+/** First owner from the mocked Safe — used for the happy path. */
+const OWNER_ADDRESS = mockedActiveSafeInfo.owners[0].value
 
-/**
- * Random address that is NOT an owner of the test Safe.
- * Used for the error path: ownership validation will fail.
- */
+/** Address that is NOT an owner of the test Safe — used for the error path. */
 const NON_OWNER_ADDRESS = '0x000000000000000000000000000000000000dEaD'
 
 const WALLET_NAME = 'E2E Wallet'
-const WALLET_ICON = 'https://safe-wallet-web.dev.5afe.dev/images/safe-logo-green.png'
+/** 1x1 green PNG pixel — avoids external URL dependency in tests. */
+const WALLET_ICON =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
 
 /**
  * Set the WC e2e state for the next connection attempt.
