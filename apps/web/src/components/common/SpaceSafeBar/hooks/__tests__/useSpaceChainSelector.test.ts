@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useSpaceChainSelector } from './useSpaceChainSelector'
+import { useSpaceChainSelector } from '../useSpaceChainSelector'
 import type { SafeItem } from '@/hooks/safes/useAllSafes'
 import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
@@ -9,7 +9,7 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: jest.fn(() => '42'),
 }))
 
-jest.mock('./useSafeBarSafes', () => ({
+jest.mock('../useSafeBarSafes', () => ({
   useSafeBarSafes: jest.fn(),
 }))
 
@@ -52,7 +52,7 @@ jest.mock('@/config/routes', () => ({
 }))
 
 import { useCurrentSpaceId } from '@/features/spaces'
-import { useSafeBarSafes } from './useSafeBarSafes'
+import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

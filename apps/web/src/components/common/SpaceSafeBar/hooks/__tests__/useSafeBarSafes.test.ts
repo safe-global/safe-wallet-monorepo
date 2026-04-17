@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { useSafeBarSafes } from './useSafeBarSafes'
+import { useSafeBarSafes } from '../useSafeBarSafes'
 import type { SafeItem } from '@/hooks/safes'
 import type { AllSafeItems } from '@/hooks/safes'
 
