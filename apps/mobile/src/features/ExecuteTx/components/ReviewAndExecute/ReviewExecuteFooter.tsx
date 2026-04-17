@@ -12,6 +12,7 @@ import { getSubmitButtonText } from './helpers'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
+import { WalletConnectGate } from '@/src/features/WalletConnect/components/WalletConnectGate'
 
 interface ReviewExecuteFooterProps {
   txId: string
@@ -47,6 +48,9 @@ export function ReviewExecuteFooter({
   const isButtonDisabled = !hasSufficientFunds || isExecuting
   const buttonText = isExecuting ? 'Executing...' : getSubmitButtonText(hasSufficientFunds)
 
+  const signerAddress = (activeSigner?.value ?? '') as Address
+  const wcSignerAddress = executionMethod === ExecutionMethod.WITH_WC ? signerAddress : ''
+
   return (
     <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
@@ -56,7 +60,7 @@ export function ReviewExecuteFooter({
         paddingVertical={'$3'}
         borderColor="$borderLight"
       >
-        <SelectExecutor executionMethod={executionMethod} address={activeSigner?.value as Address} txId={txId} />
+        <SelectExecutor executionMethod={executionMethod} address={signerAddress} txId={txId} />
 
         <EstimatedNetworkFee
           executionMethod={executionMethod}
@@ -81,9 +85,11 @@ export function ReviewExecuteFooter({
           <SafeSkeleton height={44} width="100%" radius={12} />
         </SafeSkeleton.Group>
       ) : (
-        <SafeButton onPress={onConfirmPress} width="100%" disabled={isButtonDisabled} loading={isExecuting}>
-          {buttonText}
-        </SafeButton>
+        <WalletConnectGate signerAddress={wcSignerAddress}>
+          <SafeButton onPress={onConfirmPress} width="100%" disabled={isButtonDisabled} loading={isExecuting}>
+            {buttonText}
+          </SafeButton>
+        </WalletConnectGate>
       )}
     </View>
   )

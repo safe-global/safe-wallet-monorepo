@@ -1,4 +1,4 @@
-import { useMembersGetUsersV1Query, type Member } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMembersGetUsersV1Query, type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -15,9 +15,9 @@ export enum MemberRole {
   MEMBER = 'MEMBER',
 }
 
-export const isAdmin = (member: Member) => member.role === MemberRole.ADMIN
+export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 
-export const isActiveAdmin = (member: Member) => isAdmin(member) && member.status === MemberStatus.ACTIVE
+export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
 const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()

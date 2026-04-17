@@ -71,7 +71,13 @@ export const SafeSidebarContent = ({
 
   const isItemActive = useCallback((item: SidebarItemConfig, pathname: string) => {
     if (item.href === AppRoutes.transactions.history) {
-      return pathname === AppRoutes.transactions.history || pathname === AppRoutes.transactions.queue
+      return pathname.startsWith(AppRoutes.transactions.index)
+    }
+    if (item.href === AppRoutes.balances.index) {
+      return pathname.startsWith(AppRoutes.balances.index)
+    }
+    if (item.href === AppRoutes.apps.index) {
+      return pathname.startsWith(AppRoutes.apps.index)
     }
     return pathname === item.href
   }, [])

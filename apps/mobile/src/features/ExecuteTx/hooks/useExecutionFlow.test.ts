@@ -31,6 +31,13 @@ describe('useExecutionFlow', () => {
     derivationPath: "m/44'/60'/0'/0/0",
   }
 
+  const mockWalletConnectSigner: Signer = {
+    value: '0x789',
+    name: 'WC Signer',
+    type: 'walletconnect',
+    walletName: 'MetaMask',
+  }
+
   const mockFeeParams: FeeParams = {
     maxFeePerGas: BigInt('1000000000'),
     maxPriorityFeePerGas: BigInt('100000000'),
@@ -132,6 +139,50 @@ describe('useExecutionFlow', () => {
         }),
       })
       expect(mockExecute).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('WalletConnect flow', () => {
+    it('should execute directly without ledger or biometrics redirect', async () => {
+      const { result } = renderHook(() =>
+        useExecutionFlow({
+          ...defaultParams,
+          activeSigner: mockWalletConnectSigner,
+          executionMethod: ExecutionMethod.WITH_WC,
+        }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(mockExecute).toHaveBeenCalled()
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/execution-success',
+        params: { txId: 'tx123' },
+      })
+      expect(mockPush).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: '/execute-transaction/ledger-connect' }),
+      )
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/biometrics-opt-in' }))
+    })
+
+    it('should skip biometrics even when biometrics is not enabled', async () => {
+      const { result } = renderHook(() =>
+        useExecutionFlow({
+          ...defaultParams,
+          activeSigner: mockWalletConnectSigner,
+          executionMethod: ExecutionMethod.WITH_WC,
+          isBiometricsEnabled: false,
+        }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(mockExecute).toHaveBeenCalled()
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/biometrics-opt-in' }))
     })
   })
 

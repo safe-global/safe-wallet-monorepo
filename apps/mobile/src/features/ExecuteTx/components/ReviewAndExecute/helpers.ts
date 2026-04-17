@@ -7,7 +7,7 @@ import { Signer } from '@/src/store/signersSlice'
 /**
  * Execution path types for the confirm flow
  */
-export type ExecutionPath = 'ledger' | 'biometrics' | 'standard'
+export type ExecutionPath = 'ledger' | 'walletconnect' | 'biometrics' | 'standard'
 
 /**
  * Determines the execution method based on user selection, relay availability, and signer type
@@ -27,6 +27,11 @@ export const getExecutionMethod = (
   // Ledger signer uses Ledger execution
   if (signer?.type === 'ledger') {
     return ExecutionMethod.WITH_LEDGER
+  }
+
+  // WalletConnect signer uses WC execution
+  if (signer?.type === 'walletconnect') {
+    return ExecutionMethod.WITH_WC
   }
 
   // Default to private key execution
@@ -73,6 +78,11 @@ export const determineExecutionPath = (
   // Ledger signer uses Ledger path (unless relay was selected above)
   if (activeSigner?.type === 'ledger') {
     return 'ledger'
+  }
+
+  // WalletConnect signer uses standard path (no local key, skip biometrics)
+  if (activeSigner?.type === 'walletconnect') {
+    return 'walletconnect'
   }
 
   if (!isBiometricsEnabled) {

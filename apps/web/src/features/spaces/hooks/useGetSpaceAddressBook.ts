@@ -8,7 +8,7 @@ const useGetSpaceAddressBook = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: addressBook } = useAddressBooksGetAddressBookItemsV1Query(
     { spaceId: Number(spaceId) },
-    { skip: !isUserSignedIn },
+    { skip: !isUserSignedIn || !spaceId },
   )
 
   return addressBook?.data || []
