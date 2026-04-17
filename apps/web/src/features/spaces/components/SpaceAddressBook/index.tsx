@@ -206,7 +206,7 @@ const SpaceAddressBook = () => {
                           </span>
                         )
                       }
-                      if (isAdmin && entry.isLocal) {
+                      if (isAdmin && (entry.isLocal || entry.isPrivate)) {
                         return (
                           <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
                         )
