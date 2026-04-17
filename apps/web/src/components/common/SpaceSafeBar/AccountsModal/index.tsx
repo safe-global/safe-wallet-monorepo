@@ -42,6 +42,10 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
     })
   }, [allItems, search])
 
+  // Split into trusted and other
+  const trustedItems = useMemo(() => filteredItems.filter((item) => item.isPinned), [filteredItems])
+  const otherItems = useMemo(() => filteredItems.filter((item) => !item.isPinned), [filteredItems])
+
   // Track search with debounce
   const searchTracked = useRef(false)
   useEffect(() => {
@@ -81,12 +85,6 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
-          <div className="flex items-center gap-1.5 px-2 pb-1 pt-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Manage trusted Safes
-            </span>
-          </div>
-
           {!allSafes ? (
             <SafeListSkeleton />
           ) : filteredItems.length === 0 ? (
@@ -94,13 +92,41 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
               {search.trim() ? 'No safes match your search' : 'No safes yet'}
             </p>
           ) : (
-            filteredItems.map((item) =>
-              isMultiChainSafeItem(item) ? (
-                <MultiSafeItemCard key={item.address} item={item} />
-              ) : (
-                <SafeItemCard key={`${item.chainId}:${item.address}`} safeItem={item} />
-              ),
-            )
+            <>
+              {trustedItems.length > 0 && (
+                <>
+                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-1">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Trusted Safes
+                    </span>
+                  </div>
+                  {trustedItems.map((item) =>
+                    isMultiChainSafeItem(item) ? (
+                      <MultiSafeItemCard key={item.address} item={item} />
+                    ) : (
+                      <SafeItemCard key={`${item.chainId}:${item.address}`} safeItem={item} />
+                    ),
+                  )}
+                </>
+              )}
+
+              {otherItems.length > 0 && (
+                <>
+                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Other Safes
+                    </span>
+                  </div>
+                  {otherItems.map((item) =>
+                    isMultiChainSafeItem(item) ? (
+                      <MultiSafeItemCard key={item.address} item={item} />
+                    ) : (
+                      <SafeItemCard key={`${item.chainId}:${item.address}`} safeItem={item} />
+                    ),
+                  )}
+                </>
+              )}
+            </>
           )}
         </div>
 
