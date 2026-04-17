@@ -214,4 +214,63 @@ describe('DatadogProvider', () => {
       expect(mockAddError).toHaveBeenCalledWith(error, context)
     })
   })
+
+  describe('filterRumEvent', () => {
+    const buildErrorEvent = (overrides: Record<string, unknown> = {}): any => ({
+      type: 'error',
+      error: { message: 'something broke', stack: '', ...overrides },
+    })
+
+    it('passes non-error events through', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      expect(filterRumEvent({ type: 'view' } as any, {} as any)).toBe(true)
+      expect(filterRumEvent({ type: 'action' } as any, {} as any)).toBe(true)
+      expect(filterRumEvent({ type: 'resource' } as any, {} as any)).toBe(true)
+    })
+
+    it('keeps application errors', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        stack: 'at foo (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(true)
+    })
+
+    it('drops errors whose stack points at a chrome extension', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        stack: 'at wallet (chrome-extension://abcdefg/inject.js:12:5)',
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('drops errors whose stack points at a firefox extension', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        stack: 'at provider (moz-extension://uuid/content.js:5:9)',
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('drops errors whose original error stack points at an extension', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent()
+      const ctx: any = {
+        error: { originalError: Object.assign(new Error('x'), { stack: 'safari-web-extension://abc/x.js:1:1' }) },
+      }
+      expect(filterRumEvent(event, ctx)).toBe(false)
+    })
+
+    it('drops known browser noise messages', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      for (const message of [
+        'ResizeObserver loop completed with undelivered notifications',
+        'ResizeObserver loop limit exceeded',
+        'Non-Error promise rejection captured with value: null',
+        'Script error.',
+      ]) {
+        expect(filterRumEvent(buildErrorEvent({ message }), {} as any)).toBe(false)
+      }
+    })
+  })
 })
