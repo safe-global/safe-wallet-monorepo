@@ -106,6 +106,23 @@ To View stories press `i` on iOS or `a` on Android.
 We use [Maestro](https://maestro.mobile.dev/) for E2E testing. Before running tests, install Maestro following the
 documentation for your OS.
 
+### Configure env variables
+
+Maestro tests rely on environment variables that must be set before running tests. The
+`app-start.yml` utility provides sensible defaults when variables are unset, but Maestro Studio does **not** read defaults from YAML files, so you must pass them explicitly.
+
+| Variable           | Description                                                          | iOS (production)            | iOS (dev)                       | Android (production)    | Android (dev)               |
+| ------------------ | -------------------------------------------------------------------- | --------------------------- | ------------------------------- | ----------------------- | --------------------------- |
+| `APP_ID`           | Bundle / package identifier of the installed app                     | `global.safe.mobileapp.ios` | `global.safe.mobileapp.ios.dev` | `global.safe.mobileapp` | `global.safe.mobileapp.dev` |
+| `IS_DEV_MODE`      | Set to `"true"` to dismiss dev-only dialogs on start                 | `false` (default)           | `true`                          | `false` (default)       | `true`                      |
+| `SKIP_CLEAN_START` | Set to `"true"` to preserve app state between tests (used in suites) | `false` (default)           |
+
+> [!TIP]
+>
+> When `APP_ID` is not set, `app-start.yml` defaults to the production bundle ID for the current platform. If you
+> built the app with `APP_VARIANT=development`, you **must** pass the dev bundle ID or Maestro will hang at the
+> "Launch app" step because it cannot find the app.
+
 ### Run a dev build and E2E tests
 
 To build the app for tests:
