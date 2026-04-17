@@ -109,7 +109,8 @@ const SpaceAddressBook = () => {
     [pendingRequests],
   )
 
-  const hasAnyContacts = addressBookItems.length > 0 || privateContacts.length > 0 || localContacts.length > 0
+  const hasAnyContacts =
+    addressBookItems.length > 0 || privateContacts.length > 0 || localContacts.length > 0 || pendingRequests.length > 0
 
   return (
     <>

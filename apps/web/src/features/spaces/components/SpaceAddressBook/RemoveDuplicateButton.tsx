@@ -27,14 +27,17 @@ const RemoveDuplicateButton = ({ address, chainIds, isLocal, isPrivate }: Remove
     try {
       setIsSubmitting(true)
 
+      if (isPrivate) {
+        if (!spaceId) {
+          throw new Error('Missing space id')
+        }
+        await deletePrivate({ spaceId: Number(spaceId), address }).unwrap()
+      }
+
       if (isLocal) {
         for (const chainId of chainIds) {
           dispatch(removeAddressBookEntry({ chainId, address }))
         }
-      }
-
-      if (isPrivate && spaceId) {
-        await deletePrivate({ spaceId: Number(spaceId), address })
       }
 
       setRemoved(true)

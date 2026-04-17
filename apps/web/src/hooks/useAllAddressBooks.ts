@@ -103,9 +103,14 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
     }
 
     // Build list: space + non-duplicate private + non-duplicate local
-    const filteredPrivate = privateContacts.filter(
-      (priv) => !spaceContacts.some((space) => sameAddress(space.address, priv.address)),
-    )
+    // Private keeps any chainIds not covered by a matching space entry
+    const filteredPrivate = privateContacts.flatMap((priv) => {
+      const spaceChainIds = new Set(
+        spaceContacts.filter((space) => sameAddress(space.address, priv.address)).flatMap((space) => space.chainIds),
+      )
+      const remainingChainIds = priv.chainIds.filter((cid) => !spaceChainIds.has(cid))
+      return remainingChainIds.length > 0 ? [{ ...priv, chainIds: remainingChainIds }] : []
+    })
     const filteredLocal = localContacts.filter(
       (local) =>
         !spaceContacts.some(
