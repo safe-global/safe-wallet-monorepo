@@ -72,7 +72,7 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@reown/appkit-ethers-react-native": "^2.0.3",
     "@reown/appkit-react-native": "^2.0.3",
-    "@safe-global/protocol-kit": "^5.2.26",
+    "@safe-global/protocol-kit": "^5.2.27",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",
