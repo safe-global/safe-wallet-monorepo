@@ -13,6 +13,11 @@ import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 const mockUseSafeInfo = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
 const mockUseSidebarHydrated = jest.fn()
+const mockUseAppSelector = jest.fn()
+
+jest.mock('@/store', () => ({
+  useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
+}))
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
@@ -197,6 +202,7 @@ describe('SafeSidebarVariant', () => {
     })
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(true)
   })
 
   it('renders all navigation sections', () => {
@@ -364,6 +370,21 @@ describe('SafeSidebarVariant', () => {
       expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
     })
 
+    it('shows addToWorkspace when signed in and the Safe is deployed (not counterfactual)', () => {
+      mockUseAppSelector.mockReturnValue(true)
+      mockUseIsCounterfactualSafe.mockReturnValue(false)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces: [] })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
         { id: 1, name: 'Team', safeCount: 5 },
@@ -378,6 +399,21 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+
+    it('hides addToWorkspace when the user is not signed in (SIWE session)', () => {
+      mockUseAppSelector.mockReturnValue(false)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces: [] })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
     })
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {

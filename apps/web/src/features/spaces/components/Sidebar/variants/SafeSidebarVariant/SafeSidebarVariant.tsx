@@ -26,6 +26,8 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '../../constants'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 
 const MAIN_NAV_SKELETON_COUNT = 5
 const DEFI_GROUP_SKELETON_COUNT = 4
@@ -40,6 +42,7 @@ export const SafeSidebarVariant = ({
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const isHydrated = useSidebarHydrated()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
   const safeFromQuery = useSafeQueryParam()
   const safeAddress = isHydrated ? safeFromQuery || undefined : undefined
   const isOutdated =
@@ -53,7 +56,7 @@ export const SafeSidebarVariant = ({
   const isSettingsActive = router.pathname === AppRoutes.settings.setup
 
   const shouldRenderWorkspaceHeaderGroup =
-    workspaceHeader.variant === 'backToSpace' || !(isHydrated && isCounterfactualSafe)
+    workspaceHeader.variant === 'backToSpace' || (isUserSignedIn && !(isHydrated && isCounterfactualSafe))
 
   // Use provided items or create placeholders for skeleton
   const displayMainNavItems = mainNavItems || Array(MAIN_NAV_SKELETON_COUNT).fill(null)
