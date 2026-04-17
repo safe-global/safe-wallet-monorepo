@@ -90,8 +90,8 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
         <Typography variant="body2" fontWeight={600} lineHeight={1.4}>
           {label}
         </Typography>
-        <Box className={css.actorRow}>
-          {displayText && address ? (
+        {displayText && address && (
+          <Box className={css.actorRow}>
             <Tooltip title={copied ? 'Copied' : 'Click to copy address'} placement="top">
               <Box className={css.actorCopy} onClick={handleCopy} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
                 <Typography variant="caption" color="text.secondary" component="span" className={css.actorText}>
@@ -99,12 +99,8 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
                 </Typography>
               </Box>
             </Tooltip>
-          ) : (
-            <Typography variant="caption" color="text.secondary" component="span">
-              —
-            </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
       </Box>
 
       {/* Column 3: Timestamp */}

@@ -433,7 +433,7 @@ describe('TxSigners (Audit Log)', () => {
       })
     })
 
-    it('shows dash for Created row when RPC lookup has not resolved', () => {
+    it('hides actor row for Created when RPC lookup has not resolved', () => {
       mockGetTransaction.mockReturnValue(new Promise(() => {})) // never resolves
 
       const txDetails = buildModuleTxDetails()
@@ -442,7 +442,7 @@ describe('TxSigners (Audit Log)', () => {
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
 
       expect(screen.getByText('Created')).toBeInTheDocument()
-      expect(screen.getByText('—')).toBeInTheDocument()
+      expect(screen.queryByText('—')).not.toBeInTheDocument()
     })
 
     it('does not show confirmation chip for module transactions', () => {
