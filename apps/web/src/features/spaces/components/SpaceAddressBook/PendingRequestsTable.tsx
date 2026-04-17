@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Box, Chip, Tooltip, CircularProgress } from '@mui/material'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Spinner } from '@/components/ui/spinner'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -94,7 +95,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             <TableCell className="font-bold">{req.name}</TableCell>
 
             <TableCell>
-              <div style={{ fontSize: '0.8em' }}>
+              <div className="text-[0.8em]">
                 <EthHashInfo
                   address={req.address}
                   shortAddress={false}
@@ -108,25 +109,23 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             </TableCell>
 
             <TableCell>
-              <Tooltip
-                title={
-                  <Box>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="inline-flex origin-left scale-85">
+                    {chains.configs.length === req.chainIds.length ? (
+                      <Badge variant="secondary">All</Badge>
+                    ) : (
+                      <NetworkLogosList networks={req.chainIds.map((chainId) => ({ chainId }))} />
+                    )}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col gap-1">
                     {req.chainIds.map((chainId) => (
-                      <Box key={chainId} sx={{ p: '4px 0px' }}>
-                        <ChainIndicator chainId={chainId} />
-                      </Box>
+                      <ChainIndicator key={chainId} chainId={chainId} />
                     ))}
-                  </Box>
-                }
-                arrow
-              >
-                <span className="inline-flex" style={{ transform: 'scale(0.85)', transformOrigin: 'left center' }}>
-                  {chains.configs.length === req.chainIds.length ? (
-                    <Chip label="All" size="small" />
-                  ) : (
-                    <NetworkLogosList networks={req.chainIds.map((chainId) => ({ chainId }))} />
-                  )}
-                </span>
+                  </div>
+                </TooltipContent>
               </Tooltip>
             </TableCell>
 
@@ -146,7 +145,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
               {isAdmin ? (
                 <span className="inline-flex gap-1">
                   {loadingId === req.id ? (
-                    <CircularProgress size={20} />
+                    <Spinner className="size-5" />
                   ) : (
                     <>
                       <Button variant="outline" size="icon-sm" onClick={() => handleApprove(req.id)} title="Accept">

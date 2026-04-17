@@ -1,5 +1,6 @@
-import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
 import { Button as ShadcnButton } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -103,23 +104,20 @@ const AddPrivateContact = () => {
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogContent sx={{ py: 2 }}>
-              <Stack spacing={3}>
-                <Typography variant="body2" color="text.secondary">
+              <div className="flex flex-col gap-6">
+                <p className="text-muted-foreground text-sm">
                   This contact will be visible only to you. You can request to add it to the shared workspace address
                   book later.
-                </Typography>
+                </p>
 
                 <NameInput name="name" label="Name" required />
-
                 <AddressInput name="address" label="Address" required showPrefix={false} />
 
-                <Box>
-                  <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mb={1}>
-                    Select networks
-                  </Typography>
-                  <Typography variant="body2" mb={2}>
+                <div>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
                     Add contact on all networks or only on specific ones of your choice.
-                  </Typography>
+                  </p>
                   <Controller
                     name="networks"
                     control={control}
@@ -134,8 +132,8 @@ const AddPrivateContact = () => {
                     )}
                     rules={{ required: true }}
                   />
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
               {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -149,7 +147,7 @@ const AddPrivateContact = () => {
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
-                {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
+                {isSubmitting ? <Spinner className="size-5" /> : 'Add contact'}
               </Button>
             </DialogActions>
           </form>

@@ -5,7 +5,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
 
 type RemoveDuplicateButtonProps = {
   address: string
@@ -52,7 +52,7 @@ const RemoveDuplicateButton = ({ address, chainIds, isLocal, isPrivate }: Remove
 
   return (
     <Button variant="outline" size="sm" onClick={handleRemove} disabled={isSubmitting || removed}>
-      {isSubmitting ? <CircularProgress size={14} /> : removed ? 'Removed' : 'Remove'}
+      {isSubmitting ? <Spinner className="size-3.5" /> : removed ? 'Removed' : 'Remove'}
     </Button>
   )
 }

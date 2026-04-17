@@ -8,8 +8,8 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
-import { CircularProgress } from '@mui/material'
 import { Badge } from '@/components/ui/badge'
+import { Spinner } from '@/components/ui/spinner'
 
 type RequestToAddButtonProps = {
   address: string
@@ -101,7 +101,7 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
 
   return (
     <Button variant="outline" size="sm" onClick={handleRequest} disabled={isSubmitting}>
-      {isSubmitting ? <CircularProgress size={14} /> : 'Request to add'}
+      {isSubmitting ? <Spinner className="size-3.5" /> : 'Request to add'}
     </Button>
   )
 }

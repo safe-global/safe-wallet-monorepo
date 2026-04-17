@@ -5,7 +5,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
-import { CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -62,7 +62,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
 
   return (
     <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added}>
-      {isSubmitting ? <CircularProgress size={14} /> : added ? 'Added' : 'Add to workspace'}
+      {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
     </Button>
   )
 }
