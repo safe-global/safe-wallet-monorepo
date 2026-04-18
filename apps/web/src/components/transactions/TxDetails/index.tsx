@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -199,6 +199,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             txSummary={txSummary}
             isTxFromProposer={isTxFromProposer}
             proposer={proposer}
+            isExpired={expiredSwap}
           />
 
           {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
@@ -226,12 +227,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                 </>
               )}
             </Box>
-          )}
-
-          {isQueue && expiredSwap && (
-            <Typography color="text.secondary" mt={2}>
-              This order has expired. Reject this transaction and try again.
-            </Typography>
           )}
         </div>
       )}

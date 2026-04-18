@@ -1,9 +1,9 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { type ReactElement } from 'react'
-import { Alert, Box, Divider, IconButton, Stack, Typography } from '@mui/material'
+import { Alert, Box, IconButton } from '@mui/material'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow } from '@/components/common/AuditLog'
+import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
@@ -26,23 +26,21 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
 
   return (
     <Box mb={2} data-testid="msg-audit-log">
-      <Stack direction="row" alignItems="center" gap={1} mb={1}>
-        <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Audit log
-        </Typography>
-        <TxConfirmations
-          submittedConfirmations={confirmationsSubmitted}
-          requiredConfirmations={confirmationsRequired}
-        />
-        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <AuditLogHeader
+        chip={
+          <TxConfirmations
+            submittedConfirmations={confirmationsSubmitted}
+            requiredConfirmations={confirmationsRequired}
+          />
+        }
+        actions={
           <CopyTooltip text={msgUrl} initialToolTipText="Copy message link">
             <IconButton size="small" sx={{ color: 'inherit' }}>
               <CopyIcon fontSize="small" />
             </IconButton>
           </CopyTooltip>
-        </Box>
-      </Stack>
-      <Divider sx={{ mb: 2 }} />
+        }
+      />
 
       <AuditRow
         label="Created"
@@ -67,7 +65,7 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
       {isConfirmed && <AuditRow label="Confirmed" actionType="confirmed" timestamp={msg.modifiedTimestamp} isLast />}
 
       {!isConfirmed && (
-        <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
+        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
           Can be confirmed once the threshold is reached.
         </Alert>
       )}

@@ -1,19 +1,23 @@
-import { type ReactElement, useState, useCallback, useRef, useEffect } from 'react'
-import { Box, Tooltip, Typography } from '@mui/material'
+import { type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
+import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DoneIcon from '@mui/icons-material/Done'
 import DrawOutlinedIcon from '@mui/icons-material/DrawOutlined'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 import css from './styles.module.css'
 
-export type ActionType = 'created' | 'signed' | 'executed' | 'confirmed'
+export type ActionType = 'created' | 'signed' | 'executed' | 'confirmed' | 'pending' | 'expired'
 
 export const ACTION_ICONS: Record<ActionType, typeof AddIcon> = {
   created: AddIcon,
   signed: DrawOutlinedIcon,
   executed: DoneIcon,
   confirmed: DoneIcon,
+  pending: AccessTimeIcon,
+  expired: ErrorOutlineIcon,
 }
 
 const auditDateFormatter = new Intl.DateTimeFormat(undefined, {
@@ -50,6 +54,19 @@ export const useCopyToClipboard = (text?: string | null): [boolean, () => void] 
   return [copied, handleCopy]
 }
 
+export const AuditLogHeader = ({ chip, actions }: { chip?: ReactNode; actions?: ReactNode }): ReactElement => (
+  <>
+    <Stack direction="row" alignItems="center" gap={1} mb={1}>
+      <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Audit log
+      </Typography>
+      {chip}
+      {actions && <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>{actions}</Box>}
+    </Stack>
+    <Divider sx={{ mb: 2 }} />
+  </>
+)
+
 export type AuditRowProps = {
   label: string
   actionType: ActionType
@@ -74,6 +91,8 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
   )
 
   const ActionIcon = ACTION_ICONS[actionType]
+  const showActor = displayText && address
+  const showDash = !showActor && !isLast
 
   return (
     <Box className={css.auditRow}>
@@ -90,15 +109,27 @@ export const AuditRow = ({ label, actionType, address, name, timestamp, isLast }
         <Typography variant="body2" fontWeight={600} lineHeight={1.4}>
           {label}
         </Typography>
-        {displayText && address && (
+        {(showActor || showDash) && (
           <Box className={css.actorRow}>
-            <Tooltip title={copied ? 'Copied' : 'Click to copy address'} placement="top">
-              <Box className={css.actorCopy} onClick={handleCopy} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
-                <Typography variant="caption" color="text.secondary" component="span" className={css.actorText}>
-                  By {displayText}
-                </Typography>
-              </Box>
-            </Tooltip>
+            {showActor ? (
+              <Tooltip title={copied ? 'Copied' : 'Click to copy address'} placement="top">
+                <Box
+                  className={css.actorCopy}
+                  onClick={handleCopy}
+                  onKeyDown={handleKeyDown}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <Typography variant="caption" color="text.secondary" component="span" className={css.actorText}>
+                    By {displayText}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            ) : (
+              <Typography variant="caption" color="text.secondary" component="span">
+                —
+              </Typography>
+            )}
           </Box>
         )}
       </Box>

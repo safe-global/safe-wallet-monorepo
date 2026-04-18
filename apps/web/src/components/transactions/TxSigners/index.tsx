@@ -1,9 +1,9 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Alert, Box, Divider, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, IconButton, SvgIcon, Tooltip } from '@mui/material'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow } from '@/components/common/AuditLog'
+import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -39,49 +39,45 @@ type TxSignersProps = {
   txSummary: Transaction
   isTxFromProposer: boolean
   proposer?: string
+  isExpired?: boolean
 }
 
-const AuditLogHeader = ({
-  children,
+const TxAuditLogActions = ({
   txId,
   explorerLink,
 }: {
-  children?: ReactElement
   txId: string
   explorerLink?: { title: string; href: string }
 }) => (
   <>
-    <Stack direction="row" alignItems="center" gap={1} mb={1}>
-      <Typography variant="body2" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        Audit log
-      </Typography>
-      {children}
-      <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
-          <Tooltip title="Copy transaction link" placement="top">
-            <IconButton size="small" sx={{ color: 'inherit' }}>
-              <CopyIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </TxShareLinkWrapper>
-        {explorerLink ? (
-          <ExplorerButton {...explorerLink} isCompact />
-        ) : (
-          <Tooltip title="Available after execution" placement="top">
-            <span>
-              <IconButton size="small" disabled>
-                <SvgIcon component={ExplorerFallbackIcon} inheritViewBox fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        )}
-      </Box>
-    </Stack>
-    <Divider sx={{ mb: 2 }} />
+    <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
+      <Tooltip title="Copy transaction link" placement="top">
+        <IconButton size="small" sx={{ color: 'inherit' }}>
+          <CopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </TxShareLinkWrapper>
+    {explorerLink ? (
+      <ExplorerButton {...explorerLink} isCompact />
+    ) : (
+      <Tooltip title="Available after execution" placement="top">
+        <span>
+          <IconButton size="small" disabled>
+            <SvgIcon component={ExplorerFallbackIcon} inheritViewBox fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    )}
   </>
 )
 
-const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSignersProps): ReactElement | null => {
+const TxSigners = ({
+  txDetails,
+  txSummary,
+  isTxFromProposer,
+  proposer,
+  isExpired,
+}: TxSignersProps): ReactElement | null => {
   const { detailedExecutionInfo, txInfo, txId } = txDetails
   const isPending = useIsPending(txId)
   const txStatus = useTransactionStatus(txSummary)
@@ -110,8 +106,8 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
     if (!txDetails.executedAt) return null
 
     return (
-      <Box mb={2} data-testid="transaction-actions-list">
-        <AuditLogHeader txId={txId} explorerLink={explorerLink} />
+      <Box data-testid="transaction-actions-list">
+        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
         <AuditRow
           label="Executed"
           actionType="executed"
@@ -131,8 +127,8 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <Box mb={2} data-testid="transaction-actions-list">
-        <AuditLogHeader txId={txId} explorerLink={explorerLink} />
+      <Box data-testid="transaction-actions-list">
+        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
 
         <AuditRow
           label="Created"
@@ -177,10 +173,16 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <Box mb={2} data-testid="transaction-actions-list">
-      <AuditLogHeader txId={txId} explorerLink={explorerLink}>
-        <TxConfirmations submittedConfirmations={confirmations.length} requiredConfirmations={confirmationsRequired} />
-      </AuditLogHeader>
+    <Box data-testid="transaction-actions-list">
+      <AuditLogHeader
+        chip={
+          <TxConfirmations
+            submittedConfirmations={confirmations.length}
+            requiredConfirmations={confirmationsRequired}
+          />
+        }
+        actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />}
+      />
 
       <AuditRow
         label={creationLabel}
@@ -214,19 +216,25 @@ const TxSigners = ({ txDetails, txSummary, isTxFromProposer, proposer }: TxSigne
         />
       )}
 
-      {confirmationsNeeded > 0 && !executor && (
-        <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
+      {confirmationsNeeded > 0 && !executor && !isExpired && (
+        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
           {isCancellation
             ? 'Cancellation can be executed once the required approvals are collected.'
             : 'Can be executed once the threshold is reached.'}
         </Alert>
       )}
 
-      {isTxFromProposer && !executor && (
-        <Alert severity="info" sx={{ mt: 1, py: 0.5, fontSize: '0.75rem' }}>
+      {isTxFromProposer && !executor && !isExpired && (
+        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
           {isCancellation
             ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
             : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+        </Alert>
+      )}
+
+      {isExpired && (
+        <Alert severity="warning" sx={{ mt: 2, py: 0.5 }}>
+          This order has expired. Reject this transaction and try again.
         </Alert>
       )}
     </Box>
