@@ -25,7 +25,7 @@ const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
         <>
           No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!{' '}
           <Link
-            href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+            href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
             target="_blank"
             rel="noopener noreferrer"
             sx={{ color: 'inherit', textDecoration: 'underline', fontWeight: 'bold' }}

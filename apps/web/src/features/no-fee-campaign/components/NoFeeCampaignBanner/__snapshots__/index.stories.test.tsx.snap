@@ -34,7 +34,7 @@ exports[`./NoFeeCampaignBanner.stories Default 1`] = `
          
         <a
           class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-dhjj49-MuiTypography-root-MuiLink-root"
-          href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+          href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
           rel="noopener noreferrer"
           target="_blank"
         >
