@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { useSpaceBackLink } from './useSpaceBackLink'
+import { useSpaceBackLink } from '../useSpaceBackLink'
 
 const mockPush = jest.fn()
 

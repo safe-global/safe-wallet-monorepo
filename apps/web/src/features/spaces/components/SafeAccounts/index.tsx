@@ -16,7 +16,7 @@ import {
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsAdmin, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
@@ -59,13 +59,10 @@ const SpaceSafeAccounts = () => {
     return spaceSafes.map((safe) => buildItem(safe.chainId, safe.address))
   }, [allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames, allSafes])
 
-  // Detect similar addresses
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const uniqueAddresses = [...new Set(spaceSafeItems.map((s) => s.address))]
-    if (uniqueAddresses.length < 2) return new Set()
-    const result = detectSimilarAddresses(uniqueAddresses)
-    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
-  }, [spaceSafeItems])
+  const similarAddresses = useMemo<Set<string>>(
+    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
+    [spaceSafeItems],
+  )
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(

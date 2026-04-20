@@ -73,7 +73,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex flex-wrap items-start px-6 py-4 bg-secondary dark:bg-background ${
+        className={`flex flex-wrap items-start gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'justify-between pl-2' : 'justify-between'
         }`}
       >
@@ -88,13 +88,13 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           </Button>
         ) : null}
 
-        {/* Left content */}
-        <div className="flex-1 min-w-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
+        {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
+        <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
           {isSpaceRoute ? <GlobalSearchInput className="max-w-sm" /> : <SpaceSafeBar />}
         </div>
 
-        {/* Right content: navigation buttons */}
-        <div className="flex items-center gap-1 shrink-0 max-md:ml-auto">
+        {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}
+        <div className="flex items-center gap-1 shrink-0">
           {showSafeToken && (
             <div className="hidden sm:block">
               <SafenetStakingButton />
