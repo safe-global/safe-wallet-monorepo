@@ -55,6 +55,10 @@ export function resetCaptchaPromise() {
 
 let initialized = false
 
+// Serializes token consumption so concurrent protected requests each get a
+// unique, fresh Turnstile token (tokens are single-use; reuse yields 401).
+let consumeQueue: Promise<void> = Promise.resolve()
+
 // Must be called once at app startup, before any CGW requests are made.
 export function initializeCaptchaHeaders() {
   if (initialized) return
@@ -76,17 +80,34 @@ export function initializeCaptchaHeaders() {
       activateCaptchaRef.current?.()
     }
 
-    // Block until the widget is initialized and a token is obtained
-    if (captchaReadyPromise) {
-      await captchaReadyPromise
-    }
+    const prev = consumeQueue
+    let release!: () => void
+    consumeQueue = new Promise<void>((r) => {
+      release = r
+    })
 
-    const token = sharedTokenRef.current
-    if (token) {
-      headers.set('X-Captcha-Token', token)
-    }
+    try {
+      await prev
 
-    return headers
+      // Block until the widget is initialized and a token is obtained
+      if (captchaReadyPromise) {
+        await captchaReadyPromise
+      }
+
+      const token = sharedTokenRef.current
+      if (token) {
+        headers.set('X-Captcha-Token', token)
+        // Turnstile tokens are single-use: invalidate locally and trigger a
+        // widget reset so the next request awaits a fresh token.
+        sharedTokenRef.current = null
+        resetCaptchaPromise()
+        widgetRefreshCallbackRef.current?.()
+      }
+
+      return headers
+    } finally {
+      release()
+    }
   })
 
   setHandleResponseHook(async (response: Response, url: string) => {

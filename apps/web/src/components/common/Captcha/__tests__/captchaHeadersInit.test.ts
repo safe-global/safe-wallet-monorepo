@@ -255,6 +255,66 @@ describe('captchaHeadersInit', () => {
   })
 
   // ---------------------------------------------------------------------------
+  // prepareHeaders hook — single-use token invalidation
+  // ---------------------------------------------------------------------------
+  describe('prepareHeaders hook — single-use token invalidation', () => {
+    it('clears the shared token and triggers a widget refresh after consuming a token', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+      resolveCaptchaReady()
+      sharedTokenRef.current = 'first-token'
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const headers = new Headers()
+      await hook(headers, PROTECTED_URL)
+
+      expect(headers.get('X-Captcha-Token')).toBe('first-token')
+      expect(sharedTokenRef.current).toBeNull()
+      expect(mockRefresh).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not trigger a widget refresh when no token was available', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+      resolveCaptchaReady()
+      sharedTokenRef.current = null
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      await hook(new Headers(), PROTECTED_URL)
+
+      expect(mockRefresh).not.toHaveBeenCalled()
+    })
+
+    it('serializes concurrent protected requests so each awaits its own fresh token', async () => {
+      // Simulate a widget refresh that produces a new token and resolves the promise
+      const mockRefresh = jest.fn(() => {
+        sharedTokenRef.current = 'next-token'
+        resolveCaptchaReady()
+      })
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+
+      // Seed the first token and resolve the initial promise
+      sharedTokenRef.current = 'first-token'
+      resolveCaptchaReady()
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const headersA = new Headers()
+      const headersB = new Headers()
+
+      // Fire both requests concurrently
+      const [,] = await Promise.all([hook(headersA, PROTECTED_URL), hook(headersB, PROTECTED_URL)])
+
+      // Each request must carry a distinct token
+      expect(headersA.get('X-Captcha-Token')).toBe('first-token')
+      expect(headersB.get('X-Captcha-Token')).toBe('next-token')
+      expect(mockRefresh).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
   // responseHook
   // ---------------------------------------------------------------------------
   describe('responseHook', () => {
