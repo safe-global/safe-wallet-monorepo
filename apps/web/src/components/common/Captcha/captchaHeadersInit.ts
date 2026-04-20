@@ -1,4 +1,5 @@
 import { setPrepareHeadersHook, setHandleResponseHook } from '@safe-global/store/gateway/cgwClient'
+import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 
 export const sharedTokenRef: { current: string | null } = { current: null }
 
@@ -6,6 +7,25 @@ const widgetRefreshCallbackRef: { current: (() => void) | null } = { current: nu
 
 export function registerWidgetRefreshCallback(callback: () => void) {
   widgetRefreshCallbackRef.current = callback
+}
+
+// Activation callback — registered by CaptchaProvider; called on the first protected request
+const activateCaptchaRef: { current: (() => void) | null } = { current: null }
+let captchaActivated = false
+
+export function registerActivateCaptcha(callback: () => void) {
+  activateCaptchaRef.current = callback
+}
+
+export function isCaptchaActivated(): boolean {
+  return captchaActivated
+}
+
+// Only these endpoint patterns require a captcha token
+const CAPTCHA_PROTECTED_ROUTES = [/\/v2\/owners\/[^/]+\/safes/, /\/v3\/owners\/[^/]+\/safes/]
+
+export function isProtectedEndpoint(url: string): boolean {
+  return CAPTCHA_PROTECTED_ROUTES.some((pattern) => pattern.test(url))
 }
 
 // Promise-based waiting for captcha readiness
@@ -43,8 +63,20 @@ export function initializeCaptchaHeaders() {
   // Create initial promise
   createCaptchaReadyPromise()
 
-  setPrepareHeadersHook(async (headers: Headers) => {
-    // Wait for captcha to be ready (no timeout - waits until resolved)
+  setPrepareHeadersHook(async (headers: Headers, url: string) => {
+    // Non-owners URLs pass through immediately — no captcha needed
+    if (!isProtectedEndpoint(url)) return headers
+
+    // Captcha disabled (no site key) — pass through
+    if (!TURNSTILE_SITE_KEY) return headers
+
+    // First protected request: signal CaptchaProvider to load the Turnstile script + widget
+    if (!captchaActivated) {
+      captchaActivated = true
+      activateCaptchaRef.current?.()
+    }
+
+    // Block until the widget is initialized and a token is obtained
     if (captchaReadyPromise) {
       await captchaReadyPromise
     }
@@ -57,10 +89,14 @@ export function initializeCaptchaHeaders() {
     return headers
   })
 
-  setHandleResponseHook(async (response: Response) => {
+  setHandleResponseHook(async (response: Response, url: string) => {
+    // Only handle 401 responses
     if (response.status !== 401) return
+    // Only captcha-protected endpoints can return captcha 401s
+    if (!isProtectedEndpoint(url)) return
     // No widget registered means captcha is disabled — don't reset the promise or we'll deadlock
     if (!widgetRefreshCallbackRef.current) return
+
     try {
       const data = await response.clone().json()
       if (data?.message === 'Invalid CAPTCHA token') {
