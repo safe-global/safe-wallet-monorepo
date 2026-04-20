@@ -1,4 +1,7 @@
-import WalletLogin from '@/components/welcome/WelcomeLogin/WalletLogin'
+import WalletLogin, {
+  type WalletLoginButtonStyle,
+  type WalletLoginButtonText,
+} from '@/components/welcome/WelcomeLogin/WalletLogin'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
@@ -29,9 +32,11 @@ const getSignInErrorMessage = async (wallet: ConnectedWallet | null): Promise<st
 interface SignInButtonProps {
   redirectLoading: boolean
   afterSignIn: () => void
+  buttonStyle?: WalletLoginButtonStyle
+  buttonText?: WalletLoginButtonText
 }
 
-const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProps) => {
+const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, buttonText }: SignInButtonProps) => {
   const dispatch = useAppDispatch()
   const wallet = useWallet()
   const { signIn, loading } = useSiwe()
@@ -80,7 +85,8 @@ const SignInButton = ({ afterSignIn, redirectLoading = false }: SignInButtonProp
       onLogin={handleLogin}
       onContinue={handleSignIn}
       isLoading={loading || redirectLoading}
-      buttonText="Sign in with"
+      buttonText={buttonText}
+      buttonStyle={buttonStyle}
     />
   )
 }

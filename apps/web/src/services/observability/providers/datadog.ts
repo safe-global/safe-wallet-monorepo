@@ -1,5 +1,11 @@
 import type { ILogger, IObservabilityProvider } from '../types'
-import { datadogRum } from '@datadog/browser-rum'
+import {
+  datadogRum,
+  type RumEvent,
+  type RumErrorEvent,
+  type RumEventDomainContext,
+  type RumErrorEventDomainContext,
+} from '@datadog/browser-rum'
 import {
   COMMIT_HASH,
   DATADOG_RUM_APPLICATION_ID,
@@ -28,6 +34,57 @@ type DatadogSite =
   | 'ap1.datadoghq.com'
 
 export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN)
+
+const EXTENSION_URL_PATTERNS = [
+  'chrome-extension://',
+  'moz-extension://',
+  'safari-extension://',
+  'safari-web-extension://',
+  'webkit-masked-url://',
+]
+
+const KNOWN_NOISE_PATTERNS = [
+  // Firefox fires this when ResizeObserver hits a benign infinite-loop guard
+  'ResizeObserver loop completed with undelivered notifications',
+  'ResizeObserver loop limit exceeded',
+  // Null/undefined promise rejections from injected 3rd-party scripts
+  'Non-Error promise rejection captured with value: null',
+  'Non-Error promise rejection captured with value: undefined',
+  // Safari Intelligent Tracking Prevention noise
+  'The operation is insecure',
+  // Generic script error surfaced when a cross-origin script fails — unactionable
+  'Script error.',
+]
+
+const originatesFromExtension = (stack: string | undefined): boolean => {
+  if (!stack) return false
+  return EXTENSION_URL_PATTERNS.some((pattern) => stack.includes(pattern))
+}
+
+const isKnownNoise = (message: string | undefined): boolean => {
+  if (!message) return false
+  return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
+}
+
+/**
+ * Drop RUM error events that are demonstrably not caused by our code so the
+ * Error-Free Views SLO reflects real user-impacting failures. Non-error events
+ * (views, actions, resources) pass through untouched.
+ */
+export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
+  if (event.type !== 'error') return true
+
+  const errorEvent = event as RumErrorEvent
+  if (isKnownNoise(errorEvent.error.message)) return false
+  if (originatesFromExtension(errorEvent.error.stack)) return false
+
+  // context.error is the raw value originally passed to addError/captureException
+  const { error: rawError } = context as RumErrorEventDomainContext
+  const rawStack = rawError instanceof Error ? rawError.stack : undefined
+  if (originatesFromExtension(rawStack)) return false
+
+  return true
+}
 
 export class DatadogProvider implements IObservabilityProvider {
   readonly name = 'Datadog'
@@ -60,6 +117,7 @@ export class DatadogProvider implements IObservabilityProvider {
         trackResources: DATADOG_RUM_TRACK_RESOURCES,
         trackLongTasks: DATADOG_RUM_TRACK_LONG_TASKS,
         defaultPrivacyLevel: DATADOG_RUM_DEFAULT_PRIVACY_LEVEL,
+        beforeSend: filterRumEvent,
         ...(DATADOG_RUM_TRACING_ENABLED && {
           traceSampleRate: DATADOG_RUM_TRACE_SAMPLE_RATE,
           allowedTracingUrls: [

@@ -4,20 +4,27 @@ describe('captchaHeadersInit', () => {
   let resetCaptchaPromise: () => void
   let initializeCaptchaHeaders: () => void
   let sharedTokenRef: { current: string | null }
+  let registerWidgetRefreshCallback: (callback: () => void) => void
   let mockSetPrepareHeadersHook: jest.Mock
+  let mockSetHandleResponseHook: jest.Mock
 
   beforeEach(() => {
     jest.resetModules()
     jest.doMock('@safe-global/store/gateway/cgwClient', () => ({
       setPrepareHeadersHook: jest.fn(),
+      setHandleResponseHook: jest.fn(),
     }))
     ;({
       resolveCaptchaReady,
       resetCaptchaPromise,
       initializeCaptchaHeaders,
       sharedTokenRef,
+      registerWidgetRefreshCallback,
     } = require('@/components/common/Captcha/captchaHeadersInit'))
-    ;({ setPrepareHeadersHook: mockSetPrepareHeadersHook } = require('@safe-global/store/gateway/cgwClient'))
+    ;({
+      setPrepareHeadersHook: mockSetPrepareHeadersHook,
+      setHandleResponseHook: mockSetHandleResponseHook,
+    } = require('@safe-global/store/gateway/cgwClient'))
   })
 
   describe('resolveCaptchaReady', () => {
@@ -75,10 +82,16 @@ describe('captchaHeadersInit', () => {
       expect(mockSetPrepareHeadersHook).toHaveBeenCalledTimes(1)
     })
 
-    it('is idempotent — registers the hook only once', () => {
+    it('registers a handle-response hook', () => {
+      initializeCaptchaHeaders()
+      expect(mockSetHandleResponseHook).toHaveBeenCalledTimes(1)
+    })
+
+    it('is idempotent — registers hooks only once', () => {
       initializeCaptchaHeaders()
       initializeCaptchaHeaders()
       expect(mockSetPrepareHeadersHook).toHaveBeenCalledTimes(1)
+      expect(mockSetHandleResponseHook).toHaveBeenCalledTimes(1)
     })
 
     it('adds X-Captcha-Token header when token is set', async () => {
@@ -103,6 +116,65 @@ describe('captchaHeadersInit', () => {
       await hook(headers)
 
       expect(headers.get('X-Captcha-Token')).toBeNull()
+    })
+  })
+
+  describe('responseHook', () => {
+    const makeResponse = (status: number, body: unknown) =>
+      ({
+        status,
+        clone: () => ({ json: () => Promise.resolve(body) }),
+      }) as unknown as Response
+
+    const makeUnreadableResponse = (status: number) =>
+      ({
+        status,
+        clone: () => ({ json: () => Promise.reject(new Error('not json')) }),
+      }) as unknown as Response
+
+    it('clears token, resets promise, and calls widget refresh on captcha 401', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      sharedTokenRef.current = 'old-token'
+      initializeCaptchaHeaders()
+
+      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      await hook(makeResponse(401, { message: 'Invalid CAPTCHA token' }))
+
+      expect(sharedTokenRef.current).toBeNull()
+      expect(mockRefresh).toHaveBeenCalledTimes(1)
+    })
+
+    it('does nothing for a non-401 response', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      sharedTokenRef.current = 'token'
+      initializeCaptchaHeaders()
+
+      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      await hook(makeResponse(200, { message: 'Invalid CAPTCHA token' }))
+
+      expect(sharedTokenRef.current).toBe('token')
+      expect(mockRefresh).not.toHaveBeenCalled()
+    })
+
+    it('does nothing for a 401 with a different message', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      sharedTokenRef.current = 'token'
+      initializeCaptchaHeaders()
+
+      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      await hook(makeResponse(401, { message: 'Unauthorized' }))
+
+      expect(sharedTokenRef.current).toBe('token')
+      expect(mockRefresh).not.toHaveBeenCalled()
+    })
+
+    it('does not throw when the response body is not JSON', async () => {
+      initializeCaptchaHeaders()
+      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      await expect(hook(makeUnreadableResponse(401))).resolves.not.toThrow()
     })
   })
 })

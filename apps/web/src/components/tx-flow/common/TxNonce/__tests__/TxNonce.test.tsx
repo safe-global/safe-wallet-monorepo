@@ -1,6 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import TxNonce from '../index'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -36,12 +37,19 @@ const defaultSafeTxContext: SafeTxContextParams = {
   isReadOnly: false,
 }
 
-const renderTxNonce = (contextOverrides: Partial<SafeTxContextParams> = {}, canEdit?: boolean) => {
+const renderTxNonce = (
+  contextOverrides: Partial<SafeTxContextParams> = {},
+  canEdit?: boolean,
+  txFlowOverrides: Partial<typeof initialTxFlowContext> = {},
+) => {
   const contextValue = { ...defaultSafeTxContext, ...contextOverrides }
+  const txFlowValue = { ...initialTxFlowContext, ...txFlowOverrides }
   return render(
-    <SafeTxContext.Provider value={contextValue}>
-      <TxNonce {...(canEdit !== undefined ? { canEdit } : {})} />
-    </SafeTxContext.Provider>,
+    <TxFlowContext.Provider value={txFlowValue}>
+      <SafeTxContext.Provider value={contextValue}>
+        <TxNonce {...(canEdit !== undefined ? { canEdit } : {})} />
+      </SafeTxContext.Provider>
+    </TxFlowContext.Provider>,
   )
 }
 
@@ -135,6 +143,33 @@ describe('TxNonce', () => {
     it('does not show reset button when nonce equals recommended', () => {
       renderTxNonce({ nonce: 5, recommendedNonce: 5 })
       expect(screen.queryByRole('button', { name: /reset to recommended nonce/i })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('rejection flow', () => {
+    it('shows nonce as read-only when isRejection is true in TxFlowContext', () => {
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 }, undefined, { isRejection: true })
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
+
+    it('allows nonce editing for transactions with empty data when not a rejection flow', () => {
+      const safeTx = {
+        data: { nonce: 5, to: '0x123', value: '0', data: '0x', operation: 0 },
+        signatures: new Map(),
+      } as any
+      renderTxNonce({ nonce: 5, recommendedNonce: 5, safeTx }, undefined, { isRejection: false })
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+    })
+
+    it('locks nonce when confirming an existing rejection tx (isRejection from ConfirmTxFlow)', () => {
+      const safeTx = {
+        data: { nonce: 5, to: '0x123', value: '0', data: '0x', operation: 0 },
+        signatures: new Map(),
+      } as any
+      renderTxNonce({ nonce: 5, recommendedNonce: 5, safeTx }, undefined, { isRejection: true })
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
     })
   })
 

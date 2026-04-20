@@ -34,17 +34,40 @@ export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
 }
 
-/** Intercepts the chain config API and injects a feature flag if not already present. */
-export function enableChainFeature(featureName) {
-  cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+/**
+ * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * and optionally aliases the feature's data endpoint for use with cy.wait().
+ *
+ * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
+ *
+ * @param {object} options
+ * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
+ * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
+ * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
+ */
+export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint, dataAlias }) {
+  cy.intercept('GET', '**/v2/chains**', (req) => {
     req.continue((res) => {
-      if (res.body && res.body.features) {
-        if (!res.body.features.includes(featureName)) {
-          res.body.features.push(featureName)
-        }
+      const applyFlags = (chain) => {
+        let features = chain.features || []
+        if (removeFlag) features = features.filter((f) => f !== removeFlag)
+        if (!features.includes(addFlag)) features.push(addFlag)
+        return { ...chain, features }
+      }
+
+      if (res.body?.results && Array.isArray(res.body.results)) {
+        res.body.results = res.body.results.map((chain) => (chain.chainId === chainId ? applyFlags(chain) : chain))
+      } else if (res.body?.chainId === chainId) {
+        res.body = applyFlags(res.body)
       }
     })
   })
+
+  if (dataEndpoint && dataAlias) {
+    cy.intercept('GET', dataEndpoint).as(dataAlias)
+  }
 }
 
 export function checkElementBackgroundColor(element, color) {

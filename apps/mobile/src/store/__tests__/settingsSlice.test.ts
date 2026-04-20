@@ -3,6 +3,8 @@ import settingsReducer, {
   selectTokenList,
   setDataCollectionConsented,
   selectDataCollectionConsented,
+  setScreenProtectionDisabled,
+  selectScreenProtectionDisabled,
   TOKEN_LISTS,
   type SettingsState,
 } from '../settingsSlice'
@@ -18,6 +20,7 @@ describe('settingsSlice', () => {
     hideDust: true,
     preferFiatInput: true,
     dataCollectionConsented: false,
+    screenProtectionDisabled: false,
     env: {
       rpc: {},
       tenderly: {
@@ -118,6 +121,53 @@ describe('settingsSlice', () => {
       })
       const state = store.getState() as RootState
       expect(selectDataCollectionConsented(state)).toBe(false)
+    })
+  })
+
+  describe('setScreenProtectionDisabled', () => {
+    it('should set screenProtectionDisabled to true', () => {
+      const state = settingsReducer(initialState, setScreenProtectionDisabled(true))
+      expect(state.screenProtectionDisabled).toBe(true)
+    })
+
+    it('should set screenProtectionDisabled to false', () => {
+      const previousState = { ...initialState, screenProtectionDisabled: true }
+      const state = settingsReducer(previousState, setScreenProtectionDisabled(false))
+      expect(state.screenProtectionDisabled).toBe(false)
+    })
+  })
+
+  describe('selectScreenProtectionDisabled', () => {
+    it('should default to false', () => {
+      const store = configureStore({
+        reducer: { settings: settingsReducer },
+        preloadedState: { settings: initialState },
+      })
+      const state = store.getState() as RootState
+      expect(selectScreenProtectionDisabled(state)).toBe(false)
+    })
+
+    it('should return true when set', () => {
+      const store = configureStore({
+        reducer: { settings: settingsReducer },
+        preloadedState: { settings: { ...initialState, screenProtectionDisabled: true } },
+      })
+      const state = store.getState() as RootState
+      expect(selectScreenProtectionDisabled(state)).toBe(true)
+    })
+
+    it('should default to false when undefined (persist migration)', () => {
+      const store = configureStore({
+        reducer: { settings: settingsReducer },
+        preloadedState: {
+          settings: {
+            ...initialState,
+            screenProtectionDisabled: undefined as unknown as boolean,
+          },
+        },
+      })
+      const state = store.getState() as RootState
+      expect(selectScreenProtectionDisabled(state)).toBe(false)
     })
   })
 })

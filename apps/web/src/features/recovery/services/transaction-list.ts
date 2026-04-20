@@ -10,7 +10,7 @@ import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 
 function decodeOwnerManagementTransaction(safe: SafeState, transaction: BaseTransaction): SafeState {
   const safeDeployment = getSafeSingletonDeployment({ version: safe.version ?? undefined })

@@ -1,5 +1,5 @@
 import type { BigNumberish } from 'ethers'
-import { formatUnits, parseUnits } from 'ethers'
+import { formatUnits, isAddress, parseUnits } from 'ethers'
 import { formatAmount, formatAmountPrecise } from '@safe-global/utils/utils/formatNumber'
 import { formatDuration, intervalToDuration } from 'date-fns'
 
@@ -51,6 +51,16 @@ export const safeParseUnits = (value: string, decimals?: number | string | null)
     console.error('Error parsing units', err)
     return
   }
+}
+
+export type Address = `0x${string}`
+
+export const asAddress = (value: string): Address => {
+  if (!isAddress(value)) {
+    throw new Error(`Invalid address: ${value}`)
+  }
+
+  return value as Address
 }
 
 export const shortenAddress = (address: string, length = 4): string => {

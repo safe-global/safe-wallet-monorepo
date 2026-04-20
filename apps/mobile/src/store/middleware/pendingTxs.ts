@@ -175,8 +175,8 @@ const runWatchers = async (listenerApi: AppListenerEffectAPI, pendingTxs: Pendin
       continue
     }
 
-    // Handle single transactions
-    if (pendingTx.type === ExecutionMethod.WITH_PK) {
+    // Handle single transactions (private key or WalletConnect)
+    if (pendingTx.type === ExecutionMethod.WITH_PK || pendingTx.type === ExecutionMethod.WITH_WC) {
       const { walletAddress, walletNonce, txHash } = pendingTx
       await runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
     }
@@ -192,7 +192,7 @@ export const pendingTxsListeners = (startListening: AppStartListening) => {
       if (action.payload.type === ExecutionMethod.WITH_RELAY) {
         startIndexingWatcher(listenerApi, txId, chainId)
         startRelayWatcher(listenerApi, txId, action.payload.taskId, chainId)
-      } else if (action.payload.type === ExecutionMethod.WITH_PK) {
+      } else {
         const { txHash, walletAddress, walletNonce } = action.payload
         runWatcher(listenerApi, txHash, chainId, walletAddress, walletNonce, txId)
       }

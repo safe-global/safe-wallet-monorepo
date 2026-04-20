@@ -366,6 +366,7 @@ function Sidebar({
       />
       <div
         data-slot="sidebar-container"
+        data-testid="sidebar-container"
         className={cn(
           'fixed inset-y-0 z-[var(--z-sidebar)] hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
           side === 'left'

@@ -1,8 +1,6 @@
-import React from 'react'
-
-import { SafeListItem } from '@/src/components/SafeListItem'
+import React, { useMemo } from 'react'
 import { Loader } from '@/src/components/Loader'
-import { SectionList } from 'react-native'
+import { FlatList } from 'react-native'
 import { useCallback } from 'react'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
@@ -27,36 +25,36 @@ interface SignersListProps {
 }
 
 export function SignersList({ signersGroup, isFetching, hasLocalSigners, navbarTitle }: SignersListProps) {
-  const title = navbarTitle || 'Signers'
+  const title = navbarTitle || 'Your signers'
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>{title}</NavBarTitle>,
   })
 
+  const flatData = useMemo(() => signersGroup.flatMap((section) => section.data), [signersGroup])
+
   const renderItem = useCallback(
-    ({ item, index }: { item: AddressInfo; index: number }) => {
-      return <SignersListItem item={item} index={index} signersGroup={signersGroup} />
+    ({ item }: { item: AddressInfo }) => {
+      return <SignersListItem item={item} signersGroup={signersGroup} />
     },
     [signersGroup],
   )
 
   const ListHeaderComponent = useCallback(
     () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSigners} />,
-    [hasLocalSigners],
+    [hasLocalSigners, title],
   )
 
   return (
-    <SectionList<AddressInfo, SignerSection>
-      testID="tx-history-list"
+    <FlatList<AddressInfo>
+      testID="signers-list"
       onScroll={handleScroll}
       ListHeaderComponent={ListHeaderComponent}
-      stickySectionHeadersEnabled
       contentInsetAdjustmentBehavior="automatic"
-      sections={signersGroup}
+      data={flatData}
       ListFooterComponent={isFetching ? <Loader size={24} color="$color" /> : undefined}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       scrollEventThrottle={16}
-      renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )
 }

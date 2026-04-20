@@ -10,11 +10,11 @@ interface SignersListHeaderProps {
 
 export function SignersListHeader({ withAlert, sectionTitle }: SignersListHeaderProps) {
   return (
-    <View gap="$6">
+    <View gap="$6" marginBottom="$4">
       <SectionTitle
         paddingHorizontal={'$0'}
-        title={sectionTitle || 'Signers'}
-        description="Signers have full control over the account, they can propose, sign and execute the transactions, as well as reject them."
+        title={sectionTitle || 'Your signers'}
+        description="Signers have full control over the account they are connected to. They can propose, sign and execute transactions, as well as reject them."
       />
 
       {withAlert && (

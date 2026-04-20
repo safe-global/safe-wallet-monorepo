@@ -24,7 +24,7 @@ export const SpaceSummary = ({
 }) => {
   return (
     <Box className={css.spaceInfo}>
-      <Typography variant="body2" fontWeight="bold">
+      <Typography variant="body2" fontWeight="bold" data-testid="org-name">
         {name}
       </Typography>
 

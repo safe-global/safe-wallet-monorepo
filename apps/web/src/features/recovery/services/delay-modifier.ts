@@ -1,5 +1,5 @@
 import { ContractVersions, getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { Delay, SupportedNetworks } from '@gnosis.pm/zodiac'
 import { type JsonRpcProvider, isAddress } from 'ethers'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'

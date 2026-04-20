@@ -46,6 +46,12 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
   return { __esModule: true, default: MockSafeSelectorDropdown }
 })
 
+jest.mock('./SpaceNestedSafesButton', () => {
+  const MockSpaceNestedSafesButton = () => <div data-testid="space-nested-safes-button" />
+  MockSpaceNestedSafesButton.displayName = 'SpaceNestedSafesButton'
+  return { __esModule: true, default: MockSpaceNestedSafesButton }
+})
+
 jest.mock('./SpaceBackLink', () => {
   const MockSpaceBackLink = (props: Record<string, unknown>) => (
     <div
@@ -173,6 +179,13 @@ describe('SpaceSafeBar', () => {
 
     const { queryByTestId } = render(<SpaceSafeBar />)
     expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
+  })
+
+  it('renders SpaceNestedSafesButton when useIsQualifiedSafe returns true', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('space-nested-safes-button')).toBeInTheDocument()
   })
 
   it('renders both SpaceBackLink and SafeSelectorDropdown together', () => {

@@ -1,0 +1,25 @@
+name: 'Branch Slug'
+
+description: 'Sanitize branch name into a DNS-safe slug for preview subdomains'
+
+inputs:
+  max-length:
+    description: 'Max slug length (default 50, keeps branch--walletweb under 63-char DNS limit)'
+    required: false
+    default: '50'
+
+outputs:
+  slug:
+    description: 'DNS-safe branch slug'
+    value: ${{ steps.slugify.outputs.slug }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Slugify branch name
+      id: slugify
+      shell: bash
+      run: |
+        raw="$(echo "$GITHUB_HEAD_REF" | sed 's|refs/heads/||')"
+        safe="$(echo "$raw" | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | sed 's/[A-Z]/\L&/g' | cut -c1-${{ inputs.max-length }} | sed 's/-$//')"
+        echo "slug=$safe" >> $GITHUB_OUTPUT

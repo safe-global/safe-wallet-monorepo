@@ -37,6 +37,7 @@ import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
+import { AppKitInitializer } from '@/src/features/WalletConnect/components/AppKitInitializer'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -148,20 +149,22 @@ function RootLayout() {
               <NotificationsProvider>
                 <PortalProvider shouldAddRootHost>
                   <PersistGate loading={null} persistor={persistor}>
-                    <SafeThemeProvider>
-                      <BottomSheetModalProvider>
-                        <SafeToastProvider>
-                          <NavigationGuardHOC>
-                            <HooksInitializer />
-                            <SigningMonitor />
-                            <ExecutingMonitor />
-                            <TestCtrls />
-                            <NavigationStack />
-                            <SafeStatusBar />
-                          </NavigationGuardHOC>
-                        </SafeToastProvider>
-                      </BottomSheetModalProvider>
-                    </SafeThemeProvider>
+                    <AppKitInitializer>
+                      <SafeThemeProvider>
+                        <BottomSheetModalProvider>
+                          <SafeToastProvider>
+                            <NavigationGuardHOC>
+                              <HooksInitializer />
+                              <SigningMonitor />
+                              <ExecutingMonitor />
+                              <TestCtrls />
+                              <NavigationStack />
+                              <SafeStatusBar />
+                            </NavigationGuardHOC>
+                          </SafeToastProvider>
+                        </BottomSheetModalProvider>
+                      </SafeThemeProvider>
+                    </AppKitInitializer>
                   </PersistGate>
                 </PortalProvider>
               </NotificationsProvider>

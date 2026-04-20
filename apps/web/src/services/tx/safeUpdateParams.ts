@@ -1,16 +1,16 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { SafeContractImplementationType } from '@safe-global/protocol-kit/dist/src/types/contracts'
+import type { SafeContractImplementationType } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeVersion } from '@safe-global/types-kit'
 import { OperationType } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import { getReadOnlyFallbackHandlerContract, getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
-import { SAFE_FEATURES } from '@safe-global/protocol-kit/dist/src/utils/safeVersions'
+import { SafeFeature } from '@safe-global/protocol-kit'
 import { hasSafeFeature } from '@/utils/safe-versions'
 import { createUpdateMigration } from '@/utils/safe-migrations'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { Gnosis_safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.1.1'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { determineMasterCopyVersion } from '@safe-global/utils/utils/safe'
@@ -23,7 +23,7 @@ const getChangeFallbackHandlerCallData = async (
   safeContractInstance: SafeContractImplementationType,
   chain: Chain,
 ): Promise<string> => {
-  if (!hasSafeFeature(SAFE_FEATURES.SAFE_FALLBACK_HANDLER, getLatestSafeVersion(chain))) {
+  if (!hasSafeFeature(SafeFeature.SAFE_FALLBACK_HANDLER, getLatestSafeVersion(chain))) {
     return '0x'
   }
 

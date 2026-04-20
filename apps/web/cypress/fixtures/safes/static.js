@@ -143,4 +143,13 @@ export default {
   MATIC_STATIC_SAFE_31: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
   /** Case #3 – Unsupported not migratable in-app (Warning, "Get CLI" CTA). Used in: dashboard.cy.js. Repro: safe-wallet-web.dev.5afe.dev/home?safe=matic:0xc8D6... */
   MATIC_STATIC_SAFE_32: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
+  /** Positions static safe - Used in: portfolio.cy.js */
+  MATIC_STATIC_SAFE_33: 'matic:0xc1f4652866ddB3811adcd3418c13eF640e88E1f6',
+
+  // Allowance Module address verification safes (same Safe on two networks)
+  // New safes were added to be sure they don't have the AllowanceModule enabled by default
+  /** Spending limits AllowanceModule address verification (Sepolia) - Used in: spending_limits.cy.js */
+  SEP_STATIC_SAFE_47: 'sep:0xED6ee29286c4791B55129eA2570d2e3097B067De',
+  /** Spending limits AllowanceModule address verification (Polygon) - Used in: spending_limits.cy.js */
+  MATIC_STATIC_SAFE_34: 'matic:0xED6ee29286c4791B55129eA2570d2e3097B067De',
 }
