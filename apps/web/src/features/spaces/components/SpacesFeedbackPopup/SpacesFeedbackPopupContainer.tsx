@@ -16,6 +16,8 @@ export function SpacesFeedbackPopupContainer(): ReactElement | null {
   const [setupDismissedSpaces] = useLocalStorage<Record<string, number>>(SETUP_WIDGET_DISMISSED_KEY)
 
   const hasTeamMembers = activeMembers.length + invitedMembers.length > 1
+  // setupWidgetDismissed stores a future expiry timestamp (now + 3 days), so a value
+  // greater than now means the SetupWidget is currently dismissed for that space.
   const setupDismissedForSpace = spaceId ? (setupDismissedSpaces?.[spaceId] ?? 0) > Date.now() : false
   const shouldShow = !dismissed && (hasTeamMembers || setupDismissedForSpace)
 
