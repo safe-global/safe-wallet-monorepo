@@ -15,6 +15,7 @@ import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipient
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
+import * as gtfHooks from '@/features/gtf'
 import { fireEvent, waitFor } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
@@ -353,6 +354,14 @@ describe('CreateTokenTransfer', () => {
 
   describe('GTF fee banner', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const useResolvedGasTokenSpy = jest.spyOn(gtfHooks, 'useResolvedGasToken')
+
+    const mockResolvedToSentToken = () =>
+      useResolvedGasTokenSpy.mockImplementation(
+        (sent?: string) => ({ status: 'resolved', address: sent ?? ZERO_ADDRESS }) as never,
+      )
+
+    const mockBlocked = () => useResolvedGasTokenSpy.mockReturnValue({ status: 'blocked' } as never)
 
     const mockBalancesForGtf = () => {
       const balances = {
@@ -383,9 +392,10 @@ describe('CreateTokenTransfer', () => {
       })
     }
 
-    it('should show fee banner after MAX click when GTF is enabled', async () => {
+    it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
       mockBalancesForGtf()
+      mockResolvedToSentToken()
 
       const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
@@ -398,7 +408,7 @@ describe('CreateTokenTransfer', () => {
       })
     })
 
-    it('should not show fee banner when GTF is disabled', () => {
+    it('does not show fee banner when GTF is disabled', () => {
       useHasFeatureSpy.mockImplementation(() => false)
       mockBalancesForGtf()
 
@@ -409,9 +419,26 @@ describe('CreateTokenTransfer', () => {
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
 
-    it('should dismiss fee banner on close button click', async () => {
+    it('does not show fee banner when resolved gas token differs from sent token', () => {
       useHasFeatureSpy.mockImplementation(() => true)
       mockBalancesForGtf()
+      // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
+      useResolvedGasTokenSpy.mockReturnValue({
+        status: 'resolved',
+        address: '0x1111111111111111111111111111111111111111',
+      } as never)
+
+      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    it('dismisses fee banner on close button click', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
 
       const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
 
@@ -424,6 +451,18 @@ describe('CreateTokenTransfer', () => {
       fireEvent.click(getByLabelText('Dismiss fee banner'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    it('shows block banner when resolution is blocked', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockBlocked()
+
+      const { getByTestId } = renderCreateTokenTransfer()
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-block-banner')).toBeInTheDocument()
+      })
     })
   })
 })

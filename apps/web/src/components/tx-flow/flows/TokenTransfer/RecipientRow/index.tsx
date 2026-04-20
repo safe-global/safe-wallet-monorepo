@@ -21,6 +21,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useResolvedGasToken } from '@/features/gtf'
 
 const getFieldName = (
   field: keyof TokenTransferParams,
@@ -42,6 +43,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
     formState: { errors },
     trigger,
     watch,
+    setError,
+    clearErrors,
   } = useFormContext<MultiTokenTransferParams>()
 
   const { setNonceNeeded } = useContext(SafeTxContext)
@@ -74,22 +77,33 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  // GTF: resolve fee token and track MAX press for fee info banner
+  // GTF: resolve fee token via CGW preview cascade and track MAX press for fee info banner
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
   const [maxPressed, setMaxPressed] = useState(false)
 
-  // Mock: resolved fee token = sent token (assumes no alternative has enough balance for gas)
-  // When CGW preview endpoint is available, replace with real resolution:
-  // ETH → USDC → USDT → DAI → sent token (based on Safe balances)
-  // Note: mock always shows the banner, even when a higher-priority token could cover gas
-  const resolvedFeeToken = tokenAddress
-
-  const sentTokenIsFeeToken = sameAddress(tokenAddress, resolvedFeeToken)
+  const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined)
+  const isBlocked = resolution.status === 'blocked'
+  const sentTokenIsFeeToken = resolution.status === 'resolved' && sameAddress(tokenAddress, resolution.address)
 
   // Reset banner when token changes
   useEffect(() => {
     setMaxPressed(false)
   }, [tokenAddress])
+
+  // When the sent token can't pay gas (and no other held token can either), mark the row invalid
+  // so the form-level Continue button (which gates on formState.isValid) becomes disabled.
+  const amountFieldName = getFieldName(TokenTransferFields.amount, fieldArray)
+  useEffect(() => {
+    if (isBlocked) {
+      setError(amountFieldName, {
+        type: 'gtfBlocked',
+        message: `Fees can't be paid in ${selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH or send a different asset.`,
+      })
+    } else {
+      const existing = get(errors, amountFieldName)
+      if (existing?.type === 'gtfBlocked') clearErrors(amountFieldName)
+    }
+  }, [isBlocked, amountFieldName, setError, clearErrors, errors, selectedToken?.tokenInfo.symbol])
 
   const showFeeBanner = !!isGtfEnabled && !isSpendingLimitType && maxPressed && sentTokenIsFeeToken
 
@@ -134,6 +148,13 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
             >
               Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
               change.
+            </Alert>
+          )}
+
+          {isBlocked && !isSpendingLimitType && (
+            <Alert severity="error" data-testid="gtf-block-banner">
+              Fees can&apos;t be paid in {selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH to your
+              Safe or send a different asset.
             </Alert>
           )}
 

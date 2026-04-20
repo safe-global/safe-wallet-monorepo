@@ -1,0 +1,93 @@
+import { useContext, useEffect, useMemo, useState } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useCurrentChain } from '@/hooks/useChains'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useBalances from '@/hooks/useBalances'
+import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
+
+/**
+ * Resolution of the gas token for a Safe-paid transaction.
+ *
+ * - `resolving`: the cascade is still probing or not enough context to start
+ * - `resolved`: a token (at `address`) successfully passed a `/fees/preview` probe
+ * - `blocked`: every candidate probe errored, including the sent token — the Safe cannot cover
+ *   fees with anything it holds
+ */
+export type ResolvedGasTokenState =
+  | { status: 'resolving' }
+  | { status: 'resolved'; address: string }
+  | { status: 'blocked' }
+
+/**
+ * Walk the Safe's balances probing `/fees/preview` per token. The sent token is guaranteed last
+ * as the fallback, so any other held token is preferred if the backend says it can cover fees.
+ * Stops at the first probe that returns 200. If every probe errors, resolution is `blocked`.
+ */
+export const useResolvedGasToken = (sentTokenAddress?: string): ResolvedGasTokenState => {
+  const { balances } = useBalances()
+  const { safe, safeAddress } = useSafeInfo()
+  const chain = useCurrentChain()
+  const { safeTx } = useContext(SafeTxContext)
+
+  const candidates = useMemo<string[]>(() => {
+    if (!balances?.items || !sentTokenAddress) return []
+
+    const alternatives = balances.items
+      .filter((b) => BigInt(b.balance) > 0n)
+      .filter((b) => !sameAddress(b.tokenInfo.address, sentTokenAddress))
+      .map((b) => b.tokenInfo.address)
+
+    // Sent token is always the fallback, tried after every alternative.
+    return [...alternatives, sentTokenAddress]
+  }, [balances, sentTokenAddress])
+
+  const candidatesKey = candidates.join(',')
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    setIndex(0)
+  }, [candidatesKey])
+
+  const currentCandidate = candidates[index]
+
+  const canProbe = Boolean(currentCandidate && safeTx && chain?.chainId && safeAddress && safe.threshold > 0)
+
+  const probe = useGetGtfFeePreviewQuery(
+    canProbe && safeTx && chain
+      ? {
+          chainId: chain.chainId,
+          safeAddress,
+          tx: {
+            to: safeTx.data.to,
+            value: safeTx.data.value,
+            data: safeTx.data.data,
+            operation: safeTx.data.operation,
+            gasToken: currentCandidate,
+            numberSignatures: safe.threshold,
+          },
+        }
+      : skipToken,
+  )
+
+  useEffect(() => {
+    if (!canProbe) return
+    if (probe.isLoading || probe.isFetching) return
+    if (probe.error && index < candidates.length - 1) {
+      setIndex((i) => i + 1)
+    }
+  }, [probe.isLoading, probe.isFetching, probe.error, canProbe, index, candidates.length])
+
+  if (candidates.length === 0 || !canProbe) {
+    return { status: 'resolving' }
+  }
+  if (probe.data) {
+    return { status: 'resolved', address: currentCandidate }
+  }
+  if (probe.error && index >= candidates.length - 1) {
+    return { status: 'blocked' }
+  }
+  return { status: 'resolving' }
+}
