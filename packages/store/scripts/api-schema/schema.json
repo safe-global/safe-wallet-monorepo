@@ -3155,8 +3155,9 @@
           },
           {
             "name": "safeTxHash",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
             "schema": {
               "type": "string"
             }
@@ -8335,10 +8336,12 @@
             "type": "string"
           },
           "createdAt": {
-            "type": "object"
+            "format": "date-time",
+            "type": "string"
           },
           "updatedAt": {
-            "type": "object"
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
