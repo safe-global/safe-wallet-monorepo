@@ -46,7 +46,7 @@ describe('Tx history tests 2', () => {
   // On-chain rejection
   it('Verify expanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -58,7 +58,7 @@ describe('Tx history tests 2', () => {
   // Batch transaction
   it('Verify expanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
+    createTx.verifyExpandedDetails([typeBatch.contractTitle], createTx.delegateCallWarning)
     cy.get(batches.allActionsSection).should('exist')
     batches.verifyCountOfActions(2)
   })
@@ -72,12 +72,7 @@ describe('Tx history tests 2', () => {
   it('Verify expanded details for adding owner', () => {
     createTx.clickOnTransactionItemByName(typeAddOwner.title)
     createTx.verifyExpandedDetails(
-      [
-        typeAddOwner.description,
-        typeAddOwner.requiredConfirmationsTitle,
-        typeAddOwner.ownerAddress,
-        typeAddOwner.transactionHash,
-      ],
+      [typeAddOwner.description, typeAddOwner.requiredConfirmationsTitle, typeAddOwner.ownerAddress],
       createTx.policyChangeWarning,
     )
   })
@@ -97,7 +92,6 @@ describe('Tx history tests 2', () => {
       typeChangeOwner.newOwner.ownerAddress,
       typeChangeOwner.oldOwner.actionTitile,
       typeChangeOwner.oldOwner.ownerAddress,
-      typeChangeOwner.transactionHash,
     ])
   })
 
@@ -110,12 +104,7 @@ describe('Tx history tests 2', () => {
   it('Verify expanded details for removing owner', () => {
     createTx.clickOnTransactionItemByName(typeRemoveOwner.title)
     createTx.verifyExpandedDetails(
-      [
-        typeRemoveOwner.description,
-        typeRemoveOwner.requiredConfirmationsTitle,
-        typeRemoveOwner.ownerAddress,
-        typeRemoveOwner.transactionHash,
-      ],
+      [typeRemoveOwner.description, typeRemoveOwner.requiredConfirmationsTitle, typeRemoveOwner.ownerAddress],
       createTx.policyChangeWarning,
     )
     createTx.checkRequiredThreshold(1)
@@ -129,11 +118,7 @@ describe('Tx history tests 2', () => {
 
   it('Verify expanded details for disable module', () => {
     createTx.clickOnTransactionItemByName(typeDisableOwner.title)
-    createTx.verifyExpandedDetails([
-      typeDisableOwner.description,
-      typeDisableOwner.address,
-      typeDisableOwner.transactionHash,
-    ])
+    createTx.verifyExpandedDetails([typeDisableOwner.description, typeDisableOwner.address])
   })
 
   // Added to prod
@@ -145,10 +130,7 @@ describe('Tx history tests 2', () => {
   // Added to prod
   it('Verify expanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
-    createTx.verifyExpandedDetails(
-      [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],
-      createTx.policyChangeWarning,
-    )
+    createTx.verifyExpandedDetails([typeChangeThreshold.requiredConfirmationsTitle], createTx.policyChangeWarning)
     createTx.checkRequiredThreshold(2)
   })
 
@@ -160,11 +142,7 @@ describe('Tx history tests 2', () => {
 
   it('Verify tx hashes are grouped in advanced details', () => {
     createTx.clickOnTransactionItemByName(typeDisableOwner.title)
-    createTx.verifyExpandedDetails([
-      typeDisableOwner.description,
-      typeDisableOwner.address,
-      typeDisableOwner.transactionHash,
-    ])
+    createTx.verifyExpandedDetails([typeDisableOwner.description, typeDisableOwner.address])
     createTx.clickOnAdvancedDetails()
     createTx.clickOnHashes()
     main.verifyElementByTextExists('Domain hash')
