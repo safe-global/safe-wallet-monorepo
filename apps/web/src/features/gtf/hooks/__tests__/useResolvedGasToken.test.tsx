@@ -1,15 +1,13 @@
-import type { ReactNode } from 'react'
 import { act } from '@testing-library/react'
+import { OperationType } from '@safe-global/types-kit'
 import { renderHook } from '@/tests/test-utils'
-import { useResolvedGasToken } from '../useResolvedGasToken'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useResolvedGasToken, type FeePreviewTx } from '../useResolvedGasToken'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
 const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -21,23 +19,19 @@ const mockChain = chainBuilder()
 
 const mockSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
 
-const buildSafeTx = (data: Partial<SafeTransactionData> = {}): SafeTransaction =>
-  ({
-    data: {
-      to: SAFE_TOKEN_ADDRESS,
-      value: '0',
-      data: '0x',
-      operation: 0,
-      nonce: 0,
-      safeTxGas: '0',
-      baseGas: '0',
-      gasPrice: '0',
-      gasToken: ETH_ADDRESS,
-      refundReceiver: ETH_ADDRESS,
-      ...data,
-    },
-    signatures: new Map(),
-  }) as unknown as SafeTransaction
+const nativeTx: FeePreviewTx = {
+  to: '0x38D48FaDa993b749691E93e4E62259c488bCb766',
+  value: '100000000000000',
+  data: '0x',
+  operation: OperationType.Call,
+}
+
+const erc20Tx: FeePreviewTx = {
+  to: SAFE_TOKEN_ADDRESS,
+  value: '0',
+  data: '0xa9059cbb00000000000000000000000038d48fada993b749691e93e4e62259c488bcb766000000000000000000000000000000000000000000000000000ffcb9e57d4000',
+  operation: OperationType.Call,
+}
 
 const ethBalance = {
   balance: '1000000000000000000',
@@ -95,29 +89,6 @@ const loadingProbe = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
-const withSafeTx =
-  (safeTx: SafeTransaction | undefined) =>
-  ({ children }: { children: ReactNode }) => (
-    <SafeTxContext.Provider
-      value={
-        {
-          safeTx,
-          setSafeTx: jest.fn(),
-          setSafeMessage: jest.fn(),
-          setSafeMessageHash: jest.fn(),
-          setSafeTxError: jest.fn(),
-          setNonce: jest.fn(),
-          setNonceNeeded: jest.fn(),
-          setSafeTxGas: jest.fn(),
-          setTxOrigin: jest.fn(),
-          isReadOnly: false,
-        } as never
-      }
-    >
-      {children}
-    </SafeTxContext.Provider>
-  )
-
 describe('useResolvedGasToken', () => {
   beforeEach(() => {
     jest.resetAllMocks()
@@ -130,13 +101,11 @@ describe('useResolvedGasToken', () => {
     })
   })
 
-  it('returns resolving while safeTx is undefined', () => {
+  it('returns resolving while the tx payload is undefined', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance]))
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(loadingProbe)
 
-    const { result } = renderHook(() => useResolvedGasToken(ETH_ADDRESS), {
-      wrapper: withSafeTx(undefined),
-    })
+    const { result } = renderHook(() => useResolvedGasToken(ETH_ADDRESS, undefined))
 
     expect(result.current.status).toBe('resolving')
   })
@@ -145,28 +114,21 @@ describe('useResolvedGasToken', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
     const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(successfulProbe)
 
-    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx()),
-    })
+    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
     expect(result.current).toEqual({ status: 'resolved', address: ETH_ADDRESS })
-    // first call is for ETH (index 0)
     expect(spy.mock.calls[0][0]).toMatchObject({ tx: expect.objectContaining({ gasToken: ETH_ADDRESS }) })
   })
 
   it('falls through from errored alternatives to the sent token when it probes 200', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
-    // Error on ETH probe, then success on SAFE probe as the hook advances the index.
     const querySpy = jest
       .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
       .mockImplementationOnce(() => erroredProbe)
       .mockImplementation(() => successfulProbe)
 
-    const { result, rerender } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx()),
-    })
+    const { result, rerender } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
-    // After first render, the error triggers useEffect → setIndex(1) → re-render
     act(() => {
       rerender()
     })
@@ -179,11 +141,8 @@ describe('useResolvedGasToken', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([safeTokenBalance]))
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(erroredProbe)
 
-    const { result, rerender } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx()),
-    })
+    const { result, rerender } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
-    // Single-candidate (sent = SAFE), probe errors, index can't advance → blocked.
     act(() => {
       rerender()
     })
@@ -195,22 +154,17 @@ describe('useResolvedGasToken', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([safeTokenBalance]))
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(successfulProbe)
 
-    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx()),
-    })
+    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
     expect(result.current).toEqual({ status: 'resolved', address: SAFE_TOKEN_ADDRESS })
   })
 
-  it('handles sent token already being the best candidate (e.g. sending ETH when Safe holds ETH)', () => {
+  it('handles sent token already being the only candidate (e.g. sending ETH when Safe holds ETH)', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance]))
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(successfulProbe)
 
-    const { result } = renderHook(() => useResolvedGasToken(ETH_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx({ to: ETH_ADDRESS })),
-    })
+    const { result } = renderHook(() => useResolvedGasToken(ETH_ADDRESS, nativeTx))
 
-    // Candidates dedupe: ETH appears once (as sent token). Probe passes → resolved = ETH.
     expect(result.current).toEqual({ status: 'resolved', address: ETH_ADDRESS })
   })
 
@@ -218,10 +172,20 @@ describe('useResolvedGasToken', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(loadingProbe)
 
-    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS), {
-      wrapper: withSafeTx(buildSafeTx()),
-    })
+    const { result } = renderHook(() => useResolvedGasToken(SAFE_TOKEN_ADDRESS, erc20Tx))
 
     expect(result.current.status).toBe('resolving')
+  })
+
+  it('ignores usdcBalance entry when sentTokenAddress dedupes', () => {
+    // send USDC — candidates should dedupe (USDC appears once as sent token, not as alternative)
+    jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([usdcBalance]))
+    const spy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(successfulProbe)
+
+    const usdcTx: FeePreviewTx = { ...erc20Tx, to: USDC_ADDRESS }
+    const { result } = renderHook(() => useResolvedGasToken(USDC_ADDRESS, usdcTx))
+
+    expect(result.current).toEqual({ status: 'resolved', address: USDC_ADDRESS })
+    expect(spy.mock.calls[0][0]).toMatchObject({ tx: expect.objectContaining({ gasToken: USDC_ADDRESS }) })
   })
 })

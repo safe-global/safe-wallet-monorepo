@@ -22,6 +22,9 @@ import SpendingLimitRow from '../SpendingLimitRow'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useResolvedGasToken } from '@/features/gtf'
+import type { FeePreviewTx } from '@/features/gtf'
+import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
+import { OperationType } from '@safe-global/types-kit'
 
 const getFieldName = (
   field: keyof TokenTransferParams,
@@ -81,7 +84,18 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
   const [maxPressed, setMaxPressed] = useState(false)
 
-  const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined)
+  const amountFieldName = getFieldName(TokenTransferFields.amount, fieldArray)
+
+  const previewTx = useMemo<FeePreviewTx | undefined>(() => {
+    if (!isGtfEnabled || !isAddressValid || !selectedToken) return undefined
+
+    // Probe with a fixed 1-atomic-unit amount — gas cost is largely value-independent for
+    // transfers, so this keeps the probe stable across amount-field keystrokes.
+    const params = createTokenTransferParams(recipient, '1', selectedToken.tokenInfo.decimals, tokenAddress)
+    return { ...params, operation: OperationType.Call }
+  }, [isGtfEnabled, isAddressValid, recipient, selectedToken, tokenAddress])
+
+  const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined, previewTx)
   const isBlocked = resolution.status === 'blocked'
   const sentTokenIsFeeToken = resolution.status === 'resolved' && sameAddress(tokenAddress, resolution.address)
 
@@ -92,7 +106,6 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   // When the sent token can't pay gas (and no other held token can either), mark the row invalid
   // so the form-level Continue button (which gates on formState.isValid) becomes disabled.
-  const amountFieldName = getFieldName(TokenTransferFields.amount, fieldArray)
   useEffect(() => {
     if (isBlocked) {
       setError(amountFieldName, {

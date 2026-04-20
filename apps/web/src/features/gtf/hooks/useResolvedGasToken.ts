@@ -1,12 +1,22 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { OperationType } from '@safe-global/types-kit'
 
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
+
+/**
+ * The encoded transaction payload the fees endpoint needs to probe a gas token.
+ */
+export type FeePreviewTx = {
+  to: string
+  value: string
+  data: string
+  operation: OperationType
+}
 
 /**
  * Resolution of the gas token for a Safe-paid transaction.
@@ -25,12 +35,19 @@ export type ResolvedGasTokenState =
  * Walk the Safe's balances probing `/fees/preview` per token. The sent token is guaranteed last
  * as the fallback, so any other held token is preferred if the backend says it can cover fees.
  * Stops at the first probe that returns 200. If every probe errors, resolution is `blocked`.
+ *
+ * The `tx` payload is what each probe submits alongside the candidate `gasToken`. Callers on the
+ * Create step typically build it from form state via `createTokenTransferParams`; on Review it
+ * comes from `SafeTxContext.safeTx.data`. When `tx` is `undefined` (form incomplete), the hook
+ * returns `resolving` without firing a probe.
  */
-export const useResolvedGasToken = (sentTokenAddress?: string): ResolvedGasTokenState => {
+export const useResolvedGasToken = (
+  sentTokenAddress: string | undefined,
+  tx: FeePreviewTx | undefined,
+): ResolvedGasTokenState => {
   const { balances } = useBalances()
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
-  const { safeTx } = useContext(SafeTxContext)
 
   const candidates = useMemo<string[]>(() => {
     if (!balances?.items || !sentTokenAddress) return []
@@ -53,18 +70,18 @@ export const useResolvedGasToken = (sentTokenAddress?: string): ResolvedGasToken
 
   const currentCandidate = candidates[index]
 
-  const canProbe = Boolean(currentCandidate && safeTx && chain?.chainId && safeAddress && safe.threshold > 0)
+  const canProbe = Boolean(currentCandidate && tx && chain?.chainId && safeAddress && safe.threshold > 0)
 
   const probe = useGetGtfFeePreviewQuery(
-    canProbe && safeTx && chain
+    canProbe && tx && chain
       ? {
           chainId: chain.chainId,
           safeAddress,
           tx: {
-            to: safeTx.data.to,
-            value: safeTx.data.value,
-            data: safeTx.data.data,
-            operation: safeTx.data.operation,
+            to: tx.to,
+            value: tx.value,
+            data: tx.data,
+            operation: tx.operation,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
           },
