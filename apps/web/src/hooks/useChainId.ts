@@ -1,7 +1,7 @@
 import { useParams } from 'next/navigation'
 import { parse, type ParsedUrlQuery } from 'querystring'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import useWallet from './wallets/useWallet'
 import useChains from './useChains'

@@ -1,12 +1,11 @@
-import { JsonRpcProvider } from 'ethers'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { JsonRpcProvider, toBeHex } from 'ethers'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import * as web3 from '@/hooks/wallets/web3'
 import {
   relaySafeCreation,
   getRedirect,
   createNewUndeployedSafeWithoutSalt,
 } from '@/components/new-safe/create/logic/index'
-import { toBeHex } from 'ethers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { faker } from '@faker-js/faker'
@@ -20,12 +19,17 @@ import {
 } from '@safe-global/safe-deployments'
 import { Safe_to_l2_setup__factory } from '@safe-global/utils/types/contracts'
 import { FEATURES, getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import * as safeDeployments from '@safe-global/safe-deployments'
 import type { SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { fail } from 'assert'
+import type * as SafeDeploymentsModule from '@safe-global/safe-deployments'
+
+const safeDeploymentHandlers = jest.requireActual('@safe-global/safe-deployments/dist/handler') as Pick<
+  typeof SafeDeploymentsModule,
+  'getCompatibilityFallbackHandlerDeployments'
+>
 
 const provider = new JsonRpcProvider(undefined, { name: 'ethereum', chainId: 1 })
 
@@ -360,8 +364,8 @@ describe('create/logic', () => {
       } as unknown as SingletonDeploymentV2
 
       const spy = jest
-        .spyOn(safeDeployments, 'getCompatibilityFallbackHandlerDeployments')
-        .mockReturnValue(mockDeployment)
+        .spyOn(safeDeploymentHandlers, 'getCompatibilityFallbackHandlerDeployments')
+        .mockReturnValueOnce(mockDeployment)
 
       const result = createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chain)
 
@@ -396,8 +400,8 @@ describe('create/logic', () => {
       } as unknown as SingletonDeploymentV2
 
       const spy = jest
-        .spyOn(safeDeployments, 'getCompatibilityFallbackHandlerDeployments')
-        .mockReturnValue(mockDeployment)
+        .spyOn(safeDeploymentHandlers, 'getCompatibilityFallbackHandlerDeployments')
+        .mockReturnValueOnce(mockDeployment)
 
       const result = createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chain)
 

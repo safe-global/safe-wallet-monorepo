@@ -1,4 +1,4 @@
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import { type AddressBookState } from '@/store/addressBookSlice'
 import { isChecksummedAddress } from '@safe-global/utils/utils/addresses'
 import type { LOCAL_STORAGE_DATA } from './common'

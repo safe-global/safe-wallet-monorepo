@@ -15,7 +15,8 @@ import {
   type TenderlySimulation,
 } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { EnvState } from '@safe-global/store/settingsSlice'
-import { toBeHex, ZeroAddress } from 'ethers'
+import { toBeHex } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { UseSimulationReturn } from './useSimulation'
 
 const TENDERLY_DASHBOARD_URL = 'https://dashboard.tenderly.co'
@@ -185,9 +186,9 @@ const getNonceOverwrite = (params: SimulationTxParams): number | undefined => {
   }
 }
 const getGuardOverwrite = (params: SimulationTxParams): string | undefined => {
-  const hasGuard = params.safe.guard?.value !== undefined && params.safe.guard.value !== ZeroAddress
+  const hasGuard = params.safe.guard?.value !== undefined && params.safe.guard.value !== ZERO_ADDRESS
   if (hasGuard) {
-    return ZeroAddress
+    return ZERO_ADDRESS
   }
 }
 /* We need to overwrite the threshold stored in smart contract storage to 1

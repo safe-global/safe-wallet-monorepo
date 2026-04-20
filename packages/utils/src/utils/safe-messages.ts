@@ -1,7 +1,7 @@
 import type { MessageItem, TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { hashMessage, type TypedDataDomain, type JsonRpcSigner } from 'ethers'
 import { gte } from 'semver'
-import { adjustVInSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
+import { adjustVInSignature } from '@safe-global/protocol-kit'
 
 import { hashTypedData } from '@safe-global/utils/utils/web3'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
@@ -10,7 +10,7 @@ import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 import { hasFeature } from '@safe-global/utils/utils/chains'
-import { SigningMethod } from '@safe-global/protocol-kit'
+import { SigningMethod } from '@safe-global/types-kit'
 
 /*
  * From v1.3.0, EIP-1271 support was moved to the CompatibilityFallbackHandler.

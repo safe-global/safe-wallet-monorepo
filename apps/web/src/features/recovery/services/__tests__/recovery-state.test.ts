@@ -12,14 +12,14 @@ import {
   _isMaliciousRecovery,
 } from '../recovery-state'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { getModuleInstance, KnownContracts, ContractAbis } from '@gnosis.pm/zodiac'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 
 jest.mock('@/hooks/wallets/web3')
 

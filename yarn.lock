@@ -13049,15 +13049,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/api-kit@npm:^2.4.6":
-  version: 2.5.6
-  resolution: "@safe-global/api-kit@npm:2.5.6"
+"@safe-global/api-kit@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@safe-global/api-kit@npm:4.1.0"
   dependencies:
-    "@safe-global/protocol-kit": "npm:^5.1.1"
-    "@safe-global/types-kit": "npm:^1.0.1"
+    "@safe-global/protocol-kit": "npm:^7.0.0"
+    "@safe-global/types-kit": "npm:^3.1.0"
     node-fetch: "npm:^2.7.0"
     viem: "npm:^2.21.8"
-  checksum: 10/3d80f288b03c3adb2479dc4e5052b233428ef468728c100385c3709ff6ac4987b841fae1c08123ba907b76bf83205c7483f53538a2221102d2ffe02165587395
+  checksum: 10/d094775d73811476d007d52653b0cece433e02c322ae1676f5dcc78b396aac5d88ed2e7ac840821da64d8a8f0bb15ecce21d2e9203ab3cc52dcc998cefff9c6a
   languageName: node
   linkType: hard
 
@@ -13106,11 +13106,11 @@ __metadata:
     "@reown/appkit-ethers-react-native": "npm:^2.0.3"
     "@reown/appkit-react-native": "npm:^2.0.3"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^5.2.26"
+    "@safe-global/protocol-kit": "npm:^7.1.0"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
-    "@safe-global/types-kit": "npm:^1.0.5"
+    "@safe-global/types-kit": "npm:^3.1.0"
     "@safe-global/utils": "workspace:^"
     "@shopify/flash-list": "npm:^2.3.0"
     "@storybook/addon-actions": "npm:^9.0.8"
@@ -13228,28 +13228,49 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^5.1.1, @safe-global/protocol-kit@npm:^5.2.26":
-  version: 5.2.26
-  resolution: "@safe-global/protocol-kit@npm:5.2.26"
+"@safe-global/protocol-kit@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@safe-global/protocol-kit@npm:7.0.0"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.51"
-    "@safe-global/safe-modules-deployments": "npm:^2.2.25"
-    "@safe-global/types-kit": "npm:^1.0.5"
+    "@safe-global/safe-deployments": "npm:^1.37.52"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.0"
+    "@safe-global/types-kit": "npm:^3.1.0"
     abitype: "npm:^1.0.2"
-    semver: "npm:^7.6.3"
+    semver: "npm:^7.7.2"
     viem: "npm:^2.21.8"
   dependenciesMeta:
     "@noble/curves":
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/3040589b970ac415adea57735b0ac9b76ccb29510d8c2275cb4f51d2ee1e1f6c157d6fc5dae0bd958188cac72930f9e51582bc643e1364b1a14130ceb059c3ad
+  checksum: 10/84749ca6b6327a568de07e2973b0e96e0ad8e2a6c54b4b74c5401e7ce7bd92be05e833260bf41092f20b811610bca68d069580a197d1134799626b023f11c94e
   languageName: node
   linkType: hard
 
-"@safe-global/safe-apps-provider@npm:^0.18.5":
+"@safe-global/protocol-kit@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@safe-global/protocol-kit@npm:7.1.0"
+  dependencies:
+    "@noble/curves": "npm:^1.6.0"
+    "@peculiar/asn1-schema": "npm:^2.3.13"
+    "@safe-global/safe-deployments": "npm:^1.37.54"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.2"
+    "@safe-global/types-kit": "npm:^3.1.0"
+    abitype: "npm:^1.0.2"
+    semver: "npm:^7.7.2"
+    viem: "npm:^2.21.8"
+  dependenciesMeta:
+    "@noble/curves":
+      optional: true
+    "@peculiar/asn1-schema":
+      optional: true
+  checksum: 10/16944fe7981606c3e129140a6b447904efc14325ef05ee5f4da656a97b0c87a11ea4dc93384d44b760b1d4b303da543b2c3b5401744624c3f622e36d9c783e39
+  languageName: node
+  linkType: hard
+
+"@safe-global/safe-apps-provider@npm:^0.18.6":
   version: 0.18.6
   resolution: "@safe-global/safe-apps-provider@npm:0.18.6"
   dependencies:
@@ -13280,12 +13301,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.51, @safe-global/safe-deployments@npm:^1.37.53":
-  version: 1.37.53
-  resolution: "@safe-global/safe-deployments@npm:1.37.53"
+"@safe-global/safe-deployments@npm:^1.37.52, @safe-global/safe-deployments@npm:^1.37.54":
+  version: 1.37.54
+  resolution: "@safe-global/safe-deployments@npm:1.37.54"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/4a8626ab2f46c9cdcdab98e87322ba9cc3c9923effda8eb86ac75b769660e8b945bf740fb61f7c95b84d4b06b71db6b2da89ab36f9fb9ff42c75743c279b0deb
+  checksum: 10/1a5e76d076fb8850d1320526489b60d3cebab7abfbc00ab10d916bf146f5741195f060af3636fec6ef6b0ed85682c70db5e9c2fbbaaf97b43977cb5ee8b6c731
   languageName: node
   linkType: hard
 
@@ -13303,17 +13324,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^2.2.25":
-  version: 2.2.25
-  resolution: "@safe-global/safe-modules-deployments@npm:2.2.25"
-  checksum: 10/94d67d96c9e09f423aebab7cadf37eeec9f7a291bbf692ac4c60c5a1fa3a68b9dc847ca1ac2a45d264db3717ca0c50bc7eb74270a66fc6d46bb8f8d97d3e6e79
-  languageName: node
-  linkType: hard
-
-"@safe-global/safe-modules-deployments@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.1"
-  checksum: 10/cb4ab566c3dd7e1b91c2cd3fa8df68132a3acfe15ff3c10485a8d1450a8f69be3ef47f8163860ff16880d8d44b7cb46bd07820f2d173cc622a7bf988a6379039
+"@safe-global/safe-modules-deployments@npm:^3.0.0, @safe-global/safe-modules-deployments@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.2"
+  checksum: 10/8b3ec33e7505aedbc214df25fe3d51d520d2572f301b9f58a9f15901deecd5e75b34f77b7aa309c56a2f8bb5831b2de820ec411665d0b777e678fab2f40269d0
   languageName: node
   linkType: hard
 
@@ -13365,7 +13379,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^9.2.0"
     "@safe-global/store": "workspace:^"
-    "@safe-global/types-kit": "npm:^1.0.0"
+    "@safe-global/types-kit": "npm:^3.1.0"
     ethers: "npm:6.14.3"
     jest: "npm:^29.7.0"
     jest-transform-stub: "npm:2.0.0"
@@ -13420,10 +13434,10 @@ __metadata:
     "@mui/icons-material": "npm:^6.5.0"
     "@mui/lab": "npm:^6.0.0-beta.20"
     "@mui/material": "npm:^6.5.0"
-    "@safe-global/safe-apps-provider": "npm:^0.18.5"
+    "@safe-global/safe-apps-provider": "npm:^0.18.6"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.53"
+    "@safe-global/safe-deployments": "npm:^1.37.54"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -13466,12 +13480,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/types-kit@npm:^1.0.0, @safe-global/types-kit@npm:^1.0.1, @safe-global/types-kit@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@safe-global/types-kit@npm:1.0.5"
+"@safe-global/types-kit@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@safe-global/types-kit@npm:3.1.0"
   dependencies:
     abitype: "npm:^1.0.2"
-  checksum: 10/732e8312458dab14557f0d08676ce2a55cb74b8296487ccacbb14564fdad44ff80ac1804ab75c73b8f21fc5ae6bc354d033ca968a6f1344e29316ec4b4018311
+  checksum: 10/a610e9846afc93b01be5cd9c3250ea62ba7a429ac43ac759242c7c843e34bc6f92246e8df46a68ae776ab6042f2c90902c5b46b3c1ed7c31eb8d581587459cbc
   languageName: node
   linkType: hard
 
@@ -13496,9 +13510,9 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.31.1"
   peerDependencies:
-    "@safe-global/protocol-kit": ^5.x
+    "@safe-global/protocol-kit": ^7.1.x
     "@safe-global/store": "*"
-    "@safe-global/types-kit": ^1.x
+    "@safe-global/types-kit": ^3.1.x
   languageName: unknown
   linkType: soft
 
@@ -13538,15 +13552,15 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.11.0"
     "@reown/walletkit": "npm:^1.2.7"
     "@rspack/plugin-react-refresh": "npm:^1.0.0"
-    "@safe-global/api-kit": "npm:^2.4.6"
-    "@safe-global/protocol-kit": "npm:^5.2.26"
+    "@safe-global/api-kit": "npm:^4.1.0"
+    "@safe-global/protocol-kit": "npm:^7.1.0"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.53"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.1"
+    "@safe-global/safe-deployments": "npm:^1.37.54"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.2"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
-    "@safe-global/types-kit": "npm:^1.0.5"
+    "@safe-global/types-kit": "npm:^3.1.0"
     "@storybook/addon-designs": "npm:^11.0.1"
     "@storybook/addon-docs": "npm:^10.2.6"
     "@storybook/addon-links": "npm:^10.2.6"

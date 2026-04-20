@@ -6,6 +6,7 @@ describe('CodedException', () => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = 'false'
     jest.resetModules()
     jest.clearAllMocks()
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
     jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
@@ -62,59 +63,87 @@ describe('CodedException', () => {
     expect(err.code).toBe(901)
   })
 
-  describe('Logging', () => {
-    it('logs to the console', async () => {
+  describe('Logging (warn level)', () => {
+    it('logs caught exceptions to console.warn, not console.error', async () => {
       const { logError } = await import('..')
 
       const err = logError(Errors._100, '123')
       expect(err.message).toBe('Code 100: Invalid input in the address field (123)')
-      expect(console.error).toHaveBeenCalledWith(err)
+      expect(console.warn).toHaveBeenCalledWith(err)
+      expect(console.error).not.toHaveBeenCalled()
     })
 
-    it('logs to the console via the public log method', () => {
+    it('public log method routes through console.warn', () => {
       const err = new CodedException(Errors._601)
       expect(err.message).toBe('Code 601: Error fetching balances')
-      expect(console.error).not.toHaveBeenCalled()
+      expect(console.warn).not.toHaveBeenCalled()
       err.log()
-      expect(console.error).toHaveBeenCalledWith(err)
+      expect(console.warn).toHaveBeenCalledWith(err)
     })
 
-    it('logs only the error message on prod', async () => {
+    it('logs only the message on prod', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
       const { logError, Errors } = await import('..')
 
       logError(Errors._100)
-      expect(console.error).toHaveBeenCalledWith('Code 100: Invalid input in the address field')
+      expect(console.warn).toHaveBeenCalledWith('Code 100: Invalid input in the address field')
+    })
+
+    it('forwards to logger.warn in production (NOT addError)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockWarn = jest.fn()
+      const mockError = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: mockError, debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('601'), { code: 601 })
+      expect(mockError).not.toHaveBeenCalled()
+    })
+
+    it('does not forward to logger in non-production envs', async () => {
+      const mockWarn = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: jest.fn(), debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601)
+      expect(mockWarn).not.toHaveBeenCalled()
     })
   })
 
-  describe('Tracking', () => {
-    beforeEach(() => {
-      jest.resetModules()
-      jest.clearAllMocks()
-      jest.spyOn(console, 'error').mockImplementation(() => {})
-    })
-
-    // I can't figure out a way to override the IS_PRODUCTION constant
-    it('tracks using observability on production', async () => {
+  describe('Tracking (error level)', () => {
+    it('logs at error level AND forwards to captureException on production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
 
       const mockCaptureException = jest.fn()
+      const mockError = jest.fn()
 
       jest.doMock('@/services/observability', () => ({
         __esModule: true,
         ...jest.requireActual('@/services/observability'),
         captureException: mockCaptureException,
+        logger: { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() },
       }))
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
       expect(mockCaptureException).toHaveBeenCalled()
+      expect(mockError).toHaveBeenCalledWith(err.message, { code: 100 })
       expect(console.error).toHaveBeenCalledWith(err.message)
     })
 
-    it('does not track using observability in non-production envs', async () => {
+    it('does not track in non-production envs', async () => {
       const mockCaptureException = jest.fn()
       jest.doMock('@/services/observability', () => ({
         __esModule: true,
