@@ -52,10 +52,8 @@ type ScoreCellProps = {
 }
 
 const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
-  if (isScanning) {
-    return <Skeleton variant="rounded" width={60} height={20} />
-  }
   if (!summary) {
+    if (isScanning) return <Skeleton variant="rounded" width={60} height={20} />
     return (
       <Typography variant="body2" color="text.secondary">
         {DASH}
@@ -103,7 +101,7 @@ const getEvidence = (
 }
 
 const ThresholdCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
-  if (isScanning) return <Skeleton variant="rounded" width={50} height={20} />
+  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
   const threshold = getEvidence(results, 'account_setup', 'Threshold')
   return (
     <Typography variant="body2" color="text.primary">
@@ -113,7 +111,7 @@ const ThresholdCell = ({ results, isScanning }: { results?: Record<string, ScanR
 }
 
 const VersionCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
-  if (isScanning) return <Skeleton variant="rounded" width={50} height={20} />
+  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
   const version = getEvidence(results, 'contract_version', 'Current version')
   return (
     <Typography variant="body2" color="text.primary">
@@ -129,6 +127,12 @@ const formatBalance = (fiatTotal?: string | null): string => {
   if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
   return `$${value.toFixed(0)}`
 }
+
+const BalanceCell = ({ value, isScanning }: { value?: string; isScanning?: boolean }) => (
+  <Typography variant="body2" color="text.primary">
+    {!value && isScanning ? <Skeleton variant="rounded" width={50} height={20} /> : formatBalance(value)}
+  </Typography>
+)
 
 // Pure helper functions — extracted from component body for testability and to avoid recreation per render.
 // Utilities are threaded in via parameters (not imported) to comply with feature architecture —
@@ -394,13 +398,7 @@ const SecuritySafesTable = ({
                     <ChainIndicator chainId={safe.chainId} onlyLogo />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.primary">
-                      {isScanning ? (
-                        <Skeleton variant="rounded" width={50} height={20} />
-                      ) : (
-                        formatBalance(balanceMap[key])
-                      )}
-                    </Typography>
+                    <BalanceCell value={balanceMap[key]} isScanning={isScanning} />
                   </TableCell>
                   <TableCell>
                     <ThresholdCell results={scanResults[key]} isScanning={isScanning} />
@@ -592,13 +590,7 @@ const SecuritySafesTable = ({
                           <ChainIndicator chainId={chain.chainId} onlyLogo />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.primary">
-                            {isScanning ? (
-                              <Skeleton variant="rounded" width={50} height={20} />
-                            ) : (
-                              formatBalance(balanceMap[key])
-                            )}
-                          </Typography>
+                          <BalanceCell value={balanceMap[key]} isScanning={isScanning} />
                         </TableCell>
                         <TableCell>
                           <ThresholdCell results={scanResults[key]} isScanning={isScanning} />

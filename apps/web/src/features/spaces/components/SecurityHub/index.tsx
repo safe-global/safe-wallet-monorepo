@@ -1,10 +1,8 @@
 import { type ReactElement, useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Box, Typography } from '@mui/material'
 import { useSpaceSafes } from '@/features/spaces'
-import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes, selectCurrency } from '@/store/slices'
-import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
@@ -14,6 +12,7 @@ import useAutoScan, { type AutoScanServices } from '@/features/spaces/hooks/useA
 import SecuritySafesTable from './SecuritySafesTable'
 import SecurityReportDrawer from './SecurityReportDrawer'
 import WorkspaceHealthCard from './WorkspaceHealthCard'
+import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from './utils'
 
 export type ChainEntry = {
   chainId: string
@@ -32,39 +31,6 @@ export type SelectedSafe = {
   address: string
   chainId: string
 }
-
-const flattenSafes = (
-  allSafes: Array<SafeItem | MultiChainSafeItem>,
-  undeployedSafes: UndeployedSafesState,
-): SpaceSafeEntry[] =>
-  allSafes.map((item) => {
-    if (isMultiChainSafeItem(item)) {
-      return {
-        address: item.address,
-        chainId: item.safes[0]?.chainId ?? '1',
-        name: item.name,
-        isMultichain: true,
-        chainEntries: item.safes.map((s) => ({
-          chainId: s.chainId,
-          isDeployed: !undeployedSafes[s.chainId]?.[s.address],
-        })),
-      }
-    }
-    const isDeployed = !undeployedSafes[item.chainId]?.[item.address]
-    return {
-      address: item.address,
-      chainId: item.chainId,
-      name: item.name,
-      isMultichain: false,
-      chainEntries: [{ chainId: item.chainId, isDeployed }],
-    }
-  })
-
-// Collect all deployed chain entries across all safes
-const getDeployedEntries = (safes: SpaceSafeEntry[]): SelectedSafe[] =>
-  safes.flatMap((safe) =>
-    safe.chainEntries.filter((c) => c.isDeployed).map((c) => ({ address: safe.address, chainId: c.chainId })),
-  )
 
 const SecurityHub = (): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
@@ -97,51 +63,53 @@ const SecurityHub = (): ReactElement => {
     ],
   )
 
-  const safes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
-
-  const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
+  // Raw safes reflect only this client's local undeployed slice; they may flag chains as
+  // deployed that CGW has no record of (counterfactual for another space member). We drive
+  // the batch overview query off this raw view, then reconcile below.
+  const rawSafes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
 
   // Batch overview query — single source of truth for balance/queue data.
   // Shared by both the table (display) and scan context (scanner input),
   // eliminating redundant per-Safe overview API requests during auto-scan.
   const currency = useAppSelector(selectCurrency)
-  const safeItems: SafeItem[] = useMemo(
-    () =>
-      safes.flatMap((safe) =>
-        safe.chainEntries
-          .filter((c) => c.isDeployed)
-          .map((c) => ({
-            chainId: c.chainId,
-            address: safe.address,
-            isReadOnly: false,
-            isPinned: false,
-            lastVisited: 0,
-            name: undefined,
-          })),
-      ),
-    [safes],
-  )
+  const safeItems = useMemo(() => toSafeItems(rawSafes), [rawSafes])
   const { data: overviews } = useGetMultipleSafeOverviewsQuery(
     { safes: safeItems, currency },
     { skip: safeItems.length === 0 },
   )
-  const { balanceMap, overviewMap } = useMemo(() => {
+
+  // Single pass over the batch-overview response:
+  //   - `confirmedDeployedKeys`: (chainId, address) pairs CGW actually returned. Missing
+  //     locally-deployed entries are ghost-deployed. `null` = inconclusive (still loading
+  //     or empty response from a likely transient failure) — don't reconcile.
+  //   - `balanceMap` / `overviewMap`: keyed per Safe for table cells and scan context.
+  const { confirmedDeployedKeys, balanceMap, overviewMap } = useMemo(() => {
+    if (!security.$isReady || !overviews) {
+      return { confirmedDeployedKeys: null, balanceMap: {}, overviewMap: {} as Record<string, OverviewData> }
+    }
+    const confirmed = new Set<string>()
     const bMap: Record<string, string | undefined> = {}
     const oMap: Record<string, OverviewData> = {}
-    if (overviews && security.$isReady) {
-      for (const ov of overviews) {
-        if (ov.address?.value && ov.chainId) {
-          const key = security.scanKey(ov.address.value, ov.chainId)
-          bMap[key] = ov.fiatTotal
-          oMap[key] = {
-            balanceUsd: Number(ov.fiatTotal) || 0,
-            queuedTxCount: ov.queued ?? 0,
-          }
-        }
-      }
+    for (const ov of overviews) {
+      if (!ov.address?.value || !ov.chainId) continue
+      const key = security.scanKey(ov.address.value, ov.chainId)
+      confirmed.add(key)
+      bMap[key] = ov.fiatTotal
+      oMap[key] = { balanceUsd: Number(ov.fiatTotal) || 0, queuedTxCount: ov.queued ?? 0 }
     }
-    return { balanceMap: bMap, overviewMap: oMap }
+    return {
+      confirmedDeployedKeys: confirmed.size > 0 ? confirmed : null,
+      balanceMap: bMap,
+      overviewMap: oMap,
+    }
   }, [overviews, security.$isReady, security.scanKey])
+
+  const safes = useMemo(
+    () => (security.$isReady ? reconcileDeployedSafes(rawSafes, confirmedDeployedKeys, security.scanKey) : rawSafes),
+    [rawSafes, confirmedDeployedKeys, security.$isReady, security.scanKey],
+  )
+
+  const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
 
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
