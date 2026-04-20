@@ -224,6 +224,41 @@ describe('useAutoScan', () => {
     expect(result.current.justCompleted).toBe(false)
   })
 
+  it('bails past a target whose scanContext never resolves so the queue keeps draining', async () => {
+    // Regression: a multichain Safe can include chains marked isDeployed=true locally but
+    // counterfactual in reality; Safe/masterCopies queries 404, scanContext stays null,
+    // and the sequential queue used to hang indefinitely.
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const onComplete = jest.fn()
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+
+    // Leave scanContext null for SAFE_A (simulates the hung queries) but resolve for SAFE_B.
+    mockScanContext = null
+    const queue = [mkSelected(SAFE_A), mkSelected(SAFE_B)]
+    const safes = [mkSafe(SAFE_A), mkSafe(SAFE_B)]
+    const { result, rerender } = renderHook(() => useAutoScan(queue, safes, {}, services, onComplete))
+
+    act(() => {
+      result.current.startScan()
+    })
+
+    // While scanContext is null for SAFE_A, the scanner never fires.
+    expect(scanner.scan).not.toHaveBeenCalled()
+
+    // Advance past the bail timeout — queue should move off SAFE_A and onto SAFE_B.
+    mockScanContext = mkContext()
+    await act(async () => {
+      jest.advanceTimersByTime(15_000)
+    })
+    rerender()
+
+    // SAFE_A's scanning key should have been released so its table row stops showing loading.
+    await waitFor(() => expect(result.current.scanningKeys.has(`${SAFE_A}:${CHAIN}`)).toBe(false))
+    // SAFE_B runs normally and completes.
+    await waitFor(() => expect(onComplete).toHaveBeenCalledWith(SAFE_B, CHAIN, expect.any(Number), expect.any(Object)))
+  })
+
   it('removes the scanned key from scanningKeys when its scanners complete', async () => {
     const scanner = mkScanner('account_setup')
     const services = mkServices([scanner])

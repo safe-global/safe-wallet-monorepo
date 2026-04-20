@@ -137,8 +137,10 @@ const WorkspaceHealthCard = ({
     return counts
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
-  // Show skeleton while the scan queue is running or feature still loading — partial data misleads.
-  if (!aggregate || isScanning) {
+  // Show skeleton only when we have no data at all. Once any Safe has completed, render the
+  // aggregate incrementally — it updates as more results arrive. The re-scan row below
+  // surfaces the in-progress state via its "Scanning..." label.
+  if (!aggregate) {
     return (
       <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>

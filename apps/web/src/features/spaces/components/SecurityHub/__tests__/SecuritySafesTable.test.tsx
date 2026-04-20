@@ -182,6 +182,31 @@ describe('SecuritySafesTable', () => {
     expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThanOrEqual(1)
   })
 
+  it('renders scan data even when the key is still in scanningKeys', () => {
+    // Regression: the drawer (or a parallel consumer) can populate scanResults for a Safe
+    // before useAutoScan's sequential queue reaches it. Cells must prefer data over the
+    // scanning flag so the row shows real values immediately instead of stale skeletons.
+    const key = scanKey(singleSafe.address, singleSafe.chainId)
+    const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }], {
+      account_setup: {
+        ...mkResult(),
+        evidence: [{ label: 'Threshold', value: '2 of 3' }],
+      } as ScanResult,
+      contract_version: {
+        ...mkResult(),
+        evidence: [{ label: 'Current version', value: '1.4.1' }],
+      } as ScanResult,
+    })
+    const { container } = renderTable({
+      scanningKeys: new Set([key]),
+      scanResults,
+      balanceMap: { [key]: '1000' },
+    })
+    expect(screen.getByText('2 of 3')).toBeInTheDocument()
+    expect(screen.getByText('1.4.1')).toBeInTheDocument()
+    expect(container.querySelectorAll('.MuiSkeleton-root').length).toBe(0)
+  })
+
   describe('multichain safes', () => {
     const scanResults = buildScanResults([
       { address: multiSafe.address, chainId: '1' },

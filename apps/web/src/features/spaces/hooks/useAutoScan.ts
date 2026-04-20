@@ -4,6 +4,13 @@ import type { SecurityContract } from '@/features/security'
 import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
 import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
 
+// How long to wait for useSafeScanContext to resolve before bailing past a target.
+// Protects against "ghost-deployed" chains: a multichain Safe entry may be flagged
+// isDeployed=true locally (because this client's undeployedSafes slice doesn't track it),
+// but be counterfactual in reality — the Safe/masterCopies/creation queries then 404 and
+// scanContext stays null forever, hanging the sequential queue on that target.
+const SCAN_CONTEXT_BAIL_MS = 2_000
+
 /**
  * Services this hook needs from the security feature. Callers obtain these via
  * useLoadFeature and pass them in once the feature is $isReady.
@@ -120,6 +127,29 @@ const useAutoScan = (
           }
         })
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scanContext, currentTarget?.address, currentTarget?.chainId, isRunning, services])
+
+  // Bail past a target whose scanContext never resolves. Without this the entire queue
+  // stalls on a ghost-deployed chain (see SCAN_CONTEXT_BAIL_MS comment). The timer resets
+  // whenever currentTarget changes and is cleared as soon as scanContext becomes non-null.
+  useEffect(() => {
+    if (!currentTarget || !isRunning || !services || scanContext) return
+    const key = services.scanKey(currentTarget.address, currentTarget.chainId)
+    const timer = setTimeout(() => {
+      console.warn(
+        `[SecurityHub] scan context did not resolve for ${currentTarget.address}:${currentTarget.chainId} within ${SCAN_CONTEXT_BAIL_MS}ms — skipping`,
+      )
+      completedRef.current.add(key)
+      setScanningKeys((prev) => {
+        if (!prev.has(key)) return prev
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+      setCurrentIndex((i) => i + 1)
+    }, SCAN_CONTEXT_BAIL_MS)
+    return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanContext, currentTarget?.address, currentTarget?.chainId, isRunning, services])
 
