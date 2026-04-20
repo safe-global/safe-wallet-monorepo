@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { formatUnits } from 'ethers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
@@ -135,11 +135,10 @@ const computeTotalOutgoing = ({
 }
 
 export const useFeesPreview = (): FeesPreviewData => {
-  const { safeTx } = useContext(SafeTxContext)
+  const { safeTx, gtfSelectedGasToken, setGtfSelectedGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
-  const [userSelectedGasToken, setUserSelectedGasToken] = useState<string>()
 
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
   const nativeDecimals = chain?.nativeCurrency.decimals ?? 18
@@ -186,14 +185,14 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   useEffect(() => {
-    if (!userSelectedGasToken) return
-    if (!candidates.some((c) => sameAddress(c.address, userSelectedGasToken))) {
-      setUserSelectedGasToken(undefined)
+    if (!gtfSelectedGasToken) return
+    if (!candidates.some((c) => sameAddress(c.address, gtfSelectedGasToken))) {
+      setGtfSelectedGasToken(undefined)
     }
-  }, [userSelectedGasToken, candidates])
+  }, [gtfSelectedGasToken, candidates, setGtfSelectedGasToken])
 
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
-  const selectedAddress = lockedGasToken ?? userSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
+  const selectedAddress = lockedGasToken ?? gtfSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
   const selectedCandidate = availableGasTokens.find((c) => sameAddress(c.address, selectedAddress))
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
@@ -216,7 +215,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     executionFee: EXECUTION_FEE,
     availableGasTokens,
     selectedGasToken: selectedAddress,
-    onGasTokenChange: isConfirmation ? undefined : setUserSelectedGasToken,
+    onGasTokenChange: isConfirmation ? undefined : setGtfSelectedGasToken,
     isConfirmation: isConfirmation || undefined,
   }
 

@@ -6,6 +6,8 @@ import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 
+export type GtfPaymentMode = 'safe' | 'signer'
+
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
@@ -33,6 +35,13 @@ export type SafeTxContextParams = {
   setTxOrigin: Dispatch<SetStateAction<string | undefined>>
 
   isReadOnly: boolean
+
+  // GTF: proposer's payment choice. Meaningful only for the first signer; confirmers
+  // read the locked fee fields directly from safeTx.data.
+  gtfPaymentMode: GtfPaymentMode
+  setGtfPaymentMode: Dispatch<SetStateAction<GtfPaymentMode>>
+  gtfSelectedGasToken?: string
+  setGtfSelectedGasToken: Dispatch<SetStateAction<string | undefined>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -45,6 +54,9 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
+  gtfPaymentMode: 'safe',
+  setGtfPaymentMode: () => {},
+  setGtfSelectedGasToken: () => {},
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
@@ -56,6 +68,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string>()
+  const [gtfPaymentMode, setGtfPaymentMode] = useState<GtfPaymentMode>('safe')
+  const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string>()
 
   // Signed txs cannot be updated
   const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
@@ -114,6 +128,10 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         txOrigin,
         setTxOrigin,
         isReadOnly,
+        gtfPaymentMode,
+        setGtfPaymentMode,
+        gtfSelectedGasToken,
+        setGtfSelectedGasToken,
       }}
     >
       {children}

@@ -8,9 +8,10 @@
  */
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
 import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -28,6 +29,10 @@ import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonc
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature } from '@/features/gtf'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useAppDispatch } from '@/store'
 
 type TxActions = {
   addToBatch: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
@@ -55,10 +60,31 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const [addTxToBatch] = useUpdateBatch()
   const chain = useCurrentChain()
+  const dispatch = useAppDispatch()
+  const gtfFeature = useLoadFeature(GTFFeature)
+  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
 
   return useMemo<TxActions>(() => {
     const safeAddress = safe.address.value
     const { chainId } = safe
+
+    // Merge the CGW fee-preview fee fields into the SafeTx before the first signer signs.
+    // Confirmers inherit the locked fields from the signed payload — no merge needed.
+    const mergeGtfFeeParams = async (safeTx: SafeTransaction): Promise<SafeTransaction> => {
+      if (safeTx.signatures.size > 0) return safeTx
+      if (!chain || !hasFeature(chain, FEATURES.GTF)) return safeTx
+      if (gtfPaymentMode !== 'safe' || !gtfSelectedGasToken) return safeTx
+      if (!gtfFeature.$isReady || !gtfFeature.resolveFeeParams) return safeTx
+
+      return gtfFeature.resolveFeeParams({
+        chainId,
+        safeAddress,
+        safeTx,
+        gasToken: gtfSelectedGasToken,
+        numberSignatures: safe.threshold,
+        dispatch,
+      })
+    }
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -101,6 +127,8 @@ export const useTxActions = (): TxActions => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
+
+      safeTx = await mergeGtfFeeParams(safeTx)
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {
@@ -178,7 +206,21 @@ export const useTxActions = (): TxActions => {
     }
 
     return { addToBatch, signTx, executeTx, signProposerTx, proposeTx }
-  }, [safe, wallet, signer?.provider, signer?.address, signer?.chainId, signer?.isSafe, addTxToBatch, onboard, chain])
+  }, [
+    safe,
+    wallet,
+    signer?.provider,
+    signer?.address,
+    signer?.chainId,
+    signer?.isSafe,
+    addTxToBatch,
+    onboard,
+    chain,
+    dispatch,
+    gtfFeature,
+    gtfPaymentMode,
+    gtfSelectedGasToken,
+  ])
 }
 
 export const useValidateNonce = (safeTx: SafeTransaction | undefined): boolean => {

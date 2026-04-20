@@ -50,6 +50,9 @@ const mockSafeTxContextValue = {
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
+  gtfPaymentMode: 'safe' as const,
+  setGtfPaymentMode: jest.fn(),
+  setGtfSelectedGasToken: jest.fn(),
 }
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis

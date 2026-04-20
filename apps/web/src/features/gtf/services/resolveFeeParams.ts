@@ -1,0 +1,55 @@
+import type { SafeTransaction } from '@safe-global/types-kit'
+
+import { createTx } from '@/services/tx/tx-sender'
+import { gatewayApi } from '@/store/api/gateway'
+import type { AppDispatch } from '@/store'
+
+export type ResolveFeeParamsArgs = {
+  chainId: string
+  safeAddress: string
+  safeTx: SafeTransaction
+  gasToken: string
+  numberSignatures: number
+  dispatch: AppDispatch
+}
+
+/**
+ * Merges the CGW fee-preview fee fields into a SafeTransaction so the first
+ * signer's signed payload carries the params Safe's handlePayment() reads on
+ * execution. Must run before any signature is applied.
+ */
+export const resolveFeeParams = async ({
+  chainId,
+  safeAddress,
+  safeTx,
+  gasToken,
+  numberSignatures,
+  dispatch,
+}: ResolveFeeParamsArgs): Promise<SafeTransaction> => {
+  const { to, value, data, operation, nonce } = safeTx.data
+
+  const preview = await dispatch(
+    gatewayApi.endpoints.getGtfFeePreview.initiate(
+      {
+        chainId,
+        safeAddress,
+        tx: { to, value, data, operation, gasToken, numberSignatures },
+      },
+      { forceRefetch: true },
+    ),
+  ).unwrap()
+
+  const { safeTxGas, baseGas, gasPrice, gasToken: resolvedGasToken, refundReceiver } = preview.txData
+
+  return createTx(
+    {
+      ...safeTx.data,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: resolvedGasToken,
+      refundReceiver,
+    },
+    nonce,
+  )
+}

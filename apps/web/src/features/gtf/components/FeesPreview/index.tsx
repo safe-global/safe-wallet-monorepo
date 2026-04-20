@@ -1,10 +1,11 @@
 import type { ReactElement, ReactNode } from 'react'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import { SafeTxContext, type GtfPaymentMode } from '@/components/tx-flow/SafeTxProvider'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
 import css from './styles.module.css'
 
@@ -14,7 +15,7 @@ const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on th
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
 const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
 
-type PaymentSource = 'safe' | 'signer'
+type PaymentSource = GtfPaymentMode
 
 const FeeRow = ({
   label,
@@ -80,7 +81,7 @@ const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing 
         {totalOutgoing.primary.amount} {totalOutgoing.primary.currency}
       </Typography>
       {totalOutgoing.fees && (
-        <Typography variant="body2">
+        <Typography variant="body2" fontWeight={700}>
           {totalOutgoing.fees.amount} {totalOutgoing.fees.currency}
         </Typography>
       )}
@@ -279,13 +280,13 @@ const ConfirmationFeeNotice = ({
 const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const { canCoverFees, isConfirmation, executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } =
     props
-  const [paymentSource, setPaymentSource] = useState<PaymentSource>('safe')
+  const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
 
-  const isSafeWallet = paymentSource === 'safe'
+  const isSafeWallet = gtfPaymentMode === 'safe'
   const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
 
   const handlePaymentSourceChange = (source: PaymentSource) => {
-    setPaymentSource(source)
+    setGtfPaymentMode(source)
     if (source === 'signer') {
       const nativeAddress = availableGasTokens?.[0]?.address
       if (nativeAddress) props.onGasTokenChange?.(nativeAddress)
@@ -322,7 +323,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                 <Typography variant="body2" color="text.secondary">
                   Pay fees from:
                 </Typography>
-                <PaymentSourceSelector value={paymentSource} onChange={handlePaymentSourceChange} />
+                <PaymentSourceSelector value={gtfPaymentMode} onChange={handlePaymentSourceChange} />
               </div>
               <div className={css.paymentRowGroup}>
                 <Typography variant="body2" color="text.secondary">
