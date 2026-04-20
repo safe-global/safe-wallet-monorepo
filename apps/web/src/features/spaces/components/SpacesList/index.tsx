@@ -5,7 +5,8 @@ import SignInOptions from '../SignInOptions'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { Box, Button, Card, Grid2, Link, Typography } from '@mui/material'
+import { Box, Card, Grid2, Link, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
@@ -19,19 +20,19 @@ import { filterSpacesByStatus } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
+import AddIcon from '@/public/images/common/add.svg'
 
 const AddSpaceButton = () => {
   return (
     <Button
       data-testid="create-space-button"
-      disableElevation
-      variant="contained"
-      size="small"
-      href={AppRoutes.welcome.createSpace}
-      LinkComponent={NextLink}
-      sx={{ height: '36px' }}
+      variant="default"
+      size="lg"
+      className="h-full rounded-lg px-6 text-base"
+      render={<NextLink href={AppRoutes.welcome.createSpace} />}
     >
-      <Box mt="1px">Create space</Box>
+      <AddIcon className="fill-current" />
+      Create space
     </Button>
   )
 }
