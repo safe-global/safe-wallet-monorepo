@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { formatUnits } from 'ethers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
@@ -17,7 +17,7 @@ import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPric
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { useGasTokenCandidates } from './useGasTokenCandidates'
+import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 
 export type FeeRow = {
   label: string
@@ -153,7 +153,36 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     : undefined
 
-  const { candidates, defaultAddress } = useGasTokenCandidates(txPayload)
+  // Once the first signer has signed, the gas token is baked into the signed payload — later
+  // signers can't change it, so we skip the candidate probing and just render what's locked in.
+  const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
+  const isConfirmation = lockedGasToken !== undefined
+
+  const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
+
+  const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
+    if (!lockedGasToken) return undefined
+    if (sameAddress(lockedGasToken, ZERO_ADDRESS)) {
+      return {
+        address: ZERO_ADDRESS,
+        symbol: nativeSymbol,
+        logoUri: chain?.nativeCurrency.logoUri ?? '',
+        decimals: nativeDecimals,
+        fiatBalance: '0',
+      }
+    }
+    const held = balances.items.find((b) => sameAddress(b.tokenInfo.address, lockedGasToken))
+    if (held) {
+      return {
+        address: held.tokenInfo.address,
+        symbol: held.tokenInfo.symbol,
+        logoUri: held.tokenInfo.logoUri,
+        decimals: held.tokenInfo.decimals,
+        fiatBalance: held.fiatBalance,
+      }
+    }
+    return { address: lockedGasToken, symbol: '', logoUri: '', decimals: nativeDecimals, fiatBalance: '0' }
+  }, [lockedGasToken, balances, chain, nativeSymbol, nativeDecimals])
 
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   useEffect(() => {
@@ -163,8 +192,9 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }, [userSelectedGasToken, candidates])
 
-  const selectedAddress = userSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
-  const selectedCandidate = candidates.find((c) => sameAddress(c.address, selectedAddress))
+  const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
+  const selectedAddress = lockedGasToken ?? userSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
+  const selectedCandidate = availableGasTokens.find((c) => sameAddress(c.address, selectedAddress))
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
@@ -184,9 +214,10 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   const base = {
     executionFee: EXECUTION_FEE,
-    availableGasTokens: candidates,
+    availableGasTokens,
     selectedGasToken: selectedAddress,
-    onGasTokenChange: setUserSelectedGasToken,
+    onGasTokenChange: isConfirmation ? undefined : setUserSelectedGasToken,
+    isConfirmation: isConfirmation || undefined,
   }
 
   // Pending first — guards against rendering stale `preview.data` against a freshly-edited

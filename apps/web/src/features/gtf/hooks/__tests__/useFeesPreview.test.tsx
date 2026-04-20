@@ -20,7 +20,10 @@ const mockChain = chainBuilder()
 
 const mockSafe = extendedSafeInfoBuilder().with({ threshold: 2 }).build()
 
-const buildSafeTx = (data: Partial<SafeTransactionData>): SafeTransaction =>
+const buildSafeTx = (
+  data: Partial<SafeTransactionData>,
+  signatures: Map<string, unknown> = new Map(),
+): SafeTransaction =>
   ({
     data: {
       to: mockSafe.address.value,
@@ -35,7 +38,7 @@ const buildSafeTx = (data: Partial<SafeTransactionData>): SafeTransaction =>
       refundReceiver: '0x0000000000000000000000000000000000000000',
       ...data,
     },
-    signatures: new Map(),
+    signatures,
   }) as unknown as SafeTransaction
 
 // ERC-20 transfer(0x38D48FaDa993b749691E93e4E62259c488bCb766, 4500000000000000) — 0.0045 WETH
@@ -356,5 +359,56 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(undefined) })
 
     expect(result.current.gasFee.currency).toBe('ETH')
+  })
+
+  describe('confirmation flow (second signer)', () => {
+    const signedNativeSafeTx = buildSafeTx(
+      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+      new Map([['0xSigner', {}]]),
+    )
+
+    const signedWethGasSafeTx = buildSafeTx(
+      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: WETH_ADDRESS },
+      new Map([['0xSigner', {}]]),
+    )
+
+    it('marks isConfirmation and locks the gas token from safeTx.data.gasToken', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
+
+      expect(result.current.isConfirmation).toBe(true)
+      expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+      expect(result.current.onGasTokenChange).toBeUndefined()
+    })
+
+    it('exposes only the locked token in availableGasTokens, resolved from balances', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
+
+      expect(result.current.availableGasTokens).toEqual([
+        expect.objectContaining({ address: WETH_ADDRESS, symbol: 'WETH', logoUri: 'https://weth.logo' }),
+      ])
+    })
+
+    it('resolves native metadata from the chain when gasToken is the zero address', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedNativeSafeTx) })
+
+      expect(result.current.availableGasTokens).toEqual([
+        expect.objectContaining({ address: ETH_ADDRESS, symbol: 'ETH', logoUri: 'https://eth.logo' }),
+      ])
+    })
+
+    it('fires the preview with the locked gas token, ignoring candidate probing', () => {
+      const previewSpy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+      renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
+
+      const lastCallArg = previewSpy.mock.calls.at(-1)?.[0]
+      expect(lastCallArg).toMatchObject({ tx: expect.objectContaining({ gasToken: WETH_ADDRESS }) })
+    })
   })
 })
