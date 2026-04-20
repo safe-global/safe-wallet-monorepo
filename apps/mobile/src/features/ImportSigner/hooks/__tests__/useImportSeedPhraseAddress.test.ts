@@ -1,3 +1,4 @@
+import { Alert } from 'react-native'
 import { renderHook, act } from '@/src/tests/test-utils'
 import { useImportSeedPhraseAddress } from '../useImportSeedPhraseAddress'
 import { ethers } from 'ethers'
@@ -5,11 +6,14 @@ import Logger from '@/src/utils/logger'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
+import type { Signer } from '@/src/store/signersSlice'
 
 // Mock ONLY I/O boundaries
 jest.mock('@/src/hooks/useSign/useSign')
 jest.mock('@/src/hooks/useDelegate')
 jest.mock('@/src/hooks/useAddressOwnershipValidation')
+
+jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
 
 const mockStorePrivateKey = storePrivateKey as jest.MockedFunction<typeof storePrivateKey>
 const mockUseDelegate = useDelegate as jest.MockedFunction<typeof useDelegate>
@@ -609,6 +613,37 @@ describe('useImportSeedPhraseAddress', () => {
           index: 0,
         },
       })
+    })
+  })
+
+  describe('signer collision', () => {
+    it('should block import and leave Keychain untouched when a different-type signer exists for the address', async () => {
+      const existing: Signer = {
+        value: VALID_ADDRESS,
+        name: 'Existing WC',
+        logoUri: null,
+        type: 'walletconnect',
+      }
+
+      mockValidateAddressOwnership.mockResolvedValue({
+        isOwner: true,
+        ownerInfo: { value: VALID_ADDRESS },
+      })
+
+      const { result } = renderHook(() => useImportSeedPhraseAddress(), {
+        signers: { [VALID_ADDRESS]: existing },
+      })
+
+      let importResult
+      await act(async () => {
+        importResult = await result.current.importAddress(VALID_ADDRESS, DERIVATION_PATH, 0, VALID_PRIVATE_KEY)
+      })
+
+      expect(importResult).toEqual({ success: false })
+      expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+      expect(mockStorePrivateKey).not.toHaveBeenCalled()
+      expect(mockCreateDelegate).not.toHaveBeenCalled()
+      expect(result.current.isImporting).toBe(false)
     })
   })
 })

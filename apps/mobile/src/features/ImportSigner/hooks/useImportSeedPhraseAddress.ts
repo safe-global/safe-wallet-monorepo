@@ -5,6 +5,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
+import { useSignerCollisionGuard } from './useSignerCollisionGuard'
 
 interface ImportError {
   code: 'VALIDATION' | 'IMPORT' | 'OWNER_VALIDATION'
@@ -28,6 +29,7 @@ export const useImportSeedPhraseAddress = () => {
   const [error, setError] = useState<ImportError | null>(null)
   const { validateAddressOwnership } = useAddressOwnershipValidation()
   const { createDelegate } = useDelegate()
+  const { checkCollision, showCollisionAlert } = useSignerCollisionGuard()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -54,6 +56,13 @@ export const useImportSeedPhraseAddress = () => {
             code: 'OWNER_VALIDATION',
             message: 'This address is not an owner of the Safe Account',
           })
+          setIsImporting(false)
+          return { success: false }
+        }
+
+        const existingSigner = checkCollision(address, 'private-key')
+        if (existingSigner) {
+          showCollisionAlert(existingSigner)
           setIsImporting(false)
           return { success: false }
         }
@@ -99,7 +108,7 @@ export const useImportSeedPhraseAddress = () => {
         return { success: false }
       }
     },
-    [dispatch, validateAddressOwnership, createDelegate],
+    [dispatch, validateAddressOwnership, createDelegate, checkCollision, showCollisionAlert],
   )
 
   return {
