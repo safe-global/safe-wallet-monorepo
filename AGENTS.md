@@ -404,13 +404,12 @@ Coverage report: `apps/web/cypress/COVERAGE.md`
 
 Located in `apps/web/playwright/`. Full conventions and patterns: `apps/web/playwright/CLAUDE.md` (to be added in Phase 2 of the migration).
 
-| Category        | Folder                   | CI        | Purpose                         |
-| --------------- | ------------------------ | --------- | ------------------------------- |
-| Smoke           | `tests/smoke/`           | Every PR  | Critical path functional tests  |
-| Visual          | `tests/visual/`          | Manual    | Argos visual regression         |
-| Regression      | `tests/regression/`      | On-demand | Feature tests                   |
-| Happy path      | `tests/happypath/`       | On-demand | User journey tests              |
-| Prodhealthcheck | `tests/prodhealthcheck/` | Scheduled | Post-deploy checks against prod |
+| Category   | Folder              | CI        | Purpose                        |
+| ---------- | ------------------- | --------- | ------------------------------ |
+| Smoke      | `tests/smoke/`      | Every PR  | Critical path functional tests |
+| Visual     | `tests/visual/`     | Manual    | Argos visual regression        |
+| Regression | `tests/regression/` | On-demand | Feature tests                  |
+| Happy path | `tests/happypath/`  | On-demand | User journey tests             |
 
 First-time setup — install the browser binaries (once per machine):
 

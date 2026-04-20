@@ -384,8 +384,7 @@ playwright/
 │   ├── smoke/          # Critical path (CI on every PR)
 │   ├── visual/         # Visual regression (Argos)
 │   ├── regression/     # Feature tests
-│   ├── happypath/      # User journey tests
-│   └── prodhealthcheck/# Post-deploy checks
+│   └── happypath/      # User journey tests
 ├── pages/              # Page Object Model (*.page.ts)
 │   ├── main.page.ts    # BasePage — shared utilities (3+ page objects use)
 │   ├── dashboard.page.ts
@@ -418,13 +417,12 @@ playwright/
 
 ### Test categories
 
-| Category        | Folder                   | CI trigger               | Naming                    |
-| --------------- | ------------------------ | ------------------------ | ------------------------- |
-| Smoke           | `tests/smoke/`           | Every PR                 | `[SMOKE] Verify that ...` |
-| Visual          | `tests/visual/`          | `workflow_dispatch` only | `[VISUAL] Screenshot ...` |
-| Regression      | `tests/regression/`      | On-demand                | `Verify that ...`         |
-| Happy path      | `tests/happypath/`       | On-demand                | `Verify that ...`         |
-| Prodhealthcheck | `tests/prodhealthcheck/` | Scheduled                | `Verify that ...`         |
+| Category   | Folder              | CI trigger               | Naming                    |
+| ---------- | ------------------- | ------------------------ | ------------------------- |
+| Smoke      | `tests/smoke/`      | Every PR                 | `[SMOKE] Verify that ...` |
+| Visual     | `tests/visual/`     | `workflow_dispatch` only | `[VISUAL] Screenshot ...` |
+| Regression | `tests/regression/` | On-demand                | `Verify that ...`         |
+| Happy path | `tests/happypath/`  | On-demand                | `Verify that ...`         |
 
 ## 5. Quick Reference — Where Does It Go?
 

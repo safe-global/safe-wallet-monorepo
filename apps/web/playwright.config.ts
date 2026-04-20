@@ -3,12 +3,15 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * Playwright configuration for Safe{Wallet} E2E tests.
  *
- * Test categories mirror the existing Cypress structure:
+ * All suites run against a locally built and served app (port 8080 in CI,
+ * or the dev server on port 3000 locally). Tests never hit production —
+ * matching the Cypress pattern.
+ *
+ * Test categories:
  * - smoke: Fast tests, mocked data OK, runs on every PR
  * - regression: Real data, validates backend through UI
  * - happypath: Real data, full user journeys
  * - visual: Mocked data, Argos screenshots
- * - prodhealthcheck: Real production data
  */
 export default defineConfig({
   testDir: './playwright/tests',
@@ -101,15 +104,6 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
-      },
-    },
-    {
-      name: 'prodhealthcheck',
-      testDir: './playwright/tests/prodhealthcheck',
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 800 },
-        baseURL: 'https://app.safe.global',
       },
     },
   ],

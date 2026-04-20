@@ -196,7 +196,7 @@ Some tests will require signer private keys, please include them in your .env fi
 
 ### Playwright tests
 
-Playwright tests live in `apps/web/playwright/` and run alongside Cypress during the Cypress → Playwright migration. Test categories (smoke / regression / happypath / visual / prodhealthcheck) mirror the Cypress structure.
+Playwright tests live in `apps/web/playwright/` and run alongside Cypress during the Cypress → Playwright migration. Test categories (smoke / regression / happypath / visual) mirror the Cypress structure.
 
 **First-time setup:**
 

@@ -18,7 +18,6 @@ export const addressBookUrl = '/address-book?safe='
 export const setupUrl = '/settings/setup?safe='
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
-export const prodbaseUrl = 'https://app.safe.global'
 
 // ── API endpoint patterns (for route interception) ─────────────────────────────
 export const chainsEndpoint = '**/v2/chains'
