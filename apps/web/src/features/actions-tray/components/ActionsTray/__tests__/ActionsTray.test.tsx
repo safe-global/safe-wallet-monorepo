@@ -113,7 +113,7 @@ describe('ActionsTray geoblocking', () => {
 
       fireEvent.mouseOver(sendButton.parentElement as HTMLElement)
       await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this account')
+        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
       })
     })
 
@@ -177,7 +177,7 @@ describe('ActionsTray geoblocking', () => {
 
       fireEvent.mouseOver(swapButton.parentElement as HTMLElement)
       await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this account')
+        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
       })
     })
 
