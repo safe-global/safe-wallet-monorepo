@@ -147,7 +147,7 @@ const AddContact = () => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+              <Button type="submit" variant="contained" disableElevation>
                 {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>

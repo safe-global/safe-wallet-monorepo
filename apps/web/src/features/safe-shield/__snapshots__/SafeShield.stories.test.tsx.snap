@@ -285,7 +285,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -361,7 +361,7 @@ exports[`./SafeShield.stories Empty 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -667,7 +667,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -895,7 +895,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1123,7 +1123,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1538,7 +1538,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1722,7 +1722,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -1836,7 +1836,7 @@ exports[`./SafeShield.stories Loading 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2329,7 +2329,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2663,7 +2663,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -2986,7 +2986,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -3292,7 +3292,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -3972,7 +3972,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -4155,7 +4155,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -4745,7 +4745,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5007,7 +5007,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5048,7 +5048,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5189,7 +5189,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5495,7 +5495,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -5706,7 +5706,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5747,7 +5747,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                                     This transaction calls a smart contract that will be able to modify your Safe account. 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40794-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
+                                      href="https://help.safe.global/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -5939,7 +5939,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -6245,7 +6245,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -6395,7 +6395,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                                     Verify the 
                                     <a
                                       class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-ioipc8-MuiTypography-root-MuiLink-root"
-                                      href="https://help.safe.global/en/articles/40838-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
+                                      href="https://help.safe.global/articles/9256158266-what-is-a-fallback-handler-and-how-does-it-relate-to-safe"
                                       rel="noreferrer noopener"
                                       target="_blank"
                                     >
@@ -6514,7 +6514,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >
@@ -6742,7 +6742,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
         >
           <a
             class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
-            href="https://help.safe.global/en/articles/461021-understanding-safe-shield-transaction-checks"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
             rel="noreferrer noopener"
             target="_blank"
           >

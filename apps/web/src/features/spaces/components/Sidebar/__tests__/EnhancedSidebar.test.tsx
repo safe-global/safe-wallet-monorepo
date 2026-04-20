@@ -19,6 +19,10 @@ jest.mock('../SidebarCommonFooter', () => ({
   SidebarCommonFooter: () => <div>Footer</div>,
 }))
 
+jest.mock('../SidebarProfileSection', () => ({
+  SidebarProfileSection: () => <div>Profile</div>,
+}))
+
 jest.mock('../variants', () => ({
   getSidebarVariant: jest.fn((type) => {
     if (type === 'spaces') {
@@ -45,6 +49,7 @@ describe('EnhancedSidebar', () => {
 
     expect(screen.getByText('Top Bar')).toBeInTheDocument()
     expect(screen.getByText('Footer')).toBeInTheDocument()
+    expect(screen.getByText('Profile')).toBeInTheDocument()
   })
 
   it('renders spaces variant when type is spaces', () => {
