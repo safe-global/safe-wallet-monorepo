@@ -10,10 +10,10 @@ import { Spinner } from '@/components/ui/spinner'
 
 const Accounts: NextPage = () => {
   const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
-  const { isFetching } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
+  const { isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const isRedesignEnabled = useHasFeature(FEATURES.WELCOME_ACCOUNTS_REDESIGN)
 
-  const isFlagResolved = !isFetching && isRedesignEnabled !== undefined
+  const isFlagResolved = !isLoading && isRedesignEnabled !== undefined
 
   const renderAccounts = () => {
     if (!isFlagResolved) {
