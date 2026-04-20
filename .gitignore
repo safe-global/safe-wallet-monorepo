@@ -10,6 +10,11 @@
 /reports
 report.json
 
+# playwright
+apps/web/playwright/test-results/
+apps/web/playwright/playwright-report/
+apps/web/blob-report/
+
 # generated types
 /packages/utils/src/types/contracts
 
