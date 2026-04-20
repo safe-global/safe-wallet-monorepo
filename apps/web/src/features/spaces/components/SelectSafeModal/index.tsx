@@ -20,7 +20,7 @@ import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-const SWAP_DISABLED_TOOLTIP = 'Swap is not support on this chain. Try another chain.'
+const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
 
 const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
 
