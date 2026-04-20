@@ -81,7 +81,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {submittedAt && (
+      {submittedAt && executedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
           <Typography variant="body2" component="div">
             {dateString(submittedAt)}
@@ -97,7 +97,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {txDetails && (
+      {txDetails?.executedAt && (
         <Box mt={2}>
           <HistoryFees txDetails={txDetails} />
         </Box>

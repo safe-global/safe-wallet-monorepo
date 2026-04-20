@@ -19,6 +19,8 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
 
   if (!isGtfEnabled) return null
+  // Unexecuted txs (confirmation flow) render FeesPreview with live data instead.
+  if (!txDetails.executedAt) return null
   if (!txDetails.detailedExecutionInfo) return null
   if (!isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) return null
 

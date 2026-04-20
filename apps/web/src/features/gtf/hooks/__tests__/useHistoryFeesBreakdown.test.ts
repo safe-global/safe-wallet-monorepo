@@ -5,6 +5,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 
 const mockMultisigTxDetails = {
+  executedAt: 1700000001000,
   detailedExecutionInfo: {
     type: DetailedExecutionInfoType.MULTISIG,
     baseGas: '21000',
@@ -22,6 +23,7 @@ const mockMultisigTxDetails = {
 } as unknown as TransactionDetails
 
 const mockModuleTxDetails = {
+  executedAt: 1700000001000,
   detailedExecutionInfo: {
     type: DetailedExecutionInfoType.MODULE,
   },
@@ -67,8 +69,17 @@ describe('useHistoryFeesBreakdown', () => {
   it('returns null when detailedExecutionInfo is null', () => {
     jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
 
-    const txDetails = { detailedExecutionInfo: null } as unknown as TransactionDetails
+    const txDetails = { executedAt: 1700000001000, detailedExecutionInfo: null } as unknown as TransactionDetails
     const { result } = renderHook(() => useHistoryFeesBreakdown(txDetails))
+
+    expect(result.current).toBeNull()
+  })
+
+  it('returns null for unexecuted (queued) transactions', () => {
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+
+    const queuedTx = { ...mockMultisigTxDetails, executedAt: undefined } as unknown as TransactionDetails
+    const { result } = renderHook(() => useHistoryFeesBreakdown(queuedTx))
 
     expect(result.current).toBeNull()
   })
