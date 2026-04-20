@@ -14,7 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -168,13 +168,9 @@ const AddAccounts = ({
     spaceSafes,
   ])
 
-  // Detect similar addresses
   const similarAddresses = useMemo<Set<string>>(() => {
     const allItems = [...trustedSafes, ...ownedSafes]
-    const uniqueAddresses = [...new Set(allItems.map((s) => s.address))]
-    if (uniqueAddresses.length < 2) return new Set()
-    const result = detectSimilarAddresses(uniqueAddresses)
-    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
   }, [trustedSafes, ownedSafes])
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')

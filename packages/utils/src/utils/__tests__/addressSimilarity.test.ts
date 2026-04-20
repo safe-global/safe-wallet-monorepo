@@ -1,4 +1,10 @@
-import { detectSimilarAddresses, getBucketKey, hammingDistance, getMiddleSection } from '../addressSimilarity'
+import {
+  detectSimilarAddresses,
+  getBucketKey,
+  getFlaggedSimilarAddressSet,
+  hammingDistance,
+  getMiddleSection,
+} from '../addressSimilarity'
 
 describe('addressSimilarity', () => {
   describe('getBucketKey', () => {
@@ -154,6 +160,29 @@ describe('addressSimilarity', () => {
       expect(result.isFlagged(legitimateAddress)).toBe(true)
       expect(result.isFlagged(maliciousAddress)).toBe(true)
       expect(result.groups.length).toBe(1)
+    })
+  })
+
+  describe('getFlaggedSimilarAddressSet', () => {
+    it('returns empty set when there are fewer than two distinct addresses', () => {
+      expect(getFlaggedSimilarAddressSet([])).toEqual(new Set())
+      expect(getFlaggedSimilarAddressSet(['0x1234567890abcdef1234567890abcdef12345678'])).toEqual(new Set())
+      const addr = '0x1234567890abcdef1234567890abcdef12345678'
+      expect(getFlaggedSimilarAddressSet([addr, addr.toLowerCase()])).toEqual(new Set())
+    })
+
+    it('returns lowercase flagged addresses when a pair is similar', () => {
+      const a = '0x1234567890abcdef1234567890abcdef12345678'
+      const b = '0x123456eeeeeeeeee1234567890abcdef12345678'
+      const set = getFlaggedSimilarAddressSet([a, b])
+      expect(set.size).toBe(2)
+      expect(set.has(a.toLowerCase())).toBe(true)
+      expect(set.has(b.toLowerCase())).toBe(true)
+    })
+
+    it('returns empty set when addresses are not similar', () => {
+      const addresses = ['0x1234567890abcdef1234567890abcdef12345678', '0xffffff7890abcdef1234567890abcdef12345678']
+      expect(getFlaggedSimilarAddressSet(addresses)).toEqual(new Set())
     })
   })
 })

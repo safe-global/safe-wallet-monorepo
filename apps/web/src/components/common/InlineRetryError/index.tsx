@@ -2,11 +2,12 @@ import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, RotateCw } from 'lucide-react'
 
-type SafeSelectorErrorProps = {
+type InlineRetryErrorProps = {
+  message?: string
   onRetry?: () => void
 }
 
-function SafeSelectorError({ onRetry }: SafeSelectorErrorProps) {
+function InlineRetryError({ message = 'Failed to load data', onRetry }: InlineRetryErrorProps) {
   return (
     <Alert
       variant="destructive"
@@ -15,7 +16,7 @@ function SafeSelectorError({ onRetry }: SafeSelectorErrorProps) {
     >
       <AlertCircle />
       <AlertTitle className="flex items-center justify-between gap-4">
-        Failed to load Safe data
+        {message}
         {onRetry && (
           <Button
             variant="ghost"
@@ -32,4 +33,5 @@ function SafeSelectorError({ onRetry }: SafeSelectorErrorProps) {
   )
 }
 
-export default SafeSelectorError
+export default InlineRetryError
+export type { InlineRetryErrorProps }
