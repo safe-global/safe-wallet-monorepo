@@ -89,6 +89,16 @@ export function initializeCaptchaHeaders() {
     try {
       await prev
 
+      // Lazy refresh: the previous request consumed the token and no new
+      // challenge is currently in flight (captchaReadyResolve === null means
+      // the ready promise has already resolved). Kick off a fresh challenge
+      // now — but only if a widget is actually registered, otherwise we'd
+      // arm a promise nothing can resolve.
+      if (!sharedTokenRef.current && captchaReadyResolve === null && widgetRefreshCallbackRef.current) {
+        resetCaptchaPromise()
+        widgetRefreshCallbackRef.current()
+      }
+
       // Block until the widget is initialized and a token is obtained
       if (captchaReadyPromise) {
         await captchaReadyPromise
@@ -97,11 +107,9 @@ export function initializeCaptchaHeaders() {
       const token = sharedTokenRef.current
       if (token) {
         headers.set('X-Captcha-Token', token)
-        // Turnstile tokens are single-use: invalidate locally and trigger a
-        // widget reset so the next request awaits a fresh token.
+        // Single-use: consume locally. The next hook invocation will lazily
+        // trigger a fresh challenge if another protected request shows up.
         sharedTokenRef.current = null
-        resetCaptchaPromise()
-        widgetRefreshCallbackRef.current?.()
       }
 
       return headers
