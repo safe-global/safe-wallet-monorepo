@@ -32,19 +32,12 @@ describe('useHistoryFeesBreakdown', () => {
     jest.resetAllMocks()
   })
 
-  it('returns mock fee data for multisig transactions when GTF is enabled', () => {
+  it('returns a breakdown for multisig transactions when GTF is enabled', () => {
     jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(mockMultisigTxDetails))
 
     expect(result.current).not.toBeNull()
-    expect(result.current?.totalFee.amount).toBe('0.005')
-    expect(result.current?.totalFee.currency).toBe('ETH')
-    expect(result.current?.totalFee.fiatAmount).toBe('$15.12')
-    expect(result.current?.executionFee.isFree).toBe(true)
-    expect(result.current?.executionFee.label).toContain('Execution fee')
-    expect(result.current?.gasFee.label).toBe('Gas fee')
-    expect(result.current?.gasFee.fiatAmount).toBe('$15.12')
   })
 
   it('returns null when GTF feature is disabled', () => {

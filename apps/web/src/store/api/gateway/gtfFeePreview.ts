@@ -1,5 +1,5 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
-import { OperationType } from '@safe-global/types-kit'
+import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'

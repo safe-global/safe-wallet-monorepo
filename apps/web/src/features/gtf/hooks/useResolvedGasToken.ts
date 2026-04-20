@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { OperationType } from '@safe-global/types-kit'
+import type { OperationType } from '@safe-global/types-kit'
 
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

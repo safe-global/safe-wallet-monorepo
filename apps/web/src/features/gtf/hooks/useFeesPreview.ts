@@ -1,9 +1,10 @@
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { formatUnits } from 'ethers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -16,6 +17,7 @@ import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPric
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useGasTokenCandidates } from './useGasTokenCandidates'
 
 export type FeeRow = {
   label: string
@@ -38,9 +40,10 @@ export type FeesPreviewData = {
   executionFee: FeeRow
   gasFee: FeeRow
   totalOutgoing?: TotalOutgoing
-  availableGasTokens?: Array<{ symbol: string; logoUri: string; fiatBalance?: string }>
+  availableGasTokens?: Array<{ address: string; symbol: string; logoUri: string; fiatBalance?: string }>
+  /** Address of the currently selected gas token */
   selectedGasToken?: string
-  onGasTokenChange?: (symbol: string) => void
+  onGasTokenChange?: (address: string) => void
   loading?: boolean
   error?: boolean
 }
@@ -55,6 +58,9 @@ type TotalOutgoingInputs = {
   relayCostUsd: number
   nativeSymbol: string
   nativeDecimals: number
+  gasTokenAddress: string
+  gasSymbol: string
+  gasDecimals: number
   balances: Balances
 }
 
@@ -64,24 +70,35 @@ const computeTotalOutgoing = ({
   relayCostUsd,
   nativeSymbol,
   nativeDecimals,
+  gasTokenAddress,
+  gasSymbol,
+  gasDecimals,
   balances,
 }: TotalOutgoingInputs): TotalOutgoing | undefined => {
   const { to, value, data } = safeTx.data
   const isEmptyData = !data || data === '0x'
+  const gasIsNative = sameAddress(gasTokenAddress, ZERO_ADDRESS)
 
-  // Native transfer — send token = gas token (native). Single currency.
+  // Native transfer. Single currency when gas is paid in native; two when not.
   if (value !== '0' && isEmptyData) {
     const sendWei = BigInt(value)
-    const primaryAmount = formatUnits(sendWei + gasWei, nativeDecimals)
     const nativeToken = balances.items.find((b) => b.tokenInfo.type === 'NATIVE_TOKEN')
     const sendFiat = nativeToken ? Number(formatUnits(sendWei, nativeDecimals)) * Number(nativeToken.fiatConversion) : 0
+
+    if (gasIsNative) {
+      return {
+        primary: { amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol },
+        fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+      }
+    }
     return {
-      primary: { amount: primaryAmount, currency: nativeSymbol },
+      primary: { amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol },
+      fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
       fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
     }
   }
 
-  // ERC-20 transfer — send token ≠ gas token. Two currencies.
+  // ERC-20 transfer.
   if (data?.startsWith(TRANSFER_SELECTOR)) {
     try {
       const decoded = ERC20_INTERFACE.decodeFunctionData('transfer', data)
@@ -89,12 +106,24 @@ const computeTotalOutgoing = ({
       const token = balances.items.find((b) => sameAddress(b.tokenInfo.address, to))
       if (!token || token.tokenInfo.type !== 'ERC20') return undefined
 
-      const sendAmount = formatUnits(transferValue, token.tokenInfo.decimals)
-      const sendFiat = Number(sendAmount) * Number(token.fiatConversion)
-      const gasAmount = formatUnits(gasWei, nativeDecimals)
+      const sendAmount = formatVisualAmount(transferValue, token.tokenInfo.decimals)
+      const sendFiat = Number(formatUnits(transferValue, token.tokenInfo.decimals)) * Number(token.fiatConversion)
+      const sendIsGasToken = sameAddress(token.tokenInfo.address, gasTokenAddress)
+
+      // Paying gas in the same token being sent — bundle amounts, single currency.
+      if (sendIsGasToken) {
+        return {
+          primary: {
+            amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
+            currency: token.tokenInfo.symbol,
+          },
+          fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+        }
+      }
+
       return {
         primary: { amount: sendAmount, currency: token.tokenInfo.symbol },
-        fees: { amount: gasAmount, currency: nativeSymbol },
+        fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
         fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
       }
     } catch {
@@ -110,27 +139,41 @@ export const useFeesPreview = (): FeesPreviewData => {
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
-  const [selectedGasToken, setSelectedGasToken] = useState<string>('')
+  const [userSelectedGasToken, setUserSelectedGasToken] = useState<string>()
 
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
-  const nativeLogoUri = chain?.nativeCurrency.logoUri ?? ''
   const nativeDecimals = chain?.nativeCurrency.decimals ?? 18
-  const effectiveGasToken = selectedGasToken || nativeSymbol
-  const availableGasTokens = [{ symbol: nativeSymbol, logoUri: nativeLogoUri }]
+
+  const txPayload = safeTx
+    ? {
+        to: safeTx.data.to,
+        value: safeTx.data.value,
+        data: safeTx.data.data,
+        operation: safeTx.data.operation,
+      }
+    : undefined
+
+  const { candidates, defaultAddress } = useGasTokenCandidates(txPayload)
+
+  // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
+  useEffect(() => {
+    if (!userSelectedGasToken) return
+    if (!candidates.some((c) => sameAddress(c.address, userSelectedGasToken))) {
+      setUserSelectedGasToken(undefined)
+    }
+  }, [userSelectedGasToken, candidates])
+
+  const selectedAddress = userSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
+  const selectedCandidate = candidates.find((c) => sameAddress(c.address, selectedAddress))
+  const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
+  const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
   const preview = useGetGtfFeePreviewQuery(
-    safeTx && chain?.chainId && safeAddress && safe.threshold > 0
+    txPayload && chain?.chainId && safeAddress && safe.threshold > 0
       ? {
           chainId: chain.chainId,
           safeAddress,
-          tx: {
-            to: safeTx.data.to,
-            value: safeTx.data.value,
-            data: safeTx.data.data,
-            operation: safeTx.data.operation,
-            gasToken: ZERO_ADDRESS,
-            numberSignatures: safe.threshold,
-          },
+          tx: { ...txPayload, gasToken: selectedAddress, numberSignatures: safe.threshold },
         }
       : skipToken,
   )
@@ -141,9 +184,9 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   const base = {
     executionFee: EXECUTION_FEE,
-    availableGasTokens,
-    selectedGasToken: effectiveGasToken,
-    onGasTokenChange: setSelectedGasToken,
+    availableGasTokens: candidates,
+    selectedGasToken: selectedAddress,
+    onGasTokenChange: setUserSelectedGasToken,
   }
 
   // Pending first — guards against rendering stale `preview.data` against a freshly-edited
@@ -152,7 +195,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     return {
       ...base,
       canCoverFees: true,
-      gasFee: { label: 'Gas fee', currency: nativeSymbol },
+      gasFee: { label: 'Gas fee', currency: gasSymbol },
       loading: true,
       error: false,
     }
@@ -162,13 +205,16 @@ export const useFeesPreview = (): FeesPreviewData => {
   if (preview.data && !preview.error && safeTx) {
     const { txData, relayCostUsd } = preview.data
     const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
-    const gasAmount = formatUnits(gasWei, nativeDecimals)
+    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
       gasWei,
       relayCostUsd,
       nativeSymbol,
       nativeDecimals,
+      gasTokenAddress: selectedAddress,
+      gasSymbol,
+      gasDecimals,
       balances,
     })
 
@@ -178,7 +224,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       gasFee: {
         label: 'Gas fee',
         amount: gasAmount,
-        currency: nativeSymbol,
+        currency: gasSymbol,
         fiatAmount: formatCurrency(relayCostUsd, 'usd'),
       },
       totalOutgoing,

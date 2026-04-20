@@ -79,7 +79,6 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  // GTF: resolve fee token via CGW preview cascade and track MAX press for fee info banner
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
   const [maxPressed, setMaxPressed] = useState(false)
 

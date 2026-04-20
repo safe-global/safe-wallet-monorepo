@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { act } from '@testing-library/react'
 import { renderHook } from '@/tests/test-utils'
 import { useFeesPreview } from '../useFeesPreview'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -7,6 +8,7 @@ import * as useGasPriceModule from '@/hooks/useGasPrice'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useBalancesModule from '@/hooks/useBalances'
+import * as useGasTokenCandidatesModule from '../useGasTokenCandidates'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -130,9 +132,8 @@ const loadingPreview = {
   refetch: jest.fn(),
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
-const withSafeTx =
-  (safeTx: SafeTransaction | undefined) =>
-  ({ children }: { children: ReactNode }) => (
+const withSafeTx = (safeTx: SafeTransaction | undefined) => {
+  const SafeTxWrapper = ({ children }: { children: ReactNode }) => (
     <SafeTxContext.Provider
       value={
         {
@@ -152,6 +153,26 @@ const withSafeTx =
       {children}
     </SafeTxContext.Provider>
   )
+  return SafeTxWrapper
+}
+
+const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+const candidateEth = {
+  address: ETH_ADDRESS,
+  symbol: 'ETH',
+  logoUri: 'https://eth.logo',
+  decimals: 18,
+  fiatBalance: '2500',
+}
+
+const candidateWeth = {
+  address: WETH_ADDRESS,
+  symbol: 'WETH',
+  logoUri: 'https://weth.logo',
+  decimals: 18,
+  fiatBalance: '25',
+}
 
 describe('useFeesPreview', () => {
   beforeEach(() => {
@@ -164,6 +185,11 @@ describe('useFeesPreview', () => {
       safeLoading: false,
     })
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([nativeBalance, wethBalance]))
+    jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [candidateEth, candidateWeth],
+      defaultAddress: ETH_ADDRESS,
+      probing: false,
+    })
     jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: BigInt(21000), gasLimitLoading: false })
     jest
       .spyOn(useGasPriceModule, 'default')
@@ -226,14 +252,81 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing).toBeUndefined()
   })
 
-  it('exposes native gas token in availableGasTokens', () => {
+  it('exposes candidates as availableGasTokens and defaults selection to defaultAddress', () => {
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
 
-    expect(result.current.availableGasTokens).toHaveLength(1)
-    expect(result.current.availableGasTokens?.[0]).toEqual({ symbol: 'ETH', logoUri: 'https://eth.logo' })
-    expect(result.current.selectedGasToken).toBe('ETH')
+    expect(result.current.availableGasTokens).toEqual([candidateEth, candidateWeth])
+    expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
+  })
+
+  it('updates selectedGasToken when onGasTokenChange is called, and preview re-fires with new gasToken', () => {
+    const previewSpy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
+
+    act(() => {
+      result.current.onGasTokenChange?.(WETH_ADDRESS)
+    })
+
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+    const lastCallArg = previewSpy.mock.calls.at(-1)?.[0]
+    expect(lastCallArg).toMatchObject({ tx: expect.objectContaining({ gasToken: WETH_ADDRESS }) })
+  })
+
+  it('renders gas fee in the selected gas token symbol (WETH) when user picks a non-native token', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    act(() => {
+      result.current.onGasTokenChange?.(WETH_ADDRESS)
+    })
+
+    expect(result.current.gasFee.currency).toBe('WETH')
+  })
+
+  it('forgets user selection when the token drops out of candidates', () => {
+    const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [candidateEth, candidateWeth],
+      defaultAddress: ETH_ADDRESS,
+      probing: false,
+    })
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result, rerender } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    act(() => {
+      result.current.onGasTokenChange?.(WETH_ADDRESS)
+    })
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+
+    // WETH balance drops to zero — no longer a candidate
+    spy.mockReturnValue({
+      candidates: [candidateEth],
+      defaultAddress: ETH_ADDRESS,
+      probing: false,
+    })
+    rerender()
+
+    expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
+  })
+
+  it('falls back to ZERO_ADDRESS when there is no default and no user selection', () => {
+    jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [],
+      defaultAddress: undefined,
+      probing: false,
+    })
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
+    expect(result.current.availableGasTokens).toEqual([])
   })
 
   it('returns loading state while preview is fetching', () => {

@@ -1,6 +1,8 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRef, useState } from 'react'
 import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -47,7 +49,7 @@ const FeeRow = ({
         <>
           <div className={css.feeAmount}>
             {isFree && (
-              <Typography variant="body2" component="span" color="success.main" fontWeight={700} mr={amount ? 1 : 0}>
+              <Typography variant="body2" component="span" color="success.main" fontWeight={700}>
                 FREE
               </Typography>
             )}
@@ -103,7 +105,7 @@ const PaymentSourceSelector = ({
 }): ReactElement => {
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
-  const selected = PAYMENT_SOURCE_OPTIONS.find((o) => o.value === value) ?? PAYMENT_SOURCE_OPTIONS[0]
+  const selected = PAYMENT_SOURCE_OPTIONS.find((o) => o.value === value)!
 
   const handleSelect = (source: PaymentSource) => {
     onChange(source)
@@ -122,9 +124,7 @@ const PaymentSourceSelector = ({
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
           {selected.label}
         </Typography>
-        <SvgIcon sx={{ fontSize: '16px', color: 'text.secondary' }}>
-          <path d="M7 10l5 5 5-5H7z" />
-        </SvgIcon>
+        <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />
       </div>
 
       <Popover
@@ -155,15 +155,15 @@ const GasTokenSelector = ({
 }: {
   availableGasTokens: FeesPreviewData['availableGasTokens']
   selectedGasToken: string
-  onGasTokenChange?: (symbol: string) => void
+  onGasTokenChange?: (address: string) => void
   locked?: boolean
 }): ReactElement => {
-  const selected = availableGasTokens?.find((t) => t.symbol === selectedGasToken) ?? availableGasTokens?.[0]
+  const selected = availableGasTokens?.find((t) => t.address === selectedGasToken) ?? availableGasTokens?.[0]
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
 
-  const handleSelect = (symbol: string) => {
-    onGasTokenChange?.(symbol)
+  const handleSelect = (address: string) => {
+    onGasTokenChange?.(address)
     setOpen(false)
   }
 
@@ -182,11 +182,7 @@ const GasTokenSelector = ({
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
           {selected?.symbol}
         </Typography>
-        {!locked && (
-          <SvgIcon sx={{ fontSize: '16px', color: 'text.secondary' }}>
-            <path d="M7 10l5 5 5-5H7z" />
-          </SvgIcon>
-        )}
+        {!locked && <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />}
       </div>
 
       <Popover
@@ -199,9 +195,9 @@ const GasTokenSelector = ({
       >
         {availableGasTokens?.map((token) => (
           <MenuItem
-            key={token.symbol}
-            selected={token.symbol === selectedGasToken}
-            onClick={() => handleSelect(token.symbol)}
+            key={token.address}
+            selected={token.address === selectedGasToken}
+            onClick={() => handleSelect(token.address)}
             className={css.gasTokenMenuItem}
           >
             {token.logoUri && (
@@ -213,7 +209,7 @@ const GasTokenSelector = ({
               </Typography>
               {token.fiatBalance && (
                 <Typography variant="caption" color="text.secondary">
-                  {token.fiatBalance}
+                  {formatCurrency(token.fiatBalance, 'usd')}
                 </Typography>
               )}
             </div>
@@ -263,7 +259,7 @@ const ConfirmationFeeNotice = ({
   availableGasTokens: FeesPreviewData['availableGasTokens']
   selectedGasToken?: string
 }): ReactElement => {
-  const token = availableGasTokens?.find((t) => t.symbol === selectedGasToken) ?? availableGasTokens?.[0]
+  const token = availableGasTokens?.find((t) => t.address === selectedGasToken) ?? availableGasTokens?.[0]
 
   return (
     <div className={css.signerFeeNoticeRow}>
@@ -286,10 +282,18 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const [paymentSource, setPaymentSource] = useState<PaymentSource>('safe')
 
   const isSafeWallet = paymentSource === 'safe'
+  const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
+
+  const handlePaymentSourceChange = (source: PaymentSource) => {
+    setPaymentSource(source)
+    if (source === 'signer') {
+      const nativeAddress = availableGasTokens?.[0]?.address
+      if (nativeAddress) props.onGasTokenChange?.(nativeAddress)
+    }
+  }
 
   return (
     <div className={css.container}>
-      {/* Header */}
       <div className={css.header}>
         <Typography variant="subtitle2" fontWeight={700}>
           Fees
@@ -300,9 +304,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         </a>
       </div>
 
-      {/* Fee card */}
       <div className={css.feeCard}>
-        {/* Confirmation notice — not the first signer, fees already locked */}
+        {/* Not the first signer — fees already locked */}
         {isConfirmation && canCoverFees && (
           <>
             <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
@@ -311,7 +314,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        {/* Payment source row — first signer, Safe can cover fees */}
+        {/* First signer, Safe can cover fees */}
         {!isConfirmation && canCoverFees && (
           <>
             <div className={css.paymentRow}>
@@ -319,15 +322,15 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                 <Typography variant="body2" color="text.secondary">
                   Pay fees from:
                 </Typography>
-                <PaymentSourceSelector value={paymentSource} onChange={setPaymentSource} />
+                <PaymentSourceSelector value={paymentSource} onChange={handlePaymentSourceChange} />
               </div>
               <div className={css.paymentRowGroup}>
                 <Typography variant="body2" color="text.secondary">
                   Fees token:
                 </Typography>
                 <GasTokenSelector
-                  availableGasTokens={isSafeWallet ? availableGasTokens : availableGasTokens?.slice(0, 1)}
-                  selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.symbol ?? '')}
+                  availableGasTokens={availableGasTokens}
+                  selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')}
                   onGasTokenChange={props.onGasTokenChange}
                   locked={!isSafeWallet}
                 />
@@ -338,7 +341,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        {/* Signer fallback notice — when Safe can't cover fees */}
+        {/* Safe can't cover fees — fall back to signer */}
         {!canCoverFees && (
           <>
             <SignerFeeNotice availableGasTokens={availableGasTokens} />
@@ -347,13 +350,11 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        {/* Fee breakdown */}
         <FeeRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
         <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
-      {/* Total outgoing */}
-      {totalOutgoing && <TotalOutgoingSection totalOutgoing={totalOutgoing} />}
+      {displayedOutgoing && <TotalOutgoingSection totalOutgoing={displayedOutgoing} />}
     </div>
   )
 }

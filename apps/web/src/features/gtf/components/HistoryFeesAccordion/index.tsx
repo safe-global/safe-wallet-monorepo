@@ -41,12 +41,7 @@ const FeeBreakdownRow = ({
           </Typography>
         )}
         {amount && (
-          <Typography
-            variant="body2"
-            component={isFree ? 'del' : 'span'}
-            color={isFree ? 'text.secondary' : undefined}
-            sx={isFree ? { textDecoration: 'line-through' } : undefined}
-          >
+          <Typography variant="body2" component={isFree ? 'del' : 'span'} color={isFree ? 'text.secondary' : undefined}>
             {amount} {currency}
           </Typography>
         )}
