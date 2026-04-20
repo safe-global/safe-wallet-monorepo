@@ -25,6 +25,12 @@ export class CodedException extends Error {
     this.content = content
   }
 
+  /**
+   * Default log path for caught exceptions: routed to logger.warn so it lands
+   * in Datadog as an `addAction` (level=warn) rather than an `addError`. These
+   * are not counted against the Error-Free Views SLO. Use `track()` / `trackError`
+   * for failures that truly break a user action.
+   */
   public log(): void {
     // Filter out the logError fn from the stack trace
     if (this.stack) {
@@ -37,21 +43,18 @@ export class CodedException extends Error {
       } catch (e) {}
     }
 
-    // Log only the message on prod, and the full error on dev
-    console.error(IS_PRODUCTION ? this.message : this)
+    console.warn(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
-      // Log to Datadog
-      logger.error(this.message, {
-        code: this.code,
-      })
+      logger.warn(this.message, { code: this.code })
     }
   }
 
   public track(): void {
-    this.log()
+    console.error(IS_PRODUCTION ? this.message : this)
 
     if (IS_PRODUCTION) {
+      logger.error(this.message, { code: this.code })
       captureException(this)
     }
   }
@@ -59,12 +62,21 @@ export class CodedException extends Error {
 
 type ErrorHandler = (content: ErrorCodes, thrown?: unknown) => CodedException
 
+/**
+ * Log a caught exception as a warning. Does NOT count against the RUM
+ * Error-Free Views SLO. Use for recoverable / background / expected failures.
+ */
 export const logError: ErrorHandler = function logError(...args) {
   const error = new CodedException(...args)
   error.log()
   return error
 }
 
+/**
+ * Report a user-impacting error. Logs at error level AND forwards to the
+ * observability exception channel (Datadog RUM addError + Sentry), so it
+ * DOES count against Error-Free Views. Use for failed user actions.
+ */
 export const trackError: ErrorHandler = function trackError(...args) {
   const error = new CodedException(...args)
   error.track()
