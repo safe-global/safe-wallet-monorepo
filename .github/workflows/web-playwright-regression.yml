@@ -190,9 +190,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-${{ matrix.suite }}-report
-          path: apps/web/playwright-report
+          # Matches outputFolder in playwright.config.ts ('./playwright/playwright-report')
+          # with merge-reports running in apps/web/.
+          path: apps/web/playwright/playwright-report
           retention-days: 7
-          if-no-files-found: ignore
+          # warn (not ignore) so a path typo fails loudly in the logs next time.
+          if-no-files-found: warn
 
       # Fail the merge job if any shard of this suite failed, so the suite
       # status is visible at job level (merge itself always succeeds).

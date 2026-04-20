@@ -158,9 +158,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-smoke-report
-          path: apps/web/playwright-report
-          retention-days: 5
-          if-no-files-found: ignore
+          # Matches outputFolder in playwright.config.ts ('./playwright/playwright-report')
+          # with merge-reports running in apps/web/.
+          path: apps/web/playwright/playwright-report
+          # 7 days matches regression retention and covers a typical sprint —
+          # enough time for QA to triage a late-discovered failure before the
+          # artifact link expires.
+          retention-days: 7
+          # warn (not ignore) so a path typo fails loudly in the logs next time.
+          if-no-files-found: warn
 
       # Surface the overall pass/fail at the job level, since merge-reports
       # itself never fails on test results.
