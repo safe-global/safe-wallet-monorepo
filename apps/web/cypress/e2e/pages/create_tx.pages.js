@@ -33,7 +33,6 @@ const accordionDetails = '[data-testid="accordion-details"]'
 export const copyIcon = '[data-testid="copy-btn-icon"]'
 export const explorerBtn = '[data-testid="explorer-btn"]'
 const transactionSideList = '[data-testid="transaction-actions-list"]'
-const confirmationVisibilityBtn = '[data-testid="confirmation-visibility-btn"]'
 const expandAllBtn = '[data-testid="expande-all-btn"]'
 const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
@@ -583,7 +582,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-  main.verifyElementsIsVisible([confirmationVisibilityBtn])
 }
 
 export function verifySpamIconIsDisplayed(name, token) {

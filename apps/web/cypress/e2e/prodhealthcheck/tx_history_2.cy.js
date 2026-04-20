@@ -48,7 +48,7 @@ describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
   // On-chain rejection
   it('Verify exapanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([typeOnchainRejection.description, typeOnchainRejection.transactionHash2])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -59,7 +59,7 @@ describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
   // Batch transaction
   it('Verify exapanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeBatch.contractTitle, typeBatch.transactionHash], createTx.delegateCallWarning)
+    createTx.verifyExpandedDetails([typeBatch.contractTitle], createTx.delegateCallWarning)
     createTx.verifyActions([typeBatch.nativeTransfer.title])
   })
 
@@ -81,8 +81,6 @@ describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
       typeChangeOwner.newOwner.ownerAddress,
       typeChangeOwner.oldOwner.actionTitile,
       typeChangeOwner.oldOwner.ownerAddress,
-
-      typeChangeOwner.transactionHash,
     ])
   })
 
@@ -103,10 +101,7 @@ describe('[PROD] Tx history tests 2', { defaultCommandTimeout: 30000 }, () => {
 
   it('Verify exapanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
-    createTx.verifyExpandedDetails(
-      [typeChangeThreshold.requiredConfirmationsTitle, typeChangeThreshold.transactionHash],
-      createTx.policyChangeWarning,
-    )
+    createTx.verifyExpandedDetails([typeChangeThreshold.requiredConfirmationsTitle], createTx.policyChangeWarning)
     createTx.checkRequiredThreshold(2)
   })
 

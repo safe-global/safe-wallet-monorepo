@@ -1,13 +1,4 @@
-.icon {
-  height: 16px;
-  width: 16px;
-}
-
-.dot {
-  height: 10px;
-  width: 10px;
-}
-
+/* Shared legacy styles consumed by RecoverySigners and MsgSigners */
 .signers {
   padding: 0;
 }
@@ -19,10 +10,6 @@
   left: 15px;
   top: 20px;
   height: calc(100% - 40px);
-}
-
-.signers :global .MuiListItem-root:first-of-type {
-  padding-top: 0;
 }
 
 .signers :global .MuiListItem-root {
@@ -38,10 +25,9 @@
   background-color: var(--color-background-paper);
 }
 
-.confirmationsTotal {
-  color: var(--color-border-main);
-  display: inline;
-  font-weight: normal;
+.icon {
+  height: 16px;
+  width: 16px;
 }
 
 .listFooter {
