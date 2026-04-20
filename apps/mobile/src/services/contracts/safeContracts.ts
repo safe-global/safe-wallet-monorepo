@@ -1,9 +1,5 @@
-import { SafeProvider } from '@safe-global/protocol-kit'
-import {
-  getMultiSendCallOnlyContractInstance,
-  getSafeContractInstance,
-} from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
-import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
+import { getSafeContract, getMultiSendCallOnlyContract, SafeProvider } from '@safe-global/protocol-kit'
+import type { SafeBaseContract } from '@safe-global/protocol-kit'
 import type { SafeState as SafeInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
@@ -13,11 +9,11 @@ import {
 } from '@safe-global/utils/services/contracts/deployments'
 
 const getGnosisSafeContract = async (safe: SafeInfo, safeProvider: SafeProvider) => {
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(safe.version).safeVersion,
+  return getSafeContract({
     safeProvider,
-    safe.address.value,
-  )
+    safeVersion: _getValidatedGetContractProps(safe.version).safeVersion,
+    customSafeAddress: safe.address.value,
+  })
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,9 +48,9 @@ export const getReadOnlyMultiSendCallOnlyContract = async (
     customContractAddress = getCanonicalMultiSendCallOnlyAddress(safeVersion)
   }
 
-  return getMultiSendCallOnlyContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
+  return getMultiSendCallOnlyContract({
     safeProvider,
-    customContractAddress,
-  )
+    safeVersion: _getValidatedGetContractProps(safeVersion).safeVersion,
+    customContracts: customContractAddress ? { multiSendCallOnlyAddress: customContractAddress } : undefined,
+  })
 }

@@ -3,6 +3,7 @@ import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
+import { SidebarProfileSection } from './SidebarProfileSection'
 import type { SpaceSelectorProps } from './types'
 import type { SidebarVariantType } from './variants'
 
@@ -38,6 +39,7 @@ export const EnhancedSidebar = ({
         isLoading={isLoading}
       />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
+      <SidebarProfileSection />
     </Sidebar>
   )
 }

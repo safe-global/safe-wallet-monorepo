@@ -139,7 +139,7 @@ jobs:
 
       - name: Post PR comment with screenshots
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -229,7 +229,7 @@ jobs:
 
       - name: Post no routes comment
         if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'false'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({
@@ -253,7 +253,7 @@ jobs:
 
       - name: Post no changes comment
         if: steps.changed-files.outputs.has_changes == 'false' && steps.pr.outputs.number != ''
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({

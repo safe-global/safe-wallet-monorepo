@@ -1439,6 +1439,63 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/fees/{safeAddress}/preview": {
+      "post": {
+        "description": "Calculates the estimated fees for executing a transaction via Pay with Safe, including gas costs, relay fees, and total costs in USD.",
+        "operationId": "feesGetFeePreviewV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data for fee calculation including recipient, value, data, operation type, gas token, and number of signatures",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeePreviewTransactionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fee preview with transaction data, relay cost, and pricing context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeePreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid transaction data or Pay with Safe not available for this chain"
+          }
+        },
+        "summary": "Get transaction fee preview",
+        "tags": [
+          "fees"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/messages/{messageHash}": {
       "get": {
         "description": "Retrieves a specific message by its hash, including signatures, confirmations, and message content.",
@@ -2714,6 +2771,130 @@
         ]
       }
     },
+    "/v1/users/counterfactual-safes": {
+      "post": {
+        "description": "Stores the CREATE2 deployment parameters for one or more counterfactual (undeployed) Safes. These parameters are needed to deploy the Safe later.",
+        "operationId": "counterfactualSafesCreateV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Counterfactual Safe creation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCounterfactualSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Counterfactual Safes saved successfully"
+          },
+          "401": {
+            "description": "Authentication required"
+          }
+        },
+        "summary": "Save counterfactual Safe creation parameters",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      },
+      "get": {
+        "description": "Retrieves all counterfactual (undeployed) Safes for the authenticated user, grouped by chain ID.",
+        "operationId": "counterfactualSafesGetV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Counterfactual Safes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCounterfactualSafesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          }
+        },
+        "summary": "Get counterfactual Safes",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      },
+      "delete": {
+        "description": "Removes counterfactual Safe records for the authenticated user, typically after successful deployment.",
+        "operationId": "counterfactualSafesDeleteV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteCounterfactualSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Counterfactual Safes deleted successfully"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "404": {
+            "description": "Counterfactual Safe not found"
+          }
+        },
+        "summary": "Delete counterfactual Safes",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/counterfactual-safes": {
+      "get": {
+        "description": "Retrieves creation parameters for all counterfactual (undeployed) Safes that are associated with a space. Uses a join between space_safes and counterfactual_safes to provide full transparency on Safe ownership and deployment parameters to all space members.",
+        "operationId": "spaceCounterfactualSafesGetV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counterfactual Safes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCounterfactualSafesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or user is not a member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          }
+        },
+        "summary": "Get counterfactual Safes in a space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
         "description": "Retrieves a list of Safe addresses that are owned by the specified address on a specific chain.",
@@ -2968,6 +3149,15 @@
             "required": true,
             "in": "path",
             "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeTxHash",
+            "required": false,
+            "in": "query",
+            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
             "schema": {
               "type": "string"
             }
@@ -7558,6 +7748,164 @@
           "safeTxGas"
         ]
       },
+      "FeePreviewTransactionDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "operation": {
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
+          },
+          "gasToken": {
+            "type": "string",
+            "description": "Gas token address (0x0...0 for native token)",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "numberSignatures": {
+            "type": "number",
+            "description": "Number of signatures required for execution",
+            "example": 2,
+            "minimum": 1
+          }
+        },
+        "required": [
+          "to",
+          "value",
+          "data",
+          "operation",
+          "gasToken",
+          "numberSignatures"
+        ]
+      },
+      "FeePreviewTxData": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 1
+          },
+          "safeAddress": {
+            "type": "string",
+            "description": "Safe address",
+            "example": "0x..."
+          },
+          "safeTxGas": {
+            "type": "string",
+            "description": "Safe transaction gas",
+            "example": "150000"
+          },
+          "baseGas": {
+            "type": "string",
+            "description": "Base gas for relay overhead",
+            "example": "48564"
+          },
+          "gasPrice": {
+            "type": "string",
+            "description": "Gas price per gas unit. Denominated in wei when `gasToken` is the native token (zero address), or in the ERC20 gas token atomic units per gas otherwise",
+            "example": "195000000000000"
+          },
+          "gasToken": {
+            "type": "string",
+            "description": "Gas token address",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "refundReceiver": {
+            "type": "string",
+            "description": "Refund receiver address",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "numberSignatures": {
+            "type": "number",
+            "description": "Number of signatures",
+            "example": 2
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress",
+          "safeTxGas",
+          "baseGas",
+          "gasPrice",
+          "gasToken",
+          "refundReceiver",
+          "numberSignatures"
+        ]
+      },
+      "PriceSource": {
+        "type": "string",
+        "enum": [
+          "COINGECKO"
+        ],
+        "description": "Price data source"
+      },
+      "FeePreviewPricingContext": {
+        "type": "object",
+        "properties": {
+          "phase": {
+            "type": "number",
+            "description": "Pricing phase"
+          },
+          "priceSource": {
+            "description": "Price data source",
+            "example": "COINGECKO",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PriceSource"
+              }
+            ]
+          },
+          "priceTimestamp": {
+            "type": "number",
+            "description": "Price snapshot Unix timestamp",
+            "example": 1700000000
+          },
+          "gasVolatilityBuffer": {
+            "type": "number",
+            "description": "Gas volatility buffer multiplier",
+            "example": 1.3
+          }
+        },
+        "required": [
+          "phase",
+          "priceSource",
+          "priceTimestamp",
+          "gasVolatilityBuffer"
+        ]
+      },
+      "FeePreviewResponse": {
+        "type": "object",
+        "properties": {
+          "txData": {
+            "$ref": "#/components/schemas/FeePreviewTxData"
+          },
+          "relayCostUsd": {
+            "type": "number",
+            "description": "Relay cost in USD",
+            "example": 38.22
+          },
+          "pricingContextSnapshot": {
+            "$ref": "#/components/schemas/FeePreviewPricingContext"
+          }
+        },
+        "required": [
+          "txData",
+          "relayCostUsd",
+          "pricingContextSnapshot"
+        ]
+      },
       "TypedDataParameter": {
         "type": "object",
         "properties": {
@@ -7988,12 +8336,12 @@
             "type": "string"
           },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "type": "string"
           },
           "updatedAt": {
-            "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -8457,6 +8805,220 @@
           "alias"
         ]
       },
+      "CounterfactualSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "factoryAddress": {
+            "type": "string"
+          },
+          "masterCopy": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "safeVersion": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fallbackHandler": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "string"
+          },
+          "paymentToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentReceiver": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "chainId",
+          "address",
+          "factoryAddress",
+          "masterCopy",
+          "saltNonce",
+          "safeVersion",
+          "threshold",
+          "owners",
+          "data"
+        ]
+      },
+      "CreateCounterfactualSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounterfactualSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "GetCounterfactualSafeItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "factoryAddress": {
+            "type": "string"
+          },
+          "masterCopy": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "safeVersion": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fallbackHandler": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "string"
+          },
+          "paymentToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentReceiver": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "factoryAddress",
+          "masterCopy",
+          "saltNonce",
+          "safeVersion",
+          "threshold",
+          "owners",
+          "fallbackHandler",
+          "to",
+          "data",
+          "paymentToken",
+          "payment",
+          "paymentReceiver"
+        ]
+      },
+      "GetCounterfactualSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GetCounterfactualSafeItem"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                {
+                  "address": "0x...",
+                  "factoryAddress": "0x...",
+                  "masterCopy": "0x...",
+                  "saltNonce": "1712000000000",
+                  "safeVersion": "1.4.1",
+                  "threshold": 1,
+                  "owners": [
+                    "0x..."
+                  ],
+                  "fallbackHandler": "0x...",
+                  "to": null,
+                  "data": "0x...",
+                  "paymentToken": null,
+                  "payment": null,
+                  "paymentReceiver": null
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "DeleteCounterfactualSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "DeleteCounterfactualSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteCounterfactualSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -8487,6 +9049,10 @@
             "type": "string",
             "nullable": true,
             "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash for relay-fee eligibility check"
           }
         },
         "required": [
@@ -13249,7 +13815,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n\u2022 Omitted (undefined): Deletes subscriptions regardless of signer address\n\u2022 null: Deletes only subscriptions with no signer address\n\u2022 Valid address: Deletes only subscriptions with that specific signer address"
+            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": [

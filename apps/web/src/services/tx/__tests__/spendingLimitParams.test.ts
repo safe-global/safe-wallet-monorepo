@@ -1,6 +1,6 @@
 import type { NewSpendingLimitFlowProps } from '@/features/spending-limits'
 import { chainBuilder } from '@/tests/builders/chains'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as txSender from '@/services/tx/tx-sender/create'
 import * as spendingLimitParams from '@/features/spending-limits/services/spendingLimitParams'

@@ -3,16 +3,21 @@ import useChainId from '@/hooks/useChainId'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getSafeSDKWithSigner } from '@/services/tx/tx-sender/sdk'
-import { estimateSafeDeploymentGas, estimateTxBaseGas } from '@safe-global/protocol-kit'
+import {
+  estimateSafeDeploymentGas,
+  estimateTxBaseGas,
+  getCompatibilityFallbackHandlerContract,
+} from '@safe-global/protocol-kit'
 import type Safe from '@safe-global/protocol-kit'
 
 import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
-import {
-  getCompatibilityFallbackHandlerContract,
-  getSimulateTxAccessorContract,
-} from '@safe-global/protocol-kit/dist/src/contracts/safeDeploymentContracts'
+import { getSimulateTxAccessorDeployment } from '@safe-global/safe-deployments'
+import { Interface } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+const SIMULATE_TX_ACCESSOR_ABI = [
+  'function simulate(address to, uint256 value, bytes data, uint8 operation) returns (uint256 estimate, bool success, bytes returnData)',
+]
 
 type DeployGasLimitProps = {
   safeTxGas: bigint
@@ -73,11 +78,11 @@ export const estimateBatchDeploymentTransaction = async (
     customContracts,
   })
 
-  const simulateTxAccessorContract = await getSimulateTxAccessorContract({
-    safeProvider,
-    safeVersion,
-    customContracts,
-  })
+  const simulateTxAccessorDeployment = getSimulateTxAccessorDeployment({ version: safeVersion })
+  const simulateTxAccessorAddress =
+    customContracts?.simulateTxAccessorAddress ?? simulateTxAccessorDeployment?.defaultAddress
+  if (!simulateTxAccessorAddress) throw new Error('SimulateTxAccessor deployment not found')
+  const simulateTxAccessorIface = new Interface(SIMULATE_TX_ACCESSOR_ABI)
 
   // 1. Get Deploy tx
   const safeDeploymentTransaction = await sdk.createSafeDeploymentTransaction()
@@ -89,7 +94,7 @@ export const estimateBatchDeploymentTransaction = async (
   }
 
   // 2. Add a simulate call to the predicted SafeProxy as second transaction
-  const transactionDataToEstimate: string = simulateTxAccessorContract.encode('simulate', [
+  const transactionDataToEstimate: string = simulateTxAccessorIface.encodeFunctionData('simulate', [
     safeTransaction.data.to,
     BigInt(safeTransaction.data.value),
     safeTransaction.data.data as `0x${string}`,
@@ -97,7 +102,7 @@ export const estimateBatchDeploymentTransaction = async (
   ])
 
   const safeFunctionToEstimate: string = fallbackHandlerContract.encode('simulate', [
-    simulateTxAccessorContract.getAddress(),
+    simulateTxAccessorAddress,
     transactionDataToEstimate as `0x${string}`,
   ])
 

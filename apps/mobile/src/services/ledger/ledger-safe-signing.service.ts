@@ -1,7 +1,7 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeTransaction, SafeVersion } from '@safe-global/types-kit'
 import type { TypedData } from '@ledgerhq/device-signer-kit-ethereum'
-import { generateTypedData } from '@safe-global/protocol-kit/dist/src/utils/eip-712'
+import { generateTypedData } from '@safe-global/protocol-kit'
 import { TypedDataEncoder } from 'ethers'
 import { ledgerDMKService } from './ledger-dmk.service'
 import { ledgerEthereumService } from './ledger-ethereum.service'

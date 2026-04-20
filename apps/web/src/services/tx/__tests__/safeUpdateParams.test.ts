@@ -20,6 +20,7 @@ const getMockSafeProviderForChain = (chainId: number) => {
     getExternalProvider: jest.fn(),
     getExternalSigner: jest.fn(),
     getChainId: jest.fn().mockReturnValue(BigInt(chainId)),
+    isContractDeployed: jest.fn().mockResolvedValue(true),
   } as unknown as SafeProvider
 }
 

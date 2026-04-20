@@ -1,6 +1,6 @@
 import { type NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useCurrentChain } from './useChains'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 export const useNativeTokenInfo = (): NativeToken => {
   const chain = useCurrentChain()

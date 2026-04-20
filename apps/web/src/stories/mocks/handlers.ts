@@ -710,6 +710,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
     spaces: features.spaces ?? false,
+    oidcAuth: features.oidcAuth ?? false,
   }
 
   // Build handlers array

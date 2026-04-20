@@ -20,7 +20,7 @@ const InfoSteps = [
       <Typography>
         Signing is an irreversible action so make sure you know what you are signing.{' '}
         <Track {...MODALS_EVENTS.SIGNING_ARTICLE}>
-          <ExternalLink href="https://help.safe.global/en/articles/276343-how-to-perform-basic-transactions-checks-on-safe-wallet">
+          <ExternalLink href="https://help.safe.global/articles/2485383995-How-to-perform-basic-transactions-checks-on-Safe{Wallet}">
             Read more
           </ExternalLink>
         </Track>

@@ -1,4 +1,4 @@
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 
 const RESET_TIME_OPTIONS = [
   { label: 'One time', value: '0' },

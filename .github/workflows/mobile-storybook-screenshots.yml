@@ -156,7 +156,7 @@ jobs:
 
       - name: Post PR comment with screenshots
         if: steps.changed-stories.outputs.has_changes == 'true' && steps.build-storybook.outputs.build_failed != 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -267,7 +267,7 @@ jobs:
 
       - name: Delete comment if no changes
         if: steps.changed-stories.outputs.has_changes == 'false'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: comments } = await github.rest.issues.listComments({

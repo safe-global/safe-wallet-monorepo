@@ -17,7 +17,7 @@ import { Severity, StatusGroup, ThreatStatus, type ThreatAnalysisResults, type A
 import { sortBySeverity } from './analysisUtils'
 import { transformThreatAnalysisResponse } from './transformThreatAnalysisResponse'
 import type { BalanceChangeDto } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
-import { ZeroAddress } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 /**
  * Maps Hypernative assessment response to Safe Shield ThreatAnalysisResults format
@@ -189,7 +189,7 @@ function mapBalanceChanges(safeAddress: `0x${string}`, balanceChanges: Hypernati
   // Group balance changes by token address
   // Normalize tokenAddress to lowercase for grouping to handle case variations from the API
   const changesByTokenAddress = safeBalanceChanges.reduce<Record<`0x${string}`, BalanceChangeDto>>((acc, change) => {
-    const originalTokenAddress = change.tokenAddress ?? ZeroAddress
+    const originalTokenAddress = change.tokenAddress ?? ZERO_ADDRESS
     const normalizedTokenAddress = originalTokenAddress.toLowerCase() as `0x${string}`
     const isNative = !change.tokenAddress
 

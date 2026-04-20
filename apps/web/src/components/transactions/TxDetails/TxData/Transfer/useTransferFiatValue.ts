@@ -3,7 +3,7 @@ import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GE
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import { isERC20Transfer, isNativeTokenTransfer } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { computeFiatValue } from '@/utils/fiat'
 

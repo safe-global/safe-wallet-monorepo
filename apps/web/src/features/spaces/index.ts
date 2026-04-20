@@ -61,6 +61,7 @@ export { default as useTrackSpace } from './hooks/useTrackSpace'
 export {
   useSpaceMembersByStatus,
   useCurrentMembership,
+  useCurrentMemberProfile,
   useIsActiveMember,
   useIsAdmin,
   useIsInvited,
