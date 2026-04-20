@@ -12,6 +12,7 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
+import { SpacesFeature } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
 import HelpMenu from '@/components/common/HelpMenu'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
@@ -42,6 +43,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
+  const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
@@ -116,6 +118,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       </div>
 
       <HelpMenu />
+
+      <SelectSafeModal />
     </>
   )
 }

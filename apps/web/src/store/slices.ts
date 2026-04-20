@@ -38,3 +38,12 @@ export {
   toggleGlobalSearch,
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
+export {
+  safeActionsModalSlice,
+  ESafeAction,
+  openSafeActionsModal,
+  closeSafeActionsModal,
+  selectSafeActionsModal,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from '@/features/spaces/store'

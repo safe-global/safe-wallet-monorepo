@@ -5,17 +5,20 @@ import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import useChains from '@/hooks/useChains'
 
 /**
- * Returns a memoized callback that matches a Safe by address, name,
- * or chain-prefixed address (e.g. "matic:0xf452…").
+ * Returns a memoized callback that matches a Safe by address, name, or chain.
  * Falls back to addressBooks for the name when the Safe item has no name.
+ * Chain matching checks chainName (e.g. "Ethereum") and shortName (e.g. "eth", "sep").
  */
 const useMatchSafe = () => {
   const addressBooks = useAppSelector(selectAllAddressBooks)
-  const { configs } = useChains()
+  const { configs: chains } = useChains()
 
-  const chainIdToShortName = useMemo(
-    () => new Map(configs.map((chain) => [chain.chainId, chain.shortName.toLowerCase()])),
-    [configs],
+  const chainLookup = useMemo(
+    () =>
+      new Map(
+        chains.map((c) => [c.chainId, { chainName: c.chainName.toLowerCase(), shortName: c.shortName.toLowerCase() }]),
+      ),
+    [chains],
   )
 
   return useCallback(
@@ -28,16 +31,13 @@ const useMatchSafe = () => {
         return true
       }
 
-      // Match chain-prefixed addresses (e.g. "matic:0xf452…" or just "matic:")
       const chainIds = isMultiChainSafeItem(safe) ? safe.safes.map((s) => s.chainId) : [safe.chainId]
-      return chainIds.some((chainId) => {
-        const shortName = chainIdToShortName.get(chainId)
-        if (!shortName) return false
-        const prefixed = `${shortName}:${address}`
-        return prefixed.includes(q)
+      return chainIds.some((id) => {
+        const chain = chainLookup.get(id)
+        return chain && (chain.chainName.includes(q) || chain.shortName.includes(q))
       })
     },
-    [addressBooks, chainIdToShortName],
+    [addressBooks, chainLookup],
   )
 }
 
