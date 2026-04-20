@@ -49,7 +49,7 @@ export const useResolvedGasToken = (
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
 
-  const candidates = useMemo<string[]>(() => {
+  const candidates = useMemo(() => {
     if (!balances?.items || !sentTokenAddress) return []
 
     const alternatives = balances.items
@@ -78,10 +78,7 @@ export const useResolvedGasToken = (
           chainId: chain.chainId,
           safeAddress,
           tx: {
-            to: tx.to,
-            value: tx.value,
-            data: tx.data,
-            operation: tx.operation,
+            ...tx,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
           },

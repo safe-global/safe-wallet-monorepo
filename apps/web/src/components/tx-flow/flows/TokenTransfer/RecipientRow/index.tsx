@@ -21,8 +21,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useResolvedGasToken } from '@/features/gtf'
-import type { FeePreviewTx } from '@/features/gtf'
+import { useResolvedGasToken, type FeePreviewTx } from '@/features/gtf'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
 
@@ -108,10 +107,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   // so the form-level Continue button (which gates on formState.isValid) becomes disabled.
   useEffect(() => {
     if (isBlocked) {
-      setError(amountFieldName, {
-        type: 'gtfBlocked',
-        message: `Fees can't be paid in ${selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH or send a different asset.`,
-      })
+      setError(amountFieldName, { type: 'gtfBlocked' })
     } else {
       const existing = get(errors, amountFieldName)
       if (existing?.type === 'gtfBlocked') clearErrors(amountFieldName)

@@ -122,7 +122,7 @@ describe('useResolvedGasToken', () => {
 
   it('falls through from errored alternatives to the sent token when it probes 200', () => {
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([ethBalance, safeTokenBalance]))
-    const querySpy = jest
+    jest
       .spyOn(gatewayApi, 'useGetGtfFeePreviewQuery')
       .mockImplementationOnce(() => erroredProbe)
       .mockImplementation(() => successfulProbe)
@@ -134,7 +134,6 @@ describe('useResolvedGasToken', () => {
     })
 
     expect(result.current).toEqual({ status: 'resolved', address: SAFE_TOKEN_ADDRESS })
-    expect(querySpy).toHaveBeenCalled()
   })
 
   it('blocks when every candidate errors (including the sent token)', () => {
