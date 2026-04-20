@@ -4,14 +4,23 @@ import { flattenSafeItems, type SafeItem } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
+import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectSafeActionsModalOpen, selectSafeActionsModalType, closeSafeActionsModal } from '@/features/spaces/store'
+import {
+  ESafeAction,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+  closeSafeActionsModal,
+} from '@/features/spaces/store'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+
+const SWAP_DISABLED_TOOLTIP = 'Swap is not support on this chain. Try another chain.'
 
 const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
 
@@ -23,12 +32,23 @@ const SelectSafeModal = () => {
   const dispatch = useAppDispatch()
 
   const { allSafes, isLoading } = useSpaceSafes()
+  const { configs: chains } = useChains()
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
   const actionMapper = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
+
+  const isSwapAction = actionType === ESafeAction.Swap
+  const isSwapDisabledForSafe = useCallback(
+    (safe: SafeItem) => {
+      if (!isSwapAction) return false
+      const chain = chains.find((c) => c.chainId === safe.chainId)
+      return !chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)
+    },
+    [isSwapAction, chains],
+  )
 
   const handleClose = useCallback(() => {
     dispatch(closeSafeActionsModal())
@@ -67,16 +87,21 @@ const SelectSafeModal = () => {
                 <p className="py-8 text-center text-sm text-muted-foreground">No safes found</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
-                  {filteredSafes.map((safe) => (
-                    <SafeCardReadOnly
-                      key={`${safe.chainId}:${safe.address}`}
-                      safe={safe}
-                      hideContextMenu
-                      showPending={false}
-                      onClick={() => void handleSafeClick(safe)}
-                      className="px-4 sm:px-4"
-                    />
-                  ))}
+                  {filteredSafes.map((safe) => {
+                    const disabled = isSwapDisabledForSafe(safe)
+                    return (
+                      <SafeCardReadOnly
+                        key={`${safe.chainId}:${safe.address}`}
+                        safe={safe}
+                        hideContextMenu
+                        showPending={false}
+                        onClick={() => void handleSafeClick(safe)}
+                        disabled={disabled}
+                        disabledTooltip={disabled ? SWAP_DISABLED_TOOLTIP : undefined}
+                        className="px-4 sm:px-4"
+                      />
+                    )
+                  })}
                 </div>
               )}
             </div>
