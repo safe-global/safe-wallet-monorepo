@@ -16,6 +16,7 @@ import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { cn } from '@/utils/cn'
 
 interface SafeCardReadOnlyProps {
@@ -43,6 +44,7 @@ const SafeCardReadOnly = ({
   const singleSafe = safes[0]
   const spaces = useLoadFeature(SpacesFeature)
   const chain = useChain(singleSafe?.chainId || '')
+  const displayName = useSafeDisplayName(safe.address, singleSafe?.chainId || '', name)
 
   // Fetch SafeOverview for pending transaction info
   const {
@@ -106,7 +108,7 @@ const SafeCardReadOnly = ({
             )}
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate text-base font-medium text-foreground">
-                {name || shortenAddress(safe.address)}
+                {displayName || shortenAddress(safe.address)}
               </span>
             </div>
             <div className="flex min-w-0 items-center gap-1.5">

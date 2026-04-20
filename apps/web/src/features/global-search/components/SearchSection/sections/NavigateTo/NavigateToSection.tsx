@@ -15,6 +15,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 interface NavigationItem {
   icon: ReactNode
@@ -46,7 +47,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
 
   const filteredItems = useGlobalSearchFilter(navigationItems, query, 'label')
 
-  const isSafeLevel = typeof router.query.safe === 'string'
+  const isSafeLevel = !!useSafeQueryParam()
 
   const spaceActionByLabel: Record<string, ESafeAction> = useMemo(
     () => ({

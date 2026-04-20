@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
@@ -12,9 +11,10 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ChainInfo } from '@/features/spaces/types'
+import { useSafeBarSafes } from './useSafeBarSafes'
 
 export function useSpaceChainSelector() {
-  const { allSafes } = useSpaceSafes()
+  const { chainSelectorSafes: allSafes } = useSafeBarSafes()
   const { safeAddress } = useSafeInfo()
   const selectedChainId = useChainId()
   const { configs: chainConfigs } = useChains()

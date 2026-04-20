@@ -16,11 +16,12 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
+import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
 
@@ -45,6 +46,7 @@ export const SpaceSelectorDropdown = ({
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
   const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
+  const safe = useSafeQueryParam() || undefined
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
 
@@ -67,7 +69,7 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
-    router.push(AppRoutes.spaces.createSpace)
+    router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
   }
 
   const handleViewSpaces = () => {
@@ -194,10 +196,25 @@ export const SpaceSelectorDropdown = ({
 
         <DropdownMenuSeparator className="my-1" />
 
-        <DropdownMenuItem onClick={handleCreateSpace} className={MENU_ITEM_CLASS}>
-          <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-          <span>Add new space</span>
-        </DropdownMenuItem>
+        {(() => {
+          const isAtSpacesLimit = spaces.length >= SPACES_LIMIT
+          const addSpaceMenuItem = (
+            <DropdownMenuItem onClick={handleCreateSpace} disabled={isAtSpacesLimit} className={MENU_ITEM_CLASS}>
+              <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
+              <span>Add new space</span>
+            </DropdownMenuItem>
+          )
+
+          if (!isAtSpacesLimit) return addSpaceMenuItem
+
+          return (
+            <Tooltip key="add-space-tooltip">
+              <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
+              <TooltipContent side="right">You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+            </Tooltip>
+          )
+        })()}
+
         <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
           <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
           <span>View all</span>

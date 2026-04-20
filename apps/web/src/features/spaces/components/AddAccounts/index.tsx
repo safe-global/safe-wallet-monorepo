@@ -14,7 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -44,6 +44,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -55,7 +56,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   return Object.entries(safes).filter(
     ([key, isSelected]) =>
       isSelected &&
-      !key.startsWith('multichain_') &&
+      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
       !flatSafeItems.some((spaceSafe) => {
         const [chainId, address] = key.split(':')
         return spaceSafe.address === address && spaceSafe.chainId === chainId
@@ -167,13 +168,9 @@ const AddAccounts = ({
     spaceSafes,
   ])
 
-  // Detect similar addresses
   const similarAddresses = useMemo<Set<string>>(() => {
     const allItems = [...trustedSafes, ...ownedSafes]
-    const uniqueAddresses = [...new Set(allItems.map((s) => s.address))]
-    if (uniqueAddresses.length < 2) return new Set()
-    const result = detectSimilarAddresses(uniqueAddresses)
-    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
   }, [trustedSafes, ownedSafes])
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')

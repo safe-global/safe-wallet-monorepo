@@ -1,13 +1,16 @@
 import { renderHook, act } from '@testing-library/react'
-import { useSpaceChainSelector } from './useSpaceChainSelector'
+import { useSpaceChainSelector } from '../useSpaceChainSelector'
 import type { SafeItem } from '@/hooks/safes/useAllSafes'
 import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
 jest.mock('@/features/spaces', () => ({
-  useSpaceSafes: jest.fn(),
   useCurrentSpaceId: jest.fn(() => '42'),
+}))
+
+jest.mock('../useSafeBarSafes', () => ({
+  useSafeBarSafes: jest.fn(),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -48,7 +51,8 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { home: '/home' },
 }))
 
-import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
+import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -96,7 +100,7 @@ function setupDefaults(
   } = {},
 ) {
   const allSafes = overrides.allSafes ?? [singleChainSafe]
-  ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes })
+  ;(useSafeBarSafes as jest.Mock).mockReturnValue({ chainSelectorSafes: allSafes })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress: overrides.safeAddress ?? '0xSafe1' })
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')

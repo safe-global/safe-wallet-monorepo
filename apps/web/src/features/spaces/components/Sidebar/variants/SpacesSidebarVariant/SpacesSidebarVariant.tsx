@@ -36,7 +36,7 @@ export const SpacesSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="mb-2">
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -50,7 +50,7 @@ export const SpacesSidebarVariant = ({
         <motion.div variants={itemVariants}>
           <SidebarGroup className={css.sidebarGroup}>
             <SidebarGroupContent>
-              <SidebarMenu className="gap-0">
+              <SidebarMenu className="gap-0.5">
                 {displayMainNavItems.map((item, index) => (
                   <NavItem
                     key={item?.href ?? `skeleton-main-${index}`}

@@ -1,7 +1,21 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { AddToSpacePopupModal } from '../AddToSpacePopupModal'
 import { AppRoutes } from '@/config/routes'
+
+const mockPush = jest.fn()
+let mockRouterQuery: Record<string, string> = {}
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ query: mockRouterQuery, push: mockPush }),
+}))
+
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeQueryParam: () => {
+    const safe = mockRouterQuery.safe
+    return typeof safe === 'string' ? safe : ''
+  },
+}))
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -9,12 +23,11 @@ jest.mock('next/image', () => ({
 }))
 
 jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, render: renderProp }: { children: ReactNode; render?: ReactElement<{ href?: string }> }) =>
-    renderProp?.props?.href ? (
-      <a href={renderProp.props.href}>{children}</a>
-    ) : (
-      <button type="button">{children}</button>
-    ),
+  Button: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <button type="button" className={className}>
+      {children}
+    </button>
+  ),
 }))
 
 jest.mock('@/components/ui/typography', () => ({
@@ -22,8 +35,19 @@ jest.mock('@/components/ui/typography', () => ({
 }))
 
 jest.mock('@/components/ui/dialog', () => ({
-  DialogClose: ({ children, 'aria-label': ariaLabel }: { children: ReactNode; 'aria-label'?: string }) => (
-    <button type="button" aria-label={ariaLabel}>
+  DialogClose: ({
+    children,
+    'aria-label': ariaLabel,
+    onClick,
+    render: renderProp,
+  }: {
+    children: ReactNode
+    'aria-label'?: string
+    onClick?: () => void
+    render?: ReactElement
+  }) => (
+    <button type="button" aria-label={ariaLabel} onClick={onClick}>
+      {renderProp ? null : null}
       {children}
     </button>
   ),
@@ -31,6 +55,11 @@ jest.mock('@/components/ui/dialog', () => ({
 }))
 
 describe('AddToSpacePopupModal', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRouterQuery = {}
+  })
+
   it('renders the "Add to Space" title', () => {
     render(<AddToSpacePopupModal />)
 
@@ -45,16 +74,21 @@ describe('AddToSpacePopupModal', () => {
     expect(screen.getByText('Streamline coordination across initiators, approvers, and executors')).toBeInTheDocument()
   })
 
-  it('renders a "Create a Space" link pointing to the create space route', () => {
-    render(<AddToSpacePopupModal />)
-
-    const link = screen.getByRole('link', { name: /Create a Space/i })
-    expect(link).toHaveAttribute('href', AppRoutes.spaces.createSpace)
-  })
-
   it('renders a close button', () => {
     render(<AddToSpacePopupModal />)
 
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+
+  it('navigates to createSpace with safe query param when "Create a Space" is clicked', () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    render(<AddToSpacePopupModal />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Create a Space/i }))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.createSpace,
+      query: { safe: '1:0xdeadbeef' },
+    })
   })
 })

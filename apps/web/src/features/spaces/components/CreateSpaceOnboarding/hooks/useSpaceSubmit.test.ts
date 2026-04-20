@@ -8,6 +8,8 @@ const mockDispatch = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 const mockUpdateSpace = jest.fn()
 
+let mockRouterQuery: Record<string, string> = {}
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
@@ -19,7 +21,14 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
+}))
+
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeQueryParam: () => {
+    const safe = mockRouterQuery.safe
+    return typeof safe === 'string' ? safe : ''
+  },
 }))
 
 jest.mock('@/store', () => ({
@@ -50,19 +59,20 @@ jest.mock('@/config/routes', () => ({
 describe('useSpaceSubmit tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockRouterQuery = {}
   })
 
-  const setupHook = () => {
+  const setupHook = (spaceId?: string, isEditMode = false) => {
     const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
 
-    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, spaceId, isEditMode))
     return result
   }
 
   it('tracks CREATE_SPACE with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 42, name: 'My Space' } })
 
-    const result = setupHook()
+    const result = setupHook(undefined, false)
 
     await act(async () => {
       await result.current.onSubmit()
@@ -77,7 +87,7 @@ describe('useSpaceSubmit tracking', () => {
   it('does not track CREATE_SPACE when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: 'Something went wrong' })
 
-    const result = setupHook()
+    const result = setupHook(undefined, false)
 
     await act(async () => {
       await result.current.onSubmit()
@@ -87,5 +97,74 @@ describe('useSpaceSubmit tracking', () => {
       expect.objectContaining({ action: SPACE_EVENTS.CREATE_SPACE.action }),
       expect.anything(),
     )
+  })
+})
+
+describe('useSpaceSubmit routing', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRouterQuery = {}
+  })
+
+  const setupHook = (spaceId?: string, isEditMode = false) => {
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, spaceId, isEditMode))
+    return result
+  }
+
+  it('navigates to selectSafes without ?safe= when not in URL after creating a space', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome', query: { spaceId: '7' } })
+  })
+
+  it('forwards ?safe= to selectSafes route after creating a space', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '7', safe: '1:0xdeadbeef' },
+    })
+  })
+
+  it('navigates to selectSafes without ?safe= when not in URL after editing a space', async () => {
+    mockUpdateSpace.mockResolvedValue({ data: {} })
+
+    const result = setupHook('42', true)
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome', query: { spaceId: '42' } })
+  })
+
+  it('forwards ?safe= to selectSafes route after editing a space', async () => {
+    mockRouterQuery = { safe: '5:0xcafe' }
+    mockUpdateSpace.mockResolvedValue({ data: {} })
+
+    const result = setupHook('42', true)
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '42', safe: '5:0xcafe' },
+    })
   })
 })
