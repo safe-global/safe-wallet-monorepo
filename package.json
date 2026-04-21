@@ -10,9 +10,9 @@
     "tools/codemods/*"
   ],
   "scripts": {
-    "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
-    "test": "turbo run test",
+    "lint": "turbo run lint --",
+    "type-check": "turbo run type-check --",
+    "test": "turbo run test --",
     "test:scripts": "yarn workspace @safe-global/web jest --config ../../scripts/jest.config.cjs",
     "eslint": "yarn workspaces foreach --all -pt run eslint",
     "prettier": "prettier --check . --config ./.prettierrc --ignore-path ./.prettierignore",
