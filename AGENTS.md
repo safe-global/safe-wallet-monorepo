@@ -68,6 +68,42 @@ sg -p 'useMemo(() => $$$, [$$$, chainId, $$$])' --lang tsx apps/web/src/
 
 Install: `brew install ast-grep` or `npm install -g @ast-grep/cli`
 
+### TypeScript LSP (symbol-aware navigation)
+
+When available in your agent environment, the `LSP` tool exposes the TypeScript language server and indexes the entire monorepo (`apps/` + `packages/`, ~40k+ symbols). Use it for any question about **what a symbol is** or **who uses it** — it follows imports, re-exports, and module resolution, and ignores matches in comments and strings. This is strictly more accurate than `grep` for symbol-level questions, and complements `ast-grep` (which is best for structural pattern matching).
+
+**When to reach for LSP (strongly preferred over `grep`):**
+
+- "Who consumes this hook / component / selector / slice / endpoint / type?" → `findReferences`
+- "Where is this symbol defined?" → `goToDefinition`
+- "What are all implementations of this interface?" → `goToImplementation`
+- "What's the exported API of this file?" → `documentSymbol`
+- "Does a symbol named X exist anywhere, and where?" → `workspaceSymbol`
+- "Who calls this function, and whom does it call?" → `prepareCallHierarchy` + `incomingCalls` / `outgoingCalls`
+- "What type is this expression?" → `hover`
+
+**When to reach for `ast-grep` instead:**
+
+- Structural patterns, not symbol identity. E.g. "every `useMemo` whose deps array contains `chainId`", "every call to `createSlice` with a given shape".
+
+**When plain `grep` is still fine:**
+
+- Searching strings, comments, config, copy/UI text, file names, or anything that isn't a TS/TSX identifier.
+
+**Gotcha — default exports:** For files that use `export default`, target the identifier on the `export default` line, not the local `const`/`function` binding, or you will miss all the importing consumers. Example: for `apps/web/src/hooks/useSafeInfo.ts`, aiming `findReferences` at the local `const useSafeInfo` binding returns ~2 refs; aiming at `export default useSafeInfo` returns 500+ refs across the codebase. For named exports this does not matter.
+
+**All operations take:** `filePath`, `line` (1-based), `character` (1-based), `operation`.
+
+```
+# Examples
+operation=documentSymbol  filePath=apps/web/src/hooks/useSafeInfo.ts  line=1 character=1
+operation=findReferences  filePath=apps/web/src/hooks/useSafeInfo.ts  line=29 character=16  # the "default" identifier
+operation=goToDefinition  filePath=apps/web/src/hooks/useSafeInfo.ts  line=4  character=10  # selectSafeInfo import
+operation=workspaceSymbol filePath=<any .ts file>                     line=1  character=1   # index-wide symbol search
+```
+
+**Cost note:** `workspaceSymbol` with an empty/broad query returns tens of thousands of entries (1.7 MB+) and will be truncated to a persisted file — use it with a specific query, or prefer `findReferences` / `goToDefinition` starting from a known site.
+
 ## Unified Theme System
 
 The project uses `@safe-global/theme` package as a single source of truth for all design tokens (colors, spacing, typography, radius) across web and mobile.
@@ -259,6 +295,45 @@ The repo provides automated verification:
 - If `verify:changed` reports a missing test, write one before committing
 - Do NOT run type-check, lint, prettier, and test separately — use `verify`
 - Do NOT commit without a clean `verify:changed` pass
+
+### Pre-implementation regression checklist (REQUIRED)
+
+Before writing code for any non-trivial change (anything beyond a typo, doc tweak, or single-line local fix), you MUST produce a regression checklist and include it in your response to the user. Optimise for **impact analysis**, not diff completion: a change to a shared hook, selector, component, slice, or API endpoint touches many user journeys, and plain text search is not enough to find them.
+
+**Build the checklist in this order:**
+
+1. **Map the surface.** Identify what you are touching: the primary file(s), plus any shared hooks, components, selectors, Redux slices, RTK Query endpoints, feature flags, routes, or persisted state involved.
+2. **Find consumers with symbol-aware search.** For "who uses this symbol?" questions, prefer the `LSP` tool's `findReferences` (see "TypeScript LSP" above) — it follows imports, re-exports, and module resolution across the whole monorepo. Use `ast-grep` for structural pattern questions (e.g. "every `useMemo` with `chainId` in deps"). Fall back to plain `grep` only for strings, comments, config, or UI copy. Plain text search misses structural usages, matches inside comments/strings, and does not follow re-exports.
+3. **Translate consumers into flows.** For each consumer, name the user journey it belongs to (create / edit / delete / retry / empty / error / offline / permission / feature-flag-off / mobile variant).
+4. **List tests to add or run.** Happy path, each neighbouring flow, regression-sensitive paths, and invariant properties. Prefer targeted tests around shared contracts over broad E2E sweeps.
+5. **State what you will NOT verify.** Be explicit. This exposes false confidence.
+
+**Required checklist format (paste into your response before implementing):**
+
+```
+### Regression checklist
+
+**Primary flow changed:** <one sentence>
+
+**Surfaces touched:**
+- <shared hook / component / selector / slice / endpoint / flag / route>
+
+**Neighbouring flows to verify:**
+- <flow A> — <why it could be affected>
+- <flow B> — <why it could be affected>
+
+**Tests to add/run:**
+- <test name or description>
+
+**Not verified (risks):**
+- <what you are skipping and why>
+```
+
+**Rules:**
+
+- Do NOT start editing code until this checklist exists in the conversation. For small, strictly local changes, a one-line "local change, no shared surfaces touched" note is sufficient.
+- When you open the PR, carry the relevant lines into the "Affected flows", "Blast radius", and "Risks / not checked" fields of the PR template.
+- If the checklist reveals that a shared abstraction has many unknown consumers, slow down and investigate before coding — that is the signal this process is designed to surface.
 
 1. **Install dependencies**: `yarn install` (from the repository root).
    - Uses Yarn 4 (managed via `corepack`)
