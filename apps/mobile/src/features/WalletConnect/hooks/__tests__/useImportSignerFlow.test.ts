@@ -1,9 +1,19 @@
+import { Alert } from 'react-native'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
 import { UserRejectedError } from '../useConnect'
+import Logger from '@/src/utils/logger'
 import type { ConnectResult } from '../useConnect'
+import type { Signer } from '@/src/store/signersSlice'
+
+jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
+}))
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 const checksumAddress = getAddress(mockAddress)
@@ -47,7 +57,8 @@ jest.mock('../useConnect', () => ({
   useConnect: () => mockConnect,
 }))
 
-const renderImportFlow = () => renderHook(() => useImportSignerFlow())
+const renderImportFlow = (initialStore?: { signers?: Record<string, Signer> }) =>
+  renderHook(() => useImportSignerFlow(), initialStore)
 
 describe('useImportSignerFlow', () => {
   beforeEach(() => {
@@ -164,6 +175,67 @@ describe('useImportSignerFlow', () => {
     })
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('disconnects and shows alert when a different-type signer exists for the address', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+
+    const existing: Signer = {
+      value: checksumAddress,
+      name: 'Existing PK',
+      logoUri: null,
+      type: 'private-key',
+    }
+
+    const { result } = renderImportFlow({ signers: { [checksumAddress]: existing } })
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
+
+    await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+    })
+
+    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('logs error and continues when disconnect fails during collision', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+    const disconnectError = new Error('teardown failed')
+    mockDisconnect.mockRejectedValueOnce(disconnectError)
+
+    const existing: Signer = {
+      value: checksumAddress,
+      name: 'Existing PK',
+      logoUri: null,
+      type: 'private-key',
+    }
+
+    const { result } = renderImportFlow({ signers: { [checksumAddress]: existing } })
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
+
+    await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(Logger.error).toHaveBeenCalledWith('Failed to disconnect WC session after collision:', disconnectError)
+    })
+
+    expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
 })

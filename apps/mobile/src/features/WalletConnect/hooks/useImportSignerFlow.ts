@@ -3,6 +3,7 @@ import { router } from 'expo-router'
 import { getAddress } from 'ethers'
 import { useAppKit } from '@reown/appkit-react-native'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
+import { useSignerCollisionGuard } from '@/src/features/ImportSigner/hooks/useSignerCollisionGuard'
 import Logger from '@/src/utils/logger'
 import { useSwitchNetwork } from './useSwitchNetwork'
 import { useConnect, UserRejectedError } from './useConnect'
@@ -15,6 +16,7 @@ export function useImportSignerFlow() {
   const { disconnect } = useAppKit()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
   const { validateAddressOwnership } = useAddressOwnershipValidation()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
   const connect = useConnect()
 
   const initiateConnection = useCallback(async () => {
@@ -24,6 +26,15 @@ export function useImportSignerFlow() {
       const result = await validateAddressOwnership(checksumAddress)
 
       if (result.isOwner) {
+        if (guardAgainstCollision(checksumAddress, 'walletconnect')) {
+          try {
+            await disconnect()
+          } catch (disconnectError) {
+            Logger.error('Failed to disconnect WC session after collision:', disconnectError)
+          }
+          return
+        }
+
         await switchNetworkIfNeeded()
 
         router.push({
@@ -43,7 +54,7 @@ export function useImportSignerFlow() {
         Logger.error('Error during signer import:', error)
       }
     }
-  }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect])
+  }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect, guardAgainstCollision])
 
   return { initiateConnection }
 }
