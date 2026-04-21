@@ -29,7 +29,7 @@ export const useImportLedgerAddress = () => {
   const [isImporting, setIsImporting] = useState(false)
   const [error, setError] = useState<ImportError | null>(null)
   const { validateAddressOwnership } = useAddressOwnershipValidation()
-  const { checkCollision, showCollisionAlert } = useSignerCollisionGuard()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -60,9 +60,7 @@ export const useImportLedgerAddress = () => {
           return { success: false }
         }
 
-        const existingSigner = checkCollision(address, 'ledger')
-        if (existingSigner) {
-          showCollisionAlert(existingSigner)
+        if (guardAgainstCollision(address, 'ledger')) {
           setIsImporting(false)
           return { success: false }
         }
@@ -98,7 +96,7 @@ export const useImportLedgerAddress = () => {
         return { success: false }
       }
     },
-    [dispatch, validateAddressOwnership, checkCollision, showCollisionAlert],
+    [dispatch, validateAddressOwnership, guardAgainstCollision],
   )
 
   return {

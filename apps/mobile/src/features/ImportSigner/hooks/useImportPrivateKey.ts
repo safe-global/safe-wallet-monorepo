@@ -16,7 +16,7 @@ export const useImportPrivateKey = () => {
   const [error, setError] = useState<string | undefined>(undefined)
   const router = useRouter()
   const { createDelegate } = useDelegate()
-  const { checkCollision, showCollisionAlert } = useSignerCollisionGuard()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const handleInputChange = (text: string) => {
     setInput(text)
@@ -54,9 +54,7 @@ export const useImportPrivateKey = () => {
 
     if (inputType === 'private-key' && wallet) {
       // Handle private key import (existing flow)
-      const existingSigner = checkCollision(wallet.address, 'private-key')
-      if (existingSigner) {
-        showCollisionAlert(existingSigner)
+      if (guardAgainstCollision(wallet.address, 'private-key')) {
         return
       }
 

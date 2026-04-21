@@ -29,7 +29,7 @@ export const useImportSeedPhraseAddress = () => {
   const [error, setError] = useState<ImportError | null>(null)
   const { validateAddressOwnership } = useAddressOwnershipValidation()
   const { createDelegate } = useDelegate()
-  const { checkCollision, showCollisionAlert } = useSignerCollisionGuard()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -60,9 +60,7 @@ export const useImportSeedPhraseAddress = () => {
           return { success: false }
         }
 
-        const existingSigner = checkCollision(address, 'private-key')
-        if (existingSigner) {
-          showCollisionAlert(existingSigner)
+        if (guardAgainstCollision(address, 'private-key')) {
           setIsImporting(false)
           return { success: false }
         }
@@ -108,7 +106,7 @@ export const useImportSeedPhraseAddress = () => {
         return { success: false }
       }
     },
-    [dispatch, validateAddressOwnership, createDelegate, checkCollision, showCollisionAlert],
+    [dispatch, validateAddressOwnership, createDelegate, guardAgainstCollision],
   )
 
   return {

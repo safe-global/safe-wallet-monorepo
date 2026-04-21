@@ -17,27 +17,28 @@ const describeExistingSigner = (existing: Signer): string => {
   }
 }
 
+const showCollisionAlert = (existing: Signer) => {
+  Alert.alert(
+    'Signer already imported',
+    `This address is already imported ${describeExistingSigner(existing)}. Remove it under Settings → Signers first, or use the existing signer to sign transactions.`,
+    [{ text: 'OK' }],
+  )
+}
+
 export const useSignerCollisionGuard = () => {
   const signers = useAppSelector(selectSigners)
 
-  const checkCollision = useCallback(
-    (address: string, newType: SignerKind): Signer | null => {
+  const guardAgainstCollision = useCallback(
+    (address: string, newType: SignerKind): boolean => {
       const existing = Object.values(signers).find((signer) => sameAddress(signer.value, address))
       if (!existing || existing.type === newType) {
-        return null
+        return false
       }
-      return existing
+      showCollisionAlert(existing)
+      return true
     },
     [signers],
   )
 
-  const showCollisionAlert = useCallback((existing: Signer) => {
-    Alert.alert(
-      'Signer already imported',
-      `This address is already imported ${describeExistingSigner(existing)}. Remove it under Settings → Signers first, or use the existing signer to sign transactions.`,
-      [{ text: 'OK' }],
-    )
-  }, [])
-
-  return { checkCollision, showCollisionAlert }
+  return { guardAgainstCollision }
 }

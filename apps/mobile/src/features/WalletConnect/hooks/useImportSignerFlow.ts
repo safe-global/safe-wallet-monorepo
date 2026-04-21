@@ -16,7 +16,7 @@ export function useImportSignerFlow() {
   const { disconnect } = useAppKit()
   const { switchNetworkIfNeeded } = useSwitchNetwork()
   const { validateAddressOwnership } = useAddressOwnershipValidation()
-  const { checkCollision, showCollisionAlert } = useSignerCollisionGuard()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
   const connect = useConnect()
 
   const initiateConnection = useCallback(async () => {
@@ -26,10 +26,8 @@ export function useImportSignerFlow() {
       const result = await validateAddressOwnership(checksumAddress)
 
       if (result.isOwner) {
-        const existingSigner = checkCollision(checksumAddress, 'walletconnect')
-        if (existingSigner) {
+        if (guardAgainstCollision(checksumAddress, 'walletconnect')) {
           disconnect()
-          showCollisionAlert(existingSigner)
           return
         }
 
@@ -52,7 +50,7 @@ export function useImportSignerFlow() {
         Logger.error('Error during signer import:', error)
       }
     }
-  }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect, checkCollision, showCollisionAlert])
+  }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect, guardAgainstCollision])
 
   return { initiateConnection }
 }
