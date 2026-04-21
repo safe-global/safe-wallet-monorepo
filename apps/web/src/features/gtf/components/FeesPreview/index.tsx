@@ -183,7 +183,15 @@ const GasTokenSelector = ({
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
           {selected?.symbol}
         </Typography>
-        {!locked && <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />}
+        {locked ? (
+          <Tooltip title={SIGNER_FEE_TOOLTIP} placement="top" arrow>
+            <span className={css.tooltipIcon}>
+              <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
+            </span>
+          </Tooltip>
+        ) : (
+          <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />
+        )}
       </div>
 
       <Popover
@@ -273,6 +281,11 @@ const ConfirmationFeeNotice = ({
       <Typography variant="body2" fontWeight={700}>
         {token?.symbol}
       </Typography>
+      <Tooltip title={SIGNER_FEE_TOOLTIP} placement="top" arrow>
+        <span className={css.tooltipIcon}>
+          <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
+        </span>
+      </Tooltip>
     </div>
   )
 }
