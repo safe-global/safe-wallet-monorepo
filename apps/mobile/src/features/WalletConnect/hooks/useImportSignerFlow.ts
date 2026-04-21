@@ -27,7 +27,11 @@ export function useImportSignerFlow() {
 
       if (result.isOwner) {
         if (guardAgainstCollision(checksumAddress, 'walletconnect')) {
-          disconnect()
+          try {
+            await disconnect()
+          } catch (disconnectError) {
+            Logger.error('Failed to disconnect WC session after collision:', disconnectError)
+          }
           return
         }
 

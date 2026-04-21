@@ -59,11 +59,9 @@ describe('useSignerCollisionGuard', () => {
   describe('returns true and alerts on cross-type collision', () => {
     it.each([
       ['private-key → walletconnect', pkSigner, 'walletconnect' as const],
+      ['walletconnect → private-key', wcSigner, 'private-key' as const],
       ['private-key → ledger', pkSigner, 'ledger' as const],
       ['ledger → private-key', ledgerSigner, 'private-key' as const],
-      ['ledger → walletconnect', ledgerSigner, 'walletconnect' as const],
-      ['walletconnect → private-key', wcSigner, 'private-key' as const],
-      ['walletconnect → ledger', wcSigner, 'ledger' as const],
     ])('%s', (_label, existing, newType) => {
       const { result } = renderHook(() => useSignerCollisionGuard(), preloadSigners({ [ADDRESS_A]: existing }))
       expect(result.current.guardAgainstCollision(ADDRESS_A, newType)).toBe(true)

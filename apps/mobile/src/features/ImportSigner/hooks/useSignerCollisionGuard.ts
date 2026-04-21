@@ -15,6 +15,8 @@ const describeExistingSigner = (existing: Signer): string => {
     case 'walletconnect':
       return existing.walletName ? `via ${existing.walletName}` : 'as a WalletConnect signer'
   }
+  // Defensive fallback in case a future signer type slips past the compile-time check
+  return 'as an existing signer'
 }
 
 const showCollisionAlert = (existing: Signer) => {
