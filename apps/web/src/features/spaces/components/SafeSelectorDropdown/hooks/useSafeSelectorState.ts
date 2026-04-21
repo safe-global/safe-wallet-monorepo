@@ -44,8 +44,7 @@ export const useSafeSelectorState = ({
   const handleSafeChange = useCallback(
     (value: string | null) => {
       const itemId = value ?? ''
-      // Controlled Select can emit a second onValueChange with the previous id before the URL updates.
-      // Skipping avoids a duplicate router.push and address-bar flicker (see SafeSelectorDropdown tests).
+      // Skip reselecting the previous id before the URL updates
       const currentSelectionId = selectedItemId ?? selectedItem?.id ?? ''
       if (itemId === currentSelectionId) return
       onItemSelect?.(itemId)
