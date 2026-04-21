@@ -1,6 +1,5 @@
 import { Alert } from 'react-native'
-import { useCallback } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useCallback, useMemo } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners, type Signer } from '@/src/store/signersSlice'
 
@@ -30,16 +29,23 @@ const showCollisionAlert = (existing: Signer) => {
 export const useSignerCollisionGuard = () => {
   const signers = useAppSelector(selectSigners)
 
+  // Normalize once per signers change so the guard is O(1) per import attempt,
+  // regardless of how addresses were cased when they were stored.
+  const signersByNormalizedAddress = useMemo(
+    () => new Map(Object.values(signers).map((signer) => [signer.value.toLowerCase(), signer])),
+    [signers],
+  )
+
   const guardAgainstCollision = useCallback(
     (address: string, newType: SignerKind): boolean => {
-      const existing = Object.values(signers).find((signer) => sameAddress(signer.value, address))
+      const existing = signersByNormalizedAddress.get(address.toLowerCase())
       if (!existing || existing.type === newType) {
         return false
       }
       showCollisionAlert(existing)
       return true
     },
-    [signers],
+    [signersByNormalizedAddress],
   )
 
   return { guardAgainstCollision }
