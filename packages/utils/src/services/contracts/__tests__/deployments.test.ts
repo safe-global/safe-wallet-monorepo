@@ -1,3 +1,4 @@
+import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
 import {
   getCanonicalOrFirstAddress,
@@ -11,6 +12,13 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '../../contracts/deployments'
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
+
+// Per safe-deployments src/assets/vX.Y.Z/multi_send_call_only.json, only v1.3.0 and v1.4.1
+// declare a zkSync-specific MultiSendCallOnly deployment. v1.5.0 has canonical only.
+const ZKSYNC_MULTISEND_CALL_ONLY_BY_VERSION: Record<string, string> = {
+  '1.3.0': '0xf220D3b4DFb23C4ade8C88E526C1353AbAcbC38F',
+  '1.4.1': '0x0408EF011960d02349d50286D20531229BCef773',
+}
 
 describe('deployments utils', () => {
   const chainId = '1'
@@ -329,4 +337,58 @@ describe('deployments utils', () => {
       expect(result!.safeSingletonAddress).toBeDefined()
     })
   })
+
+  // eip155 MultiSendCallOnly deployment exists only for v1.3.0. Chain 1 lists
+  // ["canonical", "eip155"] under networkAddresses, so the same "canonical or first"
+  // bug pattern applied: callers requesting `'eip155'` could get the canonical address.
+  describe('eip155 MultiSendCallOnly v1.3.0', () => {
+    const deployment = getMultiSendCallOnlyDeployments({ version: '1.3.0' })
+    const EIP155_MULTISEND_CALL_ONLY_V130 = '0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B'
+    const MAINNET_CHAIN_ID = '1'
+
+    it('safe-deployments declares the eip155 address for v1.3.0', () => {
+      expect(deployment?.deployments.eip155?.address).toBe(EIP155_MULTISEND_CALL_ONLY_V130)
+    })
+
+    it('getChainAgnosticAddress returns the eip155 address on chain 1 with deploymentType="eip155"', () => {
+      const address = getChainAgnosticAddress(deployment, MAINNET_CHAIN_ID, 'eip155')
+      expect(address).toBe(EIP155_MULTISEND_CALL_ONLY_V130)
+    })
+  })
+
+  // Regression tests for zkSync Era MultiSendCallOnly address resolution across all Safe
+  // contract versions that ship a zkSync-specific deployment (v1.3.0 and v1.4.1).
+  // The zkSync deployment JSON lists the zkSync and canonical addresses together under
+  // networkAddresses["324"], so any code path that returns the "canonical or first network
+  // address" will incorrectly prefer the canonical (EVM bytecode) address over the
+  // zkSync-specific (EraVM) one that EraVM-bytecode Safes need to delegatecall to.
+  describe.each(Object.entries(ZKSYNC_MULTISEND_CALL_ONLY_BY_VERSION))(
+    'zkSync Era MultiSendCallOnly v%s',
+    (version, expectedZkAddress) => {
+      const deployment = getMultiSendCallOnlyDeployments({ version })
+
+      it(`safe-deployments declares the zkSync-specific address for v${version}`, () => {
+        expect(deployment?.deployments.zksync?.address).toBe(expectedZkAddress)
+      })
+
+      it(`getChainAgnosticAddress returns the zkSync address on chain 324 with deploymentType="zksync" for v${version}`, () => {
+        const address = getChainAgnosticAddress(deployment, ZKSYNC_ERA_CHAIN_ID, 'zksync')
+        expect(address).toBe(expectedZkAddress)
+      })
+
+      it(`resolveChainAgnosticContractAddresses returns the zkSync MultiSendCallOnly address when isZk=true for v${version}`, () => {
+        const resolved = resolveChainAgnosticContractAddresses(version, true, true)
+        expect(resolved).toBeDefined()
+        expect(resolved!.multiSendCallOnlyAddress).toBe(expectedZkAddress)
+      })
+
+      // Regression guard matching PR #7580's pattern: never return a deployment-type-specific
+      // address for a chain where that deployment type isn't registered. Requesting 'zksync'
+      // on mainnet (which has only canonical) must not leak the zkSync EraVM address.
+      it(`does NOT return the zkSync address on mainnet (chain 1) for v${version}`, () => {
+        const address = getChainAgnosticAddress(deployment, '1', 'zksync')
+        expect(address).not.toBe(expectedZkAddress)
+      })
+    },
+  )
 })

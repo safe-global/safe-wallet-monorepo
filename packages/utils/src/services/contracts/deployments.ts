@@ -101,8 +101,17 @@ export const getCanonicalOrFirstAddress = (
 }
 
 /**
- * Returns an address for a deployment, trying per-chain lookup first, then falling back
- * to the chain-agnostic deployment type address. Works for unregistered chains.
+ * Returns an address for a deployment.
+ *
+ * When a non-default `deploymentType` is requested (e.g. `'zksync'`), the type-specific
+ * address is returned only if it is actually registered for this chain. This is required
+ * on zkSync, where networkAddresses lists both the zkSync (EraVM) and canonical (EVM)
+ * addresses together and EraVM Safes cannot delegatecall to EVM auxiliary contracts.
+ * Guarding on explicit registration prevents handing back an address that was never
+ * deployed on the target chain (same regression shape as #7494).
+ *
+ * Otherwise, falls back to per-chain lookup (canonical-or-first network address), then to
+ * the chain-agnostic deployment-type address for unregistered chains.
  */
 export const getChainAgnosticAddress = (
   deployment: SingletonDeploymentV2 | undefined,
@@ -111,11 +120,18 @@ export const getChainAgnosticAddress = (
 ): string | undefined => {
   if (!deployment) return undefined
 
-  // Try per-chain first (works for registered chains)
+  if (deploymentType !== 'canonical') {
+    const typeSpecificAddress = deployment.deployments[deploymentType]?.address
+    const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+    const isRegisteredOnChain =
+      typeSpecificAddress && networkAddresses.some((addr) => sameAddress(addr, typeSpecificAddress))
+
+    if (isRegisteredOnChain) return typeSpecificAddress
+  }
+
   const perChainAddress = getCanonicalOrFirstAddress(deployment, chainId)
   if (perChainAddress) return perChainAddress
 
-  // Fall back to chain-agnostic address by deployment type
   return deployment.deployments[deploymentType]?.address
 }
 
