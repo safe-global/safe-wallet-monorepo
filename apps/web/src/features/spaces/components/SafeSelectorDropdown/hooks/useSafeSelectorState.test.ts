@@ -60,4 +60,27 @@ describe('useSafeSelectorState', () => {
     act(() => result.current.closeDropdown())
     expect(result.current.dropdownOpen).toBe(false)
   })
+
+  /**
+   * When a controlled Select emits onValueChange twice (new id, then snap-back to the previous id
+   * before the URL updates), only the first call is forwarded — the second matches currentSelectionId.
+   */
+  it('ignores handleSafeChange when the value matches the current selection (revert snap-back)', () => {
+    const onItemSelect = jest.fn()
+    const { result } = renderHook(() =>
+      useSafeSelectorState({
+        items: [createItem('1:0xA'), createItem('2:0xB')],
+        selectedItemId: '1:0xA',
+        onItemSelect,
+      }),
+    )
+
+    act(() => {
+      result.current.handleSafeChange('2:0xB')
+      result.current.handleSafeChange('1:0xA')
+    })
+
+    expect(onItemSelect).toHaveBeenCalledTimes(1)
+    expect(onItemSelect).toHaveBeenCalledWith('2:0xB')
+  })
 })
