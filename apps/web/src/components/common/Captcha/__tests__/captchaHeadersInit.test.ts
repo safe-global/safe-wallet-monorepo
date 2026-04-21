@@ -365,7 +365,7 @@ describe('captchaHeadersInit', () => {
         clone: () => ({ json: () => Promise.reject(new Error('not json')) }),
       }) as unknown as Response
 
-    it('clears token, resets promise, and calls widget refresh on captcha 401 from protected URL', async () => {
+    it('clears token on captcha 401 from protected URL without eagerly refreshing the widget', async () => {
       const mockRefresh = jest.fn()
       registerWidgetRefreshCallback(mockRefresh)
       sharedTokenRef.current = 'old-token'
@@ -375,7 +375,9 @@ describe('captchaHeadersInit', () => {
       await hook(makeResponse(401, { message: 'Invalid CAPTCHA token' }), PROTECTED_URL)
 
       expect(sharedTokenRef.current).toBeNull()
-      expect(mockRefresh).toHaveBeenCalledTimes(1)
+      // Lazy rotation: don't refresh the widget on 401 — the retry or next
+      // protected request triggers a fresh challenge via prepareHeaders.
+      expect(mockRefresh).not.toHaveBeenCalled()
     })
 
     it('does nothing for a captcha 401 from a non-protected URL', async () => {

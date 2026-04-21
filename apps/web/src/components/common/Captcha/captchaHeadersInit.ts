@@ -129,9 +129,10 @@ export function initializeCaptchaHeaders() {
     try {
       const data = await response.clone().json()
       if (data?.message === 'Invalid CAPTCHA token') {
+        // Clear the stale token only. The next protected request will lazily
+        // trigger a fresh challenge via the rotation logic above — avoids
+        // popping a modal when no retry is in flight.
         sharedTokenRef.current = null
-        resetCaptchaPromise()
-        widgetRefreshCallbackRef.current()
       }
     } catch {
       // Ignore non-JSON or unreadable responses

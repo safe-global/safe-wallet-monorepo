@@ -2,7 +2,6 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import {
   sharedTokenRef,
   resolveCaptchaReady,
-  resetCaptchaPromise,
   registerWidgetRefreshCallback,
 } from '@/components/common/Captcha/captchaHeadersInit'
 import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
@@ -11,7 +10,6 @@ import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
 jest.mock('@/components/common/Captcha/captchaHeadersInit', () => ({
   sharedTokenRef: { current: null },
   resolveCaptchaReady: jest.fn(),
-  resetCaptchaPromise: jest.fn(),
   registerWidgetRefreshCallback: jest.fn(),
 }))
 
@@ -147,8 +145,9 @@ describe('useCaptchaToken', () => {
 
       expect(result.current.token).toBeNull()
       expect((sharedTokenRef as { current: string | null }).current).toBeNull()
-      expect(resetCaptchaPromise).toHaveBeenCalled()
-      expect(mockTurnstile.reset).toHaveBeenCalledWith('widget-id-1')
+      // Lazy rotation: don't reset the widget on silent expiry — next protected
+      // request triggers a fresh challenge via captchaHeadersInit.
+      expect(mockTurnstile.reset).not.toHaveBeenCalled()
     })
   })
 

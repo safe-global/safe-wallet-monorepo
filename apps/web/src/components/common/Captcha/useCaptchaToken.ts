@@ -1,10 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import {
-  sharedTokenRef,
-  resolveCaptchaReady,
-  resetCaptchaPromise,
-  registerWidgetRefreshCallback,
-} from './captchaHeadersInit'
+import { sharedTokenRef, resolveCaptchaReady, registerWidgetRefreshCallback } from './captchaHeadersInit'
 import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 
 declare global {
@@ -99,11 +94,12 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
           setIsLoading(false)
           setToken(null)
         },
+        // Token expired silently (Turnstile ~5min TTL). Clear it and wait for
+        // the next protected request to lazily trigger a fresh challenge via
+        // captchaHeadersInit. Avoids background modal pops when the user is idle.
         'expired-callback': () => {
           sharedTokenRef.current = null
-          resetCaptchaPromise()
           setToken(null)
-          refreshToken()
         },
         // Show modal only when interaction is required
         'before-interactive-callback': () => {
