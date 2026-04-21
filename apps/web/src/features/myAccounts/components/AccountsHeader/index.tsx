@@ -23,11 +23,11 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
         variant="outline"
         size="lg"
         onClick={onLinkClick}
-        className="w-full rounded-lg h-full text-base"
+        className="w-full rounded-lg h-full px-5 text-base "
         render={<NextLink href={AppRoutes.newSafe.load} />}
       >
-        <AddIcon color="currentColor" className="fill-primary" />
-        Add account
+        <AddIcon color="currentColor" className="size-5 fill-primary" />
+        Add
       </Button>
     </Track>
   )
