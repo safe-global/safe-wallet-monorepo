@@ -38,12 +38,11 @@ describe('useGetSpaceAddressBook', () => {
     expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('skips the query when there is no current spaceId (null)', () => {
+  it('skips the query when there is no current spaceId (Number(null) is 0 — must not hit /v1/spaces/0/...)', () => {
     mockUseCurrentSpaceId.mockReturnValue(null)
 
     renderHook(() => useGetSpaceAddressBook())
 
-    // Must NOT fire /v1/spaces/0/address-book — Number(null) would be 0 without the guard
     expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 

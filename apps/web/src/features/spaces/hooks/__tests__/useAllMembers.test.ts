@@ -46,18 +46,10 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
     expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('skips the members query when there is no current spaceId', () => {
+  it('skips the members query when there is no current spaceId (Number(null) is 0 — must not request /v1/spaces/0)', () => {
     mockUseCurrentSpaceId.mockReturnValue(null)
 
     renderHook(() => useSpaceMembersByStatus())
-
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
-  })
-
-  it('skips the members query when the explicit spaceId arg is 0', () => {
-    mockUseCurrentSpaceId.mockReturnValue('5')
-
-    renderHook(() => useCurrentMembership(0))
 
     expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })

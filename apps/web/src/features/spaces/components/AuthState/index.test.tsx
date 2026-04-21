@@ -95,6 +95,16 @@ describe('AuthState', () => {
     expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
+  it('skips the space query when spaceId is null at runtime (Number(null) is 0)', () => {
+    render(
+      <AuthState spaceId={null as unknown as string}>
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+  })
+
   it('skips the space query when spaceId is undefined at runtime', () => {
     render(
       <AuthState spaceId={undefined as unknown as string}>
