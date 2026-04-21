@@ -200,21 +200,11 @@ describe('ActionsTray geoblocking', () => {
       expect(receiveButton).toBeEnabled()
     })
 
-    it('is disabled when the space has no assets', async () => {
-      const { container } = renderTray({ isBlockedCountry: false, noAssets: true })
+    it('is disabled when the space has no assets', () => {
+      renderTray({ isBlockedCountry: false, noAssets: true })
 
       const receiveButton = screen.getByRole('button', { name: /receive/i })
       expect(receiveButton).toBeDisabled()
-
-      const wrapper = Array.from(container.querySelectorAll('span.cursor-not-allowed')).find((el) =>
-        el.contains(receiveButton),
-      )
-      expect(wrapper).toBeDefined()
-
-      fireEvent.mouseOver(receiveButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
-      })
     })
 
     it('remains enabled when the user is geoblocked (Receive should stay available)', () => {
@@ -233,21 +223,11 @@ describe('ActionsTray geoblocking', () => {
       expect(buildTxButton).toBeEnabled()
     })
 
-    it('is disabled when the space has no assets', async () => {
-      const { container } = renderTray({ isBlockedCountry: false, noAssets: true })
+    it('is disabled when the space has no assets', () => {
+      renderTray({ isBlockedCountry: false, noAssets: true })
 
       const buildTxButton = screen.getByRole('button', { name: /transaction builder/i })
       expect(buildTxButton).toBeDisabled()
-
-      const wrapper = Array.from(container.querySelectorAll('span.cursor-not-allowed')).find((el) =>
-        el.contains(buildTxButton),
-      )
-      expect(wrapper).toBeDefined()
-
-      fireEvent.mouseOver(buildTxButton.parentElement as HTMLElement)
-      await waitFor(() => {
-        expect(screen.getByRole('tooltip')).toHaveTextContent('You have no assets or balance on this safe account')
-      })
     })
 
     it('remains enabled when the user is geoblocked (Build transaction should stay available)', () => {

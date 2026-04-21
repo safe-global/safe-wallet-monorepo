@@ -101,19 +101,15 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Tooltip title={noAssets ? NO_ASSETS_MESSAGE : ''} arrow placement="top">
-              <span className={cn('inline-flex', { 'cursor-not-allowed': noAssets })}>
-                <Button
-                  variant={secondaryVariant}
-                  className={cn('px-6 hover:bg-border')}
-                  onClick={handleOnReceive}
-                  disabled={noAssets}
-                >
-                  <ArrowDownLeft className="size-5" />
-                  Receive
-                </Button>
-              </span>
-            </Tooltip>
+            <Button
+              variant={secondaryVariant}
+              className={cn('px-6 hover:bg-border')}
+              onClick={handleOnReceive}
+              disabled={noAssets}
+            >
+              <ArrowDownLeft className="size-5" />
+              Receive
+            </Button>
           ) : (
             <QrCodeButton>
               <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')}>
@@ -168,23 +164,18 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
         )}
 
         <Wallet>
-          {(isOk) => {
-            const buildTxDisabled = !isOk || noAssets
-            return isSpace ? (
-              <Tooltip title={noAssets ? NO_ASSETS_MESSAGE : ''} arrow placement="top">
-                <span className={cn('inline-flex', { 'cursor-not-allowed': buildTxDisabled })}>
-                  <Button
-                    variant={secondaryVariant}
-                    className="px-6 hover:bg-border"
-                    disabled={buildTxDisabled}
-                    onClick={handleOnBuildTx}
-                    aria-label="Transaction builder"
-                  >
-                    <SquareDashedBottomCode className="size-5" strokeWidth={1.5} />
-                    Build transaction
-                  </Button>
-                </span>
-              </Tooltip>
+          {(isOk) =>
+            isSpace ? (
+              <Button
+                variant={secondaryVariant}
+                className="px-6 hover:bg-border"
+                disabled={!isOk || noAssets}
+                onClick={handleOnBuildTx}
+                aria-label="Transaction builder"
+              >
+                <SquareDashedBottomCode className="size-5" strokeWidth={1.5} />
+                Build transaction
+              </Button>
             ) : (
               <Button
                 variant={secondaryVariant}
@@ -197,7 +188,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                 <SquareDashedBottomCode className="size-5 text-muted-foreground" strokeWidth={1.5} />
               </Button>
             )
-          }}
+          }
         </Wallet>
       </div>
     </div>
