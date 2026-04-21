@@ -116,6 +116,8 @@ export const useTxActions = (): TxActions => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
 
+      safeTx = await mergeGtfFeeParams(safeTx)
+
       // Smart contracts cannot sign transactions off-chain
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')

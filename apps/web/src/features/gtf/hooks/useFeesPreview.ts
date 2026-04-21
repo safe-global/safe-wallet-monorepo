@@ -135,7 +135,7 @@ const computeTotalOutgoing = ({
 }
 
 export const useFeesPreview = (): FeesPreviewData => {
-  const { safeTx, gtfSelectedGasToken, setGtfSelectedGasToken } = useContext(SafeTxContext)
+  const { safeTx, gtfPaymentMode, gtfSelectedGasToken, setGtfSelectedGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
@@ -191,14 +191,23 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }, [gtfSelectedGasToken, candidates, setGtfSelectedGasToken])
 
+  // Persist the implicit default — `mergeGtfFeeParams` bails without a selection.
+  useEffect(() => {
+    if (gtfPaymentMode !== 'safe') return
+    if (gtfSelectedGasToken) return
+    if (!defaultAddress) return
+    setGtfSelectedGasToken(defaultAddress)
+  }, [gtfPaymentMode, gtfSelectedGasToken, defaultAddress, setGtfSelectedGasToken])
+
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
   const selectedAddress = lockedGasToken ?? gtfSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
   const selectedCandidate = availableGasTokens.find((c) => sameAddress(c.address, selectedAddress))
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
+  // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   const preview = useGetGtfFeePreviewQuery(
-    txPayload && chain?.chainId && safeAddress && safe.threshold > 0
+    !isConfirmation && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -217,6 +226,43 @@ export const useFeesPreview = (): FeesPreviewData => {
     selectedGasToken: selectedAddress,
     onGasTokenChange: isConfirmation ? undefined : setGtfSelectedGasToken,
     isConfirmation: isConfirmation || undefined,
+  }
+
+  if (isConfirmation && safeTx) {
+    const { safeTxGas, baseGas, gasPrice: signedGasPrice } = safeTx.data
+    const gasWei = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(signedGasPrice)
+    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+
+    const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
+    const gasFiatUsd = gasTokenBalance
+      ? Number(formatUnits(gasWei, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
+      : 0
+
+    const totalOutgoing = computeTotalOutgoing({
+      safeTx,
+      gasWei,
+      relayCostUsd: gasFiatUsd,
+      nativeSymbol,
+      nativeDecimals,
+      gasTokenAddress: selectedAddress,
+      gasSymbol,
+      gasDecimals,
+      balances,
+    })
+
+    return {
+      ...base,
+      canCoverFees: true,
+      gasFee: {
+        label: 'Gas fee',
+        amount: gasAmount,
+        currency: gasSymbol,
+        fiatAmount: formatCurrency(gasFiatUsd, 'usd'),
+      },
+      totalOutgoing,
+      loading: false,
+      error: false,
+    }
   }
 
   // Pending first — guards against rendering stale `preview.data` against a freshly-edited

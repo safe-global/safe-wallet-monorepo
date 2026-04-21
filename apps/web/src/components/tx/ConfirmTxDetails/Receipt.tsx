@@ -1,15 +1,21 @@
 import type { TransactionDetails, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Fragment, useMemo, type ReactElement } from 'react'
+import { Fragment, useContext, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import TokenIcon from '@/components/common/TokenIcon'
 import { useCurrentChain } from '@/hooks/useChains'
+import useBalances from '@/hooks/useBalances'
 import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   useDomainHash,
   useMessageHash,
@@ -37,6 +43,9 @@ const inlineEthHashInfoSx = { '& > div': { width: 'auto' } }
 
 export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
   const chain = useCurrentChain()
+  const { safe, safeAddress } = useSafeInfo()
+  const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { balances } = useBalances()
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -48,6 +57,37 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
     const detailedExecutionInfo = txDetails?.detailedExecutionInfo
     return isMultisigDetailedExecutionInfo(detailedExecutionInfo) ? detailedExecutionInfo.confirmations : []
   }, [txDetails?.detailedExecutionInfo])
+
+  const shouldPreviewGtf =
+    (!safeTx || safeTx.signatures.size === 0) && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken
+  const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
+  const isNativeGasToken = displayGasToken === ZERO_ADDRESS
+  const heldToken = isNativeGasToken
+    ? undefined
+    : balances.items.find((b) => sameAddress(b.tokenInfo.address, displayGasToken))
+  const gasTokenLogo = isNativeGasToken ? chain?.nativeCurrency.logoUri : heldToken?.tokenInfo.logoUri
+  const gasTokenSymbol = isNativeGasToken ? chain?.nativeCurrency.symbol : heldToken?.tokenInfo.symbol
+
+  const previewArg =
+    shouldPreviewGtf && safeTx && gtfSelectedGasToken && chain?.chainId && safeAddress && safe.threshold > 0
+      ? {
+          chainId: chain.chainId,
+          safeAddress,
+          tx: {
+            to: safeTx.data.to,
+            value: safeTx.data.value,
+            data: safeTx.data.data,
+            operation: safeTx.data.operation,
+            gasToken: gtfSelectedGasToken,
+            numberSignatures: safe.threshold,
+          },
+        }
+      : skipToken
+  const { data: previewData } = useGetGtfFeePreviewQuery(previewArg)
+  const displayRefundReceiver =
+    shouldPreviewGtf && previewData?.txData.refundReceiver
+      ? previewData.txData.refundReceiver
+      : safeTxData.refundReceiver
 
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
@@ -115,25 +155,21 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 <TxDetailsRow label="GasToken" grid={grid}>
                   <Typography variant="body2" sx={inlineEthHashInfoSx}>
                     <EthHashInfo
-                      address={safeTxData.gasToken}
+                      address={displayGasToken}
                       showAvatar={false}
                       showPrefix={false}
                       showName={false}
                       shortAddress
                       hasExplorer
                     >
-                      {safeTxData.gasToken === ZERO_ADDRESS && chain?.nativeCurrency && (
+                      {gasTokenLogo && gasTokenSymbol && (
                         <Tooltip
                           title="The GasToken address is the address of the token used to pay gas fees."
                           placement="top"
                           arrow
                         >
                           <span style={{ display: 'inline-flex' }}>
-                            <TokenIcon
-                              logoUri={chain.nativeCurrency.logoUri}
-                              tokenSymbol={chain.nativeCurrency.symbol}
-                              size={20}
-                            />
+                            <TokenIcon logoUri={gasTokenLogo} tokenSymbol={gasTokenSymbol} size={20} />
                           </span>
                         </Tooltip>
                       )}
@@ -144,7 +180,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 <TxDetailsRow label="RefundReceiver" grid={grid}>
                   <Typography variant="body2" sx={inlineEthHashInfoSx}>
                     <EthHashInfo
-                      address={safeTxData.refundReceiver}
+                      address={displayRefundReceiver}
                       showAvatar={false}
                       showPrefix={false}
                       shortAddress

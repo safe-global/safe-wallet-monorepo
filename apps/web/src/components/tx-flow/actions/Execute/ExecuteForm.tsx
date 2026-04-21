@@ -30,6 +30,8 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { SafeTxContext } from '../../SafeTxProvider'
+import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
 
 export const ExecuteForm = ({
   safeTx,
@@ -76,21 +78,36 @@ export const ExecuteForm = ({
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
 
+  // GTF Safe-pays must go via Gelato — WALLET execution would double-charge (network gas + Safe fee).
+  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const requiresRelay = (safeTx && isGtfSafePaid(safeTx.data)) || (gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
+
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
-  // No-fee Campaign REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
-  const canRelay = (!isNoFeeCampaign || !isNoFeeCampaignEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
+  // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
+  const canRelay =
+    walletCanRelay &&
+    (requiresRelay || ((!isNoFeeCampaign || !isNoFeeCampaignEnabled) && hasRemainingRelays(relays[0])))
   const canNoFeeCampaign =
-    isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
+    !requiresRelay &&
+    isNoFeeCampaignEnabled &&
+    isNoFeeCampaign &&
+    !blockedAddress &&
+    !gasTooHigh &&
+    !!remaining &&
+    remaining > 0
   const isLimitReached = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && remaining === 0
 
-  // If gas is too high or limit reached, force WALLET method
   useEffect(() => {
+    if (requiresRelay) {
+      setExecutionMethod(ExecutionMethod.RELAY)
+      return
+    }
     if (gasTooHigh || isLimitReached) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [gasTooHigh, isLimitReached])
+  }, [requiresRelay, gasTooHigh, isLimitReached])
 
   // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
@@ -102,10 +119,11 @@ export const ExecuteForm = ({
   // Also show if gas is too high but feature is otherwise available (to show disabled state)
   // Or if limit is reached (to show 0/X available state)
   const showExecutionSelector =
-    canNoFeeCampaign ||
-    canRelay ||
-    (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-    isLimitReached
+    !requiresRelay &&
+    (canNoFeeCampaign ||
+      canRelay ||
+      (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
+      isLimitReached)
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
@@ -114,6 +132,7 @@ export const ExecuteForm = ({
     canNoFeeCampaign &&
     executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   )
+  const relayUnavailableForGtf = requiresRelay && !canRelay
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
@@ -171,42 +190,45 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
+    relayUnavailableForGtf ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
-          <AdvancedParams
-            willExecute
-            params={advancedParams}
-            recommendedGasLimit={gasLimit}
-            onFormSubmit={setAdvancedParams}
-            gasLimitError={gasLimitError}
-            willRelay={willRelay}
-            noFeeCampaign={
-              (canNoFeeCampaign || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
-                ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
-                : undefined
-            }
-          />
+        {!requiresRelay && (
+          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
+            <AdvancedParams
+              willExecute
+              params={advancedParams}
+              recommendedGasLimit={gasLimit}
+              onFormSubmit={setAdvancedParams}
+              gasLimitError={gasLimitError}
+              willRelay={willRelay}
+              noFeeCampaign={
+                (canNoFeeCampaign || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
+                  ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                  : undefined
+              }
+            />
 
-          {showExecutionSelector && (
-            <div className={css.noTopBorder}>
-              <ExecutionMethodSelector
-                executionMethod={executionMethod}
-                setExecutionMethod={handleExecutionMethodChange}
-                relays={canNoFeeCampaign ? undefined : relays[0]}
-                noFeeCampaign={
-                  isNoFeeCampaign && !blockedAddress
-                    ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
-                    : undefined
-                }
-                gasTooHigh={gasTooHigh}
-              />
-            </div>
-          )}
-        </div>
+            {showExecutionSelector && (
+              <div className={css.noTopBorder}>
+                <ExecutionMethodSelector
+                  executionMethod={executionMethod}
+                  setExecutionMethod={handleExecutionMethodChange}
+                  relays={canNoFeeCampaign ? undefined : relays[0]}
+                  noFeeCampaign={
+                    isNoFeeCampaign && !blockedAddress
+                      ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
+                      : undefined
+                  }
+                  gasTooHigh={gasTooHigh}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Error messages */}
         {cannotPropose ? (
@@ -214,6 +236,11 @@ export const ExecuteForm = ({
         ) : isExecutionLoop ? (
           <ErrorMessage>
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
+          </ErrorMessage>
+        ) : relayUnavailableForGtf ? (
+          <ErrorMessage>
+            Safe-paid fees require Gelato relay, which is currently unavailable. Cancel and retry this transaction, or
+            wait for relay quota to reset.
           </ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">
