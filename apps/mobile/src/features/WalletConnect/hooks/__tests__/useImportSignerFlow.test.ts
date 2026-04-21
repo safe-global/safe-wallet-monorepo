@@ -4,10 +4,16 @@ import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
 import { UserRejectedError } from '../useConnect'
+import Logger from '@/src/utils/logger'
 import type { ConnectResult } from '../useConnect'
 import type { Signer } from '@/src/store/signersSlice'
 
 jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
+}))
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 const checksumAddress = getAddress(mockAddress)
@@ -197,6 +203,38 @@ describe('useImportSignerFlow', () => {
       expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
     })
 
+    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('logs the error and returns cleanly when disconnect rejects on a collision', async () => {
+    mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
+    const disconnectError = new Error('teardown failed')
+    mockDisconnect.mockRejectedValueOnce(disconnectError)
+
+    const existing: Signer = {
+      value: checksumAddress,
+      name: 'Existing PK',
+      logoUri: null,
+      type: 'private-key',
+    }
+
+    const { result } = renderImportFlow({ signers: { [checksumAddress]: existing } })
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
+
+    await waitFor(() => {
+      expect(mockDisconnect).toHaveBeenCalled()
+      expect(Logger.error).toHaveBeenCalledWith('Failed to disconnect WC session after collision:', disconnectError)
+    })
+
+    expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
     expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
