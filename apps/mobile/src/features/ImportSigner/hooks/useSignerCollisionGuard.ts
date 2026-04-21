@@ -13,9 +13,13 @@ const describeExistingSigner = (existing: Signer): string => {
       return 'as a Ledger signer'
     case 'walletconnect':
       return existing.walletName ? `via ${existing.walletName}` : 'as a WalletConnect signer'
+    default:
+      // Exhaustiveness check: if a new signer kind is added to the union,
+      // `existing satisfies never` fails to compile. The runtime return is
+      // a safe fallback in case a mismatched shape slips past TS.
+      existing satisfies never
+      return 'as an existing signer'
   }
-  // Defensive fallback in case a future signer type slips past the compile-time check
-  return 'as an existing signer'
 }
 
 const showCollisionAlert = (existing: Signer) => {
