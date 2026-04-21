@@ -72,9 +72,11 @@ const NoSpacesState = () => {
             What are spaces?
           </Link>
         </Box>
-        <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-          <AddSpaceButton />
-        </Track>
+        <div className="h-12">
+          <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
+            <AddSpaceButton />
+          </Track>
+        </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
@@ -103,7 +105,7 @@ const SpacesList = () => {
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
-  }, [])
+  }, [setHasSignedIn])
 
   return (
     <Box className={css.container}>
@@ -125,17 +127,19 @@ const SpacesList = () => {
           ))}
 
         {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
-          <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
+          <>
             {activeSpaces.length > 0 ? (
-              activeSpaces.map((space) => (
-                <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                  <SpaceCard space={space} currentUserId={currentUser?.id} />
-                </Grid2>
-              ))
+              <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
+                {activeSpaces.map((space) => (
+                  <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
+                    <SpaceCard space={space} currentUserId={currentUser?.id} />
+                  </Grid2>
+                ))}
+              </Grid2>
             ) : (
               <NoSpacesState />
             )}
-          </Grid2>
+          </>
         ) : (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         )}
