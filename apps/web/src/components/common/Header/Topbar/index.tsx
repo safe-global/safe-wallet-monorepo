@@ -90,7 +90,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
         <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
-          {isSpaceRoute ? <GlobalSearchInput className="max-w-sm" /> : <SpaceSafeBar />}
+          {isSpaceRoute ? <GlobalSearchInput className="w-64 md:w-80" /> : <SpaceSafeBar />}
         </div>
 
         {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}
