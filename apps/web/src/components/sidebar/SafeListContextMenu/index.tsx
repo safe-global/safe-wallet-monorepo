@@ -19,7 +19,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
@@ -62,15 +62,15 @@ const SafeListContextMenu = ({
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const isNestedSafesEnabled = useHasFeature(FEATURES.NESTED_SAFES)
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: address },
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId, ownerAddress: address },
     { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
   )
   const addressBook = useAddressBook()
   const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
-  const nestedSafesForChain = ownedSafes?.[chainId] ?? []
+  const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
     useNestedSafesVisibility(nestedSafesForChain, chainId)
 
