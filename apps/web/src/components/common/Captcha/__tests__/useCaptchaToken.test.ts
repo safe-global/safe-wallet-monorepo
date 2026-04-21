@@ -87,6 +87,15 @@ describe('useCaptchaToken', () => {
       expect(registerWidgetRefreshCallback).toHaveBeenCalledTimes(1)
       expect(registerWidgetRefreshCallback).toHaveBeenCalledWith(expect.any(Function))
     })
+
+    it('disables auto-refresh on silent TTL expiry so the widget never challenges in the background', async () => {
+      const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
+      mountContainer(result)
+      await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
+
+      const renderOptions = mockTurnstile.render.mock.calls[0][1]
+      expect(renderOptions['refresh-expired']).toBe('never')
+    })
   })
 
   describe('token callback', () => {
