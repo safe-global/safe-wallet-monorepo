@@ -1,0 +1,83 @@
+import { renderHook } from '@testing-library/react'
+import useGetSpaceAddressBook from '../useGetSpaceAddressBook'
+
+const mockUseCurrentSpaceId = jest.fn()
+const mockUseAddressBooksGetAddressBookItemsV1Query = jest.fn()
+let mockIsAuthenticated = true
+
+jest.mock('../useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+jest.mock('@/store', () => ({
+  useAppSelector: () => mockIsAuthenticated,
+}))
+
+jest.mock('@/store/authSlice', () => ({
+  isAuthenticated: 'isAuthenticated',
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useAddressBooksGetAddressBookItemsV1Query: (...args: unknown[]) =>
+    mockUseAddressBooksGetAddressBookItemsV1Query(...args),
+}))
+
+describe('useGetSpaceAddressBook', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsAuthenticated = true
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined })
+  })
+
+  it('skips the query when the user is not authenticated', () => {
+    mockIsAuthenticated = false
+    mockUseCurrentSpaceId.mockReturnValue('7')
+
+    renderHook(() => useGetSpaceAddressBook())
+
+    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+  })
+
+  it('skips the query when there is no current spaceId (null)', () => {
+    mockUseCurrentSpaceId.mockReturnValue(null)
+
+    renderHook(() => useGetSpaceAddressBook())
+
+    // Must NOT fire /v1/spaces/0/address-book — Number(null) would be 0 without the guard
+    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+  })
+
+  it('skips the query when spaceId is an empty string', () => {
+    mockUseCurrentSpaceId.mockReturnValue('')
+
+    renderHook(() => useGetSpaceAddressBook())
+
+    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+  })
+
+  it('fires the query with the numeric spaceId when authenticated and spaceId is set', () => {
+    mockUseCurrentSpaceId.mockReturnValue('42')
+
+    renderHook(() => useGetSpaceAddressBook())
+
+    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith({ spaceId: 42 }, { skip: false })
+  })
+
+  it('returns the address book data when the query resolves', () => {
+    mockUseCurrentSpaceId.mockReturnValue('1')
+    const data = [{ address: '0xabc', name: 'Alice', chainIds: ['1'] }]
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data } })
+
+    const { result } = renderHook(() => useGetSpaceAddressBook())
+
+    expect(result.current).toEqual(data)
+  })
+
+  it('returns an empty array when the query has no data', () => {
+    mockUseCurrentSpaceId.mockReturnValue('1')
+
+    const { result } = renderHook(() => useGetSpaceAddressBook())
+
+    expect(result.current).toEqual([])
+  })
+})
