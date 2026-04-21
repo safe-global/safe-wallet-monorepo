@@ -8,7 +8,7 @@ import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt, encodeSafeCreationTx } from '@/components/new-safe/create/logic'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { predictAddressBasedOnReplayData } from '@/features/multichain'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
@@ -31,13 +31,13 @@ export function ReviewNestedSafe({
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: safeAddress },
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId: safe.chainId, ownerAddress: safeAddress },
     { skip: !safeLoaded },
   )
   const version = getLatestSafeVersion(chain)
 
-  const nestedSafes = ownedSafes?.[safe.chainId]
+  const nestedSafes = ownedSafes?.safes
 
   const safeAccountConfig = useMemo(() => {
     if (!chain || !nestedSafes) {
