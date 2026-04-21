@@ -55,6 +55,10 @@ export function resetCaptchaPromise() {
 
 let initialized = false
 
+// Serializes token consumption so concurrent protected requests each get a
+// unique, fresh Turnstile token (tokens are single-use; reuse yields 401).
+let consumeQueue: Promise<void> = Promise.resolve()
+
 // Must be called once at app startup, before any CGW requests are made.
 export function initializeCaptchaHeaders() {
   if (initialized) return
@@ -76,17 +80,42 @@ export function initializeCaptchaHeaders() {
       activateCaptchaRef.current?.()
     }
 
-    // Block until the widget is initialized and a token is obtained
-    if (captchaReadyPromise) {
-      await captchaReadyPromise
-    }
+    const prev = consumeQueue
+    let release!: () => void
+    consumeQueue = new Promise<void>((r) => {
+      release = r
+    })
 
-    const token = sharedTokenRef.current
-    if (token) {
-      headers.set('X-Captcha-Token', token)
-    }
+    try {
+      await prev
 
-    return headers
+      // Lazy refresh: the previous request consumed the token and no new
+      // challenge is currently in flight (captchaReadyResolve === null means
+      // the ready promise has already resolved). Kick off a fresh challenge
+      // now — but only if a widget is actually registered, otherwise we'd
+      // arm a promise nothing can resolve.
+      if (!sharedTokenRef.current && captchaReadyResolve === null && widgetRefreshCallbackRef.current) {
+        resetCaptchaPromise()
+        widgetRefreshCallbackRef.current()
+      }
+
+      // Block until the widget is initialized and a token is obtained
+      if (captchaReadyPromise) {
+        await captchaReadyPromise
+      }
+
+      const token = sharedTokenRef.current
+      if (token) {
+        headers.set('X-Captcha-Token', token)
+        // Single-use: consume locally. The next hook invocation will lazily
+        // trigger a fresh challenge if another protected request shows up.
+        sharedTokenRef.current = null
+      }
+
+      return headers
+    } finally {
+      release()
+    }
   })
 
   setHandleResponseHook(async (response: Response, url: string) => {

@@ -255,6 +255,101 @@ describe('captchaHeadersInit', () => {
   })
 
   // ---------------------------------------------------------------------------
+  // prepareHeaders hook — single-use token invalidation (lazy rotation)
+  // ---------------------------------------------------------------------------
+  describe('prepareHeaders hook — single-use token invalidation', () => {
+    it('clears the shared token after consuming it, without eagerly refreshing the widget', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+      resolveCaptchaReady()
+      sharedTokenRef.current = 'first-token'
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const headers = new Headers()
+      await hook(headers, PROTECTED_URL)
+
+      expect(headers.get('X-Captcha-Token')).toBe('first-token')
+      expect(sharedTokenRef.current).toBeNull()
+      // Lazy rotation: no refresh is triggered just because a token was consumed;
+      // the next hook invocation will refresh only if a new request actually arrives.
+      expect(mockRefresh).not.toHaveBeenCalled()
+    })
+
+    it('lazily refreshes the widget when a subsequent request finds no token', async () => {
+      // First run seeds and consumes 'first-token'.
+      const mockRefresh = jest.fn(() => {
+        sharedTokenRef.current = 'next-token'
+        resolveCaptchaReady()
+      })
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+      resolveCaptchaReady()
+      sharedTokenRef.current = 'first-token'
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const headersA = new Headers()
+      await hook(headersA, PROTECTED_URL)
+      expect(headersA.get('X-Captcha-Token')).toBe('first-token')
+      expect(mockRefresh).not.toHaveBeenCalled()
+
+      // Second request arrives after the token was consumed — widget refresh is triggered now.
+      const headersB = new Headers()
+      await hook(headersB, PROTECTED_URL)
+
+      expect(mockRefresh).toHaveBeenCalledTimes(1)
+      expect(headersB.get('X-Captcha-Token')).toBe('next-token')
+    })
+
+    it('does not trigger a widget refresh while an initial challenge is still in flight', async () => {
+      const mockRefresh = jest.fn()
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+      // Do NOT call resolveCaptchaReady — the initial promise is still pending.
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const hookPromise = hook(new Headers(), PROTECTED_URL)
+
+      // Give microtasks a chance to run; the lazy refresh must not fire because
+      // captchaReadyResolve is still set (challenge in flight).
+      await Promise.resolve()
+      expect(mockRefresh).not.toHaveBeenCalled()
+
+      // Resolve so the hook can complete and we don't leave a dangling promise.
+      sharedTokenRef.current = 'initial-token'
+      resolveCaptchaReady()
+      await hookPromise
+    })
+
+    it('serializes concurrent protected requests so each awaits its own fresh token', async () => {
+      // Simulate a widget refresh that produces a new token and resolves the promise
+      const mockRefresh = jest.fn(() => {
+        sharedTokenRef.current = 'next-token'
+        resolveCaptchaReady()
+      })
+      registerWidgetRefreshCallback(mockRefresh)
+      initializeCaptchaHeaders()
+
+      // Seed the first token and resolve the initial promise
+      sharedTokenRef.current = 'first-token'
+      resolveCaptchaReady()
+
+      const hook = mockSetPrepareHeadersHook.mock.calls[0][0]
+      const headersA = new Headers()
+      const headersB = new Headers()
+
+      // Fire both requests concurrently
+      const [,] = await Promise.all([hook(headersA, PROTECTED_URL), hook(headersB, PROTECTED_URL)])
+
+      // Each request must carry a distinct token
+      expect(headersA.get('X-Captcha-Token')).toBe('first-token')
+      expect(headersB.get('X-Captcha-Token')).toBe('next-token')
+      // Only B's lazy refresh fires — A consumed the pre-seeded token without refreshing.
+      expect(mockRefresh).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // ---------------------------------------------------------------------------
   // responseHook
   // ---------------------------------------------------------------------------
   describe('responseHook', () => {
