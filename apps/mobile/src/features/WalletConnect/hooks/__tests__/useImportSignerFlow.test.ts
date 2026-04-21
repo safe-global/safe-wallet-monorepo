@@ -207,7 +207,7 @@ describe('useImportSignerFlow', () => {
     expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
-  it('logs the error and returns cleanly when disconnect rejects on a collision', async () => {
+  it('logs error and continues when disconnect fails during collision', async () => {
     mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
     const disconnectError = new Error('teardown failed')
     mockDisconnect.mockRejectedValueOnce(disconnectError)
