@@ -1,3 +1,4 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
@@ -25,7 +26,6 @@ jest.mock('./components/SafeDropdownContainer', () => ({
  * See SafeSelectorDropdown + SpaceSafeBar: selection is driven by the URL async.
  */
 jest.mock('@/components/ui/select', () => {
-  const React = require('react') as typeof import('react')
   const NEW_ID = '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
   const PREV_ID = '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
