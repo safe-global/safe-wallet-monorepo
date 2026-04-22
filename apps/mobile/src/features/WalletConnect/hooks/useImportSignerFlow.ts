@@ -6,7 +6,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { useSignerCollisionGuard } from '@/src/features/ImportSigner/hooks/useSignerCollisionGuard'
 import Logger from '@/src/utils/logger'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import { useConnect, UserRejectedError } from './useConnect'
+import { useConnect, UnsupportedChainError, UserRejectedError, showUnsupportedChainAlert } from './useConnect'
 
 /**
  * Handles the signer import flow: ownership validation and navigation
@@ -50,6 +50,10 @@ export function useImportSignerFlow() {
         })
       }
     } catch (error) {
+      if (error instanceof UnsupportedChainError) {
+        showUnsupportedChainAlert()
+        return
+      }
       if (!(error instanceof UserRejectedError)) {
         Logger.error('Error during signer import:', error)
       }

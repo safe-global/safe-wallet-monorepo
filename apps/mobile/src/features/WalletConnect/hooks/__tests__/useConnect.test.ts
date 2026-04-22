@@ -1,41 +1,53 @@
 import { renderHook, act } from '@/src/tests/test-utils'
-import { useConnect, ConnectError, UserRejectedError } from '../useConnect'
+import { useConnect, ConnectError, UnsupportedChainError, UserRejectedError } from '../useConnect'
 
 const mockOpen = jest.fn()
+const mockDisconnect = jest.fn().mockResolvedValue(undefined)
+const mockSwitchNetwork = jest.fn().mockResolvedValue(undefined)
 
 const mockWalletState = {
   address: undefined as string | undefined,
   isConnected: false,
   walletInfo: undefined as { name: string; icon: string } | undefined,
+  chain: undefined as { caipNetworkId: string } | undefined,
 }
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ open: mockOpen }),
+  useAppKit: () => ({ open: mockOpen, disconnect: mockDisconnect, switchNetwork: mockSwitchNetwork }),
   useAccount: () => ({
     isConnected: mockWalletState.isConnected,
     address: mockWalletState.address,
+    chain: mockWalletState.chain,
   }),
   useWalletInfo: () => ({ walletInfo: mockWalletState.walletInfo }),
 }))
 
-const eventCallbacks: Record<string, (() => void) | undefined> = {}
+type EventCallback = (state?: { data: { address?: string; properties: { caipNetworkId?: string } } }) => void
+const eventCallbacks: Record<string, EventCallback | undefined> = {}
 
 jest.mock('../useStableAppKitEvent', () => ({
-  useStableAppKitEvent: (event: string, callback: () => void) => {
+  useStableAppKitEvent: (event: string, callback: EventCallback) => {
     eventCallbacks[event] = callback
   },
 }))
 
-const setConnected = (address: string, walletName = 'MetaMask', walletIcon = 'icon-url') => {
+const setConnected = (
+  address: string,
+  walletName = 'MetaMask',
+  walletIcon = 'icon-url',
+  caipNetworkId = 'eip155:1',
+) => {
   mockWalletState.address = address
   mockWalletState.isConnected = true
   mockWalletState.walletInfo = { name: walletName, icon: walletIcon }
+  mockWalletState.chain = { caipNetworkId }
 }
 
 const setDisconnected = () => {
   mockWalletState.address = undefined
   mockWalletState.isConnected = false
   mockWalletState.walletInfo = undefined
+  mockWalletState.chain = undefined
 }
 
 describe('useConnect', () => {
@@ -241,6 +253,217 @@ describe('useConnect', () => {
       address: '0xDEF',
       walletName: 'Phantom',
       walletIcon: 'phantom-icon',
+    })
+  })
+
+  describe('CONNECT_SUCCESS chain guard', () => {
+    const activeSafeStore = {
+      activeSafe: { address: '0x0000000000000000000000000000000000000001' as const, chainId: '1' },
+    }
+
+    beforeEach(() => {
+      mockSwitchNetwork.mockResolvedValue(undefined)
+    })
+
+    it('attempts to switch network when caipNetworkId does not match the active Safe chain', async () => {
+      const { result } = renderHook(() => useConnect(), activeSafeStore)
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { address: '0xABC', properties: { caipNetworkId: 'eip155:137' } },
+        })
+      })
+
+      expect(mockSwitchNetwork).toHaveBeenCalledWith('eip155:1')
+      expect(rejected).toBeUndefined()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+    })
+
+    it('rejects with UnsupportedChainError when switchNetwork throws', async () => {
+      mockSwitchNetwork.mockRejectedValueOnce(new Error('Chain not supported'))
+
+      const { result } = renderHook(() => useConnect(), activeSafeStore)
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { address: '0xABC', properties: { caipNetworkId: 'eip155:137' } },
+        })
+      })
+
+      expect(rejected).toBeInstanceOf(UnsupportedChainError)
+      expect(mockDisconnect).toHaveBeenCalled()
+    })
+
+    it('rejects via timeout when switchNetwork resolves but chain never settles', async () => {
+      jest.useFakeTimers()
+
+      const { result } = renderHook(() => useConnect(), activeSafeStore)
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { address: '0xABC', properties: { caipNetworkId: 'eip155:137' } },
+        })
+      })
+
+      expect(mockSwitchNetwork).toHaveBeenCalledWith('eip155:1')
+      expect(rejected).toBeUndefined()
+
+      await act(async () => {
+        jest.advanceTimersByTime(8000)
+      })
+
+      expect(rejected).toBeInstanceOf(UnsupportedChainError)
+      expect(mockDisconnect).toHaveBeenCalled()
+
+      jest.useRealTimers()
+    })
+
+    it('resolves after switchNetwork succeeds and state settles on the correct chain', async () => {
+      const { result, rerender } = renderHook(() => useConnect(), activeSafeStore)
+
+      let resolved: unknown
+      let rejected: Error | undefined
+      act(() => {
+        result.current().then(
+          (r) => {
+            resolved = r
+          },
+          (e: Error) => {
+            rejected = e
+          },
+        )
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { address: '0xABC', properties: { caipNetworkId: 'eip155:137' } },
+        })
+      })
+
+      expect(mockSwitchNetwork).toHaveBeenCalledWith('eip155:1')
+
+      // Simulate post-switch state update: wallet now connected on chain 1.
+      setConnected('0xABC', 'Rainbow', 'rainbow-icon', 'eip155:1')
+      rerender({})
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(resolved).toEqual({ address: '0xABC', walletName: 'Rainbow', walletIcon: 'rainbow-icon' })
+      expect(rejected).toBeUndefined()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+    })
+
+    it('resolver does not resolve while wallet state is on the wrong chain', async () => {
+      const { result, rerender } = renderHook(() => useConnect(), activeSafeStore)
+
+      let resolved: unknown
+      let rejected: Error | undefined
+      act(() => {
+        result.current().then(
+          (r) => {
+            resolved = r
+          },
+          (e: Error) => {
+            rejected = e
+          },
+        )
+      })
+
+      // State flips to connected on the wrong chain *before* any CONNECT_SUCCESS event.
+      // The resolver must not fire until the chain matches the active Safe.
+      setConnected('0xABC', 'Rainbow', 'rainbow-icon', 'eip155:137')
+      rerender({})
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(resolved).toBeUndefined()
+      expect(rejected).toBeUndefined()
+    })
+
+    it('does not attempt to switch when caipNetworkId matches and address is present', async () => {
+      const { result } = renderHook(() => useConnect(), activeSafeStore)
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { address: '0xABC', properties: { caipNetworkId: 'eip155:1' } },
+        })
+      })
+
+      expect(mockSwitchNetwork).not.toHaveBeenCalled()
+      expect(rejected).toBeUndefined()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+    })
+
+    it('ignores CONNECT_SUCCESS when no active Safe is set', async () => {
+      const { result } = renderHook(() => useConnect())
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({
+          data: { properties: { caipNetworkId: 'eip155:137' } },
+        })
+      })
+
+      expect(mockSwitchNetwork).not.toHaveBeenCalled()
+      expect(rejected).toBeUndefined()
+      expect(mockDisconnect).not.toHaveBeenCalled()
+    })
+
+    it('does not switch when address is present and caipNetworkId is missing', async () => {
+      const { result } = renderHook(() => useConnect(), activeSafeStore)
+
+      let rejected: Error | undefined
+      act(() => {
+        result.current().catch((e: Error) => {
+          rejected = e
+        })
+      })
+
+      await act(async () => {
+        eventCallbacks['CONNECT_SUCCESS']?.({ data: { address: '0xABC', properties: {} } })
+      })
+
+      expect(mockSwitchNetwork).not.toHaveBeenCalled()
+      expect(rejected).toBeUndefined()
+      expect(mockDisconnect).not.toHaveBeenCalled()
     })
   })
 })
