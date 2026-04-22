@@ -132,8 +132,8 @@
 
 .outdatedDot {
   position: absolute;
-  top: 4px;
-  right: 2px;
+  top: -3px;
+  right: -3px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
