@@ -191,4 +191,50 @@ describe('ActionsTray geoblocking', () => {
       })
     })
   })
+
+  describe('Receive button (space variant)', () => {
+    it('is enabled when the space has assets and the user is not geoblocked', () => {
+      renderTray({ isBlockedCountry: false })
+
+      const receiveButton = screen.getByRole('button', { name: /receive/i })
+      expect(receiveButton).toBeEnabled()
+    })
+
+    it('is disabled when the space has no assets', () => {
+      renderTray({ isBlockedCountry: false, noAssets: true })
+
+      const receiveButton = screen.getByRole('button', { name: /receive/i })
+      expect(receiveButton).toBeDisabled()
+    })
+
+    it('remains enabled when the user is geoblocked (Receive should stay available)', () => {
+      renderTray({ isBlockedCountry: true })
+
+      const receiveButton = screen.getByRole('button', { name: /receive/i })
+      expect(receiveButton).toBeEnabled()
+    })
+  })
+
+  describe('Build transaction button (space variant)', () => {
+    it('is enabled when the space has assets and the user is not geoblocked', () => {
+      renderTray({ isBlockedCountry: false })
+
+      const buildTxButton = screen.getByRole('button', { name: /transaction builder/i })
+      expect(buildTxButton).toBeEnabled()
+    })
+
+    it('is disabled when the space has no assets', () => {
+      renderTray({ isBlockedCountry: false, noAssets: true })
+
+      const buildTxButton = screen.getByRole('button', { name: /transaction builder/i })
+      expect(buildTxButton).toBeDisabled()
+    })
+
+    it('remains enabled when the user is geoblocked (Build transaction should stay available)', () => {
+      renderTray({ isBlockedCountry: true })
+
+      const buildTxButton = screen.getByRole('button', { name: /transaction builder/i })
+      expect(buildTxButton).toBeEnabled()
+    })
+  })
 })

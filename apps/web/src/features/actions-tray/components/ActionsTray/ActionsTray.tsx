@@ -101,7 +101,12 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')} onClick={handleOnReceive}>
+            <Button
+              variant={secondaryVariant}
+              className={cn('px-6 hover:bg-border')}
+              onClick={handleOnReceive}
+              disabled={noAssets}
+            >
               <ArrowDownLeft className="size-5" />
               Receive
             </Button>
@@ -164,7 +169,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               <Button
                 variant={secondaryVariant}
                 className="px-6 hover:bg-border"
-                disabled={!isOk}
+                disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
               >
