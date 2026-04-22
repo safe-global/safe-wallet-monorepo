@@ -76,7 +76,15 @@ const HistoryFeesAccordion = ({ data }: { data: HistoryFeesData }): ReactElement
         expandIcon={<ExpandMoreIcon />}
         className={accordionCss.accordion}
         data-testid="history-fees-summary"
-        sx={{ '&.Mui-expanded': { backgroundColor: 'background.paper' } }}
+        sx={{
+          minHeight: '56px',
+          px: 2,
+          py: 1.5,
+          '&.Mui-expanded': { minHeight: '56px', backgroundColor: 'background.paper' },
+          '& .MuiAccordionSummary-content': { my: 0, mr: '8px' },
+          '& .MuiAccordionSummary-content.Mui-expanded': { my: 0 },
+          '& .MuiAccordionSummary-expandIconWrapper': { width: 24, height: 24, fontSize: 24 },
+        }}
       >
         <div className={css.summaryContent}>
           <div className={css.summaryLeft}>

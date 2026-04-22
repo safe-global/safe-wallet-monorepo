@@ -16,7 +16,6 @@ import {
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import accordionCss from '@/styles/accordion.module.css'
-import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 enum ColorLevel {
@@ -104,8 +103,7 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
           <Typography variant="subtitle2" fontWeight={700} data-testid="tx-advanced-details">
-            Transaction details
-            <HelpTooltip />
+            Advanced details
           </Typography>
 
           {methodLabel && (

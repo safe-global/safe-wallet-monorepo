@@ -97,36 +97,39 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {txDetails?.executedAt && (
-        <Box mt={2}>
-          <HistoryFees txDetails={txDetails} />
-        </Box>
-      )}
+      {/* Fees + Advanced details stack with shared borders (margin-bottom: -1px on Fees) */}
+      {(txDetails?.executedAt || showDetails) && (
+        <Box
+          mt={2}
+          sx={{
+            '& > .MuiAccordion-root:not(:first-of-type)': {
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+            },
+          }}
+        >
+          {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
 
-      {showDetails && (
-        <Box mt={2}>
-          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+          {showDetails && (
+            <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+              <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
+                {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
 
-              <Box>
-                <Typography variant="subtitle2" fontWeight={700} mb={2}>
-                  Advanced details
-                </Typography>
+                <Box>
+                  <DecoderLinks />
 
-                <DecoderLinks />
-
-                <Receipt
-                  safeTxData={safeTxData}
-                  txData={txData}
-                  txDetails={txDetails}
-                  txInfo={txInfo}
-                  withSignatures
-                  grid
-                />
-              </Box>
-            </Stack>
-          </ColorCodedTxAccordion>
+                  <Receipt
+                    safeTxData={safeTxData}
+                    txData={txData}
+                    txDetails={txDetails}
+                    txInfo={txInfo}
+                    withSignatures
+                    grid
+                  />
+                </Box>
+              </Stack>
+            </ColorCodedTxAccordion>
+          )}
         </Box>
       )}
     </>
