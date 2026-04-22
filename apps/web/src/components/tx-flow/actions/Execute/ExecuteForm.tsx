@@ -72,7 +72,7 @@ export const ExecuteForm = ({
     useContext(TxFlowContext)
 
   // SC wallets can relay fully signed transactions
-  const [walletCanRelay] = useWalletCanRelay(safeTx)
+  const [walletCanRelay, , walletCanRelayLoading] = useWalletCanRelay(safeTx)
   const relays = useRelaysBySafe()
   const { isEligible: isNoFeeCampaign, remaining, limit, blockedAddress } = useNoFeeCampaignEligibility()
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
@@ -132,15 +132,16 @@ export const ExecuteForm = ({
     canNoFeeCampaign &&
     executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
   )
-  const relayUnavailableForGtf = requiresRelay && !canRelay
+  // Wait for the async SC-wallet check to settle — `walletCanRelay` is undefined while loading.
+  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Check if transaction will fail
+  // Safe-pays goes via Gelato; the wallet-executed estimate reverts with GS026 (stale sig set).
   const { executionValidationError } = useIsValidExecution(
-    safeTx,
+    requiresRelay ? undefined : safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
 

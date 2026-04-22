@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { act } from '@testing-library/react'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { renderHook } from '@/tests/test-utils'
 import { useFeesPreview } from '../useFeesPreview'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -136,26 +137,33 @@ const loadingPreview = {
 } as unknown as ReturnType<typeof gatewayApi.useGetGtfFeePreviewQuery>
 
 const withSafeTx = (safeTx: SafeTransaction | undefined) => {
-  const SafeTxWrapper = ({ children }: { children: ReactNode }) => (
-    <SafeTxContext.Provider
-      value={
-        {
-          safeTx,
-          setSafeTx: jest.fn(),
-          setSafeMessage: jest.fn(),
-          setSafeMessageHash: jest.fn(),
-          setSafeTxError: jest.fn(),
-          setNonce: jest.fn(),
-          setNonceNeeded: jest.fn(),
-          setSafeTxGas: jest.fn(),
-          setTxOrigin: jest.fn(),
-          isReadOnly: false,
-        } as never
-      }
-    >
-      {children}
-    </SafeTxContext.Provider>
-  )
+  const SafeTxWrapper = ({ children }: { children: ReactNode }) => {
+    const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string | undefined>(undefined)
+    return (
+      <SafeTxContext.Provider
+        value={
+          {
+            safeTx,
+            setSafeTx: jest.fn(),
+            setSafeMessage: jest.fn(),
+            setSafeMessageHash: jest.fn(),
+            setSafeTxError: jest.fn(),
+            setNonce: jest.fn(),
+            setNonceNeeded: jest.fn(),
+            setSafeTxGas: jest.fn(),
+            setTxOrigin: jest.fn(),
+            gtfPaymentMode: 'safe',
+            setGtfPaymentMode: jest.fn(),
+            gtfSelectedGasToken,
+            setGtfSelectedGasToken,
+            isReadOnly: false,
+          } as never
+        }
+      >
+        {children}
+      </SafeTxContext.Provider>
+    )
+  }
   return SafeTxWrapper
 }
 
@@ -402,13 +410,38 @@ describe('useFeesPreview', () => {
       ])
     })
 
-    it('fires the preview with the locked gas token, ignoring candidate probing', () => {
+    it('skips the CGW preview query — confirmers derive fees from the signed payload', () => {
       const previewSpy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
       renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
 
-      const lastCallArg = previewSpy.mock.calls.at(-1)?.[0]
-      expect(lastCallArg).toMatchObject({ tx: expect.objectContaining({ gasToken: WETH_ADDRESS }) })
+      expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
+    })
+
+    it('derives gasFee amount + fiat from the signed safeTx.data (not CGW)', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+      const lockedSafeTx = buildSafeTx(
+        {
+          to: mockSafe.address.value,
+          value: '100000000000000',
+          data: '0x',
+          gasToken: ETH_ADDRESS,
+          safeTxGas: '2409',
+          baseGas: '68568',
+          gasPrice: '741064438',
+        },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedSafeTx) })
+
+      // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
+      expect(result.current.gasFee.currency).toBe('ETH')
+      expect(result.current.gasFee.amount).toMatch(/^0\.00005/)
+      // fiat = gasWei in ETH * fiatConversion (2500) → ~$0.13
+      expect(result.current.gasFee.fiatAmount).toBeDefined()
+      expect(result.current.loading).toBe(false)
+      expect(result.current.canCoverFees).toBe(true)
     })
   })
 })

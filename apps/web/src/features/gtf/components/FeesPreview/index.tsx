@@ -281,11 +281,6 @@ const ConfirmationFeeNotice = ({
       <Typography variant="body2" fontWeight={700}>
         {token?.symbol}
       </Typography>
-      <Tooltip title={SIGNER_FEE_TOOLTIP} placement="top" arrow>
-        <span className={css.tooltipIcon}>
-          <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-        </span>
-      </Tooltip>
     </div>
   )
 }
