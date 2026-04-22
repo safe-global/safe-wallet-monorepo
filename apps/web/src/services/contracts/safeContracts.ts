@@ -104,7 +104,7 @@ export const getReadOnlyMultiSendCallOnlyContract = async (
   // cannot delegatecall to EraVM contracts.
   let customContractAddress: string | undefined
   if (chainId && implementationAddress && isCanonicalDeployment(implementationAddress, chainId, version)) {
-    customContractAddress = getCanonicalMultiSendCallOnlyAddress(version)
+    customContractAddress = getCanonicalMultiSendCallOnlyAddress(chainId, version)
   }
 
   return getMultiSendCallOnlyContract({

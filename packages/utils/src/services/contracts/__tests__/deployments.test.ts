@@ -12,9 +12,12 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '../../contracts/deployments'
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-// Only v1.3.0 and v1.4.1 ship a zkSync-specific MultiSendCallOnly; v1.5.0 is canonical-only.
-const ZKSYNC_MULTISEND_CALL_ONLY_VERSIONS = ['1.3.0', '1.4.1'] as const
+// picks the zk address for 1.5.0 if/when it has a zkSync deployment:
+const ZKSYNC_MULTISEND_CALL_ONLY_VERSIONS = (['1.3.0', '1.4.1', '1.5.0'] as const).filter(
+  (v) => getMultiSendCallOnlyDeployments({ version: v })?.deployments.zksync?.address,
+)
 
 describe('deployments utils', () => {
   const chainId = '1'
@@ -203,16 +206,99 @@ describe('deployments utils', () => {
   })
 
   describe('getCanonicalMultiSendCallOnlyAddress', () => {
-    it('returns canonical MultiSendCallOnly address for version 1.3.0', () => {
-      const address = getCanonicalMultiSendCallOnlyAddress('1.3.0')
-      // Canonical MultiSendCallOnly 1.3.0 address
-      expect(address).toBe('0x40A2aCCbd92BCA938b02010E17A5b8929b49130D')
+    const MAINNET = '1'
+    const ZKSYNC = '324'
+    const SOPHON = '50104' // zkSync-only: no canonical in any version.
+    const ROPSTEN = '3' // v1.3.0 canonical only — exercises v1.4.1 → v1.3.0 fallback.
+    const FORWARD_ONLY_CHAIN = '63' // v1.5.0 canonical only — proves we never walk upward.
+    const EIP155_ONLY_V130 = '16' // v1.3.0 registered but as eip155, no canonical.
+
+    let warnSpy: jest.SpyInstance
+
+    beforeEach(() => {
+      warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
     })
 
-    it('falls back to 1.3.0 for null version', () => {
-      const address = getCanonicalMultiSendCallOnlyAddress(null)
-      // Should fallback to 1.3.0
-      expect(address).toBe('0x40A2aCCbd92BCA938b02010E17A5b8929b49130D')
+    afterEach(() => {
+      warnSpy.mockRestore()
+    })
+
+    it('returns the requested version when canonical is registered on the chain', () => {
+      const v130 = getMultiSendCallOnlyDeployments({ version: '1.3.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.3.0')).toBe(v130)
+    })
+
+    it('returns v1.5.0 canonical on mainnet where v1.5.0 is registered', () => {
+      const v150 = getMultiSendCallOnlyDeployments({ version: '1.5.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.5.0')).toBe(v150)
+    })
+
+    it('falls back from v1.5.0 to v1.4.1 canonical on zkSync (324)', () => {
+      const v141 = getMultiSendCallOnlyDeployments({ version: '1.4.1' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(ZKSYNC, '1.5.0')).toBe(v141)
+    })
+
+    it('falls back from v1.4.1 to v1.3.0 canonical on Ropsten', () => {
+      const v130 = getMultiSendCallOnlyDeployments({ version: '1.3.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(ROPSTEN, '1.4.1')).toBe(v130)
+    })
+
+    it('falls back from v1.5.0 through v1.4.1 to v1.3.0 canonical on Ropsten', () => {
+      const v130 = getMultiSendCallOnlyDeployments({ version: '1.3.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(ROPSTEN, '1.5.0')).toBe(v130)
+    })
+
+    // Invariant: walks newest→oldest from requested, never upward.
+    it('does NOT walk upward — requesting v1.3.0 on a v1.5.0-only chain returns undefined', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(FORWARD_ONLY_CHAIN, '1.3.0')).toBeUndefined()
+    })
+
+    it('does NOT walk upward — requesting v1.4.1 on a v1.5.0-only chain returns undefined', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(FORWARD_ONLY_CHAIN, '1.4.1')).toBeUndefined()
+    })
+
+    it('returns undefined on a chain where canonical is never registered (Sophon, 50104)', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(SOPHON, '1.4.1')).toBeUndefined()
+      expect(getCanonicalMultiSendCallOnlyAddress(SOPHON, '1.3.0')).toBeUndefined()
+      expect(getCanonicalMultiSendCallOnlyAddress(SOPHON, '1.5.0')).toBeUndefined()
+    })
+
+    it('returns undefined when a chain registers the version but not the canonical type', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(EIP155_ONLY_V130, '1.3.0')).toBeUndefined()
+    })
+
+    it('returns undefined for a chainId not in safe-deployments at all', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress('99999999999', '1.4.1')).toBeUndefined()
+    })
+
+    it('falls back to v1.3.0 when version is null and canonical is registered on the chain', () => {
+      const v130 = getMultiSendCallOnlyDeployments({ version: '1.3.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, null)).toBe(v130)
+    })
+
+    it('returns undefined when version is null and chain has no canonical registration', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(SOPHON, null)).toBeUndefined()
+    })
+
+    it('falls back to v1.3.0 when version is undefined and canonical is registered on the chain', () => {
+      const v130 = getMultiSendCallOnlyDeployments({ version: '1.3.0' })?.deployments.canonical?.address
+      expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, undefined)).toBe(v130)
+    })
+
+    it('handles a version string not in the fallback list without crashing', () => {
+      expect(() => getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.2.0' as SafeState['version'])).not.toThrow()
+    })
+
+    it('logs a warning when no canonical is registered on the chain', () => {
+      getCanonicalMultiSendCallOnlyAddress(SOPHON, '1.4.1')
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[MultiSendCallOnly]'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining(SOPHON))
+    })
+
+    it('does NOT log a warning on the happy path', () => {
+      getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.3.0')
+      expect(warnSpy).not.toHaveBeenCalled()
     })
   })
 

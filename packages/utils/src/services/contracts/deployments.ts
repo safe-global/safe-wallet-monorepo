@@ -280,14 +280,38 @@ export const isCanonicalDeployment = (
   return false
 }
 
+// Newest --> oldest (fallback candidates) starting from the requested version
+const CANONICAL_FALLBACK_VERSIONS = ['1.5.0', '1.4.1', '1.3.0'] as const
+type CanonicalFallbackVersion = (typeof CANONICAL_FALLBACK_VERSIONS)[number]
+
+const isCanonicalRegisteredOnChain = (deployment: SingletonDeploymentV2 | undefined, chainId: string): boolean => {
+  const canonicalAddress = deployment?.deployments.canonical?.address
+  if (!canonicalAddress) return false
+  const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+  return networkAddresses.some((addr) => sameAddress(addr, canonicalAddress))
+}
+
 /**
- * Gets the canonical MultiSendCallOnly address for a given version.
- * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
+ * Canonical MultiSendCallOnly address for `chainId` at `version`, falling back to older
+ * versions. Returns `undefined` if no canonical is registered on the chain.
  */
-export const getCanonicalMultiSendCallOnlyAddress = (version: SafeState['version']): string | undefined => {
-  const safeVersion = version ?? '1.3.0'
-  const deployment = getMultiSendCallOnlyDeployments({ version: safeVersion })
-  return deployment?.deployments.canonical?.address
+export const getCanonicalMultiSendCallOnlyAddress = (
+  chainId: string,
+  version: SafeState['version'],
+): string | undefined => {
+  const requested = (version ?? '1.3.0') as CanonicalFallbackVersion
+  const startIndex = CANONICAL_FALLBACK_VERSIONS.indexOf(requested)
+  const candidates = startIndex >= 0 ? CANONICAL_FALLBACK_VERSIONS.slice(startIndex) : CANONICAL_FALLBACK_VERSIONS
+
+  for (const candidate of candidates) {
+    const deployment = getMultiSendCallOnlyDeployments({ version: candidate })
+    if (isCanonicalRegisteredOnChain(deployment, chainId)) {
+      return deployment!.deployments.canonical!.address
+    }
+  }
+
+  console.warn(`[MultiSendCallOnly] No canonical registered on chain ${chainId} for v${requested} or older`)
+  return undefined
 }
 
 /**
