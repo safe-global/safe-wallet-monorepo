@@ -215,6 +215,11 @@ describe('deployments utils', () => {
     it('returns false for empty implementation address', () => {
       expect(isCanonicalDeployment('', ZKSYNC_ERA_CHAIN_ID, '1.3.0')).toBe(false)
     })
+
+    it('strips version metadata before looking up safe-deployments', () => {
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, ZKSYNC_ERA_CHAIN_ID, '1.3.0+L2')).toBe(true)
+      expect(isCanonicalDeployment(CANONICAL_L2_SAFE, '232', '1.3.0+L2')).toBe(true)
+    })
   })
 
   describe('getCanonicalMultiSendCallOnlyAddress', () => {
@@ -507,6 +512,15 @@ describe('deployments utils', () => {
     it('falls back to 1.3.0 when version is null', () => {
       expect(isEraVmChain('324', null)).toBe(true)
       expect(isEraVmChain('1', null)).toBe(false)
+    })
+
+    it('strips version metadata before looking up safe-deployments', () => {
+      // CGW fixtures encode L2 flag as `1.3.0+L2`; the bare version must be used
+      // for safe-deployments lookups or EraVM detection will silently fail.
+      expect(isEraVmChain('232', '1.3.0+L2')).toBe(true)
+      expect(isEraVmChain('232', '1.4.1+L2')).toBe(true)
+      expect(isEraVmChain('324', '1.3.0+L2')).toBe(true)
+      expect(isEraVmChain('1', '1.3.0+L2')).toBe(false)
     })
   })
 })

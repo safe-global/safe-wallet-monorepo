@@ -251,7 +251,9 @@ export const getCreateCallContractDeployment = (chain: Chain, safeVersion: SafeS
  * any zk-stack chain (Lens, zkSync Sepolia, etc.) is handled uniformly.
  */
 export const isEraVmChain = (chainId: string, version: SafeState['version']): boolean => {
-  const safeVersion = version ?? '1.3.0'
+  // Safe versions in this codebase can include metadata like `1.3.0+L2`; strip before
+  // calling safe-deployments getters which match the bare version only.
+  const [safeVersion] = (version ?? '1.3.0').split('+')
   const l2 = getSafeL2SingletonDeployments({ version: safeVersion })
   const l1 = getSafeSingletonDeployments({ version: safeVersion })
 
@@ -278,7 +280,7 @@ export const isCanonicalDeployment = (
   if (!implementationAddress) return false
   if (!isEraVmChain(chainId, version)) return false
 
-  const safeVersion = version ?? '1.3.0'
+  const [safeVersion] = (version ?? '1.3.0').split('+')
 
   const deployments: (SingletonDeploymentV2 | undefined)[] = [
     getSafeL2SingletonDeployments({ version: safeVersion }),
@@ -296,7 +298,7 @@ export const isCanonicalDeployment = (
  * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
  */
 export const getCanonicalMultiSendCallOnlyAddress = (version: SafeState['version']): string | undefined => {
-  const safeVersion = version ?? '1.3.0'
+  const [safeVersion] = (version ?? '1.3.0').split('+')
   const deployment = getMultiSendCallOnlyDeployments({ version: safeVersion })
   return deployment?.deployments.canonical?.address
 }
@@ -306,7 +308,7 @@ export const getCanonicalMultiSendCallOnlyAddress = (version: SafeState['version
  * Used when a Safe on zkSync uses a canonical (EVM bytecode) mastercopy.
  */
 export const getCanonicalMultiSendAddress = (version: SafeState['version']): string | undefined => {
-  const safeVersion = version ?? '1.3.0'
+  const [safeVersion] = (version ?? '1.3.0').split('+')
   const deployment = getMultiSendDeployments({ version: safeVersion })
   return deployment?.deployments.canonical?.address
 }
