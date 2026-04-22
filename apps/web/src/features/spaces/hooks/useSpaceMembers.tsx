@@ -28,7 +28,10 @@ const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentData } = useMembersGetUsersV1Query({ spaceId: Number(actualSpaceId) }, { skip: !isUserSignedIn })
+  const { data: currentData } = useMembersGetUsersV1Query(
+    { spaceId: Number(actualSpaceId) },
+    { skip: !isUserSignedIn || !actualSpaceId },
+  )
   return currentData?.members || []
 }
 
