@@ -139,7 +139,9 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays goes via Gelato; the wallet-executed estimate reverts with GS026 (stale sig set).
+  // Safe-pays runs via Gelato, not the wallet — this hook simulates the wrong path.
+  // The wallet-as-executor simulation reverts with GS026 on owner-set drift (dev/staging)
+  // and can't see Gelato's gas budget either, so it offers no actionable signal here.
   const { executionValidationError } = useIsValidExecution(
     requiresRelay ? undefined : safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
