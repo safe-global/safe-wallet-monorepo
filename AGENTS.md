@@ -23,6 +23,28 @@ yarn workspace @safe-global/web test
 yarn workspace @safe-global/web storybook
 ```
 
+## Turborepo
+
+Root-level `lint`, `type-check`, and `test` run through [Turborepo](https://turborepo.com). Tasks are cached by input hash and re-used on subsequent runs — locally and in CI.
+
+```bash
+yarn type-check                                   # all workspaces (cached)
+yarn turbo run type-check --filter=@safe-global/web    # scoped
+yarn turbo run test --filter=@safe-global/utils... # package + dependents
+```
+
+Cache directory is `.turbo/` (gitignored). Task definitions live in `turbo.json`.
+
+### Remote cache
+
+CI reads `TURBO_TOKEN` (repo secret) and `TURBO_TEAM` (repo variable) via `.github/actions/yarn`. These must be configured once per Vercel team:
+
+1. Create or pick a Vercel team; copy the team slug → set repo variable `TURBO_TEAM`.
+2. Create a Vercel personal access token with access to that team → set repo secret `TURBO_TOKEN`.
+3. Locally: `yarn turbo login && yarn turbo link` to enable remote cache in development.
+
+Self-hosted cache (e.g. [ducktors/turborepo-remote-cache](https://github.com/ducktors/turborepo-remote-cache)) can be wired by setting `TURBO_API`, `TURBO_TOKEN`, `TURBO_TEAM` — the same env vars the Vercel backend uses.
+
 ## Architecture Overview
 
 - **apps/web** - Next.js web application
