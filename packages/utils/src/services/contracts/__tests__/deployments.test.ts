@@ -14,10 +14,18 @@ import {
 import { ZKSYNC_ERA_CHAIN_ID } from '../../../config/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
-// picks the zk address for 1.5.0 if/when it has a zkSync deployment:
+// Picks the zk address for 1.5.0 if/when it has a zkSync deployment.
 const ZKSYNC_MULTISEND_CALL_ONLY_VERSIONS = (['1.3.0', '1.4.1', '1.5.0'] as const).filter(
   (v) => getMultiSendCallOnlyDeployments({ version: v })?.deployments.zksync?.address,
 )
+
+// Guard: if safe-deployments ever drops all zkSync entries, describe.each below generates
+// zero tests and the suite silently passes. Fail loudly instead.
+describe('zkSync test setup', () => {
+  it('has zkSync MultiSendCallOnly deployments available for versioned tests', () => {
+    expect(ZKSYNC_MULTISEND_CALL_ONLY_VERSIONS).not.toHaveLength(0)
+  })
+})
 
 describe('deployments utils', () => {
   const chainId = '1'
@@ -285,8 +293,10 @@ describe('deployments utils', () => {
       expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, undefined)).toBe(v130)
     })
 
-    it('handles a version string not in the fallback list without crashing', () => {
-      expect(() => getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.2.0' as SafeState['version'])).not.toThrow()
+    // Requested version older than any MultiSendCallOnly release → no candidates pass the
+    // semver `<= requested` filter → returns undefined rather than walking upward.
+    it('returns undefined when requested version is older than the oldest candidate (v1.2.0)', () => {
+      expect(getCanonicalMultiSendCallOnlyAddress(MAINNET, '1.2.0' as SafeState['version'])).toBeUndefined()
     })
 
     it('logs a warning when no canonical is registered on the chain', () => {

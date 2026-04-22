@@ -77,7 +77,7 @@ export const hasCanonicalDeployment = (deployment: SingletonDeploymentV2 | undef
     return false
   }
 
-  const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId])
+  const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
 
   return networkAddresses.some((networkAddress) => sameAddress(canonicalAddress, networkAddress))
 }
@@ -280,16 +280,8 @@ export const isCanonicalDeployment = (
   return false
 }
 
-// Newest --> oldest (fallback candidates) starting from the requested version
+// Newest --> oldest. Filtered with semver at call time so we never walk above the requested version.
 const CANONICAL_FALLBACK_VERSIONS = ['1.5.0', '1.4.1', '1.3.0'] as const
-type CanonicalFallbackVersion = (typeof CANONICAL_FALLBACK_VERSIONS)[number]
-
-const isCanonicalRegisteredOnChain = (deployment: SingletonDeploymentV2 | undefined, chainId: string): boolean => {
-  const canonicalAddress = deployment?.deployments.canonical?.address
-  if (!canonicalAddress) return false
-  const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
-  return networkAddresses.some((addr) => sameAddress(addr, canonicalAddress))
-}
 
 /**
  * Canonical MultiSendCallOnly address for `chainId` at `version`, falling back to older
@@ -299,13 +291,12 @@ export const getCanonicalMultiSendCallOnlyAddress = (
   chainId: string,
   version: SafeState['version'],
 ): string | undefined => {
-  const requested = (version ?? '1.3.0') as CanonicalFallbackVersion
-  const startIndex = CANONICAL_FALLBACK_VERSIONS.indexOf(requested)
-  const candidates = startIndex >= 0 ? CANONICAL_FALLBACK_VERSIONS.slice(startIndex) : CANONICAL_FALLBACK_VERSIONS
+  const requested = version ?? '1.3.0'
+  const candidates = CANONICAL_FALLBACK_VERSIONS.filter((candidate) => semverSatisfies(candidate, `<=${requested}`))
 
   for (const candidate of candidates) {
     const deployment = getMultiSendCallOnlyDeployments({ version: candidate })
-    if (isCanonicalRegisteredOnChain(deployment, chainId)) {
+    if (hasCanonicalDeployment(deployment, chainId)) {
       return deployment!.deployments.canonical!.address
     }
   }
