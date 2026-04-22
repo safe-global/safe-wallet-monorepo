@@ -114,8 +114,8 @@ export const getChainAgnosticAddress = (
 ): string | undefined => {
   if (!deployment) return undefined
 
-  const deploymentTypeAddress = deployment.deployments[deploymentType]?.address
-  const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+  const deploymentTypeAddress = deployment.deployments?.[deploymentType]?.address
+  const networkAddresses = toNetworkAddressList(deployment.networkAddresses?.[chainId] ?? [])
 
   // Prefer the requested deployment-type address if it's registered for this chain
   if (
@@ -256,9 +256,10 @@ export const isEraVmChain = (chainId: string, version: SafeState['version']): bo
   const l1 = getSafeSingletonDeployments({ version: safeVersion })
 
   return [l2, l1].some((deployment) => {
-    const zksyncAddress = deployment?.deployments.zksync?.address
-    if (!zksyncAddress || !deployment) return false
-    const networkAddresses = toNetworkAddressList(deployment.networkAddresses[chainId] ?? [])
+    if (!deployment) return false
+    const zksyncAddress = deployment.deployments?.zksync?.address
+    if (!zksyncAddress) return false
+    const networkAddresses = toNetworkAddressList(deployment.networkAddresses?.[chainId] ?? [])
     return networkAddresses.some((networkAddress) => sameAddress(networkAddress, zksyncAddress))
   })
 }
@@ -285,7 +286,7 @@ export const isCanonicalDeployment = (
   ]
 
   return deployments.some((deployment) => {
-    const canonicalAddress = deployment?.deployments.canonical?.address
+    const canonicalAddress = deployment?.deployments?.canonical?.address
     return canonicalAddress ? sameAddress(implementationAddress, canonicalAddress) : false
   })
 }
@@ -382,7 +383,7 @@ export const getDeploymentTypeForMasterCopy = (
 
   for (const { getter, isL1 } of tables) {
     const deployment = getter({ version: cleanVersion })
-    if (!deployment) continue
+    if (!deployment?.deployments) continue
     const { canonical, zksync, eip155 } = deployment.deployments
     if (zksync?.address && sameAddress(implementation, zksync.address)) {
       return { deploymentType: 'zksync', isL1 }
