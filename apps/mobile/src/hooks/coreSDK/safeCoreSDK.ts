@@ -8,6 +8,10 @@ import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeCon
 import type { SafeCoreSDKProps } from '@safe-global/utils/hooks/coreSDK/types'
 import { isInDeployments } from '@safe-global/utils/hooks/coreSDK/utils'
 import {
+  getCanonicalMultiSendAddress,
+  getCanonicalMultiSendCallOnlyAddress,
+  getDeploymentTypeForMasterCopy,
+  isCanonicalDeployment,
   isChainAgnosticVersion,
   resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
@@ -42,11 +46,15 @@ export const initSafeSDK = async ({
 
   // For versions >= 1.4.1, resolve all addresses chain-agnostically (works on any chain)
   if (isChainAgnosticVersion(safeVersion) && isL2Chain !== undefined) {
-    const resolved = resolveChainAgnosticContractAddresses(safeVersion, isL2Chain, isZkChain ?? false)
+    const { deploymentType, isL1 } = getDeploymentTypeForMasterCopy(implementation, safeVersion, {
+      deploymentType: isZkChain ? 'zksync' : 'canonical',
+      isL1: !isL2Chain,
+    })
+    const resolved = resolveChainAgnosticContractAddresses(chainId, safeVersion, !isL1, deploymentType)
 
     if (resolved) {
       contractNetworks = { [chainId]: resolved }
-      isL1SafeSingleton = !isL2Chain
+      isL1SafeSingleton = isL1
     }
   }
 
@@ -72,6 +80,23 @@ export const initSafeSDK = async ({
 
   if (isLegacyVersion(safeVersion)) {
     isL1SafeSingleton = true
+  }
+
+  // zkSync Safes using a canonical (EVM bytecode) master copy cannot delegatecall
+  // the zksync-specific (EraVM) MultiSend/MultiSendCallOnly, so force the canonical
+  // aux-contract addresses. Covers versions below the chain-agnostic threshold (<1.4.1).
+  if (isCanonicalDeployment(implementation, chainId, safeVersion)) {
+    const canonicalMultiSendCallOnly = getCanonicalMultiSendCallOnlyAddress(safeVersion)
+    const canonicalMultiSend = getCanonicalMultiSendAddress(safeVersion)
+
+    contractNetworks = {
+      ...contractNetworks,
+      [chainId]: {
+        ...contractNetworks?.[chainId],
+        ...(canonicalMultiSendCallOnly && { multiSendCallOnlyAddress: canonicalMultiSendCallOnly }),
+        ...(canonicalMultiSend && { multiSendAddress: canonicalMultiSend }),
+      },
+    }
   }
 
   const safeSDK = await Safe.init({
