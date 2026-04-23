@@ -17,6 +17,12 @@ export interface AddressValidationResult {
   ownerInfo?: AddressInfo
 }
 
+const findOwner = (safes: { owners: AddressInfo[] }[], address: string): AddressValidationResult => {
+  const owners = extractSignersFromSafes(safes)
+  const ownerInfo = Object.values(owners).find((owner) => sameAddress(owner.value, address))
+  return { isOwner: !!ownerInfo, ownerInfo }
+}
+
 /**
  * Hook for validating if an address is an owner of the current Safe (post-onboarding)
  * or of the Safe currently being added during the import flow (pre-onboarding).
@@ -34,26 +40,20 @@ export const useAddressOwnershipValidation = () => {
 
   const validateAddressOwnership = useCallback(
     async (address: string): Promise<AddressValidationResult> => {
-      if (!pendingSafe && !activeSafe) {
-        return { isOwner: false }
-      }
-
       try {
         if (pendingSafe) {
           // Match the args used by AddSignersForm.container.tsx so RTK Query reuses its cached entry.
           const safes = chainIds.map((chainId) => makeSafeId(chainId, pendingSafe.address))
           const overviews = await overviewsTrigger({ safes, currency, trusted: true, excludeSpam: true }).unwrap()
 
-          if (!overviews || overviews.length === 0) {
+          if (overviews.length === 0) {
             return { isOwner: false }
           }
 
-          const owners = extractSignersFromSafes(overviews)
-          const ownerInfo = Object.values(owners).find((owner) => sameAddress(owner.value, address))
+          return findOwner(overviews, address)
+        }
 
-          return { isOwner: !!ownerInfo, ownerInfo }
-        } else if (activeSafe) {
-          // Single safe validation for active safe
+        if (activeSafe) {
           const result = await singleSafeTrigger({
             safeAddress: activeSafe.address,
             chainId: activeSafe.chainId,
@@ -63,13 +63,7 @@ export const useAddressOwnershipValidation = () => {
             return { isOwner: false }
           }
 
-          const owners = extractSignersFromSafes([result])
-          const ownerInfo = Object.values(owners).find((owner) => sameAddress(owner.value, address))
-
-          return {
-            isOwner: !!ownerInfo,
-            ownerInfo,
-          }
+          return findOwner([result], address)
         }
 
         return { isOwner: false }
