@@ -10883,6 +10883,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nodable/entities@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@nodable/entities@npm:2.1.0"
+  checksum: 10/355c55e82aebe45d4b962d16530951df51e19e3e63a27ea61ad3260c0807064619b270b9c83db10e8394f42760abd5b7f7c5b5117678c4246ce8364a4aafc637
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -13345,6 +13352,7 @@ __metadata:
     msw: "npm:^2.7.3"
     prettier: "npm:^3.6.2"
     storybook: "npm:^10.2.7"
+    turbo: "npm:^2.9.6"
   dependenciesMeta:
     cypress:
       built: true
@@ -13450,7 +13458,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.31.1"
     "@typescript-eslint/parser": "npm:^8.31.1"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    axios: "npm:^1.15.0"
+    axios: "npm:^1.15.2"
     eslint: "npm:^9.29.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-react: "npm:^7.37.5"
@@ -18133,6 +18141,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@turbo/darwin-64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/darwin-64@npm:2.9.6"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@turbo/darwin-arm64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/darwin-arm64@npm:2.9.6"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@turbo/linux-64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/linux-64@npm:2.9.6"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@turbo/linux-arm64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/linux-arm64@npm:2.9.6"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@turbo/windows-64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/windows-64@npm:2.9.6"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@turbo/windows-arm64@npm:2.9.6":
+  version: 2.9.6
+  resolution: "@turbo/windows-arm64@npm:2.9.6"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.0, @tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -20528,9 +20578,9 @@ __metadata:
   linkType: hard
 
 "@xmldom/xmldom@npm:^0.8.8":
-  version: 0.8.12
-  resolution: "@xmldom/xmldom@npm:0.8.12"
-  checksum: 10/0fc20bc72a057a939ed17afc3fb35d6be2eb19e42aa9ba3c78aa8bdf471da0b4b17c2710581ce6a2cd68ce3995c2ee7d689593a70a26df1273c0c9c29dfca257
+  version: 0.8.13
+  resolution: "@xmldom/xmldom@npm:0.8.13"
+  checksum: 10/f8f3d56fa91d5026885c0c5c00b07eae47647bda0d742ecbf8e51e06bb287ab30222977b20529ee15c364031606225ebca58907a8ecc76a3add6b3f10e6ddfc6
   languageName: node
   linkType: hard
 
@@ -21416,7 +21466,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.15.0, axios@npm:^1.6.8":
+"axios@npm:^1.15.2":
+  version: 1.15.2
+  resolution: "axios@npm:1.15.2"
+  dependencies:
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10/eebbd8cb777316d4252cd994a06ec9fb956ef519214a62dab6c5443ae8b753b5116e9a770502316789e6cdef1101e6aae53b6936d6a3791b2d66d75f4d7d2462
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.8":
   version: 1.15.0
   resolution: "axios@npm:1.15.0"
   dependencies:
@@ -21925,9 +21986,9 @@ __metadata:
   linkType: hard
 
 "basic-ftp@npm:^5.0.2":
-  version: 5.2.2
-  resolution: "basic-ftp@npm:5.2.2"
-  checksum: 10/2bb208276bafbc3549992734b67247d78bfe6546e2eb1e9513c2761364c47e88b94171666359200279a738b36b152d2bbba0953d4f83f4677f1fd5b68aea3e29
+  version: 5.3.0
+  resolution: "basic-ftp@npm:5.3.0"
+  checksum: 10/08eef717642f32d92936e02f516ab6426ecc61084e4a75b542cd202dd84dddff2520dda321db1be34b7e49860cf1b2aed67ab275dc3e53b185949df311241396
   languageName: node
   linkType: hard
 
@@ -27803,25 +27864,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-builder@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "fast-xml-builder@npm:1.1.4"
+"fast-xml-builder@npm:^1.1.5":
+  version: 1.1.5
+  resolution: "fast-xml-builder@npm:1.1.5"
   dependencies:
     path-expression-matcher: "npm:^1.1.3"
-  checksum: 10/32937866aaf5a90e69d1f4ee6e15e875248d5b5d2afd70277e9e8323074de4980cef24575a591b8e43c29f405d5f12377b3bad3842dc412b0c5c17a3eaee4b6b
+  checksum: 10/377c4ef816972e67192fd32757c50d2a9d4cccf352ceac48bda6681a0ee24fb0b1f1c892810f77886db760681f23fe0b8f62c7c0cc9469c0d2863c5c529ac1d2
   languageName: node
   linkType: hard
 
 "fast-xml-parser@npm:^5.3.7":
-  version: 5.5.10
-  resolution: "fast-xml-parser@npm:5.5.10"
+  version: 5.7.1
+  resolution: "fast-xml-parser@npm:5.7.1"
   dependencies:
-    fast-xml-builder: "npm:^1.1.4"
-    path-expression-matcher: "npm:^1.2.1"
-    strnum: "npm:^2.2.2"
+    "@nodable/entities": "npm:^2.1.0"
+    fast-xml-builder: "npm:^1.1.5"
+    path-expression-matcher: "npm:^1.5.0"
+    strnum: "npm:^2.2.3"
   bin:
     fxparser: src/cli/cli.js
-  checksum: 10/ac48edff66e5cad1c5f978a9edc2f081edc36abf74a745a3df83acaf35a7603ca561c5be9a0c0c0184095bfd06c6c7f75afb6e3bc81e6ff0cb3544b3886fa4c6
+  checksum: 10/ce7de013cae7707d12b9da8cb294265da3780bb8bfa36b17f98053654628a0142159d78746747b1ed38bdefca8b6817f051171183e69a527ba18e1df067e9bce
   languageName: node
   linkType: hard
 
@@ -29461,9 +29523,9 @@ __metadata:
   linkType: hard
 
 "hono@npm:^4.11.4":
-  version: 4.12.12
-  resolution: "hono@npm:4.12.12"
-  checksum: 10/760617935cbc40fb20f2ffb4cbd5d59c3578a6838700be5f89a636a287bce59195d08f8e8e3551ca907796110457fb276327c155289d3776c151ed74ee02270f
+  version: 4.12.14
+  resolution: "hono@npm:4.12.14"
+  checksum: 10/2e620adb89e773a7e982dee8d8c9917f79c71b89cb051b5bc0d2aa91b5318373e90ba7a236bdc4762dc36026c1d7e5e979d6b48cf1dbbe44fc524a5c4df227d9
   languageName: node
   linkType: hard
 
@@ -37219,10 +37281,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-expression-matcher@npm:^1.1.3, path-expression-matcher@npm:^1.2.1":
+"path-expression-matcher@npm:^1.1.3":
   version: 1.2.1
   resolution: "path-expression-matcher@npm:1.2.1"
   checksum: 10/2ef295fc82c0aed1efbf78b022ac38517e677c6cb06d7819872e2a3e789cdc7064164a5876aaff22358c49dce7c59157c77ef587dbd8a998e1d71cb44f15d707
+  languageName: node
+  linkType: hard
+
+"path-expression-matcher@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "path-expression-matcher@npm:1.5.0"
+  checksum: 10/28303bb9ee6831e6df14c10cd3f3f7b2d7c8d7f788d8bdb7440136fd696064c82a3e264999a0764d28e39f698275fc03a5493bec93c57ef4a22566280367dd64
   languageName: node
   linkType: hard
 
@@ -37983,8 +38052,8 @@ __metadata:
   linkType: hard
 
 "protobufjs@npm:^6.10.2":
-  version: 6.11.4
-  resolution: "protobufjs@npm:6.11.4"
+  version: 6.11.5
+  resolution: "protobufjs@npm:6.11.5"
   dependencies:
     "@protobufjs/aspromise": "npm:^1.1.2"
     "@protobufjs/base64": "npm:^1.1.2"
@@ -38002,7 +38071,7 @@ __metadata:
   bin:
     pbjs: bin/pbjs
     pbts: bin/pbts
-  checksum: 10/6b7fd7540d74350d65c38f69f398c9995ae019da070e79d9cd464a458c6d19b40b07c9a026be4e10704c824a344b603307745863310c50026ebd661ce4da0663
+  checksum: 10/2aa4d552fe9254e7e87e8cab402a4934cd58b81e3b1ff0fba37d2635f9072d287d883d11b0df07377c661c10f09c4efda7372caae953a478d724972d4db46057
   languageName: node
   linkType: hard
 
@@ -42196,10 +42265,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strnum@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "strnum@npm:2.2.2"
-  checksum: 10/c55813cfded750dc84556b4881ffc7cee91382ff15a48f1fba0ff7a678e1640ed96ca40806fbd55724940fd7d51cf752469b2d862e196e4adefb6c7d5d9cd73b
+"strnum@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "strnum@npm:2.2.3"
+  checksum: 10/fb70206301858c319f59ed34fecedf90ac3b821692c2accd403d9d4a3384223a09df8fd92b130bbd4e885b67b7790715c003405ce5f959d9cabbf07d41d62aa8
   languageName: node
   linkType: hard
 
@@ -43422,6 +43491,35 @@ __metadata:
   dependencies:
     safe-buffer: "npm:^5.0.1"
   checksum: 10/7f0d9ed5c22404072b2ae8edc45c071772affd2ed14a74f03b4e71b4dd1a14c3714d85aed64abcaaee5fec2efc79002ba81155c708f4df65821b444abb0cfade
+  languageName: node
+  linkType: hard
+
+"turbo@npm:^2.9.6":
+  version: 2.9.6
+  resolution: "turbo@npm:2.9.6"
+  dependencies:
+    "@turbo/darwin-64": "npm:2.9.6"
+    "@turbo/darwin-arm64": "npm:2.9.6"
+    "@turbo/linux-64": "npm:2.9.6"
+    "@turbo/linux-arm64": "npm:2.9.6"
+    "@turbo/windows-64": "npm:2.9.6"
+    "@turbo/windows-arm64": "npm:2.9.6"
+  dependenciesMeta:
+    "@turbo/darwin-64":
+      optional: true
+    "@turbo/darwin-arm64":
+      optional: true
+    "@turbo/linux-64":
+      optional: true
+    "@turbo/linux-arm64":
+      optional: true
+    "@turbo/windows-64":
+      optional: true
+    "@turbo/windows-arm64":
+      optional: true
+  bin:
+    turbo: bin/turbo
+  checksum: 10/e2378f55c12029bed600b9080e3d40805431f11ed2c79a9fd57176fb18b75fd85f3bc1fc69ef2f601fb65fc6a4bf19c169f4102590bd47173b66c81a729c789a
   languageName: node
   linkType: hard
 

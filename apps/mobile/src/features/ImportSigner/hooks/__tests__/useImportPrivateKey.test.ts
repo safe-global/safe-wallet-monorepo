@@ -1,3 +1,4 @@
+import { Alert } from 'react-native'
 import { renderHook, act } from '@/src/tests/test-utils'
 import { useImportPrivateKey } from '../useImportPrivateKey'
 import { ethers } from 'ethers'
@@ -5,6 +6,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import Logger from '@/src/utils/logger'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
+import type { Signer } from '@/src/store/signersSlice'
 
 jest.mock('@react-native-clipboard/clipboard')
 jest.mock('@/src/hooks/useSign/useSign')
@@ -12,6 +14,8 @@ jest.mock('@/src/hooks/useDelegate')
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }))
+
+jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
 
 const mockClipboard = Clipboard as jest.Mocked<typeof Clipboard>
 const mockStorePrivateKey = storePrivateKey as jest.MockedFunction<typeof storePrivateKey>
@@ -354,6 +358,32 @@ describe('useImportPrivateKey', () => {
 
       expect(result.current.error).toBe('Invalid private key or seed phrase.')
       expect(mockStorePrivateKey).not.toHaveBeenCalled()
+      expect(mockRouter.push).not.toHaveBeenCalled()
+    })
+
+    it('should block import and show alert when a different-type signer exists for the address', async () => {
+      const existing: Signer = {
+        value: EXPECTED_ADDRESS,
+        name: 'WC Signer',
+        logoUri: null,
+        type: 'walletconnect',
+      }
+
+      const { result } = renderHook(() => useImportPrivateKey(), {
+        signers: { [EXPECTED_ADDRESS]: existing },
+      })
+
+      act(() => {
+        result.current.handleInputChange(VALID_PRIVATE_KEY)
+      })
+
+      await act(async () => {
+        await result.current.handleImport()
+      })
+
+      expect(Alert.alert).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+      expect(mockStorePrivateKey).not.toHaveBeenCalled()
+      expect(mockCreateDelegate).not.toHaveBeenCalled()
       expect(mockRouter.push).not.toHaveBeenCalled()
     })
   })

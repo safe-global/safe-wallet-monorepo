@@ -6,13 +6,16 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import reconcileAuth from '@/store/reconcileAuth'
-import { OIDC_AUTH_PENDING_KEY } from '../constants'
+import { DEFAULT_SIGN_IN_ERROR_MESSAGE, OIDC_AUTH_PENDING_KEY, SIGN_IN_ERROR_DESCRIPTION_MAP } from '../constants'
 
-const EMAIL_SIGN_IN_ERROR = {
-  message: 'Something went wrong while signing in with email',
+const getErrorNotification = (errorDescription: string | null) => ({
+  message:
+    errorDescription && Object.hasOwn(SIGN_IN_ERROR_DESCRIPTION_MAP, errorDescription)
+      ? SIGN_IN_ERROR_DESCRIPTION_MAP[errorDescription]
+      : DEFAULT_SIGN_IN_ERROR_MESSAGE,
   variant: 'error' as const,
   groupKey: 'email-sign-in-failed',
-}
+})
 
 /**
  * Detects post-OIDC redirect and updates auth state.
@@ -48,11 +51,13 @@ export const useOidcLoginCallback = () => {
       const params = new URLSearchParams(window.location.search)
 
       if (params.has('error')) {
-        dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
+        const errorDescription = params.get('error_description')
+        dispatch(showNotification(getErrorNotification(errorDescription)))
 
         // Read params from window.location.search instead of
         // router.query, which may still be empty before router.isReady on first render.
         params.delete('error')
+        params.delete('error_description')
         const cleanQuery = Object.fromEntries(params.entries())
         routerRef.current.replace({ pathname: routerRef.current.pathname, query: cleanQuery }, undefined, {
           shallow: true,
@@ -60,7 +65,7 @@ export const useOidcLoginCallback = () => {
       } else {
         const result = await reconcileAuth(dispatch)
         if (result === 'unauthenticated') {
-          dispatch(showNotification(EMAIL_SIGN_IN_ERROR))
+          dispatch(showNotification(getErrorNotification(null)))
         }
       }
 

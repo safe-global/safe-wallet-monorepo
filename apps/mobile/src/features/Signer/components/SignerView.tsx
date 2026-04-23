@@ -58,7 +58,10 @@ export const SignerView = ({
     <YStack flex={1}>
       <ScrollView flex={1}>
         <View justifyContent={'center'} alignItems={'center'} paddingTop={'$3'}>
-          <BadgeWrapper badge={<SignerTypeBadge address={signerAddress as Address} />} position="top-right">
+          <BadgeWrapper
+            badge={<SignerTypeBadge address={signerAddress as Address} testID="signer-detail-badge" />}
+            position="top-right"
+          >
             <Identicon address={signerAddress as Address} size={56} />
           </BadgeWrapper>
         </View>

@@ -9,7 +9,6 @@
 }
 
 .tab {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -30,19 +29,10 @@
 
 .active {
   color: var(--color-text-primary);
-}
-
-.indicator {
-  position: absolute;
-  inset: 0;
   background: var(--color-background-secondary);
-  border-radius: 16px;
-  z-index: 0;
 }
 
 .label {
-  position: relative;
-  z-index: 1;
   display: inline-flex;
   align-items: center;
 }

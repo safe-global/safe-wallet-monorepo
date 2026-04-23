@@ -11,7 +11,7 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
 import { useHasFeature } from '@/hooks/useChains'
@@ -25,13 +25,13 @@ export function NestedSafesList(): ReactElement | null {
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: safeAddress },
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId: safe.chainId, ownerAddress: safeAddress },
     { skip: !isEnabled || !safeLoaded },
   )
 
   const rows = useMemo(() => {
-    const nestedSafes = ownedSafes?.[safe.chainId] ?? []
+    const nestedSafes = ownedSafes?.safes ?? []
     return nestedSafes.map((nestedSafe) => {
       return {
         cells: {
@@ -65,7 +65,7 @@ export function NestedSafesList(): ReactElement | null {
         },
       }
     })
-  }, [ownedSafes, safe.chainId])
+  }, [ownedSafes])
 
   if (!isEnabled) {
     return null

@@ -16,8 +16,8 @@ const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsPr
     <Box className={css.container}>
       {!$isDisabled && $isReady && (
         <>
-          <EmailSignInButton />
           <GoogleSignInButton />
+          <EmailSignInButton />
           <Divider className={css.divider}>OR</Divider>
         </>
       )}

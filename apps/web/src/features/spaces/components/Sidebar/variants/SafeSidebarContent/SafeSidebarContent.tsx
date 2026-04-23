@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useCallback, useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
@@ -40,13 +40,6 @@ export const SafeSidebarContent = ({
   const { safe } = useSafeInfo()
   const safeAddress = useSafeQueryParam() || undefined
 
-  // prevents a re-render of nav items when tx data arrives later:
-  useEffect(() => {
-    if (Number(queueSize) > 0 && router.pathname === AppRoutes.transactions.history) {
-      void router.replace({ pathname: AppRoutes.transactions.queue, query: router.query })
-    }
-  }, [queueSize, router.pathname])
-
   const getLink = useCallback(
     (item: SidebarItemConfig) => {
       const spaceId = getQuerySpaceId(router.query)
@@ -55,9 +48,12 @@ export const SafeSidebarContent = ({
         ...(spaceId && { spaceId }),
       }
 
-      return { pathname: item.href, query }
+      const pathname =
+        item.href === AppRoutes.transactions.history && queueSize ? AppRoutes.transactions.queue : item.href
+
+      return { pathname, query }
     },
-    [router.query, safeAddress],
+    [router.query, safeAddress, queueSize],
   )
 
   const isItemDisabled = useCallback(

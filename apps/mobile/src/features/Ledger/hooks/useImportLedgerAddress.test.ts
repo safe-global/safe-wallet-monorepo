@@ -1,3 +1,4 @@
+import { Alert } from 'react-native'
 import { renderHook, waitFor, act } from '@/src/tests/test-utils'
 import { useImportLedgerAddress } from './useImportLedgerAddress'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
@@ -521,6 +522,54 @@ describe('useImportLedgerAddress', () => {
         type: 'ledger',
         derivationPath: mockPath,
       })
+    })
+  })
+
+  describe('signer collision', () => {
+    let alertSpy: jest.SpyInstance
+
+    beforeEach(() => {
+      alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+    })
+
+    it('should block import and leave existing signer untouched when a different-type signer exists for the address', async () => {
+      const mockAddress = createMockAddress()
+      const mockPath = createMockPath()
+      const mockIndex = createMockIndex()
+
+      setupSuccessfulOwnershipValidation(mockAddress, mockSafeAddress, mockChainId)
+
+      const existingSigner = {
+        value: mockAddress,
+        name: 'Existing PK',
+        logoUri: null,
+        type: 'private-key' as const,
+      }
+
+      const initialState: Partial<RootState> = {
+        ...getDefaultInitialState(mockSafeAddress, mockChainId),
+        signers: {
+          [mockAddress]: existingSigner,
+        },
+      }
+
+      const hookResult = renderHook(() => useImportLedgerAddress(), initialState)
+      const { result } = hookResult
+      const store = hookResult.store as { getState: () => RootState }
+
+      let importResult
+      await act(async () => {
+        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
+      })
+
+      expect(importResult).toEqual({ success: false })
+      expect(alertSpy).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+      expect(mockLedgerDMKService.disconnect).not.toHaveBeenCalled()
+      expect(result.current.isImporting).toBe(false)
+
+      const state = store.getState() as RootState
+      const signers = selectSigners(state)
+      expect(signers[mockAddress]).toEqual(existingSigner)
     })
   })
 })

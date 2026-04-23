@@ -4,7 +4,7 @@ import { useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import { useConnect } from './useConnect'
+import { useConnect, UnsupportedChainError, showUnsupportedChainAlert } from './useConnect'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
@@ -33,7 +33,11 @@ export function useReconnectFlow() {
         }
 
         switchNetworkIfNeeded()
-      } catch {
+      } catch (error) {
+        if (error instanceof UnsupportedChainError) {
+          showUnsupportedChainAlert()
+          return
+        }
         // CONNECT_ERROR or USER_REJECTED — no action needed
       }
     },
