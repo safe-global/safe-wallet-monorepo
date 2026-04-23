@@ -117,7 +117,7 @@ export const getChainAgnosticAddress = (
   const deploymentTypeAddress = deployment.deployments?.[deploymentType]?.address
   const networkAddresses = toNetworkAddressList(deployment.networkAddresses?.[chainId] ?? [])
 
-  // Prefer the requested deployment-type address if it's registered for this chain
+  // 1. Prefer the requested deployment-type address if it's registered for this chain.
   if (
     deploymentTypeAddress &&
     networkAddresses.some((networkAddress) => sameAddress(networkAddress, deploymentTypeAddress))
@@ -125,13 +125,22 @@ export const getChainAgnosticAddress = (
     return deploymentTypeAddress
   }
 
-  // Fall back to the chain's primary address (first registered for this chainId)
-  if (networkAddresses.length > 0) {
-    return networkAddresses[0]
+  // 2. Prefer the chain-agnostic deployment-type address. Covers unregistered chains
+  //    and, crucially, chains whose networkAddresses list the OTHER flavour only —
+  //    falling back to networkAddresses[0] there would return the wrong flavour and
+  //    cause EVM↔EraVM delegatecall mismatches (see Lens / zkSync canonical handling).
+  if (deploymentTypeAddress) {
+    if (networkAddresses.length > 0) {
+      console.warn(
+        `[getChainAgnosticAddress] chain ${chainId} does not register the ${deploymentType} address; ` +
+          `falling back to the chain-agnostic deployment address`,
+      )
+    }
+    return deploymentTypeAddress
   }
 
-  // Unregistered chain — use the chain-agnostic deployment-type address
-  return deploymentTypeAddress
+  // 3. Last resort: chain has entries but no deployment-type address at all.
+  return networkAddresses[0]
 }
 
 /**
@@ -369,6 +378,14 @@ export type MasterCopyFlavour = {
  *
  * Falls back to `defaults` when the implementation cannot be matched — callers
  * should pass chain-level guesses (e.g. `!chain.l2`, `chain.zk`) as defaults.
+ *
+ * CAVEAT — custom / unrecognised master copies: when the implementation doesn't
+ * match any entry in safe-deployments the defaults are used, which re-introduces
+ * the chain-flag assumption this function is meant to avoid. A Safe on a zk-stack
+ * chain that isn't flagged `zk: true` on CGW (e.g. Lens) running a custom
+ * EraVM-bytecode master copy would incorrectly be treated as canonical. A proper
+ * fix would require bytecode inspection (already done in the `!isValidMasterCopy`
+ * branch of initSafeSDK) but that adds an RPC round-trip to the happy path.
  */
 export const getDeploymentTypeForMasterCopy = (
   implementation: string | undefined,

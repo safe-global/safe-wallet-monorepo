@@ -119,6 +119,35 @@ describe('deployments utils', () => {
       const deployment = makeDeployment({ canonical: { address: canonical, codeHash: '0xhash' } }, {})
       expect(getChainAgnosticAddress(deployment, unknownChainId, 'zksync')).toBeUndefined()
     })
+
+    it('prefers the deployment-type address over networkAddresses[0] when the chain lists only the other flavour', () => {
+      // Registered chain, but its networkAddresses list contains only the eip155
+      // flavour. A caller asking for `canonical` must get the canonical address
+      // (even though it isn't registered for this chain) rather than silently
+      // receiving the eip155 address — returning the wrong flavour would cause
+      // delegatecall mismatches for canonical Safes.
+      const deployment = makeDeployment(
+        {
+          canonical: { address: canonical, codeHash: '0xhash' },
+          eip155: { address: eip155Addr, codeHash: '0xhash2' },
+        },
+        { [chainId]: [eip155Addr] },
+      )
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      expect(getChainAgnosticAddress(deployment, chainId, 'canonical')).toBe(canonical)
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('does not register the canonical address'))
+      warnSpy.mockRestore()
+    })
+
+    it('returns networkAddresses[0] as last resort when no deployment-type address exists at all', () => {
+      // Deployment bucket has no matching flavour for this caller — return whatever
+      // the chain registers so the SDK can still init.
+      const deployment = makeDeployment(
+        { eip155: { address: eip155Addr, codeHash: '0xhash2' } },
+        { [chainId]: [eip155Addr] },
+      )
+      expect(getChainAgnosticAddress(deployment, chainId, 'canonical')).toBe(eip155Addr)
+    })
   })
 
   describe('hasMatchingDeployment', () => {
