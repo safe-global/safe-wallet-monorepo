@@ -7,6 +7,7 @@ const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const currencySection = '[data-testid="safe-selector-balance"]'
 const chainNavigationButton = '[data-testid="space-chain-navigation-button"]'
+const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
 const dropdownContent = '[data-slot="select-content"]'
@@ -99,6 +100,10 @@ export function clickCopyAddressBtn() {
 
 export function verifyCurrencySection(text) {
   cy.get(currencySection).should('contain.text', text)
+}
+
+export function clickOnNestedSafesBtn() {
+  cy.get(nestedSafesButton).should('be.visible').click()
 }
 
 export function clickChainNavigationButton() {
