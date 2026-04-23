@@ -5,7 +5,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -16,7 +16,7 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -311,7 +311,7 @@ exports[`./SafeShield.stories Empty 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -322,7 +322,7 @@ exports[`./SafeShield.stories Empty 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -387,7 +387,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -398,7 +398,7 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -693,7 +693,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -704,7 +704,7 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -921,7 +921,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -932,7 +932,7 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1149,7 +1149,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1160,7 +1160,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1564,7 +1564,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1575,7 +1575,7 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1748,7 +1748,7 @@ exports[`./SafeShield.stories Loading 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1759,7 +1759,7 @@ exports[`./SafeShield.stories Loading 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -1862,7 +1862,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -1873,7 +1873,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -2355,7 +2355,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -2366,7 +2366,7 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -2689,7 +2689,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -2700,7 +2700,7 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -3012,7 +3012,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -3023,7 +3023,7 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -3318,7 +3318,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -3329,7 +3329,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -4771,7 +4771,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -4782,7 +4782,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5215,7 +5215,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5226,7 +5226,7 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5521,7 +5521,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5532,7 +5532,7 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -5965,7 +5965,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -5976,7 +5976,7 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -6271,7 +6271,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -6282,7 +6282,7 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
@@ -6540,7 +6540,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-wf13l-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -6551,7 +6551,7 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
         data-testid="safe-shield-widget"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1294j3-MuiPaper-root-MuiCard-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
           style="--Paper-shadow: none;"
         >
           <div
