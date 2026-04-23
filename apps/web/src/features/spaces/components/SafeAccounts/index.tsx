@@ -81,7 +81,7 @@ const SpaceSafeAccounts = () => {
       {isAdmin && (
         <Stack direction="row" justifyContent="flex-end" mt={-3} mb={3}>
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccounts />
+            <AddAccounts buttonVariant="default" />
           </Track>
         </Stack>
       )}
