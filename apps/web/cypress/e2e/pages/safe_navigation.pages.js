@@ -16,6 +16,7 @@ const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const addNetworkBtn = '[data-testid="add-network-btn"]'
 const addChainDialog = '[data-testid="add-chain-dialog"]'
 const modalAddNetworkBtn = '[data-testid="modal-add-network-btn"]'
+const allNetworksAccordion = '[data-testid="all-networks-accordion"]'
 
 // Sidebar navigation
 const sidebarContainer = '[data-testid="sidebar-container"]'
@@ -23,6 +24,10 @@ const sidebarListItem = '[data-testid="sidebar-list-item"]'
 const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const listItemNeedHelp = '[data-testid="list-item-need-help"]'
+
+export const undeployedSafeLabel = 'Not activated'
+export const multichainSafePolygonLabel = 'Multichain polygon'
+export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 
 // AccountsModal (All Accounts popup)
 const allAccountsBtn = '[data-testid="all-accounts-btn"]'
@@ -35,6 +40,8 @@ const bookmarkIcon = '[data-testid="bookmark-icon"]'
 const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const readOnlyChip = '[data-testid="read-only-chip"]'
 const pendingActivationIcon = '[data-testid="pending-activation-icon"]'
+const pendingActivationChip = '[data-testid="pending-activation-chip"]'
+const safeItemCard = '[data-testid="safe-item-card"]'
 const safeOptionsBtn = '[data-testid="safe-options-btn"]'
 const renameBtn = '[data-testid="rename-btn"]'
 
@@ -46,9 +53,8 @@ export function openSelector() {
 export function openAccountsModal() {
   cy.get(safeSelectorBlock).should('be.visible')
   cy.get(openSafesIcon).click()
-  // Remove scroll as soon as the All Accounts btn is moved out of the scrollable container:
-  cy.get(dropdownContent).should('be.visible').scrollTo('bottom')
-  cy.get(allAccountsBtn).should('be.visible').click()
+  cy.get(dropdownContent).should('be.visible')
+  cy.get(allAccountsBtn).scrollIntoView().should('be.visible').click()
   cy.get(accountsList).should('be.visible')
 }
 
@@ -94,6 +100,11 @@ export function verifyCurrencySection(text) {
 
 export function clickChainNavigationButton() {
   cy.get(chainNavigationButton).should('be.visible').click()
+  cy.get(allNetworksAccordion).should('be.visible')
+}
+
+export function clickAllNetworksAccordion() {
+  cy.get(allNetworksAccordion).should('be.visible').click()
   cy.get(addNetworkBtn).should('be.visible')
 }
 
@@ -104,6 +115,24 @@ export function clickAddNetworkBtn(chainName) {
 
 export function clickModalAddNetworkBtn() {
   cy.get(modalAddNetworkBtn).should('be.visible').click()
+}
+
+export function verifyModalAddNetworkBtnDisabled() {
+  cy.get(modalAddNetworkBtn).should('be.disabled')
+}
+
+export function verifyNetworkNotInAddList(networkName) {
+  cy.get(addNetworkBtn).each(($btn) => {
+    cy.wrap($btn).should('not.have.attr', 'aria-label', `Add ${networkName}`)
+  })
+}
+
+export function addNetwork(chainName) {
+  clickChainNavigationButton()
+  clickAllNetworksAccordion()
+  clickAddNetworkBtn(chainName)
+  clickModalAddNetworkBtn()
+  cy.get(addChainDialog).should('not.exist')
 }
 
 export function verifySidebarContainerVisible() {
@@ -146,6 +175,10 @@ export function clickBookmarkIconByIndex(index) {
   cy.get(bookmarkIcon).eq(index).should('be.visible').click()
 }
 
+export function unpinSafeByName(name) {
+  cy.get(accountsList).contains(name).closest(safeItemCard).find(bookmarkIcon).click()
+}
+
 export function verifyMissingSignatureInfo(threshold, owners) {
   cy.get(missingSignatureInfo).should('be.visible').and('contain.text', `${threshold}/${owners}`)
 }
@@ -156,6 +189,15 @@ export function verifyReadOnlyChipVisible() {
 
 export function verifyPendingActivationIconVisible() {
   cy.get(pendingActivationIcon).should('be.visible')
+}
+
+export function expandMultichainItem(index = 0) {
+  cy.get('[data-testid="multichain-item-summary"]').eq(index).click()
+  cy.get('[data-testid="subacounts-container"]').should('be.visible')
+}
+
+export function verifyNotActivatedSafeExists() {
+  cy.get('[data-testid="subacounts-container"]').find(pendingActivationChip).should('exist')
 }
 
 export function clickSafeOptionsBtn(index = 0) {
