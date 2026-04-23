@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
-import { UserRejectedError } from '../useConnect'
+import { UnsupportedChainError, UserRejectedError } from '../useConnect'
 import Logger from '@/src/utils/logger'
 import type { ConnectResult } from '../useConnect'
 import type { Signer } from '@/src/store/signersSlice'
@@ -161,6 +161,26 @@ describe('useImportSignerFlow', () => {
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('shows an alert when wallet does not support the active Safe chain', async () => {
+    const { result } = renderImportFlow()
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectReject(new UnsupportedChainError())
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Unsupported network', expect.any(String), expect.any(Array))
+    })
+
+    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Logger.error).not.toHaveBeenCalled()
   })
 
   it('does nothing when connect fails (connection error)', async () => {

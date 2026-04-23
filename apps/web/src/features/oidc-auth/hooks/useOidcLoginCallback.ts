@@ -9,7 +9,10 @@ import reconcileAuth from '@/store/reconcileAuth'
 import { DEFAULT_SIGN_IN_ERROR_MESSAGE, OIDC_AUTH_PENDING_KEY, SIGN_IN_ERROR_DESCRIPTION_MAP } from '../constants'
 
 const getErrorNotification = (errorDescription: string | null) => ({
-  message: (errorDescription && SIGN_IN_ERROR_DESCRIPTION_MAP[errorDescription]) || DEFAULT_SIGN_IN_ERROR_MESSAGE,
+  message:
+    errorDescription && Object.hasOwn(SIGN_IN_ERROR_DESCRIPTION_MAP, errorDescription)
+      ? SIGN_IN_ERROR_DESCRIPTION_MAP[errorDescription]
+      : DEFAULT_SIGN_IN_ERROR_MESSAGE,
   variant: 'error' as const,
   groupKey: 'email-sign-in-failed',
 })
