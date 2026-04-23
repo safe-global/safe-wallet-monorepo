@@ -1,9 +1,12 @@
+import { Alert } from 'react-native'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
-import { UserRejectedError } from '../useConnect'
+import { UnsupportedChainError, UserRejectedError } from '../useConnect'
 import type { ConnectResult } from '../useConnect'
+
+jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
 
 const mockAddress = faker.finance.ethereumAddress() as `0x${string}`
 const mockOtherAddress = faker.finance.ethereumAddress() as `0x${string}`
@@ -97,6 +100,26 @@ describe('useReconnectFlow', () => {
         }),
       )
     })
+  })
+
+  it('shows an alert when wallet does not support the active Safe chain', async () => {
+    const { result } = renderReconnectFlow()
+
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(new UnsupportedChainError())
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Unsupported network', expect.any(String), expect.any(Array))
+    })
+
+    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
+    expect(mockDisconnect).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
   it('does nothing when connect is rejected', async () => {
