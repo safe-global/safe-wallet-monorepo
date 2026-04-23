@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { useContext, useEffect } from 'react'
 import { formatUnits } from 'ethers'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -159,7 +159,7 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
-  const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
+  const lockedCandidate = ((): GasTokenCandidate | undefined => {
     if (!lockedGasToken) return undefined
     if (sameAddress(lockedGasToken, ZERO_ADDRESS)) {
       return {
@@ -181,7 +181,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     }
     return { address: lockedGasToken, symbol: '', logoUri: '', decimals: nativeDecimals, fiatBalance: '0' }
-  }, [lockedGasToken, balances, chain, nativeSymbol, nativeDecimals])
+  })()
 
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   useEffect(() => {

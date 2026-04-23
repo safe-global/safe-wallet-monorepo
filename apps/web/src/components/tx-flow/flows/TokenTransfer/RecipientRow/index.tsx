@@ -125,72 +125,70 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   }, [setNonceNeeded, isSpendingLimitType, spendingLimitAmount])
 
   return (
-    <>
-      <Stack spacing={1}>
-        <Stack spacing={2}>
+    <Stack spacing={1}>
+      <Stack spacing={2}>
+        <FormControl fullWidth>
+          <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
+        </FormControl>
+
+        <FormControl fullWidth>
+          <TokenAmountInput
+            fieldArray={fieldArray}
+            balances={isSpendingLimitType ? spendingLimitBalances : balancesItems}
+            selectedToken={selectedToken}
+            maxAmount={maxAmount}
+            deps={[MultiTokenTransferFields.recipients]}
+            defaultTokenAddress={tokenAddress}
+            onMaxClick={() => setMaxPressed(true)}
+          />
+        </FormControl>
+
+        {showFeeBanner && (
+          <Alert
+            severity="info"
+            data-testid="gtf-fee-banner"
+            action={
+              <IconButton size="small" onClick={() => setMaxPressed(false)} aria-label="Dismiss fee banner">
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            }
+          >
+            Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
+            change.
+          </Alert>
+        )}
+
+        {isBlocked && !isSpendingLimitType && (
+          <Alert severity="error" data-testid="gtf-block-banner">
+            Fees can&apos;t be paid in {selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH to your
+            Safe or send a different asset.
+          </Alert>
+        )}
+
+        {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
           <FormControl fullWidth>
-            <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
+            <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
           </FormControl>
-
-          <FormControl fullWidth>
-            <TokenAmountInput
-              fieldArray={fieldArray}
-              balances={isSpendingLimitType ? spendingLimitBalances : balancesItems}
-              selectedToken={selectedToken}
-              maxAmount={maxAmount}
-              deps={[MultiTokenTransferFields.recipients]}
-              defaultTokenAddress={tokenAddress}
-              onMaxClick={() => setMaxPressed(true)}
-            />
-          </FormControl>
-
-          {showFeeBanner && (
-            <Alert
-              severity="info"
-              data-testid="gtf-fee-banner"
-              action={
-                <IconButton size="small" onClick={() => setMaxPressed(false)} aria-label="Dismiss fee banner">
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              }
-            >
-              Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
-              change.
-            </Alert>
-          )}
-
-          {isBlocked && !isSpendingLimitType && (
-            <Alert severity="error" data-testid="gtf-block-banner">
-              Fees can&apos;t be paid in {selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH to your
-              Safe or send a different asset.
-            </Alert>
-          )}
-
-          {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
-            <FormControl fullWidth>
-              <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
-            </FormControl>
-          )}
-        </Stack>
-
-        {removable && (
-          <Box>
-            <Track {...MODALS_EVENTS.REMOVE_RECIPIENT}>
-              <Button
-                data-testid="remove-recipient-btn"
-                onClick={onRemove}
-                aria-label="Remove recipient"
-                variant="text"
-                startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}
-                size="medium"
-              >
-                Remove recipient
-              </Button>
-            </Track>
-          </Box>
         )}
       </Stack>
-    </>
+
+      {removable && (
+        <Box>
+          <Track {...MODALS_EVENTS.REMOVE_RECIPIENT}>
+            <Button
+              data-testid="remove-recipient-btn"
+              onClick={onRemove}
+              aria-label="Remove recipient"
+              variant="text"
+              startIcon={<SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" />}
+              size="medium"
+            >
+              Remove recipient
+            </Button>
+          </Track>
+        </Box>
+      )}
+    </Stack>
   )
 }
 

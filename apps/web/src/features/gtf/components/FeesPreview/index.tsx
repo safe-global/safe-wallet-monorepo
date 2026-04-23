@@ -15,8 +15,6 @@ const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on th
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
 const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
 
-type PaymentSource = GtfPaymentMode
-
 const FeeRow = ({
   label,
   amount,
@@ -92,23 +90,21 @@ const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing 
   </div>
 )
 
-const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string }[] = [
-  { value: 'safe', label: 'Safe' },
-  { value: 'signer', label: 'Signer' },
-]
+const PAYMENT_SOURCES = ['safe', 'signer'] as const satisfies readonly GtfPaymentMode[]
+
+const paymentSourceLabel = (source: GtfPaymentMode) => (source === 'safe' ? 'Safe' : 'Signer')
 
 const PaymentSourceSelector = ({
   value,
   onChange,
 }: {
-  value: PaymentSource
-  onChange: (source: PaymentSource) => void
+  value: GtfPaymentMode
+  onChange: (source: GtfPaymentMode) => void
 }): ReactElement => {
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
-  const selected = PAYMENT_SOURCE_OPTIONS.find((o) => o.value === value)!
 
-  const handleSelect = (source: PaymentSource) => {
+  const handleSelect = (source: GtfPaymentMode) => {
     onChange(source)
     setOpen(false)
   }
@@ -123,7 +119,7 @@ const PaymentSourceSelector = ({
         data-testid="payment-source-selector"
       >
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
-          {selected.label}
+          {paymentSourceLabel(value)}
         </Typography>
         <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />
       </div>
@@ -136,10 +132,10 @@ const PaymentSourceSelector = ({
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         slotProps={{ paper: { sx: { mt: 0.5, minWidth: 100, borderRadius: '8px' } } }}
       >
-        {PAYMENT_SOURCE_OPTIONS.map((option) => (
-          <MenuItem key={option.value} selected={option.value === value} onClick={() => handleSelect(option.value)}>
+        {PAYMENT_SOURCES.map((source) => (
+          <MenuItem key={source} selected={source === value} onClick={() => handleSelect(source)}>
             <Typography variant="body2" fontWeight={700}>
-              {option.label}
+              {paymentSourceLabel(source)}
             </Typography>
           </MenuItem>
         ))}
@@ -293,7 +289,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
   const isSafeWallet = gtfPaymentMode === 'safe'
   const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
 
-  const handlePaymentSourceChange = (source: PaymentSource) => {
+  const handlePaymentSourceChange = (source: GtfPaymentMode) => {
     setGtfPaymentMode(source)
     if (source === 'signer') {
       const nativeAddress = availableGasTokens?.[0]?.address
