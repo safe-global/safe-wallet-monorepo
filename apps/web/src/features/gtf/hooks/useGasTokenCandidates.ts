@@ -102,5 +102,5 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
 
   const probing = Boolean(tx) && rankedItems.some((i) => !statuses[i.tokenInfo.address])
 
-  return { candidates, probing, defaultAddress: candidates[0]?.address }
+  return { candidates, probing, defaultAddress: probing ? undefined : candidates[0]?.address }
 }
