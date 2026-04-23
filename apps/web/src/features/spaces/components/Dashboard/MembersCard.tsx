@@ -20,7 +20,7 @@ const MembersCard = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, borderRadius: '12px' }}>
+      <Paper sx={{ p: 3, borderRadius: '24px' }}>
         <Box position="relative" width={1}>
           <Box className={classnames(css.iconBG, css.iconBGBlue)}>
             <SvgIcon component={MemberIcon} inheritViewBox color="info" />
