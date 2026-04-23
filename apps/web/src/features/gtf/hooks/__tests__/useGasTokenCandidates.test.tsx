@@ -96,10 +96,11 @@ describe('useGasTokenCandidates', () => {
           tokenBalance({ address: USDC_ADDRESS, symbol: 'USDC', decimals: 6, balance: '0' }),
         ]),
       )
-    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => (() => ({ unwrap: () => Promise.resolve({ txData: {} }), unsubscribe: jest.fn() })) as any,
-    )
+    jest
+      .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
+      .mockImplementation(
+        () => (() => ({ unwrap: () => Promise.resolve({ txData: {} }), unsubscribe: jest.fn() })) as any,
+      )
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
@@ -119,14 +120,13 @@ describe('useGasTokenCandidates', () => {
 
     const initiateSpy = jest
       .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementation(((arg: any) => () => ({
         unwrap:
           arg.tx.gasToken === UNPRICED_ADDRESS
             ? () => Promise.reject(new Error('no price'))
             : () => Promise.resolve({ txData: {} }),
         unsubscribe: jest.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       })) as any)
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
@@ -147,10 +147,11 @@ describe('useGasTokenCandidates', () => {
           tokenBalance({ address: DAI_ADDRESS, symbol: 'DAI', fiatBalance: '50' }),
         ]),
       )
-    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      () => (() => ({ unwrap: () => Promise.resolve({ txData: {} }), unsubscribe: jest.fn() })) as any,
-    )
+    jest
+      .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
+      .mockImplementation(
+        () => (() => ({ unwrap: () => Promise.resolve({ txData: {} }), unsubscribe: jest.fn() })) as any,
+      )
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
@@ -170,14 +171,13 @@ describe('useGasTokenCandidates', () => {
       )
     jest
       .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       .mockImplementation(((arg: any) => () => ({
         unwrap:
           arg.tx.gasToken === ETH_ADDRESS
             ? () => Promise.reject(new Error('no price'))
             : () => Promise.resolve({ txData: {} }),
         unsubscribe: jest.fn(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       })) as any)
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
@@ -196,10 +196,12 @@ describe('useGasTokenCandidates', () => {
           tokenBalance({ address: SAFE_TOKEN_ADDRESS, symbol: 'SAFE' }),
         ]),
       )
-    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (() => () => ({ unwrap: () => Promise.reject(new Error('no price')), unsubscribe: jest.fn() })) as any,
-    )
+    jest
+      .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
+      .mockImplementation((() => () => ({
+        unwrap: () => Promise.reject(new Error('no price')),
+        unsubscribe: jest.fn(),
+      })) as any)
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
@@ -214,13 +216,10 @@ describe('useGasTokenCandidates', () => {
       .mockReturnValue(mockBalances([tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' })]))
 
     let resolveProbe: (() => void) | undefined
-    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (() => () => ({
-        unwrap: () => new Promise<unknown>((resolve) => (resolveProbe = () => resolve({ txData: {} }))),
-        unsubscribe: jest.fn(),
-      })) as any,
-    )
+    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation((() => () => ({
+      unwrap: () => new Promise<unknown>((resolve) => (resolveProbe = () => resolve({ txData: {} }))),
+      unsubscribe: jest.fn(),
+    })) as any)
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
