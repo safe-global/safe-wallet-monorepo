@@ -25,6 +25,7 @@ const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const listItemNeedHelp = '[data-testid="list-item-need-help"]'
 
 // AccountsModal (All Accounts popup)
+const allAccountsBtn = '[data-testid="all-accounts-btn"]'
 const accountsList = '[data-testid="accounts-list"]'
 const pinnedAccounts = '[data-testid="pinned-accounts"]'
 const emptyPinnedList = '[data-testid="empty-pinned-list"]'
@@ -39,6 +40,15 @@ const renameBtn = '[data-testid="rename-btn"]'
 export function openSelector() {
   cy.get(safeSelectorBlock).should('be.visible')
   cy.get(openSafesIcon).click()
+}
+
+export function openAccountsModal() {
+  cy.get(safeSelectorBlock).should('be.visible')
+  cy.get(openSafesIcon).click()
+  // Remove scroll as soon as the All Accounts btn is moved out of the scrollable container:
+  cy.get(dropdownContent).should('be.visible').scrollTo('bottom')
+  cy.get(allAccountsBtn).should('be.visible').click()
+  cy.get(accountsList).should('be.visible')
 }
 
 export function verifyItemExistsInSelector(name) {
@@ -158,4 +168,8 @@ export function clickRenameBtn() {
 
 export function verifyMultichainItemSummaryVisible() {
   cy.get(multichainItemSummary).should('be.visible')
+}
+
+export function verifyAccountsListContains(name) {
+  cy.get(accountsList).should('contain.text', name)
 }

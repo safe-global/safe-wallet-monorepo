@@ -52,7 +52,7 @@ function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => v
 function DropdownFooter({ onOpen }: { onOpen: () => void }) {
   return (
     <div className="px-4 py-3">
-      <Button variant="secondary" size="sm" className="w-full" onClick={onOpen}>
+      <Button variant="secondary" size="sm" className="w-full" onClick={onOpen} data-testid="all-accounts-btn">
         All Accounts
         <ChevronRight className="size-4" />
       </Button>

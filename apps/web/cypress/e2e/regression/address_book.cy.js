@@ -4,7 +4,7 @@ import * as constants from '../../support/constants'
 import * as addressBook from '../../e2e/pages/address_book.page'
 import * as main from '../../e2e/pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
-import * as sidebar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 
@@ -110,7 +110,7 @@ describe('Address book tests', () => {
       })
   })
 
-  it('Verify Safe name changes after uploading a csv file', () => {
+  it.only('Verify Safe name changes after uploading a csv file', () => {
     cy.wrap(null)
       .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set2))
       .then(() =>
@@ -123,8 +123,8 @@ describe('Address book tests', () => {
         addressBook.importCSVFile(addressBook.addedSafesCSVFile)
         addressBook.clickOnImportBtn()
         wallet.connectSigner(signer)
-        sidebar.openSidebar()
-        sidebar.verifyAddedSafesExist([importedSafe])
+        safeNav.openAccountsModal()
+        safeNav.verifyAccountsListContains(importedSafe)
       })
   })
 })
