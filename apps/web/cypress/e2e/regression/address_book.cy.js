@@ -110,7 +110,7 @@ describe('Address book tests', () => {
       })
   })
 
-  it.only('Verify Safe name changes after uploading a csv file', () => {
+  it('Verify Safe name changes after uploading a csv file', () => {
     cy.wrap(null)
       .then(() => main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set2))
       .then(() =>

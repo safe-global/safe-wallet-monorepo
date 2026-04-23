@@ -26,6 +26,7 @@ const listItemNeedHelp = '[data-testid="list-item-need-help"]'
 
 // AccountsModal (All Accounts popup)
 const allAccountsBtn = '[data-testid="all-accounts-btn"]'
+const importBtn = '[data-testid="import-btn"]'
 const accountsList = '[data-testid="accounts-list"]'
 const pinnedAccounts = '[data-testid="pinned-accounts"]'
 const emptyPinnedList = '[data-testid="empty-pinned-list"]'
@@ -172,4 +173,8 @@ export function verifyMultichainItemSummaryVisible() {
 
 export function verifyAccountsListContains(name) {
   cy.get(accountsList).should('contain.text', name)
+}
+
+export function clickOnImportBtn() {
+  cy.get(importBtn).scrollIntoView().should('be.visible').click()
 }
