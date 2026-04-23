@@ -196,12 +196,10 @@ describe('useGasTokenCandidates', () => {
           tokenBalance({ address: SAFE_TOKEN_ADDRESS, symbol: 'SAFE' }),
         ]),
       )
-    jest
-      .spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate')
-      .mockImplementation((() => () => ({
-        unwrap: () => Promise.reject(new Error('no price')),
-        unsubscribe: jest.fn(),
-      })) as any)
+    jest.spyOn(gatewayApi.endpoints.getGtfFeePreview, 'initiate').mockImplementation((() => () => ({
+      unwrap: () => Promise.reject(new Error('no price')),
+      unsubscribe: jest.fn(),
+    })) as any)
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
