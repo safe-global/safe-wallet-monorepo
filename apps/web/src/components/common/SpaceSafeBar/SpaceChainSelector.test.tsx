@@ -9,15 +9,21 @@ jest.mock(
     function ChainSelectorBlock({
       deployedChains,
       selectedChainId,
+      safeAddress,
+      deployedChainIds,
     }: {
       deployedChains: Array<{ chainId: string }>
       selectedChainId: string
+      safeAddress: string
+      deployedChainIds: string[]
     }) {
       return (
         <div
           data-testid="chain-selector-block"
           data-deployed-count={String(deployedChains.length)}
           data-selected-chain-id={selectedChainId}
+          data-safe-address={safeAddress}
+          data-deployed-chain-ids={deployedChainIds.join(',')}
         />
       )
     },
@@ -33,13 +39,11 @@ const multiChain = [
   { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
   { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },
 ]
-const availableChains = [{ chainId: '42161', chainName: 'Arbitrum', chainLogoUri: null, shortName: 'arb1' }]
 
 describe('SpaceChainSelector', () => {
   beforeEach(() => {
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: singleChain,
-      availableChains,
       selectedChainId: '1',
       deployedChainIds: ['1'],
       safeAddress: '0xSafe1',
@@ -51,7 +55,6 @@ describe('SpaceChainSelector', () => {
   it('renders null when deployedChains is empty', () => {
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: [],
-      availableChains: [],
       selectedChainId: '1',
       deployedChainIds: [],
       safeAddress: '0xSafe1',
@@ -79,7 +82,6 @@ describe('SpaceChainSelector', () => {
   it('passes correct deployed count for multi-chain safe', () => {
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: multiChain,
-      availableChains,
       selectedChainId: '1',
       deployedChainIds: ['1', '137'],
       safeAddress: '0xSafe2',
@@ -95,7 +97,6 @@ describe('SpaceChainSelector', () => {
   it('passes selectedChainId to ChainSelectorBlock', () => {
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: multiChain,
-      availableChains,
       selectedChainId: '137',
       deployedChainIds: ['1', '137'],
       safeAddress: '0xSafe2',
@@ -106,5 +107,21 @@ describe('SpaceChainSelector', () => {
     render(<SpaceChainSelector />)
 
     expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-selected-chain-id', '137')
+  })
+
+  it('passes safeAddress and deployedChainIds down to ChainSelectorBlock', () => {
+    mockUseSpaceChainSelector.mockReturnValue({
+      deployedChains: multiChain,
+      selectedChainId: '1',
+      deployedChainIds: ['1', '137'],
+      safeAddress: '0xSafe2',
+      safeName: 'Multi Safe',
+      handleChainChange: jest.fn(),
+    })
+
+    render(<SpaceChainSelector />)
+
+    expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-safe-address', '0xSafe2')
+    expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-deployed-chain-ids', '1,137')
   })
 })

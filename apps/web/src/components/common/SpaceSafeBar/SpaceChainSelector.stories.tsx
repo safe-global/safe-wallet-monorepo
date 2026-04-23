@@ -11,12 +11,6 @@ const deployedChains = {
   ],
 }
 
-const availableChains = [
-  { chainId: '42161', chainName: 'Arbitrum', chainLogoUri: undefined, shortName: 'arb1' },
-  { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: undefined, shortName: 'gno' },
-  { chainId: '11155111', chainName: 'Sepolia', chainLogoUri: undefined, shortName: 'sep' },
-]
-
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'disconnected',
@@ -27,7 +21,9 @@ const defaultSetup = createMockStory({
 /**
  * Visual stories for the SpaceChainSelector container + ChainSelectorBlock.
  * SpaceChainSelector itself is a thin hook wrapper — these stories document
- * the visual states directly via ChainSelectorBlock.
+ * the visual states directly via ChainSelectorBlock. The "All networks" accordion
+ * and its unavailable state are driven by `useAddNetworkState`, which runs
+ * against the mocked scenario inside the Portal-rendered DropdownMenuContent.
  */
 const meta = {
   title: 'Features/Spaces/SpaceChainSelector',
@@ -53,8 +49,9 @@ export const SingleChain: Story = {
     <Wrapper>
       <ChainSelectorBlock
         deployedChains={deployedChains.single}
-        availableChains={availableChains}
         selectedChainId="1"
+        safeAddress="0x0000000000000000000000000000000000000001"
+        deployedChainIds={['1']}
         onChainSelect={() => {}}
         onAddNetwork={() => {}}
       />
@@ -67,22 +64,9 @@ export const MultiChain: Story = {
     <Wrapper>
       <ChainSelectorBlock
         deployedChains={deployedChains.multi}
-        availableChains={availableChains}
         selectedChainId="1"
-        onChainSelect={() => {}}
-        onAddNetwork={() => {}}
-      />
-    </Wrapper>
-  ),
-}
-
-export const NoAvailableChains: Story = {
-  render: () => (
-    <Wrapper>
-      <ChainSelectorBlock
-        deployedChains={deployedChains.multi}
-        availableChains={[]}
-        selectedChainId="1"
+        safeAddress="0x0000000000000000000000000000000000000002"
+        deployedChainIds={['1', '137', '8453']}
         onChainSelect={() => {}}
         onAddNetwork={() => {}}
       />

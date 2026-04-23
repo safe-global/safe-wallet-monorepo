@@ -4,15 +4,8 @@ import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 
 function SpaceChainSelector() {
-  const {
-    deployedChains,
-    availableChains,
-    selectedChainId,
-    deployedChainIds,
-    safeAddress,
-    safeName,
-    handleChainChange,
-  } = useSpaceChainSelector()
+  const { deployedChains, selectedChainId, deployedChainIds, safeAddress, safeName, handleChainChange } =
+    useSpaceChainSelector()
 
   const [addNetworkChainId, setAddNetworkChainId] = useState<string>()
 
@@ -33,8 +26,9 @@ function SpaceChainSelector() {
     >
       <ChainSelectorBlock
         deployedChains={deployedChains}
-        availableChains={availableChains}
         selectedChainId={selectedChainId}
+        safeAddress={safeAddress}
+        deployedChainIds={deployedChainIds}
         onChainSelect={handleChainChange}
         onAddNetwork={handleAddNetwork}
       />
