@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as safeNav from '../pages/safe_navigation.pages.js'
+import * as network from '../pages/network.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -28,10 +29,10 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.BALANCE_URL + safe)
     wallet.connectSigner(signer)
-    safeNav.addNetwork(constants.networks.ethereum)
-    cy.contains(safeNav.createSafeMsg(constants.networks.ethereum))
-    safeNav.clickChainNavigationButton()
-    safeNav.verifyDeployedChainsInDropdown([
+    network.addNetwork(constants.networks.ethereum)
+    cy.contains(network.createSafeMsg(constants.networks.ethereum))
+    network.clickChainNavigationButton()
+    network.verifyDeployedChainsInDropdown([
       constants.networks.ethereum,
       constants.networks.polygon,
       constants.networks.sepolia,
@@ -41,20 +42,20 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
   it('Verify that the selected network is already pre-selected in the "Add Another Network" pop-up and cannot be modified', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.BALANCE_URL + safe)
-    safeNav.clickChainNavigationButton()
-    safeNav.clickAllNetworksAccordion()
-    safeNav.clickAddNetworkBtn(constants.networks.ethereum)
-    safeNav.verifyAddedNetworkInDialog(constants.networks.ethereum)
-    safeNav.verifyNetworkInputAbsentInDialog()
+    network.clickChainNavigationButton()
+    network.clickAllNetworksAccordion()
+    network.clickAddNetworkBtn(constants.networks.ethereum)
+    network.verifyAddedNetworkInDialog(constants.networks.ethereum)
+    network.verifyNetworkInputAbsentInDialog()
   })
 
   it('Verify Show all networks displays the full list of not added networks', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.BALANCE_URL + safe)
-    safeNav.clickChainNavigationButton()
-    safeNav.clickAllNetworksAccordion()
-    safeNav.verifyAddNetworkBtnListNotEmpty()
-    safeNav.verifyAddNetworkBtnExists(constants.networks.ethereum)
+    network.clickChainNavigationButton()
+    network.clickAllNetworksAccordion()
+    network.verifyAddNetworkBtnListNotEmpty()
+    network.verifyAddNetworkBtnExists(constants.networks.ethereum)
   })
 
   // TODO clarify if we need this split which is absent in the new design
@@ -67,8 +68,8 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
   it('Verify that CF safe is created if other available network is selected from the "Show all networks"', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.BALANCE_URL + safe)
-    safeNav.addNetwork(constants.networks.ethereum)
-    cy.contains(safeNav.createSafeMsg(constants.networks.ethereum))
+    network.addNetwork(constants.networks.ethereum)
+    cy.contains(network.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.welcomeAccountUrl)
     safeNav.expandMultichainItem()
     safeNav.verifyNotActivatedSafeExists()

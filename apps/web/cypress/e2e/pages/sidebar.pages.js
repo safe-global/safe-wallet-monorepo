@@ -18,6 +18,8 @@ const explorerBtn = '[data-testid="explorer-btn"]'
 export const sideBarListItem = '[data-testid="sidebar-list-item"]'
 const sideBarListItemWhatsNew = '[data-testid="list-item-whats-new"]'
 const sideBarListItemNeedHelp = '[data-testid="list-item-need-help"]'
+export const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
+export const sidebarListItem = '[data-testid="sidebar-list-item"]'
 export const sideSafeListItem = '[data-testid="safe-list-item"]'
 const sidebarSafeHeader = '[data-testid="safe-header-info"]'
 const sidebarSafeContainer = '[data-testid="sidebar-safe-container"]'
@@ -714,4 +716,24 @@ export function checkNetworkDisabled(networks) {
       expect($el).not.to.have.attr('aria-disabled')
     }
   })
+}
+
+export function verifySidebarContainerVisible() {
+  cy.get(sidebarContainer).should('be.visible')
+}
+
+export function verifySidebarSettingsItemVisible() {
+  cy.get(sidebarSettingsItem).should('be.visible')
+}
+
+export function verifySidebarListItem() {
+  cy.get(sidebarListItem).should('be.visible')
+}
+
+export function verifyQueuedTxInfoCount(count) {
+  cy.get(queuedTxInfo).should('be.visible').and('contain.text', String(count))
+}
+
+export function verifyListItemNeedHelp() {
+  cy.get(sideBarListItemNeedHelp).should('be.visible')
 }

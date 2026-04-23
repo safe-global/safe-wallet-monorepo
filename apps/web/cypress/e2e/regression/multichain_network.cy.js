@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as safeNav from '../pages/safe_navigation.pages.js'
+import * as network from '../pages/network.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -25,8 +26,8 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
 
   it('Verify CF safe can be created when adding a new network from more options menu', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
-    safeNav.addNetwork(constants.networks.ethereum)
-    cy.contains(safeNav.createSafeMsg(constants.networks.ethereum))
+    network.addNetwork(constants.networks.ethereum)
+    cy.contains(network.createSafeMsg(constants.networks.ethereum))
     cy.url().should('include', safe)
     cy.visit(constants.welcomeAccountUrl)
     safeNav.expandMultichainItem()
@@ -50,8 +51,8 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployed)
-    safeNav.addNetwork(constants.networks.ethereum)
-    cy.contains(safeNav.createSafeMsg(constants.networks.ethereum))
+    network.addNetwork(constants.networks.ethereum)
+    cy.contains(network.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.welcomeAccountUrl)
     safeNav.expandMultichainItem()
     safeNav.verifyNotActivatedSafeExists()
@@ -65,8 +66,8 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
   })
 
   it.only('Verify that already added network is not shown in the add network list', () => {
-    safeNav.clickChainNavigationButton()
-    safeNav.clickAllNetworksAccordion()
-    safeNav.verifyNetworkNotInAddList(constants.networks.polygon)
+    network.clickChainNavigationButton()
+    network.clickAllNetworksAccordion()
+    network.verifyNetworkNotInAddList(constants.networks.polygon)
   })
 })

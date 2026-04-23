@@ -4,7 +4,7 @@ import * as constants from '../../support/constants'
 import * as addressBook from '../../e2e/pages/address_book.page'
 import * as main from '../../e2e/pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
-import * as safeNav from '../pages/safe_navigation.pages.js'
+import * as accountsModal from '../pages/accounts_modal.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 
@@ -123,8 +123,8 @@ describe('Address book tests', () => {
         addressBook.importCSVFile(addressBook.addedSafesCSVFile)
         addressBook.clickOnImportBtn()
         wallet.connectSigner(signer)
-        safeNav.openAccountsModal()
-        safeNav.verifyAccountsListContains(importedSafe)
+        accountsModal.openAccountsModal()
+        accountsModal.verifyAccountsListContains(importedSafe)
       })
   })
 })
