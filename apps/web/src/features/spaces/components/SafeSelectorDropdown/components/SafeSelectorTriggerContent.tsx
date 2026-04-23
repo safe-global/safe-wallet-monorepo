@@ -44,6 +44,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
             onPointerDown={handleCopy}
             className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer"
             aria-label="Copy address"
+            data-testid="copy-address-btn"
           />
         }
       >
@@ -55,7 +56,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
 
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
-      <Avatar size="sm" data-testid="safe-selector-trigger-identicon">
+      <Avatar size="sm" data-testid="safe-icon">
         <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
       </Avatar>

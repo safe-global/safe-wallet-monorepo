@@ -91,7 +91,10 @@ const SafeItemCard = ({
       <div className="relative shrink-0">
         <SafeIdenticon address={safeItem.address} size={ICON_SIZE} />
         {threshold > 0 && owners.length > 0 && (
-          <span className="absolute -bottom-1 -right-1.5 flex items-center justify-center rounded bg-background text-foreground text-[9px] font-bold leading-none px-[3px] py-px border border-border shadow-sm whitespace-nowrap">
+          <span
+            className="absolute -bottom-1 -right-1.5 flex items-center justify-center rounded bg-background text-foreground text-[9px] font-bold leading-none px-[3px] py-px border border-border shadow-sm whitespace-nowrap"
+            data-testid="missing-signature-info"
+          >
             {threshold}/{owners.length}
           </span>
         )}
@@ -149,6 +152,7 @@ const SafeItemCard = ({
         onClick={handleTogglePin}
         className="shrink-0 rounded p-1 hover:bg-muted"
         aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
+        data-testid="bookmark-icon"
       >
         <Bookmark
           className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}

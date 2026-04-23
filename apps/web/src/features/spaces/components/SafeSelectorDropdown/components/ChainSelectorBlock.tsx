@@ -85,6 +85,7 @@ function ChainSelectorBlock({
                       onClick={() => handleAddNetworkClick(chainItem.chainId)}
                       className="flex items-center justify-between px-2 py-2 rounded-lg w-full cursor-pointer hover:bg-muted/30 text-left"
                       aria-label={`Add ${chainItem.chainName}`}
+                      data-testid="add-network-btn"
                     >
                       <div className="flex items-center gap-4">
                         <ChainLogo chainId={chainItem.chainId} />

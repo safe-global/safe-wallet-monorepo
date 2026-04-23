@@ -113,6 +113,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
           <span
             className={cn(css.transactionsBadge, item.isActive && css.transactionsBadgeActive)}
             aria-label={getBadgeAriaLabel(item.label, item.badge)}
+            data-testid="queued-tx-info"
           >
             {item.badge}
           </span>
