@@ -1,6 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
-import * as safeSelector from '../pages/safe_selector.pages.js'
+import * as safeSelector from '../pages/safe_navigation.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 

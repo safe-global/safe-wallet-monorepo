@@ -2,7 +2,7 @@ import * as file from '../pages/import_export.pages'
 import * as main from '../pages/main.page'
 import * as constants from '../../support/constants'
 import * as ls from '../../support/localstorage_data.js'
-import * as selector from '../pages/safe_selector.pages'
+import * as selector from '../pages/safe_navigation.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
