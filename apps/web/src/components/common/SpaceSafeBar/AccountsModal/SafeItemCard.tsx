@@ -136,6 +136,7 @@ const SafeItemCard = ({
   return (
     <div
       ref={elementRef}
+      data-testid="safe-item-card"
       className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/30 transition-colors"
     >
       {href ? (

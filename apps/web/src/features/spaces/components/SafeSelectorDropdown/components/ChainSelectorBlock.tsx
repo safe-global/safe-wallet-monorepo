@@ -62,6 +62,8 @@ function ChainSelectorBlock({
                 onChainSelect(chainItem.chainId, e)
               }}
               className="flex items-center gap-4 px-2 py-2 rounded-lg cursor-pointer hover:bg-muted/30 w-full text-left"
+              data-testid="deployed-chain-btn"
+              aria-label={chainItem.chainName}
             >
               <ChainLogo chainId={chainItem.chainId} />
               <Typography variant="paragraph-small-medium">{chainItem.chainName}</Typography>
@@ -72,7 +74,10 @@ function ChainSelectorBlock({
         {availableChains.length > 0 && (
           <Accordion defaultValue={[]}>
             <AccordionItem value="all-networks" className="border-0">
-              <AccordionTrigger className="rounded-lg pl-4 pr-2 py-2 hover:no-underline hover:bg-muted/30 text-muted-foreground cursor-pointer">
+              <AccordionTrigger
+                data-testid="all-networks-accordion"
+                className="rounded-lg pl-4 pr-2 py-2 hover:no-underline hover:bg-muted/30 text-muted-foreground cursor-pointer"
+              >
                 <Typography variant="paragraph-small-medium" className="text-muted-foreground">
                   All networks
                 </Typography>
