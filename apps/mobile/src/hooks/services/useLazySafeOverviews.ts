@@ -1,13 +1,6 @@
 import { useCallback } from 'react'
 import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-
-type OverviewQueryArgs = {
-  safes: string[]
-  currency: string
-  trusted?: boolean
-  excludeSpam?: boolean
-  walletAddress?: string
-}
+import { normalizeOverviewArgs, type OverviewQueryArgs } from './overviewQueryArgs'
 
 type LazyTrigger = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[0]
 type LazyResult = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[1]
@@ -21,8 +14,7 @@ export const useLazySafeOverviews = () => {
   // caused an infinite re-render + OOM regression during WA-2041 development.
   // See useLazySafeOverviews.test.ts for the ref-stability contract.
   const normalizedTrigger = useCallback(
-    (args: OverviewQueryArgs, ...extra: LazyTriggerExtraArgs) =>
-      trigger({ ...args, currency: args.currency.toUpperCase() }, ...extra),
+    (args: OverviewQueryArgs, ...extra: LazyTriggerExtraArgs) => trigger(normalizeOverviewArgs(args), ...extra),
     [trigger],
   )
 
