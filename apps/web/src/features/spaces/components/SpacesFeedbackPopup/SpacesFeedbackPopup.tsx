@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, type ReactElement } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -23,15 +21,6 @@ export type SpacesFeedbackPopupProps = {
   onClose?: () => void
   className?: string
 }
-
-const getInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .filter(Boolean)
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
 
 export function SpacesFeedbackPopup({
   name,
@@ -78,7 +67,7 @@ export function SpacesFeedbackPopup({
         <div className="flex items-center gap-2.5 pr-8">
           <Avatar size="sm">
             {avatarSrc ? <AvatarImage src={avatarSrc} alt={name} /> : null}
-            <AvatarFallback>{avatarFallback ?? getInitials(name)}</AvatarFallback>
+            <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
           <div className="flex min-w-0 flex-col">
             <Typography variant="paragraph-small">{name}</Typography>
@@ -96,10 +85,7 @@ export function SpacesFeedbackPopup({
             {title}
           </Typography>
           <Typography variant="paragraph">{description}</Typography>
-          <Button
-            className="w-full [&_svg]:text-green-400"
-            render={<a href={ctaHref} target="_blank" rel="noreferrer noopener" />}
-          >
+          <Button className="w-full" render={<a href={ctaHref} target="_blank" rel="noreferrer noopener" />}>
             <ArrowUpRight />
             {ctaLabel}
           </Button>

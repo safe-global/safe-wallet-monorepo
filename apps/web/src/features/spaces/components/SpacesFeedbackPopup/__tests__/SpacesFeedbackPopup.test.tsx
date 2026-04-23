@@ -86,16 +86,16 @@ describe('SpacesFeedbackPopup', () => {
     expect(image).toHaveAttribute('alt', 'Iva Lukan')
   })
 
-  it('falls back to initials derived from the name when no avatarSrc is provided', () => {
-    render(<SpacesFeedbackPopup {...baseProps} />)
+  it('renders the avatarFallback text when provided', () => {
+    render(<SpacesFeedbackPopup {...baseProps} avatarFallback="IL" />)
 
     expect(screen.getByTestId('avatar-fallback')).toHaveTextContent('IL')
   })
 
-  it('uses the custom avatarFallback over derived initials', () => {
-    render(<SpacesFeedbackPopup {...baseProps} avatarFallback="??" />)
+  it('renders an empty fallback when no avatarFallback is provided', () => {
+    render(<SpacesFeedbackPopup {...baseProps} />)
 
-    expect(screen.getByTestId('avatar-fallback')).toHaveTextContent('??')
+    expect(screen.getByTestId('avatar-fallback')).toBeEmptyDOMElement()
   })
 
   describe('uncontrolled mode', () => {
