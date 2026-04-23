@@ -1,1 +1,1 @@
-export { vaultTypeToLabel, isEligibleEarnToken } from './utils'
+export { vaultTypeToLabel, isEligibleEarnToken, isEarnSupportedOnChain } from './utils'

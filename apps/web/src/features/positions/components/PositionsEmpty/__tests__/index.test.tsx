@@ -15,16 +15,24 @@ jest.mock('@/features/earn', () => ({
   __esModule: true,
   default: jest.fn(),
   useIsEarnPromoEnabled: jest.fn(() => true),
+  isEarnSupportedOnChain: jest.fn(() => true),
 }))
 
-import { useIsEarnPromoEnabled } from '@/features/earn'
+jest.mock('@/hooks/useChainId', () => jest.fn(() => '1'))
+
+import { isEarnSupportedOnChain, useIsEarnPromoEnabled } from '@/features/earn'
+import useChainId from '@/hooks/useChainId'
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 const mockUseIsEarnFeatureEnabled = useIsEarnPromoEnabled as jest.MockedFunction<typeof useIsEarnPromoEnabled>
+const mockIsEarnSupportedOnChain = isEarnSupportedOnChain as jest.MockedFunction<typeof isEarnSupportedOnChain>
+const mockUseChainId = useChainId as jest.MockedFunction<typeof useChainId>
 
 describe('PositionsEmpty', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseChainId.mockReturnValue('1')
+    mockIsEarnSupportedOnChain.mockReturnValue(true)
   })
 
   describe('when earn feature is enabled', () => {
@@ -90,6 +98,22 @@ describe('PositionsEmpty', () => {
 
       // No button to click, so tracking should not be called
       expect(mockTrackEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('when earn is not supported on the current chain', () => {
+    beforeEach(() => {
+      mockUseIsEarnFeatureEnabled.mockReturnValue(true)
+      mockUseChainId.mockReturnValue('137')
+      mockIsEarnSupportedOnChain.mockReturnValue(false)
+    })
+
+    it('should render empty positions message without explore earn button', () => {
+      render(<PositionsEmpty />)
+
+      expect(screen.getByText('You have no active DeFi positions yet')).toBeInTheDocument()
+      expect(screen.queryByText('Explore Earn')).not.toBeInTheDocument()
+      expect(mockIsEarnSupportedOnChain).toHaveBeenCalledWith('137')
     })
   })
 })

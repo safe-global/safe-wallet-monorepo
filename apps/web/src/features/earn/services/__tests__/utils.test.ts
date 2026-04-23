@@ -1,4 +1,4 @@
-import { vaultTypeToLabel, isEligibleEarnToken } from '../utils'
+import { vaultTypeToLabel, isEligibleEarnToken, isEarnSupportedOnChain } from '../utils'
 
 describe('vaultTypeToLabel', () => {
   it('maps VaultDeposit to Deposit', () => {
@@ -27,5 +27,16 @@ describe('isEligibleEarnToken', () => {
 
   it('returns undefined for unsupported chain', () => {
     expect(isEligibleEarnToken('137', '0xdAC17F958D2ee523a2206206994597C13D831ec7')).toBeUndefined()
+  })
+})
+
+describe('isEarnSupportedOnChain', () => {
+  it('returns true for supported chains', () => {
+    expect(isEarnSupportedOnChain('1')).toBe(true)
+    expect(isEarnSupportedOnChain('8453')).toBe(true)
+  })
+
+  it('returns false for unsupported chains', () => {
+    expect(isEarnSupportedOnChain('137')).toBe(false)
   })
 })
