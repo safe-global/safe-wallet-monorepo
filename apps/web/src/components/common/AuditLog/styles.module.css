@@ -1,0 +1,74 @@
+.auditRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  column-gap: var(--space-2);
+  padding: 0;
+}
+
+.timelineCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timelineIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--color-background-main);
+  flex-shrink: 0;
+}
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  background-color: var(--color-background-main);
+  min-height: 8px;
+}
+
+.infoCol {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 0 0 var(--space-2);
+}
+
+.actorRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+  min-width: 0;
+  margin-top: 2px;
+}
+
+.actorCopy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.actorText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.actorCopy:hover .actorText {
+  color: var(--color-primary-main);
+}
+
+.timestamp {
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 0;
+}

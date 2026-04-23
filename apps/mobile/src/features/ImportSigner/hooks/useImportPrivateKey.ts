@@ -6,6 +6,7 @@ import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
 import { detectInputType, InputType } from '@/src/utils/inputDetection'
+import { useSignerCollisionGuard } from './useSignerCollisionGuard'
 
 const ERROR_MESSAGE = 'Invalid private key or seed phrase.'
 export const useImportPrivateKey = () => {
@@ -15,6 +16,7 @@ export const useImportPrivateKey = () => {
   const [error, setError] = useState<string | undefined>(undefined)
   const router = useRouter()
   const { createDelegate } = useDelegate()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const handleInputChange = (text: string) => {
     setInput(text)
@@ -52,6 +54,10 @@ export const useImportPrivateKey = () => {
 
     if (inputType === 'private-key' && wallet) {
       // Handle private key import (existing flow)
+      if (guardAgainstCollision(wallet.address, 'private-key')) {
+        return
+      }
+
       try {
         // Store the private key
         await storePrivateKey(wallet.address, trimmedInput)

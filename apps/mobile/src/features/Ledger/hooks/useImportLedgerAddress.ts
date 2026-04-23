@@ -3,6 +3,7 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipValidation'
+import { useSignerCollisionGuard } from '@/src/features/ImportSigner/hooks/useSignerCollisionGuard'
 import logger from '@/src/utils/logger'
 
 type ImportError = {
@@ -28,6 +29,7 @@ export const useImportLedgerAddress = () => {
   const [isImporting, setIsImporting] = useState(false)
   const [error, setError] = useState<ImportError | null>(null)
   const { validateAddressOwnership } = useAddressOwnershipValidation()
+  const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const clearError = useCallback(() => {
     setError(null)
@@ -54,6 +56,11 @@ export const useImportLedgerAddress = () => {
             code: 'OWNER_VALIDATION',
             message: 'This address is not an owner of the Safe Account',
           })
+          setIsImporting(false)
+          return { success: false }
+        }
+
+        if (guardAgainstCollision(address, 'ledger')) {
           setIsImporting(false)
           return { success: false }
         }
@@ -89,7 +96,7 @@ export const useImportLedgerAddress = () => {
         return { success: false }
       }
     },
-    [dispatch, validateAddressOwnership],
+    [dispatch, validateAddressOwnership, guardAgainstCollision],
   )
 
   return {

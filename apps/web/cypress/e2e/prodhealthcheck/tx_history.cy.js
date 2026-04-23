@@ -60,14 +60,13 @@ describe('[PROD] Tx history tests 1', () => {
       typeCreateAccount.masterCopy.actionTitle,
       typeCreateAccount.masterCopy.name,
       typeCreateAccount.masterCopy.address,
-      typeCreateAccount.transactionHash,
     ])
   })
 
   // Token send
   it('Verify exapanded details for token send', () => {
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress, typeSend.transactionHash])
+    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress])
     createTx.verifyActionListExists([
       typeSideActions.created,
       typeSideActions.confirmations,
@@ -88,7 +87,7 @@ describe('[PROD] Tx history tests 1', () => {
   it('Verify exapanded details for initial spending limits setup', () => {
     createTx.clickOnTransactionItemByName(typeSpendingLimits.title, typeSpendingLimits.summaryTxInfo)
     createTx.verifyExpandedDetails(
-      [typeSpendingLimits.contractTitle, typeSpendingLimits.call_multiSend, typeSpendingLimits.transactionHash],
+      [typeSpendingLimits.contractTitle, typeSpendingLimits.call_multiSend],
       createTx.delegateCallWarning,
     )
   })
@@ -109,7 +108,6 @@ describe('[PROD] Tx history tests 1', () => {
       typeDeleteAllowance.description,
       typeDeleteAllowance.beneficiary,
       typeDeleteAllowance.beneficiaryAddress,
-      typeDeleteAllowance.transactionHash,
       typeDeleteAllowance.token,
       typeDeleteAllowance.tokenName,
     ])

@@ -125,11 +125,10 @@ jobs:
 
       - name: Check for concurrent release
         run: |
-          git fetch origin
-          if git ls-remote --exit-code --heads origin release >/dev/null 2>&1; then
+          RELEASE_COMMIT=$(git ls-remote origin refs/heads/release | cut -f1)
+          if [ -n "$RELEASE_COMMIT" ]; then
             # Release branch exists, check if it differs from base
-            BASE_COMMIT=$(git rev-parse origin/${{ steps.base.outputs.branch }})
-            RELEASE_COMMIT=$(git rev-parse origin/release)
+            BASE_COMMIT=$(git ls-remote origin "refs/heads/${{ steps.base.outputs.branch }}" | cut -f1)
             if [ "$RELEASE_COMMIT" != "$BASE_COMMIT" ]; then
               echo "⚠️  Warning: The 'release' branch already exists and differs from ${{ steps.base.outputs.branch }}"
               echo "This may indicate a concurrent or in-progress release."

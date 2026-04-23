@@ -40,7 +40,9 @@ const config: ExpoConfig = {
       NSFaceIDUsageDescription: 'Enabling Face ID allows you to create/access secure keys.',
       UIBackgroundModes: ['remote-notification'],
       NSBluetoothPeripheralUsageDescription: 'Allow Bluetooth access to connect to Ledger devices.',
-      AppGroup: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
+      // Read by react-native-mmkv v4 to place the MMKV store in the App Group container.
+      // Renaming this key to anything else (e.g. v3's `AppGroup`) strands data in the old location on upgrade.
+      AppGroupIdentifier: IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       // https://github.com/expo/expo/issues/39739
       UIDesignRequiresCompatibility: true,
       // https://github.com/react-native-share/react-native-share/issues/1669

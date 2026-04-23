@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
@@ -20,11 +20,11 @@ function SpaceNestedSafesButton(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
-  const { currentData: ownedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: safeAddress },
+  const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
+    { chainId, ownerAddress: safeAddress },
     { skip: !isEnabled || !safeAddress },
   )
-  const rawNestedSafes = ownedSafes?.[chainId] ?? []
+  const rawNestedSafes = ownedSafes?.safes ?? []
   const { visibleSafes, allSafesWithStatus, hasCompletedCuration, isLoading, startFiltering, hasStarted } =
     useNestedSafesVisibility(rawNestedSafes, chainId)
 

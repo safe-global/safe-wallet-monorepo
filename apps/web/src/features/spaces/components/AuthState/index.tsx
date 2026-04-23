@@ -15,7 +15,10 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const dispatch = useAppDispatch()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData, error, isLoading } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn })
+  const { currentData, error, isLoading } = useSpacesGetOneV1Query(
+    { id: Number(spaceId) },
+    { skip: !isUserSignedIn || !spaceId },
+  )
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
 

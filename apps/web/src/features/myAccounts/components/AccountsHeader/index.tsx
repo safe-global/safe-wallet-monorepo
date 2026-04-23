@@ -4,6 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import AccountsNavigation from '../AccountsNavigation'
 import CreateButton from '../CreateButton'
 import { useHasFeature } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
 import AddIcon from '@/public/images/common/add.svg'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
@@ -22,11 +23,11 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
         variant="outline"
         size="lg"
         onClick={onLinkClick}
-        className="w-full rounded-lg h-full text-base"
+        className="w-full rounded-lg h-full px-5 text-base "
         render={<NextLink href={AppRoutes.newSafe.load} />}
       >
-        <AddIcon color="currentColor" className="fill-primary" />
-        Add account
+        <AddIcon color="currentColor" className="size-5 fill-primary" />
+        Add
       </Button>
     </Track>
   )
@@ -35,13 +36,18 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
 const AccountsHeader = ({ isSidebar, onLinkClick }: { isSidebar: boolean; onLinkClick?: () => void }) => {
   const wallet = useWallet()
   const router = useRouter()
+  const isDarkMode = useDarkMode()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isLoginPage = router.pathname === AppRoutes.welcome.accounts
   const trackingLabel = isLoginPage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   return (
     <div
-      className={cn('flex justify-between gap-4 py-6 max-[599px]:flex-col', isSidebar && 'border-border border-b px-4')}
+      className={cn(
+        'shadcn-scope flex justify-between gap-4 py-6 max-[599px]:flex-col',
+        isDarkMode && 'dark',
+        isSidebar && 'border-border border-b px-4',
+      )}
     >
       {isSidebar || !isSpacesFeatureEnabled ? (
         <Typography variant={isSidebar ? 'h3' : 'h1'}>Accounts</Typography>
