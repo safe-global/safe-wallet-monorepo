@@ -42,7 +42,7 @@ export const useAddressOwnershipValidation = () => {
         if (pendingSafe) {
           // Match the args used by AddSignersForm.container.tsx so RTK Query reuses its cached entry.
           const safes = chainIds.map((chainId) => makeSafeId(chainId, pendingSafe.address))
-          const overviews = await overviewsTrigger({ safes, currency, trusted: true }).unwrap()
+          const overviews = await overviewsTrigger({ safes, currency, trusted: true, excludeSpam: true }).unwrap()
 
           if (!overviews || overviews.length === 0) {
             return { isOwner: false }

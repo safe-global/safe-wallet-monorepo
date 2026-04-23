@@ -109,8 +109,12 @@ describe('useAddressOwnershipValidation', () => {
   })
 
   it('validates multiple safes when pendingSafe present and address is owner', async () => {
+    const capturedQuery: { currency?: string; trusted?: string } = {}
     server.use(
-      http.get(`${GATEWAY_URL}/v2/safes`, () => {
+      http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
+        const params = new URL(request.url).searchParams
+        capturedQuery.currency = params.get('currency') ?? undefined
+        capturedQuery.trusted = params.get('trusted') ?? undefined
         return HttpResponse.json([
           createPendingSafeOverview('1'),
           createPendingSafeOverview('137', mockOwners.slice(1)),
@@ -130,6 +134,16 @@ describe('useAddressOwnershipValidation', () => {
       isOwner: true,
       ownerInfo: mockOwners[0],
     })
+    // Lock in the query-arg invariant that the container shares with this hook —
+    // same args means RTK Query reuses the cached entry and avoids a duplicate fetch.
+    expect(capturedQuery.currency).toBe('USD')
+    expect(capturedQuery.trusted).toBe('true')
+    // `excludeSpam` is dropped by the endpoint's queryFn before going over the wire,
+    // but it DOES participate in the RTK Query cache key — assert on that directly.
+    const queries = store.getState().api.queries
+    const overviewKey = Object.keys(queries).find((key) => key.startsWith('safesGetOverviewForMany'))
+    expect(overviewKey).toBeDefined()
+    expect(overviewKey).toContain('"excludeSpam":true')
   })
 
   it('returns false for multiple safes when pendingSafe present but address is not owner', async () => {
