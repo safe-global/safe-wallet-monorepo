@@ -8289,14 +8289,6 @@
           },
           "lastUpdatedBy": {
             "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
           }
         },
         "required": [
@@ -8304,9 +8296,7 @@
           "address",
           "chainIds",
           "createdBy",
-          "lastUpdatedBy",
-          "createdAt",
-          "updatedAt"
+          "lastUpdatedBy"
         ]
       },
       "SpaceAddressBookDto": {
