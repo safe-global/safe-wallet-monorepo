@@ -4,7 +4,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as txSender from '@/services/tx/tx-sender'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenTransferType, type MultiTokenTransferParams } from '../types'
 
 const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'

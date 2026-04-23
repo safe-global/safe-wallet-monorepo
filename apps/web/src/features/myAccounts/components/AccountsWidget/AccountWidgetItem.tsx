@@ -11,36 +11,52 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 interface AccountWidgetItemProps {
   account: Account
+  rowIndex: number
   loading?: boolean
   onItemClick?: (safeAddress: string) => void
 }
 
-const AccountWidgetItem = ({ account, loading = false, onItemClick }: AccountWidgetItemProps): ReactElement => {
+const AccountWidgetItem = ({
+  account,
+  rowIndex,
+  loading = false,
+  onItemClick,
+}: AccountWidgetItemProps): ReactElement => {
   return (
     <WidgetItem
+      testId={`space-dashboard-accounts-row-${rowIndex}`}
       href={account.href}
       onClick={onItemClick ? () => onItemClick(account.address) : undefined}
-      label={<Typography variant="paragraph-bold">{account.name}</Typography>}
+      label={
+        <Typography data-testid="single-account-name" variant="paragraph-bold">
+          {account.name}
+        </Typography>
+      }
       info={
-        <Typography variant="paragraph-mini" color="muted">
+        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
           {shortenAddress(account.address, 4)}
         </Typography>
       }
       startNode={
-        <Avatar>
+        <Avatar data-testid="single-account-identicon">
           <Identicon address={account.address} size={40} />
         </Avatar>
       }
-      featuredNode={<AccountItem.ChainBadge safes={account.safes} />}
+      featuredNode={
+        <div data-testid="single-account-chain-logos">
+          <AccountItem.ChainBadge safes={account.safes} />
+        </div>
+      }
       actionNode={
         <div className="flex flex-col items-end gap-2">
           <AccountItem.Balance
             className="w-full"
+            data-testid="single-account-balance"
             fiatTotal={account.fiatTotal}
             isLoading={!account.fiatTotal && loading}
           />
           {!account.subAccounts && (
-            <Badge variant="secondary">
+            <Badge variant="secondary" data-testid="single-account-threshold">
               <UserRound className="size-3" />
               {account.owners}
             </Badge>

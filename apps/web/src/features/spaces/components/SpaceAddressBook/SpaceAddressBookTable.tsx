@@ -18,9 +18,10 @@ const headCells = [
 
 type SpaceAddressBookTableProps = {
   entries: SpaceAddressBookItemDto[]
+  hasWallet: boolean
 }
 
-function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
+function SpaceAddressBookTable({ entries, hasWallet }: SpaceAddressBookTableProps) {
   const chains = useChains()
 
   const rows = entries.map((entry) => ({
@@ -31,18 +32,20 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
         content: (
           <Stack direction="row" spacing={1} alignItems="center">
             <Identicon address={entry.address} size={32} />
-            <Stack direction="column" spacing={0.5}>
-              <EthHashInfo
-                showAvatar={false}
-                address={entry.address}
-                name={entry.name}
-                shortAddress={false}
-                showPrefix={false}
-                addressBookNameSource={ContactSource.space}
-                hasExplorer
-                showCopyButton
-              />
-            </Stack>
+            <Box sx={{ '& .ethHashInfo-name': { fontWeight: 700 } }}>
+              <Stack direction="column" spacing={0.5}>
+                <EthHashInfo
+                  showAvatar={false}
+                  address={entry.address}
+                  name={entry.name}
+                  shortAddress={false}
+                  showPrefix={false}
+                  addressBookNameSource={ContactSource.space}
+                  hasExplorer
+                  showCopyButton
+                />
+              </Stack>
+            </Box>
           </Stack>
         ),
       },
@@ -77,11 +80,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
       actions: {
         rawValue: '',
         sticky: true,
-        content: (
-          <div className={tableCss.actions}>
-            <SpaceAddressBookActions entry={entry} />
-          </div>
-        ),
+        content: <div className={tableCss.actions}>{hasWallet && <SpaceAddressBookActions entry={entry} />}</div>,
       },
     },
   }))

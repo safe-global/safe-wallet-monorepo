@@ -46,6 +46,11 @@ export const SidebarSkeleton = (): ReactElement => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <hr className="my-1 w-48 animate-pulse mx-auto" />
+      <SidebarMenu>
+        <SkeletonRow heightClass="h-8" />
+      </SidebarMenu>
     </Sidebar>
   )
 }

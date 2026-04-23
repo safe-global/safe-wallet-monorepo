@@ -84,7 +84,9 @@ const mockModuleTx = {
 } as unknown as TransactionDetails
 
 const buildProvider = (receipt: { gasUsed: bigint; gasPrice: bigint } | null) =>
-  ({ getTransactionReceipt: jest.fn().mockResolvedValue(receipt) }) as never
+  ({ getTransactionReceipt: jest.fn().mockResolvedValue(receipt) }) as unknown as ReturnType<
+    typeof web3Module.useWeb3ReadOnly
+  > & { getTransactionReceipt: jest.Mock }
 
 describe('useHistoryFeesBreakdown', () => {
   beforeEach(() => {

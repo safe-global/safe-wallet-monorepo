@@ -1,4 +1,4 @@
-import { SigningMethod } from '@safe-global/protocol-kit'
+import { SigningMethod } from '@safe-global/types-kit'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createConnectedWallet } from '@/src/services/web3'
 import { proposeTx } from '@/src/services/tx/tx-sender'

@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from './styles.module.css'
@@ -14,16 +14,21 @@ const COLLAPSED_KEY = 'api-cta-sidebar-collapsed'
 
 export const ApiCtaSidebar = (): ReactElement => {
   const [isCollapsed = false, setIsCollapsed] = useLocalStorage<boolean>(COLLAPSED_KEY)
+  const { state } = useSidebar()
+  const isIconCollapsed = state === 'collapsed'
+  const showCollapsedButton = isCollapsed || isIconCollapsed
 
-  if (isCollapsed) {
+  if (showCollapsedButton) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
             className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
-            onClick={() => setIsCollapsed(false)}
+            onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
             data-testid="api-cta-collapsed"
+            aria-label="API"
+            render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
           >
             <Image
               src="/images/spaces/api-sidebar.svg"
@@ -32,8 +37,8 @@ export const ApiCtaSidebar = (): ReactElement => {
               height={16}
               className="dark:brightness-0 dark:invert"
             />
-            <span className="flex-1">API</span>
-            <Badge className="text-[10px] px-1 py-0 leading-none">New</Badge>
+            <span className="flex-1 group-data-[collapsible=icon]:hidden">API</span>
+            <Badge className="text-[10px] px-1 py-0 leading-none group-data-[collapsible=icon]:hidden">New</Badge>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

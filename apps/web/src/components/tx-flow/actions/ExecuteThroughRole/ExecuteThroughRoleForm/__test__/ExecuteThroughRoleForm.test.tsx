@@ -12,7 +12,8 @@ import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import * as txSender from '@/services/tx/tx-sender/dispatch'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { type OnboardAPI } from '@web3-onboard/core'
-import { AbiCoder, ZeroAddress, encodeBytes32String } from 'ethers'
+import { AbiCoder, encodeBytes32String } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import ExecuteThroughRoleForm from '../index'
 import * as hooksModule from '../hooks'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -147,20 +148,22 @@ describe('ExecuteThroughRoleForm', () => {
     mockConnectedWalletAddress(MEMBER_ADDRESS)
 
     const safeTx = createMockSafeTransaction({
-      to: ZeroAddress,
+      to: ZERO_ADDRESS,
       data: '0xd0e30db0', // deposit()
       value: AbiCoder.defaultAbiCoder().encode(['uint256'], [123]),
       operation: OperationType.Call,
     })
 
-    const { findByText, getByText } = renderWithSafeShield(
+    const { findByTestId, getByText } = renderWithSafeShield(
       <ExecuteThroughRoleForm
-        txId="0x0123412"
         safeTx={safeTx}
         role={{ ...TEST_ROLE_OK, status: zodiacRoles.Status.TargetAddressNotAllowed }}
+        options={SLOT_OPTIONS}
+        onChange={jest.fn()}
+        slotId="executeThroughRole"
       />,
     )
-    expect(await findByText('Execute')).toBeDisabled()
+    expect(await findByTestId('combo-submit-executeThroughRole')).toBeDisabled()
 
     expect(
       getByText(
@@ -181,13 +184,20 @@ describe('ExecuteThroughRoleForm', () => {
       operation: OperationType.Call,
     })
 
-    const onSubmit = jest.fn()
+    const onSubmitSuccess = jest.fn()
 
-    const { findByText } = renderWithSafeShield(
-      <ExecuteThroughRoleForm txId="0x01323" safeTx={safeTx} role={TEST_ROLE_OK} onSubmit={onSubmit} />,
+    const { findByTestId } = renderWithSafeShield(
+      <ExecuteThroughRoleForm
+        safeTx={safeTx}
+        role={TEST_ROLE_OK}
+        onSubmitSuccess={onSubmitSuccess}
+        options={SLOT_OPTIONS}
+        onChange={jest.fn()}
+        slotId="executeThroughRole"
+      />,
     )
 
-    fireEvent.click(await findByText('Execute'))
+    fireEvent.click(await findByTestId('combo-submit-executeThroughRole'))
 
     await waitFor(() => {
       expect(executeSpy).toHaveBeenCalledWith(
@@ -203,13 +213,14 @@ describe('ExecuteThroughRoleForm', () => {
       )
     })
 
-    // calls provided onSubmit callback
+    // calls provided onSubmitSuccess callback
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalled()
+      expect(onSubmitSuccess).toHaveBeenCalled()
     })
   })
 })
 
+const SLOT_OPTIONS = [{ id: 'executeThroughRole', label: 'Execute through role' }]
 const ROLES_MOD_ADDRESS = '0x1234567890000000000000000000000000000000'
 const MEMBER_ADDRESS = '0x1111111110000000000000000000000000000000'
 const ROLE_KEY = encodeBytes32String('eth_wrapping')

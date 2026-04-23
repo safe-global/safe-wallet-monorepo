@@ -1,4 +1,4 @@
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isGtfSafePaid } from './isGtfSafePaid'
 

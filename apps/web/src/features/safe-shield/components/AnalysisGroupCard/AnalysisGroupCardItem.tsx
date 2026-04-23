@@ -43,7 +43,7 @@ export const AnalysisGroupCardItem = ({
       <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
         <Box sx={{ borderLeft: `4px solid ${borderColor}`, padding: '12px' }}>
           <Stack gap={2}>
-            <Typography variant="body2" color="primary.light">
+            <Typography variant="body2" color="primary.light" sx={{ wordBreak: 'break-word' }}>
               {displayDescription}
             </Typography>
 

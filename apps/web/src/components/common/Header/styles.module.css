@@ -77,6 +77,11 @@
   margin-left: 6px;
 }
 
+.signOut {
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
 @media (max-width: 899.95px) {
   .logo {
     display: none;

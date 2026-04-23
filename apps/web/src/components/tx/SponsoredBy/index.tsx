@@ -1,4 +1,4 @@
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import css from './styles.module.css'
 
 export const RELAY_SPONSORS = {

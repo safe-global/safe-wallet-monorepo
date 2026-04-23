@@ -1,0 +1,48 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+---
+# Error path: Connect wallet that is NOT an owner of the active Safe
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Setup: onboard with test Safe, configure WC mock to return a non-owner address
+- tapOn:
+    id: 'e2eConnectSignerNonOwner'
+
+# Wait for home to load
+- assertVisible:
+    id: 'home-tab'
+
+# Navigate to Settings → Signers → Add signer
+- tapOn: 'Account, tab, 3 of 3'
+- tapOn:
+    id: 'settings-signers-list-item'
+- tapOn:
+    id: 'import-signer-button'
+
+# Tap "Connect wallet app"
+- tapOn:
+    id: 'connectSigner'
+
+# Verify Error screen with wallet icon and error status badge
+- assertVisible:
+    id: 'connect-signer-error'
+- assertVisible: "Can't sign with this wallet"
+- assertVisible:
+    id: 'wc-badge-error'
+- assertVisible:
+    id: 'wc-badge-error-status-error'
+
+# Switch e2e state so the next connection resolves as an owner
+- tapOn:
+    id: 'e2eSwitchToOwnerState'
+
+# Tap "Connect a different wallet"
+- tapOn:
+    id: 'connect-signer-error-done'
+
+# Verify Name Signer screen appears (owner address accepted)
+- assertVisible: 'Name your signer'
+- assertVisible: 'E2E Wallet - 3472'

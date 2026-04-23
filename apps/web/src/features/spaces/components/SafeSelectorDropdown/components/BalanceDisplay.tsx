@@ -26,7 +26,7 @@ const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold =
       (isLoading ? (
         <Skeleton className="h-5 w-12 rounded-full" />
       ) : (
-        <Badge variant="secondary" className="gap-1">
+        <Badge data-testid="safe-selector-threshold" variant="secondary" className="gap-1">
           <User className="size-3" />
           {threshold}/{owners}
         </Badge>

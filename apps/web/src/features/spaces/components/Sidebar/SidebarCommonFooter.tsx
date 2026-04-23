@@ -11,7 +11,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { ApiCtaSidebar } from './ApiCtaSidebar'
 
-const HELP_URL = 'https://help.safe.global/en/'
+const HELP_URL = 'https://help.safe.global'
 
 export const SidebarCommonFooter = (): ReactElement => {
   const dispatch = useAppDispatch()

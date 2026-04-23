@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
-import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
 import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
 
 type Props = {
@@ -58,16 +57,10 @@ export const SignerView = ({
   return (
     <YStack flex={1}>
       <ScrollView flex={1}>
-        <View justifyContent={'center'} alignItems={'center'} paddingTop={isWcSigner ? '$6' : undefined}>
+        <View justifyContent={'center'} alignItems={'center'} paddingTop={'$3'}>
           <BadgeWrapper
-            badge={
-              isWcSigner ? (
-                <WalletConnectBadge address={signerAddress} testID="signer-wc-badge" />
-              ) : (
-                <SignerTypeBadge address={signerAddress as Address} theme="badge_background" bordered={true} />
-              )
-            }
-            position={isWcSigner ? 'top-right' : 'bottom-right'}
+            badge={<SignerTypeBadge address={signerAddress as Address} testID="signer-detail-badge" />}
+            position="top-right"
           >
             <Identicon address={signerAddress as Address} size={56} />
           </BadgeWrapper>

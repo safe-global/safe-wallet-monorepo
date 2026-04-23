@@ -7,6 +7,14 @@ inputs:
     description: 'Run web after-install step to generate contract types'
     required: false
     default: 'true'
+  turbo-token:
+    description: 'Turborepo remote cache token (Vercel PAT)'
+    required: false
+    default: ''
+  turbo-team:
+    description: 'Turborepo remote cache team slug'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -17,6 +25,14 @@ runs:
       with:
         node-version: '24.14.0'
         cache: 'yarn'
+
+    - name: Export Turbo remote cache env
+      if: inputs.turbo-token != ''
+      shell: bash
+      run: |
+        echo "TURBO_TOKEN=${{ inputs.turbo-token }}" >> "$GITHUB_ENV"
+        echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
+        echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
     - name: Restore Yarn Cache & Types
       id: restore-yarn-types

@@ -48,7 +48,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   return (
     <>
-      <IconButton className={css.spaceActions} size="small" onClick={handleOpenContextMenu}>
+      <IconButton className={css.spaceActions} size="small" onClick={handleOpenContextMenu} data-testid="MoreVertIcon">
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>

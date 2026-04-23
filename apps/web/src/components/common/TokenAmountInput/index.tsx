@@ -1,11 +1,10 @@
 import NumberField from '@/components/common/NumberField'
-import FiatValue from '@/components/common/FiatValue'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
 import classNames from 'classnames'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
 import css from './styles.module.css'
@@ -16,6 +15,8 @@ import {
 } from '@/components/tx-flow/flows/TokenTransfer/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import FiatValue from '@/components/common/FiatValue'
+import { computeFiatValue } from '@/utils/fiat'
 
 export const InsufficientFundsValidationError = 'Insufficient funds'
 
@@ -61,9 +62,14 @@ const TokenAmountInput = ({
   // Ensure we always have a defined value to keep MUI Select controlled
   // Use defaultTokenAddress as fallback when watch() returns empty on first render
   const tokenAddress = watchedTokenAddress || defaultTokenAddress || ''
+  const watchedAmount = watch(amountField) || ''
 
-  const watchedAmount = watch(amountField)
   const isAmountError = !!get(errors, tokenAddressField) || !!get(errors, amountField)
+
+  const fiatValue = useMemo(
+    () => computeFiatValue(parseFloat(watchedAmount), selectedToken?.fiatConversion),
+    [watchedAmount, selectedToken],
+  )
 
   const validateAmount = useCallback(
     (value: string) => {
@@ -110,11 +116,6 @@ const TokenAmountInput = ({
 
     trigger(deps)
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
-
-  const fiatValue =
-    watchedAmount && selectedToken?.fiatConversion
-      ? parseFloat(watchedAmount) * parseFloat(selectedToken.fiatConversion)
-      : null
 
   return (
     <>
@@ -180,10 +181,9 @@ const TokenAmountInput = ({
           </TextField>
         </div>
       </FormControl>
-
-      {fiatValue !== null && !isNaN(fiatValue) && (
-        <Typography variant="body2" color="text.secondary" mt={0.5} ml={0.5}>
-          <FiatValue value={fiatValue.toString()} />
+      {fiatValue != null && (
+        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
+          <FiatValue value={fiatValue} precise />
         </Typography>
       )}
     </>

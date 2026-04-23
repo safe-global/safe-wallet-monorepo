@@ -108,11 +108,11 @@ export const TxFlow = <T extends unknown>({
 
                 <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
                   <Counterfactual />
-                  <ExecuteThroughRole />
 
                   <ComboSubmit>
                     <Sign />
                     <Execute />
+                    <ExecuteThroughRole />
                     <Batching />
                   </ComboSubmit>
 

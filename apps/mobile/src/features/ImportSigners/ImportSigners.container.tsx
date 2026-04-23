@@ -9,8 +9,8 @@ import { SafeCard } from '@/src/components/SafeCard'
 import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View, Image } from 'tamagui'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
 import { useTheme } from '@/src/theme/hooks/useTheme'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 
 const ConnectWalletAppImage = () => {
   const { isDark } = useTheme()
@@ -51,7 +51,7 @@ const title = 'Add signer'
 
 export const ImportSignersContainer = () => {
   const { isBiometricsEnabled } = useBiometrics()
-  const { initiateConnection } = useWalletConnect()
+  const { initiateConnection } = useWalletConnectContext()
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{title}</NavBarTitle>,

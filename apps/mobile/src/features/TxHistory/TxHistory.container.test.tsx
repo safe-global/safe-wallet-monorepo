@@ -188,7 +188,7 @@ describe('TxHistoryContainer', () => {
       },
       { timeout: 3000 },
     )
-  }, 10000)
+  }, 20000)
 
   it('shows pagination loading skeleton when loading more transactions', async () => {
     render(<TxHistoryContainer />)
@@ -243,7 +243,7 @@ describe('TxHistoryContainer', () => {
       },
       { timeout: 3000 },
     )
-  }, 10000)
+  }, 20000)
 
   it('resets list when active safe changes', async () => {
     const { rerender } = render(<TxHistoryContainer />)

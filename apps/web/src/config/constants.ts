@@ -1,4 +1,4 @@
-import chains from './chains'
+import chains from '@safe-global/utils/config/chains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 type Environment = 'development' | 'production' | 'test' | 'cypress'
@@ -80,13 +80,19 @@ export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
 export const TREZOR_APP_URL = 'app.safe.global'
 export const TREZOR_EMAIL = 'support@safe.global'
 
+// Safe Token
+export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
+  [chains.eth]: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe',
+  [chains.sep]: '0xd16d9C09d13E9Cf77615771eADC5d51a1Ae92a26',
+}
+
 export const DEVELOPER_PORTAL_URL =
   process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://developer.safe.global/login'
 
 export const SAFE_APPS_THIRD_PARTY_COOKIES_CHECK_URL = 'https://third-party-cookies-check.gnosis-safe.com'
 export const SAFE_APPS_DEMO_SAFE_MAINNET = 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7'
 export const SAFE_APPS_SDK_DOCS_URL =
-  'https://help.safe.global/en/articles/145503-how-to-create-a-safe-app-with-safe-apps-sdk-and-list-it'
+  'https://help.safe.global/articles/6872363437-How-to-create-a-Safe-App-with-Safe-Apps-SDK-and-list-it'
 
 // Google Analytics
 export const PROD_GA_TRACKING_ID = process.env.NEXT_PUBLIC_PROD_GA_TRACKING_ID || ''
@@ -114,6 +120,7 @@ export enum SafeAppsTag {
   SAFE_GOVERNANCE_APP = 'safe-governance-app',
   RECOVERY_SYGNUM = 'recovery-sygnum',
   SWAP_FALLBACK = 'swap-fallback',
+  SAFENET = 'safenet',
 }
 
 // Safe Apps names

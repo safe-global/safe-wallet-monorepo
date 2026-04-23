@@ -27,9 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Run ESLint with suggestions (PR only)
         if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@v4.1.26
+        uses: CatChen/eslint-suggestion-action@v4.1.29
         with:
           request-changes: true
           fail-check: true
@@ -39,7 +42,7 @@ jobs:
           config-path: './apps/web/eslint.config.mjs'
       - name: Run ESLint (push only)
         if: github.event_name == 'push'
-        run: yarn workspace @safe-global/web lint
+        run: yarn turbo run lint --filter=@safe-global/web
 
   prettier:
     permissions:
@@ -50,6 +53,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Run Prettier check
         run: yarn workspace @safe-global/web prettier
 
@@ -62,9 +68,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Type check
-        run: yarn type-check
-        working-directory: apps/web
+        run: yarn turbo run type-check --filter=@safe-global/web
 
   knip-exports:
     permissions:
@@ -75,8 +83,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Check for unused exports
-        run: yarn workspace @safe-global/web knip:exports
+        run: yarn turbo run knip:exports --filter=@safe-global/web
 
   notify:
     if: failure() && github.event_name == 'push'
@@ -85,7 +96,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@v3.0.1
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook

@@ -4,7 +4,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
@@ -23,6 +23,7 @@ interface Props {
   txDetails?: TransactionDetails
   showMultisend?: boolean
   showDecodedData?: boolean
+  showAuditLogFields?: boolean
 }
 
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
@@ -41,6 +42,7 @@ const Summary = ({
   txDetails,
   showMultisend = true,
   showDecodedData = true,
+  showAuditLogFields = true,
 }: Props): ReactElement => {
   const { txHash, executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
@@ -75,13 +77,13 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
-      {txHash && (
+      {showAuditLogFields && txHash && (
         <TxDataRow datatestid="tx-hash" title="Transaction hash">
           {generateDataRowValue(txHash, 'hash', true)}{' '}
         </TxDataRow>
       )}
 
-      {submittedAt && executedAt && (
+      {showAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
           <Typography variant="body2" component="div">
             {dateString(submittedAt)}
@@ -89,7 +91,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {executedAt && (
+      {showAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
           <Typography variant="body2" component="div">
             {dateString(executedAt)}

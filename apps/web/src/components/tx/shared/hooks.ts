@@ -10,8 +10,8 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
-import { sameString } from '@safe-global/protocol-kit/dist/src/utils'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -240,7 +240,7 @@ export const useImmediatelyExecutable = (): boolean => {
 export const useIsExecutionLoop = (): boolean => {
   const wallet = useWallet()
   const { safeAddress } = useSafeInfo()
-  return wallet ? sameString(wallet.address, safeAddress) : false
+  return wallet ? sameAddress(wallet.address, safeAddress) : false
 }
 
 export const useRecommendedNonce = (): number | undefined => {

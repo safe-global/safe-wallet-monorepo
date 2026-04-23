@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo } from 'react'
 import { formatUnits } from 'ethers'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'

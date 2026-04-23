@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { asAddress, shortenAddress } from '@safe-global/utils/utils/formatters'
-import { useWalletConnect } from '@/src/features/WalletConnect/hooks/useWalletConnect'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 import { useAppDispatch } from '@/src/store/hooks'
 import { addSignerWithEffects } from '@/src/store/signerThunks'
 import { formSchema } from '@/src/features/Signer/schema'
@@ -19,7 +19,7 @@ export function NameSignerContainer() {
   const address = asAddress(rawAddress)
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { isConnected, walletInfo } = useWalletConnect()
+  const { walletInfo } = useWalletConnectContext()
 
   const defaultName = buildDefaultName(walletName || undefined, address)
 
@@ -35,13 +35,6 @@ export function NameSignerContainer() {
       name: defaultName,
     },
   })
-
-  // Navigate back if wallet disconnects mid-flow
-  useEffect(() => {
-    if (!isConnected) {
-      router.back()
-    }
-  }, [isConnected, router])
 
   const handleClear = useCallback(() => {
     setValue('name', '', { shouldValidate: true })

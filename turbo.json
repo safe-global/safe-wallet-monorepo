@@ -1,0 +1,47 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": [
+    "tsconfig.base.json",
+    ".prettierrc",
+    ".prettierignore",
+    "config/tsconfig/*",
+    "config/eslint/*"
+  ],
+  "globalEnv": ["NODE_ENV", "CI", "TZ"],
+  "globalPassThroughEnv": ["TURBO_TOKEN", "TURBO_TEAM", "TURBO_API", "TURBO_REMOTE_CACHE_SIGNATURE_KEY"],
+  "tasks": {
+    "type-check": {
+      "inputs": ["src/**/*.{ts,tsx,js,jsx,json}", "tsconfig*.json", "package.json", "next-env.d.ts", "**/*.d.ts"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "lint": {
+      "inputs": ["src/**/*.{ts,tsx,js,jsx}", "eslint.config.{js,mjs,cjs,ts}", ".eslintrc*", "package.json"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "test": {
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx,json,snap}",
+        "jest.config.{js,cjs,mjs,ts}",
+        "jest.setup.{js,cjs,mjs,ts}",
+        "package.json",
+        "**/*.d.ts"
+      ],
+      "outputs": ["coverage/**"],
+      "env": ["NEXT_PUBLIC_IS_OFFICIAL_HOST", "DEBUG_PRINT_LIMIT", "LC_ALL"],
+      "outputLogs": "new-only"
+    },
+    "prettier": {
+      "inputs": ["**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css,scss}", "../../.prettierrc", "../../.prettierignore"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "knip:exports": {
+      "inputs": ["src/**", "knip.{js,ts,json}", "package.json"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    }
+  }
+}

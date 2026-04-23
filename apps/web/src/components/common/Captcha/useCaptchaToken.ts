@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { sharedTokenRef, resolveCaptchaReady, resetCaptchaPromise } from './captchaHeadersInit'
+import { sharedTokenRef, resolveCaptchaReady, registerWidgetRefreshCallback } from './captchaHeadersInit'
 import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 
 declare global {
@@ -12,6 +12,7 @@ declare global {
           theme?: 'light' | 'dark' | 'auto'
           size?: 'normal' | 'compact' | 'flexible'
           appearance?: 'always' | 'execute' | 'interaction-only'
+          'refresh-expired'?: 'auto' | 'manual' | 'never'
           callback?: (token: string) => void
           'error-callback'?: (error: string) => void
           'expired-callback'?: () => void
@@ -75,6 +76,12 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
         size: 'normal',
         // Only show widget when user interaction is required
         appearance: 'interaction-only',
+        // Default is 'auto', which silently re-runs the challenge at the
+        // ~5-minute TTL and pops the modal on idle tabs. 'never' keeps the
+        // widget dormant on expiry; refreshToken() → turnstile.reset() is the
+        // only path that fetches a new token, and only when a real protected
+        // request is waiting.
+        'refresh-expired': 'never',
         callback: (token: string) => {
           sharedTokenRef.current = token
           resolveCaptchaReady()
@@ -94,11 +101,12 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
           setIsLoading(false)
           setToken(null)
         },
+        // Token expired silently (Turnstile ~5min TTL). Clear it and wait for
+        // the next protected request to lazily trigger a fresh challenge via
+        // captchaHeadersInit. Avoids background modal pops when the user is idle.
         'expired-callback': () => {
           sharedTokenRef.current = null
-          resetCaptchaPromise()
           setToken(null)
-          refreshToken()
         },
         // Show modal only when interaction is required
         'before-interactive-callback': () => {
@@ -108,6 +116,7 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
 
       widgetIdRef.current = widgetId
       hasRenderedRef.current = true
+      registerWidgetRefreshCallback(refreshToken)
     } catch (err) {
       resolveCaptchaReady()
       setError(err instanceof Error ? err : new Error('Failed to initialize Turnstile'))

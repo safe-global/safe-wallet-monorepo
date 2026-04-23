@@ -11,6 +11,8 @@ import MaliciousTxWarning from '@/components/transactions/MaliciousTxWarning'
 import { ImitationTransactionWarning } from '@/components/transactions/ImitationTransactionWarning'
 import TokenAmount from '@/components/common/TokenAmount'
 import { type NativeToken, type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import FiatValue from '@/components/common/FiatValue'
+import useTransferFiatValue from './useTransferFiatValue'
 
 type TransferTxInfoProps = {
   txInfo: TransferTransactionInfo
@@ -21,13 +23,20 @@ type TransferTxInfoProps = {
 
 const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTxInfoProps) => {
   const { direction } = txInfo
+  const isQueued = isTxQueued(txStatus)
+  const fiatValue = useTransferFiatValue(txInfo.transferInfo, isQueued)
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center" gap={1} sx={{ '& b': { fontWeight: 'normal' } }}>
       <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40 }}>
-        {direction === TransferDirection.INCOMING ? 'Received' : isTxQueued(txStatus) ? 'Send' : 'Sent'}
+        {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}
       </Typography>
       <TransferTx info={txInfo} omitSign preciseAmount />
+      {fiatValue != null && (
+        <Typography variant="body2" color="text.secondary" component="span">
+          (<FiatValue value={fiatValue} />)
+        </Typography>
+      )}
       {!trusted && !imitation && <MaliciousTxWarning />}
     </Box>
   )

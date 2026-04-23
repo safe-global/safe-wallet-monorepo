@@ -34,6 +34,9 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
   const isActive = activeAccount === account.address.value
   const contact = useAppSelector(selectContactByAddress(account.address.value))
   const handleChainSelect = () => {
+    if (isEdit) {
+      return
+    }
     onSelect(account.address.value)
   }
 
@@ -56,12 +59,7 @@ export function AccountItem({ account, drag, chains, isDragging, activeAccount, 
   }, [account.address.value, deleteSafe])
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      disabled={isDragging}
-      onLongPress={drag}
-      onPress={isEdit ? undefined : handleChainSelect}
-    >
+    <TouchableOpacity style={styles.container} disabled={isDragging} onLongPress={drag} onPress={handleChainSelect}>
       <View
         testID="account-item-wrapper"
         backgroundColor={isActive && !isEdit ? '$borderLight' : '$backgroundTransparent'}

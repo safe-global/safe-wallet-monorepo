@@ -1,5 +1,5 @@
 import { hasCanonicalDeployment, hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
 import {
   getCompatibilityFallbackHandlerDeployments,
