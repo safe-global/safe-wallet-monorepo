@@ -65,7 +65,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
               <div className="relative flex items-center">
                 <GitMerge className="size-5 text-muted-foreground" />
                 {displayCount > 0 && (
-                  <span className="absolute left-[13px] -top-[5px] flex size-[14px] items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground">
+                  <span className="absolute left-[13px] -top-[5px] flex size-[14px] items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[12px] font-medium leading-none text-secondary-foreground">
                     {displayCount}
                   </span>
                 )}
