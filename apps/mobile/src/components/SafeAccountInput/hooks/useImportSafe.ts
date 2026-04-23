@@ -49,7 +49,7 @@ export const useImportSafe = () => {
         setValue('importedSafeResult', undefined)
       }
     }, 200),
-    [chainIds, trigger, inputAddress, setValue],
+    [chainIds, currency, trigger, inputAddress, setValue],
   )
 
   useEffect(() => {
