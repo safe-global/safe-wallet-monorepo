@@ -103,10 +103,12 @@ jest.mock('./SpaceBackLink', () => {
   return { __esModule: true, default: MockSpaceBackLink }
 })
 
+import { usePathname } from 'next/navigation'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
+const mockUsePathname = usePathname as jest.Mock
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
@@ -114,6 +116,7 @@ const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
 describe('SpaceSafeBar', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    mockUsePathname.mockReturnValue('/home')
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       items: mockItems,
       selectedItemId: '1:0xSafe1',
@@ -217,4 +220,16 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('space-back-link')).toBeInTheDocument()
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
+
+  it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(
+    'renders nothing on hidden route %s',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { queryByTestId } = render(<SpaceSafeBar />)
+      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+      expect(queryByTestId('space-nested-safes-button')).not.toBeInTheDocument()
+    },
+  )
 })

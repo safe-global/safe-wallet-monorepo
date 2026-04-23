@@ -44,9 +44,12 @@ export const useSafeSelectorState = ({
   const handleSafeChange = useCallback(
     (value: string | null) => {
       const itemId = value ?? ''
+      // Skip reselecting the previous id before the URL updates
+      const currentSelectionId = selectedItemId ?? selectedItem?.id ?? ''
+      if (itemId === currentSelectionId) return
       onItemSelect?.(itemId)
     },
-    [onItemSelect],
+    [onItemSelect, selectedItemId, selectedItem],
   )
 
   const closeDropdown = useCallback(() => {

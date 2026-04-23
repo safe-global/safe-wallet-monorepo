@@ -94,7 +94,7 @@ export const SafeSidebarVariant = ({
                 {displayMainNavItems.map((item, index) => (
                   <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
-                <SidebarMenuItem className="relative">
+                <SidebarMenuItem>
                   <SidebarMenuButton
                     size="lg"
                     isActive={isSettingsActive}
@@ -105,13 +105,15 @@ export const SafeSidebarVariant = ({
                   >
                     <Tooltip>
                       <TooltipTrigger>
-                        <Settings className="text-muted-foreground" />
+                        <span className="relative">
+                          <Settings className="text-muted-foreground" />
+                          {isOutdated && <span className={css.outdatedDot} aria-hidden />}
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent side="right">Settings</TooltipContent>
                     </Tooltip>
                     <span>Settings</span>
                   </SidebarMenuButton>
-                  {isOutdated && <span className={css.outdatedDot} aria-hidden />}
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

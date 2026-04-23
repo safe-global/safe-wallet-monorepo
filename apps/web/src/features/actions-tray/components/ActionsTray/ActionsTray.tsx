@@ -2,14 +2,17 @@ import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } 
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'lucide-react'
+import { Tooltip } from '@mui/material'
 import { Button } from '@/components/ui/button'
 import Track from '@/components/common/Track'
 import QrCodeButton from '@/components/sidebar/QrCodeButton'
 import CheckWallet from '@/components/common/CheckWallet'
+import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { AppRoutes } from '@/config/routes'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -17,6 +20,9 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import { useAppDispatch } from '@/store'
 import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
+
+const NOT_ALLOWED_COUNTRY_MESSAGE = 'is not allowed for your country'
+const NO_ASSETS_MESSAGE = 'You have no assets or balance on this safe account.'
 
 const PassThrough = ({ children }: { children: (ok: boolean) => ReactNode }) => <Fragment>{children(true)}</Fragment>
 
@@ -29,13 +35,22 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const hasNativeSwapFeature = useHasFeature(FEATURES.NATIVE_SWAPS)
+  const isBlockedCountry = Boolean(useContext(GeoblockingContext))
   const { link: txBuilderLink } = useTxBuilderApp()
   const isDarkMode = useDarkMode()
 
   const isSpace = variant === 'space'
   const Wallet = isSpace ? PassThrough : CheckWallet
   const secondaryVariant = isSpace ? 'outline' : 'secondary'
+
+  const getDisabledTooltip = (action: 'Send' | 'Swap') => {
+    if (isBlockedCountry) return `${action} ${NOT_ALLOWED_COUNTRY_MESSAGE}`
+    if (noAssets) return NO_ASSETS_MESSAGE
+    return ''
+  }
+  const sendTooltip = getDisabledTooltip('Send')
+  const swapTooltip = getDisabledTooltip('Swap')
 
   const openModal = useCallback(
     (type: ESafeAction) => {
@@ -68,20 +83,30 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       <div className="flex items-center gap-2">
-        {!noAssets && (
-          <Wallet>
-            {(isOk) => (
-              <Button variant="default" className="px-6" onClick={handleOnSend} disabled={!isOk}>
-                <ArrowUpRight className="size-5 text-green-400" />
-                Send
-              </Button>
-            )}
-          </Wallet>
-        )}
+        <Wallet>
+          {(isOk) => {
+            const sendDisabled = !isOk || isBlockedCountry || noAssets
+            return (
+              <Tooltip title={sendTooltip} arrow placement="top">
+                <span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })}>
+                  <Button variant="default" className="px-6" onClick={handleOnSend} disabled={sendDisabled}>
+                    <ArrowUpRight className="size-5 text-green-400" />
+                    Send
+                  </Button>
+                </span>
+              </Tooltip>
+            )
+          }}
+        </Wallet>
 
         <Track {...OVERVIEW_EVENTS.SHOW_QR} label="dashboard">
           {isSpace ? (
-            <Button variant={secondaryVariant} className={cn('px-6 hover:bg-border')} onClick={handleOnReceive}>
+            <Button
+              variant={secondaryVariant}
+              className={cn('px-6 hover:bg-border')}
+              onClick={handleOnReceive}
+              disabled={noAssets}
+            >
               <ArrowDownLeft className="size-5" />
               Receive
             </Button>
@@ -95,35 +120,46 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
           )}
         </Track>
 
-        {isSwapFeatureEnabled && !noAssets && (
+        {hasNativeSwapFeature && (
           <Wallet>
-            {(isOk) => (
-              <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
-                {isSpace ? (
-                  <Button
-                    variant={secondaryVariant}
-                    className={cn('px-6 hover:bg-border')}
-                    data-testid="overview-swap-btn"
-                    disabled={!isOk}
-                    onClick={handleOnSwap}
-                  >
-                    <Repeat className="size-5" strokeWidth={1.5} />
-                    Swap
-                  </Button>
-                ) : (
-                  <Button
-                    variant={secondaryVariant}
-                    className={cn('px-6 hover:bg-border')}
-                    data-testid="overview-swap-btn"
-                    disabled={!isOk}
-                    render={isOk ? <Link href={{ pathname: AppRoutes.swap, query: router.query }} /> : undefined}
-                  >
-                    <Repeat className="size-5" strokeWidth={1.5} />
-                    Swap
-                  </Button>
-                )}
-              </Track>
-            )}
+            {(isOk) => {
+              const swapDisabled = !isOk || isBlockedCountry || noAssets
+              return (
+                <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.dashboard}>
+                  <Tooltip title={swapTooltip} arrow placement="top">
+                    <span className={cn('inline-flex', { 'cursor-not-allowed': swapDisabled })}>
+                      {isSpace ? (
+                        <Button
+                          variant={secondaryVariant}
+                          className={cn('px-6 hover:bg-border')}
+                          data-testid="overview-swap-btn"
+                          disabled={swapDisabled}
+                          onClick={handleOnSwap}
+                        >
+                          <Repeat className="size-5" strokeWidth={1.5} />
+                          Swap
+                        </Button>
+                      ) : (
+                        <Button
+                          variant={secondaryVariant}
+                          className={cn('px-6 hover:bg-border')}
+                          data-testid="overview-swap-btn"
+                          disabled={swapDisabled}
+                          render={
+                            !swapDisabled ? (
+                              <Link href={{ pathname: AppRoutes.swap, query: router.query }} />
+                            ) : undefined
+                          }
+                        >
+                          <Repeat className="size-5" strokeWidth={1.5} />
+                          Swap
+                        </Button>
+                      )}
+                    </span>
+                  </Tooltip>
+                </Track>
+              )
+            }}
           </Wallet>
         )}
 
@@ -133,7 +169,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               <Button
                 variant={secondaryVariant}
                 className="px-6 hover:bg-border"
-                disabled={!isOk}
+                disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
               >

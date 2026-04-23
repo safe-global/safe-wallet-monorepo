@@ -26,6 +26,8 @@ interface SafeCardReadOnlyProps {
   className?: string
   showPending?: boolean
   onClick?: () => void
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
 const SafeCardReadOnly = ({
@@ -35,6 +37,8 @@ const SafeCardReadOnly = ({
   showPending = true,
   onClick,
   hideContextMenu = false,
+  disabled = false,
+  disabledTooltip,
 }: SafeCardReadOnlyProps) => {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
@@ -60,7 +64,8 @@ const SafeCardReadOnly = ({
 
   const hasQueuedItems = !isLoadingOverview && !isOverviewError && safeOverview && (safeOverview.queued ?? 0) > 0
 
-  const isClickable = Boolean(singleSafe)
+  const isClickable = Boolean(singleSafe) && !disabled
+  const tooltipTitle = disabled ? (disabledTooltip ?? '') : !singleSafe ? 'Safe data is not available' : ''
 
   const handleCopyAddress = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -81,10 +86,10 @@ const SafeCardReadOnly = ({
   }
 
   return (
-    <Tooltip title={!isClickable ? 'Safe data is not available' : ''} placement="top">
+    <Tooltip title={tooltipTitle} placement="top" arrow>
       <div
         ref={elementRef as React.Ref<HTMLDivElement>}
-        onClick={onClick || handleCardClick}
+        onClick={isClickable ? onClick || handleCardClick : undefined}
         className={cn(
           'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-2 sm:pl-6 sm:pr-6',
           {

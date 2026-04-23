@@ -23,7 +23,12 @@ import SpaceChainSelector from './SpaceChainSelector'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 import AccountsModal from './AccountsModal'
 
-const HIDDEN_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.spaces]
+const HIDDEN_ROUTES = [
+  AppRoutes.welcome.accounts,
+  AppRoutes.welcome.spaces,
+  AppRoutes.newSafe.create,
+  AppRoutes.newSafe.load,
+]
 
 function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
   return (
