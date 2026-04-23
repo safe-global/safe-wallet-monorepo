@@ -5,7 +5,7 @@ import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChainsIds } from '@/src/store/chains'
-import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import { useLazySafeOverviews } from '@/src/hooks/services/useLazySafeOverviews'
 import { FormValues } from '@/src/features/ImportReadOnly/types'
 import debounce from 'lodash/debounce'
 import { selectCurrency } from '@/src/store/settingsSlice'
@@ -26,7 +26,7 @@ export const useImportSafe = () => {
     trigger: triggerInput,
     formState: { isValid },
   } = useFormContext<FormValues>()
-  const [trigger, result] = useLazySafesGetOverviewForManyQuery()
+  const [trigger, result] = useLazySafeOverviews()
 
   const inputAddress = watch('safeAddress')
 

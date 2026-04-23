@@ -240,7 +240,7 @@ describe('useImportSafe', () => {
       })
 
       await waitFor(() => {
-        expect(requestedCurrency).toBe('usd')
+        expect(requestedCurrency).toBe('USD')
       })
     })
   })
