@@ -52,16 +52,18 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
             <TableRow key={entry.address}>
               {/* Name */}
               <TableCell className="font-bold">
-                <span className="inline-flex items-center gap-1.5">
-                  {entry.isLocal && (
-                    <SvgIcon
-                      component={AddressBookIcon}
-                      inheritViewBox
-                      sx={{ fontSize: 16, color: 'text.secondary' }}
-                    />
-                  )}
-                  {entry.name}
-                </span>
+                <Tooltip title={entry.name} arrow>
+                  <div className="flex items-center gap-1.5 overflow-hidden">
+                    {entry.isLocal && (
+                      <SvgIcon
+                        component={AddressBookIcon}
+                        inheritViewBox
+                        sx={{ fontSize: 16, color: 'text.secondary', flexShrink: 0 }}
+                      />
+                    )}
+                    <span className="min-w-0 truncate">{entry.name}</span>
+                  </div>
+                </Tooltip>
               </TableCell>
 
               {/* Address */}
@@ -127,7 +129,7 @@ function SpaceAddressBookTable({ entries }: SpaceAddressBookTableProps) {
       </Table>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4">
+        <div className="flex items-center justify-between pt-4 pr-16">
           <p className="text-muted-foreground text-sm">
             {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, entries.length)} of {entries.length}
           </p>
