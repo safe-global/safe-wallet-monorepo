@@ -3,7 +3,7 @@ const safeSelectorBlock = '[data-testid="space-safes-navigation-block"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
-const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
+const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const currencySection = '[data-testid="safe-selector-balance"]'
 const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
@@ -52,8 +52,9 @@ export function verifySafeSelectorTriggerName(name) {
   cy.get(safeSelectorTriggerName).should('contain.text', name)
 }
 
+/** Short address may render on the name row alone or on a second row when a display name exists. */
 export function verifySafeSelectorTriggerAddress(address) {
-  cy.get(safeSelectorTriggerAddress).should('contain.text', address)
+  cy.get(safeSelectorTriggerDetails).should('contain.text', address)
 }
 
 export function clickCopyAddressBtn() {
@@ -79,4 +80,8 @@ export function expandMultichainItem(index = 0) {
 
 export function verifyNotActivatedSafeExists() {
   cy.get(subAccountsContainer).find(pendingActivationChip).should('exist')
+}
+
+export function verifyAddedSafesInDropdown(safes) {
+  safes.forEach((address) => verifyDropdownContainsSafe(address))
 }

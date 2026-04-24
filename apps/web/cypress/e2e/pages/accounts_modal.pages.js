@@ -2,6 +2,8 @@
 const allAccountsBtn = '[data-testid="all-accounts-btn"]'
 const importBtn = '[data-testid="import-btn"]'
 const accountsList = '[data-testid="accounts-list"]'
+const nameInput = '[data-testid="name-input"]'
+const saveBtn = '[data-testid="save-btn"]'
 const pinnedAccounts = '[data-testid="pinned-accounts"]'
 const emptyPinnedList = '[data-testid="empty-pinned-list"]'
 const addSafeButton = '[data-testid="add-safe-button"]'
@@ -70,6 +72,21 @@ export function clickRenameBtn() {
 
 export function verifyAccountsListContains(name) {
   cy.get(accountsList).should('contain.text', name)
+}
+
+export function typeSafeName(name) {
+  cy.get(nameInput).find('input').clear().type(name)
+}
+
+export function clickSaveBtn() {
+  cy.get(saveBtn).click()
+}
+
+export function renameSafe(oldName, newName) {
+  cy.get(accountsList).contains(oldName).closest(safeItemCard).find(safeOptionsBtn).click()
+  clickRenameBtn()
+  typeSafeName(newName)
+  clickSaveBtn()
 }
 
 export function clickOnImportBtn() {
