@@ -263,6 +263,8 @@ export type SpaceAddressBookItemDto = {
   chainIds: string[]
   createdBy: string
   lastUpdatedBy: string
+  createdAt: string
+  updatedAt: string
 }
 export type SpaceAddressBookDto = {
   spaceId: string
