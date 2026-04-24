@@ -1,4 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { useMultiAccountItemData } from '@/features/myAccounts'
 import type { MultiChainSafeItem } from '@/hooks/safes'
@@ -24,6 +25,12 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 jest.mock('./PinnedSafeContextMenu', () => ({
   __esModule: true,
   default: () => null,
+}))
+
+jest.mock('./PinnedSafeItem', () => ({
+  PinnedSafeSubItem: ({ safeItem }: { safeItem: { chainId: string; address: string } }) => (
+    <div data-testid={`sub-item-${safeItem.chainId}`} />
+  ),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -78,10 +85,20 @@ describe('MultiSafeItemCard', () => {
     })
   })
 
-  it('links to the chain with the highest fiat total', () => {
+  it('renders collapsed with no per-chain sub-items visible', () => {
     render(<MultiSafeItemCard item={buildMultiItem()} onClose={noopClose} />)
 
-    const link = screen.getByRole('link')
-    expect(link.getAttribute('href')).toMatch(/gno/)
+    expect(screen.queryByTestId('sub-item-1')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('sub-item-100')).not.toBeInTheDocument()
+  })
+
+  it('expands and shows a sub-item per chain when the trigger is clicked', async () => {
+    const user = userEvent.setup()
+    render(<MultiSafeItemCard item={buildMultiItem()} onClose={noopClose} />)
+
+    await user.click(screen.getByRole('button', { name: /0x11/i }))
+
+    expect(screen.getByTestId('sub-item-1')).toBeInTheDocument()
+    expect(screen.getByTestId('sub-item-100')).toBeInTheDocument()
   })
 })

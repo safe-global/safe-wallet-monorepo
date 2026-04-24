@@ -13,6 +13,7 @@ import { useSafeItemData } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 import type { SafeItem } from '@/hooks/safes'
 import {
   ICON_SIZE,
@@ -37,6 +38,7 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
   const { href, safeOverview, undeployedSafe, isActivating } = useSafeItemData(safeItem)
   const chain = useChain(safeItem.chainId)
   const hasOverview = safeOverview !== undefined
+  const queuedCount = !undeployedSafe ? (safeOverview?.queued ?? 0) : 0
 
   const handleNavigate = () => {
     trackEvent({ ...OVERVIEW_EVENTS.OPEN_SAFE, label: OVERVIEW_LABELS.top_bar })
@@ -57,6 +59,12 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
         {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
         {!undeployedSafe && safeItem.isReadOnly && <ReadOnlyBadge />}
       </div>
+
+      {queuedCount > 0 && (
+        <Badge variant="secondary" className="text-xs whitespace-nowrap">
+          {queuedCount} pending
+        </Badge>
+      )}
 
       {!hasOverview && !undeployedSafe ? (
         <Skeleton className="h-3 w-10" />
