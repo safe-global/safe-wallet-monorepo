@@ -128,6 +128,56 @@ describe('Safe selector tests - pin/unpin and undeployed safes', () => {
   })
 })
 
+describe('Safe selector tests - accounts modal search', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify the search input is shown above the pinned safes list', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+    accountsModal.verifySearchInputAbovePinnedSection()
+  })
+
+  it('Verify search finds safes in the trusted list', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+    accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
+    accountsModal.verifyAccountsListItemCount(1)
+  })
+
+  it('Verify searching for a safe name filters out those who do not match', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+    accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
+    accountsModal.verifyAccountsListDoesNotContain(sideBar.sideBarSafes.safe2short)
+  })
+
+  it('Verify searching for a safe also finds safes in different networks', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe3TwoChains)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+    accountsModal.searchSafe(sideBar.sideBarSafes.multichain_short_)
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.multichain_short_)
+  })
+
+  it('Verify clearing the search input returns back to the full list', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1Safe2)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+    accountsModal.searchSafe(sideBar.sideBarSafes.safe1short_)
+    accountsModal.verifyAccountsListDoesNotContain(sideBar.sideBarSafes.safe2short)
+    accountsModal.clearSearchInput()
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe2short)
+  })
+})
+
 describe('Safe selector tests - added safes', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

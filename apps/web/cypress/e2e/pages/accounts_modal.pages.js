@@ -1,5 +1,6 @@
 // AccountsModal (All Accounts popup)
 const allAccountsBtn = '[data-testid="all-accounts-btn"]'
+const searchInput = '[data-testid="accounts-search-input"]'
 const importBtn = '[data-testid="import-btn"]'
 const accountsList = '[data-testid="accounts-list"]'
 const nameInput = '[data-testid="name-input"]'
@@ -99,6 +100,31 @@ export function clickOnImportBtn() {
 
 export function verifyAddSafeButtonVisible() {
   cy.get(addSafeButton).should('be.visible')
+}
+
+export function searchSafe(query) {
+  cy.get(searchInput).clear().type(query)
+}
+
+export function clearSearchInput() {
+  cy.get(searchInput).clear()
+}
+
+export function verifySearchInputAbovePinnedSection() {
+  cy.get(searchInput).then(($search) => {
+    cy.get(pinnedAccounts).then(($pinned) => {
+      const position = $search[0].compareDocumentPosition($pinned[0])
+      expect(position & Node.DOCUMENT_POSITION_FOLLOWING).to.equal(Node.DOCUMENT_POSITION_FOLLOWING)
+    })
+  })
+}
+
+export function verifyAccountsListDoesNotContain(text) {
+  cy.get(accountsList).should('not.contain.text', text)
+}
+
+export function verifyAccountsListItemCount(count) {
+  cy.get(accountsList).find('[data-testid="safe-item-card"]').should('have.length', count)
 }
 
 export function verifyPinnedSectionDoesNotExist() {

@@ -107,6 +107,7 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoComplete="off"
+              data-testid="accounts-search-input"
             />
           </InputGroup>
         </div>
