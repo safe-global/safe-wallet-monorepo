@@ -14,7 +14,7 @@ import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
@@ -64,7 +64,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
       openModal(ESafeAction.Send)
       return
     }
-    setTxFlow(<NewTxFlow />, undefined, false)
+    setTxFlow(<TokenTransferFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
   }, [isSpace, openModal, setTxFlow])
 

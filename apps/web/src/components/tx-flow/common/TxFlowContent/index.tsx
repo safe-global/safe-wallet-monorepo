@@ -50,10 +50,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
         <Grid sx={{ width: 200 }} pt={5}>
           <aside>
             <Stack gap={3} position="fixed">
-              <Card className={css.safeInfoCard}>
-                <SafeInfo />
-              </Card>
-
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}
@@ -80,8 +76,6 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 >
                   {title}
                 </Typography>
-
-                <ChainIndicator inline />
               </div>
 
               <Paper

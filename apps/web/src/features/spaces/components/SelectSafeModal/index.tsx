@@ -36,9 +36,14 @@ const SelectSafeModal = () => {
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
-  const actionMapper = useSafeActionMapper({
+  const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
+
+  const handleQrClose = useCallback(() => {
+    setQrOpen(false)
+    void resetActiveSafe()
+  }, [resetActiveSafe])
 
   const isSwapAction = actionType === ESafeAction.Swap
   const isSwapDisabledForSafe = useCallback(
@@ -113,7 +118,7 @@ const SelectSafeModal = () => {
 
       {qrOpen && (
         <Suspense>
-          <QrModal onClose={() => setQrOpen(false)} />
+          <QrModal onClose={handleQrClose} />
         </Suspense>
       )}
     </>
