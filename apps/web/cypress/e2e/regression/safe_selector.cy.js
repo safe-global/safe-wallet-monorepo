@@ -6,6 +6,7 @@ import * as assets from '../pages/assets.pages.js'
 import * as accountsModal from '../pages/accounts_modal.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import safes from '../../fixtures/safes/static.js'
@@ -82,6 +83,48 @@ describe('Safe selector tests - trusted safes in accounts modal', () => {
   it('Verify there is an option to rename an unnamed safe in the accounts modal', () => {
     accountsModal.openAccountsModal()
     accountsModal.clickSafeOptionsBtn(0)
+  })
+})
+
+describe('Safe selector tests - pin/unpin and undeployed safes', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify "Add safe" button is displayed in the accounts modal', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyAddSafeButtonVisible()
+  })
+
+  it('Verify a safe can be removed from the trusted list', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyPinnedAccountsSectionVisible()
+    accountsModal.unpinSafeByName(sideBar.sideBarSafes.safe1short)
+    accountsModal.verifyPinnedSafeDoesNotExist(sideBar.sideBarSafes.safe1short)
+  })
+
+  it('Verify undeployed safe appears in the trusted list', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set6_undeployed_safe)
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safe1)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyPinnedAccountsSectionVisible()
+    accountsModal.verifyPinnedSafeExists(sideBar.sideBarSafes.safe4short)
+  })
+
+  it('Verify untrusted safe can be added to trusted list from dashboard action required panel', () => {
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
+    wallet.connectSigner(signer)
+    dashboard.verifyActionRequiredCard({ messages: [dashboard.nonPinnedWarningTitle] })
+    dashboard.clickActionInPanel(dashboard.trustThisSafeButtonTestId)
+    dashboard.verifyTrustDialogVisible()
   })
 })
 

@@ -96,3 +96,15 @@ export function renameSafe(oldName, newName) {
 export function clickOnImportBtn() {
   cy.get(importBtn).scrollIntoView().should('be.visible').click()
 }
+
+export function verifyAddSafeButtonVisible() {
+  cy.get(addSafeButton).should('be.visible')
+}
+
+export function verifyPinnedSectionDoesNotExist() {
+  cy.get(pinnedAccounts).should('not.exist')
+}
+
+export function verifyPinnedSafeDoesNotExist(address) {
+  cy.get(pinnedAccounts).nextUntil(':not([data-testid="safe-item-card"])').should('not.contain.text', address)
+}
