@@ -18,6 +18,8 @@ const addedSafe900 = 'Added safe 900'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+const signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
+const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
 
 describe('Safe selector tests - details and currency', () => {
   before(async () => {
@@ -175,6 +177,42 @@ describe('Safe selector tests - accounts modal search', () => {
     accountsModal.clearSearchInput()
     accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe1short)
     accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe2short)
+  })
+})
+
+describe('Safe selector tests - accounts modal actions', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify Import button is present on the accounts page', () => {
+    cy.visit(constants.welcomeAccountsSepoliaUrl)
+    wallet.connectSigner(signer)
+    accountsModal.verifyImportBtnVisible()
+  })
+
+  it('Verify safes added to watchlist appear in the accounts modal', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer1)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyAccountsListContains(sideBar.sideBarSafes.safe3short)
+  })
+
+  it('Verify missing signature info is shown for a safe in the accounts modal', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer2)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyMissingSignatureInfoExists()
+  })
+
+  it('Verify balance is displayed in the accounts modal safe item', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+    accountsModal.verifyFiatBalanceExists()
   })
 })
 

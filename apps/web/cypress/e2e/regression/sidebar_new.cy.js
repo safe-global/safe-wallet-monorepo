@@ -36,7 +36,7 @@ describe('Sidebar tests', () => {
     sideBar.verifySideListItemsNew()
   })
 
-  it.only('Verify counter in the "Transaction" menu item if there are tx in the queue tab', () => {
+  it('Verify counter in the "Transaction" menu item if there are tx in the queue tab', () => {
     sideBar.verifyTxCounterNew(1)
   })
 })

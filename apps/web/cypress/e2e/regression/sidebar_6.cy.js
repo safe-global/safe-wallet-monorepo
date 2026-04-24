@@ -14,6 +14,7 @@ const bSafe = 'Safe B'
 const safe14 = 'Safe 14'
 const safe15 = 'Safe 15'
 
+// These tests are obsolete as there is no sorting in the new UI
 describe.skip('Sidebar sorting tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

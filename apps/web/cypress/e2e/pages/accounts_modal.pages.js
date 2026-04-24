@@ -58,6 +58,10 @@ export function verifyMissingSignatureInfo(threshold, owners) {
   cy.get(missingSignatureInfo).should('be.visible').and('contain.text', `${threshold}/${owners}`)
 }
 
+export function verifyMissingSignatureInfoExists() {
+  cy.get(missingSignatureInfo).should('exist')
+}
+
 export function verifyReadOnlyChipVisible() {
   cy.get(readOnlyChip).should('be.visible')
 }
@@ -96,6 +100,14 @@ export function renameSafe(oldName, newName) {
 
 export function clickOnImportBtn() {
   cy.get(importBtn).scrollIntoView().should('be.visible').click()
+}
+
+export function verifyImportBtnVisible() {
+  cy.get(importBtn).scrollIntoView().should('be.visible')
+}
+
+export function verifyFiatBalanceExists() {
+  cy.get(safeItemCard).first().contains(/\d/).should('exist')
 }
 
 export function verifyAddSafeButtonVisible() {
