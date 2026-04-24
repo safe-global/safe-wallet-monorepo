@@ -26,7 +26,6 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 import SafeShieldWidget from '@/features/safe-shield'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import { cn } from '@/utils/cn'
 
 export const TxLayoutHeader = ({
   hideNonce,
