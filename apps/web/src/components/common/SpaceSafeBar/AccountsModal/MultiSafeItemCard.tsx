@@ -129,7 +129,7 @@ const MultiSafeItemCard = ({
         </div>
 
         <CollapsibleContent>
-          <div className="pb-2 pl-[52px] pr-3">
+          <div className="pb-2 pl-2 pr-3">
             {sortedSafes.map((safeItem) => (
               <PinnedSafeSubItem
                 key={`${safeItem.chainId}:${safeItem.address}`}
