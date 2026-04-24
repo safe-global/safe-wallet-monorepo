@@ -38,7 +38,7 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
 }))
 
 jest.mock('@/components/tx-flow/flows', () => ({
-  NewTxFlow: () => null,
+  TokenTransferFlow: () => null,
 }))
 
 const mockSafe: SafeItem = {
@@ -86,7 +86,7 @@ describe('useSafeActionMapper', () => {
   })
 
   describe(ESafeAction.Send, () => {
-    it('navigates to the Safe and opens the NewTxFlow', async () => {
+    it('navigates to the Safe and opens the TokenTransferFlow', async () => {
       const { result, setTxFlow } = renderMapper()
 
       await act(async () => {

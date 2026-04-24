@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useMemo, useRef, type ReactElement } from 'react'
+import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
+import { TxModalContext } from '@/components/tx-flow'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
@@ -54,6 +55,12 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const isSafeOwner = useIsSafeOwner()
   const draftBatch = useDraftBatch()
   const showSafeToken = useSafeTokenEnabled()
+  const { txFlow } = useContext(TxModalContext)
+
+  // On space routes we show the global search input by default, but when a transaction
+  // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
+  // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
+  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
@@ -90,7 +97,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
         <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
-          {isSpaceRoute ? <GlobalSearchInput className="w-64 md:w-80" /> : <SpaceSafeBar />}
+          {showSpaceSafeBar ? <SpaceSafeBar /> : <GlobalSearchInput className="w-64 md:w-80" />}
         </div>
 
         {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}

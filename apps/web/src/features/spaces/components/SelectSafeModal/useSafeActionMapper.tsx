@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@/hooks/safes'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -50,7 +50,7 @@ const useSafeActionMapper = ({
     () => ({
       [ESafeAction.Send]: async (safe) => {
         await navigateToSafe(safe)
-        setTxFlow(<NewTxFlow />, undefined, false)
+        setTxFlow(<TokenTransferFlow />, undefined, false)
       },
 
       [ESafeAction.Receive]: async (safe) => {
