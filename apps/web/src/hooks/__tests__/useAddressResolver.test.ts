@@ -96,6 +96,31 @@ describe('useAddressResolver', () => {
     jest.useRealTimers()
   })
 
+  it('caches no-ENS results so repeated lookups do not hit the provider', async () => {
+    const ADDR_NO_ENS = zeroPadValue('0xcc', 20)
+
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    const lookupMock = jest.spyOn(domains, 'lookupAddress').mockResolvedValue(undefined)
+
+    const { unmount } = renderHook(() => useAddressResolver(ADDR_NO_ENS))
+
+    await waitFor(() => {
+      expect(lookupMock).toHaveBeenCalledTimes(1)
+    })
+
+    unmount()
+
+    const { result } = renderHook(() => useAddressResolver(ADDR_NO_ENS))
+
+    await waitFor(() => {
+      expect(result.current.resolving).toBe(false)
+      expect(result.current.ens).toBeUndefined()
+    })
+
+    expect(lookupMock).toHaveBeenCalledTimes(1)
+  })
+
   it('does not resolve ENS domain if feature is disabled', async () => {
     jest.spyOn(addressBook, 'default').mockReturnValue({})
     const domainsMock = jest.spyOn(domains, 'lookupAddress').mockImplementation(() => {
