@@ -320,21 +320,19 @@ const AddAccounts = ({
   return (
     <>
       {externalOpen === undefined && (
-        <Button
-          size="lg"
-          className="font-bold px-4 py-0"
-          variant={buttonVariant}
-          disabled={!isAdmin}
-          onClick={() => setOpen(true)}
-          title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
-        >
-          <Plus
-            className={cn('size-4 mr-1', {
-              'text-green-500': buttonVariant === 'default',
-            })}
-          />
-          {buttonLabel}
-        </Button>
+        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+          <Button
+            size="lg"
+            className="font-bold px-4 py-0"
+            variant={buttonVariant}
+            disabled={!isAdmin}
+            onClick={() => setOpen(true)}
+            title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
+          >
+            <Plus className="size-4 mr-1" />
+            {buttonLabel}
+          </Button>
+        </div>
       )}
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>
