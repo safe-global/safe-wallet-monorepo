@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { SAFE_ADDRESSES } from '@safe-global/test/msw/fixtures'
 import { createMockStory } from '@/stories/mocks'
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
@@ -50,7 +51,7 @@ export const SingleChain: Story = {
       <ChainSelectorBlock
         deployedChains={deployedChains.single}
         selectedChainId="1"
-        safeAddress="0x0000000000000000000000000000000000000001"
+        safeAddress={SAFE_ADDRESSES.efSafe.address}
         deployedChainIds={['1']}
         onChainSelect={() => {}}
         onAddNetwork={() => {}}
@@ -65,7 +66,7 @@ export const MultiChain: Story = {
       <ChainSelectorBlock
         deployedChains={deployedChains.multi}
         selectedChainId="1"
-        safeAddress="0x0000000000000000000000000000000000000002"
+        safeAddress={SAFE_ADDRESSES.efSafe.address}
         deployedChainIds={['1', '137', '8453']}
         onChainSelect={() => {}}
         onAddNetwork={() => {}}

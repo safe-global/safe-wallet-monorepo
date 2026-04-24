@@ -108,9 +108,15 @@ describe('useAddNetworkState', () => {
     const { result } = renderHook(() => useAddNetworkState('0xSafe', ['1']))
 
     expect(result.current.isFeatureEnabled).toBe(false)
-    // When feature is disabled on current chain, unavailableReason stays null;
-    // the consumer is expected to simply not render the section.
     expect(result.current.unavailableReason).toBeNull()
+  })
+
+  it('short-circuits useSafeCreationData to an empty chains list when feature is disabled', () => {
+    setupDefaults({ featureEnabledByChainId: { '1': false } })
+
+    renderHook(() => useAddNetworkState('0xSafe', ['1']))
+
+    expect(useSafeCreationData).toHaveBeenCalledWith('0xSafe', [])
   })
 
   it('filters out target chains that do not support the add-network feature', () => {

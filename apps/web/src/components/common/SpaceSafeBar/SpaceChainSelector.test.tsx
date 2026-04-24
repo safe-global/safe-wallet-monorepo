@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 jest.mock('./hooks/useSpaceChainSelector')
 jest.mock(
@@ -11,12 +12,7 @@ jest.mock(
       selectedChainId,
       safeAddress,
       deployedChainIds,
-    }: {
-      deployedChains: Array<{ chainId: string }>
-      selectedChainId: string
-      safeAddress: string
-      deployedChainIds: string[]
-    }) {
+    }: ChainSelectorBlockProps) {
       return (
         <div
           data-testid="chain-selector-block"

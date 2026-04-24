@@ -28,8 +28,8 @@ export function useAddNetworkState(safeAddress: string, deployedChainIds: string
   const isFeatureEnabled = hasMultiChainAddNetworkFeature(currentChain)
 
   const deployedChainConfigs = useMemo(
-    () => configs.filter((c) => deployedChainIds.includes(c.chainId)),
-    [configs, deployedChainIds],
+    () => (isFeatureEnabled ? configs.filter((c) => deployedChainIds.includes(c.chainId)) : []),
+    [isFeatureEnabled, configs, deployedChainIds],
   )
 
   const [safeCreationData, safeCreationError, safeCreationLoading] = useSafeCreationData(
