@@ -1,5 +1,6 @@
 import { Info, Loader2, Plus } from 'lucide-react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { useAddNetworkState, type AddNetworkUnavailableReason } from '@/features/multichain'
@@ -107,9 +108,9 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
                     </Typography>
                   </div>
                   {disabled ? (
-                    <Typography variant="paragraph-small-medium" className="text-muted-foreground">
+                    <Badge variant="secondary" className="text-[10px] px-1.5">
                       Not available
-                    </Typography>
+                    </Badge>
                   ) : (
                     <Plus className="size-4 shrink-0 text-muted-foreground" />
                   )}
