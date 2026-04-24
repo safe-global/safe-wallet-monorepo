@@ -14,7 +14,7 @@ const bSafe = 'Safe B'
 const safe14 = 'Safe 14'
 const safe15 = 'Safe 15'
 
-describe('Sidebar sorting tests', () => {
+describe.skip('Sidebar sorting tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

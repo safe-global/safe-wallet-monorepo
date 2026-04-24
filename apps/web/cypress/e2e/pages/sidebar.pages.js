@@ -133,6 +133,7 @@ const emptyPinnedMessage = 'Personalize your account list by clicking theicon on
 export const addedSafesEth = ['0x8675...a19b']
 export const addedSafesSepolia = ['0x6d0b...6dC1', '0x5912...fFdb', '0x0637...708e', '0xD157...DE9a']
 export const sideBarListItems = ['Home', 'Assets', 'Transactions', 'Address book', 'Apps', 'Settings', 'Swap']
+export const sideBarListItemsNew = ['Overview', 'Assets', 'Transactions', 'Address book', 'Apps']
 export const sideBarSafes = {
   safe1: '0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   safe2: '0x905934aA8758c06B2422F0C90D97d2fbb6677811',
@@ -348,6 +349,15 @@ export function verifySideListItems() {
 
 export function verifyTxCounter(counter) {
   cy.get(sideBarListItem).contains(sideBarListItems[2]).should('contain', counter)
+}
+
+export function verifySideListItemsNew() {
+  main.verifyValuesExist(sideBarListItem, sideBarListItemsNew)
+  main.verifyElementsExist([sidebarSettingsItem, sideBarListItemNeedHelp])
+}
+
+export function verifyTxCounterNew(counter) {
+  cy.get('[data-testid="queued-tx-info"]').should('be.visible').and('contain.text', String(counter))
 }
 
 export function verifyNavItemDisabled(item) {

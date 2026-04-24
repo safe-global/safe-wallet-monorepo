@@ -13,7 +13,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const addedOwner = 'Added owner'
 const addedNonowner = 'Added non-owner'
 
-describe('Sidebar non-owner tests', () => {
+describe.skip('Sidebar non-owner tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

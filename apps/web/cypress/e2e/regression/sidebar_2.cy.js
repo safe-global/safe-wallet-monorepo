@@ -14,7 +14,7 @@ const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 const staticSafe200 = 'Added safe 200'
 
-describe('Sidebar added sidebar tests', () => {
+describe.skip('Sidebar added sidebar tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

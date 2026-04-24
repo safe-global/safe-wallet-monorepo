@@ -6,6 +6,7 @@ const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
 const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const currencySection = '[data-testid="safe-selector-balance"]'
+const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
@@ -61,6 +62,10 @@ export function clickCopyAddressBtn() {
 
 export function verifyCurrencySection(text) {
   cy.get(currencySection).should('contain.text', text)
+}
+
+export function verifySafeSelectorThreshold(threshold, owners) {
+  cy.get(safeSelectorThreshold).should('contain.text', `${threshold}/${owners}`)
 }
 
 export function clickOnNestedSafesBtn() {

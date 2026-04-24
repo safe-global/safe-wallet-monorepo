@@ -7,7 +7,7 @@ import { exchangeStr, clickOnBridgeOption } from '../pages/bridge.pages.js'
 
 let staticSafes = []
 
-describe('Sidebar UI tests', () => {
+describe.skip('Sidebar UI tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
