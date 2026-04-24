@@ -65,7 +65,7 @@ describe('Multichain add network tests', { defaultCommandTimeout: 60000 }, () =>
     sideBar.getModalAddNetworkBtn().should('be.disabled')
   })
 
-  it.only('Verify that already added network is not shown in the add network list', () => {
+  it('Verify that already added network is not shown in the add network list', () => {
     network.clickChainNavigationButton()
     network.clickAllNetworksAccordion()
     network.verifyNetworkNotInAddList(constants.networks.polygon)
