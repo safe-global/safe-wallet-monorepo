@@ -110,7 +110,7 @@
     "next": "patch:next@15.5.8#../../.yarn/patches/next-npm-15.5.8-7d525d02b9.patch",
     "next-themes": "^0.4.6",
     "papaparse": "^5.3.2",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.10",
     "qrcode.react": "^3.1.0",
     "react": "19.2.0",
     "react-day-picker": "^9.13.0",
