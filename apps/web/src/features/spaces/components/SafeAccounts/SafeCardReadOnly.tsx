@@ -21,6 +21,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { cn } from '@/utils/cn'
+import css from './styles.module.css'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -101,7 +102,7 @@ const SafeCardReadOnly = ({
         data-testid="safe-list-item"
         onClick={isClickable ? onClick || handleCardClick : undefined}
         className={cn(
-          'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-2 sm:pl-6 sm:pr-6',
+          css.safeCardContainer,
           {
             'cursor-pointer hover:bg-muted/100': isClickable,
             'cursor-not-allowed opacity-60': !isClickable,
@@ -109,7 +110,7 @@ const SafeCardReadOnly = ({
           className,
         )}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+        <div className="flex w-full justify-self-start min-w-0 flex-1 items-center gap-2 sm:gap-4">
           <span className="inline-flex shrink-0">
             <Identicon address={safe.address} />
           </span>
@@ -157,11 +158,17 @@ const SafeCardReadOnly = ({
           </div>
         </div>
 
-        <div className="ml-auto flex shrink-0 items-center justify-end gap-1 pl-1 sm:pl-2">
+        <div className="hidden w-16 shrink-0 items-center justify-center min-[786px]:flex">
+          {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
+        </div>
+
+        <div className="flex w-20 shrink-0 items-center justify-center">
+          <AccountItem.ChainBadge safes={safes} className="justify-center" />
+        </div>
+
+        <div className="hidden w-24 shrink-0 items-center justify-center min-[786px]:flex">
           {isLoadingOverview ? (
-            <div className="flex shrink-0 items-center gap-1 mr-8">
-              <Skeleton className="h-6 w-20" />
-            </div>
+            <Skeleton className="h-6 w-20" />
           ) : isOverviewError ? (
             <Tooltip
               title={`Failed to load transaction data. ${
@@ -174,7 +181,7 @@ const SafeCardReadOnly = ({
                   e.stopPropagation()
                   refetchOverview()
                 }}
-                className="flex shrink-0 cursor-pointer items-center gap-1 mr-8 rounded px-1.5 py-0.5 text-destructive transition-colors hover:bg-destructive/10"
+                className="flex cursor-pointer items-center gap-1 rounded px-1.5 py-0.5 text-destructive transition-colors hover:bg-destructive/10"
                 type="button"
               >
                 <TriangleAlert className="size-4" />
@@ -192,16 +199,16 @@ const SafeCardReadOnly = ({
               </div>
             )
           )}
-          <AccountItem.ChainBadge safes={safes} className="justify-end" />
         </div>
 
-        <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-          <FiatBalance value={fiatValue} />
-          {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
-        </div>
+        <div className="flex shrink-0 justify-self-end items-center gap-2">
+          <div className="flex w-24 items-center justify-end">
+            <FiatBalance value={fiatValue} />
+          </div>
 
-        <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
-          {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
+          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+            {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
+          </div>
         </div>
       </div>
     </Tooltip>

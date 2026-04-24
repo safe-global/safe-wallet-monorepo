@@ -1,3 +1,38 @@
+.safeCardContainer {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0.75rem;
+  border: 2px solid var(--card);
+  border-radius: 1.5rem;
+  background-color: var(--card);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 640px) {
+  .safeCardContainer {
+    gap: 1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Grid layout activates at ≥786px; below that the card stays as a simple flex row. */
+@media (min-width: 786px) {
+  .safeCardContainer {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: minmax(0, 20vw) 1fr 1fr 1fr auto;
+  }
+}
+
 .sendButton {
   background-color: var(--color-background-main);
   border-radius: 3px;
