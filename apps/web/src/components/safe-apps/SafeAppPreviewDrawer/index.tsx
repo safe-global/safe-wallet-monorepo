@@ -43,8 +43,8 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
   }
 
   return (
-    <Drawer anchor="right" open={isOpen} onClose={onClose}>
-      <Box className={css.drawerContainer}>
+    <Drawer anchor="right" open={isOpen} onClose={onClose} sx={{ '& .MuiDrawer-paper': { borderTopRightRadius: '0' } }}>
+      <Box className={css.drawerContainer} sx={{ paddingTop: '20px!important' }}>
         {/* Toolbar */}
 
         {safeApp && (
