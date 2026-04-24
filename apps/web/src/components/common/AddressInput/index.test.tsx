@@ -289,6 +289,8 @@ describe('AddressInput tests', () => {
       chainIds: [mockChainId],
       createdBy: '',
       lastUpdatedBy: '',
+      createdAt: '',
+      updatedAt: '',
       source: ContactSource.local,
     }
 
@@ -315,6 +317,8 @@ describe('AddressInput tests', () => {
       chainIds: [mockChainId],
       createdBy: '',
       lastUpdatedBy: '',
+      createdAt: '',
+      updatedAt: '',
       source: ContactSource.local,
     }
 
@@ -350,6 +354,8 @@ describe('AddressInput tests', () => {
       chainIds: [mockChainId],
       createdBy: '',
       lastUpdatedBy: '',
+      createdAt: '',
+      updatedAt: '',
       source: ContactSource.local,
     }
 
