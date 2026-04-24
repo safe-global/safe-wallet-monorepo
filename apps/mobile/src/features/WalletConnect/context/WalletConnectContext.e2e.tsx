@@ -105,8 +105,13 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     }
   }, [])
 
-  const reconnect = useCallback(async (_signerAddress: string) => {
-    Logger.info('[E2E] reconnect called')
+  const reconnect = useCallback(async (signerAddress: string) => {
+    Logger.info('[E2E] reconnect called — marking session active for', signerAddress)
+    walletConnectE2eState.set({
+      isConnected: true,
+      address: getAddress(signerAddress),
+      hasProvider: true,
+    })
   }, [])
 
   const switchNetwork = useCallback(async (_chainId: string) => {
@@ -114,7 +119,8 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
   }, [])
 
   const switchNetworkIfNeeded = useCallback(async () => {
-    Logger.info('[E2E] switchNetworkIfNeeded called')
+    Logger.info('[E2E] switchNetworkIfNeeded called — clearing isWrongNetwork')
+    walletConnectE2eState.set({ isWrongNetwork: false })
   }, [])
 
   const sign = useCallback(async (_params: unknown): Promise<unknown> => {

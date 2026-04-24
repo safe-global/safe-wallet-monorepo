@@ -3,8 +3,22 @@ import type { Router } from 'expo-router'
 import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
-import { walletConnectE2eState } from '@/src/features/WalletConnect/context/walletConnectE2eState'
-import { mockedActiveAccount, mockedActiveSafeInfo } from './mockData'
+import { addSigner } from '@/src/store/signersSlice'
+import { setActiveSigner } from '@/src/store/activeSignerSlice'
+import { setExecutionMethod } from '@/src/store/executionMethodSlice'
+import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import {
+  walletConnectE2eState,
+  WalletConnectE2eState,
+} from '@/src/features/WalletConnect/context/walletConnectE2eState'
+import {
+  mockedActiveAccount,
+  mockedActiveSafeInfo,
+  pendingTxSafe1,
+  pendingTxSafeInfo1,
+  mockedPendingTxSignerAddress,
+} from './mockData'
+import { setupBaseConfig, setupSafe } from './setupHelpers'
 import { Address } from '@/src/types/address'
 
 /** First owner from the mocked Safe — used for the happy path. */
@@ -60,4 +74,61 @@ export const setupConnectSignerNonOwner = (dispatch: Dispatch, router: Router) =
   walletConnectE2eState.reset()
   setWcState(NON_OWNER_ADDRESS, false)
   onboardAndNavigate(dispatch, router)
+}
+
+// ---------------------------------------------------------------------------
+// WalletConnectGate E2E tests
+// ---------------------------------------------------------------------------
+
+/**
+ * Shared setup for WalletConnectGate tests.
+ * Creates a pending-tx safe with a WC signer and configures the gate state.
+ */
+const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partial<WalletConnectE2eState>) => {
+  walletConnectE2eState.reset()
+  setupBaseConfig(dispatch)
+
+  // Add the signer as a WalletConnect type (not private-key)
+  const wcSigner = {
+    value: mockedPendingTxSignerAddress,
+    name: 'WC Gate Signer',
+    logoUri: null,
+    type: 'walletconnect' as const,
+    walletName: WALLET_NAME,
+    walletIcon: WALLET_ICON,
+  }
+  dispatch(addSigner(wcSigner))
+
+  // Set up the pending tx safe and activate the WC signer
+  setupSafe(dispatch, pendingTxSafe1, pendingTxSafeInfo1, 'WC Gate Test Safe')
+  dispatch(setActiveSigner({ safeAddress: pendingTxSafe1.address, signer: wcSigner }))
+  dispatch(setActiveSafe(pendingTxSafe1))
+
+  // Force execution method to WITH_WC so relay doesn't override the gate
+  dispatch(setExecutionMethod(ExecutionMethod.WITH_WC))
+
+  // Configure the WC session / network state
+  walletConnectE2eState.set(wcOverrides)
+
+  router.replace('/pending-transactions')
+}
+
+/** Setup: WC signer with expired session → gate shows "Reconnect wallet to continue". */
+export const setupWcGateReconnect = (dispatch: Dispatch, router: Router) => {
+  setupWcGateBase(dispatch, router, {
+    isConnected: false,
+    address: undefined,
+    hasProvider: false,
+  })
+}
+
+/** Setup: WC signer connected on wrong network → gate shows "Switch network to continue". */
+export const setupWcGateWrongNetwork = (dispatch: Dispatch, router: Router) => {
+  setupWcGateBase(dispatch, router, {
+    isConnected: true,
+    address: mockedPendingTxSignerAddress,
+    walletInfo: { name: WALLET_NAME, icon: WALLET_ICON },
+    hasProvider: true,
+    isWrongNetwork: true,
+  })
 }
