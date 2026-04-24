@@ -33,6 +33,10 @@ export function verifyPinnedAccountsSectionVisible() {
   cy.get(pinnedAccounts).should('be.visible')
 }
 
+export function verifyPinnedSafeExists(address) {
+  cy.get(pinnedAccounts).parent().should('contain.text', address)
+}
+
 export function verifyEmptyPinnedList() {
   cy.get(emptyPinnedList).should('be.visible')
 }

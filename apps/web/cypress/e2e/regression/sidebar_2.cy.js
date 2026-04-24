@@ -14,6 +14,7 @@ const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 const staticSafe200 = 'Added safe 200'
 
+// These tests live in safe_selector.cy.js - this logic moved from the old sidebar to the selector
 describe.skip('Sidebar added sidebar tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

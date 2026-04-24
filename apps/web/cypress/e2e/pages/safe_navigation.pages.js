@@ -1,6 +1,7 @@
 // SafeSelectorDropdown (main bar)
 const safeSelectorBlock = '[data-testid="space-safes-navigation-block"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
+const connectWalletBtn = '[data-testid="safe-selector-connect-wallet-btn"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerDetails = '[data-testid="safe-selector-trigger-details"]'
@@ -84,4 +85,8 @@ export function verifyNotActivatedSafeExists() {
 
 export function verifyAddedSafesInDropdown(safes) {
   safes.forEach((address) => verifyDropdownContainsSafe(address))
+}
+
+export function verifyConnectWalletBtnVisible() {
+  cy.get(connectWalletBtn).should('be.visible')
 }

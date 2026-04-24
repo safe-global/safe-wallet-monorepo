@@ -67,6 +67,7 @@ function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; on
         variant="secondary"
         size="sm"
         className="w-full"
+        data-testid="safe-selector-connect-wallet-btn"
         onClick={() => {
           onClose()
           onConnect()
