@@ -104,6 +104,18 @@ describe('useSafeBarSafes', () => {
     expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
   })
 
+  it('returns space safes when on a space route even if the current safe is not qualified', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(true)
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
   it('returns pinned safes for dropdown in non-space context', () => {
     const pinned = createSafe('0xPinned', true)
     const unpinned = createSafe('0xUnpinned', false)
