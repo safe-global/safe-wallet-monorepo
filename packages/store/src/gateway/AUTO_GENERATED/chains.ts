@@ -128,17 +128,6 @@ export type BalancesProvider = {
   chainName: string | null
   enabled: boolean
 }
-export type ContractAddresses = {
-  safeSingletonAddress?: string | null
-  safeProxyFactoryAddress?: string | null
-  multiSendAddress?: string | null
-  multiSendCallOnlyAddress?: string | null
-  fallbackHandlerAddress?: string | null
-  signMessageLibAddress?: string | null
-  createCallAddress?: string | null
-  simulateTxAccessorAddress?: string | null
-  safeWebAuthnSignerFactoryAddress?: string | null
-}
 export type GasPriceOracle = {
   type: 'oracle'
   gasParameter: string
@@ -177,7 +166,6 @@ export type Chain = {
   disabledWallets: string[]
   ensRegistryAddress?: string | null
   balancesProvider: BalancesProvider
-  contractAddresses: ContractAddresses
   features: string[]
   gasPrice: (GasPriceOracle | GasPriceFixed | GasPriceFixedEip1559)[]
   publicRpcUri: RpcUri

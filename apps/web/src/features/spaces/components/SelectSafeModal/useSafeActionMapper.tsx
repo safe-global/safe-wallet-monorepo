@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@/hooks/safes'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -14,9 +14,12 @@ interface UseSafeActionMapperOptions {
   onReceiveComplete: () => void
 }
 
-const useSafeActionMapper = ({
-  onReceiveComplete,
-}: UseSafeActionMapperOptions): Record<ESafeAction, SafeActionHandler> => {
+interface UseSafeActionMapperResult {
+  actionMapper: Record<ESafeAction, SafeActionHandler>
+  resetActiveSafe: () => Promise<void>
+}
+
+const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions): UseSafeActionMapperResult => {
   const router = useRouter()
   const { setTxFlow } = useContext(TxModalContext)
   const { configs: chains } = useChains()
@@ -46,11 +49,21 @@ const useSafeActionMapper = ({
     [router, getSafeQueryParam],
   )
 
-  return useMemo(
+  // Clears the safe/chain query params so the topbar drops the selected-safe context
+  // after the user closes a space-level modal. Matches the SendTransactionButton pattern.
+  const resetActiveSafe = useCallback(async () => {
+    const { safe: _safe, chain: _chain, ...rest } = router.query
+    await router.replace({
+      pathname: router.pathname,
+      query: rest,
+    })
+  }, [router])
+
+  const actionMapper = useMemo<Record<ESafeAction, SafeActionHandler>>(
     () => ({
       [ESafeAction.Send]: async (safe) => {
         await navigateToSafe(safe)
-        setTxFlow(<NewTxFlow />, undefined, false)
+        setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
       },
 
       [ESafeAction.Receive]: async (safe) => {
@@ -74,8 +87,10 @@ const useSafeActionMapper = ({
         })
       },
     }),
-    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, txBuilderLink],
+    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink],
   )
+
+  return { actionMapper, resetActiveSafe }
 }
 
 export default useSafeActionMapper

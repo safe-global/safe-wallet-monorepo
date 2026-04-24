@@ -6,6 +6,7 @@ import type { Notification } from '@/store/notificationsSlice'
 import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -163,6 +164,21 @@ describe('Topbar', () => {
     it('renders SpaceSafeBar on non-space routes', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       render(<Topbar />)
+      expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+
+    it('renders SpaceSafeBar on space routes when a transaction modal is open', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
     })
   })
