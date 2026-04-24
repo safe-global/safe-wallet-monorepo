@@ -18,6 +18,7 @@ import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { cn } from '@/utils/cn'
+import css from './styles.module.css'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -91,10 +92,7 @@ const SafeCardReadOnly = ({
         ref={elementRef as React.Ref<HTMLDivElement>}
         onClick={isClickable ? onClick || handleCardClick : undefined}
         className={cn(
-          'box-border flex w-full min-w-0 max-w-full items-center gap-4 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-6 sm:pl-6 sm:pr-6',
-          // Grid layout activates at ≥786px; below that the card stays as a simple flex row.
-          'min-[786px]:grid min-[786px]:items-center min-[786px]:justify-items-center',
-          'min-[786px]:grid-cols-[minmax(0,20vw)_1fr_1fr_1fr_auto]',
+          css.safeCardContainer,
           {
             'cursor-pointer hover:bg-muted/50': isClickable,
             'cursor-not-allowed opacity-60': !isClickable,
