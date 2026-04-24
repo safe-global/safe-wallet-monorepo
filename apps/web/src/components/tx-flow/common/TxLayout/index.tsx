@@ -26,6 +26,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 import SafeShieldWidget from '@/features/safe-shield'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { cn } from '@/utils/cn'
 
 export const TxLayoutHeader = ({
   hideNonce,
@@ -145,7 +146,14 @@ const TxLayout = ({
                       <ChainIndicator inline />
                     </div>
 
-                    <Paper data-testid="modal-header" className={css.header}>
+                    <Paper
+                      data-testid="modal-header"
+                      className={css.header}
+                      sx={{
+                        borderTopLeftRadius: !hideProgress ? '0' : '16px',
+                        borderTopRightRadius: !hideProgress ? '0' : '16px',
+                      }}
+                    >
                       {!hideProgress && (
                         <Box className={css.progressBar}>
                           <ProgressBar value={progress} />
