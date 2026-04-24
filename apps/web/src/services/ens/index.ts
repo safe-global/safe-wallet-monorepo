@@ -28,5 +28,6 @@ export const lookupAddress = async (rpcProvider: Provider, address: string): Pro
   } catch (e) {
     const err = e as EthersError
     logError(ErrorCodes._101, err.reason || err.message)
+    throw err
   }
 }

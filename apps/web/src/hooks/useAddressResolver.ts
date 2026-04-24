@@ -2,13 +2,14 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { lookupAddress } from '@/services/ens'
 import { useMemo } from 'react'
+import { isAddress } from 'ethers'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useHasFeature } from './useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import useChainId from './useChainId'
 
-const cache: Record<string, Record<string, string | null>> = {}
+const cache = new Map<string, Map<string, string | null>>()
 
 export const useAddressResolver = (address?: string) => {
   const addressBook = useAddressBook()
@@ -23,15 +24,23 @@ export const useAddressResolver = (address?: string) => {
     if (!shouldResolve) return
     // Wait for debounce to settle so we never resolve a stale address
     if (debouncedValue !== address) return
-    if (chainId && debouncedValue && cache[chainId] && debouncedValue in cache[chainId]) {
-      return cache[chainId][debouncedValue] ?? undefined
+    // Only look up valid hex addresses; prevents caching arbitrary user input
+    if (!isAddress(debouncedValue)) return
+    if (!chainId) return
+    const chainCache = cache.get(chainId)
+    if (chainCache?.has(debouncedValue)) {
+      return chainCache.get(debouncedValue) ?? undefined
     }
-    const result = await lookupAddress(ethersProvider, debouncedValue)
-    if (chainId && debouncedValue) {
-      cache[chainId] = cache[chainId] || {}
-      cache[chainId][debouncedValue] = result ?? null
+    try {
+      const result = await lookupAddress(ethersProvider, debouncedValue)
+      const entries = cache.get(chainId) ?? new Map<string, string | null>()
+      entries.set(debouncedValue, result ?? null)
+      cache.set(chainId, entries)
+      return result
+    } catch {
+      // Do not cache transient RPC failures — retry on next mount
+      return undefined
     }
-    return result
   }, [chainId, ethersProvider, debouncedValue, shouldResolve, address])
 
   const resolving = (shouldResolve && isResolving) || false

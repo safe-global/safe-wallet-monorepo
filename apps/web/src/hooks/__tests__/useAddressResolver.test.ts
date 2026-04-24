@@ -121,6 +121,48 @@ describe('useAddressResolver', () => {
     expect(lookupMock).toHaveBeenCalledTimes(1)
   })
 
+  it('does not cache transient RPC errors', async () => {
+    const ADDR_FLAKY = zeroPadValue('0xdd', 20)
+
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    const lookupMock = jest
+      .spyOn(domains, 'lookupAddress')
+      .mockRejectedValueOnce(new Error('rpc failure'))
+      .mockResolvedValueOnce('recovered.eth')
+
+    const { unmount } = renderHook(() => useAddressResolver(ADDR_FLAKY))
+
+    await waitFor(() => {
+      expect(lookupMock).toHaveBeenCalledTimes(1)
+    })
+
+    unmount()
+
+    const { result } = renderHook(() => useAddressResolver(ADDR_FLAKY))
+
+    await waitFor(() => {
+      expect(result.current.ens).toBe('recovered.eth')
+    })
+
+    expect(lookupMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not call the provider for invalid addresses', async () => {
+    jest.spyOn(addressBook, 'default').mockReturnValue({})
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    const lookupMock = jest.spyOn(domains, 'lookupAddress').mockResolvedValue('should-not-happen.eth')
+
+    const { result } = renderHook(() => useAddressResolver('__proto__'))
+
+    await waitFor(() => {
+      expect(result.current.resolving).toBe(false)
+      expect(result.current.ens).toBeUndefined()
+    })
+
+    expect(lookupMock).not.toHaveBeenCalled()
+  })
+
   it('does not resolve ENS domain if feature is disabled', async () => {
     jest.spyOn(addressBook, 'default').mockReturnValue({})
     const domainsMock = jest.spyOn(domains, 'lookupAddress').mockImplementation(() => {

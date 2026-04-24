@@ -48,9 +48,10 @@ describe('domains', () => {
       expect(await lookupAddress(rpcProvider, '0x0000000000000000000000000000000000000000')).toBe('safe.eth')
     })
 
-    it('should log an error if lookup fails', async () => {
-      const name = await lookupAddress(badRpcProvider, '0x0000000000000000000000000000000000000000')
-      expect(name).toBe(undefined)
+    it('should log and throw if lookup fails', async () => {
+      await expect(lookupAddress(badRpcProvider, '0x0000000000000000000000000000000000000000')).rejects.toThrow(
+        'bad lookupAddress',
+      )
       expect(logError).toHaveBeenCalledWith('101: Failed to resolve the address', 'bad lookupAddress')
     })
   })
