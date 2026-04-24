@@ -1,6 +1,4 @@
-import { type MouseEvent, useMemo } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { type MouseEvent, useState } from 'react'
 import { Bookmark } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
@@ -9,13 +7,11 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useMultiAccountItemData, usePinActions } from '@/features/myAccounts'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import { useChain } from '@/hooks/useChains'
-import { useGetHref } from '@/hooks/safes'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import type { MultiChainSafeItem } from '@/hooks/safes'
-import { getMultiChainNavigationSafe } from './getMultiChainNavigationSafe'
 import {
   ICON_SIZE,
   SafeIdenticon,
@@ -25,6 +21,7 @@ import {
   SimilarityBadge,
   ShortAddressWithTooltip,
 } from './shared'
+import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 
 interface MultiSafeItemCardProps {
@@ -40,21 +37,9 @@ const MultiSafeItemCard = ({
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
 }: MultiSafeItemCardProps) => {
-  const router = useRouter()
-  const getHref = useGetHref(router)
+  const [open, setOpen] = useState(false)
   const currency = useAppSelector(selectCurrency)
   const { address, sortedSafes, safeOverviews, sharedSetup, totalFiatValue, name } = useMultiAccountItemData(item)
-  const navSafe = useMemo(
-    () => getMultiChainNavigationSafe(sortedSafes, safeOverviews) ?? sortedSafes[0],
-    [sortedSafes, safeOverviews],
-  )
-  const navChain = useChain(navSafe?.chainId ?? '')
-  const href = useMemo(() => {
-    if (!navSafe || !navChain) {
-      return ''
-    }
-    return getHref(navChain, navSafe.address)
-  }, [getHref, navChain, navSafe])
   const addressBookItem = useAddressBookItem(address, sortedSafes[0]?.chainId)
   const { addToPinnedList, removeFromPinnedList } = usePinActions(address, name, sortedSafes, safeOverviews)
   const chainId = sortedSafes[0]?.chainId ?? ''
@@ -62,6 +47,13 @@ const MultiSafeItemCard = ({
   const displayName = resolvedName || shortenAddress(address)
   const isTotalLoading = totalFiatValue === undefined
   const isPinned = item.isPinned
+
+  const handleOpenChange = (next: boolean) => {
+    if (next && !open) {
+      trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: openSafeTrackingLabel })
+    }
+    setOpen(next)
+  }
 
   const handleTogglePin = (e: MouseEvent) => {
     e.stopPropagation()
@@ -72,82 +64,83 @@ const MultiSafeItemCard = ({
     }
   }
 
-  const handleOpenSafeNav = () => {
+  const handleNavigate = () => {
     trackEvent({ ...OVERVIEW_EVENTS.OPEN_SAFE, label: openSafeTrackingLabel })
     onClose()
   }
 
-  const mainContentClasses =
-    'flex flex-1 min-w-0 items-center gap-3 text-foreground no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm'
-
-  const mainContent = (
-    <>
-      {/* Avatar with threshold overlay */}
-      <div className="relative shrink-0">
-        <SafeIdenticon address={address} size={ICON_SIZE} />
-        {sharedSetup && sharedSetup.threshold > 0 && (
-          <span className="absolute -bottom-1 -right-1.5 flex items-center justify-center rounded-sm bg-background text-foreground text-[9px] font-bold leading-none px-[3px] py-px border border-border shadow-sm whitespace-nowrap">
-            {sharedSetup.threshold}/{sharedSetup.owners.length}
-          </span>
-        )}
-      </div>
-
-      {/* Name + address */}
-      <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
-        <div className="flex items-center gap-1 min-w-0">
-          <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
-          {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
-        </div>
-        <div className="flex items-center gap-1 min-w-0">
-          <ShortAddressWithTooltip address={address} />
-          <CopyAddressButton address={address} />
-        </div>
-        {isSimilar && <SimilarityBadge />}
-      </div>
-
-      {/* Stacked chain logos */}
-      <div className="mx-auto shrink-0">
-        <StackedChainLogos safes={sortedSafes} />
-      </div>
-
-      {/* Balance */}
-      <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
-        {isTotalLoading ? (
-          <Skeleton className="h-3 w-12" />
-        ) : totalFiatValue !== undefined ? (
-          <span className="text-sm text-muted-foreground whitespace-nowrap">
-            {formatCurrency(totalFiatValue, currency)}
-          </span>
-        ) : null}
-      </div>
-    </>
-  )
-
   return (
-    <div className="rounded-md border border-border bg-card mb-2 overflow-hidden">
-      <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/30 transition-colors">
-        {href ? (
-          <Link href={href} onClick={handleOpenSafeNav} className={mainContentClasses}>
-            {mainContent}
-          </Link>
-        ) : (
-          <div className={mainContentClasses}>{mainContent}</div>
-        )}
+    <Collapsible open={open} onOpenChange={handleOpenChange}>
+      <div className="rounded-md border border-border bg-card mb-2 overflow-hidden">
+        <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/30 transition-colors">
+          <CollapsibleTrigger className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 text-left">
+            {/* Avatar with threshold overlay */}
+            <div className="relative shrink-0">
+              <SafeIdenticon address={address} size={ICON_SIZE} />
+              {sharedSetup && sharedSetup.threshold > 0 && (
+                <span className="absolute -bottom-1 -right-1.5 flex items-center justify-center rounded-sm bg-background text-foreground text-[9px] font-bold leading-none px-[3px] py-px border border-border shadow-sm whitespace-nowrap">
+                  {sharedSetup.threshold}/{sharedSetup.owners.length}
+                </span>
+              )}
+            </div>
 
-        {/* Pin/Unpin toggle */}
-        <button
-          type="button"
-          onClick={handleTogglePin}
-          className="shrink-0 rounded p-1 hover:bg-muted"
-          aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
-        >
-          <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
-        </button>
+            {/* Name + address */}
+            <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
+                {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
+              </div>
+              <div className="flex items-center gap-1 min-w-0">
+                <ShortAddressWithTooltip address={address} />
+                <CopyAddressButton address={address} />
+              </div>
+              {isSimilar && <SimilarityBadge />}
+            </div>
 
-        {/* Context menu */}
-        <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />
+            {/* Stacked chain logos */}
+            <div className="mx-auto shrink-0">
+              <StackedChainLogos safes={sortedSafes} />
+            </div>
+
+            {/* Balance */}
+            <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
+              {isTotalLoading ? (
+                <Skeleton className="h-3 w-12" />
+              ) : totalFiatValue !== undefined ? (
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  {formatCurrency(totalFiatValue, currency)}
+                </span>
+              ) : null}
+            </div>
+          </CollapsibleTrigger>
+
+          {/* Pin/Unpin toggle — outside trigger so it doesn't toggle the collapsible */}
+          <button
+            type="button"
+            onClick={handleTogglePin}
+            className="shrink-0 rounded p-1 hover:bg-muted"
+            aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
+          >
+            <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
+          </button>
+
+          {/* Context menu — outside trigger for the same reason */}
+          <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />
+        </div>
+
+        <CollapsibleContent>
+          <div className="pb-2 pl-2 pr-3">
+            {sortedSafes.map((safeItem) => (
+              <PinnedSafeSubItem
+                key={`${safeItem.chainId}:${safeItem.address}`}
+                safeItem={safeItem}
+                onNavigate={handleNavigate}
+              />
+            ))}
+          </div>
+        </CollapsibleContent>
       </div>
-    </div>
+    </Collapsible>
   )
 }
 

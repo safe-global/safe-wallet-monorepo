@@ -3,6 +3,7 @@ import { SelectContent, SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import SafeItem from './SafeItem'
+import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type { SafeItemData } from '../types'
 
 export interface SafeDropdownContainerProps {
@@ -61,7 +62,8 @@ const SafeDropdownContainer = ({
   footer,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
-  const filteredItems = items.filter((item) => item.id !== selectedItemId)
+  // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
+  const filteredItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
 
   const renderContent = () => {
     if (isError) {
@@ -72,15 +74,20 @@ const SafeDropdownContainer = ({
       return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
     }
 
-    return filteredItems.map((item) => (
-      <SelectItem
-        key={item.id}
-        value={item.id}
-        className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
-      >
-        <SafeItem {...item} />
-      </SelectItem>
-    ))
+    return filteredItems.map((item) => {
+      if (item.chains.length > 1) {
+        return <MultiChainSafeItemRow key={item.id} item={item} />
+      }
+      return (
+        <SelectItem
+          key={item.id}
+          value={item.id}
+          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
+        >
+          <SafeItem {...item} />
+        </SelectItem>
+      )
+    })
   }
 
   return (

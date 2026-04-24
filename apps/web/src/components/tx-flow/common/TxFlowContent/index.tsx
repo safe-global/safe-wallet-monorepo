@@ -84,7 +84,14 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                 <ChainIndicator inline />
               </div>
 
-              <Paper data-testid="modal-header" className={css.header}>
+              <Paper
+                data-testid="modal-header"
+                className={css.header}
+                sx={{
+                  borderTopLeftRadius: !hideProgress ? '0' : '16px',
+                  borderTopRightRadius: !hideProgress ? '0' : '16px',
+                }}
+              >
                 {!hideProgress && (
                   <Box className={css.progressBar}>
                     <ProgressBar value={progress} />
