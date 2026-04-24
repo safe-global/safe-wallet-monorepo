@@ -6,8 +6,10 @@ import { createTx } from '@/services/tx/tx-sender'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
-
-export type GtfPaymentMode = 'safe' | 'signer'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from '@/features/gtf/store'
+import type { GtfPaymentMode } from '@/features/gtf/types'
+import useWallet from '@/hooks/wallets/useWallet'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
@@ -40,7 +42,7 @@ export type SafeTxContextParams = {
   // GTF: proposer's payment choice. Meaningful only for the first signer; confirmers
   // read the locked fee fields directly from safeTx.data.
   gtfPaymentMode: GtfPaymentMode
-  setGtfPaymentMode: Dispatch<SetStateAction<GtfPaymentMode>>
+  setGtfPaymentMode: (source: GtfPaymentMode) => void
   gtfSelectedGasToken?: string
   setGtfSelectedGasToken: Dispatch<SetStateAction<string | undefined>>
 }
@@ -71,7 +73,13 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
     typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
   )
-  const [gtfPaymentMode, setGtfPaymentMode] = useState<GtfPaymentMode>('safe')
+  const dispatch = useAppDispatch()
+  const signerAddress = useWallet()?.address
+  const gtfPaymentMode = useAppSelector((state) => selectGtfPaymentSourcePreference(state, signerAddress)) ?? 'safe'
+  const setGtfPaymentMode = (source: GtfPaymentMode) => {
+    if (!signerAddress) return
+    dispatch(setGtfPaymentSourcePreference({ signerAddress, source }))
+  }
   const [gtfSelectedGasToken, setGtfSelectedGasToken] = useState<string>()
 
   // Signed txs cannot be updated
