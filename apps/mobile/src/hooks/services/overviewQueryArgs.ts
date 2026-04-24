@@ -15,5 +15,5 @@ export type OverviewQueryArgs = {
 
 export const normalizeOverviewArgs = (args: OverviewQueryArgs): OverviewQueryArgs => ({
   ...args,
-  currency: args.currency.toUpperCase(),
+  currency: args.currency.toLowerCase(),
 })

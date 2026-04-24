@@ -15,7 +15,7 @@ describe('useLazySafeOverviews', () => {
     server.resetHandlers()
   })
 
-  it('uppercases currency before dispatching the underlying query', async () => {
+  it('lowercases currency before dispatching the underlying query', async () => {
     let requestedCurrency: string | undefined
     const safeAddress = faker.finance.ethereumAddress() as `0x${string}`
     const mockOverview: SafeOverview = {
@@ -38,10 +38,10 @@ describe('useLazySafeOverviews', () => {
 
     await act(async () => {
       const [trigger] = result.current
-      await trigger({ safes: [`1:${safeAddress}`], currency: 'usd', trusted: true }).unwrap()
+      await trigger({ safes: [`1:${safeAddress}`], currency: 'USD', trusted: true }).unwrap()
     })
 
-    expect(requestedCurrency).toBe('USD')
+    expect(requestedCurrency).toBe('usd')
   })
 
   // This test pins the reference-stability contract that makes the wrapper safe to use

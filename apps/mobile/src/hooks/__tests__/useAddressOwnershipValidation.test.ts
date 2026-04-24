@@ -136,7 +136,7 @@ describe('useAddressOwnershipValidation', () => {
     })
     // Lock in the query-arg invariant that the container shares with this hook —
     // same args means RTK Query reuses the cached entry and avoids a duplicate fetch.
-    expect(capturedQuery.currency).toBe('USD')
+    expect(capturedQuery.currency).toBe('usd')
     expect(capturedQuery.trusted).toBe('true')
     // `excludeSpam` is dropped by the endpoint's queryFn before going over the wire,
     // but it DOES participate in the RTK Query cache key — assert on that directly.
