@@ -100,7 +100,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
     menuButton
   ) : (
     <Tooltip>
-      <TooltipTrigger className="block w-full">{menuButton}</TooltipTrigger>
+      <TooltipTrigger render={<span className="block w-full" />}>{menuButton}</TooltipTrigger>
       {item.disabled && <TooltipContent side="right">You need to activate your Safe first.</TooltipContent>}
     </Tooltip>
   )
