@@ -8,11 +8,12 @@ import type { SafeItem } from '@/hooks/safes'
 
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
+const mockQuery = jest.fn<Record<string, string>, []>(() => ({ foo: 'bar' }))
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
     pathname: '/current/path',
-    query: { foo: 'bar' },
+    query: mockQuery(),
     replace: mockReplace,
     push: mockPush,
   }),
@@ -74,23 +75,24 @@ describe('useSafeActionMapper', () => {
     jest.clearAllMocks()
     mockReplace.mockResolvedValue(true)
     mockPush.mockResolvedValue(true)
+    mockQuery.mockReturnValue({ foo: 'bar' })
   })
 
   it('returns a handler for every ESafeAction', () => {
     const { result } = renderMapper()
 
-    expect(typeof result.current[ESafeAction.Send]).toBe('function')
-    expect(typeof result.current[ESafeAction.Receive]).toBe('function')
-    expect(typeof result.current[ESafeAction.Swap]).toBe('function')
-    expect(typeof result.current[ESafeAction.BuildTransaction]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.Send]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.Receive]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.Swap]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.BuildTransaction]).toBe('function')
   })
 
   describe(ESafeAction.Send, () => {
-    it('navigates to the Safe and opens the TokenTransferFlow', async () => {
+    it('navigates to the Safe and opens the TokenTransferFlow with a reset-on-close callback', async () => {
       const { result, setTxFlow } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Send](mockSafe)
+        await result.current.actionMapper[ESafeAction.Send](mockSafe)
       })
 
       expect(mockReplace).toHaveBeenCalledWith({
@@ -98,7 +100,7 @@ describe('useSafeActionMapper', () => {
         query: { foo: 'bar', safe: `eth:${mockSafe.address}` },
       })
       expect(setTxFlow).toHaveBeenCalledTimes(1)
-      expect(setTxFlow).toHaveBeenCalledWith(expect.anything(), undefined, false)
+      expect(setTxFlow).toHaveBeenCalledWith(expect.anything(), expect.any(Function), false)
     })
 
     it('awaits navigation before opening the tx flow', async () => {
@@ -114,7 +116,7 @@ describe('useSafeActionMapper', () => {
       const { result } = renderMapper(jest.fn(), setTxFlow)
 
       await act(async () => {
-        await result.current[ESafeAction.Send](mockSafe)
+        await result.current.actionMapper[ESafeAction.Send](mockSafe)
       })
 
       expect(callOrder).toEqual(['replace', 'setTxFlow'])
@@ -126,7 +128,7 @@ describe('useSafeActionMapper', () => {
       const { result, onReceiveComplete } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Receive](mockSafe)
+        await result.current.actionMapper[ESafeAction.Receive](mockSafe)
       })
 
       expect(mockReplace).toHaveBeenCalledWith({
@@ -140,7 +142,7 @@ describe('useSafeActionMapper', () => {
       const { result, setTxFlow } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Receive](mockSafe)
+        await result.current.actionMapper[ESafeAction.Receive](mockSafe)
       })
 
       expect(setTxFlow).not.toHaveBeenCalled()
@@ -152,7 +154,7 @@ describe('useSafeActionMapper', () => {
       const { result } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Swap](mockSafe)
+        await result.current.actionMapper[ESafeAction.Swap](mockSafe)
       })
 
       expect(mockPush).toHaveBeenCalledWith({
@@ -166,7 +168,7 @@ describe('useSafeActionMapper', () => {
       const { result } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Swap]({ ...mockSafe, chainId: '137' })
+        await result.current.actionMapper[ESafeAction.Swap]({ ...mockSafe, chainId: '137' })
       })
 
       expect(mockPush).toHaveBeenCalledWith({
@@ -179,7 +181,7 @@ describe('useSafeActionMapper', () => {
       const { result } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.Swap]({ ...mockSafe, chainId: '999' })
+        await result.current.actionMapper[ESafeAction.Swap]({ ...mockSafe, chainId: '999' })
       })
 
       expect(mockPush).toHaveBeenCalledWith({
@@ -194,12 +196,49 @@ describe('useSafeActionMapper', () => {
       const { result } = renderMapper()
 
       await act(async () => {
-        await result.current[ESafeAction.BuildTransaction](mockSafe)
+        await result.current.actionMapper[ESafeAction.BuildTransaction](mockSafe)
       })
 
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/apps/open',
         query: { appUrl: 'https://tx-builder.example', safe: `eth:${mockSafe.address}` },
+      })
+    })
+  })
+
+  describe('resetActiveSafe', () => {
+    it('strips the safe and chain query params while preserving the rest', async () => {
+      mockQuery.mockReturnValue({ foo: 'bar', safe: 'eth:0xabc', chain: 'eth' })
+      const { result } = renderMapper()
+
+      await act(async () => {
+        await result.current.resetActiveSafe()
+      })
+
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/current/path',
+        query: { foo: 'bar' },
+      })
+    })
+
+    it('is used as the Send tx flow onClose callback so closing the modal clears the active safe', async () => {
+      mockQuery.mockReturnValue({ foo: 'bar', safe: 'eth:0xabc', chain: 'eth' })
+      const { result, setTxFlow } = renderMapper()
+
+      await act(async () => {
+        await result.current.actionMapper[ESafeAction.Send](mockSafe)
+      })
+
+      const onClose = setTxFlow.mock.calls[0][1] as () => Promise<void>
+      mockReplace.mockClear()
+
+      await act(async () => {
+        await onClose()
+      })
+
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/current/path',
+        query: { foo: 'bar' },
       })
     })
   })
