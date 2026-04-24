@@ -13,6 +13,7 @@ import TxStatusWidget from '../TxStatusWidget'
 import css from './styles.module.css'
 import SafeShieldWidget from '@/features/safe-shield'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { cn } from '@/utils/cn'
 
 export const TxLayoutHeader = ({
   hideNonce,
