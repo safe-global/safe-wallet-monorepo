@@ -23,18 +23,21 @@
  * }
  * ```
  *
- * Gated on FEATURES.SPACES — the Security Hub only renders inside Spaces.
+ * Gated on FEATURES.SECURITY_HUB so ops can roll out the Hub independently of broader
+ * Spaces UI. Spaces itself remains gated on FEATURES.SPACES; both flags must be on for
+ * the Hub to render.
  */
 
 import { createFeatureHandle } from '@/features/__core__'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SecurityContract } from './contract'
 
-// Feature handle — gated on Spaces since the hub lives there
-export const SecurityFeature = createFeatureHandle<SecurityContract>('security', FEATURES.SPACES)
+// Feature handle — gated on the dedicated Security Hub flag
+export const SecurityFeature = createFeatureHandle<SecurityContract>('security', FEATURES.SECURITY_HUB)
 
 // Contract type (for explicit annotations if needed)
 export type { SecurityContract } from './contract'
 
 // Hooks exported directly — always loaded, not lazy
 export { default as useSecurityScan } from './hooks/useSecurityScan'
+export { default as useSecurityHubFeatureRedirect } from './hooks/useSecurityHubFeatureRedirect'
