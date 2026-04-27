@@ -43,7 +43,7 @@ export function verifyDropdownContainsSafe(address) {
 export function verifyMultichainSafeChainLogos(address, expectedCount) {
   cy.get(dropdownContent)
     .contains(address)
-    .parents('[role="option"]')
+    .closest('[data-slot="collapsible"]')
     .find('[data-testid="chain-logo"]')
     .should('have.length', expectedCount)
 }
