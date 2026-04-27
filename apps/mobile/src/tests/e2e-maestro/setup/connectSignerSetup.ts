@@ -3,7 +3,7 @@ import type { Router } from 'expo-router'
 import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
-import { addSigner } from '@/src/store/signersSlice'
+import { addSigner, Signer } from '@/src/store/signersSlice'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { setExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
@@ -89,11 +89,11 @@ const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partia
   setupBaseConfig(dispatch)
 
   // Add the signer as a WalletConnect type (not private-key)
-  const wcSigner = {
+  const wcSigner: Signer = {
     value: mockedPendingTxSignerAddress,
     name: 'WC Gate Signer',
     logoUri: null,
-    type: 'walletconnect' as const,
+    type: 'walletconnect',
     walletName: WALLET_NAME,
     walletIcon: WALLET_ICON,
   }
