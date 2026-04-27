@@ -48,7 +48,7 @@ export const SpacesEnhancedSidebar = ({
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
-      {isHydrated ? <HydratedSidebar /> : <></>}
+      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
     </SidebarProvider>
   )
 }
