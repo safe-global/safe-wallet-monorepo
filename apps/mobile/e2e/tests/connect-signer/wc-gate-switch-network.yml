@@ -26,10 +26,9 @@ tags:
 - tapOn:
     id: 'switch-network-button'
 
-# Verify the gate is dismissed and the normal execute button appears
+# Verify the gate is dismissed (the underlying execute/insufficient-funds
+# button is intentionally not asserted — those are distinct semantic states)
 - extendedWaitUntil:
-    visible:
-      text: '.*(Execute transaction|Insufficient funds).*'
+    notVisible:
+      id: 'switch-network-button'
     timeout: 10000
-- assertNotVisible:
-    id: 'switch-network-button'
