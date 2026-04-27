@@ -3,7 +3,6 @@ import classnames from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
 
 import Topbar from '@/components/common/Header/Topbar'
-import Header from '@/components/common/Header'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
@@ -13,13 +12,15 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
+import { SpacesFeature } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
 import HelpMenu from '@/components/common/HelpMenu'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
-import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
+import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -43,6 +44,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
+  const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
@@ -51,6 +53,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
   useRouterGuard({ useGuard: useFlowActivationGuard })
+  useKeyboardObserver()
+  const isTopbarElevated = useIsTopbarElevated()
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -61,16 +65,15 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {!hideHeader && isSpaceRoute && (
-        <div className={css.topbar}>
-          <Topbar onMenuToggle={menuToggleHandler} />
+      {!hideHeader && (
+        <div
+          className={classnames(css.topbar, {
+            [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+            [css.topbarElevated]: isTopbarElevated,
+          })}
+        >
+          <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </div>
-      )}
-
-      {!hideHeader && !isSpaceRoute && (
-        <header className={css.header}>
-          <Header onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
-        </header>
       )}
 
       {isSidebarRoute ? (
@@ -86,14 +89,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
-          [css.mainSpace]: isSpaceRoute,
+          [css.mainSpace]: !hideHeader,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
-            {!hideHeader && !isSpaceRoute && pathname === AppRoutes.home && <SpaceSafeBar />}
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div
@@ -119,6 +121,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       </div>
 
       <HelpMenu />
+
+      <SelectSafeModal />
     </>
   )
 }

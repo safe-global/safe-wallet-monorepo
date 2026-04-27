@@ -20,23 +20,22 @@ interface HeaderActionsProps {
 }
 
 const HeaderActions = ({ onSend, onReceive, onSwap, onBuildTransaction, otherActions }: HeaderActionsProps) => {
-  const outlineClassName = 'bg-transparent !border-[var(--color-border-light)] hover:bg-muted/50'
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="default" onClick={onSend}>
-          <ArrowUpRight className="size-4 text-[#4ade80]" />
+        <Button variant="default" className="!px-6" onClick={onSend}>
+          <ArrowUpRight className="size-4 text-green-400" />
           Send
         </Button>
-        <Button variant="outline" className={outlineClassName} onClick={onReceive}>
+        <Button variant="outline" className="!px-6" onClick={onReceive}>
           <ArrowDownLeft className="size-4" />
           Receive
         </Button>
-        <Button variant="outline" className={outlineClassName} onClick={onSwap}>
+        <Button variant="outline" className="!px-6" onClick={onSwap}>
           <Repeat className="size-4" />
           Swap
         </Button>
-        <Button variant="outline" className={outlineClassName} onClick={onBuildTransaction}>
+        <Button variant="outline" className="!px-6" onClick={onBuildTransaction}>
           <SquareDashedBottomCode className="size-4" />
           Build transaction
         </Button>

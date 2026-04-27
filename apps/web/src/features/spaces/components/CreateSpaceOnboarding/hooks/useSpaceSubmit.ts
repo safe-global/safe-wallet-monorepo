@@ -11,6 +11,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -22,6 +23,7 @@ const useSpaceSubmit = (
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const safe = useSafeQueryParam() || undefined
   const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
@@ -40,7 +42,7 @@ const useSpaceSubmit = (
       }),
     )
 
-    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
   }
 
   const createSpace = async (name: string) => {
@@ -60,7 +62,10 @@ const useSpaceSubmit = (
         }),
       )
 
-      router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId: newSpaceId } })
+      router.push({
+        pathname: AppRoutes.welcome.selectSafes,
+        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
+      })
     }
 
     if (response.error) {

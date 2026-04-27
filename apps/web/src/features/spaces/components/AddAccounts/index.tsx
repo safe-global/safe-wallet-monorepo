@@ -14,7 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -43,6 +43,8 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
+import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -54,7 +56,7 @@ function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSa
   return Object.entries(safes).filter(
     ([key, isSelected]) =>
       isSelected &&
-      !key.startsWith('multichain_') &&
+      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
       !flatSafeItems.some((spaceSafe) => {
         const [chainId, address] = key.split(':')
         return spaceSafe.address === address && spaceSafe.chainId === chainId
@@ -71,9 +73,6 @@ function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSaf
   })
 }
 
-const safeAccountsLimitRaw = Number.parseInt(process.env.NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT ?? '', 10)
-const SAFE_ACCOUNTS_LIMIT = !Number.isNaN(safeAccountsLimitRaw) ? safeAccountsLimitRaw : 40
-
 const _groupAndSort = (
   items: SafeItem[],
   sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
@@ -83,9 +82,22 @@ const _groupAndSort = (
   return [...multi, ...single].sort(sortComparator)
 }
 
-const AddAccounts = () => {
+interface AddAccountsProps {
+  buttonVariant?: 'outline' | 'default'
+  buttonLabel?: string
+  externalOpen?: boolean
+  onExternalClose?: () => void
+}
+
+const AddAccounts = ({
+  buttonVariant = 'outline',
+  buttonLabel = 'Add Accounts',
+  externalOpen,
+  onExternalClose,
+}: AddAccountsProps = {}) => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
+  const isOpen = externalOpen ?? open
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
   const hasResetForOpen = useRef(false)
@@ -156,13 +168,9 @@ const AddAccounts = () => {
     spaceSafes,
   ])
 
-  // Detect similar addresses
   const similarAddresses = useMemo<Set<string>>(() => {
     const allItems = [...trustedSafes, ...ownedSafes]
-    const uniqueAddresses = [...new Set(allItems.map((s) => s.address))]
-    if (uniqueAddresses.length < 2) return new Set()
-    const result = detectSimilarAddresses(uniqueAddresses)
-    return new Set(uniqueAddresses.filter((addr) => result.isFlagged(addr)).map((a) => a.toLowerCase()))
+    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
   }, [trustedSafes, ownedSafes])
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
@@ -198,13 +206,13 @@ const AddAccounts = () => {
 
   // Reset form when modal opens
   useEffect(() => {
-    if (open && !hasResetForOpen.current) {
+    if (isOpen && !hasResetForOpen.current) {
       reset({ selectedSafes: defaultSelectedSafes })
       hasResetForOpen.current = true
-    } else if (!open) {
+    } else if (!isOpen) {
       hasResetForOpen.current = false
     }
-  }, [open, defaultSelectedSafes, reset])
+  }, [isOpen, defaultSelectedSafes, reset])
 
   const onSubmit = handleSubmit(async (data) => {
     const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
@@ -234,7 +242,8 @@ const AddAccounts = () => {
         })
 
         if (result.error) {
-          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.')
+          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.'
+          setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
           return
         }
       }
@@ -297,6 +306,7 @@ const AddAccounts = () => {
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
     setOpen(false)
+    onExternalClose?.()
   }
 
   useEffect(() => {
@@ -309,19 +319,25 @@ const AddAccounts = () => {
 
   return (
     <>
-      <Button
-        size="sm"
-        className="font-bold"
-        variant="outline"
-        disabled={!isAdmin}
-        onClick={() => setOpen(true)}
-        title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
-      >
-        <Plus className="size-4" />
-        Add Accounts
-      </Button>
+      {externalOpen === undefined && (
+        <Button
+          size="lg"
+          className="font-bold px-4 py-0"
+          variant={buttonVariant}
+          disabled={!isAdmin}
+          onClick={() => setOpen(true)}
+          title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
+        >
+          <Plus
+            className={cn('size-4 mr-1', {
+              'text-green-500': buttonVariant === 'default',
+            })}
+          />
+          {buttonLabel}
+        </Button>
+      )}
 
-      <ModalDialog open={open} fullScreen hideChainIndicator>
+      <ModalDialog open={isOpen} fullScreen hideChainIndicator>
         <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
           <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-hidden overflow-x-hidden bg-secondary p-4">
             <div className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">

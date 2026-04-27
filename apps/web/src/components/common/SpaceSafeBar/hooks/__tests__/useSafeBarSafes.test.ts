@@ -1,0 +1,210 @@
+import { renderHook } from '@testing-library/react'
+import { useSafeBarSafes } from '../useSafeBarSafes'
+import type { SafeItem } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes'
+
+// ── mocks ──────────────────────────────────────────────────────────────
+
+const mockUseIsQualifiedSafe = jest.fn(() => false)
+const mockSpaceSafes: AllSafeItems = []
+const mockUseSpaceSafes = jest.fn(() => ({ allSafes: mockSpaceSafes }))
+
+jest.mock('@/features/spaces', () => ({
+  useIsQualifiedSafe: () => mockUseIsQualifiedSafe(),
+  useSpaceSafes: () => mockUseSpaceSafes(),
+}))
+
+const mockSafeAddress = jest.fn(() => '0xCurrentSafe')
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: () => ({ safeAddress: mockSafeAddress() }),
+}))
+
+const mockChainId = jest.fn(() => '1')
+jest.mock('@/hooks/useChainId', () => ({
+  __esModule: true,
+  default: () => mockChainId(),
+}))
+
+const mockAllSafes = jest.fn<SafeItem[] | undefined, []>(() => undefined)
+jest.mock('@/hooks/safes', () => ({
+  useAllSafes: () => mockAllSafes(),
+  useAllSafesGrouped: (items: SafeItem[]) => ({
+    allMultiChainSafes: [],
+    allSingleSafes: items,
+  }),
+}))
+
+const mockIsSpaceRoute = jest.fn(() => false)
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: () => mockIsSpaceRoute(),
+}))
+
+// ── helpers ────────────────────────────────────────────────────────────
+
+const createSafe = (address: string, isPinned = false, chainId = '1'): SafeItem => ({
+  address,
+  chainId,
+  isPinned,
+  isReadOnly: false,
+  lastVisited: 0,
+  name: undefined,
+})
+
+// ── tests ──────────────────────────────────────────────────────────────
+
+describe('useSafeBarSafes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(false)
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+    mockChainId.mockReturnValue('1')
+    mockAllSafes.mockReturnValue(undefined)
+  })
+
+  it('returns empty lists when allSafes is undefined', () => {
+    mockAllSafes.mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // dropdownSafes should contain only the fallback current safe
+    expect(result.current.dropdownSafes).toHaveLength(1)
+    expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
+  })
+
+  it('returns space safes when in space context', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
+  it('returns space safes when on a space route even if the current safe is not qualified', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(true)
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
+  it('returns pinned safes for dropdown in non-space context', () => {
+    const pinned = createSafe('0xPinned', true)
+    const unpinned = createSafe('0xUnpinned', false)
+    mockAllSafes.mockReturnValue([pinned, unpinned])
+    mockSafeAddress.mockReturnValue('0xPinned')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // dropdown should have pinned safe (current safe is already pinned, no injection)
+    expect(result.current.dropdownSafes).toHaveLength(1)
+    expect(result.current.dropdownSafes[0].address).toBe('0xPinned')
+  })
+
+  it('returns all known safes for chain selector in non-space context', () => {
+    const pinned = createSafe('0xPinned', true)
+    const unpinned = createSafe('0xUnpinned', false)
+    mockAllSafes.mockReturnValue([pinned, unpinned])
+    mockSafeAddress.mockReturnValue('0xPinned')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.chainSelectorSafes).toHaveLength(2)
+  })
+
+  it('injects current safe into dropdownSafes when not pinned but in allKnownSafes', () => {
+    const pinned = createSafe('0xPinned', true)
+    const current = createSafe('0xCurrentSafe', false)
+    mockAllSafes.mockReturnValue([pinned, current])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Current safe should be injected at the front
+    expect(result.current.dropdownSafes).toHaveLength(2)
+    expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
+    expect(result.current.dropdownSafes[1].address).toBe('0xPinned')
+  })
+
+  it('creates fallback SafeItem when current safe is not in any list', () => {
+    const pinned = createSafe('0xPinned', true)
+    mockAllSafes.mockReturnValue([pinned])
+    mockSafeAddress.mockReturnValue('0xUnknownSafe')
+    mockChainId.mockReturnValue('11155111')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Fallback should be injected
+    expect(result.current.dropdownSafes).toHaveLength(2)
+    const fallback = result.current.dropdownSafes[0] as SafeItem
+    expect(fallback.address).toBe('0xUnknownSafe')
+    expect(fallback.chainId).toBe('11155111')
+    expect(fallback.isReadOnly).toBe(true)
+    expect(fallback.isPinned).toBe(false)
+  })
+
+  it('injects fallback into chainSelectorSafes when not in allKnownSafes', () => {
+    mockAllSafes.mockReturnValue([])
+    mockSafeAddress.mockReturnValue('0xUnknownSafe')
+    mockChainId.mockReturnValue('1')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.chainSelectorSafes).toHaveLength(1)
+    expect(result.current.chainSelectorSafes[0].address).toBe('0xUnknownSafe')
+  })
+
+  it('does not duplicate current safe if already pinned', () => {
+    const pinned = createSafe('0xCurrentSafe', true)
+    mockAllSafes.mockReturnValue([pinned])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(1)
+    expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
+  })
+
+  it('does not duplicate current safe in chainSelectorSafes if already in allKnownSafes', () => {
+    const safe = createSafe('0xCurrentSafe', false)
+    mockAllSafes.mockReturnValue([safe])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.chainSelectorSafes).toHaveLength(1)
+  })
+
+  it('returns pinnedSafes as-is when safeAddress is empty', () => {
+    const pinned = createSafe('0xPinned', true)
+    mockAllSafes.mockReturnValue([pinned])
+    mockSafeAddress.mockReturnValue('')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(1)
+    expect(result.current.dropdownSafes[0].address).toBe('0xPinned')
+  })
+
+  it('prefers allKnownSafes entry over fallback for injection', () => {
+    const knownSafe = createSafe('0xCurrentSafe', false)
+    knownSafe.name = 'Known Name'
+    mockAllSafes.mockReturnValue([knownSafe])
+    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Should use the real entry from allKnownSafes, not the fallback
+    const injected = result.current.dropdownSafes[0] as SafeItem
+    expect(injected.name).toBe('Known Name')
+    expect(injected.isReadOnly).toBe(false)
+  })
+})

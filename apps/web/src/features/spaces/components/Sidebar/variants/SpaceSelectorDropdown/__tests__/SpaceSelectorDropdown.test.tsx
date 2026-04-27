@@ -1,0 +1,709 @@
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import type * as ReactModule from 'react'
+import type { ReactElement, ReactNode, CSSProperties } from 'react'
+import { AppRoutes } from '@/config/routes'
+import { trackEvent } from '@/services/analytics'
+import { getDeterministicColor } from '@/features/spaces'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../../constants'
+import { truncateSpaceName } from '../../../utils'
+import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
+
+jest.mock('../../../hooks/useAddSafeToSpace', () => ({
+  useAddSafeToSpace: jest.fn(() => ({ addToSpace: jest.fn().mockResolvedValue(true), loadingSpaceId: null })),
+}))
+
+const mockPush = jest.fn()
+let mockRouterQuery: Record<string, string> = { spaceId: '1' }
+jest.mock('next/router', () => ({
+  useRouter: () => ({
+    pathname: '/spaces',
+    query: mockRouterQuery,
+    push: mockPush,
+  }),
+}))
+
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeQueryParam: () => {
+    const safe = mockRouterQuery.safe
+    return typeof safe === 'string' ? safe : ''
+  },
+}))
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
+
+jest.mock('@/services/analytics/events/spaces', () => ({
+  SPACE_EVENTS: {
+    CREATE_SPACE_MODAL: {},
+    OPEN_SPACE_LIST_PAGE: {},
+  },
+  SPACE_LABELS: {
+    space_selector: 'space_selector',
+  },
+}))
+
+jest.mock('@/components/ui/sidebar', () => ({
+  SidebarMenuButton: ({
+    children,
+    onClick,
+    ...props
+  }: {
+    children: ReactNode
+    onClick?: () => void
+    [key: string]: unknown
+  }) => (
+    <button type="button" onClick={onClick} {...props}>
+      {children}
+    </button>
+  ),
+}))
+
+jest.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  AvatarFallback: ({ children, style }: { children: ReactNode; style?: CSSProperties }) => (
+    <div data-testid="avatar-fallback" style={style}>
+      {children}
+    </div>
+  ),
+}))
+
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+}))
+
+jest.mock('@/components/ui/dropdown-menu', () => {
+  const { createContext, useContext, useState, cloneElement } = jest.requireActual('react') as typeof ReactModule
+
+  type DropdownCtx = { open: boolean; setOpen: (open: boolean) => void }
+  const Ctx = createContext<DropdownCtx | null>(null)
+
+  const DropdownMenu = ({
+    children,
+    open: openProp,
+    onOpenChange,
+  }: {
+    children: ReactNode
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+  }) => {
+    const [internalOpen, setInternalOpen] = useState(false)
+    const isControlled = openProp !== undefined
+    const open = isControlled ? openProp : internalOpen
+    const setOpen = (nextOpen: boolean) => {
+      if (!isControlled) setInternalOpen(nextOpen)
+      onOpenChange?.(nextOpen)
+    }
+
+    return <Ctx.Provider value={{ open, setOpen }}>{children}</Ctx.Provider>
+  }
+
+  type TriggerElementProps = { onClick?: () => void; children?: ReactNode }
+
+  const DropdownMenuTrigger = ({
+    render,
+    children,
+  }: {
+    render: ReactElement<TriggerElementProps>
+    children: ReactNode
+  }) => {
+    const context = useContext(Ctx)
+    if (!context) return null
+
+    return cloneElement(render, {
+      onClick: () => context.setOpen(!context.open),
+      children,
+    })
+  }
+
+  const DropdownMenuContent = ({ children, id }: { children: ReactNode; id?: string }) => {
+    const context = useContext(Ctx)
+    if (!context?.open) return null
+    return <div id={id}>{children}</div>
+  }
+
+  const DropdownMenuItem = ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: ReactNode
+    onClick?: () => void
+    disabled?: boolean
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
+  )
+
+  const DropdownMenuSeparator = () => <hr />
+
+  return {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+  }
+})
+
+describe('SpaceSelectorDropdown', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRouterQuery = { spaceId: '1' }
+  })
+
+  it('adds an accessible label to the trigger', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space', safeCount: 0 }} spaces={[]} />)
+
+    expect(screen.getByRole('button', { name: 'Open workspace selector' })).toBeVisible()
+  })
+
+  it('sets aria-expanded on the trigger based on dropdown state', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space', safeCount: 0 }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(trigger)
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('shows all space items when the dropdown is opened', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha', safeCount: 0 },
+      { id: 2, name: 'Beta', safeCount: 0 },
+      { id: 3, name: 'Gamma', safeCount: 0 },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+
+    const spaceItemButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => spaces.some((s) => btn.querySelector('span')?.textContent === s.name))
+    expect(spaceItemButtons).toHaveLength(3)
+  })
+
+  it('calls router.push with the correct spaceId when a space is selected', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha', safeCount: 0 },
+      { id: 2, name: 'Beta', safeCount: 0 },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+
+    const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+    fireEvent.click(betaButton!)
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '2' } })
+  })
+
+  it('tracks CREATE_SPACE_MODAL event and navigates when "Add new space" is clicked', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('Add new space'))
+
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
+  })
+
+  it('includes safe query param in create space navigation when safe is in the URL', () => {
+    mockRouterQuery = { spaceId: '1', safe: '1:0xdeadbeef' }
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('Add new space'))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.createSpace,
+      query: { safe: '1:0xdeadbeef' },
+    })
+  })
+
+  it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View all" is clicked', () => {
+    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByText('View all'))
+
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
+  })
+
+  describe('getDeterministicColor (avatar color from name)', () => {
+    it('returns the same color for the same name', () => {
+      expect(getDeterministicColor('My Space')).toBe(getDeterministicColor('My Space'))
+    })
+
+    it('returns different colors for different names', () => {
+      const colors = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'].map(getDeterministicColor)
+      expect(new Set(colors).size).toBe(colors.length)
+    })
+  })
+
+  it('shows a checkmark only next to the currently selected space', () => {
+    const spaces = [
+      { id: 1, name: 'Alpha', safeCount: 0 },
+      { id: 2, name: 'Beta', safeCount: 0 },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+    fireEvent.click(trigger)
+
+    const alphaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+    const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+
+    expect(alphaButton?.querySelector('svg')).toBeInTheDocument()
+    expect(betaButton?.querySelector('svg')).not.toBeInTheDocument()
+  })
+
+  describe('safe limit per workspace (addToWorkspace variant)', () => {
+    const LIMIT = 40
+
+    it('disables a space that has reached the safe limit', () => {
+      const spaces = [
+        { id: 1, name: 'Full Space', safeCount: LIMIT },
+        { id: 2, name: 'Empty Space', safeCount: 0 },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const fullButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Full Space')
+      const emptyButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Empty Space')
+
+      expect(fullButton).toBeDisabled()
+      expect(emptyButton).not.toBeDisabled()
+    })
+
+    it('shows a tooltip with the limit message for a space at the limit', () => {
+      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText(/You can have up to /)).toBeInTheDocument()
+    })
+
+    it('does not show a limit tooltip for a space below the limit', () => {
+      const spaces = [{ id: 1, name: 'Space', safeCount: LIMIT - 1 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.queryByText(/You can have up to /)).not.toBeInTheDocument()
+    })
+
+    it('does not disable spaces at the limit in the default variant', () => {
+      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+
+      const fullButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Full Space')
+      expect(fullButton).not.toBeDisabled()
+    })
+
+    it('shows the full tooltip text including the limit number', () => {
+      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText(`You can have up to ${LIMIT} Safes per workspace`)).toBeInTheDocument()
+    })
+  })
+
+  describe('onSpaceAdded callback propagation', () => {
+    it('passes onSpaceAdded to useAddSafeToSpace hook', () => {
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      const onSpaceAdded = jest.fn()
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} onSpaceAdded={onSpaceAdded} />)
+
+      expect(useAddSafeToSpace).toHaveBeenCalledWith(expect.objectContaining({ onSpaceAdded }))
+    })
+
+    it('closes the dropdown after successfully adding a Safe to a Space', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      await act(async () => {
+        fireEvent.click(alphaButton!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('space selector interactions and loading states', () => {
+    it('disables all space items while one is loading in addToWorkspace variant', () => {
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({
+        addToSpace: jest.fn(),
+        loadingSpaceId: 1,
+      })
+
+      const spaces = [
+        { id: 1, name: 'Alpha', safeCount: 0 },
+        { id: 2, name: 'Beta', safeCount: 0 },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+
+      expect(alphaButton).toBeDisabled()
+      expect(betaButton).toBeDisabled()
+    })
+
+    it('shows a loading spinner on the space item being added to in addToWorkspace variant', () => {
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({
+        addToSpace: jest.fn(),
+        loadingSpaceId: 1,
+      })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+
+      expect(alphaButton?.querySelector('svg')).toBeInTheDocument()
+    })
+
+    it('does not close the dropdown when adding a Safe fails', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(false)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      await act(async () => {
+        fireEvent.click(alphaButton!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(screen.getByText('Alpha')).toBeInTheDocument()
+    })
+
+    it('navigates to the correct space in default variant when clicked', () => {
+      const spaces = [
+        { id: 10, name: 'Gamma', safeCount: 0 },
+        { id: 20, name: 'Delta', safeCount: 0 },
+      ]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+
+      const deltaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Delta')
+      fireEvent.click(deltaButton!)
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '20' } })
+    })
+  })
+
+  describe('edge cases and error states', () => {
+    it('renders correctly with no spaces', () => {
+      render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Space', safeCount: 0 }} spaces={[]} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText('Add new space')).toBeInTheDocument()
+      expect(screen.getByText('View all')).toBeInTheDocument()
+    })
+
+    it('renders correctly when selectedSpace is undefined', () => {
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText('Space')).toBeInTheDocument()
+    })
+
+    it('handles spaces with very long names', () => {
+      const longName = 'A'.repeat(100)
+      const spaces = [{ id: 1, name: longName, safeCount: 0 }]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(trigger).toHaveTextContent(truncateSpaceName(longName, SPACE_SELECTOR_NAME_MAX_LENGTH))
+    })
+
+    it('handles space names with special characters for avatar initial', () => {
+      const spaces = [{ id: 1, name: '123SpecialSpace', safeCount: 0 }]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const avatarFallback = screen.getByTestId('avatar-fallback')
+      expect(avatarFallback).toHaveTextContent('1')
+    })
+
+    it('handles single space in list', () => {
+      const spaces = [{ id: 1, name: 'OnlySpace', safeCount: 0 }]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const spaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'OnlySpace')
+      expect(spaceButton).toBeInTheDocument()
+    })
+
+    it('disables spaces when multiple are at the safe limit', () => {
+      const LIMIT = 40
+      const spaces = [
+        { id: 1, name: 'Full1', safeCount: LIMIT },
+        { id: 2, name: 'Full2', safeCount: LIMIT },
+        { id: 3, name: 'Available', safeCount: LIMIT - 1 },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const full1 = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Full1')
+      const full2 = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Full2')
+      const available = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Available')
+
+      expect(full1).toBeDisabled()
+      expect(full2).toBeDisabled()
+      expect(available).not.toBeDisabled()
+    })
+
+    it('handles space with safeCount exactly one below the limit', () => {
+      const LIMIT = 40
+      const spaces = [{ id: 1, name: 'AlmostFull', safeCount: LIMIT - 1 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const button = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'AlmostFull')
+      expect(button).not.toBeDisabled()
+    })
+
+    it('multiple open/close cycles preserve state correctly', () => {
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+
+      // First cycle
+      fireEvent.click(trigger)
+      expect(trigger).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByText('Spaces')).toBeInTheDocument()
+
+      fireEvent.click(trigger)
+      expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      expect(screen.queryByText('Spaces')).not.toBeInTheDocument()
+
+      // Second cycle
+      fireEvent.click(trigger)
+      expect(trigger).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByText('Spaces')).toBeInTheDocument()
+    })
+
+    it('correctly displays checkmark only for the selected space after re-renders', () => {
+      const spaces = [
+        { id: 1, name: 'Alpha', safeCount: 0 },
+        { id: 2, name: 'Beta', safeCount: 0 },
+      ]
+      const { rerender } = render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      let alphaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      expect(alphaButton?.querySelector('svg')).toBeInTheDocument()
+
+      rerender(<SpaceSelectorDropdown selectedSpace={spaces[1]} spaces={spaces} />)
+
+      const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+      alphaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      expect(betaButton?.querySelector('svg')).toBeInTheDocument()
+      expect(alphaButton?.querySelector('svg')).not.toBeInTheDocument()
+    })
+
+    it('does not throw when onSpaceAdded is not provided', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alphaButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Alpha')
+      await act(async () => {
+        fireEvent.click(alphaButton!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('spaces limit (max 10 workspaces)', () => {
+    it('disables "Add new space" button when spaces are at the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).toBeDisabled()
+    })
+
+    it('shows a tooltip when "Add new space" button is disabled due to spaces limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+    })
+
+    it('does not disable "Add new space" button when spaces are below the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).not.toBeDisabled()
+    })
+
+    it('does not show a tooltip when "Add new space" button is enabled', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.queryByText(`You can have up to ${SPACES_LIMIT} workspaces`)).not.toBeInTheDocument()
+    })
+
+    it('disables "Add new space" button when spaces exceed the limit', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT + 1 }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      const addNewSpaceButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+      expect(addNewSpaceButton).toBeDisabled()
+    })
+
+    it('shows the correct limit message in the tooltip', () => {
+      const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
+        id: i + 1,
+        name: `Space${i + 1}`,
+        safeCount: 0,
+      }))
+      render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+      const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
+      fireEvent.click(trigger)
+
+      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+    })
+  })
+})

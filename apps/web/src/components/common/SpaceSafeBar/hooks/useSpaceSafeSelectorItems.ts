@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -9,6 +9,9 @@ import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { PendingSafeStatus } from '@/features/counterfactual/types'
+import type { UndeployedSafesState } from '@/features/counterfactual/types'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
@@ -16,10 +19,11 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemData, SafeItemDataChain } from '@/features/spaces/components/SafeSelectorDropdown/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useSafeBarSafes } from './useSafeBarSafes'
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -27,12 +31,6 @@ const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainLogoUri: chain?.chainLogoUri ?? null,
   shortName: chain?.shortName ?? chainId,
 })
-
-const sumFiatTotals = (overviews: SafeOverview[]): number =>
-  overviews.reduce((sum, o) => {
-    const fiat = parseFloat(o.fiatTotal || '0')
-    return isNaN(fiat) ? sum : sum + fiat
-  }, 0)
 
 const resolveThresholdAndOwners = (
   isCurrentSafe: boolean,
@@ -51,6 +49,32 @@ const mapChainIds = (chainConfigs: Chain[], chainIds: string[]): ChainInfo[] =>
     ),
   )
 
+const mapMultiChainItemChains = (
+  chainConfigs: Chain[],
+  chainIds: string[],
+  item: MultiChainSafeItem,
+  overviews: SafeOverview[] | undefined,
+  overviewsLoading: boolean,
+  undeployedSafes: UndeployedSafesState,
+): SafeItemDataChain[] =>
+  chainIds.map((id) => {
+    const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === id)
+    const perChainSafe = item.safes.find((s) => s.chainId === id)
+    const undeployed = undeployedSafes[id]?.[item.address]
+    return {
+      ...toChainInfo(
+        id,
+        chainConfigs.find((c) => c.chainId === id),
+      ),
+      balance: overview?.fiatTotal,
+      isLoading: overviewsLoading && !overview,
+      queued: overview?.queued,
+      isReadOnly: perChainSafe?.isReadOnly ?? false,
+      isUndeployed: Boolean(undeployed),
+      isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
+    }
+  })
+
 function buildMultiChainItem(
   item: MultiChainSafeItem,
   isCurrentSafe: boolean,
@@ -59,24 +83,23 @@ function buildMultiChainItem(
   overviewsLoading: boolean,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
+  undeployedSafes: UndeployedSafesState,
 ): SafeItemData {
   const chainIds = item.safes.map((s) => s.chainId)
   const orderedChainIds = isCurrentSafe ? [currentChainId, ...chainIds.filter((id) => id !== currentChainId)] : chainIds
 
-  const safeOverviews =
-    overviews?.filter(
-      (o) => sameAddress(o.address.value, item.address) && item.safes.some((s) => s.chainId === o.chainId),
-    ) ?? []
-  const firstOverview = safeOverviews[0] as SafeOverview | undefined
+  const currentChainOverview = overviews?.find(
+    (o) => sameAddress(o.address.value, item.address) && o.chainId === currentChainId,
+  )
 
   return {
     id: `${orderedChainIds[0]}:${item.address}`,
     name: item.name ?? '',
     address: item.address,
-    ...resolveThresholdAndOwners(isCurrentSafe, safe, firstOverview),
-    balance: sumFiatTotals(safeOverviews).toString(),
-    isLoading: overviewsLoading && safeOverviews.length === 0,
-    chains: mapChainIds(chainConfigs, orderedChainIds),
+    ...resolveThresholdAndOwners(isCurrentSafe, safe, currentChainOverview),
+    balance: currentChainOverview?.fiatTotal ?? '0',
+    isLoading: overviewsLoading && !currentChainOverview,
+    chains: mapMultiChainItemChains(chainConfigs, orderedChainIds, item, overviews, overviewsLoading, undeployedSafes),
   }
 }
 
@@ -102,12 +125,13 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { allSafes } = useSpaceSafes()
+  const { dropdownSafes: allSafes } = useSafeBarSafes()
   const { safe, safeAddress } = useSafeInfo()
   const currentChainId = useChainId()
   const { configs: chainConfigs } = useChains()
   const router = useRouter()
   const currency = useAppSelector(selectCurrency)
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { address: walletAddress } = useWallet() || {}
   const spaceId = useCurrentSpaceId()
 
@@ -125,12 +149,21 @@ export function useSpaceSafeSelectorItems() {
       const isCurrentSafe = item.address.toLowerCase() === safeAddress.toLowerCase()
 
       if (isMultiChainSafeItem(item)) {
-        return buildMultiChainItem(item, isCurrentSafe, currentChainId, overviews, overviewsLoading, safe, chainConfigs)
+        return buildMultiChainItem(
+          item,
+          isCurrentSafe,
+          currentChainId,
+          overviews,
+          overviewsLoading,
+          safe,
+          chainConfigs,
+          undeployedSafes,
+        )
       }
 
       return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs)
     })
-  }, [allSafes, safeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs])
+  }, [allSafes, safeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
 
   const selectedItemId = `${currentChainId}:${safeAddress}`
 
@@ -154,10 +187,13 @@ export function useSpaceSafeSelectorItems() {
     [chainConfigs, router, spaceId],
   )
 
+  const itemsNotReady = items.length === 0 && !overviewsError
+
   return {
     items,
     selectedItemId,
     handleItemSelect,
+    isLoading: overviewsLoading || itemsNotReady,
     isError: overviewsError,
     refetch: refetchOverviews,
   }

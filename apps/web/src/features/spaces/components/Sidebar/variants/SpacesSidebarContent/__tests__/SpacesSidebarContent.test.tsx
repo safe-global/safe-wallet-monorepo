@@ -1,0 +1,173 @@
+import { render, screen } from '@testing-library/react'
+import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
+import { SpacesSidebarContent } from '../SpacesSidebarContent'
+import type { SpaceItem, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../../types'
+
+const mockUseCurrentSpaceId = jest.fn()
+const mockUseIsActiveMember = jest.fn()
+const mockUseResolvedSidebarNav = jest.fn()
+
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  useIsActiveMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
+}))
+
+jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
+  useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
+}))
+
+jest.mock('../../../config', () => ({
+  spacesMainNavigation: [
+    {
+      icon: () => <div>Home</div>,
+      label: 'Home',
+      href: '/spaces',
+    },
+    {
+      icon: () => <div>Transactions</div>,
+      label: 'Transactions',
+      href: '/spaces/transactions',
+    },
+  ],
+  spacesSetupGroup: {
+    label: 'Setup',
+    items: [
+      {
+        icon: () => <div>Team</div>,
+        label: 'Team',
+        href: '/spaces/members',
+      },
+      {
+        icon: () => <div>Security</div>,
+        label: 'Security',
+        href: '/spaces/security',
+        activeMemberOnly: true,
+      },
+    ],
+  },
+}))
+
+jest.mock('../../SpacesSidebarVariant', () => ({
+  SpacesSidebarVariant: ({
+    mainNavItems,
+    setupGroup,
+  }: {
+    mainNavItems: ResolvedSidebarItem[]
+    setupGroup: ResolvedSidebarGroup
+  }) => (
+    <div>
+      <div>Main items: {mainNavItems.length}</div>
+      <div>Setup items: {setupGroup.items.length}</div>
+    </div>
+  ),
+}))
+
+describe('SpacesSidebarContent', () => {
+  const mockSpace: SpaceItem = {
+    id: 1,
+    name: 'Test Space',
+    safeCount: 0,
+  }
+
+  const mockSpaces: SpaceItem[] = [
+    { id: 1, name: 'Space 1', safeCount: 0 },
+    { id: 2, name: 'Space 2', safeCount: 0 },
+  ]
+
+  const mockResolvedNavItems = {
+    mainNavItems: [
+      {
+        icon: () => <div>Home</div>,
+        label: 'Home',
+        href: '/spaces',
+        badge: 0,
+        isActive: true,
+        disabled: false,
+        link: { pathname: '/spaces', query: { spaceId: '1' } },
+      },
+    ],
+    setupGroup: {
+      label: 'Setup',
+      items: [
+        {
+          icon: () => <div>Team</div>,
+          label: 'Team',
+          href: '/spaces/members',
+          badge: 0,
+          isActive: false,
+          disabled: false,
+          link: { pathname: '/spaces/members', query: { spaceId: '1' } },
+        },
+      ],
+    },
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseCurrentSpaceId.mockReturnValue('1')
+    mockUseIsActiveMember.mockReturnValue(true)
+    mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
+  })
+
+  it('renders SpacesSidebarVariant with resolved navigation', () => {
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    expect(screen.getByText(/Main items:/)).toBeInTheDocument()
+    expect(screen.getByText(/Setup items:/)).toBeInTheDocument()
+  })
+
+  it('disables items requiring active membership when user is not active member', () => {
+    mockUseIsActiveMember.mockReturnValue(false)
+
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(options.isItemDisabled({ activeMemberOnly: true })).toBe(true)
+  })
+
+  it('enables items requiring active membership when user is active member', () => {
+    mockUseIsActiveMember.mockReturnValue(true)
+
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(options.isItemDisabled({ activeMemberOnly: true })).toBe(false)
+  })
+
+  it('generates links with current space ID', () => {
+    mockUseCurrentSpaceId.mockReturnValue('123')
+
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    const [, , options] = mockUseResolvedSidebarNav.mock.calls[0]
+    const link = options.getLink({ href: '/spaces/members' })
+
+    expect(link).toEqual({
+      pathname: '/spaces/members',
+      query: { spaceId: '123' },
+    })
+  })
+
+  it('handles undefined selectedSpace', () => {
+    mockUseIsActiveMember.mockReturnValue(false)
+
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={undefined} spaces={mockSpaces} />)
+
+    expect(screen.getByText(/Main items:/)).toBeInTheDocument()
+  })
+
+  it('is unaffected by geoblocking — nav items remain visible when user is blocked', () => {
+    render(
+      <GeoblockingContext.Provider value={true}>
+        <SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />
+      </GeoblockingContext.Provider>,
+    )
+
+    const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(mainNav).toHaveLength(2)
+    expect(setupGroup.items).toHaveLength(2)
+  })
+})

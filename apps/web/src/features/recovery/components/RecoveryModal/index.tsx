@@ -14,6 +14,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
+import { useTopbarElevation } from '@/hooks/useTopbarElevation'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 function InternalRecoveryModal({
@@ -34,6 +35,8 @@ function InternalRecoveryModal({
 
   const [modal, setModal] = useState<ReactElement | null>(null)
   const router = useRouter()
+
+  useTopbarElevation('recovery', !!modal)
 
   const next = queue[0]
 

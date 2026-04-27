@@ -16,13 +16,30 @@ import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { cn } from '@/utils/cn'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
   isSimilar?: boolean
+  hideContextMenu?: boolean
+  className?: string
+  showPending?: boolean
+  onClick?: () => void
+  disabled?: boolean
+  disabledTooltip?: string
 }
 
-const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
+const SafeCardReadOnly = ({
+  safe,
+  isSimilar,
+  className,
+  showPending = true,
+  onClick,
+  hideContextMenu = false,
+  disabled = false,
+  disabledTooltip,
+}: SafeCardReadOnlyProps) => {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
@@ -31,6 +48,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
   const singleSafe = safes[0]
   const spaces = useLoadFeature(SpacesFeature)
   const chain = useChain(singleSafe?.chainId || '')
+  const displayName = useSafeDisplayName(safe.address, singleSafe?.chainId || '', name)
 
   // Fetch SafeOverview for pending transaction info
   const {
@@ -39,11 +57,15 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
     isError: isOverviewError,
     error: overviewError,
     refetch: refetchOverview,
-  } = useGetSafeOverviewQuery({ chainId: singleSafe?.chainId, safeAddress: singleSafe?.address }, { skip: !singleSafe })
+  } = useGetSafeOverviewQuery(
+    { chainId: singleSafe?.chainId, safeAddress: singleSafe?.address },
+    { skip: !singleSafe || !showPending },
+  )
 
   const hasQueuedItems = !isLoadingOverview && !isOverviewError && safeOverview && (safeOverview.queued ?? 0) > 0
 
-  const isClickable = Boolean(singleSafe)
+  const isClickable = Boolean(singleSafe) && !disabled
+  const tooltipTitle = disabled ? (disabledTooltip ?? '') : !singleSafe ? 'Safe data is not available' : ''
 
   const handleCopyAddress = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -64,13 +86,18 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
   }
 
   return (
-    <Tooltip title={!isClickable ? 'Safe data is not available' : ''} placement="top">
+    <Tooltip title={tooltipTitle} placement="top" arrow>
       <div
         ref={elementRef as React.Ref<HTMLDivElement>}
-        onClick={handleCardClick}
-        className={`box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-2 sm:pl-6 sm:pr-6 ${
-          isClickable ? 'cursor-pointer hover:bg-muted/50' : 'cursor-not-allowed opacity-60'
-        }`}
+        onClick={isClickable ? onClick || handleCardClick : undefined}
+        className={cn(
+          'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-2 sm:pl-6 sm:pr-6',
+          {
+            'cursor-pointer hover:bg-muted/50': isClickable,
+            'cursor-not-allowed opacity-60': !isClickable,
+          },
+          className,
+        )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
           <span className="inline-flex shrink-0">
@@ -86,7 +113,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
             )}
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate text-base font-medium text-foreground">
-                {name || shortenAddress(safe.address)}
+                {displayName || shortenAddress(safe.address)}
               </span>
             </div>
             <div className="flex min-w-0 items-center gap-1.5">
@@ -146,6 +173,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
               </button>
             </Tooltip>
           ) : (
+            showPending &&
             hasQueuedItems && (
               <div className="flex shrink-0 items-center gap-1 mr-8">
                 <Badge variant="secondary" className="text-xs">
@@ -163,7 +191,7 @@ const SafeCardReadOnly = ({ safe, isSimilar }: SafeCardReadOnlyProps) => {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
-          {spaces?.SpaceSafeContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
+          {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
         </div>
       </div>
     </Tooltip>

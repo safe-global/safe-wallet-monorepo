@@ -5,7 +5,7 @@ exports[`./ChainIndicator.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -40,7 +40,7 @@ exports[`./ChainIndicator.stories HideUnknown 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   />
 </div>
@@ -51,7 +51,7 @@ exports[`./ChainIndicator.stories Inline 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -86,7 +86,7 @@ exports[`./ChainIndicator.stories LargeImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -121,7 +121,7 @@ exports[`./ChainIndicator.stories NoLogo 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -148,7 +148,7 @@ exports[`./ChainIndicator.stories OnlyLogo 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -174,7 +174,7 @@ exports[`./ChainIndicator.stories Responsive 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -209,7 +209,7 @@ exports[`./ChainIndicator.stories SmallImage 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -244,7 +244,7 @@ exports[`./ChainIndicator.stories UnknownChain 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span
@@ -275,7 +275,7 @@ exports[`./ChainIndicator.stories WithFiatValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <span

@@ -1,4 +1,5 @@
 import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Button as ShadcnButton } from '@/components/ui/button'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -21,7 +22,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = ({ disabled }: { disabled?: boolean }) => {
+const AddContact = () => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -98,9 +99,10 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
 
   return (
     <>
-      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} disabled={disabled}>
+      <ShadcnButton size="sm" onClick={handleOpen}>
+        <PlusIcon />
         Add contact
-      </Button>
+      </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
@@ -145,7 +147,7 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+              <Button type="submit" variant="contained" disableElevation>
                 {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>

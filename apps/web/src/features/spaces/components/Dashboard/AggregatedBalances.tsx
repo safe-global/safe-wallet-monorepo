@@ -16,7 +16,13 @@ import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
 import QrModal from '@/components/sidebar/QrCodeButton/QrModal'
 
-const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
+const AggregatedBalance = ({
+  safeItems,
+  accountsLoading = false,
+}: {
+  safeItems: SafeItem[]
+  accountsLoading?: boolean
+}) => {
   const currency = useAppSelector(selectCurrency)
   const router = useRouter()
   const { link: txBuilderLink } = useTxBuilderApp()
@@ -47,6 +53,7 @@ const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
 
   if (isLoading) return <AggregatedBalanceSkeleton />
 
+  const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
 
   const handleSend = async () => {
@@ -78,19 +85,22 @@ const AggregatedBalance = ({ safeItems }: { safeItems: SafeItem[] }) => {
 
   return (
     <>
-      <DashboardHeader
-        value={formattedValue}
-        onSend={handleSend}
-        onReceive={handleReceive}
-        onSwap={handleSwap}
-        onBuildTransaction={handleBuildTransaction}
-        otherActions={
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
-            <MoreVertical className="size-4 text-foreground" />
-            Customize
-          </Button>
-        }
-      />
+      <div className={isDimmed ? 'opacity-50' : undefined}>
+        <DashboardHeader
+          value={formattedValue}
+          noAssets={isDimmed}
+          onSend={handleSend}
+          onReceive={handleReceive}
+          onSwap={handleSwap}
+          onBuildTransaction={handleBuildTransaction}
+          otherActions={
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
+              <MoreVertical className="size-4 text-foreground" />
+              Customize
+            </Button>
+          }
+        />
+      </div>
       {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
     </>
   )

@@ -1,9 +1,18 @@
 import { useState, useCallback } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 
-function SpaceChainSelector() {
+function SpaceChainSelectorSkeleton() {
+  return (
+    <div className="self-stretch sm:order-last flex items-center rounded-lg bg-card shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)] px-4">
+      <Skeleton className="size-6 rounded-full" />
+    </div>
+  )
+}
+
+function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   const { deployedChains, selectedChainId, deployedChainIds, safeAddress, safeName, handleChainChange } =
     useSpaceChainSelector()
 
@@ -17,7 +26,10 @@ function SpaceChainSelector() {
     setAddNetworkChainId(undefined)
   }, [])
 
-  if (!deployedChains.length) return null
+  if (!deployedChains.length) {
+    if (isLoading) return <SpaceChainSelectorSkeleton />
+    return null
+  }
 
   return (
     <div

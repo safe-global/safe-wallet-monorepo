@@ -10,8 +10,8 @@ export const batchedTxs = 'Batched transactions'
 
 export const closeModalBtnBtn = '[data-testid="CloseIcon"]'
 export const deleteTransactionbtn = '[title="Delete transaction"]'
-export const batchTxTopBar = '[data-track="batching: Batch sidebar open"]'
-export const batchTxCounter = '[data-track="batching: Batch sidebar open"] span > span'
+export const batchTxTopBar = '[data-track="batching: Batch sidebar open"] button'
+export const batchTxCounter = '[data-track="batching: Batch sidebar open"] button'
 export const addNewTxBatch = '[data-track="batching: Add new tx to batch"]'
 export const batchedTransactionsStr = 'Batched transactions'
 export const addInitialTransactionStr = 'Add an initial transaction to the batch'
@@ -36,7 +36,8 @@ export function addToBatch(EOA, currentNonce, amount) {
   selectComboButtonOption('addToBatch')
 
   addToBatchButton()
-  cy.contains(transactionAddedToBatchStr).click().should('not.be.visible')
+  cy.contains(transactionAddedToBatchStr).click({ force: true })
+  cy.contains(transactionAddedToBatchStr).should('not.exist')
 }
 
 function fillTransactionData(EOA, amount) {
@@ -71,6 +72,10 @@ export function openBatchtransactionsModal() {
   cy.contains(batchedTransactionsStr).should('be.visible')
 }
 
+export function closeBatchtransactionsModal() {
+  cy.get('aside').find('[aria-label="close"]').click()
+}
+
 export function openNewTransactionModal() {
   cy.get(addNewTxBatch).click()
   cy.contains(sendTokensButn).click()
@@ -103,7 +108,7 @@ export function clickOnBatchCounter() {
 }
 
 export function verifyBatchIconCount(count) {
-  cy.get(batchTxCounter).contains(count)
+  cy.get(`[data-track="batching: Batch sidebar open"] [aria-label="${count} batched transactions"]`).should('exist')
 }
 
 export function verifyNewTxButtonStatus(param) {

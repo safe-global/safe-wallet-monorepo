@@ -8,7 +8,7 @@ exports[`./index.stories BlockedAddress 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -66,7 +66,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
     class="container"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1jhq0nx-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-15brele-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div

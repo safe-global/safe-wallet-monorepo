@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-const SCRIPTS_DIR = new URL('.', import.meta.url).pathname
+const SCRIPTS_DIR = __dirname
 const SCHEMA_PATH = resolve(SCRIPTS_DIR, 'api-schema/schema.json')
 const HASH_FILE_PATH = resolve(SCRIPTS_DIR, '../src/gateway/AUTO_GENERATED/.schema-hash')
 
