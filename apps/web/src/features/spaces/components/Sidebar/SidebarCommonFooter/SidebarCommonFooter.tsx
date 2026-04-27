@@ -12,6 +12,7 @@ import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 
@@ -49,13 +50,13 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
 
       <ApiCtaSidebar />
 
-      {/* Help Button */}
+      {/* Help Button + Indexing Status */}
       <SidebarMenu>
-        <SidebarMenuItem>
+        <SidebarMenuItem className={css.footerHelpRow}>
           <SidebarMenuButton
             size="lg"
             className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
-            render={<a href={`${HELP_CENTER_URL}/en/`} target="_blank" rel="noopener noreferrer" />}
+            render={<a href={HELP_CENTER_URL} target="_blank" rel="noopener noreferrer" />}
             data-testid="list-item-need-help"
             onClick={() =>
               trackEvent({ ...OVERVIEW_EVENTS.HELP_CENTER }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' })
@@ -64,6 +65,9 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             <icons.CircleHelp />
             <span>Help</span>
           </SidebarMenuButton>
+          <div className={css.footerHelpStatus}>
+            <SidebarIndexingStatus />
+          </div>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
