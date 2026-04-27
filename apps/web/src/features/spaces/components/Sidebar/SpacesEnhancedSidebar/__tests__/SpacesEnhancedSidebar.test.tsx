@@ -16,6 +16,20 @@ const mockUseIsQualifiedSafe = jest.fn()
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
   useSidebar: () => mockUseSidebar(),
+  Sidebar: ({ children, ...props }: { children: ReactNode } & Record<string, unknown>) => (
+    <div {...props}>{children}</div>
+  ),
+  SidebarHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarFooter: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}))
+
+jest.mock('../../SidebarTopBar', () => ({
+  SidebarTopBar: () => <div data-testid="sidebar-top-bar" />,
 }))
 
 jest.mock('../../hooks/useSidebarHydrated', () => ({
@@ -76,13 +90,23 @@ describe('SpacesEnhancedSidebar', () => {
     mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
-  it('does not render sidebar content until hydration completes', () => {
+  it('renders the skeleton until hydration completes', () => {
     mockUseSidebarHydrated.mockReturnValue(false)
 
     render(<SpacesEnhancedSidebar />)
 
     expect(screen.getByTestId('sidebar-provider')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-skeleton')).toBeInTheDocument()
     expect(screen.queryByTestId('enhanced-sidebar')).not.toBeInTheDocument()
+  })
+
+  it('replaces the skeleton with the sidebar after hydration', () => {
+    mockUseSidebarHydrated.mockReturnValue(true)
+
+    render(<SpacesEnhancedSidebar />)
+
+    expect(screen.queryByTestId('sidebar-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByTestId('enhanced-sidebar')).toBeInTheDocument()
   })
 
   it('renders spaces variant after hydration when on a space route', () => {

@@ -20,6 +20,12 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: () => mockUseIsMobile(),
 }))
 
+const mockUseMediaQuery = jest.fn(() => false)
+jest.mock('@mui/material', () => ({
+  ...jest.requireActual('@mui/material'),
+  useMediaQuery: () => mockUseMediaQuery(),
+}))
+
 jest.mock('@/features/wallet', () => ({
   WalletFeature: { name: 'wallet' },
   useWalletPopover: () => ({
@@ -252,6 +258,11 @@ describe('Topbar', () => {
   describe('mobile', () => {
     beforeEach(() => {
       mockUseIsMobile.mockReturnValue(true)
+      mockUseMediaQuery.mockReturnValue(true)
+    })
+
+    afterEach(() => {
+      mockUseMediaQuery.mockReturnValue(false)
     })
 
     it('shows the sidebar menu button when on mobile and onMenuToggle is provided', () => {

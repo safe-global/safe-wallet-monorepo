@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
 
 const mockSetIsCollapsed = jest.fn()
-let mockIsCollapsed = false
+let mockIsCollapsed: boolean | undefined = undefined
 let mockSidebarState: 'expanded' | 'collapsed' = 'expanded'
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [mockIsCollapsed, mockSetIsCollapsed]))
@@ -62,11 +62,24 @@ jest.mock('../../styles.module.css', () => ({}))
 describe('ApiCtaSidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsCollapsed = false
+    mockIsCollapsed = undefined
     mockSidebarState = 'expanded'
   })
 
-  describe('expanded state (default)', () => {
+  describe('no saved preference (first visit)', () => {
+    it('renders the collapsed row, not the expanded card', () => {
+      render(<ApiCtaSidebar />)
+
+      expect(screen.getByTestId('api-cta-collapsed')).toBeInTheDocument()
+      expect(screen.queryByTestId('api-cta-sidebar')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('expanded state', () => {
+    beforeEach(() => {
+      mockIsCollapsed = false
+    })
+
     it('renders the expanded card', () => {
       render(<ApiCtaSidebar />)
 
@@ -113,6 +126,10 @@ describe('ApiCtaSidebar', () => {
   })
 
   describe('minimizing', () => {
+    beforeEach(() => {
+      mockIsCollapsed = false
+    })
+
     it('calls setIsCollapsed(true) when the minimize button is clicked', () => {
       render(<ApiCtaSidebar />)
 

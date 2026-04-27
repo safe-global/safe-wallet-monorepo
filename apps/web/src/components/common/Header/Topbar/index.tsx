@@ -9,7 +9,8 @@ import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { GlobalSearchFeature } from '@/features/global-search'
 import { WalletConnectFeature } from '@/features/walletconnect'
 import { useDraftBatch } from '@/features/batching'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
@@ -35,7 +36,10 @@ interface TopbarProps {
 
 const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const dispatch = useAppDispatch()
-  const isMobile = useIsMobile()
+  const { breakpoints } = useTheme()
+  // Below `md` the sidebar is closed and rendered as an overlay,
+  // so the burger needs to appear on the same range to keep it reachable.
+  const isBelowMd = useMediaQuery(breakpoints.down('md'))
   const {
     wallet,
     open: walletOpen,
@@ -75,7 +79,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   }
 
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
-  const showMenuButton = Boolean(onMenuToggle && isMobile)
+  const showMenuButton = Boolean(onMenuToggle && isBelowMd)
 
   return (
     <>
