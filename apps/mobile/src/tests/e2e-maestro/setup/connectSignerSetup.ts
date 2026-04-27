@@ -115,11 +115,9 @@ const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partia
 
 /** Setup: WC signer with expired session → gate shows "Reconnect wallet to continue". */
 export const setupWcGateReconnect = (dispatch: Dispatch, router: Router) => {
-  setupWcGateBase(dispatch, router, {
-    isConnected: false,
-    address: undefined,
-    hasProvider: false,
-  })
+  // Post-reset defaults already model an expired WC session
+  // (isConnected=false, address=undefined). No overrides needed.
+  setupWcGateBase(dispatch, router, {})
 }
 
 /** Setup: WC signer connected on wrong network → gate shows "Switch network to continue". */
@@ -127,8 +125,6 @@ export const setupWcGateWrongNetwork = (dispatch: Dispatch, router: Router) => {
   setupWcGateBase(dispatch, router, {
     isConnected: true,
     address: mockedPendingTxSignerAddress,
-    walletInfo: { name: WALLET_NAME, icon: WALLET_ICON },
-    hasProvider: true,
     isWrongNetwork: true,
   })
 }

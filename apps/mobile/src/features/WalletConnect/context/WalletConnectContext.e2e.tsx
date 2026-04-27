@@ -110,7 +110,6 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     walletConnectE2eState.set({
       isConnected: true,
       address: getAddress(signerAddress),
-      hasProvider: true,
     })
   }, [])
 
