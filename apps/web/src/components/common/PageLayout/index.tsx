@@ -69,6 +69,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div
           className={classnames(css.topbar, {
             [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+            [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
             [css.topbarElevated]: isTopbarElevated,
           })}
         >
