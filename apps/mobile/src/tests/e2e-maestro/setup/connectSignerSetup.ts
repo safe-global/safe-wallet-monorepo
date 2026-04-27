@@ -3,7 +3,7 @@ import type { Router } from 'expo-router'
 import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
-import { Signer } from '@/src/store/signersSlice'
+import { addSigner, Signer } from '@/src/store/signersSlice'
 import { setExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import {
@@ -122,4 +122,37 @@ export const setupWcGateWrongNetwork = (dispatch: Dispatch, router: Router) => {
     address: mockedPendingTxSignerAddress,
     isWrongNetwork: true,
   })
+}
+
+/**
+ * Setup: WC signer present, but the next reconnect() will mismatch and route
+ * to ReconnectError. Single-shot — the retry from ReconnectError clears the
+ * flag and succeeds.
+ */
+export const setupWcGateReconnectWrongWallet = (dispatch: Dispatch, router: Router) => {
+  setupWcGateBase(dispatch, router, { reconnectMismatch: true })
+}
+
+/**
+ * Setup collision path: pre-seed a *private-key* signer at OWNER_ADDRESS,
+ * then configure the WC mock to return that same address. When the user
+ * triggers initiateConnection, the mock's collision branch (mirroring
+ * useSignerCollisionGuard via the shared findCollidingSigner helper) fires
+ * the native alert + clears the WC session.
+ *
+ * Same-type re-imports are intentionally NOT covered — findCollidingSigner
+ * returns null for them (silent overwrite per production).
+ */
+export const setupConnectSignerCollision = (dispatch: Dispatch, router: Router) => {
+  resetReduxForE2E(dispatch)
+  setWcState(OWNER_ADDRESS, true)
+  dispatch(
+    addSigner({
+      value: OWNER_ADDRESS,
+      name: 'Pre-existing PK Signer',
+      logoUri: null,
+      type: 'private-key',
+    }),
+  )
+  onboardAndNavigate(dispatch, router)
 }
