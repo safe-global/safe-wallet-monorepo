@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
-import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages'
+import * as network from '../pages/network.pages.js'
 import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -10,14 +11,16 @@ import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 
 import { suspendOutreachModal } from '../pages/modals.page.js'
+import { isThisYear } from 'date-fns'
 
 let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-// Tests rewritten for the new UI in multichain_setup_new.cy.js.
-describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
+const sidebarNavItem = '[data-testid="sidebar-list-item"]'
+
+describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -30,24 +33,47 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => 
     wallet.connectSigner(signer)
   })
 
-  it('Verify that batch tx with safe activation is not allowed for the CF safes', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
-    sideBar.openSidebar()
-    sideBar.addNetwork(constants.networks.ethereum)
-    cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
-    sideBar.checkUndeployedSafeExists(0).click()
+  // Renamed from: 'Verify that batch tx with safe activation is not allowed for the CF safes'
+  it('Verify that CF safes block transaction creation and signer management', () => {
+    const safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
+
+    network.addNetwork(constants.networks.ethereum)
+    cy.contains(network.createSafeMsg(constants.networks.ethereum))
+
+    safeNav.openSelector()
+    safeNav.expandMultichainRowByAddress(staticSafes.MATIC_STATIC_SAFE_28.split(':')[1].slice(0, 6))
+    safeNav.clickNotActivatedSubAccount()
+
     main.verifyElementsCount(navigation.newTxBtn, 0)
     main.verifyElementsCount(create_wallet.activateAccountBtn, 2)
+
     cy.visit(constants.setupUrl + safe)
     owner.verifyManageSignersBtnIsDisabled()
-    sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[4])
-    sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[6])
+    cy.contains(sidebarNavItem, 'Apps').should('be.disabled')
   })
 
-  it('Verify notification if the owner set up was changed in original safe', () => {
-    sideBar.openSidebar()
-    sideBar.addNetwork(constants.networks.ethereum)
-    cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
+  isThisYear('Verify notification if the owner set up was changed in original safe', () => {
+    const safeAddress = staticSafes.MATIC_STATIC_SAFE_28.split(':')[1]
+    // Mock /v2/safes to return deviating owners across chains — triggers InconsistentSignerSetupWarning
+    cy.intercept('GET', '**/v2/safes**', [
+      {
+        address: { value: safeAddress },
+        chainId: '137',
+        threshold: 1,
+        owners: [{ value: constants.DEFAULT_OWNER_ADDRESS }],
+        fiatTotal: '0',
+        queued: 0,
+      },
+      {
+        address: { value: safeAddress },
+        chainId: '11155111',
+        threshold: 1,
+        owners: [{ value: constants.SEPOLIA_OWNER_2 }],
+        fiatTotal: '0',
+        queued: 0,
+      },
+    ])
+
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
     dashboard.expandActionRequiredPanel()
     dashboard.checkInconsistentSignersMsgDisplayed()
@@ -61,11 +87,12 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => 
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressManage(4, constants.SEPOLIA_OWNER_2)
     owner.clickOnNextBtnManage()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
+
+    owner.verifyInconsistentSignersWarning(constants.networks.polygon)
   })
 
   it('Verify warning on remove owner for one safe in the group', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
+    const safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
 
     owner.waitForConnectionStatus()
@@ -74,11 +101,12 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => 
     owner.openRemoveOwnerWindow(1)
     cy.wait(1000)
     create_wallet.clickOnNextBtn()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.sepolia)
+
+    owner.verifyInconsistentSignersWarning(constants.networks.sepolia)
   })
 
   it('Verify warning on change policy for one safe in the group', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
+    const safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
     navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
@@ -86,11 +114,12 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => 
     owner.clickOnChangeThresholdBtn()
     create_wallet.updateThreshold(2)
     owner.clickOnThresholdNextBtn()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.sepolia)
+
+    owner.verifyInconsistentSignersWarning(constants.networks.sepolia)
   })
 
   it('Verify warning on swap owner for one safe in the group', () => {
-    let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
+    const safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     cy.visit(constants.setupUrl + safe)
     owner.waitForConnectionStatus()
     navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
@@ -99,6 +128,7 @@ describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => 
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     cy.wait(2000)
     owner.clickOnNextBtn()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.sepolia)
+
+    owner.verifyInconsistentSignersWarning(constants.networks.sepolia)
   })
 })

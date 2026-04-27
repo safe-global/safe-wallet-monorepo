@@ -97,3 +97,11 @@ export function verifyFirstDropdownRowHasBalance() {
 export function verifyConnectWalletBtnVisible() {
   cy.get(connectWalletBtn).should('be.visible')
 }
+
+export function expandMultichainRowByAddress(address) {
+  cy.get(dropdownContent).contains(address).closest('[data-slot="collapsible"]').find('button').first().click()
+}
+
+export function clickNotActivatedSubAccount() {
+  cy.get(dropdownContent).find(dropdownRow).contains(undeployedSafeLabel).click()
+}
