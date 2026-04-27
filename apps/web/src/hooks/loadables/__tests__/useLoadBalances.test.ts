@@ -461,11 +461,11 @@ describe('useLoadBalances', () => {
         } as unknown as store.RootState),
       )
 
-      jest
+      const balancesSpy = jest
         .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
         .mockReturnValue(mockQueryResult({ currentData: mockTxServiceBalances }))
 
-      jest
+      const portfolioSpy = jest
         .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
         .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
@@ -489,6 +489,14 @@ describe('useLoadBalances', () => {
       expect(balances?.items).toEqual(mockTxServiceBalances.items)
       // isAllTokensMode flag should be true
       expect(balances?.isAllTokensMode).toBe(true)
+      expect(portfolioSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ trusted: false }),
+        expect.objectContaining({ skip: false }),
+      )
+      expect(balancesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ trusted: false }),
+        expect.objectContaining({ skip: false }),
+      )
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })
