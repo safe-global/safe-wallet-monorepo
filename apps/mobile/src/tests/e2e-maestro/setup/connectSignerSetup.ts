@@ -17,7 +17,7 @@ import {
   pendingTxSafeInfo1,
   mockedPendingTxSignerAddress,
 } from './mockData'
-import { setupPendingTxSafe } from './setupHelpers'
+import { resetReduxForE2E, setupPendingTxSafe } from './setupHelpers'
 import { Address } from '@/src/types/address'
 
 /** First owner from the mocked Safe — used for the happy path. */
@@ -63,14 +63,14 @@ export const switchToOwnerState = () => setWcState(OWNER_ADDRESS, true)
 
 /** Setup happy path: onboard + configure WC mock to return an owner address. */
 export const setupConnectSignerOwner = (dispatch: Dispatch, router: Router) => {
-  walletConnectE2eState.reset()
+  resetReduxForE2E(dispatch)
   setWcState(OWNER_ADDRESS, true)
   onboardAndNavigate(dispatch, router)
 }
 
 /** Setup error path: onboard + configure WC mock to return a non-owner address. */
 export const setupConnectSignerNonOwner = (dispatch: Dispatch, router: Router) => {
-  walletConnectE2eState.reset()
+  resetReduxForE2E(dispatch)
   setWcState(NON_OWNER_ADDRESS, false)
   onboardAndNavigate(dispatch, router)
 }
@@ -84,7 +84,7 @@ export const setupConnectSignerNonOwner = (dispatch: Dispatch, router: Router) =
  * Creates a pending-tx safe with a WC signer and configures the gate state.
  */
 const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partial<WalletConnectE2eState>) => {
-  walletConnectE2eState.reset()
+  resetReduxForE2E(dispatch)
 
   const wcSigner: Signer = {
     value: mockedPendingTxSignerAddress,

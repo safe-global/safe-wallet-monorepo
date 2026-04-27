@@ -3,6 +3,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 
 import { RootState } from '@/src/store'
 import logger from '@/src/utils/logger'
+import { resetE2EState } from './resetE2EState'
 
 export type Signer = AddressInfo &
   (
@@ -37,6 +38,9 @@ const signersSlice = createSlice({
       const { [action.payload]: _, ...newState } = state
       return newState
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetE2EState, () => initialState)
   },
 })
 

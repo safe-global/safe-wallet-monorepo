@@ -8,6 +8,21 @@ import { addContact } from '@/src/store/addressBookSlice'
 import { addSigner, Signer } from '@/src/store/signersSlice'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
+import { resetE2EState } from '@/src/store/resetE2EState'
+import { walletConnectE2eState } from '@/src/features/WalletConnect/context/walletConnectE2eState'
+
+/**
+ * Reset all e2e-relevant state (Redux slices + walletConnectE2eState) to
+ * initial values. Setup helpers MUST call this first so each Maestro test
+ * starts from a clean slate regardless of what prior tests left behind.
+ *
+ * Test independence stops depending on `__suite__.yml` ordering as soon
+ * as every helper does this.
+ */
+export const resetReduxForE2E = (dispatch: Dispatch) => {
+  dispatch(resetE2EState())
+  walletConnectE2eState.reset()
+}
 
 /**
  * Common setup: skip onboarding and disable notification prompts
