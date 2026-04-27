@@ -55,34 +55,34 @@ const Balances: NextPage = () => {
           </Box>
         )}
 
+        {!error && isNoFeeCampaignEnabled && !hideNoFeeCampaignBanner && (
+          <Box mb={2}>
+            <NoFeeCampaignBanner onDismiss={handleNoFeeCampaignDismiss} />
+          </Box>
+        )}
+
+        <Box mb={2}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <TotalAssetValue
+              fiatTotal={tokensFiatTotal}
+              title="Total assets value"
+              tooltipTitle="Total from this list only. Portfolio total includes positions and may use other token data."
+            />
+
+            <Stack direction="column" alignItems="flex-end" gap={0.5}>
+              <portfolio.PortfolioRefreshHint entryPoint="Assets" />
+              <Stack direction="row" gap={1} alignItems="center">
+                <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
+                <CurrencySelect />
+              </Stack>
+            </Stack>
+          </Stack>
+        </Box>
+
         {error ? (
           <PagePlaceholder img={<NoAssetsIcon />} text="There was an error loading your assets" />
         ) : (
           <>
-            {isNoFeeCampaignEnabled && !hideNoFeeCampaignBanner && (
-              <Box mb={2}>
-                <NoFeeCampaignBanner onDismiss={handleNoFeeCampaignDismiss} />
-              </Box>
-            )}
-
-            <Box mb={2}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <TotalAssetValue
-                  fiatTotal={tokensFiatTotal}
-                  title="Total assets value"
-                  tooltipTitle="Total from this list only. Portfolio total includes positions and may use other token data."
-                />
-
-                <Stack direction="column" alignItems="flex-end" gap={0.5}>
-                  <portfolio.PortfolioRefreshHint entryPoint="Assets" />
-                  <Stack direction="row" gap={1} alignItems="center">
-                    <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
-                    <CurrencySelect />
-                  </Stack>
-                </Stack>
-              </Stack>
-            </Box>
-
             <AssetsTable
               setShowHiddenAssets={setShowHiddenAssets}
               showHiddenAssets={showHiddenAssets}
