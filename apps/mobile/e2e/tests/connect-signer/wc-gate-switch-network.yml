@@ -9,40 +9,10 @@ tags:
 - runFlow:
     file: ../../utils/setup/app-start.yml
 
-# Setup: onboard with pending tx safe, WC signer on wrong network
-- tapOn:
-    id: 'e2eWcGateWrongNetwork'
-
-# Wait for pending transactions list to load
-- extendedWaitUntil:
-    visible:
-      id: 'pending-tx-list'
-    timeout: 10000
-
-# Tap on the first pending transaction (Send)
-- extendedWaitUntil:
-    visible:
-      text: 'Send'
-    timeout: 10000
-- tapOn:
-    text: 'Send'
-    index: 0
-
-# Wait for the Confirm transaction screen
-- extendedWaitUntil:
-    visible:
-      text: 'Confirm transaction'
-    timeout: 10000
-
-# Tap Continue to navigate to the review screen
-- assertVisible:
-    text: 'Continue'
-- tapOn:
-    text: 'Continue'
-
-# Wait for the review screen to load
-- waitForAnimationToEnd:
-    timeout: 2000
+- runFlow:
+    file: ../../utils/setup/open-review-and-execute.yml
+    env:
+      SETUP_BUTTON_ID: 'e2eWcGateWrongNetwork'
 
 # Verify the WalletConnect gate shows "Switch network to continue"
 # instead of the normal execute/confirm button
