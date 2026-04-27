@@ -55,7 +55,7 @@ export const SidebarIndexingStatus = (): ReactElement | null => {
       >
         <StatusIcon className={css.indexingStatusIcon} />
       </TooltipTrigger>
-      <TooltipContent side="top">{`Last synced with the blockchain ${time} (${STATUS_LABEL[status]})`}</TooltipContent>
+      <TooltipContent side="top">{`Last synced with the blockchain ${time}`}</TooltipContent>
     </Tooltip>
   )
 }
