@@ -46,20 +46,21 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
         </div>
       )}
 
-      <ApiCtaSidebar />
+      <SidebarMenu className="gap-0.5">
+        <ApiCtaSidebar />
 
-      {/* Help Button */}
-      <SidebarMenu>
-        <SidebarMenuItem>
+        <SidebarMenuItem className={css.footerHelpRow}>
           <SidebarMenuButton
-            size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
-            render={<a href={`${HELP_CENTER_URL}/en/`} target="_blank" rel="noopener noreferrer" />}
+            className={cn('h-9 min-w-0 flex-1 gap-3', css.sidebarInteractive, css.sidebarNavItem)}
+            render={<a href={HELP_CENTER_URL} target="_blank" rel="noopener noreferrer" />}
             data-testid="list-item-need-help"
           >
             <icons.CircleHelp />
             <span>Help</span>
           </SidebarMenuButton>
+          <div className={css.footerHelpStatus}>
+            <SidebarIndexingStatus />
+          </div>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
