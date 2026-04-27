@@ -16,7 +16,7 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
   if (isLoading) {
     return (
       <SectionWrapper label={label}>
-        <div className="flex flex-col gap-2 px-4">
+        <div className="flex flex-col gap-2 px-2">
           <Skeleton className="h-16 w-full rounded-xl" />
           <Skeleton className="h-16 w-full rounded-xl" />
         </div>
@@ -30,7 +30,7 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
 
   return (
     <SectionWrapper label={label}>
-      <div className="flex flex-col gap-1 px-4">
+      <div className="flex flex-col gap-1 px-2">
         {filteredSafes.map((safe, index) => {
           const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
           return (
@@ -39,7 +39,7 @@ const AccountsSection = ({ query, label }: SectionItemProps) => {
                 safe={safe}
                 hideContextMenu
                 showPending={false}
-                className="group-data-[focused]/search-focus:bg-accent px-2 sm:px-2 -mx-2"
+                className="group-data-[focused]/search-focus:bg-accent px-2 sm:px-2"
               />
             </div>
           )
