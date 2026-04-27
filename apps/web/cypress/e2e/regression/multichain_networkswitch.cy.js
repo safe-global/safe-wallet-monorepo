@@ -79,7 +79,7 @@ describe('Multichain header network switch tests', { defaultCommandTimeout: 3000
         const safeAddress = staticSafes.MATIC_STATIC_SAFE_28.substring(6)
 
         expect(addressBook).to.have.property('1')
-        expect(addressBook['1']).to.have.property(safeAddress, safeNav.multichainSafeSepoliaLabel)
+        expect(addressBook['1']).to.have.property(safeAddress, safeNav.multichainSafePolygonLabel)
       })
     })
   })
