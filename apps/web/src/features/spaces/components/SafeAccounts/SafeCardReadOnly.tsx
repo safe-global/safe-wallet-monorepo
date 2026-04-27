@@ -93,7 +93,7 @@ const SafeCardReadOnly = ({
         className={cn(
           'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-3 pr-3 transition-colors sm:gap-2 sm:pl-6 sm:pr-6',
           {
-            'cursor-pointer hover:bg-muted/50': isClickable,
+            'cursor-pointer hover:bg-muted/100': isClickable,
             'cursor-not-allowed opacity-60': !isClickable,
           },
           className,
