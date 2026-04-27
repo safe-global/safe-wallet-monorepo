@@ -1,6 +1,7 @@
 appId: ${APP_ID}
 tags:
   - connect-signer
+  - wc-gate
   - suite
 ---
 # Connect Signer Test Suite
