@@ -6,13 +6,15 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { SafeStatus } from '@safe-global/utils/features/safe-shield/types'
 
 export const RiskConfirmation = () => {
-  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskConfirmed } = useSafeShield()
+  const { needsRiskConfirmation, isRiskConfirmed, setIsRiskConfirmed, safeAnalysis } = useSafeShield()
   const { safeTx } = useContext(SafeTxContext)
 
   // We either scan a tx or a message if tx is undefined
   const isTransaction = !!safeTx
+  const isUntrustedSafeMessage = !isTransaction && safeAnalysis?.type === SafeStatus.UNTRUSTED
 
   const toggleConfirmation = () => {
     setIsRiskConfirmed((prev) => !prev)
@@ -29,7 +31,9 @@ export const RiskConfirmation = () => {
           data-testid="risk-confirmation-checkbox"
           label={
             <Typography variant="body2" data-testid="risk-confirmation-text">
-              I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
+              {isUntrustedSafeMessage
+                ? 'I understand this Safe is untrusted and would like to proceed with this message.'
+                : `I understand the risks and would like to proceed with this ${isTransaction ? 'transaction' : 'message'}.`}
             </Typography>
           }
           control={<Checkbox checked={isRiskConfirmed} onChange={toggleConfirmation} color="primary" />}
