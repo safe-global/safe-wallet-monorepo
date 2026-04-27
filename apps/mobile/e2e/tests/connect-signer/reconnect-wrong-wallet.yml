@@ -1,0 +1,50 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - reconnect-error
+---
+# WalletConnect reconnect mismatch:
+# 1) Tap reconnect on the gate → mock detects wrong wallet → routes to ReconnectError
+# 2) Tap "Connect a different wallet" on ReconnectError → router.dismiss() + reconnect retries
+# 3) Single-shot reconnectMismatch flag is now cleared → retry succeeds → gate dismisses
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- runFlow:
+    file: ../../utils/setup/open-review-and-execute.yml
+    env:
+      SETUP_BUTTON_ID: 'e2eWcGateReconnectWrongWallet'
+
+# Gate visible — same precondition as wc-gate-reconnect.yml
+- extendedWaitUntil:
+    visible:
+      id: 'reconnect-wallet-button'
+    timeout: 10000
+- tapOn:
+    id: 'reconnect-wallet-button'
+
+# First attempt mismatches → ReconnectError screen
+- extendedWaitUntil:
+    visible:
+      id: 'reconnect-error'
+    timeout: 10000
+- assertVisible: 'Wrong wallet connected'
+
+# Tap the retry CTA — ReconnectError calls router.dismiss() + reconnect(expectedAddress)
+- tapOn:
+    id: 'reconnect-error-done'
+
+# Wait for the dismiss animation before asserting the post-state
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Second attempt succeeds (flag cleared) — gate is dismissed and ReconnectError is gone
+- extendedWaitUntil:
+    notVisible:
+      id: 'reconnect-wallet-button'
+    timeout: 10000
+- extendedWaitUntil:
+    notVisible:
+      id: 'reconnect-error'
+    timeout: 5000
