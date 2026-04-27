@@ -3,8 +3,7 @@ import type { Router } from 'expo-router'
 import { addSafe } from '@/src/store/safesSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
-import { addSigner, Signer } from '@/src/store/signersSlice'
-import { setActiveSigner } from '@/src/store/activeSignerSlice'
+import { Signer } from '@/src/store/signersSlice'
 import { setExecutionMethod } from '@/src/store/executionMethodSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import {
@@ -18,7 +17,7 @@ import {
   pendingTxSafeInfo1,
   mockedPendingTxSignerAddress,
 } from './mockData'
-import { setupBaseConfig, setupSafe } from './setupHelpers'
+import { setupPendingTxSafe } from './setupHelpers'
 import { Address } from '@/src/types/address'
 
 /** First owner from the mocked Safe — used for the happy path. */
@@ -86,9 +85,7 @@ export const setupConnectSignerNonOwner = (dispatch: Dispatch, router: Router) =
  */
 const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partial<WalletConnectE2eState>) => {
   walletConnectE2eState.reset()
-  setupBaseConfig(dispatch)
 
-  // Add the signer as a WalletConnect type (not private-key)
   const wcSigner: Signer = {
     value: mockedPendingTxSignerAddress,
     name: 'WC Gate Signer',
@@ -97,12 +94,10 @@ const setupWcGateBase = (dispatch: Dispatch, router: Router, wcOverrides: Partia
     walletName: WALLET_NAME,
     walletIcon: WALLET_ICON,
   }
-  dispatch(addSigner(wcSigner))
 
-  // Set up the pending tx safe and activate the WC signer
-  setupSafe(dispatch, pendingTxSafe1, pendingTxSafeInfo1, 'WC Gate Test Safe')
-  dispatch(setActiveSigner({ safeAddress: pendingTxSafe1.address, signer: wcSigner }))
-  dispatch(setActiveSafe(pendingTxSafe1))
+  setupPendingTxSafe(dispatch, pendingTxSafe1, pendingTxSafeInfo1, 'WC Gate Test Safe', mockedPendingTxSignerAddress, {
+    signer: wcSigner,
+  })
 
   // Force execution method to WITH_WC so relay doesn't override the gate
   dispatch(setExecutionMethod(ExecutionMethod.WITH_WC))
