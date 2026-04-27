@@ -327,6 +327,13 @@ describe('Safe selector tests - new transaction button states', () => {
 
     navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
   })
+
+  it('Verify the new transaction button is enabled for non-owners with spending limits', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_11)
+    wallet.connectSigner(signer)
+
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+  })
 })
 
 describe('Safe selector tests - add safe button', () => {
@@ -340,5 +347,22 @@ describe('Safe selector tests - add safe button', () => {
     accountsModal.openAccountsModal()
 
     accountsModal.clickAddSafeButtonAndVerifyLoadFlow()
+  })
+})
+
+describe('Safe selector tests - threshold tag visible for owners and non-owners', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify the threshold badge is shown on safe cards for both owner and non-owner safes', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set3)
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.addedSafes)
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+
+    accountsModal.verifyThresholdBadgeOnSafeCard('Added owner')
+    accountsModal.verifyThresholdBadgeOnSafeCard('Added non-owner')
   })
 })

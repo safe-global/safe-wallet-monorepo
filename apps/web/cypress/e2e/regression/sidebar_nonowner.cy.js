@@ -13,6 +13,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const addedOwner = 'Added owner'
 const addedNonowner = 'Added non-owner'
 
+// Tests rewritten in safe_selector.cy.js for the new UI.
 describe.skip('Sidebar non-owner tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)

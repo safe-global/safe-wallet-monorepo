@@ -64,6 +64,10 @@ export function verifyMissingSignatureInfo(threshold, owners) {
   cy.get(missingSignatureInfo).should('be.visible').and('contain.text', `${threshold}/${owners}`)
 }
 
+export function verifyThresholdBadgeOnSafeCard(name) {
+  cy.get(accountsList).contains(name).closest(safeItemCard).find(missingSignatureInfo).should('be.visible')
+}
+
 export function verifyMissingSignatureInfoExists() {
   cy.get(missingSignatureInfo).should('exist')
 }
