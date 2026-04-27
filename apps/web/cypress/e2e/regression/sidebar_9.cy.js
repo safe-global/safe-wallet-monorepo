@@ -7,6 +7,8 @@ import { exchangeStr, clickOnBridgeOption } from '../pages/bridge.pages.js'
 
 let staticSafes = []
 
+// Bridge test rewritten in sidebar_new.cy.js;
+// other tests covered by unit tests or deprecated in the new UI.
 describe.skip('Sidebar UI tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
