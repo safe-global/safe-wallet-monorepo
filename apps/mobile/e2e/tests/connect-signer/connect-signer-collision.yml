@@ -1,0 +1,56 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - collision
+---
+# Type-mismatch collision: connecting a wallet whose address already exists
+# as a signer of a different type triggers useSignerCollisionGuard's native
+# alert. The mock mirrors production via the shared findCollidingSigner
+# helper.
+#
+# Same-type re-imports are intentionally NOT covered — findCollidingSigner
+# returns null for them (silent overwrite per production).
+#
+# iOS-only: native Alert.alert handling differs on Android.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Pre-seed a private-key signer at OWNER_ADDRESS, then configure the WC mock
+# to return that same address. Type-mismatch fires the collision branch.
+- tapOn:
+    id: 'e2eConnectSignerCollision'
+
+# Wait for home to load
+- assertVisible:
+    id: 'home-tab'
+
+# Navigate to Settings → Signers → Add signer → Connect wallet app
+- tapOn: 'Account, tab, 3 of 3'
+- tapOn:
+    id: 'settings-signers-list-item'
+- assertVisible: 'Signers'
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible: 'Add signer'
+- tapOn:
+    id: 'connectSigner'
+
+# Native alert appears
+- extendedWaitUntil:
+    visible:
+      text: 'Signer already imported'
+    timeout: 5000
+
+# Dismiss the alert
+- tapOn:
+    text: 'OK'
+
+# Verify the alert is gone and the user is back on the Add signer screen —
+# the flow did NOT advance to Name your signer.
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible: 'Add signer'
+- assertVisible: 'Connect wallet app'
+- assertNotVisible:
+    id: 'name-signer-input'
