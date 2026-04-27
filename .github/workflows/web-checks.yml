@@ -96,7 +96,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v3.0.1
+        uses: slackapi/slack-github-action@v3.0.2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook
