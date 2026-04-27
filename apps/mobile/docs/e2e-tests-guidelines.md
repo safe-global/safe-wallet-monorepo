@@ -14,6 +14,12 @@ This document outlines best practices for writing and maintaining end-to-end tes
   - **Screen:** `settings-screen`
 - **Uniqueness:** It's virtually impossible to have unique testIDs across the app. We should make sure that every screen
   has unique testIDs.
+- **Exception — TestCtrls triggers:** The hidden buttons in
+  [`TestCtrls.e2e.tsx`](../src/tests/e2e-maestro/components/TestCtrls.e2e.tsx)
+  that seed Redux state for a scenario use the `e2e<PascalCase>` form
+  (e.g. `e2eConnectSignerOwner`, `e2eWcGateReconnect`). These IDs only
+  exist in e2e builds and are scoped to test setup, so they are kept
+  visually distinct from product testIDs.
 
 ---
 
