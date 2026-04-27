@@ -1,3 +1,5 @@
+import * as constants from '../../support/constants.js'
+
 // AccountsModal (All Accounts popup)
 const allAccountsBtn = '[data-testid="all-accounts-btn"]'
 const searchInput = '[data-testid="accounts-search-input"]'
@@ -51,6 +53,10 @@ export function clickBookmarkIconByIndex(index) {
 }
 
 export function unpinSafeByName(name) {
+  cy.get(accountsList).contains(name).closest(safeItemCard).find(bookmarkIcon).click()
+}
+
+export function pinSafeByName(name) {
   cy.get(accountsList).contains(name).closest(safeItemCard).find(bookmarkIcon).click()
 }
 
@@ -112,6 +118,11 @@ export function verifyFiatBalanceExists() {
 
 export function verifyAddSafeButtonVisible() {
   cy.get(addSafeButton).should('be.visible')
+}
+
+export function clickAddSafeButtonAndVerifyLoadFlow() {
+  cy.get(addSafeButton).should('be.visible').click()
+  cy.url().should('include', constants.loadNewSafeUrl)
 }
 
 export function searchSafe(query) {

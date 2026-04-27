@@ -7,6 +7,7 @@ import * as accountsModal from '../pages/accounts_modal.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as dashboard from '../pages/dashboard.pages.js'
+import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import safes from '../../fixtures/safes/static.js'
@@ -281,5 +282,63 @@ describe('Safe selector tests - watchlist in dropdown', () => {
     safeNav.openSelector()
 
     safeNav.verifyFirstDropdownRowHasBalance()
+  })
+})
+
+describe('Safe selector tests - pin toggle in accounts modal', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify that pinning a safe in the accounts modal moves it into the trusted safes section', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
+    wallet.connectSigner(signer)
+    accountsModal.openAccountsModal()
+
+    accountsModal.verifyPinnedSafeDoesNotExist(safes.SEP_STATIC_SAFE_9_SHORT)
+    accountsModal.pinSafeByName(safes.SEP_STATIC_SAFE_9_SHORT)
+
+    accountsModal.verifyPinnedAccountsSectionVisible()
+    accountsModal.verifyPinnedSafeExists(safes.SEP_STATIC_SAFE_9_SHORT)
+  })
+})
+
+describe('Safe selector tests - new transaction button states', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify the new transaction button is enabled for proposers', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_31)
+    wallet.connectSigner(signer1)
+
+    navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
+  })
+
+  it('Verify the new transaction button is disabled for disconnected users', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+
+    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
+  })
+
+  it('Verify the new transaction button is disabled for connected non-owners', () => {
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_7)
+    wallet.connectSigner(signer1)
+
+    navigation.verifyTxBtnStatus(constants.enabledStates.disabled)
+  })
+})
+
+describe('Safe selector tests - add safe button', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify the add safe button in the accounts modal navigates to the load safe flow', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedSafe1)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    accountsModal.openAccountsModal()
+
+    accountsModal.clickAddSafeButtonAndVerifyLoadFlow()
   })
 })

@@ -17,6 +17,8 @@ const currentSafe = '0x9870...fec0'
 const currentSafe2 = '0x5912...fFdb'
 const multiChainSafe = 'matic:0xC96e...ee3B'
 
+// New Spaces UI: most tests rewritten in safe_selector.cy.js;
+// remainder covered by multichain_networkswitch.cy.js or unit tests.
 describe.skip('Sidebar tests 8', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
