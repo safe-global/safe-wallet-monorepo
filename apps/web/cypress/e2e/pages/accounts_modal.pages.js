@@ -14,7 +14,6 @@ const bookmarkIcon = '[data-testid="bookmark-icon"]'
 const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const readOnlyChip = '[data-testid="read-only-chip"]'
 const pendingActivationIcon = '[data-testid="pending-activation-icon"]'
-const pendingActivationChip = '[data-testid="pending-activation-chip"]'
 const safeItemCard = '[data-testid="safe-item-card"]'
 const safeOptionsBtn = '[data-testid="safe-options-btn"]'
 const renameBtn = '[data-testid="rename-btn"]'
@@ -159,5 +158,8 @@ export function verifyPinnedSectionDoesNotExist() {
 }
 
 export function verifyPinnedSafeDoesNotExist(address) {
-  cy.get(pinnedAccounts).nextUntil(':not([data-testid="safe-item-card"])').should('not.contain.text', address)
+  cy.get('body').then(($body) => {
+    if ($body.find(pinnedAccounts).length === 0) return
+    cy.get(pinnedAccounts).nextUntil(':not([data-testid="safe-item-card"])').should('not.contain.text', address)
+  })
 }

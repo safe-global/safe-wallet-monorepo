@@ -22,6 +22,18 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
 
+describe('Safe selector tests - connect wallet prompt', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify connect wallet button is shown in the dropdown when wallet is not connected and no safes are added', () => {
+    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9, { skipAutoTrust: true })
+    safeNav.openSelector()
+    safeNav.verifyConnectWalletBtnVisible()
+  })
+})
+
 describe('Safe selector tests - details and currency', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
@@ -38,18 +50,6 @@ describe('Safe selector tests - details and currency', () => {
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
     assets.changeCurrency(assets.currencyCAD)
     safeNav.verifyCurrencySection(assets.currency$)
-  })
-})
-
-describe('Safe selector tests - connect wallet prompt', () => {
-  before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
-  })
-
-  it('Verify connect wallet button is shown in the dropdown when wallet is not connected and no safes are added', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-    safeNav.openSelector()
-    safeNav.verifyConnectWalletBtnVisible()
   })
 })
 
