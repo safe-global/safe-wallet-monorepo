@@ -103,6 +103,10 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
+jest.mock('../../SidebarIndexingStatus', () => ({
+  SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
+}))
+
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -130,11 +134,16 @@ describe('SidebarCommonFooter', () => {
     expect(screen.getByText('Help')).toBeInTheDocument()
   })
 
+  it('renders the indexing status next to Help', () => {
+    render(<SidebarCommonFooter />)
+    expect(screen.getByTestId('indexing-status')).toBeInTheDocument()
+  })
+
   it('renders help link with correct attributes', () => {
     render(<SidebarCommonFooter />)
 
     const helpLink = screen.getByRole('link', { name: /Help/i })
-    expect(helpLink).toHaveAttribute('href', 'https://help.safe.global/en/')
+    expect(helpLink).toHaveAttribute('href', 'https://help.safe.global')
     expect(helpLink).toHaveAttribute('target', '_blank')
     expect(helpLink).toHaveAttribute('rel', 'noopener noreferrer')
   })

@@ -13,6 +13,7 @@ import { getQuerySpaceId } from '../utils'
 import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
+import { SidebarSkeleton } from '../SidebarSkeleton'
 
 interface SpacesEnhancedSidebarProps {
   /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
@@ -47,7 +48,7 @@ export const SpacesEnhancedSidebar = ({
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
-      {isHydrated ? <HydratedSidebar /> : <></>}
+      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
     </SidebarProvider>
   )
 }

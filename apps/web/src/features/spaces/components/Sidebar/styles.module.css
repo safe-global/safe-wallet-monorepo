@@ -272,6 +272,31 @@
   line-height: 1.25rem;
 }
 
+.footerHelpRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footerHelpRow .footerHelp {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.footerHelpStatus {
+  display: flex;
+  width: 32px;
+  min-width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+:global(.group[data-collapsible='icon']) .footerHelpStatus {
+  display: none;
+}
+
 .footerMenuAction {
   top: 50% !important;
   transform: translateY(-50%);
