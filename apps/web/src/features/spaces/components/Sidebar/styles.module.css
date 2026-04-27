@@ -285,8 +285,12 @@
 
 .footerHelpStatus {
   display: flex;
-  align-items: center;
+  width: 32px;
+  min-width: 32px;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
 }
 
 :global(.group[data-collapsible='icon']) .footerHelpStatus {

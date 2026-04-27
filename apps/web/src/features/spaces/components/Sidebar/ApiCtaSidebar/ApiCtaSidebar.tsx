@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from '../styles.module.css'
@@ -13,73 +13,79 @@ const API_DOCS_URL = process.env.NEXT_PUBLIC_DEVELOPER_PORTAL_URL || 'https://de
 const COLLAPSED_KEY = 'api-cta-sidebar-collapsed'
 
 export const ApiCtaSidebar = (): ReactElement => {
-  const [isCollapsed = false, setIsCollapsed] = useLocalStorage<boolean>(COLLAPSED_KEY)
+  const [isCollapsed = true, setIsCollapsed] = useLocalStorage<boolean>(COLLAPSED_KEY)
   const { state } = useSidebar()
   const isIconCollapsed = state === 'collapsed'
   const showCollapsedButton = isCollapsed || isIconCollapsed
 
   if (showCollapsedButton) {
     return (
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            className={cn(css.sidebarInteractive, css.footerHelp, css.sidebarNavItem)}
-            onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
-            data-testid="api-cta-collapsed"
-            aria-label="API"
-            render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
-          >
-            <Image
-              src="/images/spaces/api-sidebar.svg"
-              alt="API"
-              width={16}
-              height={16}
-              className="dark:brightness-0 dark:invert"
-            />
-            <span className="flex-1 group-data-[collapsible=icon]:hidden">API</span>
-            <Badge className="text-[10px] px-1 py-0 leading-none group-data-[collapsible=icon]:hidden">New</Badge>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <SidebarMenuItem className={css.footerHelpRow}>
+        <SidebarMenuButton
+          className={cn('h-9 min-w-0 flex-1 gap-3', css.sidebarInteractive, css.sidebarNavItem)}
+          onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
+          data-testid="api-cta-collapsed"
+          aria-label="API"
+          render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
+        >
+          <Image
+            src="/images/spaces/api-sidebar.svg"
+            alt="API"
+            width={16}
+            height={16}
+            className="dark:brightness-0 dark:invert"
+          />
+          <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">API</span>
+        </SidebarMenuButton>
+        <div
+          className={cn(css.footerHelpStatus, !isIconCollapsed && 'cursor-pointer')}
+          onClick={!isIconCollapsed ? () => setIsCollapsed(false) : undefined}
+        >
+          <Badge className="px-1 py-0 text-[10px] leading-none tabular-nums group-data-[collapsible=icon]:hidden">
+            New
+          </Badge>
+        </div>
+      </SidebarMenuItem>
     )
   }
 
   return (
-    <div
-      className="flex flex-col gap-2 rounded-[8px] bg-secondary p-3 group-data-[collapsible=icon]:hidden"
-      data-testid="api-cta-sidebar"
-    >
-      <div className="flex w-full items-start justify-between">
-        <Image
-          src="/images/spaces/api-sidebar.svg"
-          alt="API"
-          width={24}
-          height={24}
-          className="shrink-0 dark:brightness-0 dark:invert"
-        />
-        <button
-          className="shrink-0 text-muted-foreground hover:text-foreground"
-          onClick={() => setIsCollapsed(true)}
-          aria-label="Minimize API section"
-          data-testid="api-cta-minimize"
-        >
-          <X className="size-4" />
-        </button>
-      </div>
-
-      <Typography variant="paragraph-small" color="muted" className="leading-snug">
-        Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
-      </Typography>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-auto self-start !bg-background hover:!bg-muted"
-        render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
+    <SidebarMenuItem>
+      <div
+        className="flex flex-col gap-1.5 rounded-md bg-secondary p-2 group-data-[collapsible=icon]:hidden"
+        data-testid="api-cta-sidebar"
       >
-        Get API key
-      </Button>
-    </div>
+        <div className="flex w-full items-start justify-between">
+          <Image
+            src="/images/spaces/api-sidebar.svg"
+            alt="API"
+            width={24}
+            height={24}
+            className="shrink-0 dark:brightness-0 dark:invert"
+          />
+          <button
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+            onClick={() => setIsCollapsed(true)}
+            aria-label="Minimize API section"
+            data-testid="api-cta-minimize"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <Typography variant="paragraph-small" color="muted" className="leading-snug">
+          Authenticated access, predictable quotas, and webhooks for teams that rely on Safe as critical infrastructure.
+        </Typography>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-auto self-start !bg-background hover:!bg-muted"
+          render={<a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" />}
+        >
+          Get API key
+        </Button>
+      </div>
+    </SidebarMenuItem>
   )
 }
