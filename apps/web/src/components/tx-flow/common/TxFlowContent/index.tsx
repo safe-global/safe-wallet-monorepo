@@ -1,17 +1,15 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext } from 'react'
-import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Card, Stack } from '@mui/material'
+import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
-import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 
 /**
  * TxFlowContent is a component that renders the main content of the transaction flow.
