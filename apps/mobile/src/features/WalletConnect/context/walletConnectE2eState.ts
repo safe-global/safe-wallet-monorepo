@@ -25,7 +25,7 @@ export interface WalletConnectE2eState {
   /** Session state (read by WalletConnectGate via useWalletConnectStatus) */
   isConnected: boolean
   address: string | undefined
-  chainId: number | undefined
+  chainId: string | undefined
   walletInfo: { name: string; icon?: string } | undefined
 
   /** Gate states */

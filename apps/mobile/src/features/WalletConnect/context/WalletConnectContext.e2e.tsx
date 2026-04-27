@@ -17,24 +17,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
 import { walletConnectE2eState } from './walletConnectE2eState'
 import Logger from '@/src/utils/logger'
-
-interface WalletConnectContextValue {
-  initiateConnection: () => Promise<void>
-  reconnect: (signerAddress: string) => Promise<void>
-  switchNetwork: (chainId: string) => Promise<void>
-  switchNetworkIfNeeded: () => Promise<void>
-  isWrongNetwork: boolean
-  sign: (params: unknown) => Promise<unknown>
-  hasProvider: boolean
-  provider: undefined
-  isWalletConnectSigner: (address: string) => boolean
-  isConnected: boolean
-  address: string | undefined
-  chainId: number | undefined
-  walletInfo: { name: string; icon?: string } | undefined
-  disconnect: () => Promise<void>
-  open: () => Promise<void>
-}
+import type { WalletConnectContextValue } from './types'
 
 const WalletConnectContext = createContext<WalletConnectContextValue | null>(null)
 
@@ -122,7 +105,7 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     walletConnectE2eState.set({ isWrongNetwork: false })
   }, [])
 
-  const sign = useCallback(async (_params: unknown): Promise<unknown> => {
+  const sign = useCallback<WalletConnectContextValue['sign']>(async () => {
     throw new Error('E2E: Signing not implemented in test mode')
   }, [])
 
