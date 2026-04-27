@@ -86,7 +86,15 @@ const SafeDropdownContainer = ({
 
     update()
     scroller.addEventListener('scroll', update, { passive: true })
-    return () => scroller.removeEventListener('scroll', update)
+    // base-ui sizes the popup async and avatars/logos load late, so the initial
+    // measurement often misses the overflow. Observe size changes to catch up.
+    const resizeObserver = new ResizeObserver(update)
+    resizeObserver.observe(scroller)
+    Array.from(scroller.children).forEach((child) => resizeObserver.observe(child))
+    return () => {
+      scroller.removeEventListener('scroll', update)
+      resizeObserver.disconnect()
+    }
   }, [filteredItems.length, isLoading, isError])
 
   const renderContent = () => {
