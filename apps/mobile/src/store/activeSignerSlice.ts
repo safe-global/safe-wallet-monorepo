@@ -31,7 +31,7 @@ const activeSignerSlice = createSlice({
         }
       }
     })
-    builder.addCase(resetE2EState, () => initialState)
+    builder.addCase(resetE2EState, () => ({}))
   },
 })
 

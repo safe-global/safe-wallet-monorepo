@@ -16,12 +16,12 @@
  */
 import React, { createContext, useCallback, useContext, useMemo } from 'react'
 import { useSyncExternalStore } from 'react'
-import { Alert } from 'react-native'
 import { router } from 'expo-router'
 import { getAddress } from 'ethers'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
 import { findCollidingSigner } from '@/src/features/ImportSigner/utils/findCollidingSigner'
+import { showCollisionAlert } from '@/src/features/ImportSigner/utils/showCollisionAlert'
 import { walletConnectE2eState } from './walletConnectE2eState'
 import Logger from '@/src/utils/logger'
 import type { WalletConnectContextValue } from './types'
@@ -56,6 +56,15 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     [signers],
   )
 
+  const clearSession = useCallback(() => {
+    walletConnectE2eState.set({
+      isConnected: false,
+      address: undefined,
+      walletInfo: undefined,
+      hasProvider: false,
+    })
+  }, [])
+
   const initiateConnection = useCallback(async () => {
     const currentState = walletConnectE2eState.get()
     const { connectResult, connectError, isOwner } = currentState
@@ -89,18 +98,9 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
       const colliding = findCollidingSigner(signers, checksumAddress, 'walletconnect')
       if (colliding) {
         Logger.info(`[E2E] initiateConnection: collision with existing ${colliding.type} signer`)
-        Alert.alert(
-          'Signer already imported',
-          'This address is already imported. Remove it under Settings → Signers first, or use the existing signer to sign transactions.',
-          [{ text: 'OK' }],
-        )
+        showCollisionAlert(colliding)
         // Disconnect — clear session state so the user can start over
-        walletConnectE2eState.set({
-          isConnected: false,
-          address: undefined,
-          walletInfo: undefined,
-          hasProvider: false,
-        })
+        clearSession()
         return
       }
 
@@ -114,27 +114,33 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
         params: { address: checksumAddress, walletIcon },
       })
     }
-  }, [signers])
+  }, [signers, clearSession])
 
-  const reconnect = useCallback(async (signerAddress: string) => {
-    const { reconnectMismatch } = walletConnectE2eState.get()
-    if (reconnectMismatch) {
-      Logger.info('[E2E] reconnect: simulating wrong-wallet mismatch')
-      // Single-shot — clear so the next attempt (typically the retry from
-      // ReconnectError) succeeds. Mirrors useReconnectFlow's mismatch routing.
-      walletConnectE2eState.set({ reconnectMismatch: false })
-      router.push({
-        pathname: '/import-signers/reconnect-error',
-        params: { address: getAddress(signerAddress) },
+  const reconnect = useCallback(
+    async (signerAddress: string) => {
+      const { reconnectMismatch } = walletConnectE2eState.get()
+      if (reconnectMismatch) {
+        Logger.info('[E2E] reconnect: simulating wrong-wallet mismatch')
+        // Single-shot — clear so the next attempt (typically the retry from
+        // ReconnectError) succeeds. Mirrors useReconnectFlow's mismatch routing.
+        walletConnectE2eState.set({ reconnectMismatch: false })
+        // Mirror production: useReconnectFlow disconnects before routing on
+        // mismatch, so the session state stays consistent with the UI.
+        clearSession()
+        router.push({
+          pathname: '/import-signers/reconnect-error',
+          params: { address: getAddress(signerAddress) },
+        })
+        return
+      }
+      Logger.info('[E2E] reconnect — marking session active for', signerAddress)
+      walletConnectE2eState.set({
+        isConnected: true,
+        address: getAddress(signerAddress),
       })
-      return
-    }
-    Logger.info('[E2E] reconnect — marking session active for', signerAddress)
-    walletConnectE2eState.set({
-      isConnected: true,
-      address: getAddress(signerAddress),
-    })
-  }, [])
+    },
+    [clearSession],
+  )
 
   const switchNetwork = useCallback(async (_chainId: string) => {
     Logger.info('[E2E] switchNetwork called')
@@ -150,13 +156,8 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
   }, [])
 
   const disconnect = useCallback(async () => {
-    walletConnectE2eState.set({
-      isConnected: false,
-      address: undefined,
-      walletInfo: undefined,
-      hasProvider: false,
-    })
-  }, [])
+    clearSession()
+  }, [clearSession])
 
   const open = useCallback(async () => {
     Logger.info('[E2E] open called')

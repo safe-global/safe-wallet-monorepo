@@ -1,12 +1,11 @@
 appId: ${APP_ID}
 tags:
   - connect-signer
+  - wc-gate
   - reconnect-error
 ---
-# WalletConnect reconnect mismatch:
-# 1) Tap reconnect on the gate → mock detects wrong wallet → routes to ReconnectError
-# 2) Tap "Connect a different wallet" on ReconnectError → router.dismiss() + reconnect retries
-# 3) Single-shot reconnectMismatch flag is now cleared → retry succeeds → gate dismisses
+# WalletConnect reconnect mismatch: wrong-wallet detection routes to ReconnectError,
+# then retry succeeds (single-shot reconnectMismatch flag clears after first read).
 
 - runFlow:
     file: ../../utils/setup/app-start.yml

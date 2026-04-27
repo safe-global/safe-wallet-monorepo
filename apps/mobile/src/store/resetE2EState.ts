@@ -14,9 +14,11 @@ import { createAction } from '@reduxjs/toolkit'
  *     builder.addCase(resetE2EState, () => initialState)
  *   }
  *
- * Slices intentionally NOT reset:
- * - settingsSlice — `onboardingVersionSeen` must persist across tests so
- *   setup helpers that skip `setupBaseConfig` (e.g. onboardAndNavigate)
- *   don't accidentally surface the onboarding screen again.
+ * Slices with selective reset:
+ * - settingsSlice — selectively resets to initialState while preserving
+ *   `onboardingVersionSeen` so setup helpers that skip `setupBaseConfig`
+ *   (e.g. `onboardAndNavigate`) don't accidentally surface the onboarding
+ *   screen again. Per-test settings (theme/currency/RPC overrides etc.)
+ *   are reset to prevent suite-wide leakage.
  */
 export const resetE2EState = createAction('e2e/resetState')

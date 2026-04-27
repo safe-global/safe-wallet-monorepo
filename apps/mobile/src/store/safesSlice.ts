@@ -52,7 +52,7 @@ const safesSlice = createSlice({
       }
     }
 
-    builder.addCase(resetE2EState, () => initialState)
+    builder.addCase(resetE2EState, () => ({}))
     builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
       handleOverviewFulfilled(state, action.payload)
     })

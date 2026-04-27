@@ -11,16 +11,16 @@
  */
 import type { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
 import type { Provider } from '@reown/appkit-common-react-native'
-import type { useImportSignerFlow } from '../hooks/useImportSignerFlow'
-import type { useReconnectFlow } from '../hooks/useReconnectFlow'
-import type { useSwitchNetwork } from '../hooks/useSwitchNetwork'
-import type { useWalletConnectSigning } from '../hooks/useWalletConnectSigning'
+import type { ImportSignerFlowResult } from '../hooks/useImportSignerFlow'
+import type { ReconnectFlowResult } from '../hooks/useReconnectFlow'
+import type { SwitchNetworkResult } from '../hooks/useSwitchNetwork'
+import type { WalletConnectSigningResult } from '../hooks/useWalletConnectSigning'
 
 export interface WalletConnectContextValue
-  extends Pick<ReturnType<typeof useImportSignerFlow>, 'initiateConnection'>,
-    Pick<ReturnType<typeof useReconnectFlow>, 'reconnect'>,
-    Pick<ReturnType<typeof useSwitchNetwork>, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
-    Pick<ReturnType<typeof useWalletConnectSigning>, 'sign' | 'hasProvider'> {
+  extends Pick<ImportSignerFlowResult, 'initiateConnection'>,
+    Pick<ReconnectFlowResult, 'reconnect'>,
+    Pick<SwitchNetworkResult, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
+    Pick<WalletConnectSigningResult, 'sign' | 'hasProvider'> {
   provider: Provider | undefined
   isWalletConnectSigner: (address: string) => boolean
   isConnected: ReturnType<typeof useAccount>['isConnected']

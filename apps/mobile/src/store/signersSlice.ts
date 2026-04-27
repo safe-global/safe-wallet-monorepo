@@ -40,7 +40,7 @@ const signersSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(resetE2EState, () => initialState)
+    builder.addCase(resetE2EState, () => ({}))
   },
 })
 

@@ -47,7 +47,9 @@ const notificationsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(resetE2EState, () => initialState)
+    // Spread-copy + fresh array reference so resets don't share `remoteMessages`
+    // across calls — guards against future in-place mutation.
+    builder.addCase(resetE2EState, () => ({ ...initialState, remoteMessages: [] }))
   },
 })
 

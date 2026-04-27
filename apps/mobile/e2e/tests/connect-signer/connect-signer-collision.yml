@@ -3,14 +3,8 @@ tags:
   - connect-signer
   - collision
 ---
-# Type-mismatch collision: connecting a wallet whose address already exists
-# as a signer of a different type triggers useSignerCollisionGuard's native
-# alert. The mock mirrors production via the shared findCollidingSigner
-# helper.
-#
-# Same-type re-imports are intentionally NOT covered — findCollidingSigner
-# returns null for them (silent overwrite per production).
-#
+# Type-mismatch collision: importing a wallet whose address already exists
+# as a different signer type triggers useSignerCollisionGuard's native alert.
 # iOS-only: native Alert.alert handling differs on Android.
 
 - runFlow:
