@@ -35,6 +35,11 @@ jest.mock('@/hooks/safes', () => ({
   }),
 }))
 
+const mockIsSpaceRoute = jest.fn(() => false)
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: () => mockIsSpaceRoute(),
+}))
+
 // ── helpers ────────────────────────────────────────────────────────────
 
 const createSafe = (address: string, isPinned = false, chainId = '1'): SafeItem => ({
@@ -52,6 +57,7 @@ describe('useSafeBarSafes', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(false)
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
     mockChainId.mockReturnValue('1')
     mockAllSafes.mockReturnValue(undefined)
@@ -69,6 +75,18 @@ describe('useSafeBarSafes', () => {
 
   it('returns space safes when in space context', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
+  it('returns space safes when on a space route even if the current safe is not qualified', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockIsSpaceRoute.mockReturnValue(true)
     const spaceSafe = createSafe('0xSpaceSafe', true)
     mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
 

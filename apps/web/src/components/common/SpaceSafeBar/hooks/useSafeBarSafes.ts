@@ -4,18 +4,23 @@ import { useAllSafes, useAllSafesGrouped, type AllSafeItems } from '@/hooks/safe
 import type { SafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 /**
  * Returns appropriate safe lists for the SafeBar based on context.
- * - Space context: space safes for both dropdown and chain selector
- * - Non-space: pinned safes for dropdown, all known safes for chain selector
+ * - Space context (qualified safe or on a space route): space safes for both
+ *   dropdown and chain selector, so the user always sees the current space's
+ *   accounts — including when a tx modal is opened from the space-level Actions Tray.
+ * - Non-space: pinned safes for dropdown, all known safes for chain selector.
  *
  * The current safe is always injected into both lists so the selector
  * and chain switcher render even when the safe isn't pinned.
  */
 export function useSafeBarSafes() {
-  const isInSpaceContext = useIsQualifiedSafe()
+  const isQualifiedSafe = useIsQualifiedSafe()
+  const isSpaceRoute = useIsSpaceRoute()
+  const isInSpaceContext = isQualifiedSafe || isSpaceRoute
   const { allSafes: spaceSafes } = useSpaceSafes()
   const { safeAddress } = useSafeInfo()
   const currentChainId = useChainId()
