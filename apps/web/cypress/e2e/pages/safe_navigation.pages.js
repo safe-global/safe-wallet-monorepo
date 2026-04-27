@@ -12,9 +12,12 @@ const nestedSafesButton = '[data-testid="nested-safes-button"]'
 
 // SafeSelectorDropdown dropdown list
 const dropdownContent = '[data-slot="select-content"]'
+const dropdownRow = '[data-slot="select-item"]'
 const multichainItemSummary = '[data-testid="multichain-item-summary"]'
 const pendingActivationChip = '[data-testid="pending-activation-chip"]'
 const subAccountsContainer = '[data-testid="subacounts-container"]'
+
+const balanceRegex = /\d/
 
 export const undeployedSafeLabel = 'Not activated'
 export const multichainSafePolygonLabel = 'Multichain polygon'
@@ -85,6 +88,10 @@ export function verifyNotActivatedSafeExists() {
 
 export function verifyAddedSafesInDropdown(safes) {
   safes.forEach((address) => verifyDropdownContainsSafe(address))
+}
+
+export function verifyFirstDropdownRowHasBalance() {
+  cy.get(dropdownContent).find(dropdownRow).first().invoke('text').should('match', balanceRegex)
 }
 
 export function verifyConnectWalletBtnVisible() {

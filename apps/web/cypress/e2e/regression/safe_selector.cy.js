@@ -238,3 +238,48 @@ describe('Safe selector tests - added safes', () => {
     accountsModal.verifyAccountsListContains(newSafeName)
   })
 })
+
+describe('Safe selector tests - watchlist in dropdown', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify that safes the user does not own appear in the safe selector dropdown after adding them', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer2)
+
+    safeNav.openSelector()
+
+    safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafes.safe3short)
+  })
+
+  it('Verify that safes the user owns appear in the safe selector dropdown after adding them', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer1)
+
+    safeNav.openSelector()
+
+    safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafes.safe3short)
+  })
+
+  it('Verify that a watched safe with a pending tx appears in the safe selector dropdown', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.sidebarTrustedPendingSafe1)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+    wallet.connectSigner(signer2)
+
+    safeNav.openSelector()
+
+    safeNav.verifyDropdownContainsSafe(sideBar.sideBarSafesPendingActions.safe1short)
+  })
+
+  it('Verify the first row in the safe selector dropdown shows a balance', () => {
+    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.set4)
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
+
+    safeNav.openSelector()
+
+    safeNav.verifyFirstDropdownRowHasBalance()
+  })
+})
