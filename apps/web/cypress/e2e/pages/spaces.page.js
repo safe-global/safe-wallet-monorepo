@@ -51,7 +51,7 @@ const chainIndicatorNetworkLogoImg = '[data-testid="chain-indicator-network-logo
 
 // -- Safe-level navigation panel --
 const spaceChainSelector = '[data-testid="space-chain-selector"]'
-const safeSelectorTriggerIdenticon = '[data-testid="safe-selector-trigger-identicon"]'
+const safeSelectorTriggerIdenticon = '[data-testid="safe-icon"]'
 const safeSelectorTriggerName = '[data-testid="safe-selector-trigger-name"]'
 const safeSelectorTriggerAddress = '[data-testid="safe-selector-trigger-address"]'
 const safeSelectorBalance = '[data-testid="safe-selector-balance"]'
@@ -422,7 +422,7 @@ export function editSpace(newName) {
 export function deleteSpace(name) {
   cy.get(spaceDeleteBtn).click({ force: true })
   cy.get(spaceConfirmDeleteBtn).click()
-  cy.get(orgList).contains(name).should('not.exist')
+  cy.contains(spaceCard, name).should('not.exist')
 }
 
 function deleteAllSpaces() {
