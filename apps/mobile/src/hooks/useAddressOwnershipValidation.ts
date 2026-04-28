@@ -1,10 +1,14 @@
 import { useCallback } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useLazyOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
+import { selectAllChainsIds } from '@/src/store/chains'
+import { selectCurrency } from '@/src/store/settingsSlice'
 import { extractSignersFromSafes } from '@/src/features/ImportReadOnly/helpers/safes'
+import { useLazySafeOverviews } from '@/src/hooks/services/useLazySafeOverviews'
+import { makeSafeId } from '@/src/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import logger from '@/src/utils/logger'
 import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
@@ -13,46 +17,43 @@ export interface AddressValidationResult {
   ownerInfo?: AddressInfo
 }
 
+const findOwner = (safes: { owners: AddressInfo[] }[], address: string): AddressValidationResult => {
+  const owners = extractSignersFromSafes(safes)
+  const ownerInfo = Object.values(owners).find((owner) => sameAddress(owner.value, address))
+  return { isOwner: !!ownerInfo, ownerInfo }
+}
+
 /**
- * Hook for validating if an address is an owner of the current Safe or the same Safe on multiple chains
+ * Hook for validating if an address is an owner of the current Safe (post-onboarding)
+ * or of the Safe currently being added during the import flow (pre-onboarding).
  *
- * Used by both private key and Ledger import flows
+ * Used by WalletConnect, Ledger, and seed-phrase signer imports.
  */
 export const useAddressOwnershipValidation = () => {
   const activeSafe = useAppSelector(selectActiveSafe)
   const pendingSafe = useAppSelector(selectPendingSafe)
+  const chainIds = useAppSelector(selectAllChainsIds)
+  const currency = useAppSelector(selectCurrency)
 
   const [singleSafeTrigger] = useLazySafesGetSafeV1Query({})
-  const [ownerSafesTrigger] = useLazyOwnersGetAllSafesByOwnerV2Query()
+  const [overviewsTrigger] = useLazySafeOverviews()
 
   const validateAddressOwnership = useCallback(
     async (address: string): Promise<AddressValidationResult> => {
-      if (!pendingSafe && !activeSafe) {
-        return { isOwner: false }
-      }
-
       try {
         if (pendingSafe) {
-          // Multi-chain validation - check if address owns the pending safe on any chain
-          const ownedSafesResult = await ownerSafesTrigger({
-            ownerAddress: address,
-          }).unwrap()
+          // Match the args used by AddSignersForm.container.tsx so RTK Query reuses its cached entry.
+          const safes = chainIds.map((chainId) => makeSafeId(chainId, pendingSafe.address))
+          const overviews = await overviewsTrigger({ safes, currency, trusted: true, excludeSpam: true }, true).unwrap()
 
-          // Check if the pending safe address is owned by this address on any chain
-          const isOwnerOfSafe = Object.entries(ownedSafesResult || {}).some(([_chainId, safeAddresses]) =>
-            safeAddresses.some((addr) => addr.toLowerCase() === pendingSafe.address.toLowerCase()),
-          )
-
-          if (isOwnerOfSafe) {
-            return {
-              isOwner: true,
-              ownerInfo: { value: address } as AddressInfo,
-            }
-          } else {
+          if (overviews.length === 0) {
             return { isOwner: false }
           }
-        } else if (activeSafe) {
-          // Single safe validation for active safe
+
+          return findOwner(overviews, address)
+        }
+
+        if (activeSafe) {
           const result = await singleSafeTrigger({
             safeAddress: activeSafe.address,
             chainId: activeSafe.chainId,
@@ -62,13 +63,7 @@ export const useAddressOwnershipValidation = () => {
             return { isOwner: false }
           }
 
-          const owners = extractSignersFromSafes([result])
-          const ownerInfo = Object.values(owners).find((owner) => owner.value.toLowerCase() === address.toLowerCase())
-
-          return {
-            isOwner: !!ownerInfo,
-            ownerInfo,
-          }
+          return findOwner([result], address)
         }
 
         return { isOwner: false }
@@ -77,7 +72,7 @@ export const useAddressOwnershipValidation = () => {
         return { isOwner: false }
       }
     },
-    [pendingSafe, activeSafe, ownerSafesTrigger, singleSafeTrigger],
+    [pendingSafe, activeSafe, chainIds, currency, overviewsTrigger, singleSafeTrigger],
   )
 
   return {

@@ -131,13 +131,61 @@ describe('useOidcLoginCallback', () => {
     expect(mockReconcileAuth).not.toHaveBeenCalled()
   })
 
-  it('should clean error param from URL via Next.js router', async () => {
+  it('should show mapped error message when error_description is known', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
         ...originalLocation,
-        search: '?error=access_denied',
+        search: '?error=access_denied&error_description=method_conflict_otp_required',
+        pathname: '/welcome/spaces',
+      },
+    })
+
+    renderHook(() => useOidcLoginCallback())
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'notifications/showNotification',
+        payload: expect.objectContaining({
+          variant: 'error',
+          message: 'You have signed in with this email before. Please continue with email option.',
+        }),
+      })
+    })
+  })
+
+  it('should show default error message when error_description is unknown', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        ...originalLocation,
+        search: '?error=access_denied&error_description=some+unknown+error',
+        pathname: '/welcome/spaces',
+      },
+    })
+
+    renderHook(() => useOidcLoginCallback())
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'notifications/showNotification',
+        payload: expect.objectContaining({
+          variant: 'error',
+          message: 'Something went wrong while signing in with email',
+        }),
+      })
+    })
+  })
+
+  it('should clean error and error_description params from URL via Next.js router', async () => {
+    sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        ...originalLocation,
+        search: '?error=access_denied&error_description=method_conflict',
         pathname: '/welcome/spaces',
       },
     })
@@ -151,13 +199,13 @@ describe('useOidcLoginCallback', () => {
     })
   })
 
-  it('should preserve other query params when cleaning error param', async () => {
+  it('should preserve other query params when cleaning error params', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
         ...originalLocation,
-        search: '?spaceId=42&error=access_denied',
+        search: '?spaceId=42&error=access_denied&error_description=method_conflict',
         pathname: '/welcome/spaces',
       },
     })

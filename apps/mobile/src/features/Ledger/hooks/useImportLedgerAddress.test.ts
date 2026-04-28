@@ -1,4 +1,5 @@
-import { renderHook, waitFor, act } from '@/src/tests/test-utils'
+import { Alert } from 'react-native'
+import { renderHook, renderHookWithStore, createTestStore, waitFor, act } from '@/src/tests/test-utils'
 import { useImportLedgerAddress } from './useImportLedgerAddress'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
 import { faker } from '@faker-js/faker'
@@ -8,7 +9,9 @@ import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectContactByAddress } from '@/src/store/addressBookSlice'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
-import { GATEWAY_URL } from '@/src/config/constants'
+import { CONFIG_SERVICE_KEY, GATEWAY_URL } from '@/src/config/constants'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 jest.mock('@/src/services/ledger/ledger-dmk.service', () => ({
   ledgerDMKService: {
@@ -473,29 +476,33 @@ describe('useImportLedgerAddress', () => {
       const mockPath = createMockPath()
       const mockIndex = createMockIndex()
 
-      const mockOwnedSafesResponse = {
-        '1': [pendingSafeAddress],
-        '137': [faker.finance.ethereumAddress()],
-      }
-
       server.use(
-        http.get(`${GATEWAY_URL}/v2/owners/${mockAddress}/safes`, () => {
-          return HttpResponse.json(mockOwnedSafesResponse)
+        http.get(`${GATEWAY_URL}/v2/safes`, () => {
+          return HttpResponse.json([
+            {
+              address: { value: pendingSafeAddress, name: null, logoUri: null },
+              chainId: '1',
+              threshold: 1,
+              owners: [{ value: mockAddress }, { value: faker.finance.ethereumAddress() }],
+              fiatTotal: '0',
+              queued: 0,
+              awaitingConfirmation: null,
+            } satisfies SafeOverview,
+          ])
         }),
       )
 
-      const initialState: Partial<RootState> = {
+      const store = createTestStore({
         signers: {},
         addressBook: { contacts: {}, selectedContact: null },
         activeSigner: {},
         signerImportFlow: {
           pendingSafe: { address: pendingSafeAddress, name: 'Pending Safe' },
         },
-      }
+      })
+      await store.dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY))
 
-      const hookResult = renderHook(() => useImportLedgerAddress(), initialState)
-      const { result } = hookResult
-      const store = hookResult.store as { getState: () => RootState }
+      const { result } = renderHookWithStore(() => useImportLedgerAddress(), store)
 
       let importResult
       await act(async () => {
@@ -521,6 +528,54 @@ describe('useImportLedgerAddress', () => {
         type: 'ledger',
         derivationPath: mockPath,
       })
+    })
+  })
+
+  describe('signer collision', () => {
+    let alertSpy: jest.SpyInstance
+
+    beforeEach(() => {
+      alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
+    })
+
+    it('should block import and leave existing signer untouched when a different-type signer exists for the address', async () => {
+      const mockAddress = createMockAddress()
+      const mockPath = createMockPath()
+      const mockIndex = createMockIndex()
+
+      setupSuccessfulOwnershipValidation(mockAddress, mockSafeAddress, mockChainId)
+
+      const existingSigner = {
+        value: mockAddress,
+        name: 'Existing PK',
+        logoUri: null,
+        type: 'private-key' as const,
+      }
+
+      const initialState: Partial<RootState> = {
+        ...getDefaultInitialState(mockSafeAddress, mockChainId),
+        signers: {
+          [mockAddress]: existingSigner,
+        },
+      }
+
+      const hookResult = renderHook(() => useImportLedgerAddress(), initialState)
+      const { result } = hookResult
+      const store = hookResult.store as { getState: () => RootState }
+
+      let importResult
+      await act(async () => {
+        importResult = await result.current.importAddress(mockAddress, mockPath, mockIndex, 'Ledger Device')
+      })
+
+      expect(importResult).toEqual({ success: false })
+      expect(alertSpy).toHaveBeenCalledWith('Signer already imported', expect.any(String), expect.any(Array))
+      expect(mockLedgerDMKService.disconnect).not.toHaveBeenCalled()
+      expect(result.current.isImporting).toBe(false)
+
+      const state = store.getState() as RootState
+      const signers = selectSigners(state)
+      expect(signers[mockAddress]).toEqual(existingSigner)
     })
   })
 })

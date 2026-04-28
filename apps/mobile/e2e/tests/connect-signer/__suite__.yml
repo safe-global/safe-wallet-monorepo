@@ -1,0 +1,20 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - wc-gate
+  - suite
+---
+# Connect Signer Test Suite
+# Runs all connect signer and WalletConnect gate tests
+
+- runFlow:
+    file: ./connect-signer-success.yml
+
+- runFlow:
+    file: ./connect-signer-not-owner.yml
+
+- runFlow:
+    file: ./wc-gate-reconnect.yml
+
+- runFlow:
+    file: ./wc-gate-switch-network.yml

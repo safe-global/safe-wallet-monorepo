@@ -92,6 +92,7 @@ function WalletConnectBadgeInner({
       content={<SafeFontIcon name={statusIcon} color={color} size={statusSize} />}
       circleSize={statusSize}
       circleProps={{ backgroundColor: '$backgroundLight' }}
+      testID={testID ? `${testID}-status-${resolvedStatus}` : undefined}
     />
   )
 

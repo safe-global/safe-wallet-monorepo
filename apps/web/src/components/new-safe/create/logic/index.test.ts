@@ -374,7 +374,13 @@ describe('create/logic', () => {
       spy.mockRestore()
     })
 
-    it('falls back to first network address when canonical not present for chain', () => {
+    it('prefers the canonical deployment address over networkAddresses[0] when canonical is not registered for the chain', () => {
+      // Chain's networkAddresses list omits the canonical address entirely — this
+      // happens on zk-stack chains that register only the EraVM (zksync) flavour.
+      // Returning networkAddresses[0] here would give the WRONG bytecode flavour
+      // for a canonical Safe (EVM master copy delegatecalling EraVM aux reverts),
+      // so getChainAgnosticAddress must return the canonical address from
+      // deployments.canonical instead and log a warning.
       const chain = chainBuilder()
         .with({ chainId: '1' })
         .with({ features: [FEATURES.COUNTERFACTUAL] as any })
@@ -387,12 +393,12 @@ describe('create/logic', () => {
       }
 
       const canonical = faker.finance.ethereumAddress()
-      const firstAddress = faker.finance.ethereumAddress()
+      const otherFlavour = faker.finance.ethereumAddress()
 
       const mockDeployment: SingletonDeploymentV2 = {
         version: '1.4.1',
         contractName: 'CompatibilityFallbackHandler',
-        networkAddresses: { [chain.chainId]: [firstAddress] },
+        networkAddresses: { [chain.chainId]: [otherFlavour] },
         deployments: {
           canonical: { address: canonical },
         },
@@ -402,12 +408,15 @@ describe('create/logic', () => {
       const spy = jest
         .spyOn(safeDeploymentHandlers, 'getCompatibilityFallbackHandlerDeployments')
         .mockReturnValueOnce(mockDeployment)
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       const result = createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chain)
 
-      expect(result.safeAccountConfig.fallbackHandler).toEqual(firstAddress)
+      expect(result.safeAccountConfig.fallbackHandler).toEqual(canonical)
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('does not register the canonical address'))
 
       spy.mockRestore()
+      warnSpy.mockRestore()
     })
   })
 })

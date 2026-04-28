@@ -4,6 +4,7 @@ import type {
   TransactionDetails,
   MultisigExecutionDetails,
   MultisigConfirmationDetails,
+  ModuleExecutionDetails,
   AddressInfo,
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -53,6 +54,13 @@ export const multisigExecutionDetailsBuilder = (): IBuilder<MultisigExecutionDet
     trusted: true,
     proposer: signer,
     proposedByDelegate: null,
+  })
+}
+
+export const moduleExecutionDetailsBuilder = (): IBuilder<ModuleExecutionDetails> => {
+  return Builder.new<ModuleExecutionDetails>().with({
+    type: 'MODULE' as const,
+    address: addressInfoBuilder().build(),
   })
 }
 

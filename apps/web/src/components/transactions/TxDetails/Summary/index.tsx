@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -21,6 +21,7 @@ interface Props {
   txDetails?: TransactionDetails
   showMultisend?: boolean
   showDecodedData?: boolean
+  showAuditLogFields?: boolean
 }
 
 const Summary = ({
@@ -30,8 +31,9 @@ const Summary = ({
   txDetails,
   showMultisend = true,
   showDecodedData = true,
+  showAuditLogFields = true,
 }: Props): ReactElement => {
-  const { txHash, executedAt } = txDetails ?? {}
+  const { executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
@@ -64,13 +66,7 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
-      {txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash">
-          {generateDataRowValue(txHash, 'hash', true)}{' '}
-        </TxDataRow>
-      )}
-
-      {submittedAt && (
+      {showAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
           <Typography variant="body2" component="div">
             {dateString(submittedAt)}
@@ -78,7 +74,7 @@ const Summary = ({
         </TxDataRow>
       )}
 
-      {executedAt && (
+      {showAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
           <Typography variant="body2" component="div">
             {dateString(executedAt)}
