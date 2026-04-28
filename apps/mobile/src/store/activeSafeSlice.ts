@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { SafeInfo } from '../types/address'
-import { resetE2EState } from './resetE2EState'
 
 const initialState = null as SafeInfo | null
 
@@ -24,9 +23,6 @@ const activeSafeSlice = createSlice({
       }
       return state
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(resetE2EState, () => initialState)
   },
 })
 

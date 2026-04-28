@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '.'
-import { resetE2EState } from './resetE2EState'
 
 export interface EstimatedFeeValues {
   maxFeePerGas: bigint
@@ -23,9 +22,6 @@ const estimatedFeeSlice = createSlice({
     clearEstimatedFeeValues: () => {
       return initialState
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(resetE2EState, () => initialState)
   },
 })
 

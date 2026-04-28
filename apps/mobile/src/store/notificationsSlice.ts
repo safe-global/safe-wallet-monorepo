@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { RootState } from '.'
-import { resetE2EState } from './resetE2EState'
 
 export interface NotificationsSliceItem {
   isDeviceNotificationsEnabled: boolean
@@ -45,11 +44,6 @@ const notificationsSlice = createSlice({
     updateLastTimePromptAttempted: (state, action) => {
       state.lastTimePromptAttempted = action.payload
     },
-  },
-  extraReducers: (builder) => {
-    // Spread-copy + fresh array reference so resets don't share `remoteMessages`
-    // across calls — guards against future in-place mutation.
-    builder.addCase(resetE2EState, () => ({ ...initialState, remoteMessages: [] }))
   },
 })
 

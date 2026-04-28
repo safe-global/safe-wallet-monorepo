@@ -3,7 +3,6 @@ import { RootState } from '.'
 import { Address } from '@/src/types/address'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
-import { resetE2EState } from './resetE2EState'
 
 export type SafesSliceItem = Record<string, SafeOverview>
 export type SafesSlice = Record<Address, SafesSliceItem>
@@ -52,7 +51,6 @@ const safesSlice = createSlice({
       }
     }
 
-    builder.addCase(resetE2EState, () => ({}))
     builder.addMatcher(additionalSafesRtkApi.endpoints.safesGetOverviewForMany.matchFulfilled, (state, action) => {
       handleOverviewFulfilled(state, action.payload)
     })

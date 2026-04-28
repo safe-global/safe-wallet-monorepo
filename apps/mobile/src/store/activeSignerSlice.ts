@@ -2,7 +2,6 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { Address, SignerInfo } from '../types/address'
 import { removeSigner } from '@/src/store/signersSlice'
-import { resetE2EState } from './resetE2EState'
 
 type ActiveSignerState = Record<Address, SignerInfo>
 
@@ -31,7 +30,6 @@ const activeSignerSlice = createSlice({
         }
       }
     })
-    builder.addCase(resetE2EState, () => ({}))
   },
 })
 

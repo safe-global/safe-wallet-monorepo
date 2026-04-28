@@ -1,7 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { faker } from '@faker-js/faker'
 
-import { resetE2EState } from './resetE2EState'
+import { resetE2EState, withE2EReset } from './resetE2EState'
 import signersReducer, { addSigner, type Signer } from './signersSlice'
 import activeSignerReducer, { setActiveSigner } from './activeSignerSlice'
 import safesReducer, { addSafe } from './safesSlice'
@@ -9,6 +9,7 @@ import activeSafeReducer, { setActiveSafe } from './activeSafeSlice'
 import executionMethodReducer, { setExecutionMethod } from './executionMethodSlice'
 import estimatedFeeReducer, { setEstimatedFeeValues } from './estimatedFeeSlice'
 import notificationsReducer, { updatePromptAttempts } from './notificationsSlice'
+import settingsReducer, { updateSettings } from './settingsSlice'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import type { Address } from '@/src/types/address'
 
@@ -27,19 +28,22 @@ const pkSigner: Signer = { value: SIGNER_ADDRESS, name: null, logoUri: null, typ
 
 const createE2EStore = () =>
   configureStore({
-    reducer: {
-      signers: signersReducer,
-      activeSigner: activeSignerReducer,
-      safes: safesReducer,
-      activeSafe: activeSafeReducer,
-      executionMethod: executionMethodReducer,
-      estimatedFee: estimatedFeeReducer,
-      notifications: notificationsReducer,
-    },
+    reducer: withE2EReset(
+      combineReducers({
+        signers: signersReducer,
+        activeSigner: activeSignerReducer,
+        safes: safesReducer,
+        activeSafe: activeSafeReducer,
+        executionMethod: executionMethodReducer,
+        estimatedFee: estimatedFeeReducer,
+        notifications: notificationsReducer,
+        settings: settingsReducer,
+      }),
+    ),
   })
 
 describe('resetE2EState', () => {
-  it('returns every wired slice to its initialState', () => {
+  it('returns every wired slice to its initialState via withE2EReset', () => {
     const store = createE2EStore()
 
     // Mutate every slice with realistic seed data
@@ -86,5 +90,21 @@ describe('resetE2EState', () => {
       promptAttempts: 0,
       lastTimePromptAttempted: null,
     })
+  })
+
+  it('preserves slice-level extraReducers (settings keeps onboardingVersionSeen)', () => {
+    const store = createE2EStore()
+
+    // Seed onboardingVersionSeen + a per-test setting that should NOT survive reset
+    store.dispatch(updateSettings({ onboardingVersionSeen: '1.2.3', currency: 'eur' }))
+    expect(store.getState().settings.onboardingVersionSeen).toBe('1.2.3')
+    expect(store.getState().settings.currency).toBe('eur')
+
+    store.dispatch(resetE2EState())
+    const cleared = store.getState()
+
+    // settingsSlice's extraReducer ran: onboardingVersionSeen preserved, rest reset.
+    expect(cleared.settings.onboardingVersionSeen).toBe('1.2.3')
+    expect(cleared.settings.currency).toBe('usd')
   })
 })
