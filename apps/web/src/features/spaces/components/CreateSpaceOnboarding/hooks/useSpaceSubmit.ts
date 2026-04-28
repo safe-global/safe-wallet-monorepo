@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import {
-  useSpacesCreateWithUserV1Mutation,
-  useSpacesUpdateV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
 import { setLastUsedSpace } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -24,7 +21,7 @@ const useSpaceSubmit = (
   const router = useRouter()
   const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
-  const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
+  const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
   const editSpace = async (name: string) => {

@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - wc-gate
+---
+# WalletConnect Gate: Wrong network → "Switch network to continue"
+# Uses pendingTxSafe1 with a WC signer connected on the wrong chain.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- runFlow:
+    file: ../../utils/setup/open-review-and-execute.yml
+    env:
+      SETUP_BUTTON_ID: 'e2eWcGateWrongNetwork'
+
+# Verify the WalletConnect gate shows "Switch network to continue"
+# instead of the normal execute/confirm button
+- extendedWaitUntil:
+    visible:
+      id: 'switch-network-button'
+    timeout: 10000
+- assertVisible: 'Switch network to continue'
+
+# Tap "Switch network to continue" — the e2e mock clears isWrongNetwork
+- tapOn:
+    id: 'switch-network-button'
+
+# Verify the gate is dismissed (the underlying execute/insufficient-funds
+# button is intentionally not asserted — those are distinct semantic states)
+- extendedWaitUntil:
+    notVisible:
+      id: 'switch-network-button'
+    timeout: 10000

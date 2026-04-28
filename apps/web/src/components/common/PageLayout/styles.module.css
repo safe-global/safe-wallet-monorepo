@@ -10,6 +10,10 @@
   left: 4rem;
 }
 
+.topbarNoSidebar {
+  left: 0;
+}
+
 .topbarElevated {
   position: fixed;
   z-index: 99;
