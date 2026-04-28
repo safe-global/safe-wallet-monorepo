@@ -1994,6 +1994,316 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/address-book/private": {
+      "get": {
+        "description": "Retrieves the authenticated user's private address book entries for a specific space.",
+        "operationId": "userAddressBookGetPrivateItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Private address book items retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space"
+          }
+        },
+        "summary": "Get private address book",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "put": {
+        "description": "Creates or updates the authenticated user's private address book entries for a space.",
+        "operationId": "userAddressBookUpsertPrivateItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Address book items to create or update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAddressBookItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Private address book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space or wallet authentication required"
+          }
+        },
+        "summary": "Upsert private address book entries",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/private/{address}": {
+      "delete": {
+        "description": "Removes a specific address from the user's private address book.",
+        "operationId": "userAddressBookDeletePrivateItemV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Address to remove (0x prefixed)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Private address book entry deleted successfully"
+          },
+          "403": {
+            "description": "User is not a member or wallet authentication required"
+          },
+          "404": {
+            "description": "Entry not found"
+          }
+        },
+        "summary": "Delete a private address book entry",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests": {
+      "get": {
+        "description": "Retrieves pending requests to add contacts to the space address book. Admins see all pending requests, members see only their own.",
+        "operationId": "addressBookRequestsGetPendingRequestsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending requests retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBookRequestsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space"
+          }
+        },
+        "summary": "Get pending address book requests",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "post": {
+        "description": "Creates a request to add a private contact to the shared space address book. Requires the contact to exist in the private address book first.",
+        "operationId": "addressBookRequestsCreateRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Address of the private contact to request adding",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressBookRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Request created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBookRequestItemDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member or wallet authentication required"
+          },
+          "404": {
+            "description": "Private contact not found"
+          }
+        },
+        "summary": "Request to add a private contact to the space address book",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests/{requestId}/approve": {
+      "put": {
+        "description": "Admin approves a pending request. The contact is added to the shared space address book.",
+        "operationId": "addressBookRequestsApproveRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "description": "Request ID to approve",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request approved successfully"
+          },
+          "400": {
+            "description": "Only pending requests can be approved"
+          },
+          "403": {
+            "description": "User is not an admin or wallet authentication required"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        },
+        "summary": "Approve a pending address book request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests/{requestId}/reject": {
+      "put": {
+        "description": "Admin rejects a pending request. The contact stays in the private address book.",
+        "operationId": "addressBookRequestsRejectRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "description": "Request ID to reject",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request rejected successfully"
+          },
+          "400": {
+            "description": "Only pending requests can be rejected"
+          },
+          "403": {
+            "description": "User is not an admin or wallet authentication required"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        },
+        "summary": "Reject a pending address book request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces": {
       "post": {
         "description": "Creates a new space for the authenticated user. A space is a collaborative workspace where users can manage multiple Safes together.",
@@ -2066,7 +2376,8 @@
     },
     "/v1/spaces/create-with-user": {
       "post": {
-        "description": "Creates a new space for the authenticated user. Activates the user if their status is PENDING.",
+        "deprecated": true,
+        "description": "Creates a new space for the authenticated user. This endpoint is deprecated, please use POST /v1/spaces instead.",
         "operationId": "spacesCreateWithUserV1",
         "parameters": [],
         "requestBody": {
@@ -2098,7 +2409,7 @@
             "description": "Forbidden resource - user lacks permission to create spaces"
           }
         },
-        "summary": "Create space with user",
+        "summary": "Create space with user (deprecated)",
         "tags": [
           "spaces"
         ]
@@ -8361,6 +8672,137 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "UserAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "object"
+          },
+          "updatedAt": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UserAddressBookDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserAddressBookItemDto"
+            }
+          }
+        },
+        "required": [
+          "spaceId",
+          "data"
+        ]
+      },
+      "AddressBookRequestItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requestedBy": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "address",
+          "chainIds",
+          "requestedBy",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AddressBookRequestsDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookRequestItemDto"
+            }
+          }
+        },
+        "required": [
+          "spaceId",
+          "data"
+        ]
+      },
+      "CreateAddressBookRequestDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address of the private contact to request adding to space"
+          }
+        },
+        "required": [
+          "address"
         ]
       },
       "CreateSpaceDto": {
