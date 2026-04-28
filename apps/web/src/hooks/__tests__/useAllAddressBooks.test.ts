@@ -90,6 +90,8 @@ describe('useAllAddressBooks', () => {
           chainIds: ['1'],
           createdBy: '',
           lastUpdatedBy: '',
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
         {
@@ -98,6 +100,8 @@ describe('useAllAddressBooks', () => {
           chainIds: ['1'],
           createdBy: '',
           lastUpdatedBy: '',
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
       ]
@@ -140,6 +144,8 @@ describe('useAllAddressBooks', () => {
           chainIds: ['1'],
           createdBy: '',
           lastUpdatedBy: '',
+          createdAt: '',
+          updatedAt: '',
           source: ContactSource.space,
         },
       ]

@@ -6,5 +6,10 @@
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"]
     }
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
   }
 }
