@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import SpaceSafeBar from './index'
+import { TxModalContext } from '@/components/tx-flow'
 
 const mockItems = [
   {
@@ -219,6 +220,25 @@ describe('SpaceSafeBar', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('space-back-link')).toBeInTheDocument()
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
+  })
+
+  it('hides SpaceBackLink while a tx-flow modal is open', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceBackLink.mockReturnValue({
+      space: { id: 1, name: 'Test Space' },
+      handleBackToSpace: jest.fn(),
+    })
+
+    const { queryByTestId, getByTestId } = render(
+      <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+        <SpaceSafeBar />
+      </TxModalContext.Provider>,
+    )
+
+    expect(queryByTestId('space-back-link')).not.toBeInTheDocument()
+    // Other elements still render — only the back link is hidden
+    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
+    expect(getByTestId('space-chain-selector')).toBeInTheDocument()
   })
 
   it.each([['/welcome/accounts'], ['/welcome/spaces'], ['/new-safe/create'], ['/new-safe/load']])(
