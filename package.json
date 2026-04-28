@@ -32,6 +32,7 @@
     "@ethersproject/signing-key/elliptic": "^6.6.1",
     "stylus": "0.64.0",
     "viem": "2.21.55",
+    "isows": "1.0.7",
     "webpack": "5.97.1",
     "react-native-quick-base64": "2.2.2",
     "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
@@ -56,7 +57,7 @@
       "built": true
     }
   },
-  "packageManager": "yarn@4.12.0",
+  "packageManager": "yarn@4.14.1+sha512.64df448055b2d37ba269d7db535a469b8da93f8ef1140c25fd7a83c00a8fbaacb214ca0e02553b92a2c54cef78bb67d0b4817fab02001df0e24fac0faccc3b42",
   "dependencies": {
     "@yarnpkg/types": "^4.0.1"
   },

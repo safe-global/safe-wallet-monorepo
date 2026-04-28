@@ -4,7 +4,13 @@ import { useDispatch } from 'react-redux'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
-import { setupConnectSignerOwner, setupConnectSignerNonOwner, switchToOwnerState } from '../setup/connectSignerSetup'
+import {
+  setupConnectSignerOwner,
+  setupConnectSignerNonOwner,
+  switchToOwnerState,
+  setupWcGateReconnect,
+  setupWcGateWrongNetwork,
+} from '../setup/connectSignerSetup'
 import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
 import { setupPositionsTestSafe } from '../setup/positionsSetup'
 import {
@@ -228,6 +234,20 @@ export function TestCtrls() {
         <Pressable
           testID="e2eSwitchToOwnerState"
           onPress={() => switchToOwnerState()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+
+        {/* WalletConnect Gate Scenarios */}
+        <Pressable
+          testID="e2eWcGateReconnect"
+          onPress={() => setupWcGateReconnect(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcGateWrongNetwork"
+          onPress={() => setupWcGateWrongNetwork(dispatch, router)}
           accessibilityRole="button"
           style={BTN}
         />

@@ -44,7 +44,7 @@ jest.mock('@/store/notificationsSlice', () => ({
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpacesCreateWithUserV1Mutation: () => [mockCreateSpaceWithUser],
+  useSpacesCreateV1Mutation: () => [mockCreateSpaceWithUser],
   useSpacesUpdateV1Mutation: () => [mockUpdateSpace],
 }))
 
