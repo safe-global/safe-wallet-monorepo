@@ -202,7 +202,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Ledger signing is not supported. Please use a different wallet to sign in.',
+          message: 'Ledger for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })

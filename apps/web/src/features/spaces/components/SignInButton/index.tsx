@@ -23,7 +23,7 @@ const getSignInErrorMessage = async (wallet: ConnectedWallet | null): Promise<st
   }
 
   if (wallet && isLedger(wallet)) {
-    return 'Ledger signing is not supported. Please use a different wallet to sign in.'
+    return 'Ledger for logging into Workspace is not supported at the moment.'
   }
 
   return 'Something went wrong while trying to sign in'
