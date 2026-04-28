@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
@@ -20,6 +20,12 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => mockUseDarkMode(),
 }))
 
+jest.mock('@/components/common/HelpMenu', () => ({
+  __esModule: true,
+  default: ({ anchorEl, onClose }: { anchorEl: HTMLElement | null; onClose: () => void }) =>
+    anchorEl ? <div data-testid="help-menu" role="menu" onClick={onClose} /> : null,
+}))
+
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarFooter: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
@@ -29,33 +35,19 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuItem: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuButton: ({
     children,
-    render: renderProp,
     className,
     'data-testid': testId,
     onClick,
   }: {
     children: ReactNode
-    render?: ReactElement<{ href: string; target?: string; rel?: string }>
     className?: string
     'data-testid'?: string
-    onClick?: () => void
-  }) =>
-    renderProp ? (
-      <a
-        data-testid={testId}
-        className={className}
-        href={renderProp.props.href}
-        target={renderProp.props.target}
-        rel={renderProp.props.rel}
-        onClick={onClick}
-      >
-        {children}
-      </a>
-    ) : (
-      <button data-testid={testId} className={className} onClick={onClick}>
-        {children}
-      </button>
-    ),
+    onClick?: React.MouseEventHandler<HTMLButtonElement>
+  }) => (
+    <button data-testid={testId} className={className} onClick={onClick}>
+      {children}
+    </button>
+  ),
 }))
 
 jest.mock('@/components/ui/switch', () => ({
@@ -139,13 +131,22 @@ describe('SidebarCommonFooter', () => {
     expect(screen.getByTestId('indexing-status')).toBeInTheDocument()
   })
 
-  it('renders help link with correct attributes', () => {
+  it('opens help menu when Help button is clicked', () => {
     render(<SidebarCommonFooter />)
 
-    const helpLink = screen.getByRole('link', { name: /Help/i })
-    expect(helpLink).toHaveAttribute('href', 'https://help.safe.global')
-    expect(helpLink).toHaveAttribute('target', '_blank')
-    expect(helpLink).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.queryByTestId('help-menu')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('list-item-need-help'))
+    expect(screen.getByTestId('help-menu')).toBeInTheDocument()
+  })
+
+  it('closes help menu when onClose is called', () => {
+    render(<SidebarCommonFooter />)
+
+    fireEvent.click(screen.getByTestId('list-item-need-help'))
+    expect(screen.getByTestId('help-menu')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('help-menu'))
+    expect(screen.queryByTestId('help-menu')).not.toBeInTheDocument()
   })
 
   it('does not render dev toggles in production', () => {
