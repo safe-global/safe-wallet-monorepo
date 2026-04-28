@@ -32,7 +32,7 @@ export function verifyAccountsListVisible() {
 }
 
 export function verifyPinnedAccountsSectionVisible() {
-  cy.get(pinnedAccounts).should('be.visible')
+  cy.get(pinnedAccounts).scrollIntoView().should('be.visible')
 }
 
 export function verifyPinnedSafeExists(address) {

@@ -152,6 +152,8 @@ export function clickOnSettingsBtn() {
 
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
+  // Wait for appearance page content to render after Next.js client-side navigation
+  cy.contains('Chain-specific addresses').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {
