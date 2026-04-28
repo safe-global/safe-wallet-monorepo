@@ -1,0 +1,49 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Open Review and Execute Flow
+# ===========================================
+# Shared flow for navigating from app start to the Review and Execute screen
+# of the first pending transaction. Use after a TestCtrls button has seeded
+# Redux with a pending-tx safe and any required signer/session state.
+#
+# Environment variables:
+#   SETUP_BUTTON_ID: testID of the TestCtrls button that seeds the scenario
+#                    Example: 'e2eWcGateReconnect'
+
+# Seed Redux state for the scenario
+- tapOn:
+    id: '${SETUP_BUTTON_ID}'
+
+# Wait for pending transactions list to load
+- extendedWaitUntil:
+    visible:
+      id: 'pending-tx-list'
+    timeout: 10000
+
+# Tap on the first pending transaction (Send)
+- extendedWaitUntil:
+    visible:
+      text: 'Send'
+    timeout: 10000
+- tapOn:
+    text: 'Send'
+    index: 0
+
+# Wait for the Confirm transaction screen
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: 10000
+
+# Tap Continue to navigate to the review screen
+- assertVisible:
+    text: 'Continue'
+- tapOn:
+    text: 'Continue'
+
+# Wait for the review screen to load
+- waitForAnimationToEnd:
+    timeout: 2000
