@@ -1,4 +1,5 @@
 import { useState, useCallback, type ReactElement } from 'react'
+import { Sparkles } from 'lucide-react'
 import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { cn } from '@/utils/cn'
 import { icons } from '../config'
@@ -9,15 +10,20 @@ import { Switch } from '@/components/ui/switch'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
+import { openCookieBanner } from '@/store/popupSlice'
+import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
+  const hasBeamerConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
@@ -35,6 +41,13 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const handleHelpMenuClose = useCallback(() => {
     setHelpMenuAnchor(null)
   }, [])
+
+  const handleBeamerClick = useCallback(() => {
+    trackEvent({ ...OVERVIEW_EVENTS.WHATS_NEW }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" })
+    if (!hasBeamerConsent) {
+      dispatch(openCookieBanner({ warningKey: CookieAndTermType.UPDATES }))
+    }
+  }, [dispatch, hasBeamerConsent])
 
   return (
     <SidebarFooter data-testid="sidebar-common-footer">
@@ -70,6 +83,28 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             <icons.CircleHelp />
             <span>Help</span>
           </SidebarMenuButton>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <SidebarMenuButton
+                  type="button"
+                  id={BEAMER_SELECTOR}
+                  data-testid="list-item-whats-new"
+                  aria-label="What's new"
+                  className={cn(
+                    'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
+                    '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
+                    css.sidebarInteractive,
+                    css.footerBeamerButton,
+                  )}
+                  onClick={handleBeamerClick}
+                />
+              }
+            >
+              <Sparkles aria-hidden strokeWidth={1.25} />
+            </TooltipTrigger>
+            <TooltipContent side="top">What&apos;s new</TooltipContent>
+          </Tooltip>
           <div className={css.footerHelpStatus}>
             <SidebarIndexingStatus />
           </div>

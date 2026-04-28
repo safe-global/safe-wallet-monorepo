@@ -224,6 +224,22 @@
   display: block;
 }
 
+/* Beamer unread count */
+.footerBeamerButton {
+  position: relative;
+  overflow: visible;
+}
+
+.footerBeamerButton :global(.beamer_icon) {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 18px;
+  background-color: var(--color-success-background, #dcfce7) !important;
+  color: var(--accent-secondary-foreground) !important;
+}
+
 .sidebarGroup {
   padding-block: 0;
 }
@@ -276,6 +292,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow: visible;
 }
 
 .footerHelpRow .footerHelp {

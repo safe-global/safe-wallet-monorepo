@@ -1,19 +1,25 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import { SidebarCommonFooter } from '../SidebarCommonFooter'
 
 const mockUseAppDispatch = jest.fn()
 const mockUseDarkMode = jest.fn()
 const mockTrackEvent = jest.fn()
 
+let mockHasBeamerConsent = true
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-  OVERVIEW_EVENTS: { HELP_CENTER: { action: 'Open Help Center' } },
+  OVERVIEW_EVENTS: {
+    HELP_CENTER: { action: 'Open Help Center' },
+    WHATS_NEW: { action: "Open What's New" },
+  },
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockUseAppDispatch(),
+  useAppSelector: () => mockHasBeamerConsent,
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({
@@ -36,18 +42,36 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     className,
+    id,
+    type = 'button',
     'data-testid': testId,
+    'aria-label': ariaLabel,
     onClick,
   }: {
-    children: ReactNode
+    children?: ReactNode
     className?: string
+    id?: string
+    type?: 'button' | 'submit' | 'reset'
     'data-testid'?: string
+    'aria-label'?: string
     onClick?: React.MouseEventHandler<HTMLButtonElement>
   }) => (
-    <button data-testid={testId} className={className} onClick={onClick}>
+    <button type={type} id={id} data-testid={testId} className={className} aria-label={ariaLabel} onClick={onClick}>
       {children}
     </button>
   ),
+}))
+
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({
+    children,
+    render,
+  }: {
+    children: ReactNode
+    render: React.ReactElement<{ children?: ReactNode }>
+  }) => React.cloneElement(render, {}, children),
+  TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
 jest.mock('@/components/ui/switch', () => ({
@@ -99,10 +123,15 @@ jest.mock('../../SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
 
+jest.mock('@/services/beamer', () => ({
+  BEAMER_SELECTOR: 'whats-new-button',
+}))
+
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     isProductionMock = true
+    mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
   })
@@ -117,11 +146,38 @@ describe('SidebarCommonFooter', () => {
     )
   })
 
+  it("fires WHATS_NEW tracking event when clicking What's new", () => {
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('list-item-whats-new'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "Open What's New" }),
+      expect.objectContaining({ sidebarElement: "What's New" }),
+    )
+  })
+
+  it("dispatches open cookie banner when What's new is clicked without Beamer consent", () => {
+    mockHasBeamerConsent = false
+    const mockDispatch = jest.fn()
+    mockUseAppDispatch.mockReturnValue(mockDispatch)
+
+    render(<SidebarCommonFooter />)
+    fireEvent.click(screen.getByTestId('list-item-whats-new'))
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: expect.stringMatching(/openCookieBanner/),
+        payload: { warningKey: 'updates' },
+      }),
+    )
+  })
+
   it('renders footer and help entry', () => {
     render(<SidebarCommonFooter />)
 
     expect(screen.getByTestId('sidebar-common-footer')).toBeInTheDocument()
     expect(screen.getByTestId('list-item-need-help')).toBeInTheDocument()
+    expect(screen.getByTestId('list-item-whats-new')).toBeInTheDocument()
     expect(screen.getByTestId('help-icon')).toBeInTheDocument()
     expect(screen.getByText('Help')).toBeInTheDocument()
   })
