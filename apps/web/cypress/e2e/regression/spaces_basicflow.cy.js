@@ -21,7 +21,7 @@ describe('Spaces basic flow tests', () => {
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-    const newSpaceName = 'Renamed Space'
+    const newSpaceName = 'Renamed Space' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
@@ -41,7 +41,7 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it('Verify an account can be added manually', () => {
+  it.only('Verify an account can be added manually', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)

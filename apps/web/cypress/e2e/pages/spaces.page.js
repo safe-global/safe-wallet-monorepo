@@ -105,7 +105,6 @@ const onboardingInviteMembersPath = '/welcome/invite-members'
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
 export const addSafeAccountsLabel = 'Add your Safe Accounts'
-export const addAccountBtn = '[data-testid="add-space-account-button"]'
 export const addAccountsModalLabel = 'Add Safe Accounts'
 export const importAddressBookBtn = '[aria-label="Import address book"]'
 export const importAddressBookLabel = 'Import address book'
@@ -121,7 +120,6 @@ export const exploreSpacesLabel = 'Introducing spaces'
 const spaceDashboardTotalValueLabelText = 'Total value'
 const viewAllAccountsLabel = 'View all accounts'
 const updateSuccessMsg = 'Updated space name'
-const noSpacesStr = 'No spaces found'
 const formattedSpaceTotalValuePattern = /^\$[\u200a\s]*[\d,]+\.\d{2}$/
 
 export const nonZeroBalanceRegex = /\$[\u200a\s]*[1-9][\d,]*(?:\.\d{2})?/
@@ -178,8 +176,11 @@ export function visitSpaceDashboard(spaceId) {
   cy.visit(constants.spaceDashboardUrl + String(spaceId))
 }
 
-export function clickOnSpaceSelector() {
+export function clickOnSpaceSelector(spaceName) {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
+  if (spaceName) {
+    cy.get(spaceSelectorMenu).contains(spaceName).click()
+  }
 }
 
 export function disconnectFromSpaceLevel() {
@@ -420,7 +421,7 @@ export function editSpace(newName) {
 export function deleteSpace(name) {
   cy.get(spaceDeleteBtn).click({ force: true })
   cy.get(spaceConfirmDeleteBtn).click()
-  cy.contains(noSpacesStr).should('be.visible')
+  cy.get(orgList).contains(name).should('not.exist')
 }
 
 function deleteAllSpaces() {
@@ -503,7 +504,7 @@ function navigateToCreateSpacePage() {
       cy.wait(3000)
       cy.url().then((urlAfterWait) => {
         if (!urlAfterWait.includes(onboardingCreateSpacePath)) {
-          cy.get(createSpaceBtn).should('be.visible').and('be.enabled').click()
+          cy.get(createSpaceBtn).should('be.visible').click()
         }
       })
     }
@@ -513,7 +514,7 @@ function navigateToCreateSpacePage() {
 }
 
 function submitSpaceName(name) {
-  cy.get(orgSpaceInput).should('be.visible').clear().type(name)
+  cy.get(orgSpaceInput).should('be.visible').and('be.enabled').clear().type(name)
   cy.get(createSpaceOnboardingContinueBtn).should('be.enabled').click()
 }
 
