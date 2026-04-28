@@ -128,6 +128,7 @@ export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
 export const deleteSpaceConfirmationMsg = (name) => `Deleted space ${name}`
+export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
 // Internal helpers (selectors builders)

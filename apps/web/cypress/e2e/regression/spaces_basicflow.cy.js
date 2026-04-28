@@ -41,7 +41,7 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it.only('Verify an account can be added manually', () => {
+  it('Verify an account can be added manually', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
@@ -70,8 +70,8 @@ describe('Spaces basic flow tests', () => {
     space.disconnectFromSpaceLevel()
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
-    main.verifyElementByTextExists('Pending invitations')
-    cy.reload() // Required to trigger the invite
+    main.verifyElementByTextExists(`You were invited to join ${spaceName}`)
     space.acceptInvite(newInviteName)
+    main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
   })
 })
