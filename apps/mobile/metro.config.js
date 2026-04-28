@@ -13,13 +13,6 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     return context.resolveRequest(context, 'react-native-quick-crypto', platform)
   }
 
-  // viem's barrel export pulls in ws (Node.js WebSocket server) which requires
-  // http, stream, events, etc. On React Native, isows uses the native WebSocket
-  // global instead, so ws never executes. Shim the entire ws package to empty.
-  if (moduleName === 'ws') {
-    return { type: 'empty' }
-  }
-
   return context.resolveRequest(context, moduleName, platform)
 }
 
