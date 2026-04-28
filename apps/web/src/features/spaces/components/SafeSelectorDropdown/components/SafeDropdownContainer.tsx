@@ -1,4 +1,5 @@
-import { RotateCw } from 'lucide-react'
+import { ChevronDown, RotateCw } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -65,6 +66,37 @@ const SafeDropdownContainer = ({
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
   const filteredItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
 
+  const footerRef = useRef<HTMLDivElement>(null)
+  const [showScrollHint, setShowScrollHint] = useState(false)
+
+  // Custom scroll hint replaces base-ui's built-in scroll arrows: they sit at `bottom: 0`
+  // (colliding with the sticky footer) and don't animate, so users miss that the list is scrollable.
+  useEffect(() => {
+    const el = footerRef.current
+    if (!el) return
+    // base-ui's Popup is the scroll container; reach it via the project's `data-slot` marker.
+    const scroller = el.closest<HTMLElement>('[data-slot="select-content"]')
+    if (!scroller) return
+
+    const update = () => {
+      const hasOverflow = scroller.scrollHeight > scroller.clientHeight + 1
+      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1
+      setShowScrollHint(hasOverflow && !atBottom)
+    }
+
+    update()
+    scroller.addEventListener('scroll', update, { passive: true })
+    // base-ui sizes the popup async and avatars/logos load late, so the initial
+    // measurement often misses the overflow. Observe size changes to catch up.
+    const resizeObserver = new ResizeObserver(update)
+    resizeObserver.observe(scroller)
+    Array.from(scroller.children).forEach((child) => resizeObserver.observe(child))
+    return () => {
+      scroller.removeEventListener('scroll', update)
+      resizeObserver.disconnect()
+    }
+  }, [filteredItems.length, isLoading, isError])
+
   const renderContent = () => {
     if (isError) {
       return <DropdownContentError onRetry={onRetry} />
@@ -95,14 +127,25 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[20rem] overflow-y-auto bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[20rem] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
       {header}
       {renderContent()}
-      {typeof footer === 'function' ? footer(closeDropdown) : footer}
+      {footer && (
+        <div ref={footerRef} className="sticky bottom-0 z-10 bg-card">
+          {showScrollHint && (
+            <ChevronDown
+              data-testid="scroll-hint"
+              aria-hidden
+              className="pointer-events-none absolute -top-3 left-1/2 size-4 -translate-x-1/2 animate-bounce text-muted-foreground"
+            />
+          )}
+          {typeof footer === 'function' ? footer(closeDropdown) : footer}
+        </div>
+      )}
     </SelectContent>
   )
 }
