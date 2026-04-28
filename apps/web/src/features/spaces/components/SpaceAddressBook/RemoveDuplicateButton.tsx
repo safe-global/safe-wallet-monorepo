@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { useAddressBooksDeletePrivateItemV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUserAddressBookDeletePrivateItemV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -17,7 +17,7 @@ type RemoveDuplicateButtonProps = {
 const RemoveDuplicateButton = ({ address, chainIds, isLocal, isPrivate }: RemoveDuplicateButtonProps) => {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
-  const [deletePrivate] = useAddressBooksDeletePrivateItemV1Mutation()
+  const [deletePrivate] = useUserAddressBookDeletePrivateItemV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [removed, setRemoved] = useState(false)
 

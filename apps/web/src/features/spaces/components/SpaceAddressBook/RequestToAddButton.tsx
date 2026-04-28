@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
-  useAddressBooksCreateRequestV1Mutation,
-  useAddressBooksUpsertPrivateItemsV1Mutation,
+  useAddressBookRequestsCreateRequestV1Mutation,
+  useUserAddressBookUpsertPrivateItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
@@ -22,8 +22,8 @@ type RequestToAddButtonProps = {
 const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
-  const [createRequest] = useAddressBooksCreateRequestV1Mutation()
-  const [upsertPrivate] = useAddressBooksUpsertPrivateItemsV1Mutation()
+  const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
+  const [upsertPrivate] = useUserAddressBookUpsertPrivateItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
 

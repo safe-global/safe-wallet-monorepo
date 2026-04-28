@@ -9,8 +9,8 @@ import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
-  useAddressBooksApproveRequestV1Mutation,
-  useAddressBooksRejectRequestV1Mutation,
+  useAddressBookRequestsApproveRequestV1Mutation,
+  useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
@@ -27,8 +27,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
-  const [approveRequest] = useAddressBooksApproveRequestV1Mutation()
-  const [rejectRequest] = useAddressBooksRejectRequestV1Mutation()
+  const [approveRequest] = useAddressBookRequestsApproveRequestV1Mutation()
+  const [rejectRequest] = useAddressBookRequestsRejectRequestV1Mutation()
   const [loadingId, setLoadingId] = useState<number | null>(null)
 
   const handleApprove = async (requestId: number) => {

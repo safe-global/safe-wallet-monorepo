@@ -9,7 +9,7 @@ import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
-import { useAddressBooksUpsertPrivateItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUserAddressBookUpsertPrivateItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
@@ -28,7 +28,7 @@ const AddPrivateContact = () => {
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
-  const [upsertPrivate] = useAddressBooksUpsertPrivateItemsV1Mutation()
+  const [upsertPrivate] = useUserAddressBookUpsertPrivateItemsV1Mutation()
 
   const defaultValues = {
     name: '',

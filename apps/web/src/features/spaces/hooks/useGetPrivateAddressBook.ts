@@ -1,17 +1,33 @@
+import { useMemo } from 'react'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useAddressBooksGetPrivateItemsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  useUserAddressBookGetPrivateItemsV1Query,
+  type SpaceAddressBookItemDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const useGetPrivateAddressBook = () => {
+const useGetPrivateAddressBook = (): SpaceAddressBookItemDto[] => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: addressBook } = useAddressBooksGetPrivateItemsV1Query(
+  const { currentData: addressBook } = useUserAddressBookGetPrivateItemsV1Query(
     { spaceId: Number(spaceId) },
     { skip: !isUserSignedIn || !spaceId },
   )
 
-  return addressBook?.data || []
+  return useMemo(
+    () =>
+      (addressBook?.data ?? []).map((item) => ({
+        name: item.name,
+        address: item.address,
+        chainIds: item.chainIds,
+        createdBy: item.createdBy,
+        lastUpdatedBy: item.createdBy,
+        createdAt: String(item.createdAt),
+        updatedAt: String(item.updatedAt),
+      })),
+    [addressBook],
+  )
 }
 
 export default useGetPrivateAddressBook
