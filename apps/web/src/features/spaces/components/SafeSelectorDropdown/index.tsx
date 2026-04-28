@@ -78,6 +78,7 @@ function SafeSelectorDropdown({
           )}
           size="default"
           iconWrapperClassName={variants.iconWrapperClass}
+          data-testid="open-safes-icon"
         >
           <SelectValue>
             <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={selectedChainId} />

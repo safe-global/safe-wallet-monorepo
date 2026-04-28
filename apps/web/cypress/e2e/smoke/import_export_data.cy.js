@@ -2,12 +2,12 @@ import * as file from '../pages/import_export.pages'
 import * as main from '../pages/main.page'
 import * as constants from '../../support/constants'
 import * as ls from '../../support/localstorage_data.js'
-import * as sideBar from '../pages/sidebar.pages'
+import * as selector from '../pages/safe_navigation.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
 
-describe.skip('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, () => {
+describe('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -26,10 +26,11 @@ describe.skip('[SMOKE] Import Export Data tests', { defaultCommandTimeout: 20000
       )
       .then(() => {
         cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_4)
-        return sideBar.openSidebar()
+        return selector.openSelector()
       })
       .then(() => {
-        return file.clickOnImportedSafe(safe)
+        selector.verifyItemExistsInSelector(safe)
+        selector.clickOnSafe(safe)
       })
   })
 

@@ -100,7 +100,7 @@ describe('SpaceNestedSafesButton', () => {
 
   it('renders the button when feature is enabled and safe is deployed', () => {
     render(<SpaceNestedSafesButton />)
-    expect(screen.getByTestId('space-nested-safes-button')).toBeInTheDocument()
+    expect(screen.getByTestId('nested-safes-button')).toBeInTheDocument()
   })
 
   it('displays the visible safes count in the badge', () => {
@@ -148,7 +148,7 @@ describe('SpaceNestedSafesButton', () => {
     })
 
     render(<SpaceNestedSafesButton />)
-    expect(screen.getByTestId('space-nested-safes-button')).toBeInTheDocument()
+    expect(screen.getByTestId('nested-safes-button')).toBeInTheDocument()
     expect(screen.queryByText('0')).not.toBeInTheDocument()
   })
 
@@ -170,7 +170,7 @@ describe('SpaceNestedSafesButton', () => {
   it('calls startFiltering when clicked', () => {
     render(<SpaceNestedSafesButton />)
 
-    fireEvent.click(screen.getByTestId('space-nested-safes-button'))
+    fireEvent.click(screen.getByTestId('nested-safes-button'))
     expect(mockStartFiltering).toHaveBeenCalledTimes(1)
   })
 
@@ -179,7 +179,7 @@ describe('SpaceNestedSafesButton', () => {
 
     expect(screen.getByTestId('nested-safes-popover')).toHaveAttribute('data-open', 'false')
 
-    fireEvent.click(screen.getByTestId('space-nested-safes-button'))
+    fireEvent.click(screen.getByTestId('nested-safes-button'))
     expect(screen.getByTestId('nested-safes-popover')).toHaveAttribute('data-open', 'true')
   })
 

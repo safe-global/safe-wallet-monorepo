@@ -64,6 +64,8 @@ function ChainSelectorBlock({
                 onChainSelect(chainItem.chainId, e)
               }}
               className="flex items-center gap-4 px-2 py-2 rounded-lg cursor-pointer hover:bg-muted/30 w-full text-left"
+              data-testid="deployed-chain-btn"
+              aria-label={chainItem.chainName}
             >
               <ChainLogo chainId={chainItem.chainId} />
               <Typography variant="paragraph-small-medium">{chainItem.chainName}</Typography>

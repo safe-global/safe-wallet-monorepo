@@ -277,3 +277,9 @@ export function clickOnThresholdNextBtn() {
   cy.wait(3000)
   cy.get(thresholdNextBtn).click()
 }
+
+export function verifyInconsistentSignersWarning(network) {
+  cy.contains(
+    `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`,
+  ).should('exist')
+}

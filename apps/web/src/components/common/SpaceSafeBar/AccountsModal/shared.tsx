@@ -207,7 +207,10 @@ export function SafeListSkeleton({ count = 4 }: { count?: number }) {
 /** Read-only badge — outlined pill with eye icon */
 export function ReadOnlyBadge() {
   return (
-    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full border border-border px-1.5 py-px text-[11px] leading-none text-muted-foreground">
+    <span
+      className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full border border-border px-1.5 py-px text-[11px] leading-none text-muted-foreground"
+      data-testid="read-only-chip"
+    >
       <Eye className="size-3 shrink-0" />
       Read-only
     </span>
@@ -223,6 +226,7 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
         backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
         color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)',
       }}
+      data-testid="pending-activation-icon"
     >
       <AlertCircle className="size-3 shrink-0" />
       {isActivating ? 'Activating account' : 'Not activated'}

@@ -327,6 +327,7 @@ const AddAccounts = ({
           disabled={!isAdmin}
           onClick={() => setOpen(true)}
           title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
+          data-testid="add-space-account-button"
         >
           <Plus
             className={cn('size-4 mr-1', {
@@ -401,7 +402,7 @@ const AddAccounts = ({
 
                     <div className="flex shrink-0 flex-col gap-2">
                       <Button
-                        data-testid="save-accounts-button"
+                        data-testid="add-accounts-button"
                         type="submit"
                         size="lg"
                         disabled={!isFormDirty || isSubmitting}
