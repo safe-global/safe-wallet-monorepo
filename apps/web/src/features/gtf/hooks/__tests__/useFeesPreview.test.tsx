@@ -263,6 +263,20 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing).toBeUndefined()
   })
 
+  it('renders totalOutgoing as gas-only for a reject-shape safeTx (value=0, data=0x) — PLA-1384', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+    const rejectTx = buildSafeTx({ to: mockSafe.address.value, value: '0', data: '0x' })
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(rejectTx) })
+
+    expect(result.current.totalOutgoing).toBeDefined()
+    expect(result.current.totalOutgoing?.primary.currency).toBe('ETH')
+    // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
+    expect(result.current.totalOutgoing?.primary.amount).toMatch(/^0\.00005/)
+    expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
+  })
+
   it('exposes candidates as availableGasTokens and defaults selection to defaultAddress', () => {
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
@@ -442,6 +456,51 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.fiatAmount).toBeDefined()
       expect(result.current.loading).toBe(false)
       expect(result.current.canCoverFees).toBe(true)
+    })
+
+    it('renders totalOutgoing as gas-only for a reject-shape signed safeTx with native gas — PLA-1384', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+      const lockedReject = buildSafeTx(
+        {
+          to: mockSafe.address.value,
+          value: '0',
+          data: '0x',
+          gasToken: ETH_ADDRESS,
+          safeTxGas: '2409',
+          baseGas: '68568',
+          gasPrice: '741064438',
+        },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedReject) })
+
+      expect(result.current.totalOutgoing).toBeDefined()
+      expect(result.current.totalOutgoing?.primary.currency).toBe('ETH')
+      expect(result.current.totalOutgoing?.primary.amount).toMatch(/^0\.00005/)
+      expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    })
+
+    it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx — PLA-1384', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+      const lockedRejectWeth = buildSafeTx(
+        {
+          to: mockSafe.address.value,
+          value: '0',
+          data: '0x',
+          gasToken: WETH_ADDRESS,
+          safeTxGas: '2409',
+          baseGas: '68568',
+          gasPrice: '741064438',
+        },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedRejectWeth) })
+
+      expect(result.current.totalOutgoing).toBeDefined()
+      expect(result.current.totalOutgoing?.primary.currency).toBe('WETH')
+      expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
   })
 })

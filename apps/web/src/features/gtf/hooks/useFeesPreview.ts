@@ -131,6 +131,14 @@ const computeTotalOutgoing = ({
     }
   }
 
+  // No-op self-call: only outflow is gas. FeesPreview drops this row in Signer mode via its !isSafeWallet check.
+  if (isEmptyData) {
+    return {
+      primary: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+      fiatTotal: formatCurrency(relayCostUsd, 'usd'),
+    }
+  }
+
   return undefined
 }
 
