@@ -3,6 +3,15 @@ import { render, screen } from '@testing-library/react'
 import SafeDropdownContainer from './SafeDropdownContainer'
 import type { SafeItemData } from '../types'
 
+// jsdom doesn't implement ResizeObserver; the component uses one to catch popup
+// size changes. A noop stub is enough since tests drive scroll state explicitly.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+;(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub
+
 // Render SelectContent as a plain div carrying the `data-slot` marker that the
 // component's `closest()` lookup relies on, so the scroll-hint effect can find it.
 jest.mock('@/components/ui/select', () => ({
