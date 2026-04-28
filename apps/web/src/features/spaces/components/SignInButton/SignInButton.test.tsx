@@ -165,7 +165,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'Safe{Wallet} is not supported for sign-in. Please use an EOA wallet.',
+          message: 'Safe{Wallet} for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
@@ -184,7 +184,7 @@ describe('SignInButton error messages', () => {
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'notifications/show',
         payload: expect.objectContaining({
-          message: 'MetaMask is not supported for sign-in. Please use an EOA wallet.',
+          message: 'MetaMask for logging into Workspace is not supported at the moment.',
           variant: 'error',
         }),
       })
