@@ -15,7 +15,7 @@
     "build": "yarn fetch-schema && yarn generate-api",
     "build:dev": "NODE_ENV=dev yarn fetch-schema && yarn generate-api",
     "build:local": "NODE_ENV=local yarn fetch-schema && yarn generate-api",
-    "check-sync": "yarn ts-node --esm scripts/check-auto-generated-sync.ts"
+    "check-sync": "ts-node scripts/check-auto-generated-sync.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
