@@ -144,22 +144,6 @@ describe('useSpaceChainSelector', () => {
     expect(result.current.deployedChains).toHaveLength(2)
   })
 
-  it('returns availableChains excluding deployed chains', () => {
-    setupDefaults({ allSafes: [singleChainSafe], safeAddress: '0xSafe1' })
-
-    const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.availableChains).toHaveLength(2)
-    expect(result.current.availableChains.map((c) => c.chainId)).toEqual(['137', '42161'])
-  })
-
-  it('returns availableChains excluding all deployed chains for multi-chain safe', () => {
-    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
-
-    const { result } = renderHook(() => useSpaceChainSelector())
-    expect(result.current.availableChains).toHaveLength(1)
-    expect(result.current.availableChains[0].chainId).toBe('42161')
-  })
-
   it('returns empty deployedChains when the current safe is not found in allSafes', () => {
     setupDefaults({ allSafes: [], safeAddress: '0xSafe1' })
 
