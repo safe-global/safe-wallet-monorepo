@@ -51,9 +51,12 @@ export function SpacesFeedbackPopup({
     <div
       role="dialog"
       aria-label={title}
-      className={cn('fixed right-4 bottom-24 z-50 w-[340px] max-w-[calc(100vw-2rem)]', className)}
+      className={cn('fixed right-4 bottom-6 z-50 w-[340px] max-w-[calc(100vw-2rem)]', className)}
     >
-      <Card size="sm" className="relative gap-4 rounded-2xl px-5 py-5 shadow-xs">
+      <Card
+        size="sm"
+        className="relative gap-4 rounded-2xl border border-muted-foreground/20 px-5 py-5 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.07)]"
+      >
         <Button
           variant="ghost"
           size="icon-sm"

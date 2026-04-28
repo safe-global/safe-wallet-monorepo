@@ -81,7 +81,7 @@ function CameraLens({
     }
   }, [hasPermission, isCameraActive, onActivateCamera, onPressSettings])
 
-  const buttonText = 'Enable camera'
+  const buttonText = 'Continue'
   const buttonAction = handleGrantOrActivatePress
 
   return (

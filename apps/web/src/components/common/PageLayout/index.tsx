@@ -14,7 +14,6 @@ import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
 import { SpacesFeature } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
-import HelpMenu from '@/components/common/HelpMenu'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
@@ -69,6 +68,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div
           className={classnames(css.topbar, {
             [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
+            [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
             [css.topbarElevated]: isTopbarElevated,
           })}
         >
@@ -119,8 +119,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         {!isSafeLabsTermsPage && <Footer />}
       </div>
-
-      <HelpMenu />
 
       <SelectSafeModal />
     </>
