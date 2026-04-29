@@ -54,6 +54,13 @@ export enum MixpanelEvent {
   PENDING_TX_WIDGET_CLICKED = 'Pending TX Widget Clicked',
   WALLET_SWITCHED = 'Wallet Switched',
   WALLET_DISCONNECTED = 'Wallet Disconnected',
+  WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
+}
+
+export enum WorkspaceCreateEntryPoint {
+  WELCOME = 'welcome',
+  EMPTY_STATE = 'empty_state',
+  SIDEBAR = 'sidebar',
 }
 
 export enum MixpanelUserProperty {

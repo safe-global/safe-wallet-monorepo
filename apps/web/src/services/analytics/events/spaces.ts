@@ -27,8 +27,8 @@ export const SPACE_EVENTS = {
     action: 'Open space dashboard',
     category: SPACE_CATEGORY,
   },
-  CREATE_SPACE_MODAL: {
-    action: 'Open create space dialog',
+  WORKSPACE_CREATE_STARTED: {
+    action: 'Workspace create started',
     category: SPACE_CATEGORY,
   },
   CREATE_SPACE: {
