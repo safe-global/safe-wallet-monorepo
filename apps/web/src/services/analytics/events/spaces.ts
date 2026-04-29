@@ -217,6 +217,18 @@ export const SPACE_EVENTS = {
     action: 'Chain switched in space',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_SAFE_LINK_STARTED: {
+    action: 'Workspace safe link started',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SAFE_LINKED: {
+    action: 'Workspace safe linked',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SAFE_UNLINKED: {
+    action: 'Workspace safe unlinked',
+    category: SPACE_CATEGORY,
+  },
   ACCOUNTS_WIDGET_CLICKED: {
     action: 'Accounts widget clicked',
     category: SPACE_CATEGORY,

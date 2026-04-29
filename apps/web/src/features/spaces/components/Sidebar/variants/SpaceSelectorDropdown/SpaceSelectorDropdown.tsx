@@ -50,6 +50,7 @@ export const SpaceSelectorDropdown = ({
   const safe = useSafeQueryParam() || undefined
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
+  const spaceId = selectedSpace?.id?.toString()
 
   const spaceColors = useMemo(
     () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
@@ -118,8 +119,18 @@ export const SpaceSelectorDropdown = ({
     return renderMenuItemWithTooltip(menuItem, space)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    if (open && triggerVariant === 'addToWorkspace') {
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+        { workspace_id: spaceId, entry_point: 'sidebar' },
+      )
+    }
+    setIsOpen(open)
+  }
+
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
         render={
           <SidebarMenuButton
