@@ -29,7 +29,7 @@ const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
       data-testid="create-space-button"
       variant="default"
       size="lg"
-      className="h-full rounded-lg px-6 text-base"
+      className="h-full rounded-lg px-6 py-3 text-base"
       render={<NextLink href={AppRoutes.welcome.createSpace} />}
       onClick={onClick}
     >
