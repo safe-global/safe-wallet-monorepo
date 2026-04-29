@@ -25,7 +25,7 @@ const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
 
   return (
     <SectionWrapper label={label}>
-      <div className="flex flex-col gap-1 px-4">
+      <div className="flex flex-col gap-1 px-2">
         {filteredSafes.map((safe, index) => {
           const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
           return (
@@ -34,7 +34,7 @@ const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
                 safe={safe}
                 hideContextMenu
                 showPending={false}
-                className="group-data-[focused]/search-focus:bg-muted/50 px-2 sm:px-2 -mx-2"
+                className="group-data-[focused]/search-focus:bg-muted/50 px-2 sm:px-2"
               />
             </div>
           )

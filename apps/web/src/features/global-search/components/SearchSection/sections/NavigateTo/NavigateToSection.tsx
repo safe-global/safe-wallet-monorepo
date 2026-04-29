@@ -126,7 +126,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
                 'rounded-lg mx-2 transition-colors',
                 isDisabled
                   ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-accent data-[focused]:bg-accent',
+                  : 'cursor-pointer hover:bg-muted/100 data-[focused]:bg-accent',
               )}
               onClick={() => handleNavigation(item.label)}
             >

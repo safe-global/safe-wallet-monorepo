@@ -36,9 +36,6 @@ const ExpandableAccountItem = ({
         <AccountItemContent account={account}>
           <div className="flex items-center gap-2">
             <AccountItem.Balance fiatTotal={account.fiatTotal} isLoading={!account.fiatTotal && loading} />
-            <ChevronDown
-              className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')}
-            />
           </div>
         </AccountItemContent>
       </CollapsibleTrigger>
