@@ -11,14 +11,14 @@ jest.mock('@/services/analytics', () => ({
   },
   OVERVIEW_LABELS: { top_bar: 'top_bar' },
 }))
-jest.mock('./ChainLogo', () => ({
+jest.mock('../ChainLogo', () => ({
   __esModule: true,
   default: ({ chainId }: { chainId: string }) => <span data-testid="chain-logo" data-chain-id={chainId} />,
 }))
 
 import { useAddNetworkState } from '@/features/multichain'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import AllNetworksSection from './AllNetworksSection'
+import AllNetworksSection from '../AllNetworksSection'
 
 const mockHook = useAddNetworkState as jest.Mock
 const mockTrack = trackEvent as jest.Mock

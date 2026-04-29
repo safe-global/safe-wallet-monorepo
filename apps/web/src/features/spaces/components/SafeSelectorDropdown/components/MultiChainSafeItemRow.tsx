@@ -55,7 +55,7 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
           chainShortName={chainShortName}
           className="flex-1 min-w-0"
         />
-        <div className="flex items-center gap-2 bg-muted rounded-full p-0.5 shrink-0">
+        <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (
             <span
               key={chainItem.chainId}
@@ -65,6 +65,14 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
               <ChainLogo chainId={chainItem.chainId} />
             </span>
           ))}
+          {item.chains.length > 3 && (
+            <span
+              className="size-6 rounded-full border-2 border-card bg-muted shrink-0 inline-flex items-center justify-center text-[10px] leading-none text-muted-foreground select-none"
+              style={{ marginLeft: '-8px' }}
+            >
+              +{item.chains.length - 3}
+            </span>
+          )}
         </div>
         <BalanceDisplay
           balance={<FiatValue value={item.balance} />}

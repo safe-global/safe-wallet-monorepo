@@ -1,7 +1,7 @@
 import React, { act } from 'react'
 import { render, screen } from '@testing-library/react'
-import SafeDropdownContainer from './SafeDropdownContainer'
-import type { SafeItemData } from '../types'
+import SafeDropdownContainer from '../SafeDropdownContainer'
+import type { SafeItemData } from '../../types'
 
 // jsdom doesn't implement ResizeObserver; the component uses one to catch popup
 // size changes. A noop stub is enough since tests drive scroll state explicitly.
@@ -28,12 +28,12 @@ jest.mock('@/components/ui/select', () => ({
   ),
 }))
 
-jest.mock('./SafeItem', () => ({
+jest.mock('../SafeItem', () => ({
   __esModule: true,
   default: ({ name }: { name: string }) => <div data-testid="safe-item">{name}</div>,
 }))
 
-jest.mock('./MultiChainSafeItemRow', () => ({
+jest.mock('../MultiChainSafeItemRow', () => ({
   __esModule: true,
   default: ({ item }: { item: SafeItemData }) => <div data-testid="multi-chain-row">{item.name}</div>,
 }))

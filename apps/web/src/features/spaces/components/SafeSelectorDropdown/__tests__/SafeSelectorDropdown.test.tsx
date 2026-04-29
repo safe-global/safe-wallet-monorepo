@@ -3,19 +3,19 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import SafeSelectorDropdown from './index'
-import type { SafeItemData } from './types'
+import SafeSelectorDropdown from '../index'
+import type { SafeItemData } from '../types'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('./components/SafeSelectorTriggerContent', () => ({
+jest.mock('../components/SafeSelectorTriggerContent', () => ({
   __esModule: true,
   default: () => <span data-testid="safe-selector-trigger-content" />,
 }))
 
-jest.mock('./components/SafeDropdownContainer', () => ({
+jest.mock('../components/SafeDropdownContainer', () => ({
   __esModule: true,
   default: () => null,
 }))
