@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
@@ -45,13 +46,16 @@ function SafeSelectorDropdown({
     closeDropdown,
   } = useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
 
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
-  if (!selectedItem) {
-    if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
-    if (isLoading) return <SafeSelectorDropdownSkeleton />
+  if (!selectedItem || !mounted) {
+    if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    if (isLoading || !mounted) return <SafeSelectorDropdownSkeleton />
     return null
   }
 
