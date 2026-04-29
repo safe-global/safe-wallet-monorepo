@@ -1,6 +1,5 @@
 import { useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { AccountItem } from '../AccountItem'
 import ChainIndicator from '@/components/common/ChainIndicator'
