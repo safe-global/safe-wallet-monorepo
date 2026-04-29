@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { TxModalContext } from '@/components/tx-flow'
 import { Bookmark, ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
@@ -93,6 +94,7 @@ function SpaceSafeBar() {
   const allSafeItems = useAllSafes()
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
+  const { txFlow } = useContext(TxModalContext)
 
   if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
 
@@ -154,7 +156,7 @@ function SpaceSafeBar() {
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
-      {isQualifiedSafe && space && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
+      {isQualifiedSafe && space && !txFlow && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
       <SpaceChainSelector isLoading={isLoading} />
       <SpaceNestedSafesButton />
       <SafeSelectorDropdown
