@@ -544,9 +544,25 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(result.current.selectedItemId).toBe('1:0xNewSafeFromUrl')
   })
 
-  it('returns empty selectedItemId when no safe is in the URL', () => {
+  it('falls back to Redux safeAddress for selectedItemId when URL has no safe', () => {
     setupDefaults()
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
+    ;(useSafeInfo as jest.Mock).mockReturnValue({
+      safe: { address: { value: '0xFromRedux' }, threshold: 2, owners: [] },
+      safeAddress: '0xFromRedux',
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.selectedItemId).toBe('1:0xFromRedux')
+  })
+
+  it('returns empty selectedItemId when both URL and Redux are empty', () => {
+    setupDefaults()
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
+    ;(useSafeInfo as jest.Mock).mockReturnValue({
+      safe: { address: { value: '' }, threshold: 0, owners: [] },
+      safeAddress: '',
+    })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.selectedItemId).toBe('')

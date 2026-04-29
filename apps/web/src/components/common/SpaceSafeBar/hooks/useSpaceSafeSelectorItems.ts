@@ -127,8 +127,9 @@ function buildSingleChainItem(
 
 export function useSpaceSafeSelectorItems() {
   const { dropdownSafes: allSafes } = useSafeBarSafes()
-  const { safe } = useSafeInfo()
+  const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
+  const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
   const currentChainId = useChainId()
   const { configs: chainConfigs } = useChains()
   const router = useRouter()
@@ -148,7 +149,7 @@ export function useSpaceSafeSelectorItems() {
 
   const items: SafeItemData[] = useMemo(() => {
     return allSafes.map((item) => {
-      const isCurrentSafe = sameAddress(item.address, urlSafeAddress)
+      const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
 
       if (isMultiChainSafeItem(item)) {
         return buildMultiChainItem(
@@ -165,9 +166,9 @@ export function useSpaceSafeSelectorItems() {
 
       return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs)
     })
-  }, [allSafes, urlSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
+  }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
 
-  const selectedItemId = urlSafeAddress ? `${currentChainId}:${urlSafeAddress}` : ''
+  const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
   const handleItemSelect = useCallback(
     (itemId: string) => {

@@ -19,6 +19,12 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockSafeAddress(),
 }))
 
+const mockReduxSafeAddress = jest.fn(() => '')
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: () => ({ safeAddress: mockReduxSafeAddress() }),
+}))
+
 const mockChainId = jest.fn(() => '1')
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
@@ -58,6 +64,7 @@ describe('useSafeBarSafes', () => {
     mockUseIsQualifiedSafe.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(false)
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
+    mockReduxSafeAddress.mockReturnValue('')
     mockChainId.mockReturnValue('1')
     mockAllSafes.mockReturnValue(undefined)
   })
@@ -199,15 +206,41 @@ describe('useSafeBarSafes', () => {
     expect(result.current.chainSelectorSafes).toHaveLength(1)
   })
 
-  it('returns pinnedSafes as-is when safeAddress is empty', () => {
+  it('returns pinnedSafes as-is when both URL and Redux are empty', () => {
     const pinned = createSafe('0xPinned', true)
     mockAllSafes.mockReturnValue([pinned])
     mockSafeAddress.mockReturnValue('')
+    mockReduxSafeAddress.mockReturnValue('')
 
     const { result } = renderHook(() => useSafeBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(1)
     expect(result.current.dropdownSafes[0].address).toBe('0xPinned')
+  })
+
+  it('falls back to Redux safeAddress when URL has no safe param', () => {
+    const pinned = createSafe('0xPinned', true)
+    mockAllSafes.mockReturnValue([pinned])
+    mockSafeAddress.mockReturnValue('')
+    mockReduxSafeAddress.mockReturnValue('0xFromRedux')
+    mockChainId.mockReturnValue('1')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(2)
+    expect(result.current.dropdownSafes[0].address).toBe('0xFromRedux')
+    expect(result.current.dropdownSafes[1].address).toBe('0xPinned')
+  })
+
+  it('prefers URL safeAddress over Redux when both are present', () => {
+    const pinned = createSafe('0xPinned', true)
+    mockAllSafes.mockReturnValue([pinned])
+    mockSafeAddress.mockReturnValue('0xFromUrl')
+    mockReduxSafeAddress.mockReturnValue('0xFromRedux')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes[0].address).toBe('0xFromUrl')
   })
 
   it('prefers allKnownSafes entry over fallback for injection', () => {
