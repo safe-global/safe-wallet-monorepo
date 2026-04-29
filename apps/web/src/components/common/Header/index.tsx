@@ -37,6 +37,8 @@ import { BRAND_LOGO, BRAND_NAME } from '@/config/constants'
 import useLogout from '@/hooks/useLogout'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@/utils/featureToggled'
 
 type HeaderProps = {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -58,6 +60,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const isOfficialHost = useIsOfficialHost()
   const authenticated = useAppSelector(isAuthenticated)
   const { logout } = useLogout()
+  const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH)
 
   const logoHref = getLogoLink()
 
@@ -128,7 +131,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
       </div>
 
       {/* TODO temporary sign out button til Spaces are not signer-protected */}
-      {authenticated && (
+      {isOidcAuthEnabled && authenticated && (
         <div className={classnames(css.element, css.signOut)}>
           <ButtonBase
             onClick={logout}

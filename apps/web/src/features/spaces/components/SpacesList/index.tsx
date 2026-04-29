@@ -33,7 +33,7 @@ const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
       render={<NextLink href={AppRoutes.welcome.createSpace} />}
       onClick={onClick}
     >
-      <AddIcon className="size-5 fill-[var(--color-static-text-brand)]" />
+      <AddIcon className="size-5 fill-primary-foreground" />
       Create space
     </Button>
   )
