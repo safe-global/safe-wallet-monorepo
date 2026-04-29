@@ -169,6 +169,10 @@ export const SPACE_EVENTS = {
     action: 'Submit add address',
     category: SPACE_CATEGORY,
   },
+  ADDRESS_BOOK_ENTRY_CREATED: {
+    action: 'Address book entry created',
+    category: SPACE_CATEGORY,
+  },
   REMOVE_ADDRESS: {
     action: 'Open remove address dialog',
     category: SPACE_CATEGORY,
@@ -239,6 +243,10 @@ export const SPACE_EVENTS = {
   },
   PENDING_TX_WIDGET_CLICKED: {
     action: 'Pending TX widget clicked',
+    category: SPACE_CATEGORY,
+  },
+  TRANSACTION_INITIATED: {
+    action: 'Transaction initiated',
     category: SPACE_CATEGORY,
   },
   WALLET_SWITCHED: {

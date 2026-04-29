@@ -49,7 +49,7 @@ export enum MixpanelEvent {
   WORKSPACE_MEMBER_INVITE_ACCEPTED = 'Workspace Member Invite Accepted',
   WORKSPACE_MEMBER_ROLE_CHANGED = 'Workspace Member Role Changed',
   WORKSPACE_MEMBER_REMOVED = 'Workspace Member Removed',
-  SPACE_INVITE_DECLINED = 'Space Invite Declined',
+  WORKSPACE_MEMBER_INVITE_DECLINED = 'Workspace Member Invite Declined',
   SAFE_SELECTED = 'Safe Selected',
   CHAIN_SWITCHED = 'Chain Switched',
   WORKSPACE_SAFE_LINK_STARTED = 'Workspace Safe Link Started',
@@ -61,6 +61,8 @@ export enum MixpanelEvent {
   WALLET_DISCONNECTED = 'Wallet Disconnected',
   WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
   WORKSPACE_SWITCHED = 'Workspace Switched',
+  ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
+  WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
 }
 
 export enum WorkspaceCreateEntryPoint {

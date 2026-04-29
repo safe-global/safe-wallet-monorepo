@@ -11,6 +11,7 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { AppRoutes } from '@/config/routes'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxModalContext } from '@/components/tx-flow'
@@ -20,6 +21,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import { useAppDispatch } from '@/store'
 import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 const NOT_ALLOWED_COUNTRY_MESSAGE = 'is not allowed for your country'
 const NO_ASSETS_MESSAGE = 'You have no assets or balance on this safe account.'
@@ -40,6 +42,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   const { link: txBuilderLink } = useTxBuilderApp()
   const isDarkMode = useDarkMode()
 
+  const spaceId = useCurrentSpaceId()
   const isSpace = variant === 'space'
   const Wallet = isSpace ? PassThrough : CheckWallet
   const secondaryVariant = isSpace ? 'outline' : 'secondary'
@@ -61,24 +64,47 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
   const handleOnSend = useCallback(() => {
     if (isSpace) {
+      trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
+        workspace_id: spaceId,
+        action: 'send',
+        entry_point: 'actions_tray',
+      })
       openModal(ESafeAction.Send)
       return
     }
     setTxFlow(<TokenTransferFlow />, undefined, false)
     trackEvent(OVERVIEW_EVENTS.NEW_TRANSACTION)
-  }, [isSpace, openModal, setTxFlow])
+  }, [isSpace, openModal, setTxFlow, spaceId])
 
   const handleOnSwap = useCallback(() => {
+    if (isSpace)
+      trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
+        workspace_id: spaceId,
+        action: 'swap',
+        entry_point: 'actions_tray',
+      })
     openModal(ESafeAction.Swap)
-  }, [openModal])
+  }, [openModal, isSpace, spaceId])
 
   const handleOnReceive = useCallback(() => {
+    if (isSpace)
+      trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
+        workspace_id: spaceId,
+        action: 'receive',
+        entry_point: 'actions_tray',
+      })
     openModal(ESafeAction.Receive)
-  }, [openModal])
+  }, [openModal, isSpace, spaceId])
 
   const handleOnBuildTx = useCallback(() => {
+    if (isSpace)
+      trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
+        workspace_id: spaceId,
+        action: 'build_tx',
+        entry_point: 'actions_tray',
+      })
     openModal(ESafeAction.BuildTransaction)
-  }, [openModal])
+  }, [openModal, isSpace, spaceId])
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
