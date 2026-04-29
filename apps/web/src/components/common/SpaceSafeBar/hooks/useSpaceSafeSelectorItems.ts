@@ -177,9 +177,10 @@ export function useSpaceSafeSelectorItems() {
       trackEvent(
         { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined },
         {
-          spaceId,
+          workspace_id: spaceId,
           [MixpanelEventParams.SAFE_ADDRESS]: address,
           [MixpanelEventParams.CHAIN_ID]: chainId,
+          source: 'space_selector',
         },
       )
       router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })

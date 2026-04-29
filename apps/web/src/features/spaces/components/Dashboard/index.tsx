@@ -97,6 +97,14 @@ const SpaceDashboard = () => {
         [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
       },
     )
+    trackEvent(
+      { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId },
+      {
+        workspace_id: spaceId,
+        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+        source: 'accounts_widget',
+      },
+    )
   }
 
   const handleViewAllPendingTxs = () => {
